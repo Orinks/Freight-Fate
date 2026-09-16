@@ -4,7 +4,7 @@
 use ff_core::data::amenities::{classify_brand, spoken_amenities};
 use ff_core::data::buffs::{buffs_for_stop, Buff};
 use ff_core::models::solvency;
-use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
+use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_int, round_py_n};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 use serde_json::json;
@@ -918,12 +918,33 @@ impl RestStopState {
         buff.price
     }
 
+    /// Spoken cost for a buff row or purchase line.
+    ///
+    /// Free showers after fuel keep the fuel wording; catalog-free items (Wall
+    /// Drug ice water) just say free. Sub-dollar prices speak in cents so
+    /// five-cent coffee is not rounded to "0 dollars".
+    fn format_buff_price_amount(price: f64) -> String {
+        if price < 1.0 {
+            let cents = round_py_int(price * 100.0).max(1);
+            if cents == 1 {
+                "1 cent".to_string()
+            } else {
+                format!("{cents} cents")
+            }
+        } else {
+            format!("{} dollars", fmt_grouped(price, 0))
+        }
+    }
+
     fn buff_label(&self, buff: &Buff) -> String {
         let price = self.buff_price(buff);
         if price <= 0.0 {
-            return format!("{}: free with your fuel purchase", buff.label);
+            if buff.free_with_fuel {
+                return format!("{}: free with your fuel purchase", buff.label);
+            }
+            return format!("{}: free", buff.label);
         }
-        format!("{}: {} dollars", buff.label, fmt_grouped(price, 0))
+        format!("{}: {}", buff.label, Self::format_buff_price_amount(price))
     }
 
     /// Apply a consumable buff purchase (`data/buffs.rs`).
@@ -946,9 +967,9 @@ impl RestStopState {
         if !carrier_pays && profile_of(ctx).money < price {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
-                "The {} costs {} dollars and you have {}.",
+                "The {} costs {} and you have {} dollars.",
                 buff.label.to_lowercase(),
-                fmt_grouped(price, 0),
+                Self::format_buff_price_amount(price),
                 fmt_grouped(profile_of(ctx).money, 0)
             ));
             return;
@@ -1002,11 +1023,15 @@ impl RestStopState {
             let billing = if carrier_pays {
                 "Billed to the carrier.".to_string()
             } else if price <= 0.0 {
-                "Free with your fuel purchase.".to_string()
+                if buff.free_with_fuel {
+                    "Free with your fuel purchase.".to_string()
+                } else {
+                    "Free.".to_string()
+                }
             } else {
                 format!(
-                    "{} dollars. You have {} dollars.",
-                    fmt_grouped(price, 0),
+                    "{}. You have {} dollars.",
+                    Self::format_buff_price_amount(price),
                     fmt_grouped(profile_of(ctx).money, 0)
                 )
             };

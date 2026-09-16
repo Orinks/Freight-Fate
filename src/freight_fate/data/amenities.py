@@ -44,6 +44,8 @@ SIGNATURE_SERVICE_LABELS = {
     "restaurant": "a sit-down restaurant",
     "barbecue": "smoked barbecue and brisket",
     "souvenirs": "souvenirs and road snacks",
+    "coffee": "five-cent coffee",
+    "ice_water": "free ice water",
     "cat_scale": "a Cat certified weigh scale",
     "laundry": "public laundry facilities",
     "game_room": "a game room",
@@ -128,6 +130,14 @@ BRANDS: tuple[Brand, ...] = (
         signature=("barbecue", "souvenirs"),
         keywords=("big buck", "buc-ee", "bucee", "buckee"),
         bans_big_rigs=True,
+    ),
+    Brand(
+        "wall_drug",
+        "Wall Drug",
+        "landmark",
+        signature=("coffee", "ice_water"),
+        keywords=("wall drug",),
+        bans_big_rigs=False,
     ),
 )
 

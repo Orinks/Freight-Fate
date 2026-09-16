@@ -40,6 +40,8 @@ pub const SIGNATURE_SERVICE_LABELS: &[(&str, &str)] = &[
     ("restaurant", "a sit-down restaurant"),
     ("barbecue", "smoked barbecue and brisket"),
     ("souvenirs", "souvenirs and road snacks"),
+    ("coffee", "five-cent coffee"),
+    ("ice_water", "free ice water"),
     ("cat_scale", "a Cat certified weigh scale"),
     ("laundry", "public laundry facilities"),
     ("game_room", "a game room"),
@@ -142,6 +144,14 @@ pub const BRANDS: &[Brand] = &[
         signature: &["barbecue", "souvenirs"],
         keywords: &["big buck", "buc-ee", "bucee", "buckee"],
         bans_big_rigs: true,
+    },
+    Brand {
+        key: "wall_drug",
+        spoken: "Wall Drug",
+        tier: "landmark",
+        signature: &["coffee", "ice_water"],
+        keywords: &["wall drug"],
+        bans_big_rigs: false,
     },
 ];
 
@@ -347,5 +357,21 @@ mod tests {
         ] {
             assert!(flying_j.signature.contains(&key));
         }
+    }
+
+    #[test]
+    fn test_wall_drug_is_a_landmark_without_a_big_rig_ban() {
+        let brand = classify_brand("Wall Drug").unwrap();
+        assert_eq!(brand.key, "wall_drug");
+        assert_eq!(brand.tier, "landmark");
+        assert!(!brand.bans_big_rigs);
+        assert!(brand.signature.contains(&"coffee"));
+        assert!(brand.signature.contains(&"ice_water"));
+        let text = spoken_amenities("Wall Drug", "");
+        assert!(text.contains("Wall Drug"));
+        assert!(text.contains("landmark"));
+        assert!(text.contains("five-cent coffee"));
+        assert!(text.contains("free ice water"));
+        assert!(!text.contains("big rigs"));
     }
 }

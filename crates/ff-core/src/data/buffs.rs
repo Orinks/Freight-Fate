@@ -249,6 +249,43 @@ mod tests {
             buff_ids("Big Buck's Travel Center", &[]),
             set(&["big_bucks_brisket"])
         );
+        assert_eq!(
+            buff_ids("Wall Drug", &["park", "save", "break", "sleep"]),
+            set(&["wall_drug_five_cent_coffee", "wall_drug_free_ice_water"])
+        );
+        // Park-only actions alone must not invent generic fuel/food cooler items.
+        assert_eq!(
+            buff_ids(
+                "Cactus Flats Truck Stop",
+                &["park", "save", "break", "sleep"]
+            ),
+            set(&[])
+        );
+        // Other brands do not sell Wall Drug staples.
+        assert!(!buff_ids("Pilot Travel Center", &["fuel"]).contains("wall_drug_five_cent_coffee"));
+        assert!(!buff_ids("Pilot Travel Center", &["fuel"]).contains("wall_drug_free_ice_water"));
+        assert!(!buff_ids("Big Buck's Travel Center", &[]).contains("wall_drug_five_cent_coffee"));
+    }
+
+    #[test]
+    fn test_wall_drug_buffs_are_weaker_than_energy_drink_and_meals() {
+        let catalog = buff_catalog();
+        let coffee = &catalog["wall_drug_five_cent_coffee"];
+        let water = &catalog["wall_drug_free_ice_water"];
+        let energy = &catalog["energy_drink"];
+        let meal = &catalog["diner_meal"];
+        assert!((coffee.price - 0.05).abs() < 1e-9);
+        assert_eq!(water.price, 0.0);
+        // Higher rate = weaker slowdown; coffee < energy drink < meal on strength.
+        assert!(coffee.rate > energy.rate);
+        assert!(energy.rate > meal.rate);
+        assert!(water.rate >= coffee.rate);
+        assert!(coffee.fatigue_instant < energy.fatigue_instant);
+        assert!(energy.fatigue_instant < meal.fatigue_instant);
+        assert!(water.fatigue_instant <= coffee.fatigue_instant);
+        assert!(coffee.duration_game_h < energy.duration_game_h);
+        assert!(energy.duration_game_h < meal.duration_game_h);
+        assert!(water.duration_game_h <= coffee.duration_game_h);
     }
 
     #[test]

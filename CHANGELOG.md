@@ -51,6 +51,8 @@
 
 - **Wall Drug on mitchell→rapid is park-capable only.** Truck parking at the Wall exit — no diesel or travel-center fuel inventing.
 
+- **Wall Drug sells its famous five-cent coffee and free ice water.** Park-only stops on mitchell→rapid and rapid→sioux_falls offer those fatigue buffs by brand — no diesel inventing.
+
 - **Roadside billboard pools grew without packing the highway.** New jokes, attorney and travel-plaza ads, corridor music landmarks, casino and Tejano approaches, and dated movie/TV promo copy; spacing stays in the same thirty-five to sixty-five mile band and the rare tribute draw rate is unchanged. Anywhere-pool jokes stay silent in Maine, Vermont, Alaska, and Hawaii.
 
 

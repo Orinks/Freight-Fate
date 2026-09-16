@@ -203,6 +203,64 @@ fn test_big_bucks_buffs_require_running_bobtail() {
     );
 }
 
+#[test]
+fn test_wall_drug_park_only_sells_five_cent_coffee_and_free_ice_water() {
+    let mut app = TestApp::new();
+    let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.money = 10.0;
+        p.fatigue = 40.0;
+    }
+    let mut state = rest_stop(&drive, "Wall Drug", &["park", "save", "break", "sleep"]);
+    let texts = build_labels(&mut state, &mut app.ctx);
+    assert!(
+        texts
+            .iter()
+            .any(|t| t.contains("Five-cent coffee") && t.contains("5 cents")),
+        "{texts:?}"
+    );
+    assert!(
+        texts.iter().any(|t| t.starts_with("Free ice water: free")),
+        "{texts:?}"
+    );
+    assert!(
+        !texts.iter().any(|t| {
+            let low = t.to_lowercase();
+            low.contains("diesel") || low.contains("energy drink")
+        }),
+        "{texts:?}"
+    );
+
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Free ice water");
+    let p = app.ctx.profile.as_ref().expect("a career");
+    approx(p.money, 10.0);
+    approx(p.fatigue, 39.0);
+    assert_eq!(p.active_buffs[0]["id"], "wall_drug_free_ice_water");
+    let said = app.main_lines();
+    assert!(
+        said.last().is_some_and(|line| {
+            line.to_lowercase().contains("free ice water") && line.contains("Free.")
+        }),
+        "{said:?}"
+    );
+
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Five-cent coffee");
+    let p = app.ctx.profile.as_ref().expect("a career");
+    approx(p.money, 9.95);
+    approx(p.fatigue, 37.0); // 39 - 2
+    assert_eq!(p.active_buffs[0]["id"], "wall_drug_five_cent_coffee");
+    let said = app.main_lines();
+    assert!(
+        said.last().is_some_and(|line| {
+            line.to_lowercase().contains("five-cent coffee") && line.contains("5 cents")
+        }),
+        "{said:?}"
+    );
+}
+
 // -- the fuel row reads the tank it is standing at -------------------------
 
 /// The rest stop's fuel row used to read "Fuel: tank is full" on any tank.
