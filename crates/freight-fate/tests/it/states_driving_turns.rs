@@ -1589,7 +1589,7 @@ fn test_route_status_on_a_street_chain_answers_with_the_gate() {
     app.clear_speech();
     d.speak_route_status(&mut app.ctx);
     let said = app.main_lines().last().expect("a route status").clone();
-    assert!(said.starts_with("Route status: on city streets, "));
+    assert!(said.starts_with("on city streets, "));
     assert!(said.contains(" to the gate at "));
 }
 

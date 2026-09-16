@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- **Route status starts with your location or arrival information instead of saying "Route status."**
+
 ### Added
 
 - **Career stats opens your citations and violations, newest first.** Each
