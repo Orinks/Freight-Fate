@@ -122,10 +122,13 @@ These items are part of the release-gate sweep:
       cold storage, food processors, grocery DCs, grain elevators and ports,
       and a state batch merges into the checked-in file instead of
       rebuilding it (a prior chain is never demoted, untried facilities
-      keep their rows). The route sweep over the state extracts has not run
-      yet, so the file is still 1,415 chains of 5,037 facilities (28
-      percent); 492 source-backed facilities of the newly eligible types
-      are the first batch.
+      keep their rows). A 24-state Geofabrik route sweep on 2026-09-16
+      raised the file from 1,415 to 1,647 chains of 5,037 facilities (28
+      to 33 percent); 92 of the newly eligible types now carry turn-level
+      streets. About 67 percent of facilities still depart straight onto
+      the highway. Leftovers: CA/TX/NY and other unextracted states, path
+      failures inside swept states, and the deferred 419 estimated-near-city
+      residuals.
 
 #### World data and sound licensing blockers
 

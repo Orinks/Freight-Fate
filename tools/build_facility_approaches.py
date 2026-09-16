@@ -245,6 +245,18 @@ def merge_existing(
     }
 
 
+def shared_turn_level(existing: dict[str, Any], merged: dict[str, Any]) -> tuple[int, int]:
+    """Turn-level counts before and after a merge over the facilities both
+    payloads know, so a facility the world retired does not read as a lost
+    chain."""
+    prior = existing.get("approaches") or {}
+    rows = merged.get("approaches") or {}
+    shared = prior.keys() & rows.keys()
+    before = sum(1 for facility_id in shared if prior[facility_id].get("turn_level"))
+    after = sum(1 for facility_id in shared if rows[facility_id].get("turn_level"))
+    return before, after
+
+
 def collect_targets() -> list[FacilityTarget]:
     # Read endpoints and local approaches through the world so their keys are
     # remapped onto current slug facility ids (the checked-in files may still
@@ -474,10 +486,13 @@ def main() -> int:
         before = int((existing.get("coverage") or {}).get("turn_level") or 0)
         after = payload["coverage"]["turn_level"]
         print(f"turn_level {before} -> {after}", flush=True)
-        if after < before:
-            # merge_existing keeps every prior chain, so this cannot happen;
-            # refusing to write is cheaper than shipping a silent regression.
-            print("Refusing to write: merged turn_level fell below the base file.", flush=True)
+        kept_before, kept_after = shared_turn_level(existing, payload)
+        if kept_after < kept_before:
+            # merge_existing keeps every prior chain a facility still has, so
+            # this cannot happen; refusing to write is cheaper than shipping a
+            # silent regression. (A raw count can drop legitimately when the
+            # world retires a facility, hence the shared-facility comparison.)
+            print("Refusing to write: a facility lost its turn-level chain in the merge.")
             return 1
         print("Coverage after (merged):", flush=True)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))

@@ -28,9 +28,9 @@ def test_facility_approach_data_covers_full_facility_set(world):
     assert coverage["facilities"] == 5037
     # Synced with facility_endpoints after far-pin regeocode (419 estimated).
     assert coverage["source_backed_endpoints"] == 2779
-    assert coverage["road_snapped"] == 1579
-    assert coverage["turn_level"] == 1415
-    assert coverage["nearest_road_fallback"] == 1200
+    assert coverage["road_snapped"] == 1839
+    assert coverage["turn_level"] == 1647
+    assert coverage["nearest_road_fallback"] == 940
     assert coverage["representative_fallback"] == 2258
     assert coverage["gate_yard_dock_hints"] == 0
 
@@ -395,6 +395,35 @@ def test_merge_existing_keeps_chains_and_deferred_residuals_across_a_partial_bat
     assert [source["file"] for source in merged["sources"]] == ["new-ohio", "texas"]
 
 
+def test_write_guard_ignores_retired_facilities_but_catches_a_lost_chain():
+    """The refuse-to-write guard compares chains over facilities both files
+    know: a facility the world retired drops from the merge without reading
+    as a regression, while a chain that turned into a fallback does."""
+    tool = _load_tool()
+    existing = {
+        "approaches": {
+            "a": _approach_stub("a", turn_level=True),
+            "retired": _approach_stub("retired", turn_level=True),
+            "b": _approach_stub("b", turn_level=False, reason="x"),
+        }
+    }
+    healthy = {
+        "approaches": {
+            "a": _approach_stub("a", turn_level=True),
+            "b": _approach_stub("b", turn_level=True),
+        }
+    }
+    assert tool.shared_turn_level(existing, healthy) == (1, 2)
+
+    demoted = {
+        "approaches": {
+            "a": _approach_stub("a", turn_level=False, reason="x"),
+            "b": _approach_stub("b", turn_level=False, reason="x"),
+        }
+    }
+    assert tool.shared_turn_level(existing, demoted) == (1, 0)
+
+
 def test_merge_existing_refreshes_only_what_the_batch_attempted():
     tool = _load_tool()
     outside = "Source-backed endpoint is outside this bounded Midwest road-snap batch."
@@ -478,8 +507,10 @@ def test_long_synthetic_approach_steps_down_45_25_15(world):
     from freight_fate.sim.weather import WeatherSystem
 
     # Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
-    # regeocode; Kenosha Dry Warehouse still has a long synthetic approach.
-    route = world.facility_approach_route("kenosha_wi_us", "Kenosha Dry Warehouse")
+    # regeocode; Kenosha Dry Warehouse gained an 0.81-mile turn-level chain in
+    # the 2026-09-16 departure-route sweep. Cottonwood Dry Warehouse still has
+    # a long synthetic approach (no connected public-road path).
+    route = world.facility_approach_route("cottonwood_az_us", "Cottonwood Dry Warehouse")
     assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
     truck = TruckState()
     truck.transmission.automatic = True

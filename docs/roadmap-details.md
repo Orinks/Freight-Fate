@@ -7259,10 +7259,13 @@ city service drives below.)
       the checked-in file by default (`--merge-existing`): a prior chain is
       never demoted, facilities the batch did not attempt keep their rows
       (the 419 estimated-near-city residuals included), and
-      `generated.regeocode_far_pins` survives. Still to do: run the sweep
-      over the state extracts (492 source-backed facilities of the new
-      types are eligible today; the file is still 1,415 chains of 5,037)
-      and move the pinned coverage counts.
+      `generated.regeocode_far_pins` survives. A 24-state Geofabrik route
+      sweep on 2026-09-16 moved the file from 1,415 to 1,647 chains of
+      5,037 facilities (28 to 33 percent) and pinned coverage counts with
+      it; 92 newly eligible types now have turn-level streets. Still open:
+      remaining unextracted states (CA/TX/NY and peers), path failures in
+      swept states, endpoint re-sweep for steel/auto/chemical name matches,
+      and the deferred 419 estimated-near-city residuals.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim
