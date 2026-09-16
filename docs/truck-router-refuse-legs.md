@@ -1,19 +1,23 @@
 # Truck-router refuse legs (Career 1.9 world-data)
 
 Owner decision still needed on the leftovers below. On each of those legs the
-loaded-semi truck profile wants a route whose length disagrees with the curated
-paid miles by more than the 6 percent `tools/repair_geometry.py` adoption
-screen -- even when the route is pinned to the archived corridor with
-intermediate vias. Either the mileage is wrong, or the road the leg is on is
-not one an 80,000 lb rig should be routed down. Pay and deadlines hang off
-mileage, so this is not a silent auto-fix.
+loaded-semi truck profile cannot honestly follow the archived corridor inside
+the 6 percent `tools/repair_geometry.py` adoption screen -- even when pinned
+with intermediate vias. Refuse means the geometry cannot be truck-followed as
+drawn; it is not merely "router ≠ old paid number." Either the road needs a
+truck-legal path (with paid miles then set to that path), or the leg should be
+retired/split. Pay and deadlines hang off mileage, so this is not a silent
+auto-fix.
 
 ## Fixed (25) -- corridor-pinned truck geometry
 
 Public Valhalla truck costing (`FF_VALHALLA_URL`, loaded-semi options) with
 intermediate vias sampled from the archived corridor (or curated `route_via`)
-lands inside the 6 percent screen. Geometry archive rewritten; **paid miles
-kept**. Unconstrained A→B truck length still drifts on many of these -- a
+lands inside the 6 percent screen. Geometry archive rewritten, and **paid /
+settlement miles were synced to the adopted archive path length** (same source
+of truth as the drive). The refuse screen is whether geometry can be
+truck-followed honestly -- not whether the router disagrees with an old paid
+number. Unconstrained A→B truck length still drifts on many of these -- a
 future unconstrained `repair_geometry` pass will refuse again rather than
 overwrite; that is expected until vias are first-class in that tool.
 
@@ -65,12 +69,12 @@ Measured 2026-09-16 against `https://valhalla1.openstreetmap.de`.
 1. **Keep road, fix mileage** -- when the archived line is the intended road
    and the paid miles are stale. Use `tools/repair_leg_mileage.py` / curated
    mileage update, then re-enrich. Player-facing: pay and deadlines move.
-2. **Keep mileage, reroute onto a truck-legal road** -- when the curated
-   corridor is car-only or otherwise HGV-hostile. Corridor-via Valhalla truck
-   routing (as used for the 25) is the entrypoint; length must land inside
-   the adoption screen. `tools/reroute_leg.py` changes miles and drops
-   enrichment -- prefer geometry-archive adopt that keeps paid miles when
-   via-constrained length already agrees.
+2. **Adopt truck-legal geometry, then set paid miles to that path** -- when
+   the curated corridor is car-only or otherwise HGV-hostile. Corridor-via
+   Valhalla truck routing (as used for the 25) is the entrypoint; once the
+   geometry can be truck-followed honestly, paid / settlement miles follow
+   the adopted archive length. `tools/reroute_leg.py` changes miles and drops
+   enrichment -- prefer a geometry-archive adopt plus mileage sync.
 3. **Retire / split the leg** -- when neither road nor mileage should stand
    (corridor does not exist for trucks as drawn). Needs an owner call on
    network shape; do not silently drop a freight node pair.
