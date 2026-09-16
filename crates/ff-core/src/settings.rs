@@ -181,11 +181,10 @@ pub enum AssistValue {
     Mode(&'static str),
 }
 
-pub const DRIVING_ASSIST_FIELDS: [&str; 10] = [
+pub const DRIVING_ASSIST_FIELDS: [&str; 9] = [
     "automatic_emergency_braking",
     "lane_departure_warning",
     "stop_and_go_assist",
-    "lane_centering_assist",
     "descent_speed_control",
     "exit_speed_assist",
     // Facility stopping assistance is a preset field again (owner, 2026-09-11).
@@ -205,14 +204,13 @@ pub const DRIVING_ASSIST_FIELDS: [&str; 10] = [
 
 use AssistValue::{Flag, Mode};
 
-pub const DRIVING_ASSIST_PRESETS: [(&str, [AssistValue; 10]); 3] = [
+pub const DRIVING_ASSIST_PRESETS: [(&str, [AssistValue; 9]); 3] = [
     (
         "realistic",
         [
             Flag(true),
             Flag(true),
             Flag(true),
-            Flag(false),
             Mode("realistic"),
             Flag(true),
             Flag(false),
@@ -224,7 +222,6 @@ pub const DRIVING_ASSIST_PRESETS: [(&str, [AssistValue; 10]); 3] = [
     (
         "balanced",
         [
-            Flag(true),
             Flag(true),
             Flag(true),
             Flag(true),
@@ -242,7 +239,6 @@ pub const DRIVING_ASSIST_PRESETS: [(&str, [AssistValue; 10]); 3] = [
             Flag(true),
             Flag(true),
             Flag(true),
-            Flag(true),
             Mode("interactive"),
             Flag(true),
             Flag(true),
@@ -254,14 +250,14 @@ pub const DRIVING_ASSIST_PRESETS: [(&str, [AssistValue; 10]); 3] = [
 ];
 
 /// `DRIVING_ASSIST_PRESETS[name]`.
-pub fn driving_assist_preset(name: &str) -> Option<&'static [AssistValue; 10]> {
+pub fn driving_assist_preset(name: &str) -> Option<&'static [AssistValue; 9]> {
     DRIVING_ASSIST_PRESETS
         .iter()
         .find(|(preset, _)| *preset == name)
         .map(|(_, values)| values)
 }
 
-/// The 76 persisted fields, in the Python dataclass's declaration order
+/// The 78 persisted fields, in the Python dataclass's declaration order
 /// (which is the order `save` writes them in). Each row is
 /// `name: type = default => coercion`, the coercion naming how a raw JSON
 /// value lands on the typed field (see `migrate::coerce`).
@@ -440,7 +436,6 @@ settings_fields! {
     automatic_emergency_braking: bool = true => bool_strict,
     lane_departure_warning: bool = true => bool_strict,
     stop_and_go_assist: bool = true => bool_strict,
-    lane_centering_assist: bool = false => bool_strict,
     descent_speed_control: String = "realistic" => str_checked,
     exit_speed_assist: bool = true => bool_strict,
     destination_approach_assist: bool = false => bool_strict,
@@ -666,12 +661,11 @@ impl Settings {
     }
 
     /// The preset fields' current values, in DRIVING_ASSIST_FIELDS order.
-    pub fn assist_values(&self) -> [AssistValue; 10] {
+    pub fn assist_values(&self) -> [AssistValue; 9] {
         [
             Flag(self.automatic_emergency_braking),
             Flag(self.lane_departure_warning),
             Flag(self.stop_and_go_assist),
-            Flag(self.lane_centering_assist),
             Mode(static_mode(&self.descent_speed_control)),
             Flag(self.exit_speed_assist),
             Flag(self.destination_approach_assist),
@@ -696,7 +690,6 @@ impl Settings {
             ("automatic_emergency_braking", Flag(v)) => self.automatic_emergency_braking = v,
             ("lane_departure_warning", Flag(v)) => self.lane_departure_warning = v,
             ("stop_and_go_assist", Flag(v)) => self.stop_and_go_assist = v,
-            ("lane_centering_assist", Flag(v)) => self.lane_centering_assist = v,
             ("descent_speed_control", Mode(v)) => self.descent_speed_control = v.to_string(),
             ("exit_speed_assist", Flag(v)) => self.exit_speed_assist = v,
             ("destination_approach_assist", Flag(v)) => self.destination_approach_assist = v,

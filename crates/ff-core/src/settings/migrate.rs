@@ -418,14 +418,12 @@ impl Settings {
             s.lane_keeping = LANE_KEEPING_FALLBACK.to_string();
             s.lane_keeping_unreadable = true;
             s.lane_departure_warning = false;
-            s.lane_centering_assist = false;
         }
         s.lane_keeping_rename_notice_left = s
             .lane_keeping_rename_notice_left
             .clamp(0, LANE_KEEPING_RENAME_NOTICES);
         if data.is_some_and(|data| !data.contains_key("driving_assistance_preset")) {
             s.lane_departure_warning = s.lane_keeping != "full";
-            s.lane_centering_assist = s.lane_keeping == "partial";
             for field in DRIVING_ASSIST_FIELDS {
                 match field {
                     "descent_speed_control" => s.descent_speed_control = "off".to_string(),
@@ -436,10 +434,7 @@ impl Settings {
                     // Facility stopping was an explicit opt-in on every
                     // pre-preset save (its merged rest-stop half too, kept
                     // above); the blanket off must not take it back.
-                    "lane_departure_warning"
-                    | "lane_centering_assist"
-                    | "lane_keeping"
-                    | "destination_approach_assist" => {}
+                    "lane_departure_warning" | "lane_keeping" | "destination_approach_assist" => {}
                     other => {
                         s.set_assist_value(other, super::AssistValue::Flag(false));
                     }

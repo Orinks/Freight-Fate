@@ -1625,16 +1625,6 @@ class SettingsCategoryState(MenuState):
                 "Stop-and-go assistance",
                 "Adaptive cruise can slow behind modeled traffic and resume while it remains safe.",
             ),
-            # Nothing in the driving code reads this yet, and the row used to
-            # promise steering help that never arrived. It stays as the slot
-            # the help will land in, and says plainly that it is not doing
-            # anything today -- a blind driver cannot see that the wheel is
-            # unchanged, so the row has to tell them.
-            (
-                "lane_centering_assist",
-                "Lane centering assistance",
-                "Reserved for steering help toward the lane center, which the truck does not do yet: leaving this on or off makes no difference to how it steers today. Lane keeping is the row that decides how much of the lane work is yours, and Lane-departure warning is the one that speaks when you drift.",
-            ),
             (
                 "descent_speed_control",
                 "Descent speed control",

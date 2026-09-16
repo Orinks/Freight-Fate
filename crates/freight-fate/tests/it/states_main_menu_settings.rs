@@ -181,7 +181,6 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
             "Automatic emergency braking",
             "Lane-departure warning",
             "Stop-and-go assistance",
-            "Lane centering assistance",
             "Descent speed control",
             "Exit speed assistance",
             "Facility stopping assistance",
@@ -636,7 +635,6 @@ fn test_driving_assistance_preset_keyboard_path_and_custom_transition() {
     assert_eq!(app.ctx.settings.lane_keeping, "off");
     key(&mut app, Key::Right);
     assert_eq!(app.ctx.settings.driving_assistance_preset, "balanced");
-    assert!(app.ctx.settings.lane_centering_assist);
     assert_eq!(app.ctx.settings.time_scale, 10.0);
     assert_eq!(app.ctx.settings.hos_mode, "realistic");
     key(&mut app, Key::Down);
@@ -918,15 +916,16 @@ fn test_a_player_two_layouts_behind_hears_the_driving_speech_notice() {
 }
 
 #[test]
-fn test_lane_centering_help_does_not_promise_steering_help() {
+fn test_lane_centering_row_is_retired() {
+    // Owner 1.9: the phantom settings promise is gone. Lane keeping full
+    // already holds center; this row must not reappear.
     let mut app = TestApp::new();
     let rows = cat_rows(&mut app, "assistance");
-    let (_, help) = rows
-        .iter()
-        .find(|(label, _)| label.starts_with("Lane centering assistance"))
-        .unwrap();
-    assert!(help.contains("does not do yet"));
-    assert!(help.contains("makes no difference"));
+    assert!(
+        rows.iter()
+            .all(|(label, _)| !label.starts_with("Lane centering assistance")),
+        "retired row still present: {rows:?}"
+    );
 }
 
 #[test]

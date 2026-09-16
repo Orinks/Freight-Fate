@@ -8,6 +8,8 @@
 
 ### Changed
 
+- **Lane centering assistance is gone from Driving assistance.** It never steered; lane keeping full already holds the lane. Old saves drop the setting the next time settings are saved.
+
 - **Circle K, Exxon, QuikTrip, and similar plazas already on the map are bobtail-only.** A familiar name is not a promise a tractor-trailer can pull in.
 
 - **The nationwide fuel-gap tool now behaves safely on public Overpass.** It identifies itself, backs off on rate limits, paces uncached requests, and never caches network failures as proof that a corridor is empty. Circle K, Exxon, QuikTrip, and similar convenience plazas stay bobtail-only unless the site name identifies a real travel/truck center.

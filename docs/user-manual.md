@@ -1546,9 +1546,9 @@ Three driving assistance presets are available: Realistic, Balanced, and All ass
 #### Individual assists
 
 The individual controls are Automatic emergency braking, Lane-departure warning,
-Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit
-speed assistance, Destination approach assistance, Planned rest-stop stopping
-assistance, Curve speed assistance, and Route-transition assistance.
+Stop-and-go assistance, Descent speed control, Exit speed assistance, Destination
+approach assistance, Planned rest-stop stopping assistance, Curve speed
+assistance, and Route-transition assistance.
 
 Descent speed control has four levels: Off, Realistic, Balanced, and Interactive.
 Interactive is a descent-control level, not a preset.
@@ -1578,9 +1578,9 @@ Inside a bend you entered too fast, it brakes and it reaches for the engine brak
 
 It aims at the advisory itself: a load starts shifting a little over fifteen percent above a bend's posted advisory.
 
-#### Route transitions and lane centering
+#### Route transitions
 
-Route-transition assistance helps manage speed and lane workload at confirmed route transitions. Lane centering assistance is reserved for steering help the truck does not do yet: the row is there, and the presets set it, but leaving it on or off makes no difference to how the truck steers today.
+Route-transition assistance helps manage speed and lane workload at confirmed route transitions. Lane keeping is the row that decides how much of the lane work is yours; there is no separate lane-centering assist.
 
 Assists never silently choose a route or optional exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
 

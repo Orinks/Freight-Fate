@@ -144,7 +144,6 @@ DRIVING_ASSIST_FIELDS = (
     "automatic_emergency_braking",
     "lane_departure_warning",
     "stop_and_go_assist",
-    "lane_centering_assist",
     "descent_speed_control",
     "exit_speed_assist",
     "destination_approach_assist",
@@ -158,9 +157,9 @@ DRIVING_ASSIST_FIELDS = (
 )
 
 DRIVING_ASSIST_PRESETS = {
-    "realistic": (True, True, True, False, "realistic", True, False, True, True, "off"),
-    "balanced": (True, True, True, True, "balanced", True, True, True, True, "partial"),
-    "all": (True, True, True, True, "interactive", True, True, True, True, "full"),
+    "realistic": (True, True, True, "realistic", True, False, True, True, "off"),
+    "balanced": (True, True, True, "balanced", True, True, True, True, "partial"),
+    "all": (True, True, True, "interactive", True, True, True, True, "full"),
 }
 
 
@@ -284,7 +283,6 @@ class Settings:
     automatic_emergency_braking: bool = True
     lane_departure_warning: bool = True
     stop_and_go_assist: bool = True
-    lane_centering_assist: bool = False
     descent_speed_control: str = "realistic"
     exit_speed_assist: bool = True
     destination_approach_assist: bool = False
@@ -573,7 +571,6 @@ class Settings:
             s.lane_keeping = LANE_KEEPING_FALLBACK
             s.lane_keeping_unreadable = True
             s.lane_departure_warning = False
-            s.lane_centering_assist = False
         if not isinstance(s.lane_keeping_rename_notice_left, int) or isinstance(
             s.lane_keeping_rename_notice_left, bool
         ):
@@ -583,13 +580,11 @@ class Settings:
         )
         if data is not None and "driving_assistance_preset" not in data:
             s.lane_departure_warning = s.lane_keeping != "full"
-            s.lane_centering_assist = s.lane_keeping == "partial"
             for field in DRIVING_ASSIST_FIELDS:
                 if field == "descent_speed_control":
                     setattr(s, field, "off")
                 elif field not in (
                     "lane_departure_warning",
-                    "lane_centering_assist",
                     # The migrated lane-keeping mode IS this save's current
                     # difficulty. The blanket "everything off" below must not
                     # reach it, or a pre-preset save would change what the

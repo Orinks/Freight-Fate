@@ -95,8 +95,8 @@ These steps remain open even where a related implementation bullet is checked:
 
 These items are part of the release-gate sweep:
 
-- [ ] Lane centering assist is a settings promise with no feature:
-      implement or retire before 1.9 ships (owner decision).
+- [x] Lane centering assist retired (2026-09-16): the settings row and
+      preset writes are gone; lane keeping full already holds center.
 - [x] Signal running is dice and tickets (2026-09-12): the crossroad's
       seeded traffic decides whether a blown red or stop sign meets nothing,
       a horn, a clip or a heavy broadside, and a flat seeded roll draws the

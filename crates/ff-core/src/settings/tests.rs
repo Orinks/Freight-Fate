@@ -80,16 +80,16 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_nine_persisted_fields_in_python_order() {
+fn the_struct_carries_the_seventy_eight_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12) and the two shortcut tables (2026-09-14) were added on
-    // the Rust side.
-    assert_eq!(Settings::FIELD_NAMES.len(), 79);
+    // the Rust side; lane_centering_assist was retired for 1.9.
+    assert_eq!(Settings::FIELD_NAMES.len(), 78);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[76], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[75], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 79);
+    assert_eq!(pairs.len(), 78);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -115,7 +115,7 @@ fn the_defaults_match_the_python_dataclass() {
         "lane_cue_loudness": "standard", "lane_guide_tone": false,
         "driving_assistance_preset": "realistic", "automatic_emergency_braking": true,
         "lane_departure_warning": true, "stop_and_go_assist": true,
-        "lane_centering_assist": false, "descent_speed_control": "realistic",
+        "descent_speed_control": "realistic",
         "exit_speed_assist": true, "destination_approach_assist": false,
         "selected_stop_assist": false, "curve_speed_assist": true,
         "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
@@ -143,7 +143,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 79);
+    assert_eq!(expected.len(), 78);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -219,7 +219,6 @@ fn unknown_keys_are_ignored_and_wrong_shapes_take_the_python_fallbacks() {
     assert_eq!(s.lane_keeping, "full");
     assert!(s.lane_keeping_unreadable);
     assert!(!s.lane_departure_warning);
-    assert!(!s.lane_centering_assist);
     assert_eq!(s.lane_cue_loudness, "standard");
     assert_eq!(s.descent_speed_control, "realistic");
     assert_eq!(s.acc_following_gap, "normal");
@@ -531,6 +530,26 @@ fn test_realistic_pacing_migrates_to_standard_and_is_explained() {
 }
 
 #[test]
+fn test_retired_lane_centering_assist_is_dropped_on_load_and_save() {
+    // Owner 1.9: retire the phantom row. Old saves still carry the key;
+    // load must ignore it, and the next save must not write it back.
+    with_data_dir(|_| {
+        write_settings_file(
+            r#"{"lane_centering_assist": true, "lane_keeping": "off", "driving_assistance_preset": "realistic"}"#,
+        );
+        let loaded = Settings::load();
+        assert!(!Settings::FIELD_NAMES.contains(&"lane_centering_assist"));
+        loaded.save().unwrap();
+        let saved: Value =
+            serde_json::from_str(&std::fs::read_to_string(Settings::path()).unwrap()).unwrap();
+        assert!(
+            saved.get("lane_centering_assist").is_none(),
+            "retired key must not be rewritten: {saved}"
+        );
+    });
+}
+
+#[test]
 fn test_a_pacing_the_row_still_offers_is_left_alone() {
     // The migration is for the one retired value, not a clamp on the field.
     //
@@ -549,9 +568,8 @@ fn test_a_pacing_the_row_still_offers_is_left_alone() {
 
 /// Fields with no consumer anywhere outside settings.py and the settings
 /// menu. Each one needs a reason to be here, because "a menu row and nothing
-/// else" is exactly what a phantom setting looks like: lane_centering_assist
-/// offered blind players steering help for months while nothing in the
-/// driving code read it.
+/// else" is exactly what a phantom setting looks like (lane_centering_assist
+/// was one until it was retired for 1.9).
 ///
 /// Internal flags -- machinery the player never chooses, read inside
 /// settings.py or by the settings menu itself.
@@ -589,12 +607,10 @@ const SETTINGS_INTERNAL_FLAGS: [&str; 11] = [
 
 /// Pending features -- a real row a player can set, for behaviour that does
 /// not exist yet. Different from an internal flag: a player CAN choose it
-/// and hear nothing happen, so the help text must say so plainly. Owner
-/// direction 2026-08-15 keeps this row as the slot the work will land in.
-const SETTINGS_PENDING_FEATURES: [&str; 1] = [
-    // No steering help is implemented; the help text says exactly that.
-    "lane_centering_assist",
-];
+/// and hear nothing happen, so the help text must say so plainly. Empty
+/// after lane_centering_assist was retired for 1.9 (owner: retire, do not
+/// implement).
+const SETTINGS_PENDING_FEATURES: [&str; 0] = [];
 
 /// Every Settings field must reach the game, or be listed above with a
 /// reason. A field whose only appearances are its own definition and a menu

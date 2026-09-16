@@ -59,7 +59,7 @@ fn back_row() -> Row {
 }
 
 /// `(field, label, help)` for each driving assist row.
-pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 13] = [
+pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "automatic_emergency_braking",
         "Automatic emergency braking",
@@ -74,16 +74,6 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 13] = [
         "stop_and_go_assist",
         "Stop-and-go assistance",
         "Adaptive cruise slows behind traffic and resumes when it is safe.",
-    ),
-    // Nothing in the driving code reads this yet, and the row used to
-    // promise steering help that never arrived. It stays as the slot
-    // the help will land in, and says plainly that it is not doing
-    // anything today -- a blind driver cannot see that the wheel is
-    // unchanged, so the row has to tell them.
-    (
-        "lane_centering_assist",
-        "Lane centering assistance",
-        "Reserved for steering help the truck does not do yet: on or off makes no difference today. Lane keeping decides how much of the lane work is yours; Lane-departure warning speaks when you drift.",
     ),
     (
         "descent_speed_control",
@@ -146,7 +136,6 @@ pub(super) fn assist_flag(s: &Settings, field: &str) -> bool {
         "automatic_emergency_braking" => s.automatic_emergency_braking,
         "lane_departure_warning" => s.lane_departure_warning,
         "stop_and_go_assist" => s.stop_and_go_assist,
-        "lane_centering_assist" => s.lane_centering_assist,
         "exit_speed_assist" => s.exit_speed_assist,
         "destination_approach_assist" => s.destination_approach_assist,
         "curve_speed_assist" => s.curve_speed_assist,
