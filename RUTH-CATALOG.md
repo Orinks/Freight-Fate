@@ -1,6 +1,6 @@
-# Ruth catalog — billboard pool expansion (feat/career-1.9-songs)
+# Ruth catalog: billboard pool expansion (feat/career-1.9-songs)
 
-For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc base of this draft).
+For Chelsea to Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc base of this draft).
 
 ## Confirms
 - ME/VT/AK/HI commercial-board gate in `place_billboards` (Scenic America / FHWA four-state ban). Bubba's Fireworks re-anchored to SC+NC.
@@ -12,20 +12,20 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 ## Ruth cut (2026-09-16)
 KEEP: GENERIC; ATTORNEY Big Jim; FAITH; ODDITIES; TRUCKER except lumper; RADIO; POP_CULTURE generic dated theatrical-drive-in; BIG_BUCKS approach; corridor ticketed tourism+produce+Tejano SA-Laredo+casinos+Iowa 80+OZ Wamego+Arch+Blueberry Hill+Billy Bob's+Crystal Palace+MoPOP+Harley+Slugger+Space Center+Horse Park+Bristol museum+Corn Palace+Spam+Graceland/Beale/Opry/Ryman+Orlando no-Disney-slogans.
 
-MOVED (Anywhere → States, wired through `regional_genre_signs` + `place_billboards` / `corridor_signs` filter):
-- FIREWORKS → AL/AR/FL/GA/IA/IL/IN/KS/KY/LA/MI/MO/MS/NC/OH/OK/PA/SC/TN/TX/VA/WI/WV (southern/midwest fireworks-stand country). Bubba's stays SC+NC on I-95.
-- PECAN → TX/GA/LA/AL/MS.
-- Sheetz → PA/OH/WV/MD/VA/NC/MI.
-- Wawa → FL/NJ/PA/VA/MD/DE (mid-Atlantic + FL, not AZ).
-- RaceTrac → AL/AR/FL/GA/KY/LA/MS/NC/SC/TN/TX/VA (southeast + Texas).
-- Cracker Barrel → South/Midwest (AL AR FL GA IA IL IN KS KY LA MI MN MO MS NC NE OH OK SC TN TX VA WI WV).
+MOVED (Anywhere to States, wired through `regional_genre_signs` + `place_billboards` / `corridor_signs` filter):
+- FIREWORKS: AL/AR/FL/GA/IA/IL/IN/KS/KY/LA/MI/MO/MS/NC/OH/OK/PA/SC/TN/TX/VA/WI/WV (southern/midwest fireworks-stand country). Bubba's stays SC+NC on I-95.
+- PECAN: TX/GA/LA/AL/MS.
+- Sheetz: PA/OH/WV/MD/VA/NC/MI.
+- Wawa: FL/NJ/PA/VA/MD/DE (mid-Atlantic + FL, not AZ).
+- RaceTrac: AL/AR/FL/GA/KY/LA/MS/NC/SC/TN/TX/VA (southeast + Texas).
+- Cracker Barrel: South/Midwest (AL AR FL GA IA IL IN KS KY LA MI MN MO MS NC NE OH OK SC TN TX VA WI WV).
 - Love's / Pilot / generic travel-center / motel / QSR stay Anywhere.
 
 KILLED:
 - TRUCKER "Lumper service, next warehouse…"
 - I-35 "McAllen ahead…" (McAllen is I-2/I-69C/US-281; I-35 ends Laredo). Not relocated onto an unmapped shield. Laredo + San Antonio keep I-35 Tejano.
 
-STILL OUT: lyrics, META growth, Music Highway paid ads, Rock City on I-75, Wall Drug MT only (WY restored — Argus Leader campaign SD/WY/western MN; Greybull WY ~394 mi).
+STILL OUT: lyrics, META growth, Music Highway paid ads, Rock City on I-75, Wall Drug MT only (WY restored: Argus Leader campaign SD/WY/western MN; Greybull WY ~394 mi).
 
 ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den / next-exit register (superstore, bookstore, gentleman's club, XXX theater). No graphic sex-act copy, no real-chain slogans, no named towns.
 

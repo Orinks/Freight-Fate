@@ -1,23 +1,23 @@
 # Truck-router refuse legs (Career 1.9 world-data)
 
-All eight leftovers were **retired** from the career network (owner option 3).
-Background: on each of those legs the loaded-semi truck profile could not
-honestly follow the archived corridor inside the 6 percent
-`tools/repair_geometry.py` adoption screen -- even when pinned with intermediate
-vias. Edges were dropped rather than remileaged or resplit. Pay and deadlines
-hang off mileage, so this was not a silent auto-fix.
+All eight leftovers were retired from the career network (owner option 3).
+On each of those legs the loaded-semi truck profile could not follow the
+archived corridor inside the 6 percent `tools/repair_geometry.py` adoption
+screen, even when pinned with intermediate vias. Edges were dropped rather
+than remileaged or resplit. Pay and deadlines hang off mileage, so the owner
+made the call by hand.
 
-## Fixed (25) -- corridor-pinned truck geometry
+## Fixed (25): corridor-pinned truck geometry
 
 Public Valhalla truck costing (`FF_VALHALLA_URL`, loaded-semi options) with
 intermediate vias sampled from the archived corridor (or curated `route_via`)
-lands inside the 6 percent screen. Geometry archive rewritten, and **paid /
-settlement miles were synced to the adopted archive path length** (same source
-of truth as the drive). The refuse screen is whether geometry can be
-truck-followed honestly -- not whether the router disagrees with an old paid
-number. Unconstrained A→B truck length still drifts on many of these -- a
+lands inside the 6 percent screen. The geometry archive was rewritten, and
+paid and settlement miles were synced to the adopted archive path length, the
+same source of truth as the drive. The refuse screen asks whether a truck can
+follow the geometry; it does not compare the router against an old paid
+number. Unconstrained A to B truck length still drifts on many of these, so a
 future unconstrained `repair_geometry` pass will refuse again rather than
-overwrite; that is expected until vias are first-class in that tool.
+overwrite. That is expected until vias are first-class in that tool.
 
 Measured 2026-09-16 against `https://valhalla1.openstreetmap.de`.
 
@@ -49,7 +49,7 @@ Measured 2026-09-16 against `https://valhalla1.openstreetmap.de`.
 | santa_ana_ca_us:lancaster_ca_us | archive_2 | +2.7% |
 | paintsville_ky_us:pikeville_ky_us | archive_6 | +5.7% |
 
-## Retired (8) -- dropped from career network
+## Retired (8): dropped from the career network
 
 Owner chose option 3 (retire). Directed edges removed from
 `world_source/legs/{KY,TN,IN,WV,CA}.json` on 2026-09-16; no new via/split
@@ -72,18 +72,18 @@ not run.
 
 ## Retirement options (historical)
 
-1. **Keep road, fix mileage** -- when the archived line is the intended road
-   and the paid miles are stale. Use `tools/repair_leg_mileage.py` / curated
+1. Keep road, fix mileage: when the archived line is the intended road and
+   the paid miles are stale. Use `tools/repair_leg_mileage.py` / curated
    mileage update, then re-enrich. Player-facing: pay and deadlines move.
-2. **Adopt truck-legal geometry, then set paid miles to that path** -- when
-   the curated corridor is car-only or otherwise HGV-hostile. Corridor-via
-   Valhalla truck routing (as used for the 25) is the entrypoint; once the
-   geometry can be truck-followed honestly, paid / settlement miles follow
-   the adopted archive length. `tools/reroute_leg.py` changes miles and drops
-   enrichment -- prefer a geometry-archive adopt plus mileage sync.
-3. **Retire / split the leg** -- when neither road nor mileage should stand
-   (corridor does not exist for trucks as drawn). **Applied to all 8 leftovers
-   above** -- edges dropped; no silent split cities.
+2. Adopt truck-legal geometry, then set paid miles to that path: when the
+   curated corridor is car-only or otherwise HGV-hostile. Corridor-via
+   Valhalla truck routing (as used for the 25) is the entrypoint; once a
+   truck can follow the geometry, paid and settlement miles follow the
+   adopted archive length. `tools/reroute_leg.py` changes miles and drops
+   enrichment, so prefer a geometry-archive adopt plus mileage sync.
+3. Retire or split the leg: when neither road nor mileage should stand (the
+   corridor does not exist for trucks as drawn). Applied to all 8 leftovers
+   above: edges dropped, and no split cities were added.
 
 ## Out of scope here
 

@@ -6,26 +6,26 @@
 
 - **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.
 
-- **Duff-shared sound cues are N/A for the public-build gate.** They are dropped from the release-blocker list; no replacement work is owed for that audit row.
+- **The shared Duff sound cues stay as they are.** No replacements are planned for them.
 
 ### Fixed
 
-- **Estimated-near-city facility pins are labeled estimated so approach miles greater than zero stay honest.** Coverage counts are synced; those pins are not claimed as OSM-matched docks.
+- **A facility placed only by estimate now says so.** Its approach miles come from that estimate.
 
 - **Wall Drug corridor boards again cover Wyoming as well as South Dakota and western Minnesota.** Montana stays out.
 
-- **Curve connectors and artifact screens catch up after the offline curve re-bake.** The 205 legs whose archive line no longer matched the baked curves were re-swept from geometry; Valhalla road-class readings then mark interchange ramps and town streets as connectors with a named source again, and the artifact screen drops departure hairpins and sub-50 ft radii. Interstate mainline asks a truck to slow about once per hundred-plus miles again. Glenwood Canyon and US-550 switchbacks stay.
+- **Interstate curve warnings are rare again, about one slow-down per hundred-plus miles.** Ramps and town streets no longer count as highway bends; Glenwood Canyon and the US-550 switchbacks stay.
 
-- **Twenty-five more curve mismatches from the truck-router geometry adopts are re-baked offline.** Curves-only from archived geometry, then Valhalla connector reclass and the artifact screen so CI curve tests stay green. Glenwood Canyon and US-550 switchbacks stay.
+- **Twenty-five more runs got the same curve cleanup.** Glenwood Canyon and the US-550 switchbacks stay.
 
 
 ### Changed
 
-- **Lane centering assistance is gone from Driving assistance.** It never steered; lane keeping full already holds the lane. Old saves drop the setting the next time settings are saved.
+- **Lane centering assistance is gone from Driving assistance.** It never steered; lane keeping full already holds the lane, and old saves lose the row on their next save.
 
 - **Circle K, Exxon, QuikTrip, and similar plazas already on the map are bobtail-only.** A familiar name is not a promise a tractor-trailer can pull in.
 
-- **The nationwide fuel-gap tool now behaves safely on public Overpass.** It identifies itself, backs off on rate limits, paces uncached requests, and never caches network failures as proof that a corridor is empty. Circle K, Exxon, QuikTrip, and similar convenience plazas stay bobtail-only unless the site name identifies a real travel/truck center.
+- **The map's fuel-gap search no longer hammers the shared map server.** It backs off when asked and never records a failed lookup as an empty corridor; convenience plazas stay bobtail-only unless the name says travel center.
 
 - **Traffic lights announce only their color, and the approach countdown says only the distance.**
 
@@ -37,25 +37,25 @@
 
 ### Added
 
-- **Pilot, Love's, and Flying J travel centers on thin US-hwy tractor-fuel legs.** Clovis (US-380), Rapid City (US-14), Dodge City (US-183), Norfolk (US-81), Benson #9/#460 and Tucson (AZ-80), Lufkin (US-96), Columbia Falls (US-2), Mayer (AZ-69), and Missoula (US-93). Tractor-trailer keep; Corsicana dealer and OSM Petro Mayer not added.
+- **Pilot, Love's and Flying J travel centers now stand on ten thin US highway runs.** Clovis, Rapid City, Dodge City, Norfolk, Benson, Tucson, Lufkin, Columbia Falls, Mayer and Missoula each gain a tractor-trailer fuel stop.
 
-- **Love's and Pilot Travel Centers at Corbin on I-75.** london→knoxville (I-75 Exit 29) at 10.9 / 11.7 mi; tractor-trailer keep; parking likely / confirmed. Remapped onto the live corridor after morristown→london retired.
+- **Love's and Pilot travel centers now sit at Corbin on I-75, between London and Knoxville.** Both take a tractor-trailer and both offer truck parking.
 
-- **Little America Travel Center pull-ins at Cheyenne and Flagstaff.** Cheyenne (I-80 Exit 358/359) on cheyenne→laramie, cheyenne→salt_lake, and rock_springs→cheyenne; Flagstaff (2515 E Butler) on camp_verde→flagstaff, flagstaff→kingman, and flagstaff→winslow. Tractor-trailer travel-center actions; hotels and unrelated Little America sites stay off the map.
+- **Little America travel centers at Cheyenne and Flagstaff are pull-ins.** Cheyenne serves the I-80 runs to Laramie, Rock Springs and Salt Lake City; Flagstaff serves the runs to Camp Verde, Kingman and Winslow.
 
-- **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
+- **Little America's fuel center on I-80 west of Rock Springs is a pull-in.** It serves the runs from Rock Springs and Cheyenne toward Salt Lake City.
 
-- **Opposite-direction corridors share honest truck stops the other way already had.** Flying J, Petro, Love's, and the rest copy onto overlapping same-highway partners only.
+- **A truck stop known driving one way on a highway now shows up driving the other way too.** Flying J, Petro, Love's and the rest are copied only where the same highway overlaps.
 
 - **Midway Service Center is a pull-in on US-45 between Mobile and Meridian.** Circle K on that corridor and Birmingham to Opelika is bobtail-only.
 
 - **Wall Drug on Rapid City to Sioux Falls is park-capable only.** Same Exit 110 pull-in as the westbound side, with no diesel.
 
-- **Wall Drug on mitchell→rapid is park-capable only.** Truck parking at the Wall exit — no diesel or travel-center fuel inventing.
+- **Wall Drug on the Mitchell to Rapid City run is park-capable only.** Truck parking at the Wall exit, with no diesel.
 
-- **Wall Drug sells its famous five-cent coffee and free ice water.** Park-only stops on mitchell→rapid and rapid→sioux_falls offer those fatigue buffs by brand — no diesel inventing.
+- **Wall Drug sells its famous five-cent coffee and free ice water.** Both ease fatigue at the park-only stops on the Mitchell to Rapid City and Rapid City to Sioux Falls runs.
 
-- **Roadside billboard pools grew without packing the highway.** New jokes, attorney and travel-plaza ads, corridor music landmarks, casino and Tejano approaches, and dated movie/TV promo copy; spacing stays in the same thirty-five to sixty-five mile band and the rare tribute draw rate is unchanged. Anywhere-pool jokes stay silent in Maine, Vermont, Alaska, and Hawaii.
+- **More billboards along the road, without crowding it.** New jokes, attorney and travel-plaza ads, music landmarks, casino and Tejano approaches and dated movie promos, at the same spacing as before; Maine, Vermont, Alaska and Hawaii stay quiet.
 
 
 - **Career stats opens your citations and violations, newest first.** Each
@@ -471,9 +471,9 @@
 
 ### Changed
 
-- **Running from the police is what the truck does, not a key.** Hold speed
-  for twelve seconds after the final warning, unbraked, and it is a pursuit,
-  while a touch of the brake is a forced stop.
+- **Running from the police is judged by how you drive, with no key to
+  press.** Hold speed unbraked for twelve seconds after the final warning and
+  it is a pursuit; a touch of the brake is a forced stop.
 
 - **Whole hours are spoken as whole numbers.** Three hours is "3 hours"
   now, never "three point zero".
@@ -565,10 +565,9 @@
 - **Choose developer snapshots on the Update channel row to move to newer
   prerelease builds.**
 
-- **Licenses and training replaces the endorsement menu at every terminal,
-  built the way real trucking licenses work.** Carrier certificates come
-  first, then the CDL endorsements by written test, then the TWIC port
-  card and the LCV certificate.
+- **Licenses and training replaces the endorsement menu at every terminal.**
+  Carrier certificates come first, then the CDL endorsements by written
+  test, then the TWIC port card and the LCV certificate.
 
 - **Flatbed securement now covers steel and lumber.**
 
@@ -845,9 +844,9 @@
 - **"Drivers board" is now "Drivers on duty".** The Online menu, the pause
   menu, the screen itself and the website all use the one name.
 
-- **Career 1.9 updates now look for 1.9 tester builds, not public developer
-  snapshots.** With Update channel set to developer snapshots, a 1.9 copy
-  downloads the tester builds and ignores 1.8 snapshots.
+- **Career 1.9 updates now look for 1.9 tester builds.** With Update channel
+  set to developer snapshots, a 1.9 copy downloads the tester builds and
+  ignores 1.8 snapshots.
 
 - **Detention, lumpers, washouts, and tolls now come out of an owner-
   operator's settlement.** Detention pays you and the rest charge you; a
@@ -1109,9 +1108,9 @@
 - **Selecting reverse no longer speaks a line on top of the reverse beep.**
   Coming back out to a forward gear still says so.
 
-- **Real-world traffic reports are spoken as a live road report, not an
-  alert.** With Traffic source set to real time, they describe the real road
-  today and do not change the one you drive.
+- **Real-world traffic reports are spoken as a live road report.** With
+  Traffic source set to real time, they describe the real road today and do
+  not change the one you drive.
 
 - **The semis out there are governed now, so you can get around one.**
   Heavy trucks vary a little from one another; cars still pass at their own
@@ -1140,7 +1139,7 @@
 
 - **A fine inside a construction zone is doubled, and every prior citation
   raises the next one.** You are told when a fine was doubled, and every
-  spoken fine says the amount actually taken.
+  spoken fine says the amount taken.
 
 - **You never pay a fine into a hole.** A fine you cannot cover becomes a
   balance owed, and part of every settlement still reaches you.
@@ -1156,8 +1155,8 @@
 - **With Lane keeping on full, the truck says so the first time it sets an
   exit lane and the first time it takes your destination exit.**
 
-- **The owner-operator start no longer skips the career.** It begins at
-  level one; what it changes is who pays, not how far along you are.
+- **The owner-operator start now begins at level one.** Buying in changes
+  who pays, and your level stays where it was.
 
 - **Three new keys answer one hours question each.** Alt A says how long
   you have been at the wheel, Alt S when your break is due, and Alt D how
@@ -1353,7 +1352,7 @@
   for.** It glazes the road far slicker than snow; the forecast and weather
   reports call it out, and live weather recognizes it.
 
-- **Hydroplaning now depends on your tires, not just the sky.** Worn tires
+- **Hydroplaning now depends on your tires as well as the rain.** Worn tires
   float at lower speeds; the truck calls it out, and steering and braking go
   soft until you ease off.
 
@@ -1418,9 +1417,8 @@
 - **Pressing S says when a speed limit is a truck limit.** You hear "Truck
   limit 55. California holds trucks to this" instead of the bare figure.
 
-- **Driving speech is now a ladder you pick, not a single terse switch.**
-  The Driving speech row under Speech settings has three settings:
-  Standard, Quiet and Urgent only.
+- **Driving speech now has three settings: Standard, Quiet and Urgent
+  only.** The Driving speech row is under Speech settings.
 
 - **Standard speaks every confirmation and status readout in words.** A
   driving tip is said once per leg, and a status readout repeats only when
@@ -1445,11 +1443,9 @@
 
 ### Fixed
 
-- **Quiet-mode confirmation notes on the main say path get the same room as event ones.** With Game sounds step back for speech on, cruise and stop confirmations that become earcons at quiet no longer play against the full road bed. This is the mix stepping back under the cue, not Gameplay cues volume getting quieter.
+- **Quiet-mode confirmation notes get the same room as every other cue.** With Game sounds step back for speech on, cruise and stop confirmations no longer play against the full road bed.
 
 - **Driving out of a station's range now says so and retunes the radio.**
-  The old station used to keep playing at full volume while the drivers
-  board named a station you were not hearing.
 
 - **Automatic speed control comes back on its own when a hazard leaves you
   below 20 miles per hour.** The speed keeper builds speed and hands to
@@ -1459,19 +1455,14 @@
   and a serious violation; a felony only if you choose to run.
 
 - **The percent there counts the whole run, streets included, and never
-  says 100 before the gate.** On the last mile of streets the drivers board
-  used to say 100 percent there.
+  says 100 before the gate.**
 
-- **Control now silences the last-stop warning for good.** It used to come
-  back whole on every press, and the same goes for wear warnings.
+- **Control now silences the last-stop warning and wear warnings for good.**
 
 - **Your public profile and cloud backup name the truck you drive now.**
-  A company driver promoted to a new fleet used to keep the old yard's
-  tractor on the page.
 
 - **Automatic speed control eases to the taper speed first and meets the work
-  zone speed at the barrels.** It used to drop to the work zone number miles
-  early, then arrive a little over it.
+  zone speed at the barrels.**
 
 - **The game no longer uses up Windows a little at a time while it sits
   open.** A session that runs all day stays the size it started at.
@@ -1514,7 +1505,7 @@
   sleep.** You wake with the window you went to bed with, and the wake-up
   line says when it closes.
 
-- **A voice that cannot start no longer prevents speech fallback.** The game
+- **A voice that cannot start no longer blocks the next one.** The game
   skips it and tries the next voice.
 
 - **Bobtail trips to find work use your driving hours.** Stops during that
@@ -1656,9 +1647,9 @@
 - **Facility stopping assistance's final prompt names Enter or controller A
   according to your controls.**
 
-- **Roadside achievements now match where you actually stopped.** A weigh
-  station or repair shop no longer earns Sweetheart of the Truck Stop, and a
-  motel room never counts as sleeping in the bunk.
+- **Roadside achievements now match where you stopped.** A weigh station or
+  repair shop no longer earns Sweetheart of the Truck Stop, and a motel room
+  never counts as sleeping in the bunk.
 
 - **The destination and planned-rest-stop options are now one Facility
   stopping assistance setting.** It covers pickups, deliveries, planned rest
@@ -1686,14 +1677,12 @@
 - **Closing the game hands your screen reader back right away.** Quitting
   drops whatever was left unsaid after the sentence already being spoken.
 
-- **A radio stream that will not play lands on a live station, not on
-  silence.** The radio tries the next station on the same band, then AFN
-  Humphreys The Eagle, and says so; streamer-safe mode still lands on the
-  silent channel.
+- **A radio stream that will not play lands on a live station.** The radio
+  tries the next station on the same band, then AFN Humphreys The Eagle, and
+  says so; streamer-safe mode still lands on the silent channel.
 
-- **The drivers list names the truck you are actually in.** A company
-  driver's line and Discord now show the assigned truck, not the old yard
-  mule.
+- **The drivers list names the truck you are in.** A company driver's line
+  and Discord now show the assigned truck instead of the old yard mule.
 
 - **Updating the game works now.** The download keeps going as long as it
   makes progress, the game announces every quarter, and Escape still cancels.
@@ -1828,9 +1817,8 @@
 - **No more phantom brake lights.** Traffic only brakes where the road gives
   it a reason: a jam, roadwork, or a ramp.
 
-- **Braking down behind a slower vehicle is confirmed as slowing to match it,
-  not as easing around it.** Swerving into an open lane still has its own
-  line.
+- **Braking down behind a slower vehicle is confirmed as slowing to match
+  it.** Swerving into an open lane still has its own line.
 
 - **The traffic placed along your route when a run begins takes an exit like
   everybody else.**
@@ -1844,9 +1832,8 @@
 - **Facility stopping assistance no longer brakes you on the way out of a
   yard.** It leaves a departure alone and slows only on the way in.
 
-- **Facility stopping assistance stops you at the gate on every delivery, not
-  just some.** The last city streets no longer go by faster than the brakes
-  can answer.
+- **Facility stopping assistance stops you at the gate on every delivery.**
+  The last city streets no longer go by faster than the brakes can answer.
 
 - **An automatic dock pull-in no longer also tells you to press Enter.** The
   arrival says the dock menu is opening and leaves it there.
@@ -1865,8 +1852,8 @@
   freezes the game either.
 
 - **The speed key and the status screen tell you the speed adaptive cruise is
-  really holding.** You hear "adaptive cruise holding thirty-three for the
-  ramp, set eighty" until nothing holds it down.
+  holding.** You hear "adaptive cruise holding thirty-three for the ramp,
+  set eighty" until nothing holds it down.
 
 - **A turn or exit instruction cut off by the next one is read straight after
   it.** A line you were already hearing still gives way, and one no longer
@@ -1904,9 +1891,8 @@
 
 - **Asheville to Hickory is now called a mountain road.**
 
-- **Five legs are named for the road you are actually on.** Hickory to
-  Charlotte is now NC-16 and West Palm Beach to Cape Coral is SR-80, among
-  others.
+- **Five runs are named for the road you are on.** Hickory to Charlotte is
+  now NC-16 and West Palm Beach to Cape Coral is SR-80, among others.
 
 - **Legs that were booked shorter than the road really runs now carry their
   true distance.** Expect them to pay more and be given more time.
@@ -1915,12 +1901,12 @@
   Asheville and Knoxville and I-70 through Glenwood Canyon now say what they
   are.
 
-- **Bends are judged against the road you are actually on.** You hear the
-  corners on roads like US-231 again, and never a town square called as a
-  highway curve.
+- **Bends are judged against the road you are on.** You hear the corners on
+  roads like US-231 again, and never a town square called as a highway
+  curve.
 
-- **A hot exit ramp tells you once, not twice.** The line that survives names
-  what the assist is braking for.
+- **A hot exit ramp warns you once.** The line that survives names what the
+  assist is braking for.
 
 - **The delivery clock now counts the bends you have to slow for.** A mountain
   run like US-550 over Red Mountain Pass is given the driving time it takes.
@@ -1928,17 +1914,17 @@
 - **A tank load is described in tank words at the dock too.** The receiver
   uses the same words the road did.
 
-- **Facility stopping assistance delivers the truck to the gate, not a truck
-  length short of it.** It rolls the last few lengths to the gate and stops
-  there, so the pull-in opens on its own.
+- **Facility stopping assistance delivers the truck all the way to the
+  gate.** It rolls the last few lengths and stops there, so the pull-in opens
+  on its own.
 
 - **T plans the next sleep stop however far ahead it is.** Inside signalling
   range it tells you to press X; further out, it tells you to wait for the
   exit call.
 
-- **The speed readout tells you what the speed keeper is actually holding.**
-  You hear "speed keeper holding fifteen for the corner, set twenty-five" when
-  the two differ.
+- **The speed readout tells you what the speed keeper is holding.** You hear
+  "speed keeper holding fifteen for the corner, set twenty-five" when the two
+  differ.
 
 - **Coming off the ramp onto city streets, you hear the first corner and the
   speed keeper takes the streets at once.** The off-the-ramp line carries the
@@ -1989,9 +1975,8 @@
 - **"Hairpin" now means a hairpin.** Only a switchback gets the word; a tight
   corner taken slowly is a sharp bend.
 
-- **Curve speed assistance slows for the whole chain of bends, not just the
-  first one.** It holds the slowest speed in the chain until the last bend is
-  behind you.
+- **Curve speed assistance slows for the whole chain of bends.** It holds the
+  slowest speed in the chain until the last bend is behind you.
 
 - **You can get past a box truck now.** It no longer runs at a loaded semi's
   governed speed.
@@ -2090,9 +2075,8 @@
 - **A delayed stop announcement says the distance that is true when it
   speaks.** A waiting notice stays silent if you have already passed the stop.
 
-- **Adaptive cruise says the speed it will actually hold after traffic
-  clears.** In a zone you hear "resuming at 20 miles per hour through the
-  heavy traffic."
+- **Adaptive cruise says the speed it will hold after traffic clears.** In a
+  zone you hear "resuming at 20 miles per hour through the heavy traffic."
 
 - **The Five-by-Two and Out badge means the bunk again.** Motel nights no
   longer count; a night in your own sleeper does.
@@ -2131,8 +2115,8 @@
 - **The last half mile to a delivery no longer flies past.** The ramp down to
   your destination runs on the real clock, so you have time to brake.
 
-- **One engine brake voice, not two.** Each engine brake setting plays only
-  its own voice, all the way down a grade.
+- **Each engine brake setting plays one voice.** It keeps that voice all the
+  way down a grade.
 
 - **The engine brake voice switches over wherever you are in the rev range.**
   On the classic voice the growl no longer restarts each time the revs cross a
@@ -2157,9 +2141,8 @@
   facility gate warning, the merge off a ramp and the hold at a red light are
   always spoken.
 
-- **Most cars are just travelling now, not merging into you.** Merging traffic
-  only comes from where a ramp feeds in, hard braking only where traffic is
-  backed up.
+- **Most cars are just travelling now.** Merging traffic only comes from
+  where a ramp feeds in, hard braking only where traffic is backed up.
 
 - **Hazard instructions cannot go missing on a busy road.** The follow-up that
   a hazard is still in your lane, and the still-reversing reminder, always
@@ -2205,7 +2188,7 @@
   changes. (reported by Darren)
 
 - **Exits now end at the control that is really there.** What waits at the
-  bottom of an off-ramp is looked up for every state, not guessed.
+  bottom of an off-ramp is looked up for every state.
 
 - **A few stretches of road were far steeper than any road really is.** Those
   grades are now held to what a road of that kind is built to.
@@ -2276,8 +2259,8 @@
   holds road speed until it needs to slow, and the approach runs at real-time
   pace.
 
-- **Exit speed assistance carries you to the exit, not just down to ramp
-  speed.** It holds ramp speed to the gore; brake and it stands aside.
+- **Exit speed assistance holds ramp speed all the way to the exit.** Brake
+  and it stands aside.
 
 - **Your own playlists work again, and can carry internet stations as well as
   music files.** They play in your order, and PLS is read alongside M3U and
@@ -2438,8 +2421,8 @@
 - **The speed keeper no longer misses the second corner of a short block.**
   Every corner close enough to matter now bids, and the slowest one wins.
 
-- **Pulled over means idling, not revving.** The engine settles to idle at the
-  roadside for the whole stop.
+- **The engine settles to idle while you are pulled over, for the whole
+  stop.**
 
 - **Sleeping at a motel now shuts the engine off.** The wake-up message no
   longer tells you to start an engine that was already running.
@@ -2468,8 +2451,8 @@
 - **A trooper who saw you no longer forgets because you were busy.** The
   pull-over comes as soon as the cab is quiet.
 
-- **The reconnect advice now covers a driver account gone from orinks.net,
-  not just a signed-out computer.** It tells you how to tell the two apart
+- **The reconnect advice now covers a driver account gone from orinks.net as
+  well as a signed-out computer.** It tells you how to tell the two apart
   and what to do for each.
 
 - **The assists no longer empty the air tanks stopping for a light or a
@@ -2489,9 +2472,9 @@
 - **The speed keeper now slows down before a street corner instead of at
   it.** The corner call tells you when the keeper is taking it.
 
-- **The engine brake is for hills now, not for corners.** Curve speed
-  assistance, adaptive cruise and the automatic gearbox all slow for a bend
-  on level road on the service brakes.
+- **The engine brake now stays out of corners.** Curve speed assistance,
+  adaptive cruise and the automatic gearbox all slow for a bend on level
+  road on the service brakes.
 
 - **A construction zone can no longer close the only lane you have.** Work
   zones only close a lane where the road has another to give you.
@@ -2709,9 +2692,9 @@
 - **A curve call silenced by your stop-speech key comes back once with a
   fresh distance.** It stays quiet if you have already slowed for the bend.
 
-- **Chained bends are one call now, not a flood.** A bend covered by a
-  "then" tail gets no call of its own: "Sharp left, half a mile. Advise 35.
-  Then hairpin right, advise 25."
+- **Chained bends are one call now.** A bend covered by a "then" tail gets
+  no call of its own: "Sharp left, half a mile. Advise 35. Then hairpin
+  right, advise 25."
 
 - **Driving to a local dock no longer sounds like driving to town.** Local
   facility runs name where you are going: "toward dry warehouse Camp Verde
@@ -2752,9 +2735,9 @@
   early enough on tired brakes, and hazard warnings arrive earlier when the
   truck needs more stopping room.
 
-- **The ramp light now tells you where you are, not just what color it
-  is.** The game says when you are stopped short, and yellow and green
-  announcements say whether you have reached the bar.
+- **The ramp light now says where you are as well as its color.** The game
+  says when you are stopped short, and yellow and green announcements say
+  whether you have reached the bar.
 
 - **Missing the destination exit twice no longer strands you at the end of
   the road.** Dispatch reroutes you every time, and the turnaround drops

@@ -109,11 +109,11 @@ These items are part of the release-gate sweep:
       hazard warnings retain service-braking and reaction time; emergency
       braking has its own stopping estimate.
 
-- [x] Testers hear sounds quieter at the quiet speech rung -- the Aug 19
-      earcon duck covered say_event; the main say path (cruise/stop
+- [x] Testers hear sounds quieter at the quiet speech rung. CLOSED: the
+      Aug 19 earcon duck covered say_event; the main say path (cruise/stop
       confirmations) now ducks the bed the same way when game sounds step
-      back for speech is on. Absolute levels were never low; relative
-      masking under the unducked road bed was.
+      back for speech is on. The cue levels were never low; the unducked
+      road bed was masking them.
 - [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE;
       last open world-data item for 1.9. The real-zone floor and the
       merge-free opening miles landed 2026-08-16; what remains is departure
@@ -142,19 +142,18 @@ closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
 world-data item (see above): every state has been swept once, and the
 leftovers are path failures inside swept states and the endpoint re-sweep.
 
-- [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry
-      -- CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
+- [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry.
+      CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
       25 to 0, connectors and screens restored; curve inventory green.
-- [x] 33 legs a truck router would refuse -- CLOSED 2026-09-16: 25 adopted
+- [x] 33 legs a truck router would refuse. CLOSED 2026-09-16: 25 adopted
       truck-legal geometry with paid miles synced to path length; 8 leftovers
-      retired (no silent drop). Refuse inventory 0.
-- [x] 776 facility approach pins land too far out -- CLOSED 2026-09-16: far
+      retired by owner decision. Refuse inventory 0.
+- [x] 776 facility approach pins land too far out. CLOSED 2026-09-16: far
       pins regeocoded within city bounds (776 to 0); estimated-near-city
-      honesty gates landed. Residual estimated pins and OSM source_backed
-      quality follow-up deferred, not a far-pin blocker.
+      labels landed. Residual estimated pins and the OSM source_backed
+      quality follow-up are deferred; neither blocks far pins.
 - [x] The Duff-shared sound cues flagged unlicensed by the provenance
-      audit -- N/A 2026-09-16 (owner): not applicable; drop from the
-      release gate.
+      audit. N/A 2026-09-16 (owner): dropped from the release gate.
 - [ ] Colorado's live traffic and construction are dead (CARS GraphQL
       retired; COtrip's WZDx feed wants a registered key, as do Ohio,
       Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
