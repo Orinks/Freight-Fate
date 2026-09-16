@@ -12195,6 +12195,33 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: way 549380876 name=\"Little America Travel Center\" shop=convenience addr 2800 West Lincolnway, Cheyenne WY @ 41.11775,-104.85585; I-80 Exit 358/359; Ruth KEEP tractor_trailer 2026-09-16 \u2014 Sinclair diesel, ~20\u201330 truck parking spots, showers (OSM convenience-only tags incomplete)",
+          "at_mi": 3.0,
+          "lat": 41.1177498,
+          "lon": -104.8558532
+        },
+        {
           "name": "Summit Rest Area and Visitor Center",
           "type": "public_rest_area",
           "at_mi": 37.5,
@@ -17719,6 +17746,33 @@
           "lat": 41.09763,
           "lon": -104.84878,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: way 549380876 name=\"Little America Travel Center\" shop=convenience addr 2800 West Lincolnway, Cheyenne WY @ 41.11775,-104.85585; I-80 Exit 358/359; Ruth KEEP tractor_trailer 2026-09-16 \u2014 Sinclair diesel, ~20\u201330 truck parking spots, showers (OSM convenience-only tags incomplete)",
+          "at_mi": 4.5,
+          "lat": 41.1177498,
+          "lon": -104.8558532
         },
         {
           "name": "Summit Rest Area and Visitor Center",
@@ -28619,6 +28673,33 @@
           "directions": [
             "both"
           ]
+        },
+        {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: way 549380876 name=\"Little America Travel Center\" shop=convenience addr 2800 West Lincolnway, Cheyenne WY @ 41.11775,-104.85585; I-80 Exit 358/359; Ruth KEEP tractor_trailer 2026-09-16 \u2014 Sinclair diesel, ~20\u201330 truck parking spots, showers (OSM convenience-only tags incomplete)",
+          "at_mi": 255.0,
+          "lat": 41.1177498,
+          "lon": -104.8558532
         },
         {
           "name": "Love's",
