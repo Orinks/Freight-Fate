@@ -358,24 +358,21 @@ fn test_city_departure_hairpins_are_gone_off_the_mountains() {
 
 #[test]
 fn test_leaving_a_mountain_town_keeps_the_road_and_drops_the_town() {
-    // Both halves of the Hazard case, re-pinned to the actual roads.
+    // Mountain-town through-road honesty: town streets drop as connectors,
+    // the trunk's own bends near the city node stay.
     //
-    // This test used to assert that "a real 80 ft switchback at mile 2.48,
-    // where the road is already into the mountains, stays". The road data says
-    // otherwise: mile 2.48 is on `KY 15 Business`, OSM class `secondary`,
-    // turning 71 and 89 degrees at an 80 ft radius -- the business loop through
-    // Hazard, which is a street corner rather than a switchback. The leg is
-    // made of `trunk` (38 sampled miles of KY-15 against 3 of residential), and
-    // the through road's own bends at miles 1.06 and 1.59 are what survive.
-    //
-    // Terrain alone could not tell those apart, because both are in the
-    // mountains. Reading the road under each bend can, which is what the
-    // connector bake now does.
-    let recs = leg_curves("hazard_ky_us:london_ky_us", true);
+    // Originally pinned to Hazard->London (KY-15). That directed edge was
+    // retired with the truck-router refuse leftovers (owner option 3); the
+    // business-loop / KY-15 story in older comments lived on that edge. The
+    // property is the same on the surviving eastern-KY coalfield trunk:
+    // Ashland->Paintsville on US-23. Departure streets read off-corridor;
+    // US-23's own bends inside the first 2.5 miles survive, none tighter
+    // than a truck's turning circle.
+    let recs = leg_curves("ashland_ky_us:paintsville_ky_us", true);
     let near: Vec<_> = recs.iter().filter(|r| r.apex_mi < 2.5).collect();
     assert!(
         !near.is_empty(),
-        "KY-15's own bends leaving Hazard must survive"
+        "US-23's own bends leaving Ashland must survive"
     );
     assert!(
         near.iter().all(|r| r.min_radius_ft >= 50),
@@ -385,17 +382,17 @@ fn test_leaving_a_mountain_town_keeps_the_road_and_drops_the_town() {
 
 #[test]
 fn test_a_mountain_town_keeps_the_road_out_of_it() {
-    // US-119 leaving Charleston, re-pinned for the same reason.
+    // Same property on the remaining Pikeville mountain approach.
     //
-    // The record this test used to protect as "a real switchback within the
-    // first mile" is Thayer Street in Charleston -- OSM class `primary`, 92 ft
-    // radius, 96 degrees. US-119 itself (`trunk`, signed Corridor G) starts at
-    // mile 1.62, and those bends are the ones that stay.
-    let recs = leg_curves("charleston_wv_us:pikeville_ky_us", true);
+    // Originally Charleston->Pikeville (US-119 Corridor G). That edge was
+    // retired with the refuse leftovers. Johnson City->Pikeville on US-23
+    // still climbs into Pikeville: town geometry at the start reads as
+    // connectors, and the trunk bends inside the first three miles stay.
+    let recs = leg_curves("johnson_city_tn_us:pikeville_ky_us", true);
     let near: Vec<_> = recs.iter().filter(|r| r.apex_mi < 3.0).collect();
     assert!(
         !near.is_empty(),
-        "Corridor G's own bends out of Charleston must survive"
+        "US-23's own bends toward Pikeville must survive"
     );
     assert!(near.iter().all(|r| r.min_radius_ft >= 50));
 }
