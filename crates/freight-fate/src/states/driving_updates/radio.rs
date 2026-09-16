@@ -3,9 +3,9 @@
 
 use ff_core::music::RADIO_TRACKS_PER_HOST_BREAK;
 use ff_core::radio::{
-    effective_range_miles, is_stream_entry, signal_volume_factor, truck_elevation_ft,
-    truck_position, RadioAction, RadioPlaybackError, RadioReception, RadioStation,
-    PERSONAL_PLAYLIST_SOURCE_TYPE,
+    effective_range_miles, is_stream_entry, signal_volume_factor, station_identity,
+    truck_elevation_ft, truck_position, RadioAction, RadioPlaybackError, RadioReception,
+    RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE,
 };
 use ff_core::radio_content::{content_duration_s, plan_break};
 use ff_core::radio_rotation::{cue_after, RotationCue, StationRotation};
@@ -55,11 +55,27 @@ impl DrivingState {
             return;
         }
         self.radio_signal_timer = 1.5;
-        let before = self.radio.current_station();
+        // What the cab is playing, not what the dial resolves to. The frame's
+        // settings sync has already moved the truck's radio position and
+        // re-pointed the dial by the time this tick runs, so a resolving read
+        // here answered with the fallback on both sides of the comparison:
+        // the station left the map with nothing said, no static, no retune,
+        // and its dead stream carried on at the fallback's full volume while
+        // the drivers board named a station the cab never played (owner,
+        // I-35 south of Minneapolis, 2026-09-16: KVSC "came back", and the
+        // board had him on the Eagle). Ported from Python, which had the
+        // same frame order and the same hole.
+        let on_air = self.radio.station_by_id(&self.radio_station_id).cloned();
         let (position, elevation) = self.radio_position(ctx);
         self.radio.update_position(position, elevation);
         let reception = self.radio.current_reception();
-        if reception.station.id != before.id {
+        // Sites of one station are one station: a stronger sibling taking the
+        // dial is the signal getting better, not a station lost.
+        let lost = on_air.filter(|before| {
+            before.id != reception.station.id
+                && station_identity(before) != station_identity(&reception.station)
+        });
+        if let Some(before) = lost {
             // the tuned station fell past its range contour mid-drive
             ctx.award_achievement("radio_faded_out");
             self.radio_states_held.clear();

@@ -745,6 +745,11 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
                 return Err(RadioPlaybackError("station has no stream URL".to_string()));
             }
             self.driving.apply_radio_volume(self.ctx);
+            // The station on the air, for the reception tick and the drivers
+            // board: the built-in and playlist branches record it as their
+            // rotation starts, and a live stream has to record it here or
+            // the cab has no answer for what it is playing.
+            self.driving.radio_station_id = station.id.clone();
             return self
                 .ctx
                 .audio
@@ -753,6 +758,7 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
         }
         self.driving.apply_radio_volume(self.ctx);
         if station.fallback {
+            self.driving.radio_station_id = station.id.clone();
             self.ctx.audio.stop_music_with(600);
         } else {
             self.driving.start_station_rotation(self.ctx, station, 900);

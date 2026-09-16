@@ -515,13 +515,22 @@ impl DrivingState {
         if !self.radio.enabled {
             return Some(base);
         }
-        // `current_station` re-resolves the dial (and may take an identity
-        // handover), which needs `&mut`; `lines()`/`presence()` are `&self`,
-        // so this reads without re-pointing the dial and the handover is
-        // left to the tick. It used to do that by resolving on a whole
-        // clone of the radio -- 757 stations and their identity map, copied
-        // sixty times a second, which measured 2.4 ms of every frame.
-        let station = self.radio.tuned_station();
+        // The station the cab is playing, by the id the playback seam
+        // recorded, not what the dial resolves to at this instant: between
+        // the truck crossing a range contour and the reception tick that
+        // retunes, the resolving read already answers with the fallback,
+        // and the board then names a station nobody in the cab can hear
+        // (owner, I-35, 2026-09-16: "listening to the Eagle" while KVSC
+        // played). `tuned_station` stays as the answer when nothing has been
+        // played yet; it reads without re-pointing the dial, and the
+        // handover is left to the tick. Both are `&self`: resolving on a
+        // whole clone of the radio (757 stations and their identity map,
+        // sixty times a second) measured 2.4 ms of every frame.
+        let station = self
+            .radio
+            .station_by_id(&self.radio_station_id)
+            .cloned()
+            .unwrap_or_else(|| self.radio.tuned_station());
         let mut clause = format!("listening to {}", station.display_name());
         // And the song, when the stream says: broadcast metadata the station
         // itself publishes to every listener, so no more private than the

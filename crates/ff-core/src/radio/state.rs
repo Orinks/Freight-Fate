@@ -887,7 +887,11 @@ impl RadioState {
         !self.streamer_safe
     }
 
-    fn station_by_id(&self, station_id: &str) -> Option<&RadioStation> {
+    /// The catalog row for an id, exactly as checked in: no range check, no
+    /// handover, no fallback. This is how the drive names the station its
+    /// cab is actually playing, which the resolving reads above cannot
+    /// answer once the dial has moved on.
+    pub fn station_by_id(&self, station_id: &str) -> Option<&RadioStation> {
         self.catalog.iter().find(|s| s.id == station_id)
     }
 

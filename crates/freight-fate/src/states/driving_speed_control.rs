@@ -128,6 +128,7 @@ impl DrivingState {
         self.speed_control_armed = false;
         self.clear_stop_pause();
         self.speed_control_target_mph = None;
+        self.speed_control_floor_said = false;
         // A curve pause dies with the session it was holding open: a manual
         // K, the driver's own emergency brake, or any other disarm during the
         // bend must not leave a resume mile behind to re-engage a session
@@ -390,13 +391,44 @@ impl DrivingState {
             return;
         }
         if self.trip.truck.speed_mph() < CRUISE_MIN_MPH {
-            // Open road, but not yet at cruise's holding speed. Wait to engage
-            // rather than snapping cruise on at the full remembered error and
-            // flooring the throttle to chase a high target from a crawl. A zone
-            // bridges the low-speed regime with the keeper (above); on the open
-            // road the truck simply has to be at road speed first -- which is
-            // what makes Shift+K behave like the automatic resume the tester
-            // already trusts.
+            // Open road, but not yet at cruise's holding speed. Cruise must
+            // not snap on here at the full remembered error and floor the
+            // throttle to chase a high target from a crawl. It used to wait,
+            // silently, for the driver to bring the rig back up by hand --
+            // and after "Brake! Slow car right ahead" matched a car doing 17
+            // the driver sat at 17 on a 55 road with nothing holding speed
+            // and nothing said about why (owner, US-12 near Litchfield,
+            // 2026-09-16). The keeper is the automation for the low-speed
+            // stretch, exactly as it is for the acceleration lane: it builds
+            // toward the posted limit behind whatever traffic held the truck
+            // down, and `update_keeper` hands to cruise at road speed.
+            if !ctx.settings.speed_keeper {
+                if !self.speed_control_floor_said {
+                    self.speed_control_floor_said = true;
+                    let floor = ctx.settings.speed_text(CRUISE_MIN_MPH);
+                    ctx.say_event_with(
+                        format!(
+                            "Automatic speed control resumes at {floor}. You have the pedals \
+                             until then."
+                        ),
+                        SayEvent::queued()
+                            .priority(EventPriority::Route)
+                            .category(SpeechCategory::Confirmation),
+                    );
+                }
+                return;
+            }
+            self.engage_keeper(ctx, limit, KEEPER_OPEN_ROAD_BRIDGE, Some(limit), false);
+            let floor = ctx.settings.speed_text(CRUISE_MIN_MPH);
+            ctx.say_event_with(
+                format!(
+                    "Automatic speed control resuming. Speed keeper building speed; adaptive \
+                     cruise takes over at {floor}."
+                ),
+                SayEvent::queued()
+                    .priority(EventPriority::Route)
+                    .category(SpeechCategory::Confirmation),
+            );
             return;
         }
         let target = self.speed_control_target_mph.unwrap_or(limit);

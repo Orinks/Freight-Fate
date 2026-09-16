@@ -13,7 +13,9 @@ use std::rc::Rc;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
-use ff_core::radio::{RadioPlaybackBackend, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE};
+use ff_core::radio::{
+    RadioPlaybackBackend, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE, SAFE_ROUTE_PLAYLIST,
+};
 use ff_core::radio_content::content_duration_s;
 
 use freight_fate::app::testing::TestApp;
@@ -60,6 +62,8 @@ struct MusicAudio {
     /// Seconds into the track each `music` entry was asked to start at.
     starts: Rc<RefCell<Vec<f64>>>,
     stops: Rc<RefCell<Vec<u32>>>,
+    /// Every live stream URL the cab was asked to open, in order.
+    streams: Rc<RefCell<Vec<String>>>,
     volume: Rc<Cell<f64>>,
     playing: Rc<Cell<bool>>,
     engine_on: Rc<Cell<bool>>,
@@ -70,9 +74,15 @@ struct MusicTape {
     music: Rc<RefCell<Vec<(String, u32)>>>,
     starts: Rc<RefCell<Vec<f64>>>,
     stops: Rc<RefCell<Vec<u32>>>,
+    streams: Rc<RefCell<Vec<String>>>,
 }
 
 impl MusicTape {
+    /// The live stream the cab was last asked to open.
+    fn last_stream(&self) -> Option<String> {
+        self.streams.borrow().last().cloned()
+    }
+
     fn tracks(&self) -> Vec<String> {
         self.music
             .borrow()
@@ -110,6 +120,7 @@ impl MusicAudio {
             music: Rc::clone(&audio.music),
             starts: Rc::clone(&audio.starts),
             stops: Rc::clone(&audio.stops),
+            streams: Rc::clone(&audio.streams),
         };
         app.ctx.audio = Box::new(audio);
         tape
@@ -204,7 +215,8 @@ impl Audio for MusicAudio {
         self.starts.borrow_mut().push(start_s);
         self.playing.set(true);
     }
-    fn play_radio_stream_with(&mut self, _url: &str, _fade_ms: u32) -> Result<(), AudioError> {
+    fn play_radio_stream_with(&mut self, url: &str, _fade_ms: u32) -> Result<(), AudioError> {
+        self.streams.borrow_mut().push(url.to_string());
         self.playing.set(true);
         Ok(())
     }
@@ -729,4 +741,91 @@ fn test_a_playlist_with_nothing_playable_says_so_once() {
     d.playlist_nothing_plays(&mut app.ctx, &station);
     assert_eq!(app.event_lines().len(), 1);
     assert!(!tape.stopped().is_empty());
+}
+
+// -- driving out of range -------------------------------------------------------------
+
+/// A live stream sited on Denver's yard with a short contour, so the Denver
+/// run drives out of it well inside the first leg.
+fn a_ranged_stream(id: &str) -> RadioStation {
+    RadioStation {
+        lat: Some(39.7392),
+        lon: Some(-104.9903),
+        range_miles: 20.0,
+        real_stream: true,
+        stream_url: format!("https://radio.test/{id}"),
+        ..RadioStation::new(
+            id,
+            "Mile High 91.5",
+            "KMHF",
+            "college variety",
+            "test fixture",
+        )
+    }
+}
+
+/// One drive frame's worth of radio work, in the order the frame runs it:
+/// the settings sync first, then the reception tick.
+fn radio_frame(d: &mut DrivingState, app: &mut TestApp) {
+    d.sync_radio_settings(&mut app.ctx);
+    d.update_radio_reception(&mut app.ctx, 1.5);
+}
+
+#[test]
+fn test_driving_out_of_a_stations_range_says_so_and_retunes_the_cab() {
+    // Owner, Willmar to Owatonna, 2026-09-16: KVSC thinned out on I-35, then
+    // came back at full volume with nothing said, and the drivers board had
+    // him "listening to AFN Humphreys The Eagle" while the cab still played
+    // KVSC. The per-frame settings sync had already re-pointed the dial at
+    // the new position, so the reception tick compared the Eagle with itself:
+    // no line, no static, and the dead station's stream left running at the
+    // fallback's full volume.
+    let mut app = TestApp::new();
+    app.ctx.settings.radio_streamer_safe = false; // the Eagle is the audible fallback
+    let mut d = a_denver_drive(&mut app, 916);
+    let tape = MusicAudio::install(&mut app);
+    d.trip.truck.start_engine();
+    d.update_audio(&mut app.ctx, 0.0);
+    let mut catalog = d.radio.catalog.clone();
+    catalog.push(a_ranged_stream("kmhf-denver"));
+    d.radio.set_catalog(catalog);
+    tune(&mut d, &mut app, "kmhf-denver");
+    radio_frame(&mut d, &mut app);
+    assert_eq!(d.radio.tuned_station().id, "kmhf-denver");
+    assert_eq!(
+        tape.last_stream().as_deref(),
+        Some("https://radio.test/kmhf-denver")
+    );
+    app.clear_speech();
+
+    // Past the contour.
+    let tracks_before = tape.tracks().len();
+    d.trip.position_mi = 120.0;
+    radio_frame(&mut d, &mut app);
+
+    // The announced landing is the Roadhouse, receivable everywhere. The
+    // Eagle is only ever where the dial's silent resolution lands, which is
+    // exactly what the drivers board used to read out.
+    let on_air = d.radio.tuned_station();
+    assert_eq!(on_air.id, SAFE_ROUTE_PLAYLIST);
+    let said = app.event_lines();
+    assert!(
+        said.iter()
+            .any(|line| line.contains("Mile High 91.5 faded out of range. Falling back to FFR")),
+        "{said:?}"
+    );
+    assert!(
+        tape.tracks().len() > tracks_before,
+        "the cab retunes to what the dial says"
+    );
+    let presence = d
+        .online_presence_state(&app.ctx)
+        .expect("a drivers-board line");
+    assert!(
+        presence
+            .detail
+            .contains("listening to FFR, Freight Fate Roadhouse"),
+        "{}",
+        presence.detail
+    );
 }

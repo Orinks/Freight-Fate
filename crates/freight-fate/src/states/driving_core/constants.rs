@@ -375,6 +375,12 @@ pub const KEEPER_MAX_THROTTLE: f64 = 0.5;
 pub const KEEPER_DROOP_MPH: f64 = 3.0;
 pub const KEEPER_GAP_SECONDS: f64 = 3.0; // follow queued traffic at this gap, down to a stop
 pub const CRUISE_MIN_MPH: f64 = 20.0; // cruise control needs road speed to hold
+/// The keeper's zone name while it bridges open road below cruise's holding
+/// speed: a hazard or a stop that left the truck crawling with the session
+/// still armed. It builds toward the posted limit behind whatever traffic
+/// held the truck down and hands to adaptive cruise at `CRUISE_MIN_MPH`, the
+/// way the acceleration lane does at its merge speed.
+pub const KEEPER_OPEN_ROAD_BRIDGE: &str = "open road";
 pub const CRUISE_STEP_MPH: f64 = 5.0; // set-point change per Accel/Coast (+/-) tap
 pub const CRUISE_MAX_MPH: f64 = 85.0; // highest cruise set point (top US posted limits)
 

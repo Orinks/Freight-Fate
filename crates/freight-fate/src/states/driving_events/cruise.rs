@@ -84,6 +84,7 @@ impl DrivingState {
     ) {
         self.speed_control_armed = true;
         self.speed_control_paused_at_stop = false;
+        self.speed_control_floor_said = false;
         // Round to the whole mph the player actually hears (speed_text already
         // rounds the readout): a plain K-set otherwise captures the truck's
         // exact float speed (e.g. 59.95), and the first +/- tap would spend
@@ -355,6 +356,24 @@ impl DrivingState {
             self.say_route_confirmation(ctx, "Speed keeper canceled; automatic speed control off.");
             return;
         }
+        let position = self.trip.position_mi;
+        let (limit, mut zone_reason) = self.trip.speed_limit_at(position);
+        if self.keeper_zone == KEEPER_OPEN_ROAD_BRIDGE
+            && zone_reason.is_none()
+            && self.trip.truck.speed_mph() >= CRUISE_MIN_MPH
+        {
+            // The bridge is spent at road speed whether the keeper or the
+            // driver's own foot got the truck there. The session's promise is
+            // that cruise comes back on its own, and a driver accelerating
+            // through the handoff is exactly how it came back before the
+            // keeper bridged the crawl -- so this runs ahead of the manual
+            // override below, which would otherwise hold the handoff until
+            // the key lifted.
+            let target_mph = self.speed_control_target_mph.unwrap_or(limit);
+            self.cancel_keeper(ctx, true);
+            self.engage_cruise(ctx, target_mph, true);
+            return;
+        }
         if accelerating {
             return; // manual override; the keeper resumes when the key lifts
         }
@@ -362,8 +381,6 @@ impl DrivingState {
             self.trip.truck.throttle = 0.0;
             return;
         }
-        let position = self.trip.position_mi;
-        let (limit, mut zone_reason) = self.trip.speed_limit_at(position);
         if zone_reason.is_none() && self.departure_ramp_mi.is_some() {
             // The acceleration lane is a low-speed regime like a zone, and the
             // keeper is the tool for those -- it exists because holding an
@@ -375,6 +392,16 @@ impl DrivingState {
             // builds toward the road's own limit, then hands to cruise once
             // this truck reaches its capability-aware merge threshold.
             zone_reason = Some("acceleration lane".to_string());
+        } else if zone_reason.is_none()
+            && self.keeper_zone == KEEPER_OPEN_ROAD_BRIDGE
+            && self.trip.truck.speed_mph() < CRUISE_MIN_MPH
+        {
+            // The open-road bridge (`resume_speed_control_if_ready`): a hazard
+            // or a stop left the truck below cruise's holding speed with the
+            // session still armed, and the keeper builds it back up. Once the
+            // truck is at road speed the bridge is spent and the plain
+            // no-zone handoff below gives the road to adaptive cruise.
+            zone_reason = Some(KEEPER_OPEN_ROAD_BRIDGE.to_string());
         }
         let Some(zone_reason) = zone_reason else {
             let target_mph = self.speed_control_target_mph.unwrap_or(limit);
@@ -641,6 +668,8 @@ impl DrivingState {
         let held = ctx.settings.speed_text(limit);
         let spoken = if zone_reason == "acceleration lane" {
             format!("Speed keeper building to {held} for the merge.")
+        } else if zone_reason == KEEPER_OPEN_ROAD_BRIDGE {
+            format!("Speed keeper building to {held}.")
         } else {
             format!("Speed keeper holding {held} through the {zone_reason} zone.")
         };

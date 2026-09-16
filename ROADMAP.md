@@ -347,6 +347,23 @@ its status or release decision.
       pause. Server side deployed first; builds before it keep the old
       behaviour.
 
+### September 16 radio range and the cruise floor
+
+- [x] Driving out of a station's range is announced and retuned again. The
+      per-frame settings sync re-pointed the dial at the new position before
+      the reception tick compared, so the tick saw the fallback on both sides:
+      no line, no static, the dead stream left running at full volume, and
+      the drivers board naming the Eagle while the cab played KVSC (owner,
+      Willmar to Owatonna, 2026-09-16; inherited from the Python frame order).
+      The tick and the board now go by the station the playback seam
+      recorded.
+- [x] A hazard that leaves the truck below cruise's holding speed no longer
+      parks the armed session silently. The keeper bridges the crawl on open
+      road, as it does the acceleration lane, and hands to adaptive cruise at
+      20; with the keeper off the cab says once what the session waits for
+      (owner, US-12 near Litchfield, 2026-09-16: "Well done" at 17 mph, then
+      nothing).
+
 ### September 13 driver directory
 
 - [x] A driver directory beside Drivers on duty, in the game and on

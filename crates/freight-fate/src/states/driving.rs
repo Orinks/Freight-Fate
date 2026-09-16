@@ -596,6 +596,10 @@ pub struct DrivingState {
     pub keeper_mph: Option<f64>,
     pub keeper_throttle: f64,
     pub keeper_zone: String,
+    // With the speed keeper off, an open-road resume below cruise's holding
+    // speed has nothing to bridge it, so the cab says once what the session
+    // is waiting for. Reset when cruise engages or the session disarms.
+    pub speed_control_floor_said: bool,
     // The posted number the keeper last took its target from, so a street
     // that posts a HIGHER one can hand the keeper back up to street speed.
     pub keeper_zone_limit: Option<f64>,

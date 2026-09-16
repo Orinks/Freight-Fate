@@ -10,7 +10,7 @@ use ff_core::sim::trip_route_helpers::zone_key;
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::base::Key;
-use freight_fate::states::driving_core::{ACC_LIMIT_OFFSET_MPH, LANE_TAP_CHANGE_S};
+use freight_fate::states::driving_core::{ACC_LIMIT_OFFSET_MPH, LANE_TAP_CHANGE_S, MPH_PER_MPS};
 
 use crate::transcript_cruise_support::*;
 
@@ -1157,4 +1157,61 @@ fn test_cruise_keeps_aiming_at_a_limit_drop_once_it_has_eased_for_it() {
         (30.0, None)
     );
     assert!(harness.read_drive(|d| d.acc_limit_hold.is_none()));
+}
+
+#[test]
+fn test_a_hazard_that_leaves_the_truck_below_cruise_speed_still_resumes() {
+    // Owner, Willmar to Owatonna, 2026-09-16: "Brake! Slow car right ahead"
+    // matched a 17 mph car, "Well done", and then nothing. Adaptive cruise
+    // refuses below 20, so the session sat paused with the driver holding 17
+    // and nobody saying why. The keeper is the automation for the low-speed
+    // stretch (the acceleration-lane bridge, Brandon, 2026-08-21) and it
+    // takes this one too: builds behind whatever held the truck down, then
+    // hands to cruise at road speed.
+    let mut harness = bench_drive("Slow Car Resume", 55.0, 0.0);
+    press(&mut harness, Key::E, None);
+    harness.with_drive(|d, _| {
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().velocity_mps = 26.8;
+    });
+    press(&mut harness, Key::K, None);
+    assert!(harness.read_drive(|d| d.cruise_mph).is_some());
+    harness.with_drive(|d, ctx| {
+        d.handle_trip_event(
+            ctx,
+            &hazard_event(
+                "Brake! Slow car right ahead.",
+                TripEventData {
+                    deadline_s: Some(4.0),
+                    ..Default::default()
+                },
+            ),
+        )
+    });
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+    assert!(harness.read_drive(|d| d.cruise_mph).is_none());
+
+    // Braked down to the car's 17 and the hazard clears there.
+    harness.with_drive(|d, _| d.truck_mut().velocity_mps = 17.0 / MPH_PER_MPS);
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| d.clear_hazard(ctx));
+    harness.with_drive(|d, ctx| d.resume_speed_control_if_ready(ctx, false));
+
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+    assert!(
+        harness.read_drive(|d| d.keeper_mph).is_some(),
+        "the keeper bridges the crawl back to road speed: {:?}",
+        spoken(&harness)
+    );
+    assert!(
+        said_any(&harness, "Automatic speed control resuming."),
+        "{:?}",
+        spoken(&harness)
+    );
+
+    // Back at road speed, the keeper hands to adaptive cruise on its own.
+    harness.with_drive(|d, _| d.truck_mut().velocity_mps = 24.0 / MPH_PER_MPS);
+    harness.with_drive(|d, ctx| d.update_keeper(ctx, 0.1, false, false, false));
+    assert!(harness.read_drive(|d| d.cruise_mph).is_some());
+    assert!(harness.read_drive(|d| d.keeper_mph).is_none());
 }
