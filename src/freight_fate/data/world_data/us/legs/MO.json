@@ -20263,7 +20263,7 @@
           ],
           "lat": 39.7419903,
           "lon": -104.6040341,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -30517,7 +30517,7 @@
           ],
           "lat": 36.03541,
           "lon": -90.94589,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Valero",

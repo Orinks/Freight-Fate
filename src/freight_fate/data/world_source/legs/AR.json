@@ -16719,7 +16719,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,
@@ -23045,7 +23045,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,
@@ -25816,7 +25816,7 @@
           ],
           "lat": 34.88758,
           "lon": -92.37519,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -36991,7 +36991,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "I-30 Weigh Station",
@@ -45123,7 +45123,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Road Ranger",
@@ -46304,7 +46304,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,

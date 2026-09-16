@@ -2528,7 +2528,7 @@
           ],
           "lat": 43.2386562,
           "lon": -73.6866449,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Clifton Park Rest Area",

@@ -16727,7 +16727,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop",

@@ -23089,7 +23089,7 @@
           ],
           "lat": 40.7101583,
           "lon": -96.3957398,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Casey's",
@@ -23112,7 +23112,7 @@
           ],
           "lat": 40.812534,
           "lon": -96.5977113,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -28261,7 +28261,7 @@
           ],
           "lat": 38.78556,
           "lon": -94.92843,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,

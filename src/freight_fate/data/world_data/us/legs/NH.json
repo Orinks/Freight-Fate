@@ -6370,7 +6370,7 @@
           ],
           "lat": 42.9382522,
           "lon": -71.4268854,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Rest Area NB",
@@ -8784,7 +8784,7 @@
           ],
           "lat": 42.81413,
           "lon": -71.48642,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Rest Area NB",

@@ -41362,7 +41362,7 @@
           ],
           "lat": 32.29835,
           "lon": -86.19711,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,

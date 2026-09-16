@@ -2992,7 +2992,7 @@
           ],
           "lat": 36.35105,
           "lon": -86.71641,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Bay 2",

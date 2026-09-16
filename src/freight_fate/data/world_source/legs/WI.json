@@ -13224,7 +13224,7 @@
           ],
           "lat": 44.2014258,
           "lon": -88.484568,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Columbus West Travel Center",
@@ -16590,7 +16590,7 @@
           ],
           "lat": 42.25226,
           "lon": -87.9001,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Road Ranger",
@@ -35341,7 +35341,7 @@
           ],
           "lat": 44.20143,
           "lon": -88.48457,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Kwik Trip",

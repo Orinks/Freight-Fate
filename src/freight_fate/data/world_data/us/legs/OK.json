@@ -8025,7 +8025,7 @@
           ],
           "lat": 35.43977,
           "lon": -95.9697,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -30702,7 +30702,7 @@
           ],
           "lat": 36.07634,
           "lon": -96.04824,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -44065,7 +44065,7 @@
           ],
           "lat": 37.0553417,
           "lon": -94.4233276,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pete's 66 Fort Scott",

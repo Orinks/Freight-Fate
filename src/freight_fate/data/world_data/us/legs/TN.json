@@ -1570,7 +1570,7 @@
           ],
           "lat": 34.92704,
           "lon": -85.15056,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "lanes": 3
@@ -35713,7 +35713,7 @@
           ],
           "lat": 33.7852,
           "lon": -89.8334,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -48488,7 +48488,7 @@
           ],
           "lat": 36.6433,
           "lon": -83.70076,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Sunoco",

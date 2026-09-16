@@ -3095,7 +3095,7 @@
           ],
           "lat": 35.70666,
           "lon": -81.29529,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -14268,7 +14268,7 @@
           ],
           "lat": 35.2737,
           "lon": -80.88514,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot Travel Center",
@@ -14338,7 +14338,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Flying J Travel Center Carnesville",
@@ -28937,7 +28937,7 @@
           ],
           "lat": 35.2737,
           "lon": -80.88514,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot Travel Center",
@@ -28983,7 +28983,7 @@
           ],
           "lat": 35.0796,
           "lon": -81.70481,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -42080,7 +42080,7 @@
           ],
           "lat": 35.70666,
           "lon": -81.29529,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Conover Convenience Store",
@@ -50522,7 +50522,7 @@
           ],
           "lat": 35.76381,
           "lon": -78.00053,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,

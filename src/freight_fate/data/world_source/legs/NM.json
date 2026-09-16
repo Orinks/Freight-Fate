@@ -9743,7 +9743,7 @@
           ],
           "lat": 34.9164545,
           "lon": -110.1542063,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop",

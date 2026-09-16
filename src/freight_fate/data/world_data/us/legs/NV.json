@@ -2895,7 +2895,7 @@
           ],
           "lat": 39.18895,
           "lon": -119.75132,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Shell",
@@ -21272,7 +21272,7 @@
           ],
           "lat": 39.18895,
           "lon": -119.75132,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {

@@ -8,6 +8,8 @@
 
 ### Changed
 
+- **Circle K, Exxon, QuikTrip, and similar plazas already on the map are bobtail-only.** A familiar name is not a promise a tractor-trailer can pull in.
+
 - **The nationwide fuel-gap tool now behaves safely on public Overpass.** It identifies itself, backs off on rate limits, paces uncached requests, and never caches network failures as proof that a corridor is empty. Circle K, Exxon, QuikTrip, and similar convenience plazas stay bobtail-only unless the site name identifies a real travel/truck center.
 
 - **Traffic lights announce only their color, and the approach countdown says only the distance.**
@@ -21,6 +23,8 @@
 ### Added
 
 - **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
+
+- **Wall Drug on Rapid City to Sioux Falls is park-capable only.** Same Exit 110 pull-in as the westbound side, with no diesel.
 
 - **Wall Drug on mitchell→rapid is park-capable only.** Truck parking at the Wall exit — no diesel or travel-center fuel inventing.
 

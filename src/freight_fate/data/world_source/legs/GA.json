@@ -17632,7 +17632,7 @@
           ],
           "lat": 34.57727,
           "lon": -82.6922,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -49765,7 +49765,7 @@
           ],
           "lat": 34.1414,
           "lon": -84.74424,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -51481,7 +51481,8 @@
             "parking"
           ],
           "lat": 34.06452,
-          "lon": -83.12764
+          "lon": -83.12764,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Fast Trac",
@@ -52045,7 +52046,8 @@
             "parking"
           ],
           "lat": 33.53309,
-          "lon": -82.31443
+          "lon": -82.31443,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot Travel Center",
@@ -58284,7 +58286,7 @@
           ],
           "lat": 32.98638,
           "lon": -85.03062,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Georgia Visitor Information Center - Columbus",
@@ -60188,7 +60190,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "JP Travel Center",
@@ -74169,7 +74171,7 @@
           ],
           "lat": 31.71213,
           "lon": -83.63884,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's",

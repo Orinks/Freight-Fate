@@ -134494,7 +134494,7 @@
           ],
           "lat": 35.06271,
           "lon": -118.97005,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {

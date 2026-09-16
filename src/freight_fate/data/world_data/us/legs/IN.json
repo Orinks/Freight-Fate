@@ -3051,7 +3051,7 @@
           ],
           "lat": 39.29614,
           "lon": -85.95786,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Road Ranger",
@@ -18480,7 +18480,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,

@@ -5600,7 +5600,7 @@
           ],
           "lat": 41.6436,
           "lon": -111.91394,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop",

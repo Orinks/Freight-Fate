@@ -5431,7 +5431,7 @@
           ],
           "lat": 41.6483063,
           "lon": -93.5989585,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -13316,7 +13316,7 @@
           ],
           "lat": 41.691,
           "lon": -92.06721,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Iowa 80 Truckstop",
@@ -28341,7 +28341,7 @@
           ],
           "lat": 41.691,
           "lon": -92.06721,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -35084,7 +35084,7 @@
           ],
           "lat": 42.45452,
           "lon": -92.40715,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "BP",
@@ -36294,7 +36294,7 @@
           ],
           "lat": 42.45452,
           "lon": -92.40715,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Casey's",

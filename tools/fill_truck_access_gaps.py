@@ -120,6 +120,11 @@ def _gap_fill_access(name: str) -> str:
     lowered = name.strip().lower()
     if any(word in lowered for word in TRUCK_CENTER_WORDS):
         return "tractor_trailer"
+    # "Shell Truck Lanes" / "Exxon (Truck)" identify truck facilities even
+    # without the words "truck stop".
+    tokens = {tok.strip("()[],.") for tok in lowered.replace("-", " ").split()}
+    if "truck" in tokens or "trucks" in tokens:
+        return "tractor_trailer"
     if any(brand in lowered for brand in CONVENIENCE_PLAZA_NAMES):
         return "bobtail_only"
     return "tractor_trailer"
@@ -321,15 +326,16 @@ def fill_leg(
                 continue
             tags = element.get("tags") or {}
             stop_type = _stop_type_from_tags(tags)
+            stop_name = _clean_poi_name(str(tags.get("name", "")).strip())
             stop = {
-                "name": _clean_poi_name(str(tags.get("name", "")).strip()),
+                "name": stop_name,
                 "type": stop_type,
                 "at_mi": at_mi,
                 "source": SOURCE_NOTE,
                 "parking": _parking_for_stop_type(stop_type),
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),
-                "vehicle_access": _gap_fill_access(name),
+                "vehicle_access": _gap_fill_access(stop_name),
                 "lat": lat,
                 "lon": lon,
             }

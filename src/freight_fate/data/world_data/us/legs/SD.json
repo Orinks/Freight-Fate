@@ -16788,6 +16788,29 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Wall Drug",
+          "type": "truck_parking",
+          "at_mi": 55.7,
+          "source": "Wall Drug Store, Wall SD on I-90 (Exit 110); OSM name Wall Drug (shop=mall relation); corridor geometry hits Wall at_mi=55.7 on rapid_city_sd_us->sioux_falls_sd_us (eastbound I-90, 349 mi). Park/visit pull-in only \u2014 no diesel or travel-center fuel at Wall Drug. Parking lot ~43.9927,-102.2430; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.99274,
+          "lon": -102.24302
+        },
+        {
           "name": "I-90W truck parking near Cactus Flats",
           "type": "public_rest_area",
           "at_mi": 81.9,

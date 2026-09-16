@@ -15904,7 +15904,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -22335,7 +22335,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "TA Travel Center",
@@ -47581,7 +47581,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -68358,7 +68358,7 @@
           ],
           "lat": 37.9807795,
           "lon": -91.7211118,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "TA",
@@ -86758,7 +86758,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop Hillsboro",
@@ -95316,7 +95316,7 @@
           ],
           "lat": 32.07569,
           "lon": -96.44763,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": true,
@@ -106386,7 +106386,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -117682,7 +117682,7 @@
           ],
           "lat": 33.15156,
           "lon": -94.15491,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Exxon",
@@ -117705,7 +117705,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,
@@ -125506,7 +125506,7 @@
           ],
           "lat": 33.23003,
           "lon": -96.63091,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot Travel Center Fort Worth",
@@ -127198,7 +127198,7 @@
           ],
           "lat": 33.23003,
           "lon": -96.63091,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Picnic Area",
@@ -127264,7 +127264,7 @@
           ],
           "lat": 32.3902594,
           "lon": -95.2868964,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -129245,7 +129245,7 @@
           ],
           "lat": 33.23003,
           "lon": -96.63091,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop",
@@ -146333,7 +146333,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,
@@ -154046,7 +154046,7 @@
           ],
           "lat": 32.46018,
           "lon": -96.8418,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -170199,7 +170199,7 @@
           ],
           "lat": 33.15156,
           "lon": -94.15491,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Exxon",
@@ -170222,7 +170222,7 @@
           ],
           "lat": 33.39494,
           "lon": -94.09963,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "divided": false,
@@ -172477,7 +172477,7 @@
           ],
           "lat": 28.77856,
           "lon": -96.96659,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Sunoco",
@@ -174234,7 +174234,7 @@
           ],
           "lat": 28.77856,
           "lon": -96.96659,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Valero",
@@ -175892,7 +175892,7 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -181584,7 +181584,7 @@
           ],
           "lat": 32.0756941,
           "lon": -96.4476335,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Shell",
@@ -183745,7 +183745,7 @@
           ],
           "lat": 33.23003,
           "lon": -96.63091,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {

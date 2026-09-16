@@ -3043,7 +3043,7 @@
           ],
           "lat": 39.74199,
           "lon": -104.60403,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "76",
@@ -36773,7 +36773,7 @@
           ],
           "lat": 39.74199,
           "lon": -104.60403,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {

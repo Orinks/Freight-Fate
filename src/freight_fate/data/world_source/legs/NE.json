@@ -7081,7 +7081,7 @@
           ],
           "lat": 40.84842,
           "lon": -99.98492,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Flying J Travel Center",
@@ -7559,7 +7559,7 @@
           ],
           "lat": 40.84842,
           "lon": -99.98492,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Brady Rest Area Westbound",
@@ -25453,7 +25453,7 @@
           ],
           "lat": 41.1600885,
           "lon": -104.5214488,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Love's Travel Stop",
