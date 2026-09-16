@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- **Estimated-near-city facility pins are labeled estimated so approach miles greater than zero stay honest.** Coverage counts are synced; those pins are not claimed as OSM-matched docks.
+
 - **Wall Drug corridor boards again cover Wyoming as well as South Dakota and western Minnesota.** Montana stays out.
 
 - **Curve connectors and artifact screens catch up after the offline curve re-bake.** The 205 legs whose archive line no longer matched the baked curves were re-swept from geometry; Valhalla road-class readings then mark interchange ramps and town streets as connectors with a named source again, and the artifact screen drops departure hairpins and sub-50 ft radii. Interstate mainline asks a truck to slow about once per hundred-plus miles again. Glenwood Canyon and US-550 switchbacks stay.
