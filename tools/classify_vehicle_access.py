@@ -95,6 +95,8 @@ TRUCK_STOP_CHAINS = (
     "roady's",
     "ambest",
     "travel centers of america",
+    "little america",
+    "iowa 80",
 )
 
 # OSM values that admit a combination vehicle.

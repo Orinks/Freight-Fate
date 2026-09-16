@@ -17636,6 +17636,31 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Little America's Fuel Center",
+          "type": "truck_stop",
+          "source": "OSM name via public Overpass (kumi.systems) 2026-09-16: node 4772016826 amenity=fuel name=\"Little America's Fuel Center\" fuel:HGV_diesel=yes @ 41.54442,-109.85551; I-80 Exit 68, Little America WY; official travel center https://wyoming.littleamerica.com/travel-center/ (6945 WY-374, Little America, WY 82929); Rocky Mountain Truck Centers on site",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "at_mi": 293.6
+        },
+        {
           "name": "TA Travel Center",
           "type": "service_plaza",
           "at_mi": 330.7,
@@ -30801,6 +30826,31 @@
           "lat": 41.5598064,
           "lon": -109.5386432,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Little America's Fuel Center",
+          "type": "truck_stop",
+          "source": "OSM name via public Overpass (kumi.systems) 2026-09-16: node 4772016826 amenity=fuel name=\"Little America's Fuel Center\" fuel:HGV_diesel=yes @ 41.54442,-109.85551; I-80 Exit 68, Little America WY; official travel center https://wyoming.littleamerica.com/travel-center/ (6945 WY-374, Little America, WY 82929); Rocky Mountain Truck Centers on site",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "at_mi": 37.0
         },
         {
           "name": "North Lyman Rest area",

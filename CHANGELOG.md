@@ -18,6 +18,10 @@
 
 ### Added
 
+- **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
+
+- **Wall Drug on mitchell→rapid is park-capable only.** Truck parking at the Wall exit — no diesel or travel-center fuel inventing.
+
 - **Roadside billboard pools grew without packing the highway.** New jokes, attorney and travel-plaza ads, corridor music landmarks, casino and Tejano approaches, and dated movie/TV promo copy; spacing stays in the same thirty-five to sixty-five mile band and the rare tribute draw rate is unchanged. Anywhere-pool jokes stay silent in Maine, Vermont, Alaska, and Hawaii.
 
 

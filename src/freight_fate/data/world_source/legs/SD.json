@@ -5489,6 +5489,27 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Wall Drug",
+          "type": "truck_parking",
+          "at_mi": 222.3,
+          "source": "Wall Drug Store, Wall SD on I-90 (Exit 110); corridor town Wall at_mi=222.3 and Wall Drug next-exit billboard at_mi=222.0 on mitchell_sd_us->rapid_city_sd_us. Park/visit pull-in only \u2014 no diesel or travel-center fuel at Wall Drug. OSM tourism/shop landmark; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 267.5,
