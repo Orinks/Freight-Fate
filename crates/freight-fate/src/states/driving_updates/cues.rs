@@ -262,16 +262,19 @@ impl DrivingState {
 
     /// Is a lane move underway that the driver should hear their position for?
     ///
-    /// Two ways in. Holding a steering direction for `STEER_CUE_ARM_S` is a
-    /// move rather than a drift correction, and lasts as long as the wheel is
-    /// held. An armed exit takes the cue over for the whole line-up: it runs
-    /// from the moment the driver starts moving over until the exit lane is
-    /// set, so the wheel coming back afterwards cannot re-arm it.
+    /// An armed exit owns the blinker until the ramp or cancellation. Otherwise
+    /// a sustained steering hold summons the ordinary lane-position cue.
     pub fn steering_lane_cue_armed(&mut self, ctx: &GameContext, dt: f64) -> bool {
         if self.lane.steering != 0.0 {
             self.steer_cue_hold_s += dt;
         } else {
             self.steer_cue_hold_s = 0.0;
+        }
+        if self.exit_blinker_on() {
+            return true;
+        }
+        if self.ramp_mi.is_some() {
+            return false;
         }
         if self.lane_locator_on {
             return false; // the driver already has this tock running; one is enough
@@ -282,14 +285,7 @@ impl DrivingState {
         if self.trip.truck.speed_mph() < STEER_CUE_MIN_MPH {
             return false;
         }
-        let steered = self.steer_cue_hold_s >= STEER_CUE_ARM_S;
-        if self.exit_stop.is_some() && self.exit_signal_on && self.ramp_mi.is_none() {
-            if self.exit_lane_ready() {
-                return false;
-            }
-            return steered || self.exit_lane_alignment > 0.0;
-        }
-        steered
+        self.steer_cue_hold_s >= STEER_CUE_ARM_S
     }
 
     /// Hear where you are in the lane while you steer across it.
@@ -297,14 +293,24 @@ impl DrivingState {
     /// The lane locator answers "where am I" on demand. This answers it for
     /// the length of a move being made right now, with no key to remember:
     /// a panned relay-click recording, keeping time from the moment the wheel goes
-    /// over until the move is done. Taking an exit with the lane work yours
-    /// means holding a position at the right of the lane, and that position
-    /// was the one thing on the road a blind driver could not hear (owner,
-    /// 2026-08-15).
+    /// over until the move is done.
     ///
-    /// The recording stops and the signal cancels the instant the exit-lane
-    /// position is good, like a turn signal as the wheel comes back.
+    /// An exit signal has a steady beat on the right, independent of steering
+    /// and lane readiness. The audio hold expires while a menu owns the frame.
     pub fn update_steering_lane_cue(&mut self, ctx: &mut GameContext, dt: f64) {
+        if self.exit_blinker_on() {
+            self.exit_blinker_active = true;
+        } else if self.exit_blinker_active {
+            // Finishing or abandoning an exit must not turn the still-held
+            // Right key straight into another blinker for ordinary steering.
+            ctx.audio.release_cue("vehicle/turn_signal");
+            ctx.audio.release_cue(STEER_CUE_HOLD);
+            self.steer_cue_active = false;
+            self.steer_cue_timer = 0.0;
+            self.steer_cue_hold_s = 0.0;
+            self.exit_blinker_active = self.lane.steering != 0.0;
+            return;
+        }
         if !self.steering_lane_cue_armed(ctx, dt) {
             if self.lane_change_target.is_none() {
                 ctx.audio.release_cue("vehicle/turn_signal");
@@ -326,11 +332,16 @@ impl DrivingState {
             }
             return;
         }
+        let resumed = !ctx.audio.cue_held("vehicle/turn_signal");
         ctx.audio.hold_cue(STEER_CUE_HOLD);
         let volume = 1.0f64.min(0.5 * self.cue_loudness(ctx));
-        let pan = self.lane.offset.clamp(-1.0, 1.0);
+        let pan = if self.exit_blinker_on() {
+            0.6
+        } else {
+            self.lane.offset.clamp(-1.0, 1.0)
+        };
         ctx.audio.update_cue("vehicle/turn_signal", volume, pan);
-        if !self.steer_cue_active {
+        if !self.steer_cue_active || resumed {
             self.steer_cue_active = true;
             self.steer_cue_timer = 0.0; // first tock lands on the frame the move starts
         }
@@ -339,8 +350,16 @@ impl DrivingState {
             return;
         }
         let span = STEER_CUE_TOCK_S - STEER_CUE_TOCK_FAST_S;
-        self.steer_cue_timer = STEER_CUE_TOCK_S - span * self.exit_alignment_progress();
+        self.steer_cue_timer = if self.exit_blinker_on() {
+            STEER_CUE_TOCK_S
+        } else {
+            STEER_CUE_TOCK_S - span * self.exit_alignment_progress()
+        };
         ctx.audio.play_if_idle("vehicle/turn_signal", volume, pan);
+    }
+
+    pub fn exit_blinker_on(&self) -> bool {
+        self.exit_signal_on && self.exit_stop.is_some() && self.ramp_mi.is_none()
     }
 
     /// Run the edge-boundary ladder: structural loops, not louder beeps.

@@ -296,6 +296,12 @@ impl DrivingState {
 
     /// The `_ramp_mi is None` half of `_update_exit`.
     fn update_armed_exit(&mut self, ctx: &mut GameContext) {
+        if self.exit_signal_canceled {
+            self.exit_stop = None;
+            self.cruise_exit_mph = None;
+            self.reset_exit_lane_state();
+            return;
+        }
         let Some(stop) = self.exit_stop.clone() else {
             return;
         };
@@ -308,17 +314,6 @@ impl DrivingState {
         // taking it pauses the session for the ramp, and missing it must not
         // leave automatic control crawling at ramp speed down the open highway.
         self.cruise_exit_mph = None;
-        if self.exit_signal_canceled {
-            self.reset_exit_lane_state();
-            self.exit_signal_canceled = false;
-            let mut opts = SayEvent::new();
-            opts.category = Some(SpeechCategory::Confirmation);
-            ctx.say_event_with(
-                "Exit signal canceled. You stayed on the highway.".to_string(),
-                opts,
-            );
-            return;
-        }
         self.exit_signal_canceled = false;
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI {
             self.reset_exit_lane_state();

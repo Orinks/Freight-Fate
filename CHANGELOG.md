@@ -6,6 +6,10 @@
 
 - **Route status starts with your location or arrival information instead of saying "Route status."**
 
+- **The exit blinker keeps clicking until you take, cancel, or miss the exit.**
+
+- **Canceling an exit stops its countdown and lane guidance until you signal again.**
+
 ### Added
 
 - **Career stats opens your citations and violations, newest first.** Each

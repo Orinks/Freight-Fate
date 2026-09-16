@@ -355,7 +355,7 @@ from the words, and synonyms cost them a re-read.
 | The soft chime confirming the truck is centered again after a drift | Back in the lane | lane-centered chime, drift recovered, all-clear | `vehicle/lane_centered` |
 | Tires rolling over a painted line's raised markers, meaning a lane change happened whether meant or not | Lane line crossed | line cross, lane-change bump | `vehicle/lane_line_cross` |
 | The tock that pans to where the truck sits inside its lane, toggled with I | Lane locator | position tick, lane ping, centering assist | `vehicle/lane_locator` |
-| Mechanical relay clicks following lane position during steering or exit line-up, or the direction of a full-assist lane change; stops when the move ends | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
+| Mechanical relay clicks following steering position or assisted lane-change direction; an armed exit repeats on the right until ramp entry, cancellation, or a missed exit | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
 | One rumble hit with nothing held after it, unattached to a steering correction -- fatigue or a momentary catch | Rumble strip, single hit | single tap, fatigue rumble | `vehicle/rumble_strip` |
 | Grouped bars cut across a whole lane, placed only ahead of a curve that has killed people | Transverse strips | rumble bars, wake-up strips, dead-man's-curve strips | `vehicle/transverse_strips`, `sim/lane_guidance.TRANSVERSE_KEY` |
 | A chime from the side a demanding bend turns toward, ahead of curve callouts | Curve chime | curve bink, bend warning | `vehicle/curve_bink` |
