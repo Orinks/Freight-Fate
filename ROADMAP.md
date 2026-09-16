@@ -143,10 +143,9 @@ world-data item (see above).
       pins regeocoded within city bounds (776 to 0); estimated-near-city
       honesty gates landed. Residual estimated pins and OSM source_backed
       quality follow-up deferred, not a far-pin blocker.
-- [ ] The Duff-shared sound cues flagged unlicensed by the provenance
-      audit -- cannot ship in a public build (separate from the
-      resolved Splice matter; owner may already know better). Sound
-      licensing, not world data.
+- [x] The Duff-shared sound cues flagged unlicensed by the provenance
+      audit -- N/A 2026-09-16 (owner): not applicable; drop from the
+      release gate.
 - [ ] Colorado's live traffic and construction are dead (CARS GraphQL
       retired; COtrip's WZDx feed wants a registered key, as do Ohio,
       Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4

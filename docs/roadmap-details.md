@@ -6955,20 +6955,12 @@ repository root; Markdown links are relative to this document.
       thin (no wastegate, no blow-off, no diesel turbo anywhere), so
       the shift sound gets built from a GMC 6000 gear clunk plus a
       pitched-down transmission clunk plus an air release.
-- [ ] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
-      The Duff-shared cues cannot ship -- he holds no license for the
-      material he passed along (owner ruling, 2026-07-22), so every
-      Duff row is a replacement, not a check. Audit ran 2026-07-22
-      (git history of every unlabeled row): the 2026-06-18 batch
-      (weather, event cues, POI/ambience loops) is all project-clean
-      ElevenLabs/procedural work, never swapped since -- weather
-      re-sourcing from Splice is now a quality upgrade, not a
-      compliance fix. One mislabel found and corrected:
-      `ambient/night.ogg` was credited "original" but came from
-      Darren's sound pack. Replacements owed: vehicle/horn.ogg,
-      driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
-      rebuild retires idle/start/shutdown, gear_shift, and both
-      parking-brake cues.
+- [x] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
+      N/A 2026-09-16 (owner): Duff-shared cues are not applicable; drop
+      from the release gate. Historical note: the 2026-07-22 audit found
+      the 2026-06-18 batch project-clean; replacements that had been owed
+      (horn, yawn, night ambience, engine-voice rebuild) are no longer a
+      gate.
 - [x] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** Shipped 2026-07-22: `trailer_attached` on the truck
       drops the dry van's 6.4 t from the tare on reposition and
