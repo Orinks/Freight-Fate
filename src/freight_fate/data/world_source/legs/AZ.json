@@ -2395,6 +2395,33 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: relation 16180928 name=\"Little America Travel Center\" addr 2515 East Butler Avenue, Flagstaff AZ @ 35.19122,-111.61833; Ruth KEEP tractor_trailer 2026-09-16 \u2014 semi access, truck parking, fueling, scales, showers per official travel-center page (OSM name/address only; no HGV tags)",
+          "at_mi": 58.0,
+          "lat": 35.1912195,
+          "lon": -111.6183306
+        },
+        {
           "name": "Rocky Mountain Truck Centers",
           "type": "service_plaza",
           "at_mi": 59.0,
@@ -10568,6 +10595,33 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: relation 16180928 name=\"Little America Travel Center\" addr 2515 East Butler Avenue, Flagstaff AZ @ 35.19122,-111.61833; Ruth KEEP tractor_trailer 2026-09-16 \u2014 semi access, truck parking, fueling, scales, showers per official travel-center page (OSM name/address only; no HGV tags)",
+          "at_mi": 2.0,
+          "lat": 35.1912195,
+          "lon": -111.6183306
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 12.5,
@@ -12404,6 +12458,33 @@
           "lat": 35.19176,
           "lon": -111.61797,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Little America Travel Center",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "OSM name via public Overpass inventory 2026-09-16: relation 16180928 name=\"Little America Travel Center\" addr 2515 East Butler Avenue, Flagstaff AZ @ 35.19122,-111.61833; Ruth KEEP tractor_trailer 2026-09-16 \u2014 semi access, truck parking, fueling, scales, showers per official travel-center page (OSM name/address only; no HGV tags)",
+          "at_mi": 2.0,
+          "lat": 35.1912195,
+          "lon": -111.6183306
         },
         {
           "name": "Shell",

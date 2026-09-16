@@ -24,6 +24,8 @@
 
 ### Added
 
+- **Little America Travel Center pull-ins at Cheyenne and Flagstaff.** Cheyenne (I-80 Exit 358/359) on cheyenne→laramie, cheyenne→salt_lake, and rock_springs→cheyenne; Flagstaff (2515 E Butler) on camp_verde→flagstaff, flagstaff→kingman, and flagstaff→winslow. Tractor-trailer travel-center actions; hotels and unrelated Little America sites stay off the map.
+
 - **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
 
 - **Opposite-direction corridors share honest truck stops the other way already had.** Flying J, Petro, Love's, and the rest copy onto overlapping same-highway partners only.
