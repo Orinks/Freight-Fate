@@ -95,7 +95,7 @@ def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = Fal
         or hgv
         or hgv_diesel
         or is_brand
-        or amenity == "parking"
+        or amenity in {"parking", "truck_stop"}
     )
     if not truck_signal:
         if rural_fallback and amenity == "fuel" and tags.get("fuel:diesel", "") != "no":
@@ -114,6 +114,8 @@ def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = Fal
         score += 3
     if amenity == "parking":
         score += 1
+    if amenity == "truck_stop":
+        score += 10
     return score
 
 

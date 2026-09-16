@@ -24,6 +24,8 @@
 
 - **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
 
+- **Midway Service Center is a pull-in on US-45 between Mobile and Meridian.** Circle K on that corridor and Birmingham to Opelika is bobtail-only.
+
 - **Wall Drug on Rapid City to Sioux Falls is park-capable only.** Same Exit 110 pull-in as the westbound side, with no diesel.
 
 - **Wall Drug on mitchell→rapid is park-capable only.** Truck parking at the Wall exit — no diesel or travel-center fuel inventing.

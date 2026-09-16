@@ -11723,6 +11723,26 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Circle K",
+          "type": "fuel_station",
+          "at_mi": 7.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-09-16; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "vehicle_access": "bobtail_only",
+          "lat": 33.4624216,
+          "lon": -86.731096
+        },
+        {
           "name": "BP",
           "type": "fuel_station",
           "at_mi": 28.2,
@@ -33051,6 +33071,26 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Circle K",
+          "type": "fuel_station",
+          "at_mi": 11.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-09-16; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "vehicle_access": "bobtail_only",
+          "lat": 30.8300984,
+          "lon": -88.0931165
+        },
+        {
           "name": "Murphy USA",
           "type": "fuel_station",
           "at_mi": 79.8,
@@ -33069,6 +33109,29 @@
           "lat": 31.68806,
           "lon": -88.63178,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Midway Service Center",
+          "type": "travel_center",
+          "at_mi": 98.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-09-16; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 31.8929433,
+          "lon": -88.7144876
         },
         {
           "name": "Pilot Travel Center",

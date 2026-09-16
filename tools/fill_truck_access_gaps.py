@@ -205,12 +205,10 @@ def _project_mi(line: list[tuple[float, float, float]], lat: float, lon: float) 
 
 
 def _query(url: str, body: str, retries: int = 5) -> dict[str, Any]:
-    request = urllib.request.Request(
-        url,
-        data=body.encode("utf-8"),
-        headers={"User-Agent": "FreightFateGapFill/1.0 (https://github.com/Orinks/Freight-Fate)"},
-    )
+    headers = {"User-Agent": "FreightFateGapFill/1.0 (https://github.com/Orinks/Freight-Fate)"}
+    encoded = body.encode("utf-8")
     for attempt in range(retries):
+        request = urllib.request.Request(url, data=encoded, headers=headers)
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
                 return json.loads(response.read().decode("utf-8"))
@@ -221,9 +219,15 @@ def _query(url: str, body: str, retries: int = 5) -> dict[str, Any]:
             multiplier = 5.0 if exc.code in {429, 502, 503, 504} else 2.0
             time.sleep(min(60.0, (2 ** (attempt + 1)) * multiplier))
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+            # overpass-api.de often EOFs on TLS from this network; the same
+            # public interpreter answers on HTTP. Retry rather than treating
+            # a handshake failure as an empty corridor.
+            if url.startswith("https://overpass-api.de/"):
+                url = "http://" + url[len("https://") :]
+                continue
             if attempt == retries - 1:
                 return {"elements": []}
-            time.sleep(2 * (attempt + 1))
+            time.sleep(2 ** (attempt + 1))
     return {"elements": []}
 
 
@@ -295,9 +299,14 @@ def fill_leg(
                 if not raw_name:
                     continue
                 score = _truck_relevance(tags, raw_name, rural_fallback=False)
-                if score is None:
-                    continue
                 name = _clean_poi_name(raw_name)
+                if score is None:
+                    # Convenience plazas stay on the map as bobtail-only rather
+                    # than being dropped. A later access pass cannot promote them.
+                    if _gap_fill_access(name) == "bobtail_only":
+                        score = 1
+                    else:
+                        continue
                 key = name.lower()
                 if key in existing_names:
                     continue
