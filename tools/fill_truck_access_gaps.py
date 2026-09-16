@@ -67,7 +67,7 @@ from world_source import load_world, save_world
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = ROOT / ".route-cache" / "gap-fill"
-ACCESSED_DATE = "2026-07-19"
+ACCESSED_DATE = "2026-09-16"
 
 SOURCE_NOTE = (
     "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed "
@@ -75,6 +75,55 @@ SOURCE_NOTE = (
     "service after the truck-accessibility sweep. Curated into a gameplay POI "
     "(clean name, normalized category) without raw OSM IDs."
 )
+
+# Public APIs sometimes tag car-scale convenience plazas hgv=yes because a
+# delivery truck can reach the pumps. That is not evidence of tractor-trailer
+# parking. Keep these on the map as bobtail-only unless the name itself says
+# this branch is a real travel/truck center.
+CONVENIENCE_PLAZA_NAMES = (
+    "7-eleven",
+    "7 eleven",
+    "arco",
+    "bp ",
+    "casey",
+    "chevron",
+    "circle k",
+    "circlek",
+    "exxon",
+    "getgo",
+    "get go",
+    "kum & go",
+    "maverik",
+    "mobil",
+    "murphy express",
+    "murphy usa",
+    "quiktrip",
+    "quicktrip",
+    "racetrac",
+    "race trac",
+    "shell",
+    "sheetz",
+    "speedway",
+    "thorntons",
+    "wawa",
+)
+TRUCK_CENTER_WORDS = (
+    "travel center",
+    "travel stop",
+    "travel plaza",
+    "truck stop",
+    "truckstop",
+)
+
+
+def _gap_fill_access(name: str) -> str:
+    lowered = name.strip().lower()
+    if any(word in lowered for word in TRUCK_CENTER_WORDS):
+        return "tractor_trailer"
+    if any(brand in lowered for brand in CONVENIENCE_PLAZA_NAMES):
+        return "bobtail_only"
+    return "tractor_trailer"
+
 
 # Sampling step along the gap. The search box is ~6 km (about 7.5 mi across),
 # so an 8-mile step overlaps slightly and leaves no unlooked-at road.
@@ -89,8 +138,8 @@ def _overpass_url() -> str:
     url = os.environ.get("OVERPASS_URL", "").strip()
     if not url:
         raise SystemExit(
-            "Set OVERPASS_URL=http://localhost:12347/api/interpreter -- this "
-            "sweep is far too many queries for the public endpoint."
+            "Set OVERPASS_URL to an Overpass interpreter (public or local). "
+            "Public mirrors need OVERPASS_RATE_LIMIT_S pacing and .route-cache/gap-fill."
         )
     return url
 
@@ -150,14 +199,22 @@ def _project_mi(line: list[tuple[float, float, float]], lat: float, lon: float) 
     return best_mi
 
 
-def _query(url: str, body: str, retries: int = 3) -> dict[str, Any]:
+def _query(url: str, body: str, retries: int = 5) -> dict[str, Any]:
     request = urllib.request.Request(
-        url, data=body.encode("utf-8"), headers={"User-Agent": "FreightFateGapFill/1.0"}
+        url,
+        data=body.encode("utf-8"),
+        headers={"User-Agent": "FreightFateGapFill/1.0 (https://github.com/Orinks/Freight-Fate)"},
     )
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
                 return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            # 429/504/502: back off harder for public mirrors
+            if attempt == retries - 1:
+                return {"elements": []}
+            multiplier = 5.0 if exc.code in {429, 502, 503, 504} else 2.0
+            time.sleep(min(60.0, (2 ** (attempt + 1)) * multiplier))
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
             if attempt == retries - 1:
                 return {"elements": []}
@@ -180,8 +237,14 @@ def _sample(url: str, leg_key: str, at_mi: float, lat: float, lon: float) -> lis
 );
 out tags center 40;"""
     payload = _query(url, body)
-    path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
-    return payload.get("elements", [])
+    elements = payload.get("elements", [])
+    # Only cache a real answer. Empty payloads are often 429/timeout/TLS
+    # failures on public mirrors; caching them would freeze a gap as barren.
+    if elements or payload.get("osm3s"):
+        path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+    # Public Overpass needs a pause; local Docker can set OVERPASS_RATE_LIMIT_S=0.
+    time.sleep(float(os.environ.get("OVERPASS_RATE_LIMIT_S", "1.5")))
+    return elements
 
 
 def usable_positions(leg: dict[str, Any], action: str) -> list[float]:
@@ -266,6 +329,7 @@ def fill_leg(
                 "parking": _parking_for_stop_type(stop_type),
                 "actions": _actions_for_stop_type(stop_type),
                 "services": _services_for_stop_type(stop_type),
+                "vehicle_access": _gap_fill_access(name),
                 "lat": lat,
                 "lon": lon,
             }
@@ -290,9 +354,9 @@ def main(argv: list[str] | None = None) -> int:
 
     url = _overpass_url()
     data = load_world()
-    targets = [
-        leg for leg in data["legs"] if gap_spans(leg, args.action, args.min_gap)
-    ][: args.limit_legs or None]
+    targets = [leg for leg in data["legs"] if gap_spans(leg, args.action, args.min_gap)][
+        : args.limit_legs or None
+    ]
 
     print(f"{len(targets)} leg(s) with a {args.min_gap:.0f}+ mile {args.action} gap.")
     total = 0
@@ -304,7 +368,9 @@ def main(argv: list[str] | None = None) -> int:
             empty.append(f"{leg['from']} -> {leg['to']} ({leg.get('highway', '')})")
         elif args.report:
             for stop in added:
-                print(f"  + {leg['from']}->{leg['to']}: {stop['name']} ({stop['type']}) @ {stop['at_mi']}")
+                print(
+                    f"  + {leg['from']}->{leg['to']}: {stop['name']} ({stop['type']}) @ {stop['at_mi']}"
+                )
         if index % 10 == 0:
             print(f"  ...{index}/{len(targets)} legs, {total} added", flush=True)
 

@@ -8,6 +8,8 @@
 
 ### Changed
 
+- **The nationwide fuel-gap tool now behaves safely on public Overpass.** It identifies itself, backs off on rate limits, paces uncached requests, and never caches network failures as proof that a corridor is empty. Circle K, Exxon, QuikTrip, and similar convenience plazas stay bobtail-only unless the site name identifies a real travel/truck center.
+
 - **Traffic lights announce only their color, and the approach countdown says only the distance.**
 
 - **Route status starts with your location or arrival information instead of saying "Route status."**
