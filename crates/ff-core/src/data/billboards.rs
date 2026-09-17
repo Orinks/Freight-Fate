@@ -550,7 +550,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Casino genre -- the Tulsa approach.
         approaching("Tulsa ahead. Casino lights off the right. Don't bet the load.", &["tulsa_ok_us"]),
         // Paying venue -- Blueberry Hill / Chuck Berry room, Delmar Loop, St. Louis approach on I-44.
-        approaching("Saint Louis ahead. Chuck Berry's Blueberry Hill is a real room. The duck walk is not a traffic pattern.", &["st_louis_mo_us"]),
+        approaching("Saint Louis ahead. Blueberry Hill on Delmar is a real room; Chuck Berry played its Duck Room for years. The duck walk is not a traffic pattern.", &["st_louis_mo_us"]),
     ]),
     // Song tributes -- the Texas-to-Minnesota main street of country music:
     // San Antonio, Austin, Waco, Abbott, Fort Worth, and Wichita.
