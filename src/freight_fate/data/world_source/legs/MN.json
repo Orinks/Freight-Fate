@@ -676,10 +676,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Albert Lea",
+          "type": "travel_center",
           "at_mi": 1.27,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1474,33 +1474,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 43.65972,
-          "lon": -93.31555,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
-          "at_mi": 17.9,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 1.0,
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 1 of this leg (14.4 mi); coordinates read from the mapped site. Mile marker moved from 17.9 to 1: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 17.9 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -1521,8 +1498,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 43.86562739150087,
-          "lon": -93.27722705767962
+          "lat": 43.65965,
+          "lon": -93.315752
         }
       ],
       "divided": true,
@@ -7177,10 +7154,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Columbus",
+          "type": "travel_center",
           "at_mi": 126.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 832 at Columbus; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12353,10 +12330,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Rogers",
+          "type": "travel_center",
           "at_mi": 187.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): TA store 0190 at Rogers; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18021,8 +17998,8 @@
         {
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
-          "at_mi": 80.0,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "at_mi": 94.8,
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 94.8 of this leg (14.3 mi); coordinates read from the mapped site. Mile marker moved from 80 to 94.8: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 80 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -18042,33 +18019,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 94.8,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 43.65972,
-          "lon": -93.31555,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 43.65965,
+          "lon": -93.315752
         },
         {
           "name": "Love's Travel Stop Ellsworth",
@@ -18142,9 +18095,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 192.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 426 at Ellsworth; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20805,10 +20758,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Albert Lea",
+          "type": "travel_center",
           "at_mi": 63.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23840,10 +23793,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Inver Grove Heights",
+          "type": "travel_center",
           "at_mi": 62.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at Inver Grove Heights; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 62.3 of this leg (1.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23858,7 +23811,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.780786,
+          "lon": -93.033739
         }
       ],
       "divided": true,
@@ -24825,10 +24780,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Saint Charles",
+          "type": "travel_center",
           "at_mi": 26.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 844 at Saint Charles; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by position, the only Love's within 5 mi of mile 26.5 of this leg (2.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24843,7 +24798,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.954069,
+          "lon": -92.064173
         }
       ],
       "divided": true,
@@ -28002,10 +27959,10 @@
           ]
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Clearwater",
+          "type": "travel_center",
           "at_mi": 16.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 16.4 of this leg (3.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28020,7 +27977,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.412138,
+          "lon": -94.05365
         },
         {
           "name": "Kwik Trip",

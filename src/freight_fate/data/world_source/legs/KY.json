@@ -2949,10 +2949,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Franklin",
+          "type": "travel_center",
           "at_mi": 16.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Franklin; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4328,9 +4328,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 360; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4350,10 +4350,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Smiths Grove",
+          "type": "travel_center",
           "at_mi": 56.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): TA store 0468 at Smiths Grove; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6152,10 +6152,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Elizabethtown",
+          "type": "travel_center",
           "at_mi": 1.02,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elizabethtown_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elizabethtown_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 716 at Elizabethtown; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7870,7 +7870,7 @@
           "name": "Love's Travel Stop Sadieville",
           "type": "travel_center",
           "at_mi": 25.4,
-          "source": "Love's official store feed lists store 618 in Sadieville, KY on I-75, exit 136; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 618 in Sadieville, KY on I-75, exit 136; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 618 at Sadieville; matched by position, the only Love's within 5 mi of mile 25.4 of this leg (0.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7890,7 +7890,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.379978,
+          "lon": -84.573058
         },
         {
           "name": "Mr. Fuel Travel Center",
@@ -9290,10 +9292,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Elizabethtown",
+          "type": "travel_center",
           "at_mi": 83.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elizabethtown_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elizabethtown_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 716 at Elizabethtown; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10976,7 +10978,7 @@
           "name": "Love's Travel Stop Waddy",
           "type": "travel_center",
           "at_mi": 37.5,
-          "source": "Love's official store feed lists store 303 in Waddy, KY on I-64, exit 43; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 303 in Waddy, KY on I-64, exit 43; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 303 at Waddy; matched by position, the only Love's within 5 mi of mile 37.5 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -10996,7 +10998,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.151478,
+          "lon": -85.069524
         },
         {
           "name": "I-64 Weigh Station",
@@ -11779,10 +11783,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mount Sterling",
+          "type": "travel_center",
           "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Mount Sterling; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12409,10 +12413,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Richmond",
+          "type": "travel_center",
           "at_mi": 19.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 291 at Richmond; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16100,10 +16104,10 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator / harvest places Pilot Travel Center Corbin on I-75 Exit 29; KEEP tractor_trailer 2026-09-16 \u2014 remapped from retired morristown\u2192london onto live london\u2192knoxville; parking=confirmed; projected at_mi=11.7 off_mi=0.43",
+          "source": "Pilot Flying J official locator / harvest places Pilot Travel Center Corbin on I-75 Exit 29; KEEP tractor_trailer 2026-09-16 \u2014 remapped from retired morristown\u2192london onto live london\u2192knoxville; parking=confirmed; projected at_mi=11.7 off_mi=0.43; Store coordinates read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Corbin; matched by position, the only Pilot within 5 mi of mile 11.7 of this leg (0.4 mi); coordinates read from the mapped site.",
           "at_mi": 11.7,
-          "lat": 36.97511182002901,
-          "lon": -84.10778245470296
+          "lat": 36.975126,
+          "lon": -84.107467
         },
         {
           "name": "Sunoco",
@@ -17536,7 +17540,7 @@
           "name": "Love's Travel Stop Memphis",
           "type": "travel_center",
           "at_mi": 13.2,
-          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 355 at Memphis; matched by position, the only Love's within 5 mi of mile 13.2 of this leg (3.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -17556,14 +17560,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 38.435445846700034,
-          "lon": -85.76518251861644
+          "lat": 38.490441,
+          "lon": -85.769764
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Memphis",
+          "type": "travel_center",
           "at_mi": 18.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Memphis; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17583,10 +17587,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seymour",
+          "type": "travel_center",
           "at_mi": 54.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): TA store 0065 at Seymour; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18669,10 +18673,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Brooks",
+          "type": "travel_center",
           "at_mi": 11.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Brooks; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18692,10 +18696,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Shepherdsville",
+          "type": "travel_center",
           "at_mi": 22.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 238 at Shepherdsville; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18741,10 +18745,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Lebanon Junction",
+          "type": "travel_center",
           "at_mi": 32.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Lebanon Junction; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 32.1 of this leg (0.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18760,8 +18764,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 37.82191311918584,
-          "lon": -85.73372777451286,
+          "lat": 37.827407,
+          "lon": -85.724123,
           "directions": [
             "both"
           ]
@@ -20022,10 +20026,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Catlettsburg",
+          "type": "travel_center",
           "at_mi": 48.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Flying J store at Catlettsburg; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21476,10 +21480,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mount Sterling",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Mount Sterling; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22133,10 +22137,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mount Sterling",
+          "type": "travel_center",
           "at_mi": 8.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Mount Sterling; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22860,10 +22864,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mount Sterling",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the mount_sterling_ky_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Mount Sterling; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22903,10 +22907,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Richmond",
+          "type": "travel_center",
           "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 291 at Richmond; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25688,7 +25692,7 @@
           "name": "Love's",
           "type": "travel_center",
           "at_mi": 23.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 348; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27987,10 +27991,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mortons Gap",
+          "type": "travel_center",
           "at_mi": 75.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Mortons Gap; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 75.3 of this leg (0.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28006,8 +28010,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 37.249616024745734,
-          "lon": -87.44982548353565,
+          "lat": 37.255436,
+          "lon": -87.448889,
           "directions": [
             "both"
           ]

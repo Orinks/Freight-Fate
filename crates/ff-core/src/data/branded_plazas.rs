@@ -50,6 +50,14 @@
 //! access, loyalty (which reads the name), the exit number and the ramp's
 //! control (both found by mile marker for every stop) are the same for a
 //! service plaza and a travel center.
+//!
+//! # Since the store import
+//!
+//! `tools/import_chain_locators.py` (2026-09-17) matched the chain records to
+//! stores by coordinate and typed the matched ones `travel_center` in the
+//! data. This screen stays as the net for the records no store was found
+//! for, or whose store says nothing about serving trucks. The numbers above
+//! are the map before that import; ROADMAP has the ones after.
 
 use crate::data::stop_twins::chain_of;
 use crate::data::world_models::Stop;

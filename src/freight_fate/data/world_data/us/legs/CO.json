@@ -47,10 +47,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Walsenburg",
+          "type": "travel_center",
           "at_mi": 71.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the walsenburg_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the walsenburg_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 660 at Walsenburg; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2954,10 +2954,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Burlington",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the burlington_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the burlington_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store at Burlington; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2977,10 +2977,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Limon",
+          "type": "travel_center",
           "at_mi": 78.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Flying J store at Limon; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3000,10 +3000,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Bennett",
           "type": "travel_center",
           "at_mi": 132.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 300 at Bennett; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7778,9 +7778,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 37.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 226; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 37.8 of this leg (0.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7795,7 +7795,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.342439,
+          "lon": -104.623261
         },
         {
           "name": "Cuerno Verde Rest Area",
@@ -7821,10 +7823,10 @@
           ]
         },
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Walsenburg",
+          "type": "travel_center",
           "at_mi": 90.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA Express store 0649 at Walsenburg; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7850,7 +7852,7 @@
           "name": "Love's Travel Stop Walsenburg",
           "type": "travel_center",
           "at_mi": 92.1,
-          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 660 at Walsenburg; matched by position, the only Love's within 5 mi of mile 92.1 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7870,33 +7872,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 93.4,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the walsenburg_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.61678,
-          "lon": -104.75618,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 37.616817,
+          "lon": -104.7564
         },
         {
           "name": "Love's Travel Stop Trinidad",
@@ -7945,10 +7923,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Springer",
+          "type": "travel_center",
           "at_mi": 182.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): TA store 0469 at Springer; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7991,7 +7969,7 @@
           "name": "Love's Travel Stop Las Vegas",
           "type": "travel_center",
           "at_mi": 254.7,
-          "source": "Love's official store feed lists store 733 in Las Vegas, NM on I-25, exit 347/N Grand Ave; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 733 in Las Vegas, NM on I-25, exit 347/N Grand Ave; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): Love's store 733 at Las Vegas; matched by position, the only Love's within 5 mi of mile 254.7 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -8011,33 +7989,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's",
-          "type": "travel_center",
-          "at_mi": 254.7,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the las_vegas_nm_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.61972,
-          "lon": -105.20816,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 35.619937,
+          "lon": -105.207978
         },
         {
           "name": "La Bajada Rest Area",
@@ -8086,10 +8040,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Albuquerque",
           "type": "travel_center",
           "at_mi": 377.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albuquerque_nm_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albuquerque_nm_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): Love's store 210 at Albuquerque; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9709,7 +9663,7 @@
           "name": "Pilot Travel Center Colorado Springs",
           "type": "travel_center",
           "at_mi": 16.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Colorado Springs; matched by position, the only Pilot within 5 mi of mile 16.9 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -9729,33 +9683,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 17.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.0554885,
-          "lon": -104.8526916,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 39.056037,
+          "lon": -104.853556
         },
         {
           "name": "Conoco (Truck)",
@@ -10704,9 +10634,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 37.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 226; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 37 of this leg (0.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10722,8 +10652,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 38.353326654147764,
-          "lon": -104.61995253672254,
+          "lat": 38.342439,
+          "lon": -104.623261,
           "directions": [
             "both"
           ]
@@ -17792,10 +17722,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Albuquerque",
           "type": "travel_center",
           "at_mi": 419.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albuquerque_nm_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albuquerque_nm_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): Love's store 210 at Albuquerque; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17826,10 +17756,10 @@
       "terrain": "mountain",
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wheat Ridge",
+          "type": "travel_center",
           "at_mi": 9.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA store 0174 at Wheat Ridge; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17936,10 +17866,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Roosevelt",
           "type": "travel_center",
           "at_mi": 348.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Pilot store at Roosevelt; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17984,10 +17914,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Salt Lake City",
+          "type": "travel_center",
           "at_mi": 489.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Salt Lake City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27534,7 +27464,7 @@
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
           "at_mi": 10.2,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by name, the only Love's the map has at Berthoud within 40 mi of mile 10.2 of this leg (24.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -27555,8 +27485,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.65619623311882,
-          "lon": -105.00103289666183
+          "lat": 40.30515,
+          "lon": -104.983977
         },
         {
           "name": "Southeast Wyoming Welcome Center",
@@ -27577,10 +27507,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 46.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30439,7 +30369,7 @@
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
           "at_mi": 23.5,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by position, the only Love's within 5 mi of mile 23.5 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -30459,33 +30389,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 24.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
           "vehicle_access": "tractor_trailer",
-          "lat": 40.29184433867376,
-          "lon": -104.98034123881682,
-          "directions": [
-            "both"
-          ]
+          "lat": 40.30515,
+          "lon": -104.983977
         },
         {
           "name": "Exxon (Truck)",
@@ -30514,10 +30420,10 @@
           ]
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Commerce City",
+          "type": "travel_center",
           "at_mi": 62.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Commerce City; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30566,7 +30472,7 @@
           "name": "Pilot Travel Center Colorado Springs",
           "type": "travel_center",
           "at_mi": 116.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Colorado Springs; matched by position, the only Pilot within 5 mi of mile 116.4 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -30587,31 +30493,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 39.049378828948136,
-          "lon": -104.84688549355542
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 116.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.0554885,
-          "lon": -104.8526916,
-          "vehicle_access": "tractor_trailer"
+          "lat": 39.056037,
+          "lon": -104.853556
         }
       ],
       "divided": true,
@@ -32166,7 +32049,7 @@
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
           "at_mi": 23.7,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by position, the only Love's within 5 mi of mile 23.7 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -32186,33 +32069,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 24.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
           "vehicle_access": "tractor_trailer",
-          "lat": 40.29184433867376,
-          "lon": -104.98034123881682,
-          "directions": [
-            "both"
-          ]
+          "lat": 40.30515,
+          "lon": -104.983977
         },
         {
           "name": "Exxon (Truck)",
@@ -33263,10 +33122,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Laramie",
+          "type": "travel_center",
           "at_mi": 64.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Laramie; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34632,10 +34491,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Parachute",
+          "type": "travel_center",
           "at_mi": 43.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 826 at Parachute; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35994,10 +35853,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Grand Junction",
+          "type": "travel_center",
           "at_mi": 6.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Grand Junction; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36070,10 +35929,10 @@
       "miles": 118,
       "stops": [
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Lamar",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the lamar_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the lamar_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA Express store 0929 at Lamar; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36093,10 +35952,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Eads",
+          "type": "travel_center",
           "at_mi": 29.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 653 at Eads; town DERIVED, not read: the nearest mapped place, 0.5 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36136,10 +35995,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Limon",
+          "type": "travel_center",
           "at_mi": 117.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the limon_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the limon_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Flying J store at Limon; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37121,10 +36980,10 @@
       "miles": 90,
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Limon",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the limon_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the limon_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Flying J store at Limon; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40135,9 +39994,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 226; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 8 of this leg (0.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40153,8 +40012,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 38.353326654147764,
-          "lon": -104.61995253672254,
+          "lat": 38.342439,
+          "lon": -104.623261,
           "directions": [
             "both"
           ]
@@ -40186,7 +40045,7 @@
           "name": "Pilot Travel Center Colorado Springs",
           "type": "travel_center",
           "at_mi": 61.1,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Colorado Springs; matched by position, the only Pilot within 5 mi of mile 61.1 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -40206,33 +40065,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 61.6,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.0554885,
-          "lon": -104.8526916,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 39.056037,
+          "lon": -104.853556
         },
         {
           "name": "Conoco (Truck)",
@@ -40287,62 +40122,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 152.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 40.29184433867376,
-          "lon": -104.98034123881682,
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
           "at_mi": 153.1,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking",
-            "restrooms"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "likely",
-          "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop Berthoud",
-          "type": "travel_center",
-          "at_mi": 178.2,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by position, the only Love's within 5 mi of mile 153.1 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -40363,8 +40146,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.65619623311882,
-          "lon": -105.00103289666183
+          "lat": 40.30515,
+          "lon": -104.983977
         },
         {
           "name": "Southeast Wyoming Welcome Center",
@@ -40390,10 +40173,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 214.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44388,9 +44171,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 226; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 8 of this leg (0.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44406,8 +44189,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 38.353326654147764,
-          "lon": -104.61995253672254,
+          "lat": 38.342439,
+          "lon": -104.623261,
           "directions": [
             "both"
           ]
@@ -44439,7 +44222,7 @@
           "name": "Pilot Travel Center Colorado Springs",
           "type": "travel_center",
           "at_mi": 60.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Colorado Springs; matched by position, the only Pilot within 5 mi of mile 60.9 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -44459,33 +44242,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 61.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.0554885,
-          "lon": -104.8526916,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 39.056037,
+          "lon": -104.853556
         },
         {
           "name": "Conoco (Truck)",
@@ -46855,9 +46614,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 226; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 8 of this leg (0.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -46873,8 +46632,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 38.353326654147764,
-          "lon": -104.61995253672254,
+          "lat": 38.342439,
+          "lon": -104.623261,
           "directions": [
             "both"
           ]
@@ -46906,7 +46665,7 @@
           "name": "Pilot Travel Center Colorado Springs",
           "type": "travel_center",
           "at_mi": 61.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1110 in Colorado Springs, CO with 72 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/co/colorado-springs/15455-terrazzo-drive; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Pilot store at Colorado Springs; matched by position, the only Pilot within 5 mi of mile 61.4 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -46926,33 +46685,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 61.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.0554885,
-          "lon": -104.8526916,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 39.056037,
+          "lon": -104.853556
         },
         {
           "name": "Conoco (Truck)",
@@ -47007,31 +46742,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 152.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
           "at_mi": 154.1,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by position, the only Love's within 5 mi of mile 154.1 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -47052,8 +46766,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.31198896099473,
-          "lon": -104.98055795284294
+          "lat": 40.30515,
+          "lon": -104.983977
         }
       ],
       "corridor": {
@@ -53049,36 +52763,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 35.5,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the walsenburg_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.61678,
-          "lon": -104.75618,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Walsenburg",
           "type": "travel_center",
           "at_mi": 36.8,
-          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 660 at Walsenburg; matched by position, the only Love's within 5 mi of mile 36.8 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -53099,14 +52787,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 37.63330366316951,
-          "lon": -104.76955204488968
+          "lat": 37.616817,
+          "lon": -104.7564
         },
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Walsenburg",
+          "type": "travel_center",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA Express store 0649 at Walsenburg; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -53159,7 +52847,7 @@
           "name": "Love's Travel Stop Walsenburg",
           "type": "travel_center",
           "at_mi": 0.3,
-          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 660 in Walsenburg, CO on I-25, exit 49/I-25BL; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 660 at Walsenburg; matched by position, the only Love's within 5 mi of mile 0.3 of this leg (1.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -53180,37 +52868,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 37.63330366316951,
-          "lon": -104.76955204488968
+          "lat": 37.616817,
+          "lon": -104.7564
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the walsenburg_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.61678,
-          "lon": -104.75618,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Walsenburg",
+          "type": "travel_center",
           "at_mi": 2.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA Express store 0649 at Walsenburg; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

@@ -1411,10 +1411,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Arlington",
+          "type": "travel_center",
           "at_mi": 45.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Pilot store at Arlington; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 45.7 of this leg (0.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1429,7 +1429,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 48.187345,
+          "lon": -122.19626
         }
       ],
       "divided": true,
@@ -6586,7 +6588,7 @@
           "name": "Love's Travel Stop Moses Lake",
           "type": "travel_center",
           "at_mi": 2.0,
-          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 827 at Moses Lake; matched by position, the only Love's within 5 mi of mile 2 of this leg (1.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -6607,8 +6609,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.10197942842996,
-          "lon": -119.29049834611844
+          "lat": 47.103006,
+          "lon": -119.34044
         },
         {
           "name": "Ryegrass Eastbound Rest Area",
@@ -6634,10 +6636,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6657,10 +6659,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 141.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8783,33 +8785,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 34.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 46.6037,
-          "lon": -122.90702,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Napavine",
           "type": "travel_center",
-          "at_mi": 42.0,
-          "source": "Love's official store feed lists store 454 in Napavine, WA on I-5, exit 72; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 34.5,
+          "source": "Love's official store feed lists store 454 in Napavine, WA on I-5, exit 72; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 454 at Napavine; matched by name, the only Love's the map has at Napavine within 40 mi of mile 34.5 of this leg (8.1 mi); coordinates read from the mapped site. Mile marker moved from 42 to 34.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 42 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -8830,8 +8809,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 46.487163884890535,
-          "lon": -122.87904500266951
+          "lat": 46.603752,
+          "lon": -122.90747
         }
       ],
       "divided": true,
@@ -13126,10 +13105,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fife",
           "type": "travel_center",
           "at_mi": 103.89,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 448 at Fife; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14282,10 +14261,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fife",
           "type": "travel_center",
           "at_mi": 25.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 448 at Fife; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by position, the only Love's within 5 mi of mile 25.5 of this leg (3.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14300,7 +14279,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 47.245144,
+          "lon": -122.384725
         }
       ],
       "divided": true,
@@ -16621,10 +16602,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 29.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21530,10 +21511,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Ritzville",
+          "type": "travel_center",
           "at_mi": 59.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 514 at Ritzville; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21605,10 +21586,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Stanfield",
+          "type": "travel_center",
           "at_mi": 176.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Stanfield; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21720,10 +21701,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center La Grande",
+          "type": "travel_center",
           "at_mi": 252.6,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the la_grande_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the la_grande_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Flying J store at La Grande; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21772,7 +21753,7 @@
           "name": "Love's Travel Stop Baker City",
           "type": "travel_center",
           "at_mi": 291.9,
-          "source": "Love's official store feed lists store 569 in Baker City, OR on I-84, exit 304/Campbell St; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 569 in Baker City, OR on I-84, exit 304/Campbell St; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store at Baker City; matched by position, the only Love's within 5 mi of mile 291.9 of this leg (1.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -21793,8 +21774,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 44.789282778439805,
-          "lon": -117.8113554101376
+          "lat": 44.784619,
+          "lon": -117.807728
         },
         {
           "name": "Baker Truck Corral",
@@ -21867,10 +21848,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Huntington",
+          "type": "travel_center",
           "at_mi": 336.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): TA store 0276 at Huntington; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21912,10 +21893,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Ontario",
+          "type": "travel_center",
           "at_mi": 364.1,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21967,10 +21948,10 @@
           "lon": -116.86228979627442
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Caldwell",
+          "type": "travel_center",
           "at_mi": 392.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Caldwell; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25740,10 +25721,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Spokane",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Petro store 0339 at Spokane; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25763,33 +25744,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 58.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 47.1136105,
-          "lon": -118.3673366,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Ritzville",
           "type": "travel_center",
           "at_mi": 60.1,
-          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 514 at Ritzville; matched by position, the only Love's within 5 mi of mile 60.1 of this leg (0.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25810,14 +25768,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.111295313512336,
-          "lon": -118.38337605866276
+          "lat": 47.113381,
+          "lon": -118.366811
         },
         {
           "name": "Love's Travel Stop Moses Lake",
           "type": "travel_center",
           "at_mi": 102.3,
-          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 827 at Moses Lake; matched by position, the only Love's within 5 mi of mile 102.3 of this leg (3.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25838,8 +25796,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.10197942842996,
-          "lon": -119.29049834611844
+          "lat": 47.103006,
+          "lon": -119.34044
         },
         {
           "name": "Colville Fuels Half Sun Travel Plaza",
@@ -29723,10 +29681,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Spokane",
+          "type": "travel_center",
           "at_mi": 9.2,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Petro store 0339 at Spokane; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29749,33 +29707,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 55.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 47.11361,
-          "lon": -118.36734,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Ritzville",
           "type": "travel_center",
           "at_mi": 60.8,
-          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 514 at Ritzville; matched by position, the only Love's within 5 mi of mile 60.8 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -29796,14 +29731,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.111295313512336,
-          "lon": -118.38337605866276
+          "lat": 47.113381,
+          "lon": -118.366811
         },
         {
           "name": "Love's Travel Stop Moses Lake",
           "type": "travel_center",
           "at_mi": 103.9,
-          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 827 at Moses Lake; matched by position, the only Love's within 5 mi of mile 103.9 of this leg (2.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -29823,7 +29758,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 47.103006,
+          "lon": -119.34044
         },
         {
           "name": "Colville Fuels Half Sun Travel Plaza",
@@ -29878,7 +29815,7 @@
           "name": "Love's Travel Stop Ellensburg",
           "type": "travel_center",
           "at_mi": 171.0,
-          "source": "Love's official store feed lists store 413 in Ellensburg, WA on I-90, exit 106; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 413 in Ellensburg, WA on I-90, exit 106; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 413 at Ellensburg; matched by position, the only Love's within 5 mi of mile 171 of this leg (3.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -29898,13 +29835,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 47.008342,
+          "lon": -120.586372
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 171.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29968,10 +29907,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 244.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31861,10 +31800,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Spokane",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Petro store 0339 at Spokane; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31884,33 +31823,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 58.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 47.1136105,
-          "lon": -118.3673366,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Ritzville",
           "type": "travel_center",
           "at_mi": 59.8,
-          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 514 at Ritzville; matched by position, the only Love's within 5 mi of mile 59.8 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -31931,8 +31847,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.111295313512336,
-          "lon": -118.38337605866276
+          "lat": 47.113381,
+          "lon": -118.366811
         },
         {
           "name": "Schrag Westbound Rest Area",
@@ -31981,7 +31897,7 @@
           "name": "Love's Travel Stop Moses Lake",
           "type": "travel_center",
           "at_mi": 103.0,
-          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 827 at Moses Lake; matched by position, the only Love's within 5 mi of mile 103 of this leg (2.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -32002,8 +31918,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.10197942842996,
-          "lon": -119.29049834611844
+          "lat": 47.103006,
+          "lon": -119.34044
         },
         {
           "name": "Quincy Valley Rest Area",
@@ -33024,10 +32940,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fife",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 448 at Fife; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35158,10 +35074,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fife",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the tacoma_wa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 448 at Fife; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35201,10 +35117,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Ellensburg",
+          "type": "travel_center",
           "at_mi": 118.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 413 at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36004,7 +35920,7 @@
           "name": "Pilot Travel Center Stanfield",
           "type": "travel_center",
           "at_mi": 51.2,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 390 in Stanfield, OR with 112 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/stanfield/2115-s-hwy-395 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 390 in Stanfield, OR with 112 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/stanfield/2115-s-hwy-395 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Stanfield; matched by name, the only Pilot the map has at Stanfield within 40 mi of mile 51.2 of this leg (20.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -36026,40 +35942,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 45.83127484263385,
-          "lon": -119.61190719636384
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 60.3,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.8253175,
-          "lon": -119.7980411,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 45.76586,
+          "lon": -119.205776
         },
         {
           "name": "Love's Travel Stop Boardman",
           "type": "travel_center",
           "at_mi": 60.4,
-          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Boardman with 10 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Boardman with 10 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about; Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 650 at Boardman; matched by position, the only Love's within 5 mi of mile 60.4 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -36080,68 +35970,15 @@
           "parking": "confirmed",
           "curation": "curated",
           "parking_spaces": 10,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center Wasco",
-          "type": "travel_center",
-          "at_mi": 108.5,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 195 in Wasco, OR with 37 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/wasco/91485-biggs-rufus-hwy Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "restrooms",
-            "parking",
-            "scale"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "confirmed",
-          "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 45.704830347844954,
-          "lon": -120.70958643168407
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 115.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.6692089,
-          "lon": -120.8355459,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 45.825112,
+          "lon": -119.798597
         },
         {
           "name": "Pilot Travel Center Wasco",
           "type": "travel_center",
           "at_mi": 115.7,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 195 in Wasco, OR with 37 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/wasco/91485-biggs-rufus-hwy",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 195 in Wasco, OR with 37 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/or/wasco/91485-biggs-rufus-hwy; Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Wasco; matched by position, the only Pilot within 5 mi of mile 115.7 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -36162,7 +35999,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.669306,
+          "lon": -120.83525
         },
         {
           "name": "Kodak Point Highway Pullout",
@@ -36191,7 +36030,7 @@
           "name": "Love's Travel Stop Troutdale",
           "type": "travel_center",
           "at_mi": 202.6,
-          "source": "Love's official store feed lists store 449 in Troutdale, OR on I-84, exit 17; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 449 in Troutdale, OR on I-84, exit 17; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 449 at Troutdale; matched by position, the only Love's within 5 mi of mile 202.6 of this leg (0.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -36212,31 +36051,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 45.542862116512474,
-          "lon": -122.40905579310134
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 203.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.5434535,
-          "lon": -122.3921652,
-          "vehicle_access": "tractor_trailer"
+          "lat": 45.543741,
+          "lon": -122.39204
         }
       ],
       "corridor": {
@@ -39747,10 +39563,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Prosser",
+          "type": "travel_center",
           "at_mi": 31.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 681 at Prosser; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 31.9 of this leg (1.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39765,7 +39581,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 46.219465,
+          "lon": -119.793137
         },
         {
           "name": "Highway 97 Truck Plaza",
@@ -39794,10 +39612,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 111.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39837,10 +39655,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 191.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by position, the only TA within 5 mi of mile 191.1 of this leg (1.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39855,7 +39673,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 47.467913,
+          "lon": -121.717602
         }
       ],
       "corridor": {
@@ -43247,7 +43067,7 @@
           "name": "Love's Travel Stop Ritzville",
           "type": "travel_center",
           "at_mi": 79.8,
-          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 514 in Ritzville, WA on I-90, exit 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 514 at Ritzville; matched by position, the only Love's within 5 mi of mile 79.8 of this leg (0.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -43267,39 +43087,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 80.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 47.1136105,
-          "lon": -118.3673366,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 47.113381,
+          "lon": -118.366811
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Spokane",
+          "type": "travel_center",
           "at_mi": 131.7,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Petro store 0339 at Spokane; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49370,10 +49166,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 114.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50986,10 +50782,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Ellensburg",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 413 at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51009,10 +50805,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 73.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -52304,10 +52100,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 32.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -52373,7 +52169,7 @@
           "name": "Love's Travel Stop Moses Lake",
           "type": "travel_center",
           "at_mi": 98.2,
-          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 827 in Moses Lake, WA on I-90, exit 174; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 827 at Moses Lake; matched by position, the only Love's within 5 mi of mile 98.2 of this leg (1.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -52394,8 +52190,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 47.10197942842996,
-          "lon": -119.29049834611844
+          "lat": 47.103006,
+          "lon": -119.34044
         },
         {
           "name": "Colville Fuels Half Sun Travel Plaza",
@@ -54977,10 +54773,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 28.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Flying J store at Ellensburg; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 28.4 of this leg (4.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54995,39 +54791,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 33.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 46.9708861,
-          "lon": -120.5371859,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 46.970945,
+          "lon": -120.536823
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Ellensburg",
+          "type": "travel_center",
           "at_mi": 37.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Pilot store at Ellensburg; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -55047,10 +54819,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seattle East",
+          "type": "travel_center",
           "at_mi": 107.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): TA store 0176 at Seattle East; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -56267,10 +56039,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Prosser",
+          "type": "travel_center",
           "at_mi": 49.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Washington extract dated 2026-06-22, read 2026-09-17): Love's store 681 at Prosser; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 49.1 of this leg (1.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -56286,8 +56058,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 46.221419808974005,
-          "lon": -119.75905590628776,
+          "lat": 46.219465,
+          "lon": -119.793137,
           "directions": [
             "both"
           ]

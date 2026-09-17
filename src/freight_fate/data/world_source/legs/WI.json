@@ -4301,7 +4301,7 @@
           "name": "Love's Travel Stop Menomonie",
           "type": "travel_center",
           "at_mi": 23.0,
-          "source": "Love's Travel Stop #622, 5930 Badger Dr, I-94 Exit 45, Menomonie, WI -- 24hr diesel, CAT scales, showers, tire and truck repair; accessed 2026-07-03: https://www.truckstopsandservices.com/location_details.php?id=47749",
+          "source": "Love's Travel Stop #622, 5930 Badger Dr, I-94 Exit 45, Menomonie, WI -- 24hr diesel, CAT scales, showers, tire and truck repair; accessed 2026-07-03: https://www.truckstopsandservices.com/location_details.php?id=47749; Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 622 at Menomonie; matched by position, the only Love's within 5 mi of mile 23 of this leg (2.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -4320,7 +4320,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.9075,
+          "lon": -91.856105
         },
         {
           "name": "Kwik Trip Baldwin",
@@ -7114,10 +7116,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fond du Lac",
           "type": "travel_center",
           "at_mi": 1.21,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 587 at Fond du Lac; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7703,10 +7705,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fond du Lac",
           "type": "travel_center",
           "at_mi": 1.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 587 at Fond du Lac; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7774,10 +7776,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Oak Creek",
+          "type": "travel_center",
           "at_mi": 125.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 432 at Oak Creek; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7803,7 +7805,7 @@
           "name": "Pilot Travel Center Oak Creek",
           "type": "travel_center",
           "at_mi": 128.7,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd; Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Pilot store at Oak Creek; matched by name, the only Pilot the map has at Oak Creek within 40 mi of mile 128.7 of this leg (3.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7824,13 +7826,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.871449,
+          "lon": -87.944089
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Racine",
+          "type": "travel_center",
           "at_mi": 132.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Petro store at Racine; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 132.1 of this leg (3.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7846,8 +7850,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 42.77660114645639,
-          "lon": -87.95369079670778,
+          "lat": 42.725037,
+          "lon": -87.955696,
           "directions": [
             "both"
           ]
@@ -7879,10 +7883,10 @@
           ]
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 205.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7905,7 +7909,7 @@
           "name": "Love's Travel Stop South Holland",
           "type": "travel_center",
           "at_mi": 218.2,
-          "source": "Love's official store feed lists store 606 in South Holland, IL on I-94, exit 73B @ 162nd St; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 606 in South Holland, IL on I-94, exit 73B @ 162nd St; at_mi estimated by projecting source coordinates onto checked-in route geometry (8.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Love's store 606 at South Holland; matched by name, the only Love's the map has at South Holland within 40 mi of mile 218.2 of this leg (6.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7925,13 +7929,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.599597,
+          "lon": -87.579614
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Gary",
+          "type": "travel_center",
           "at_mi": 236.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Gary; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7955,9 +7961,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 263.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8010,7 +8016,7 @@
           "name": "Pilot Travel Center Benton Harbor",
           "type": "travel_center",
           "at_mi": 301.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 666 in Benton Harbor, MI with 135 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/benton-harbor/1860-e-napier-ave",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 666 in Benton Harbor, MI with 135 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/benton-harbor/1860-e-napier-ave; Store coordinates read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Pilot store at Benton Harbor; matched by position, the only Pilot within 5 mi of mile 301.4 of this leg (2.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -8031,13 +8037,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.089692,
+          "lon": -86.412386
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Holland",
+          "type": "travel_center",
           "at_mi": 352.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Pilot store at Holland; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16706,10 +16714,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Wadsworth",
           "type": "travel_center",
           "at_mi": 15.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Love's store 770 at Wadsworth; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 15.5 of this leg (2.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16724,7 +16732,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.488997,
+          "lon": -87.953373
         },
         {
           "name": "Mobil",
@@ -16750,10 +16760,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 61.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17893,10 +17903,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Racine",
+          "type": "travel_center",
           "at_mi": 20.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Petro store at Racine; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 20 of this leg (3.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17911,13 +17921,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.725037,
+          "lon": -87.955696
         },
         {
           "name": "Pilot Travel Center Oak Creek",
           "type": "travel_center",
           "at_mi": 23.6,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Pilot store at Oak Creek; matched by name, the only Pilot the map has at Oak Creek within 40 mi of mile 23.6 of this leg (3.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -17939,14 +17951,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.8264923264916,
-          "lon": -87.95264856479447
+          "lat": 42.871449,
+          "lon": -87.944089
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Oak Creek",
+          "type": "travel_center",
           "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 432 at Oak Creek; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20113,7 +20125,7 @@
           "name": "Love's",
           "type": "travel_center",
           "at_mi": 116.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 637; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 116 of this leg (1.0 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20128,7 +20140,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.389236,
+          "lon": -89.469877
         }
       ],
       "divided": true,
@@ -22271,10 +22285,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Janesville",
+          "type": "travel_center",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Petro store 0071 at Janesville; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 37.5 of this leg (0.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22290,8 +22304,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 42.72452166154273,
-          "lon": -88.99091943750004,
+          "lat": 42.714098,
+          "lon": -88.978573,
           "directions": [
             "both"
           ]
@@ -22315,7 +22329,7 @@
           "name": "Pilot Travel Center Beloit",
           "type": "travel_center",
           "at_mi": 52.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 289 in Beloit, WI with 55 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/beloit/3001-milwaukee-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 289 in Beloit, WI with 55 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/beloit/3001-milwaukee-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Pilot store at Beloit; matched by position, the only Pilot within 5 mi of mile 52.4 of this leg (1.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -22337,8 +22351,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.512486709486794,
-          "lon": -88.97899415612892
+          "lat": 42.526953,
+          "lon": -88.97985
         },
         {
           "name": "Pilot Dealer Belvidere",
@@ -22367,10 +22381,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 147.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23977,10 +23991,10 @@
       "terrain": "flat",
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Oak Creek",
+          "type": "travel_center",
           "at_mi": 13.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 432 at Oak Creek; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24006,7 +24020,7 @@
           "name": "Pilot Travel Center Oak Creek",
           "type": "travel_center",
           "at_mi": 17.0,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Pilot store at Oak Creek; matched by name, the only Pilot the map has at Oak Creek within 40 mi of mile 17 of this leg (3.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -24028,14 +24042,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.8264923264916,
-          "lon": -87.95264856479447
+          "lat": 42.871449,
+          "lon": -87.944089
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Racine",
+          "type": "travel_center",
           "at_mi": 22.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Petro store at Racine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24103,10 +24117,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 89.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26498,10 +26512,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Fond du Lac",
           "type": "travel_center",
           "at_mi": 61.98,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fond_du_lac_wi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 587 at Fond du Lac; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31394,7 +31408,7 @@
           "name": "Love's",
           "type": "travel_center",
           "at_mi": 93.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 637; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31414,10 +31428,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mauston",
+          "type": "travel_center",
           "at_mi": 139.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Pilot store at Mauston; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31458,7 +31472,7 @@
           "name": "Flying J Travel Center Black River Falls",
           "type": "travel_center",
           "at_mi": 192.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 756 in Black River Falls, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/black-river-falls/780-wi-54",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 756 in Black River Falls, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/black-river-falls/780-wi-54; Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Flying J store at Black River Falls; matched by position, the only Flying J within 5 mi of mile 192.2 of this leg (2.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -31479,7 +31493,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.295439,
+          "lon": -90.829806
         },
         {
           "name": "Love's Travel Stop Menomonie",
@@ -31511,7 +31527,7 @@
           "name": "Flying J Travel Center Roberts",
           "type": "travel_center",
           "at_mi": 297.7,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 470 in Roberts, WI with 86 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/roberts/1191-70th-ave",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 470 in Roberts, WI with 86 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/roberts/1191-70th-ave; Store coordinates read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Flying J store at Roberts; matched by position, the only Flying J within 5 mi of mile 297.7 of this leg (2.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -31532,13 +31548,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.962745,
+          "lon": -92.560207
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Hudson",
+          "type": "travel_center",
           "at_mi": 308.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): TA store 0192 at Hudson; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33309,10 +33327,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Elkhorn",
+          "type": "travel_center",
           "at_mi": 48.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 752 at Elkhorn; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33332,10 +33350,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
-          "type": "service_plaza",
+          "name": "Road Ranger South Beloit",
+          "type": "travel_center",
           "at_mi": 72.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at South Beloit; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43415,10 +43433,10 @@
           "parking_spaces": 20
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Portage",
+          "type": "travel_center",
           "at_mi": 109.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Petro store 0403 at Portage; town read from the mapped site's address; matched by coordinate, 0.05 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43441,7 +43459,7 @@
           "name": "Love's",
           "type": "travel_center",
           "at_mi": 116.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wisconsin extract dated 2026-06-22, read 2026-09-17): Love's store 637; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 116 of this leg (1.0 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43456,7 +43474,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.389236,
+          "lon": -89.469877
         }
       ],
       "divided": true,

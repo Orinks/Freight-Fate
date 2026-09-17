@@ -7,10 +7,10 @@
       "miles": 40,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Buckeye",
+          "type": "travel_center",
           "at_mi": 10.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 280 at Buckeye; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30,10 +30,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1904,10 +1904,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Lake Havasu City",
+          "type": "travel_center",
           "at_mi": 48.69,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 386 at Lake Havasu City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4592,10 +4592,10 @@
       "miles": 68,
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Eloy",
+          "type": "travel_center",
           "at_mi": 17.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Eloy; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8343,33 +8343,6 @@
           "lon": -110.346561
         },
         {
-          "name": "Love's Travel Stop Benson #460",
-          "type": "truck_stop",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "likely",
-          "curation": "curated",
-          "vehicle_access": "tractor_trailer",
-          "source": "Love's official store feed lists store 460 in Benson, AZ on I-10; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=80.0 off_mi=0.07",
-          "at_mi": 80.0,
-          "lat": 31.962406,
-          "lon": -110.344844
-        },
-        {
           "name": "Pilot Travel Center Tucson",
           "type": "truck_stop",
           "actions": [
@@ -10680,10 +10653,10 @@
           "lon": -111.6183306
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Bellemont",
+          "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Bellemont; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10703,10 +10676,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Williams",
+          "type": "travel_center",
           "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 553 at Williams; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10726,10 +10699,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Kingman",
+          "type": "travel_center",
           "at_mi": 133.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Petro store 0315 at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10749,9 +10722,9 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
+          "name": "TA Travel Center Kingman",
           "type": "travel_center",
-          "source": "OpenStreetMap/Overpass amenity query centered on Kingman's own coordinates (development-time, accessed 2026-07-06); curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass amenity query centered on Kingman's own coordinates (development-time, accessed 2026-07-06); curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0094 at Kingman; town read from the mapped site's branch name; matched by position, the only TA within 5 mi of mile 147 of this leg (2.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10772,7 +10745,9 @@
           ],
           "curation": "curated",
           "at_mi": 147.0,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.190588,
+          "lon": -114.070432
         }
       ],
       "divided": true,
@@ -12588,7 +12563,7 @@
           "name": "Love's Travel Stop Joseph City",
           "type": "travel_center",
           "at_mi": 51.7,
-          "source": "Love's official store feed lists store 278 in Joseph City, AZ on I-40, exit 277; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 278 in Joseph City, AZ on I-40, exit 277; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; matched by name, the only Love's the map has at Joseph City within 40 mi of mile 51.7 of this leg (28.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -12609,14 +12584,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 35.05650690103357,
-          "lon": -110.79696798089017
+          "lat": 34.95485,
+          "lon": -110.311848
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Winslow",
+          "type": "travel_center",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14689,10 +14664,10 @@
       "miles": 95,
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Holbrook",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14752,10 +14727,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Gallup",
+          "type": "travel_center",
           "at_mi": 89.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): TA store 0008 at Gallup; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17963,10 +17938,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Truck Lanes",
+          "name": "Flying J Travel Center Kingman",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18630,10 +18605,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Kingman",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19384,10 +19359,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Kingman",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20838,10 +20813,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center White Hills",
+          "type": "travel_center",
           "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at White Hills; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20935,10 +20910,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Henderson",
+          "type": "travel_center",
           "at_mi": 85.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Petro store 0968 at Henderson; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22398,10 +22373,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Quartzsite",
+          "type": "travel_center",
           "at_mi": 72.97,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Quartzsite; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22421,10 +22396,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Yuma",
+          "type": "travel_center",
           "at_mi": 154.99,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22474,10 +22449,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Holbrook",
+          "type": "travel_center",
           "at_mi": 123.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22497,10 +22472,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Joseph City",
+          "type": "travel_center",
           "at_mi": 127.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22520,10 +22495,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Winslow",
+          "type": "travel_center",
           "at_mi": 152.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24490,10 +24465,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Mayer",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 722 at Mayer; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28567,10 +28542,10 @@
       "terrain": "hills",
       "stops": [
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 8.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28593,10 +28568,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Buckeye",
+          "type": "travel_center",
           "at_mi": 28.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 280 at Buckeye; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28641,10 +28616,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Tonopah",
           "type": "travel_center",
           "at_mi": 51.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Tonopah; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28667,36 +28642,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 128.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 33.65735,
-          "lon": -114.2414,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Quartzsite",
           "type": "travel_center",
           "at_mi": 129.7,
-          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review.",
+          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 286 at Quartzsite; matched by position, the only Love's within 5 mi of mile 129.7 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28715,13 +28664,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 33.657386,
+          "lon": -114.241524
         },
         {
           "name": "Flying J Travel Center Ehrenberg",
           "type": "travel_center",
           "at_mi": 142.6,
-          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n.",
+          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 142.6 of this leg (2.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28740,33 +28691,9 @@
             "both"
           ],
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 145.3,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the blythe_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 33.60194,
-          "lon": -114.52379,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 33.601943,
+          "lon": -114.523265
         },
         {
           "name": "Chiriaco Summit Travel Center",
@@ -28794,10 +28721,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Coachella",
           "type": "travel_center",
           "at_mi": 242.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 207 at Coachella; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28845,10 +28772,10 @@
           "lon": -116.27256996664816
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Thousand Palms",
+          "type": "travel_center",
           "at_mi": 257.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Thousand Palms; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28868,10 +28795,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center North Palm Springs",
+          "type": "travel_center",
           "at_mi": 268.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at North Palm Springs; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28917,10 +28844,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Colton",
+          "type": "travel_center",
           "at_mi": 315.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Colton; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28940,10 +28867,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Ontario",
+          "type": "travel_center",
           "at_mi": 331.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0026 at Ontario; town read from the mapped site's address; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36122,10 +36049,10 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1175 in Mayer, AZ with 25 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=35.0 off_mi=0.24",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1175 in Mayer, AZ with 25 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=35.0 off_mi=0.24; Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Mayer; matched by position, the only Pilot within 5 mi of mile 35 of this leg (0.3 mi); coordinates read from the mapped site.",
           "at_mi": 35.0,
-          "lat": 34.32741874206012,
-          "lon": -112.11799225871981
+          "lat": 34.327168,
+          "lon": -112.117856
         },
         {
           "name": "Sunset Point Rest Area",
@@ -36198,10 +36125,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Holbrook",
+          "type": "travel_center",
           "at_mi": 46.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38178,10 +38105,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Nogales",
           "type": "travel_center",
           "at_mi": 62.77,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nogales_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nogales_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Nogales; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39236,10 +39163,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Nogales",
           "type": "travel_center",
           "at_mi": 64.98,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nogales_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nogales_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Nogales; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40305,10 +40232,10 @@
       "miles": 33,
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Winslow",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40328,10 +40255,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Joseph City",
+          "type": "travel_center",
           "at_mi": 24.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42217,10 +42144,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Yuma",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42260,10 +42187,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Avondale",
+          "type": "travel_center",
           "at_mi": 173.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Avondale; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42283,10 +42210,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 178.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

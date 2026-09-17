@@ -1139,10 +1139,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Tehachapi",
+          "type": "travel_center",
           "at_mi": 42.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 1094 at Tehachapi; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1162,10 +1162,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Boron",
+          "type": "travel_center",
           "at_mi": 89.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 755 at Boron; town DERIVED, not read: the nearest mapped place, 0.9 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1185,10 +1185,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Barstow",
+          "type": "travel_center",
           "at_mi": 128.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the barstow_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the barstow_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Barstow; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2062,7 +2062,7 @@
           "name": "Love's Travel Stop Tulare",
           "type": "travel_center",
           "at_mi": 60.7,
-          "source": "Love's official store feed lists store 382 in Tulare, CA on Hwy 99, exit 85; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 382 in Tulare, CA on Hwy 99, exit 85; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 382 at Tulare; matched by position, the only Love's within 5 mi of mile 60.7 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -2082,7 +2082,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.180669,
+          "lon": -119.330185
         },
         {
           "name": "Valley Fuel Travel Plaza",
@@ -4258,10 +4260,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Wheeler Ridge",
+          "type": "travel_center",
           "at_mi": 28.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 327 at Wheeler Ridge; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 28 of this leg (2.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4276,7 +4278,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.985256,
+          "lon": -118.948579
         },
         {
           "name": "Water",
@@ -4305,7 +4309,7 @@
           "name": "Flying J Travel Center Lebec",
           "type": "travel_center",
           "at_mi": 42.4,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lebec; matched by position, the only Flying J within 5 mi of mile 42.4 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -4326,7 +4330,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.816987,
+          "lon": -118.887079
         },
         {
           "name": "Castaic Truck Stop",
@@ -5992,7 +5998,7 @@
           "name": "Flying J",
           "type": "travel_center",
           "at_mi": 111.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6042,7 +6048,7 @@
           "name": "One9",
           "type": "travel_center",
           "at_mi": 122.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): ONE9 store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6062,10 +6068,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Las Vegas",
+          "type": "travel_center",
           "at_mi": 144.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): TA store 0108 at Las Vegas; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6724,10 +6730,10 @@
           "lon": -116.99996991111668
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Barstow",
+          "type": "travel_center",
           "at_mi": 8.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 282 at Barstow; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7528,33 +7534,10 @@
       "miles": 123,
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the blythe_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 33.60194,
-          "lon": -114.52379,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Flying J Travel Center Ehrenberg",
           "type": "travel_center",
           "at_mi": 7.2,
-          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (2.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7574,14 +7557,14 @@
           ],
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 33.611795853898904,
-          "lon": -114.47752591648614
+          "lat": 33.601943,
+          "lon": -114.523265
         },
         {
           "name": "Love's Travel Stop Quartzsite",
           "type": "travel_center",
           "at_mi": 20.3,
-          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 286 at Quartzsite; matched by position, the only Love's within 5 mi of mile 20.3 of this leg (1.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -7601,37 +7584,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 33.65658523942185,
-          "lon": -114.26400406654851
+          "lat": 33.657386,
+          "lon": -114.241524
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 24.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 33.65735,
-          "lon": -114.2414,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Tonopah",
           "type": "travel_center",
           "at_mi": 98.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Tonopah; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8706,36 +8666,10 @@
       "miles": 126,
       "stops": [
         {
-          "name": "Pilot",
-          "type": "travel_center",
-          "at_mi": 84.2,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 38.6170346,
-          "lon": -121.5383568,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Pilot Dealer Sacramento",
           "type": "travel_center",
           "at_mi": 88.3,
-          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted.",
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store; matched by position, the only Pilot within 5 mi of mile 88.3 of this leg (3.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -8755,7 +8689,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.617032,
+          "lon": -121.538356
         },
         {
           "name": "Sacramento 49er Travel Plaza",
@@ -13301,10 +13237,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Yuma",
+          "type": "travel_center",
           "at_mi": 58.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23461,10 +23397,10 @@
       },
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 13.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): TA store 0919 at Madera; town read from the store page the mapped site links to; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23490,7 +23426,7 @@
           "name": "Love's Travel Stop Madera",
           "type": "travel_center",
           "at_mi": 24.9,
-          "source": "Love's Madera opening note, Highway 99, lists 95 truck parking spaces: https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california",
+          "source": "Love's Madera opening note, Highway 99, lists 95 truck parking spaces: https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 736 at Madera; matched by position, the only Love's within 5 mi of mile 24.9 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -23509,13 +23445,15 @@
             "both"
           ],
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.995849,
+          "lon": -120.096495
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 28.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 365 at Madera; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23538,10 +23476,10 @@
           ]
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Livingston",
+          "type": "travel_center",
           "at_mi": 71.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): TA store 0170 at Livingston; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23564,36 +23502,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 105.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.75559,
-          "lon": -121.14427,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Flying J Travel Center Ripon",
           "type": "travel_center",
           "at_mi": 109.4,
-          "source": "Pilot Flying J Ripon official location page, Highway 99, confirms truck parking: https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd",
+          "source": "Pilot Flying J Ripon official location page, Highway 99, confirms truck parking: https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Ripon; matched by position, the only Flying J within 5 mi of mile 109.4 of this leg (3.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -23612,7 +23524,9 @@
             "both"
           ],
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.75587,
+          "lon": -121.143945
         }
       ],
       "divided": true,
@@ -24901,10 +24815,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Coachella",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indio_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indio_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 207 at Coachella; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24951,10 +24865,10 @@
           "lon": -115.91913228985145
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ehrenberg",
+          "type": "travel_center",
           "at_mi": 97.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the blythe_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the blythe_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25831,10 +25745,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Westmorland",
+          "type": "travel_center",
           "at_mi": 64.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 749 at Westmorland; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25887,10 +25801,10 @@
       "miles": 89,
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Tehachapi",
+          "type": "travel_center",
           "at_mi": 44.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 1094 at Tehachapi; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 44.5 of this leg (2.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25905,7 +25819,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.126899,
+          "lon": -118.415496
         }
       ],
       "corridor": {
@@ -27887,10 +27803,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Barstow",
+          "type": "travel_center",
           "at_mi": 94.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the barstow_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the barstow_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Barstow; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28926,10 +28842,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Palmdale",
+          "type": "travel_center",
           "at_mi": 15.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 1267 at Palmdale; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -32343,10 +32259,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Lebec",
+          "type": "travel_center",
           "at_mi": 70.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lebec; town as this map's curated record of the same store names it; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -32394,7 +32310,7 @@
           "name": "Love's Travel Stop Tulare",
           "type": "travel_center",
           "at_mi": 170.0,
-          "source": "Love's Travel Stop Tulare official listing, CA-99 Exit 85, truck parking: https://www.loves.com/locations/ca/tulare/loves-travel-stop-tulare-382",
+          "source": "Love's Travel Stop Tulare official listing, CA-99 Exit 85, truck parking: https://www.loves.com/locations/ca/tulare/loves-travel-stop-tulare-382; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 382 at Tulare; matched by position, the only Love's within 5 mi of mile 170 of this leg (2.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -32413,7 +32329,9 @@
             "both"
           ],
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.180669,
+          "lon": -119.330185
         },
         {
           "name": "Valley Fuel Travel Plaza",
@@ -35112,10 +35030,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Ontario",
+          "type": "travel_center",
           "at_mi": 41.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0026 at Ontario; town read from the mapped site's address; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35135,10 +35053,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Colton",
+          "type": "travel_center",
           "at_mi": 56.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Colton; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35181,10 +35099,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center North Palm Springs",
+          "type": "travel_center",
           "at_mi": 102.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at North Palm Springs; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35204,10 +35122,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Thousand Palms",
+          "type": "travel_center",
           "at_mi": 114.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Thousand Palms; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -41860,7 +41778,7 @@
           "name": "Flying J Travel Center Lebec",
           "type": "travel_center",
           "at_mi": 73.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lebec; matched by position, the only Flying J within 5 mi of mile 73.8 of this leg (1.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -41882,8 +41800,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 34.83011935028047,
-          "lon": -118.8691947721473
+          "lat": 34.816987,
+          "lon": -118.887079
         },
         {
           "name": "Water",
@@ -41909,10 +41827,10 @@
           ]
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Wheeler Ridge",
+          "type": "travel_center",
           "at_mi": 88.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 327 at Wheeler Ridge; town read from the mapped site's branch name; matched by coordinate, 0.07 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42009,10 +41927,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Gustine",
+          "type": "travel_center",
           "at_mi": 273.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 441 at Gustine; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42035,7 +41953,7 @@
           "name": "Love's Travel Stop Patterson",
           "type": "travel_center",
           "at_mi": 284.7,
-          "source": "Love's official store feed lists store 807 in Patterson, CA on I-5, exit 434/Sperry Ave; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 807 in Patterson, CA on I-5, exit 434/Sperry Ave; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store at Patterson; matched by name, the only Love's the map has at Patterson within 40 mi of mile 284.7 of this leg (15.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -42055,7 +41973,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.462801,
+          "lon": -121.175187
         },
         {
           "name": "Lucky Spot",
@@ -43273,10 +43193,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 28.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 365 at Madera; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43299,7 +43219,7 @@
           "name": "Love's Travel Stop Madera",
           "type": "travel_center",
           "at_mi": 31.1,
-          "source": "Love's Madera opening note, Highway 99, lists 95 truck parking spaces: https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's Madera opening note, Highway 99, lists 95 truck parking spaces: https://www.loves.com/news/2020/february/loves-travel-stops-opens-in-madera-california Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 736 at Madera; matched by position, the only Love's within 5 mi of mile 31.1 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -43319,14 +43239,14 @@
           ],
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 36.98665146784745,
-          "lon": -120.08900881596767
+          "lat": 36.995849,
+          "lon": -120.096495
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 42.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): TA store 0919 at Madera; town read from the store page the mapped site links to; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43902,10 +43822,10 @@
       },
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Livingston",
+          "type": "travel_center",
           "at_mi": 19.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): TA store 0170 at Livingston; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -45122,10 +45042,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Weed",
+          "type": "travel_center",
           "at_mi": 9.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Weed; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -58031,10 +57951,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Weed",
+          "type": "travel_center",
           "at_mi": 70.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Weed; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -58055,9 +57975,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 140.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the klamath_falls_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the klamath_falls_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 823; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -63277,10 +63197,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center North Palm Springs",
+          "type": "travel_center",
           "at_mi": 53.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at North Palm Springs; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -63303,10 +63223,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Thousand Palms",
+          "type": "travel_center",
           "at_mi": 58.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Thousand Palms; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -63326,10 +63246,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Coachella",
+          "type": "travel_center",
           "at_mi": 77.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indio_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indio_ca_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 207 at Coachella; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -70373,10 +70293,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Colton",
+          "type": "travel_center",
           "at_mi": 13.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Colton; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77735,10 +77655,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Corning",
+          "type": "travel_center",
           "at_mi": 109.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0309 at Corning; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77786,9 +77706,9 @@
         },
         {
           "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 309.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Central Point; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77831,10 +77751,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Roseburg",
+          "type": "travel_center",
           "at_mi": 396.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 312 at Roseburg; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77903,10 +77823,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Millersburg",
+          "type": "travel_center",
           "at_mi": 514.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 728 at Millersburg; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77929,10 +77849,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Brooks",
+          "type": "travel_center",
           "at_mi": 540.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Brooks; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -77970,10 +77890,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Aurora",
+          "type": "travel_center",
           "at_mi": 556.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Flying J store at Aurora; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -79748,10 +79668,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Dunnigan",
+          "type": "travel_center",
           "at_mi": 35.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Dunnigan; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -79771,10 +79691,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Williams",
+          "type": "travel_center",
           "at_mi": 59.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 652 at Williams; town DERIVED, not read: the nearest mapped place, 0.9 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -79842,10 +79762,10 @@
           "lon": -122.21453630609174
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Corning",
+          "type": "travel_center",
           "at_mi": 111.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0309 at Corning; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -82592,7 +82512,7 @@
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 3.6,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -84750,7 +84670,7 @@
           "name": "Pilot Dealer Sacramento",
           "type": "travel_center",
           "at_mi": 5.8,
-          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store; matched by position, the only Pilot within 5 mi of mile 5.8 of this leg (3.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -84771,8 +84691,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 38.573526581620904,
-          "lon": -121.58271040232512
+          "lat": 38.617032,
+          "lon": -121.538356
         },
         {
           "name": "Sacramento 49er Travel Plaza",
@@ -85332,10 +85252,10 @@
       "miles": 141,
       "stops": [
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Salinas",
           "type": "travel_center",
           "at_mi": 0.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 237 at Salinas; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -85355,10 +85275,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Gustine",
+          "type": "travel_center",
           "at_mi": 60.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 441 at Gustine; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -85378,10 +85298,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 112.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 365 at Madera; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 112.8 of this leg (0.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -85396,7 +85316,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.019487,
+          "lon": -120.13302
         }
       ],
       "corridor": {
@@ -86964,10 +86886,10 @@
       "miles": 110,
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Salinas",
+          "type": "travel_center",
           "at_mi": 0.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 237 at Salinas; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -89994,10 +89916,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Salinas",
+          "type": "travel_center",
           "at_mi": 1.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 237 at Salinas; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -90090,10 +90012,10 @@
       "miles": 131,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Gustine",
+          "type": "travel_center",
           "at_mi": 65.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 441 at Gustine; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 65.5 of this leg (0.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -90108,7 +90030,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.111402,
+          "lon": -121.016771
         },
         {
           "name": "Joe's Travel Plaza",
@@ -97576,10 +97500,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Yuma",
           "type": "travel_center",
           "at_mi": 172.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -97602,7 +97526,7 @@
           "name": "Pilot Travel Center Gila Bend",
           "type": "travel_center",
           "at_mi": 266.2,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1243 in Gila Bend, AZ with 70 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/az/gila-bend/3006-s-butterfield-trl",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1243 in Gila Bend, AZ with 70 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/az/gila-bend/3006-s-butterfield-trl; Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Gila Bend; matched by name, the only Pilot the map has at Gila Bend within 40 mi of mile 266.2 of this leg (22.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -97623,13 +97547,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 32.930409,
+          "lon": -112.672998
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Buckeye",
+          "type": "travel_center",
           "at_mi": 325.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 280 at Buckeye; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108203,10 +108129,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Dunnigan",
+          "type": "travel_center",
           "at_mi": 89.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Dunnigan; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108226,10 +108152,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Williams",
+          "type": "travel_center",
           "at_mi": 113.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 652 at Williams; town DERIVED, not read: the nearest mapped place, 0.9 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108275,10 +108201,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Corning",
+          "type": "travel_center",
           "at_mi": 164.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0309 at Corning; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108298,10 +108224,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Weed",
           "type": "travel_center",
           "at_mi": 279.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Weed; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108365,10 +108291,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro",
+          "name": "Petro Stopping Center Phoenix",
           "type": "travel_center",
           "at_mi": 356.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Petro store 0324 at Phoenix; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108411,10 +108337,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Roseburg",
           "type": "fuel_station",
           "at_mi": 451.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 312 at Roseburg; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -108480,10 +108406,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Millersburg",
+          "type": "travel_center",
           "at_mi": 569.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 728 at Millersburg; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108506,10 +108432,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Brooks",
+          "type": "travel_center",
           "at_mi": 595.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Pilot store at Brooks; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -108547,10 +108473,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Aurora",
+          "type": "travel_center",
           "at_mi": 609.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Flying J store at Aurora; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -116478,7 +116404,7 @@
           "name": "Pilot Dealer Sacramento",
           "type": "travel_center",
           "at_mi": 81.8,
-          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store; matched by position, the only Pilot within 5 mi of mile 81.8 of this leg (3.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -116499,31 +116425,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 38.573526581620904,
-          "lon": -121.58271040232512
-        },
-        {
-          "name": "Pilot",
-          "type": "travel_center",
-          "at_mi": 85.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 38.6170346,
-          "lon": -121.5383568,
-          "vehicle_access": "tractor_trailer"
+          "lat": 38.617032,
+          "lon": -121.538356
         },
         {
           "name": "Gold Run Eastbound Rest Area",
@@ -116592,10 +116495,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Sparks",
+          "type": "travel_center",
           "at_mi": 224.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Petro store 0338 at Sparks; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -116615,10 +116518,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "ONE9 Travel Center",
-          "type": "service_plaza",
+          "name": "ONE9 Travel Center McCarran",
+          "type": "travel_center",
           "at_mi": 237.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): ONE9 store at McCarran; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -116638,10 +116541,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Fernley",
+          "type": "travel_center",
           "at_mi": 250.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Love's store 246 at Fernley; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -116661,10 +116564,33 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center Winnemucca",
+          "type": "travel_center",
+          "at_mi": 379.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Pilot store at Winnemucca; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.9314321,
+          "lon": -117.8052551,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Flying J Travel Center Winnemucca",
           "type": "travel_center",
-          "at_mi": 358.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 770 in Winnemucca, NV with 51 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/winnemucca/1880-w-winnemucca-blvd",
+          "at_mi": 383.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 770 in Winnemucca, NV with 51 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/winnemucca/1880-w-winnemucca-blvd; Store coordinates read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Flying J store at Winnemucca; matched by name, the only Flying J the map has at Winnemucca within 40 mi of mile 383.5 of this leg (22.0 mi); coordinates read from the mapped site. Mile marker moved from 358.8 to 383.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 358.8 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -116685,53 +116611,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 379.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 40.9314321,
-          "lon": -117.8052551,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 383.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 40.9603946,
-          "lon": -117.7475709,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.960169,
+          "lon": -117.747738
         },
         {
           "name": "Hardy Enterprises Truck Stop",
@@ -116760,36 +116642,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center Wells",
-          "type": "travel_center",
-          "at_mi": 541.1,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "restrooms",
-            "parking"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "confirmed",
-          "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's",
+          "name": "Love's Travel Stop Wells",
           "type": "fuel_station",
           "at_mi": 557.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Love's store 365 at Wells; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -116809,7 +116665,7 @@
           "name": "Flying J Travel Center Wells",
           "type": "travel_center",
           "at_mi": 557.3,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93; Store coordinates read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Flying J store at Wells; matched by name, the only Flying J the map has at Wells within 40 mi of mile 557.3 of this leg (15.5 mi); coordinates read from the mapped site. Mile marker moved from 541.1 to 557.3: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 541.1 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -116830,8 +116686,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.10729198658706,
-          "lon": -114.94984759293982
+          "lat": 41.097924,
+          "lon": -114.957209
         },
         {
           "name": "Salt Lake City Travel Center",
@@ -116857,10 +116713,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Salt Lake City",
+          "type": "travel_center",
           "at_mi": 736.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Salt Lake City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -119721,10 +119577,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Los Banos",
+          "type": "travel_center",
           "at_mi": 70.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0346 at Los Banos; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -119744,10 +119600,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Madera",
+          "type": "travel_center",
           "at_mi": 125.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 365 at Madera; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 125 of this leg (3.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -119762,7 +119618,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.019487,
+          "lon": -120.13302
         }
       ],
       "divided": true,
@@ -123120,10 +122978,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Salinas",
+          "type": "travel_center",
           "at_mi": 59.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 237 at Salinas; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -126205,7 +126063,7 @@
           "name": "Pilot Travel Center Castaic",
           "type": "travel_center",
           "at_mi": 68.42,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 372 in Castaic, CA with 54 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (17.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/castaic/31642-castiac-rd",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 372 in Castaic, CA with 54 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (17.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/castaic/31642-castiac-rd; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at Castaic; matched by name, the only Pilot the map has at Castaic within 40 mi of mile 68.42 of this leg (11.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -126226,7 +126084,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.494371,
+          "lon": -118.619842
         }
       ],
       "corridor": {
@@ -130841,7 +130701,7 @@
           "name": "Pilot Travel Center Hesperia",
           "type": "travel_center",
           "at_mi": 71.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 381 at Hesperia; matched by position, the only Pilot within 5 mi of mile 71.9 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -130862,7 +130722,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.408971,
+          "lon": -117.397722
         },
         {
           "name": "Flying J",
@@ -136299,10 +136161,10 @@
       "miles": 155,
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Wheeler Ridge",
+          "type": "travel_center",
           "at_mi": 107.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 327 at Wheeler Ridge; town read from the mapped site's branch name; matched by coordinate, 0.07 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -136342,10 +136204,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Lebec",
+          "type": "travel_center",
           "at_mi": 124.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lebec; town as this map's curated record of the same store names it; matched by position, the only Flying J within 5 mi of mile 124 of this leg (1.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -136360,7 +136222,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.816987,
+          "lon": -118.887079
         },
         {
           "name": "Castaic Truck Stop",
@@ -138083,7 +137947,7 @@
           "name": "Pilot Dealer Sacramento",
           "type": "travel_center",
           "at_mi": 88.9,
-          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Dealer store 879 in Sacramento, CA with 275 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/sacramento/2828-el-centro-rd Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store; matched by position, the only Pilot within 5 mi of mile 88.9 of this leg (3.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -138104,8 +137968,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 38.573526581620904,
-          "lon": -121.58271040232512
+          "lat": 38.617032,
+          "lon": -121.538356
         }
       ],
       "corridor": {
@@ -141926,7 +141790,7 @@
           "name": "Flying J Travel Center Lodi",
           "type": "travel_center",
           "at_mi": 92.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 617 in Lodi, CA with 197 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lodi/15100-thorton-rd",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 617 in Lodi, CA with 197 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lodi/15100-thorton-rd; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lodi; matched by position, the only Flying J within 5 mi of mile 92.8 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -141947,7 +141811,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.117475,
+          "lon": -121.394074
         }
       ],
       "corridor": {
@@ -145145,33 +145011,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 15.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.75559,
-          "lon": -121.14427,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Flying J Travel Center Ripon",
           "type": "travel_center",
           "at_mi": 15.6,
-          "source": "Pilot Flying J Ripon official location page, Highway 99, confirms truck parking: https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J Ripon official location page, Highway 99, confirms truck parking: https://locations.pilotflyingj.com/us/ca/ripon/1501-n-jack-tone-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Ripon; matched by position, the only Flying J within 5 mi of mile 15.6 of this leg (3.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -145191,8 +145034,8 @@
           ],
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 37.790123020409396,
-          "lon": -121.18932772733761
+          "lat": 37.75587,
+          "lon": -121.143945
         }
       ],
       "divided": true,
@@ -145863,10 +145706,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Lodi",
+          "type": "travel_center",
           "at_mi": 12.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lodi; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 12.2 of this leg (1.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -145881,7 +145724,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.117475,
+          "lon": -121.394074
         }
       ],
       "divided": true,
@@ -154001,7 +153846,7 @@
           "name": "Flying J Travel Center Lebec",
           "type": "travel_center",
           "at_mi": 34.1,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 616 in Lebec, CA with 277 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/lebec/42810-frazier-mountain-park-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Lebec; matched by position, the only Flying J within 5 mi of mile 34.1 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -154023,8 +153868,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 34.83011935028047,
-          "lon": -118.8691947721473
+          "lat": 34.816987,
+          "lon": -118.887079
         },
         {
           "name": "Water",
@@ -154045,10 +153890,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Wheeler Ridge",
+          "type": "travel_center",
           "at_mi": 48.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 327 at Wheeler Ridge; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 48.7 of this leg (2.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -154064,8 +153909,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 35.0162348503278,
-          "lon": -118.95573659622205,
+          "lat": 34.985256,
+          "lon": -118.948579,
           "directions": [
             "both"
           ]
@@ -155079,10 +154924,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Palmdale",
+          "type": "travel_center",
           "at_mi": 45.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 1267 at Palmdale; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 45.5 of this leg (0.4 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -155097,7 +154942,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.543542,
+          "lon": -118.035968
         }
       ],
       "corridor": {
@@ -156585,7 +156432,7 @@
           "name": "Pilot Travel Center Hesperia",
           "type": "travel_center",
           "at_mi": 12.3,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 381 in Hesperia, CA with 217 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ca/hesperia/8701-us-395; Store coordinates read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store 381 at Hesperia; matched by position, the only Pilot within 5 mi of mile 12.3 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -156606,7 +156453,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.408971,
+          "lon": -117.397722
         }
       ],
       "corridor": {
@@ -166242,10 +166091,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Phoenix",
+          "type": "travel_center",
           "at_mi": 50.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the medford_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the medford_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Petro store 0324 at Phoenix; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

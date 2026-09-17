@@ -402,10 +402,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Daleville",
+          "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Daleville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3055,9 +3055,9 @@
         },
         {
           "name": "Road Ranger",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 34.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Road Ranger store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3589,7 +3589,7 @@
           "name": "Pilot Travel Center Leavenworth",
           "type": "travel_center",
           "at_mi": 82.7,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 478 in Leavenworth, IN with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/leavenworth/6921-in-66",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 478 in Leavenworth, IN with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/leavenworth/6921-in-66; Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Leavenworth; matched by position, the only Pilot within 5 mi of mile 82.7 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -3610,7 +3610,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.23922,
+          "lon": -86.362247
         }
       ],
       "corridor": {
@@ -6760,7 +6762,7 @@
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6820,10 +6822,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Goshen",
+          "type": "travel_center",
           "at_mi": 63.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 729 at Goshen; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 63.6 of this leg (2.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6839,8 +6841,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 41.637292587549936,
-          "lon": -85.92360559922327,
+          "lat": 41.66483,
+          "lon": -85.890407,
           "directions": [
             "both"
           ]
@@ -8508,7 +8510,7 @@
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8528,10 +8530,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Plymouth",
+          "type": "travel_center",
           "at_mi": 65.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Plymouth; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8552,9 +8554,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 70.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 633; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8574,10 +8576,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "ONE9 Travel Center",
-          "type": "service_plaza",
+          "name": "ONE9 Travel Center Valparaiso",
+          "type": "travel_center",
           "at_mi": 106.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): ONE9 store at Valparaiso; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8597,10 +8599,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Gary",
+          "type": "travel_center",
           "at_mi": 132.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0369 at Gary; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10552,7 +10554,7 @@
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10595,7 +10597,7 @@
           "name": "Love's Travel Stop Angola",
           "type": "travel_center",
           "at_mi": 42.0,
-          "source": "Love's official store feed lists store 551 in Angola, IN on I-69, exit 348; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 551 in Angola, IN on I-69, exit 348; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 551 at Angola; matched by position, the only Love's within 5 mi of mile 42 of this leg (1.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -10616,14 +10618,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.6506615310011,
-          "lon": -85.04420189062114
+          "lat": 41.633631,
+          "lon": -85.050771
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Angola",
+          "type": "travel_center",
           "at_mi": 50.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0345 at Angola; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10668,10 +10670,10 @@
           ]
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Tekonsha",
+          "type": "travel_center",
           "at_mi": 79.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): TA store 0243 at Tekonsha; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11595,10 +11597,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Gary",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0369 at Gary; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11618,10 +11620,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 24.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by position, the only Road Ranger within 5 mi of mile 24.8 of this leg (4.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11636,7 +11638,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.831259,
+          "lon": -87.694466
         }
       ],
       "divided": true,
@@ -12874,10 +12878,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Gary",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0369 at Gary; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12897,10 +12901,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Hebron",
+          "type": "travel_center",
           "at_mi": 22.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Flying J store at Hebron; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 22.8 of this leg (0.4 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12915,7 +12919,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.287239,
+          "lon": -87.293259
         },
         {
           "name": "Wolcott Rest Area - I-65 SB",
@@ -14031,10 +14037,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Gary",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gary_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0369 at Gary; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14054,10 +14060,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Burns Harbor",
+          "type": "travel_center",
           "at_mi": 16.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Burns Harbor; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 16.4 of this leg (2.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14072,7 +14078,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.60452,
+          "lon": -87.115066
         },
         {
           "name": "Shell",
@@ -16452,10 +16460,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Indianapolis",
+          "type": "travel_center",
           "at_mi": 14.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Flying J store at Indianapolis; town read from the store page the mapped site links to; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18187,7 +18195,7 @@
           "name": "Flying J Travel Center Marion",
           "type": "travel_center",
           "at_mi": 78.9,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 1086 in Marion, IN with 80 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/marion/6255-in-18",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 1086 in Marion, IN with 80 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/marion/6255-in-18; Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Flying J store at Marion; matched by position, the only Flying J within 5 mi of mile 78.9 of this leg (2.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -18208,13 +18216,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.55437,
+          "lon": -85.553694
         },
         {
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 128.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19370,9 +19380,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 45.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 710; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23228,9 +23238,9 @@
         },
         {
           "name": "Road Ranger",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 13.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Road Ranger store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23253,10 +23263,10 @@
           ]
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Seymour",
+          "type": "travel_center",
           "at_mi": 62.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): TA store 0065 at Seymour; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23279,10 +23289,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Memphis",
+          "type": "travel_center",
           "at_mi": 96.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Memphis; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23308,7 +23318,7 @@
           "name": "Love's Travel Stop Memphis",
           "type": "travel_center",
           "at_mi": 100.3,
-          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355",
+          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355; Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 355 at Memphis; matched by position, the only Love's within 5 mi of mile 100.3 of this leg (3.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -23327,13 +23337,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.490441,
+          "lon": -85.769764
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Brooks",
+          "type": "travel_center",
           "at_mi": 127.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Brooks; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23356,10 +23368,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Shepherdsville",
+          "type": "travel_center",
           "at_mi": 133.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Love's store 238 at Shepherdsville; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23403,10 +23415,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Lebanon Junction",
+          "type": "travel_center",
           "at_mi": 145.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Lebanon Junction; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 145.4 of this leg (0.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23422,17 +23434,17 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 37.82191311918584,
-          "lon": -85.73372777451286,
+          "lat": 37.827407,
+          "lon": -85.724123,
           "directions": [
             "both"
           ]
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Glendale",
+          "type": "travel_center",
           "at_mi": 162.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Petro store 0330 at Glendale; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23452,10 +23464,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "ONE9 Travel Center",
-          "type": "service_plaza",
+          "name": "ONE9 Travel Center Sonora",
+          "type": "travel_center",
           "at_mi": 168.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): ONE9 store at Sonora; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23478,7 +23490,7 @@
           "name": "Pilot Travel Center Franklin",
           "type": "travel_center",
           "at_mi": 248.3,
-          "source": "Pilot Flying J official Franklin, Kentucky location page lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from I-65 Kentucky Exit 6 near the Tennessee line, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/franklin/2940-scottsville-rd",
+          "source": "Pilot Flying J official Franklin, Kentucky location page lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from I-65 Kentucky Exit 6 near the Tennessee line, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/franklin/2940-scottsville-rd; Store coordinates read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Franklin; matched by name, the only Pilot the map has at Franklin within 40 mi of mile 248.3 of this leg (5.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -23497,7 +23509,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.71802,
+          "lon": -86.525612
         },
         {
           "name": "Bay 2",
@@ -24753,10 +24767,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Knightstown",
+          "type": "travel_center",
           "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 601 at Knightstown; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24779,7 +24793,7 @@
           "name": "Flying J Travel Center Spiceland",
           "type": "travel_center",
           "at_mi": 47.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 655 in Spiceland, IN with 193 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/spiceland/5300-in-3 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 655 in Spiceland, IN with 193 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/in/spiceland/5300-in-3 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Flying J store at Spiceland; matched by name, the only Flying J the map has at Spiceland within 40 mi of mile 47.8 of this leg (6.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -24801,14 +24815,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 39.852676399273236,
-          "lon": -85.2973554195755
+          "lat": 39.851307,
+          "lon": -85.412786
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Richmond",
+          "type": "travel_center",
           "at_mi": 67.4,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 222 at Richmond; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26562,9 +26576,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 44.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 710; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26607,10 +26621,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Plymouth",
+          "type": "travel_center",
           "at_mi": 118.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Plymouth; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29719,7 +29733,7 @@
           "name": "Pilot Travel Center Marshall",
           "type": "travel_center",
           "at_mi": 81.1,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1174 in Marshall, IL with 63 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/il/marshall/104-w-trefz-dr",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1174 in Marshall, IL with 63 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/il/marshall/104-w-trefz-dr; Store coordinates read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store at Marshall; matched by name, the only Pilot the map has at Marshall within 40 mi of mile 81.1 of this leg (8.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -29739,7 +29753,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.419009,
+          "lon": -87.694897
         },
         {
           "name": "Green Creek Rest Area - Southbound",
@@ -29765,7 +29781,7 @@
           "name": "Pilot Travel Center Vandalia",
           "type": "travel_center",
           "at_mi": 167.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1219 in Vandalia, IL with 93 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/il/vandalia/10-interstate-dr",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1219 in Vandalia, IL with 93 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/il/vandalia/10-interstate-dr; Store coordinates read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store at Vandalia; matched by name, the only Pilot the map has at Vandalia within 40 mi of mile 167.8 of this leg (7.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -29785,7 +29801,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.970716,
+          "lon": -89.13631
         },
         {
           "name": "Love's Travel Stop",
@@ -29809,10 +29827,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 236.7,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31230,10 +31248,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Brazil",
+          "type": "travel_center",
           "at_mi": 57.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Petro store 0376 at Brazil; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33183,10 +33201,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Whitestown",
+          "type": "travel_center",
           "at_mi": 47.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): TA store 0173 at Whitestown; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 47.2 of this leg (2.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33201,7 +33219,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.948078,
+          "lon": -86.35763
         },
         {
           "name": "Horner Industrial Group",
@@ -34351,7 +34371,7 @@
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 77.78,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35346,10 +35366,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Richmond",
+          "type": "travel_center",
           "at_mi": 41.92,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 222 at Richmond; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36369,10 +36389,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Richmond",
+          "type": "travel_center",
           "at_mi": 1.02,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the richmond_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 222 at Richmond; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36392,10 +36412,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center New Paris",
+          "type": "travel_center",
           "at_mi": 11.45,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Ohio extract dated 2026-06-22, read 2026-09-17): Petro store 0357 at New Paris; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36438,7 +36458,7 @@
           "name": "Pilot Travel Center Eaton",
           "type": "travel_center",
           "at_mi": 29.3,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 286 in Eaton, OH with 34 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/oh/eaton/6141-us-127 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 286 in Eaton, OH with 34 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/oh/eaton/6141-us-127 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Ohio extract dated 2026-06-22, read 2026-09-17): Pilot store at Eaton; matched by name, the only Pilot the map has at Eaton within 40 mi of mile 29.3 of this leg (10.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -36460,14 +36480,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 39.848897651168585,
-          "lon": -84.42487935175345
+          "lat": 39.831577,
+          "lon": -84.630376
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Oakwood",
           "type": "travel_center",
           "at_mi": 44.98,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dayton_oh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dayton_oh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Ohio extract dated 2026-06-22, read 2026-09-17): Love's store 427 at Oakwood; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36518,10 +36538,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Porter",
+          "type": "travel_center",
           "at_mi": 48.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): TA store 0220 at Porter; town read from the store page the mapped site links to; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36541,10 +36561,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Burns Harbor",
+          "type": "travel_center",
           "at_mi": 50.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Burns Harbor; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 50.1 of this leg (2.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36560,17 +36580,17 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 41.5794096544336,
-          "lon": -87.07709570322355,
+          "lat": 41.60452,
+          "lon": -87.115066,
           "directions": [
             "both"
           ]
         },
         {
-          "name": "Road Ranger",
+          "name": "Road Ranger Chicago",
           "type": "travel_center",
           "at_mi": 95.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the chicago_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Chicago; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38191,10 +38211,10 @@
       "miles": 85,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Goshen",
+          "type": "travel_center",
           "at_mi": 21.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Love's store 729 at Goshen; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 21.2 of this leg (2.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38209,13 +38229,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.66483,
+          "lon": -85.890407
         },
         {
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 84.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fort_wayne_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Pilot store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39794,7 +39816,7 @@
           "name": "Pilot Travel Center Holland",
           "type": "travel_center",
           "at_mi": 87.1,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1021 in Holland, MI with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/holland/853-interchange-dr",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1021 in Holland, MI with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/holland/853-interchange-dr; Store coordinates read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Pilot store at Holland; matched by position, the only Pilot within 5 mi of mile 87.1 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -39815,13 +39837,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.740978,
+          "lon": -86.070235
         },
         {
           "name": "Love's Travel Stop Holland",
           "type": "travel_center",
           "at_mi": 91.3,
-          "source": "Love's official store feed lists store 742 in Holland, MI on I-196, exit 52/Adams St; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 742 in Holland, MI on I-196, exit 52/Adams St; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Love's store 742 at Holland; matched by position, the only Love's within 5 mi of mile 91.3 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -39842,8 +39866,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.78914313527294,
-          "lon": -86.02313306001314
+          "lat": 42.782449,
+          "lon": -86.023474
         }
       ],
       "corridor": {
@@ -42544,9 +42568,9 @@
       "stops": [
         {
           "name": "Road Ranger",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 17.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Road Ranger store; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42566,10 +42590,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Effingham",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the effingham_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the effingham_il_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Petro store 0321 at Effingham; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43455,10 +43479,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Haubstadt",
+          "type": "travel_center",
           "at_mi": 39.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Indiana extract dated 2026-06-22, read 2026-09-17): Flying J store at Haubstadt; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

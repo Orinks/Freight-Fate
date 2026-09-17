@@ -18,6 +18,8 @@
 
 - **The shared Duff sound cues stay as they are.** No replacements are planned for them.
 
+- **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
+
 ### Fixed
 
 - **A truck stop that was on the map twice is announced once.** Signalling for it arms the real exit, with its exit number and the stop at the end of the ramp.

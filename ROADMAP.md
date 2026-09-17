@@ -530,14 +530,34 @@ its status or release decision.
       two miles and 5% a recorded ramp control within 0.15, against 62% and
       3% for the map's other travel centers. 312 of the ones with no exit
       number are on legs with no interchange records at all.
-- [ ] Import the chains' store locator records (Pilot Flying J, Love's,
-      TA and Petro, Road Ranger, ONE9, Sapp Bros): store number, town, exit,
-      coordinates, parking count and amenities, with a terms-of-use check per
-      locator and a `source` that says read, store number and date. Match a
-      locator store to an existing record by coordinate (1,163 of the 1,285
-      chain records from the import already carry one) and not by mile
-      marker. That names every store, which retires the four-mile twin
-      calibration and the retype above.
+- [x] The chain truck stops carry their store (`tools/import_chain_locators.py`,
+      2026-09-17). The terms-of-use check came first and ruled the locators
+      out: Love's, TA and Petro, and Road Ranger forbid automated access, and
+      Pilot Flying J (with ONE9) forbids copying its listing. Sapp Bros posts
+      no terms; its one page lists 17 towns. So the store table is read from
+      the cached OpenStreetMap state extracts: 1,764 stores, a town for 1,556
+      (read from the address, branch or linked store page for 1,275, the
+      curated record's own town for 39, derived from the nearest mapped town
+      within two miles for 239 and labelled so),
+      a store number for 897, a truck parking count for 8. No exits. Records
+      match a store by coordinate inside 0.1 mile (1,462 records under it,
+      none between 0.1 and 5 miles). A record with no coordinates matches the
+      only store of its brand within 5 miles of its mile marker, or the one
+      store carrying its own town's name. Of 1,726 bare records 1,326 are
+      named, 126 are typed and sourced with no town to name them by, 52 match
+      a store nothing says serves trucks, 77 found no store, 9 would repeat a
+      name already on the leg, and 145 were twins. 164 twins deleted in all,
+      38 kept records took the deleted twin's better mile marker, and 563
+      records gained coordinates. The two load-time screens stay as the net:
+      the twin screen now drops 2 records where it dropped 90, and the retype
+      acts on 52 where it acted on 1,317 (counted with a Python mirror of both
+      rules that reproduces the 90 and the 1,317 on the map before).
+- [ ] Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
+      percentile of 3.4 from where the store projects onto the leg's own
+      line, and 5 to 40 miles for about 110 curated records on long legs.
+      Exit numbers and ramp controls are found by mile marker, so re-project
+      each from the store coordinates it now carries. Exits and parking
+      counts still need the chains' written consent to use their locators.
 - [ ] A stop's ramp control is looked up within 0.15 miles of a projected
       mile marker, which only one stop in twenty meets, so most ramps take
       the seeded urban or rural control. Snapping each stop to the

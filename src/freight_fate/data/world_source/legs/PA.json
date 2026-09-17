@@ -51,10 +51,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
+          "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 140.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3328,10 +3328,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Bloomsbury",
+          "type": "travel_center",
           "at_mi": 26.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Bloomsbury; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 26.1 of this leg (3.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3347,8 +3347,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 40.66980466042937,
-          "lon": -75.13440097001966,
+          "lat": 40.659527,
+          "lon": -75.072756,
           "directions": [
             "both"
           ]
@@ -3357,7 +3357,7 @@
           "name": "Pilot Travel Center Hampton",
           "type": "travel_center",
           "at_mi": 35.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173; Store coordinates read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Hampton; matched by position, the only Pilot within 5 mi of mile 35.9 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -3378,7 +3378,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.636708,
+          "lon": -74.967575
         },
         {
           "name": "I-95 Fairfield SB Service Plaza",
@@ -6730,10 +6732,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Bloomsbury",
+          "type": "travel_center",
           "at_mi": 27.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Bloomsbury; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 27.5 of this leg (3.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6748,13 +6750,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.659527,
+          "lon": -75.072756
         },
         {
           "name": "Pilot Travel Center Hampton",
           "type": "travel_center",
           "at_mi": 36.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 190 in Hampton, NJ with 50 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nj/hampton/66-nj-173 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Hampton; matched by position, the only Pilot within 5 mi of mile 36.8 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -6776,8 +6780,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.63616117778807,
-          "lon": -74.97622306431549
+          "lat": 40.636708,
+          "lon": -74.967575
         }
       ],
       "corridor": {
@@ -13181,10 +13185,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Carlisle",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13204,10 +13208,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Hagerstown",
+          "type": "travel_center",
           "at_mi": 54.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14709,31 +14713,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 23.45,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Ripley",
           "type": "travel_center",
-          "at_mi": 28.9,
-          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 23.45,
+          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 833 at Ripley; matched by name, the only Love's the map has at Ripley within 40 mi of mile 23.45 of this leg (6.7 mi); coordinates read from the mapped site. Mile marker moved from 28.9 to 23.45: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 28.9 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -14754,8 +14737,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.30904723173764,
-          "lon": -79.63427139931906
+          "lat": 42.258948,
+          "lon": -79.744037
         },
         {
           "name": "Angola Travel Plaza",
@@ -16610,10 +16593,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Austinburg",
+          "type": "travel_center",
           "at_mi": 51.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Ohio extract dated 2026-06-22, read 2026-09-17): Pilot store at Austinburg; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 51 of this leg (0.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16628,7 +16611,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.785521,
+          "lon": -80.853804
         }
       ],
       "divided": true,
@@ -19387,10 +19372,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Jonestown",
+          "type": "travel_center",
           "at_mi": 20.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Love's store 366 at Jonestown; town read from the mapped site's branch name; matched by position, the only Love's within 5 mi of mile 20.2 of this leg (4.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19405,7 +19390,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.449285,
+          "lon": -76.515175
         },
         {
           "name": "Allentown Service Plaza",
@@ -21299,10 +21286,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
+          "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 79.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22163,10 +22150,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Carlisle",
+          "type": "travel_center",
           "at_mi": 17.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27564,10 +27551,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Carlisle",
+          "type": "travel_center",
           "at_mi": 18.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27684,10 +27671,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Breezewood",
+          "type": "travel_center",
           "at_mi": 83.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at Breezewood; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30229,10 +30216,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Jonestown",
+          "type": "travel_center",
           "at_mi": 24.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Love's store 366 at Jonestown; town read from the mapped site's branch name; matched by position, the only Love's within 5 mi of mile 24.2 of this leg (1.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30247,7 +30234,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.449285,
+          "lon": -76.515175
         },
         {
           "name": "Nelly Travel Plaza",
@@ -34003,10 +33992,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Slippery Rock",
+          "type": "travel_center",
           "at_mi": 46.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Love's store 731 at Slippery Rock; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37786,10 +37775,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
+          "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 101.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42494,10 +42483,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Carlisle",
+          "type": "travel_center",
           "at_mi": 116.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42623,10 +42612,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Breezewood",
+          "type": "travel_center",
           "at_mi": 182.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at Breezewood; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -47745,10 +47734,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Breezewood",
+          "type": "travel_center",
           "at_mi": 121.7,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at Breezewood; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -47873,10 +47862,10 @@
           ]
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Carlisle",
+          "type": "travel_center",
           "at_mi": 188.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50553,10 +50542,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Austintown",
+          "type": "travel_center",
           "at_mi": 66.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Ohio extract dated 2026-06-22, read 2026-09-17): Pilot store at Austintown; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 66.5 of this leg (4.4 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50571,7 +50560,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.128717,
+          "lon": -80.769794
         },
         {
           "name": "Portage Service Plaza",
@@ -53603,7 +53594,7 @@
           "name": "Flying J Travel Center Smithton",
           "type": "travel_center",
           "at_mi": 27.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 620 in Smithton, PA with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/pa/smithton/122-fitz-henry-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 620 in Smithton, PA with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/pa/smithton/122-fitz-henry-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at Smithton; matched by name, the only Flying J the map has at Smithton within 40 mi of mile 27.8 of this leg (8.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -53625,8 +53616,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.27962425078874,
-          "lon": -79.66873644403813
+          "lat": 40.170281,
+          "lon": -79.731888
         },
         {
           "name": "Sheetz",
@@ -53675,10 +53666,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Breezewood",
+          "type": "travel_center",
           "at_mi": 123.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at Breezewood; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 123.1 of this leg (0.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -53694,8 +53685,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 39.9930068642368,
-          "lon": -78.24036261992467,
+          "lat": 39.996947,
+          "lon": -78.237122,
           "directions": [
             "both"
           ]
@@ -53731,9 +53722,9 @@
         },
         {
           "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 176.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -56918,10 +56909,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center New Milford",
+          "type": "travel_center",
           "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Flying J store at New Milford; town read from the mapped site's address; matched by position, the only Flying J within 5 mi of mile 30 of this leg (2.0 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -56936,7 +56927,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.824621,
+          "lon": -75.68282
         },
         {
           "name": "Truck Parking",
@@ -63081,10 +63074,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Lamar",
+          "type": "travel_center",
           "at_mi": 31.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Pilot store at Lamar; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

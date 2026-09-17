@@ -1040,10 +1040,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Gillette",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Gillette; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3914,10 +3914,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Casper",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Casper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4031,7 +4031,7 @@
           "name": "Love's Travel Stop Hardin",
           "type": "travel_center",
           "at_mi": 230.9,
-          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Montana extract dated 2026-06-22, read 2026-09-17): Love's store 679 at Hardin; matched by position, the only Love's within 5 mi of mile 230.9 of this leg (0.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -4052,8 +4052,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 45.74611485391125,
-          "lon": -107.60259509255046
+          "lat": 45.749514,
+          "lon": -107.610625
         },
         {
           "name": "Christiansen-Graham-Rest-Area",
@@ -4079,10 +4079,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Billings",
+          "type": "travel_center",
           "at_mi": 272.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Montana extract dated 2026-06-22, read 2026-09-17): Pilot store at Billings; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5303,10 +5303,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Casper",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Casper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6967,10 +6967,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Casper",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the casper_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Casper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6990,10 +6990,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Gillette",
           "type": "travel_center",
           "at_mi": 130.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Gillette; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9285,10 +9285,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9378,10 +9378,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Casper",
+          "type": "travel_center",
           "at_mi": 175.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Casper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11297,10 +11297,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 1.01,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11345,34 +11345,8 @@
         {
           "name": "Love's Travel Stop Berthoud",
           "type": "travel_center",
-          "at_mi": 37.06,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking",
-            "restrooms"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "likely",
-          "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop Berthoud",
-          "type": "travel_center",
           "at_mi": 62.2,
-          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 668 in Berthoud, CO on I-25, exit 250/E State Hwy 56; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Love's store 668 at Berthoud; matched by name, the only Love's the map has at Berthoud within 40 mi of mile 62.2 of this leg (24.2 mi); coordinates read from the mapped site. Mile marker moved from 37.06 to 62.2: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 37.06 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -11393,8 +11367,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 40.29533965379824,
-          "lon": -104.98005249280634
+          "lat": 40.30515,
+          "lon": -104.983977
         },
         {
           "name": "Exxon (Truck)",
@@ -12172,10 +12146,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12242,10 +12216,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Laramie",
+          "type": "travel_center",
           "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Laramie; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17725,10 +17699,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17798,10 +17772,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Laramie",
+          "type": "travel_center",
           "at_mi": 51.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Laramie; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17869,37 +17843,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center Rawlins",
+          "name": "TA Travel Center Rawlins",
           "type": "travel_center",
-          "at_mi": 143.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "restrooms",
-            "parking",
-            "scale"
-          ],
-          "directions": [
-            "both"
-          ],
-          "parking": "confirmed",
-          "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "TA",
-          "type": "service_plaza",
           "at_mi": 149.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0234 at Rawlins; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17922,11 +17869,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Rawlins",
+          "type": "travel_center",
           "at_mi": 152.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd; Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rawlins; matched by name, the only Flying J the map has at Rawlins within 40 mi of mile 152.5 of this leg (9.5 mi); coordinates read from the mapped site. Mile marker moved from 143.8 to 152.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 143.8 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -17938,11 +17884,18 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "restrooms",
+            "parking",
+            "scale"
           ],
-          "lat": 41.7790087,
-          "lon": -107.3088341,
-          "vehicle_access": "tractor_trailer"
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.778423,
+          "lon": -107.309459
         },
         {
           "name": "Turnout westbound",
@@ -17970,10 +17923,10 @@
           "lon": -107.7034983153973
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Wamsutter",
           "type": "travel_center",
           "at_mi": 188.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 310 at Wamsutter; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18018,8 +17971,8 @@
         {
           "name": "Flying J Travel Center Rock Springs",
           "type": "travel_center",
-          "at_mi": 251.3,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd",
+          "at_mi": 258.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd; Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rock Springs; matched by name, the only Flying J the map has at Rock Springs within 40 mi of mile 258.5 of this leg (6.0 mi); coordinates read from the mapped site. Mile marker moved from 251.3 to 258.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 251.3 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -18039,39 +17992,15 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J",
-          "type": "travel_center",
-          "at_mi": 258.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.6090837,
-          "lon": -109.231101,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 41.609038,
+          "lon": -109.230757
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop James Town",
+          "type": "travel_center",
           "at_mi": 277.3,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 888 at James Town; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18143,31 +18072,10 @@
           "lon": -110.2472019049729
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Fort Bridger",
+          "type": "travel_center",
           "at_mi": 330.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 356.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0188 at Fort Bridger; town read from the mapped site's branch name; matched by position, the only TA within 5 mi of mile 330.7 of this leg (1.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18183,8 +18091,31 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 41.26757442250671,
-          "lon": -110.93224568340572,
+          "lat": 41.314561,
+          "lon": -110.508584
+        },
+        {
+          "name": "Flying J Travel Center Evanston",
+          "type": "travel_center",
+          "at_mi": 356.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Evanston; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 356.2 of this leg (2.5 mi); coordinates read from the mapped site.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.264859,
+          "lon": -110.977691,
           "directions": [
             "both"
           ]
@@ -18193,7 +18124,7 @@
           "name": "Pilot Travel Center Evanston",
           "type": "travel_center",
           "at_mi": 356.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 141 in Evanston, WY with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/evanston/289-bear-river-dr",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 141 in Evanston, WY with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/evanston/289-bear-river-dr; Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Evanston; matched by position, the only Pilot within 5 mi of mile 356.8 of this leg (0.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -18214,7 +18145,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.269064,
+          "lon": -110.941137
         },
         {
           "name": "Echo Canyon (EB)",
@@ -18242,10 +18175,10 @@
           "lon": -111.39376183001151
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Salt Lake City",
+          "type": "travel_center",
           "at_mi": 440.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Salt Lake City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18275,10 +18208,10 @@
       "miles": 70,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20420,10 +20353,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Gillette",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Gillette; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20443,10 +20376,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Miles City",
+          "type": "travel_center",
           "at_mi": 171.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the miles_city_mt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the miles_city_mt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Montana extract dated 2026-06-22, read 2026-09-17): Pilot store at Miles City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21802,10 +21735,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Gillette",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gillette_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Gillette; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22962,10 +22895,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Laramie",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Laramie; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23031,8 +22964,8 @@
         {
           "name": "Flying J Travel Center Rawlins",
           "type": "travel_center",
-          "at_mi": 92.7,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 98.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rawlins; matched by name, the only Flying J the map has at Rawlins within 40 mi of mile 98 of this leg (9.5 mi); coordinates read from the mapped site. Mile marker moved from 92.7 to 98: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 92.7 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -23054,37 +22987,14 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.77941486298721,
-          "lon": -107.1250208015573
+          "lat": 41.778423,
+          "lon": -107.309459
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 98.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rawlins_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.77901,
-          "lon": -107.30883,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Rawlins",
+          "type": "travel_center",
           "at_mi": 98.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0234 at Rawlins; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25353,10 +25263,10 @@
       },
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Rawlins",
+          "type": "travel_center",
           "at_mi": 0.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0234 at Rawlins; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25379,10 +25289,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Rawlins",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rawlins_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rawlins_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rawlins; town read from the mapped site's address; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25427,10 +25337,10 @@
           "lon": -107.7034983153973
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Wamsutter",
           "type": "travel_center",
           "at_mi": 39.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 310 at Wamsutter; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25495,8 +25405,8 @@
         {
           "name": "Flying J Travel Center Rock Springs",
           "type": "travel_center",
-          "at_mi": 101.6,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 107.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rock Springs; matched by name, the only Flying J the map has at Rock Springs within 40 mi of mile 107 of this leg (6.1 mi); coordinates read from the mapped site. Mile marker moved from 101.6 to 107: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 101.6 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -25517,34 +25427,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.61840335751317,
-          "lon": -109.11433065386703
-        },
-        {
-          "name": "Flying J",
-          "type": "travel_center",
-          "at_mi": 107.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.6090837,
-          "lon": -109.231101,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 41.609038,
+          "lon": -109.230757
         }
       ],
       "divided": true,
@@ -28387,33 +28271,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rock_springs_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.60866,
-          "lon": -109.23092,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Flying J Travel Center Rock Springs",
           "type": "travel_center",
-          "at_mi": 6.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 1.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rock Springs; matched by name, the only Flying J the map has at Rock Springs within 40 mi of mile 1 of this leg (5.9 mi); coordinates read from the mapped site. Mile marker moved from 6.2 to 1: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 6.2 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -28434,8 +28295,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.61840335751317,
-          "lon": -109.11433065386703
+          "lat": 41.609038,
+          "lon": -109.230757
         },
         {
           "name": "Bitter Creek Rest Area (westbound)",
@@ -28461,10 +28322,10 @@
           ]
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Wamsutter",
+          "type": "travel_center",
           "at_mi": 66.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 310 at Wamsutter; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28507,56 +28368,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J",
-          "type": "travel_center",
-          "at_mi": 104.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.7783845,
-          "lon": -107.3090246,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "TA",
-          "type": "service_plaza",
-          "at_mi": 109.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.7749043,
-          "lon": -107.2239957,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Flying J Travel Center Rawlins",
           "type": "travel_center",
-          "at_mi": 114.3,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 104.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rawlins; matched by name, the only Flying J the map has at Rawlins within 40 mi of mile 104 of this leg (9.4 mi); coordinates read from the mapped site. Mile marker moved from 114.3 to 104: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 114.3 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -28578,8 +28393,31 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.77941486298721,
-          "lon": -107.1250208015573
+          "lat": 41.778423,
+          "lon": -107.309459
+        },
+        {
+          "name": "TA Travel Center Rawlins",
+          "type": "travel_center",
+          "at_mi": 109.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0234 at Rawlins; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.7749043,
+          "lon": -107.2239957,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Fort Steele Rest Area",
@@ -28629,10 +28467,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Laramie",
+          "type": "travel_center",
           "at_mi": 200.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Laramie; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28702,10 +28540,10 @@
           "lon": -104.8558532
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Cheyenne",
           "type": "travel_center",
           "at_mi": 257.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31676,10 +31514,10 @@
       },
       "stops": [
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Rock Springs",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rock_springs_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rock_springs_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Rock Springs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31699,10 +31537,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop James Town",
+          "type": "travel_center",
           "at_mi": 19.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 888 at James Town; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31769,10 +31607,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Fort Bridger",
+          "type": "travel_center",
           "at_mi": 75.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0188 at Fort Bridger; town read from the mapped site's branch name; matched by position, the only TA within 5 mi of mile 75.6 of this leg (1.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31788,17 +31626,17 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 41.32376963028903,
-          "lon": -110.47503888105355,
+          "lat": 41.314561,
+          "lon": -110.508584,
           "directions": [
             "both"
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Evanston",
+          "type": "travel_center",
           "at_mi": 99.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Evanston; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31818,10 +31656,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Evanston",
+          "type": "travel_center",
           "at_mi": 105.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Flying J store at Evanston; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31864,10 +31702,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Salt Lake City",
+          "type": "travel_center",
           "at_mi": 183.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Salt Lake City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
