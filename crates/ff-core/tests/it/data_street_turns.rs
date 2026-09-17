@@ -146,3 +146,23 @@ fn test_facility_street_chains_speak_no_ref_lists() {
         "expected at least one raw ref list in source data"
     );
 }
+
+#[test]
+fn test_no_facility_street_is_spoken_with_a_semicolon_anywhere_on_the_map() {
+    // The check above builds five routes and stops, which is how 79 strings
+    // with a list OUTSIDE the parentheses ("Continue onto I 70 BUS;US 6;US
+    // 50.") got past it on 2026-09-17: the first five happened to be the
+    // parenthetical kind. This one reads every street of every approach.
+    let world = world();
+    let mut lists = 0usize;
+    for (location_id, approach) in world.facility_approaches().unwrap() {
+        for segment in &approach.segments {
+            for raw in [&segment.road, &segment.cue] {
+                lists += usize::from(raw.contains(';'));
+                let spoken = ff_core::data::world_services::spoken_road_text(raw);
+                assert!(!spoken.contains(';'), "{location_id}: {raw} -> {spoken}");
+            }
+        }
+    }
+    assert!(lists > 0, "the source data still carries raw lists to trim");
+}
