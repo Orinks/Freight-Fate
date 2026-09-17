@@ -459,13 +459,50 @@ its status or release decision.
       leg that already lists it under another name (the same rule, mirrored),
       and a copy of a copy no longer stacks the source note: 257 of its 960
       copies carry the note twice, one per hop.
-- [ ] 1,300 of the map's 1,819 service plazas carry a truck-stop chain's
-      name (Love's 445, Pilot 371, Flying J 233, Petro 117, TA 91), so the
-      type is mostly the map import's guess and not a reading. The ones with
-      no named twin still announce as service plazas, with no exit number or
-      ramp control of their own. Retyping them wants the chains' locator
-      records, which would also replace the four-mile calibration with
-      facility coordinates.
+- [x] A chain truck stop the map import typed as a service plaza is read as
+      a travel center, at load (`data::branded_plazas`). A service plaza is a
+      toll road's own plaza on the highway, and the import had no such
+      distinction to read, so the type was its default. The rule is a
+      self-contradiction screen: the type says toll-road plaza and the name
+      begins with a national truck-stop chain. A record whose own name also
+      says service plaza or service area would stay. Measured 2026-09-17,
+      after the twin screen: 1,317 records retyped (Love's 396, Pilot 356,
+      Flying J 212, TA 137, Petro 117, Road Ranger 32, Sapp Brothers 32,
+      ONE9 28, Stamart 3, Onvo 3, Roady's 1) and none kept. All 1,317 are
+      sourced to the amenity query and none to a toll authority's listing;
+      the 99 plazas that name themselves are separate records and are left
+      alone. 29 of the retyped records sit on a leg that charges a toll, and
+      each is a store at an interchange. The value is derived from the name,
+      not read, and the data keeps the recorded type so the rule can be
+      re-judged. "Sapp Brothers" joined the chain list, which only knew
+      "Sapp Bros".
+- [x] What the type changes, checked 2026-09-17: the spoken label and
+      nothing else. Actions, assumed parking, vehicle access and loyalty are
+      the same for both types. The exit number and the ramp's control are
+      found by mile marker for every stop, so the retyped records were never
+      short of them because of their type: 58% have a numbered exit within
+      two miles and 5% a recorded ramp control within 0.15, against 62% and
+      3% for the map's other travel centers. 312 of the ones with no exit
+      number are on legs with no interchange records at all.
+- [ ] Import the chains' store locator records (Pilot Flying J, Love's,
+      TA and Petro, Road Ranger, ONE9, Sapp Bros): store number, town, exit,
+      coordinates, parking count and amenities, with a terms-of-use check per
+      locator and a `source` that says read, store number and date. Match a
+      locator store to an existing record by coordinate (1,163 of the 1,285
+      chain records from the import already carry one) and not by mile
+      marker. That names every store, which retires the four-mile twin
+      calibration and the retype above.
+- [ ] A stop's ramp control is looked up within 0.15 miles of a projected
+      mile marker, which only one stop in twenty meets, so most ramps take
+      the seeded urban or rural control. Snapping each stop to the
+      interchange that serves it needs coordinates on both sides;
+      interchanges carry a mile marker only.
+- [ ] 419 service plazas carry no chain name, and only 99 of them name
+      themselves a service plaza or service area. The other 320 are still
+      the import's default type: independents (Eagles Landing Travel Plaza,
+      Castaic Truck Stop), convenience stores the access screen already
+      hides behind a trailer (QuikTrip 25), and places that are not stops
+      (Horner Industrial Group 15, "Auto Repair", "Bay 2").
 
 ### September 16 radio range and the cruise floor
 

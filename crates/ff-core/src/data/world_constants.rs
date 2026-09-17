@@ -76,6 +76,8 @@ pub const TRUCK_STOP_CHAINS: &[&str] = &[
     "road ranger",
     "one9",
     "sapp bros",
+    // The map spells it out: "Sapp Brothers Travel Center".
+    "sapp brothers",
     "bosselman",
     "iowa 80",
     "little america",

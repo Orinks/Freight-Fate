@@ -464,7 +464,7 @@ fn test_stop_notice_yields_to_recent_route_speech() {
     app.clear_speech();
 
     let merge = "Merge onto I-90 East toward South Bend, then 66 miles on it.";
-    let plaza = "service plaza: Petro Stopping Centers in 1 mile. Press X to signal for the exit.";
+    let plaza = "travel center: Petro Stopping Centers in 1 mile. Press X to signal for the exit.";
     d.handle_trip_event(
         &mut app.ctx,
         &event(TripEventKind::GpsCue, merge, TripEventData::default()),

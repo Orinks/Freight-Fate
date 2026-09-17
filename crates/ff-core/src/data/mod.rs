@@ -3,6 +3,7 @@ pub mod amenities;
 pub mod baked;
 pub mod big_bucks;
 pub mod billboards;
+pub mod branded_plazas;
 pub mod buffs;
 pub mod curves;
 pub mod data_resources;

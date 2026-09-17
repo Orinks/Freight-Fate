@@ -79,7 +79,7 @@ const GENERIC_NAME_WORDS: &[&str] = &[
 ];
 
 /// The chain at the head of a stop's name, if any.
-fn chain_of(name: &str) -> Option<&'static str> {
+pub(crate) fn chain_of(name: &str) -> Option<&'static str> {
     let lower = name.trim().to_lowercase();
     TRUCK_STOP_CHAINS
         .iter()
