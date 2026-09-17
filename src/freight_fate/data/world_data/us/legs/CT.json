@@ -4649,27 +4649,6 @@
           "lon": -72.72124856450802
         },
         {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "service_plaza",
-          "at_mi": 27.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 41.5,
@@ -4718,29 +4697,6 @@
           "lat": 41.23658,
           "lon": -73.02254,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 48.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.23750129190995,
-          "lon": -73.05789062135072,
           "directions": [
             "both"
           ]
@@ -7524,24 +7480,6 @@
           "directions": [
             "both"
           ]
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 10.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -8711,27 +8649,6 @@
         }
       },
       "stops": [
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "service_plaza",
-          "at_mi": 9.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Wallingford Rest Area",
           "type": "public_rest_area",
@@ -10932,29 +10849,6 @@
           "lat": 41.23658,
           "lon": -73.02254,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 10.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.23750129190995,
-          "lon": -73.05789062135072,
           "directions": [
             "both"
           ]

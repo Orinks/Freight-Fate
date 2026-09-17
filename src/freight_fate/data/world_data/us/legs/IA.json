@@ -5518,9 +5518,9 @@
         },
         {
           "name": "QuikTrip",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 117.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34386,9 +34386,9 @@
       "stops": [
         {
           "name": "Coffee Cub Travel Plaza - TA Express",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 34.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.0 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35305,9 +35305,9 @@
       "stops": [
         {
           "name": "Casey's General Store",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the waterloo_ia_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the waterloo_ia_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36515,9 +36515,9 @@
       "stops": [
         {
           "name": "Casey's General Store",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the waterloo_ia_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the waterloo_ia_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

@@ -20,6 +20,8 @@
 
 - **Chain truck stops like Love's, Pilot and Flying J are announced as travel centers.** Many were called service plazas, which are on toll roads.
 
+- **Businesses that are not truck stops are off the map.** Independent truck stops are announced as travel centers, not service plazas.
+
 - **Station names keep their apostrophes.** Fifteen imported stations no longer read as, for example, Birmingham s Beautiful QEZ.
 
 - **Stepping the dial visits each terrestrial station once.** The band no longer re-sorts by signal under a moving truck between presses.

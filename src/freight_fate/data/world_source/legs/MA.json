@@ -14630,32 +14630,6 @@
             "restrooms"
           ],
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "service_plaza",
-          "at_mi": 54.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.40354344504966,
-          "lon": -72.83672711862835,
-          "directions": [
-            "both"
-          ]
         }
       ],
       "divided": true,

@@ -8155,21 +8155,18 @@
         },
         {
           "name": "Stucks Fleet Fueling",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 186.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Type corrected from service_plaza to fuel_station (derived): the name says fuel and the OpenStreetMap feature at the record's coordinate maps nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 40.1130796,

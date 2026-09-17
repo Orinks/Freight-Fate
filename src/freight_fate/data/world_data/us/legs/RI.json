@@ -2343,7 +2343,7 @@
           "name": "Madison, CT - North",
           "type": "service_plaza",
           "at_mi": 84.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists CT Service Plaza- Madison NB with 11 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists CT Service Plaza- Madison NB with 11 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -3509,29 +3509,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pat's Service Center",
-          "type": "service_plaza",
-          "at_mi": 25.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.6968,
-          "lon": -71.52253,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -8892,7 +8869,7 @@
           "name": "Madison, CT - North",
           "type": "service_plaza",
           "at_mi": 86.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8960,29 +8937,6 @@
           "lat": 41.23658,
           "lon": -73.02254,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 111.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.23750129190995,
-          "lon": -73.05789062135072,
           "directions": [
             "both"
           ]

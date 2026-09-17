@@ -7854,9 +7854,9 @@
         },
         {
           "name": "Kenosha Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 142.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13321,9 +13321,9 @@
       "stops": [
         {
           "name": "Depere Superstore",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 6.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13362,9 +13362,9 @@
         },
         {
           "name": "Speedway",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17871,9 +17871,9 @@
       "stops": [
         {
           "name": "Kenosha Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 10.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24056,9 +24056,9 @@
         },
         {
           "name": "Kenosha Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 31.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35644,9 +35644,9 @@
       "stops": [
         {
           "name": "Speedway",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35687,9 +35687,9 @@
         },
         {
           "name": "Depere Superstore",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 43.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38360,29 +38360,6 @@
           "lat": 43.76201,
           "lon": -87.7231,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Bones Welding",
-          "type": "service_plaza",
-          "at_mi": 49.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 44.34049,
-          "lon": -87.84585,
-          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-43 Weigh Station",

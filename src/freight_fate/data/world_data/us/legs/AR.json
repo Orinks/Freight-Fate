@@ -20210,9 +20210,9 @@
         },
         {
           "name": "Littlefield Express",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 124.35,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25851,9 +25851,9 @@
       "stops": [
         {
           "name": "QuikTrip",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 16.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37060,9 +37060,9 @@
         },
         {
           "name": "JJ's Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

@@ -6364,9 +6364,9 @@
         },
         {
           "name": "Arrowhead Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 215.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (derived): the name carries a word the access screen already reads as truck-serving, the OpenStreetMap feature of the same name 0.3 miles away names no toll authority and the leg carries no toll. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6409,9 +6409,9 @@
         },
         {
           "name": "Arrowhead Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 238.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (derived): same name as a record identified at its coordinate; this one has no coordinate OpenStreetMap answers at. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11008,9 +11008,9 @@
         },
         {
           "name": "Mr Gas Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 8.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11136,9 +11136,9 @@
         },
         {
           "name": "Mr. Gas",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 114.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13114,9 +13114,9 @@
         },
         {
           "name": "Mr. Gas",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 165.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13238,9 +13238,9 @@
         },
         {
           "name": "Mr Gas Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 272.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31715,32 +31715,6 @@
           ]
         },
         {
-          "name": "Trailers Plus Salt Lake City",
-          "type": "service_plaza",
-          "at_mi": 195.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 40.36563,
-          "lon": -111.78587,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Flying J Truck Lanes",
           "type": "travel_center",
           "at_mi": 208.0,
@@ -40368,9 +40342,9 @@
       "stops": [
         {
           "name": "Mr. Gas",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40490,9 +40464,9 @@
         },
         {
           "name": "Mr Gas Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 119.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

@@ -2420,29 +2420,6 @@
           "at_mi": 58.0,
           "lat": 35.1912195,
           "lon": -111.6183306
-        },
-        {
-          "name": "Rocky Mountain Truck Centers",
-          "type": "service_plaza",
-          "at_mi": 59.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the flagstaff_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.19176,
-          "lon": -111.61797,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -10630,29 +10607,6 @@
       },
       "stops": [
         {
-          "name": "Rocky Mountain Truck Centers",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the flagstaff_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.19176,
-          "lon": -111.61797,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Little America Travel Center",
           "type": "truck_stop",
           "actions": [
@@ -10784,29 +10738,6 @@
       "highway": "US-89",
       "miles": 135,
       "stops": [
-        {
-          "name": "Rocky Mountain Truck Centers",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the flagstaff_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.19176,
-          "lon": -111.61797,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Express Gap",
           "type": "fuel_station",
@@ -12494,29 +12425,6 @@
       "highway": "I-40",
       "miles": 58,
       "stops": [
-        {
-          "name": "Rocky Mountain Truck Centers",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the flagstaff_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.19176,
-          "lon": -111.61797,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Little America Travel Center",
           "type": "truck_stop",
@@ -17987,9 +17895,9 @@
         },
         {
           "name": "Pride Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 24.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20862,21 +20770,18 @@
         },
         {
           "name": "Mile Marker 27",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 45.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to fuel_station (read): the OpenStreetMap feature at the record's coordinate maps fuel or a convenience store and nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 35.72297,
@@ -34347,29 +34252,6 @@
           "lat": 34.94096,
           "lon": -111.65445,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Rocky Mountain Truck Centers",
-          "type": "service_plaza",
-          "at_mi": 97.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the flagstaff_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.19176,
-          "lon": -111.61797,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,

@@ -174,12 +174,46 @@ def _norm_name(name: str) -> str:
     return " ".join(str(name).lower().replace("’", "'").split())
 
 
+# Mirrors ff-core `data::world_constants::screened_vehicle_access`; change them
+# together. A fuel-type stop is truck-serving on evidence, not on its type:
+# `service_plaza` was the import's word for any OpenStreetMap highway=services
+# feature, and that tag sits on bus bays and industrial suppliers too. Until
+# 2026-09-17 the type alone made a record honest, which copied "Horner
+# Industrial Group" and "Trailers Plus Salt Lake City" onto partner legs.
+_SCREENED_TYPES = {"travel_center", "service_plaza", "fuel_station"}
+_ACCESS_NAME_WORDS = (
+    "truck",
+    "travel",
+    "plaza",
+    "rest area",
+    "service area",
+    "traffic center",
+    "fuel center",
+    "welcome center",
+)
+
+
+def _access_screen_allows(stop: dict[str, Any]) -> bool:
+    """Whether the game's load-time access screen reads this stop as open to a
+    tractor-trailer."""
+    if str(stop.get("type") or "") not in _SCREENED_TYPES:
+        return True
+    if stop.get("parking") == "confirmed" or int(stop.get("parking_spaces") or 0) > 0:
+        return True
+    if any(service in ("scale", "showers") for service in stop.get("services") or []):
+        return True
+    lowered = _norm_name(stop.get("name") or "")
+    return _chain(lowered) is not None or any(word in lowered for word in _ACCESS_NAME_WORDS)
+
+
 def _is_honest(stop: dict[str, Any]) -> bool:
     if str(stop.get("vehicle_access", "tractor_trailer")) != "tractor_trailer":
         return False
     name = str(stop.get("name") or "")
     # never promote convenience plazas
     if _gap_fill_access(name) == "bobtail_only":
+        return False
+    if not _access_screen_allows(stop):
         return False
     stop_type = str(stop.get("type") or "")
     lowered = _norm_name(name)
@@ -200,7 +234,7 @@ def _one_way_only(stop: dict[str, Any]) -> bool:
 TWIN_STOP_MILES = 4.0
 _CHAINS = (
     "love's", "pilot", "flying j", "ta ", "travelcenters", "petro", "road ranger",
-    "one9", "sapp bros", "bosselman", "iowa 80", "little america", "ambest",
+    "one9", "sapp bros", "sapp brothers", "bosselman", "iowa 80", "little america", "ambest",
     "roady's", "stamart", "onvo", "kwik trip", "kwik star",
 )  # fmt: skip
 _GENERIC_NAME_WORDS = frozenset(

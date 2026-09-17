@@ -14761,7 +14761,7 @@
           "name": "Angola Travel Plaza",
           "type": "service_plaza",
           "at_mi": 70.55,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Angola Travel Plaza EB with 40 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Angola Travel Plaza EB with 40 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (read): the OpenStreetMap feature of the same name 0.6 miles away is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -37743,7 +37743,7 @@
           "name": "Chesapeake House Travel Plaza",
           "type": "service_plaza",
           "at_mi": 45.7,
-          "source": "Maryland Transportation Authority travel plaza listing for Chesapeake House on I-95, accessed 2026-06-16: https://mdta.maryland.gov/TravelPlazas",
+          "source": "Maryland Transportation Authority travel plaza listing for Chesapeake House on I-95, accessed 2026-06-16: https://mdta.maryland.gov/TravelPlazas Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "actions": [
             "park",
             "save",

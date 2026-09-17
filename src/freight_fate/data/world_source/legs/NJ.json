@@ -10188,29 +10188,6 @@
       },
       "stops": [
         {
-          "name": "Franklin Submersibles",
-          "type": "service_plaza",
-          "at_mi": 16.45,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 40.11289,
-          "lon": -74.06209,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Thomas Edison Service Area",
           "type": "public_rest_area",
           "at_mi": 49.55,

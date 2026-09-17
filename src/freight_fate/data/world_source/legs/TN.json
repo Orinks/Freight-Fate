@@ -6126,9 +6126,9 @@
         },
         {
           "name": "I-24 Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 68.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.0 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6175,29 +6175,6 @@
           "directions": [
             "both"
           ]
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 133.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -6233,27 +6210,6 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "The Bug Man",
-          "type": "service_plaza",
-          "at_mi": 80.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -10086,29 +10042,6 @@
           "lat": 36.27983,
           "lon": -86.87368,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 47.98,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -11655,29 +11588,6 @@
           "lat": 36.18773,
           "lon": -86.40945,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 79.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -16293,29 +16203,6 @@
           ],
           "lat": 36.08275,
           "lon": -87.09503,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 129.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -22346,21 +22233,18 @@
         },
         {
           "name": "Hamblen Farmers' Co-op",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 55.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to fuel_station (read): the OpenStreetMap feature at the record's coordinate maps fuel or a convenience store and nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 36.23334,
@@ -31393,21 +31277,18 @@
         },
         {
           "name": "Hamblen Farmers' Co-op",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to fuel_station (read): the OpenStreetMap feature at the record's coordinate maps fuel or a convenience store and nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 36.23334,
@@ -39047,29 +38928,6 @@
           "lat": 36.08275,
           "lon": -87.09503,
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 211.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -42327,9 +42185,9 @@
         },
         {
           "name": "Mr. Fuel Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 256.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43658,21 +43516,18 @@
       "stops": [
         {
           "name": "Hamblen Farmers' Co-op",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the morristown_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to fuel_station (read): the OpenStreetMap feature at the record's coordinate maps fuel or a convenience store and nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 36.23334,
@@ -43710,33 +43565,10 @@
       "miles": 101,
       "stops": [
         {
-          "name": "The Bug Man",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the murfreesboro_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.85645,
-          "lon": -86.3928,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "I-24 Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 33.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.0 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51250,29 +51082,6 @@
       },
       "stops": [
         {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 16.8,
@@ -51300,9 +51109,9 @@
         },
         {
           "name": "I-24 Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 61.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.0 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -52319,29 +52128,6 @@
       },
       "stops": [
         {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 1.03,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 18.0,
@@ -52362,29 +52148,6 @@
           ],
           "lat": 35.99789,
           "lon": -86.59495,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "The Bug Man",
-          "type": "service_plaza",
-          "at_mi": 34.97,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the murfreesboro_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.85645,
-          "lon": -86.3928,
           "vehicle_access": "tractor_trailer"
         }
       ],

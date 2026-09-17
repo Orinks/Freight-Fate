@@ -9518,29 +9518,6 @@
           "lat": 39.58332,
           "lon": -85.81775,
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 111.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -14915,7 +14892,7 @@
           "name": "Rolling Prairie Travel Plaza",
           "type": "service_plaza",
           "at_mi": 255.0,
-          "source": "Indiana Toll Road travel plaza listing for Rolling Prairie, accessed 2026-06-16: https://www.indianatollroad.org/travel-plazas/",
+          "source": "Indiana Toll Road travel plaza listing for Rolling Prairie, accessed 2026-06-16: https://www.indianatollroad.org/travel-plazas/ Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "actions": [
             "park",
             "save",
@@ -20876,29 +20853,6 @@
           ],
           "lat": 39.82704,
           "lon": -85.70287,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 174.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -36137,7 +36091,7 @@
           "name": "George N. Craig Travel Plaza EB",
           "type": "service_plaza",
           "at_mi": 138.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

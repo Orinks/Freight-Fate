@@ -1343,9 +1343,9 @@
       "stops": [
         {
           "name": "Eagles Landing Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3990,9 +3990,9 @@
       "stops": [
         {
           "name": "Eagles Landing Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5184,9 +5184,9 @@
       "stops": [
         {
           "name": "Eagles Landing Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13978,29 +13978,6 @@
           "lat": 38.01406,
           "lon": -97.94255,
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Simpson Construction Services",
-          "type": "service_plaza",
-          "at_mi": 39.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.73605,
-          "lon": -97.42567,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -16785,9 +16762,9 @@
         },
         {
           "name": "Eagles Landing Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 82.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dodge_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22377,9 +22354,9 @@
         },
         {
           "name": "Plaza of the Flint Hills",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 32.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23209,21 +23186,18 @@
         },
         {
           "name": "Casey's General Store",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 146.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to fuel_station (derived): the nearest OpenStreetMap feature of the brand, 0.03 miles away, is a fuel station or convenience store; this record's own feature was not found. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 40.7101583,
@@ -23232,21 +23206,18 @@
         },
         {
           "name": "Casey's",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 161.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to fuel_station (read): the OpenStreetMap feature of the same name 5.9 miles away maps fuel or a convenience store and nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 40.812534,
@@ -28434,9 +28405,9 @@
         },
         {
           "name": "QuikTrip",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 167.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; a truck scale (amenity=weighbridge); amenity=fuel with HGV lanes or HGV diesel. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

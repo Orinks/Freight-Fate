@@ -4819,29 +4819,6 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 191.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -29794,29 +29771,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 119.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
       ],

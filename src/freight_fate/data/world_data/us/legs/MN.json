@@ -22283,9 +22283,9 @@
         },
         {
           "name": "Nodine Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 55.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29057,29 +29057,6 @@
             "food"
           ],
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Divine House Inc.",
-          "type": "service_plaza",
-          "at_mi": 61.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the willmar_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.12099,
-          "lon": -95.04823,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -30639,29 +30616,6 @@
       },
       "stops": [
         {
-          "name": "Divine House Inc.",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the willmar_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.12099,
-          "lon": -95.04823,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 47.0,
@@ -31825,29 +31779,6 @@
           "lat": 45.10209,
           "lon": -95.04347,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Quick Pro Lube",
-          "type": "service_plaza",
-          "at_mi": 83.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.22546,
-          "lon": -96.61669,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": false,
@@ -32633,9 +32564,9 @@
       "stops": [
         {
           "name": "Nodine Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 15.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.1 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
