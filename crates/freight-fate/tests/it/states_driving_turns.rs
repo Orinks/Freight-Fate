@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use ff_core::data::curves::{curve_severity, leg_curves, route_curves, RouteCurve};
 use ff_core::data::world::get_world;
-use ff_core::data::world_models::{CorridorDetail, Landmark, Leg, Route};
+use ff_core::data::world_models::{CorridorDetail, Landmark, Leg, Route, RouteCheckpoint};
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::settings::Settings;
@@ -21,6 +21,7 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
+use freight_fate::states::driving_location::NEAREST_TOWN_MI;
 use freight_fate::states::driving_turns::{
     RAMP_GUIDE_DEMAND, TURN_COMMIT_TAIL_MI, TURN_CORNER_MAX_MPH, TURN_MISS_LOOP_MIN,
     TURN_WINDOW_MAX_MI, TURN_WINDOW_MIN_MI,
@@ -1396,6 +1397,38 @@ fn a_village(name: &str, at_mi: f64, off_mi: f64) -> Landmark {
     }
 }
 
+fn a_route_town(name: &str, at_mi: f64) -> RouteCheckpoint {
+    RouteCheckpoint {
+        name: name.to_string(),
+        at_mi,
+        checkpoint_type: "place".to_string(),
+        state: "New York".to_string(),
+        highway: "I-90".to_string(),
+        ..Default::default()
+    }
+}
+
+/// Replace the curated route towns on the leg the truck is currently
+/// driving (the villages are cleared with them).
+fn set_leg_checkpoints(d: &mut DrivingState, checkpoints: Vec<RouteCheckpoint>) {
+    let (index, _) = d.trip.leg_at_mile(d.trip.position_mi);
+    let old = d.trip.route.legs[index].clone();
+    let detail = CorridorDetail {
+        checkpoints,
+        ..Default::default()
+    };
+    let leg = Leg::new(
+        &old.a,
+        &old.b,
+        old.miles,
+        &old.highway,
+        &old.terrain,
+        Vec::new(),
+    )
+    .with_detail(detail);
+    d.trip.route.legs[index] = Arc::new(leg);
+}
+
 /// `_set_leg_landmarks`: replace the landmarks on the leg the truck is
 /// currently driving.
 fn set_leg_landmarks(d: &mut DrivingState, landmarks: Vec<Landmark>) {
@@ -1483,6 +1516,9 @@ fn test_alt_with_a_number_does_not_touch_the_engine_brake() {
 fn test_town_key_names_the_town_the_truck_is_in() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
+    // Mid-leg, clear of both cities: the leg's own cities are towns too.
+    let (index, start) = d.trip.leg_at_mile(d.trip.position_mi);
+    d.trip.position_mi = start + d.trip.route.legs[index].miles / 2.0;
     app.clear_speech();
     let (native, _forward) = native_offset(&d);
     // A village on the road, right where the truck is: that is the town
@@ -1496,6 +1532,9 @@ fn test_town_key_names_the_town_the_truck_is_in() {
 fn test_town_key_places_a_town_off_the_road() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
+    // Mid-leg, clear of both cities: the leg's own cities are towns too.
+    let (index, start) = d.trip.leg_at_mile(d.trip.position_mi);
+    d.trip.position_mi = start + d.trip.route.legs[index].miles / 2.0;
     app.clear_speech();
     let (native, forward) = native_offset(&d);
     let ahead = if forward { native + 4.0 } else { native - 4.0 };
@@ -1513,10 +1552,65 @@ fn test_town_key_says_so_when_there_is_no_town() {
     let mut d = a_drive(&mut app);
     app.clear_speech();
     set_leg_landmarks(&mut d, Vec::new());
+    // Well clear of both ends of the leg: the leg's own cities are towns too.
+    let (index, start) = d.trip.leg_at_mile(d.trip.position_mi);
+    let miles = d.trip.route.legs[index].miles;
+    d.trip.position_mi = start + miles / 2.0;
+    assert!(
+        miles / 2.0 > NEAREST_TOWN_MI,
+        "the Buffalo to Rochester leg is {miles} miles"
+    );
     d.speak_current_town(&mut app.ctx);
     assert_eq!(
         app.main_lines().last().expect("a town line"),
         "No town near here."
+    );
+}
+
+#[test]
+fn test_town_key_names_the_route_town_just_passed() {
+    // "Passing Batavia, New York on I-90" is a curated route town, not a
+    // baked village, and Alt+3 right after it used to say there was no
+    // town (owner, 2026-09-16).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    // Mid-leg, clear of both cities: the leg's own cities are towns too.
+    let (index, start) = d.trip.leg_at_mile(d.trip.position_mi);
+    d.trip.position_mi = start + d.trip.route.legs[index].miles / 2.0;
+    app.clear_speech();
+    let (native, forward) = native_offset(&d);
+    let behind = if forward { native - 0.5 } else { native + 0.5 };
+    set_leg_checkpoints(&mut d, vec![a_route_town("Batavia", behind)]);
+    d.speak_current_town(&mut app.ctx);
+    assert_eq!(app.main_lines().last().expect("a town line"), "In Batavia.");
+
+    // Once it is a few miles back it is named as behind, not forgotten.
+    app.clear_speech();
+    let back = if forward { native - 4.0 } else { native + 4.0 };
+    set_leg_checkpoints(&mut d, vec![a_route_town("Batavia", back)]);
+    d.speak_current_town(&mut app.ctx);
+    let said = app.main_lines().last().expect("a town line").clone();
+    assert!(said.contains("Batavia") && said.contains("back"), "{said}");
+}
+
+#[test]
+fn test_town_key_names_the_city_the_leg_starts_in() {
+    // At the start of the leg the truck is in the leg's own city, whether
+    // or not the corridor bakes a village there.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    set_leg_landmarks(&mut d, Vec::new());
+    let (index, start) = d.trip.leg_at_mile(d.trip.position_mi);
+    d.trip.position_mi = start + 0.2;
+    let city = app
+        .ctx
+        .world
+        .spoken_city(&d.trip.route.cities[index], Some(false));
+    d.speak_current_town(&mut app.ctx);
+    assert_eq!(
+        app.main_lines().last().expect("a town line"),
+        &format!("In {city}.")
     );
 }
 

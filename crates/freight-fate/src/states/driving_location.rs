@@ -3,7 +3,7 @@
 
 use std::sync::Arc;
 
-use ff_core::data::world_models::{Landmark, Leg};
+use ff_core::data::world_models::Leg;
 use ff_core::sim::trip::spoken_short_miles;
 use ff_core::sim::trip_models::leg_state_at;
 use ff_core::sim::trip_route_helpers::leg_heading;
@@ -61,6 +61,17 @@ pub struct HighwayFrame {
     pub from_city: String,
     pub toward_city: String,
     pub native_offset: f64,
+}
+
+/// A town near the truck: straight-line miles to it, its position along the
+/// leg relative to the truck (native frame), how far off the road it sits,
+/// and its spoken name.
+#[derive(Debug, Clone, PartialEq)]
+pub struct NearbyTown {
+    pub away: f64,
+    pub along: f64,
+    pub off_mi: f64,
+    pub name: String,
 }
 
 impl DrivingState {
@@ -222,6 +233,54 @@ impl DrivingState {
         })
     }
 
+    /// The town nearest the truck on this leg, within `NEAREST_TOWN_MI`.
+    ///
+    /// Three kinds of town are on a leg, and the driver has heard all three
+    /// announced: the baked villages with their distance off the corridor,
+    /// the curated route towns the corridor passes through ("Passing Marion
+    /// on I-57"), and the leg's own two cities ("Passing Cleveland, Ohio").
+    /// Alt+3 used to read only the villages, so right after "Passing
+    /// Cleveland" it named some other village or said there was no town
+    /// (owner, 2026-09-16). Ranked by how far the town actually is, not by
+    /// how far along the road it sits: a place 200 feet ahead and five
+    /// miles off is further away than one two miles up the road and right
+    /// on it, and "nearest" has to mean nearest.
+    pub fn nearest_town(&self, ctx: &GameContext, frame: &HighwayFrame) -> Option<NearbyTown> {
+        let mut nearest: Option<NearbyTown> = None;
+        let mut consider = |name: String, at_mi: f64, off_mi: f64| {
+            if name.is_empty() {
+                return;
+            }
+            let along = at_mi - frame.native_offset;
+            let away = (along.powi(2) + off_mi.powi(2)).sqrt();
+            if nearest.as_ref().is_none_or(|found| away < found.away) {
+                nearest = Some(NearbyTown {
+                    away,
+                    along,
+                    off_mi,
+                    name,
+                });
+            }
+        };
+        for landmark in frame.leg.landmarks() {
+            if landmark.category == "village" {
+                consider(landmark.name.clone(), landmark.at_mi, landmark.off_mi);
+            }
+        }
+        for checkpoint in frame.leg.checkpoints() {
+            if checkpoint.checkpoint_type == "place" {
+                consider(checkpoint.name.clone(), checkpoint.at_mi, 0.0);
+            }
+        }
+        consider(ctx.world.spoken_city(&frame.leg.a, Some(false)), 0.0, 0.0);
+        consider(
+            ctx.world.spoken_city(&frame.leg.b, Some(false)),
+            frame.leg.miles,
+            0.0,
+        );
+        nearest.filter(|town| town.away <= NEAREST_TOWN_MI)
+    }
+
     /// `_speak_current_state()`: Alt+1, the state the truck is in, and nothing
     /// else.
     /// Where the truck is, for the record: the road, the nearest town when
@@ -251,21 +310,8 @@ impl DrivingState {
         let mut place = format!("{} {heading}", frame.leg.highway)
             .trim()
             .to_string();
-        let mut nearest: Option<(f64, String)> = None;
-        for landmark in frame.leg.landmarks() {
-            if landmark.category != "village" {
-                continue;
-            }
-            let along = landmark.at_mi - frame.native_offset;
-            let away = (along.powi(2) + landmark.off_mi.powi(2)).sqrt();
-            if nearest.as_ref().is_none_or(|found| away < found.0) {
-                nearest = Some((away, landmark.name.clone()));
-            }
-        }
-        if let Some((away, town)) = nearest {
-            if away <= NEAREST_TOWN_MI {
-                place = format!("{place} near {town}");
-            }
+        if let Some(town) = self.nearest_town(ctx, &frame) {
+            place = format!("{place} near {}", town.name);
         }
         let mut state = leg_state_at(&frame.leg, frame.native_offset);
         if state.is_empty() {
@@ -354,30 +400,11 @@ impl DrivingState {
             return;
         };
         let forward = frame.from_city == frame.leg.a;
-        // Ranked by how far the town actually is, not by how far along the
-        // road it sits: a place 200 feet ahead and five miles off is further
-        // away than one two miles up the road and right on it, and "nearest"
-        // has to mean nearest.
-        let mut nearest: Option<(f64, f64, Landmark)> = None;
-        for landmark in frame.leg.landmarks() {
-            if landmark.category != "village" {
-                continue;
-            }
-            let along = landmark.at_mi - frame.native_offset;
-            let away = (along.powi(2) + landmark.off_mi.powi(2)).sqrt();
-            if nearest.as_ref().is_none_or(|found| away < found.0) {
-                nearest = Some((away, along, landmark.clone()));
-            }
-        }
-        let Some((away, along, landmark)) = nearest else {
+        let Some(town) = self.nearest_town(ctx, &frame) else {
             ctx.say("No town near here.");
             return;
         };
-        if away > NEAREST_TOWN_MI {
-            ctx.say("No town near here.");
-            return;
-        }
-        let off_road = landmark.off_mi;
+        let (along, off_road, landmark) = (town.along, town.off_mi, town);
         if along.abs() <= IN_TOWN_ALONG_MI && off_road <= IN_TOWN_OFF_MI {
             ctx.say(&format!("In {}.", landmark.name));
             return;
