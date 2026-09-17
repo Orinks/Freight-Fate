@@ -557,7 +557,9 @@ its status or release decision.
       line, and 5 to 40 miles for about 110 curated records on long legs.
       Exit numbers and ramp controls are found by mile marker, so re-project
       each from the store coordinates it now carries. Exits and parking
-      counts still need the chains' written consent to use their locators.
+      counts would need the chains' written consent to use their locators.
+      Owner ruling 2026-09-17: not asking; the OpenStreetMap store table
+      stands.
 - [x] A stop carries the interchange that serves it, decided once when the
       data is built (`tools/snap_stops_to_interchanges.py`), and the exit
       number, the ramp's control and the ramp's advisory speed are looked up
@@ -635,11 +637,11 @@ its status or release decision.
       asks a fuel-type stop for the access screen's evidence before copying
       it; the type alone had carried 4 of the removed records onto partner
       legs.
-- [ ] 21 convenience-brand records (QuikTrip 16, Casey's, Speedway, OnCue)
+- [x] 21 convenience-brand records (QuikTrip 16, Casey's, Speedway, OnCue)
       have HGV fuel lanes and a truck scale mapped in OpenStreetMap, and the
       access screen still reads them bobtail-only because their services
-      list no scale. Adding the scale as a read service would open them to
-      a trailer, with parking that is only assumed: the owner's call.
+      list no scale. Owner ruling 2026-09-17: left as they are. Their truck
+      parking is only assumed, so they stay closed to a trailer.
 
 ### September 16 radio range and the cruise floor
 
