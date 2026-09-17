@@ -10,9 +10,9 @@ use indexmap::IndexMap;
 
 use super::playlists::{load_personal_playlists, PERSONAL_PLAYLIST_SOURCE_TYPE};
 use super::{
-    dial_category_name, dial_group, estimate_signal, identity_siblings, station_identity,
-    RadioAction, RadioPlaybackBackend, RadioReception, RadioStation, RADIO_SEARCH_LIMIT,
-    SAFE_ROUTE_PLAYLIST, SIGNAL_FULL_VOLUME,
+    dial_category_name, dial_group, estimate_signal, identity_siblings, station_distance_miles,
+    station_identity, RadioAction, RadioPlaybackBackend, RadioReception, RadioStation,
+    RADIO_SEARCH_LIMIT, SAFE_ROUTE_PLAYLIST, SIGNAL_FULL_VOLUME,
 };
 use crate::pyfmt::{fmt_f, round_py_int};
 
@@ -71,7 +71,19 @@ pub struct RadioState {
     /// construction -- so tuning and reception lookups stay O(sites),
     /// not O(catalog), on every call.
     identity_siblings: HashMap<String, Vec<RadioStation>>,
+    /// The dial order the current sweep is stepping through, and where the
+    /// truck was when it was built. The terrestrial band runs strongest
+    /// first, and a moving truck's signals drift between presses, so an
+    /// order rebuilt on every step revisited one station and skipped
+    /// another (WRND twice in nine presses, 2026-09-16). A sweep keeps its
+    /// order until the truck has moved `DIAL_SWEEP_MI`, the radio is
+    /// switched, or a category jump starts a new one.
+    sweep_order: Vec<String>,
+    sweep_anchor: Option<(f64, f64)>,
 }
+
+/// How far the truck moves before a dial sweep's order is rebuilt.
+pub const DIAL_SWEEP_MI: f64 = 2.0;
 
 impl RadioState {
     /// A radio over `catalog` with the Python defaults: on, tuned to the
@@ -91,6 +103,8 @@ impl RadioState {
             unplayable_ids: HashSet::new(),
             connect_failures: HashMap::new(),
             identity_siblings,
+            sweep_order: Vec::new(),
+            sweep_anchor: None,
         }
     }
 
@@ -555,6 +569,7 @@ impl RadioState {
 
     pub fn toggle(&mut self, backend: Option<&mut dyn RadioPlaybackBackend>) -> RadioAction {
         self.enabled = !self.enabled;
+        self.end_sweep();
         if !self.enabled {
             Self::stop(backend);
             let station = self.current_station();
@@ -615,7 +630,7 @@ impl RadioState {
         if !self.enabled {
             return self.dial_is_off();
         }
-        let receptions = self.receivable_stations();
+        let receptions = self.sweep_receptions();
         let current = self.current_station();
         let index = receptions
             .iter()
@@ -626,6 +641,48 @@ impl RadioState {
         self.station_id = reception.station.id.clone();
         let prefix = format!("Tuned to {}.", reception.station.display_name());
         self.play(backend, &prefix)
+    }
+
+    /// The receivable stations in this sweep's order.
+    ///
+    /// Built strongest-first when a sweep starts and held while the truck
+    /// stays within `DIAL_SWEEP_MI` of where it started; a station that has
+    /// since come into range joins at the end of its category, one that has
+    /// dropped out is skipped. So every press visits the next station, and
+    /// no station twice, however the signals drift under a moving truck.
+    pub fn sweep_receptions(&mut self) -> Vec<RadioReception> {
+        let receptions = self.receivable_stations();
+        let moved = match (self.sweep_anchor, self.position) {
+            (Some((alat, alon)), Some((plat, plon))) => {
+                let anchor = RadioStation {
+                    lat: Some(alat),
+                    lon: Some(alon),
+                    ..RadioStation::default()
+                };
+                station_distance_miles(&anchor, Some((plat, plon))).unwrap_or(0.0)
+            }
+            (None, _) => f64::INFINITY,
+            (Some(_), None) => 0.0,
+        };
+        if self.sweep_order.is_empty() || moved >= DIAL_SWEEP_MI {
+            self.sweep_order = receptions.iter().map(|r| r.station.id.clone()).collect();
+            self.sweep_anchor = self.position;
+            return receptions;
+        }
+        let rank = |id: &str| self.sweep_order.iter().position(|known| known == id);
+        let mut ordered: Vec<(usize, usize, RadioReception)> = receptions
+            .into_iter()
+            .enumerate()
+            .map(|(fresh, r)| (rank(&r.station.id).unwrap_or(usize::MAX), fresh, r))
+            .collect();
+        ordered.sort_by_key(|(known, fresh, _)| (*known, *fresh));
+        ordered.into_iter().map(|(_, _, r)| r).collect()
+    }
+
+    /// Forget the current sweep: the next dial press builds a fresh order.
+    fn end_sweep(&mut self) {
+        self.sweep_order.clear();
+        self.sweep_anchor = None;
     }
 
     /// The reply to any dial key while the radio is switched off.
@@ -659,6 +716,7 @@ impl RadioState {
         if !self.enabled {
             return self.dial_is_off();
         }
+        self.end_sweep();
         let receptions = self.receivable_stations();
         let mut groups: Vec<i32> = Vec::new();
         for reception in &receptions {

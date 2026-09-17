@@ -12,6 +12,10 @@
 
 ### Fixed
 
+- **Station names keep their apostrophes.** Fifteen imported stations no longer read as, for example, Birmingham s Beautiful QEZ.
+
+- **Stepping the dial visits each terrestrial station once.** The band no longer re-sorts by signal under a moving truck between presses.
+
 - **Real roadside attractions on billboards stay near the real thing.** The twine ball, rocking chair, ketchup bottle and petrified wood signs no longer appear just anywhere.
 
 - **Alt 3 names the town you just heard the game pass.** Route towns and the leg's own cities count now, not only villages off the corridor.

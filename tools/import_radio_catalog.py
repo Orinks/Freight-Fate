@@ -84,6 +84,11 @@ def clean_web_name(raw: str) -> str:
     name = _NAME_SPLIT.split(raw.strip())[0]
     name = _NOISE_WORDS.sub(" ", name)
     name = re.sub(r"[(\[][^A-Za-z0-9]*[)\]]", " ", name)
+    # The source stripped every apostrophe, so "Birmingham's Beautiful QEZ"
+    # arrived as "Birmingham s Beautiful QEZ" and was read aloud that way:
+    # a lone lowercase s after a word, with more name to follow, is the
+    # possessive it used to be.
+    name = re.sub(r"\b([A-Za-z]{2,}) s\b(?=\s)", r"\1's", name)
     name = re.sub(r"\s+", " ", name).strip(" -|/,:;")
     if len(name) > _MAX_NAME_CHARS:
         head = name[:_MAX_NAME_CHARS]

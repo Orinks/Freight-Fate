@@ -840,6 +840,54 @@ fn terrestrial_at(station_id: &str, call_sign: &str, degrees_east: f64) -> Radio
 }
 
 #[test]
+fn test_no_imported_station_name_has_a_stripped_apostrophe() {
+    // "Birmingham s Beautiful QEZ" is what a stripped apostrophe sounds like.
+    let catalog = default_radio_catalog();
+    let stranded: Vec<&str> = catalog
+        .iter()
+        .filter(|station| {
+            let words: Vec<&str> = station.name.split_whitespace().collect();
+            words
+                .windows(3)
+                .any(|w| w[1] == "s" && w[0].chars().all(|c| c.is_ascii_alphabetic()))
+        })
+        .map(|station| station.name.as_str())
+        .collect();
+    assert!(stranded.is_empty(), "{stranded:?}");
+}
+
+#[test]
+fn test_a_dial_sweep_keeps_its_order_while_the_truck_moves() {
+    // Two stations whose signals cross as the truck moves: stepping the
+    // dial used to re-sort on every press, so the band could hand back the
+    // station just left and skip the next one.
+    let east = terrestrial_at("fix-east", "KEEE", 0.30);
+    let west = terrestrial_at("fix-west", "KWWW", -0.30);
+    let mut radio =
+        RadioState::new(vec![east, west]).with_position(Some((DALLAS.0, DALLAS.1 - 0.02)));
+    radio.station_id = "fix-west".to_string();
+    // Nearer the western tower, west leads the band; the first press steps
+    // to east.
+    let first = radio.tune(1, None);
+    assert_eq!(first.station.id, "fix-east");
+    // Drift east a few hundred feet, enough to flip the raw signal order
+    // but not to end the sweep: the next press must go on to west, not
+    // re-sort and land on east again.
+    radio.update_position(Some((DALLAS.0, DALLAS.1 + 0.02)), None);
+    let second = radio.tune(1, None);
+    assert_eq!(second.station.id, "fix-west");
+    // A real move ends the sweep and the band is rebuilt strongest-first,
+    // which now puts east ahead.
+    radio.update_position(Some((DALLAS.0, DALLAS.1 + 0.2)), None);
+    let ids: Vec<String> = radio
+        .sweep_receptions()
+        .into_iter()
+        .map(|r| r.station.id)
+        .collect();
+    assert_eq!(ids[0], "fix-east");
+}
+
+#[test]
 fn test_terrestrial_category_sorts_strongest_signal_first() {
     // Call signs deliberately disagree with signal order: the old call-sign
     // sort opened the band on the fringe station at the start of every run.
