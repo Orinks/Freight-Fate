@@ -14,6 +14,8 @@ use super::*;
 use crate::models::business::{business_status_summary, LEASED_OWNER_OPERATOR};
 use crate::models::career_ladder::STARTER_CARRIER_NAME;
 use crate::models::loyalty::LoyaltyAccount;
+use crate::models::solvency::REPOSSESSION_EQUITY_SHARE;
+use crate::models::trucks::TRUCK_CATALOG;
 use crate::settings::paths::ENV_LOCK;
 use crate::sim::vehicle::TruckState;
 
@@ -414,24 +416,89 @@ fn test_skip_signing_flag_is_ignored_in_frozen_builds() {
 }
 
 #[test]
-fn test_legacy_unsigned_json_save_keeps_amnesty_and_converts() {
+fn test_unsigned_json_save_is_marked_modified_and_converts() {
+    // This shape used to keep an amnesty as the look of a save from before
+    // signing. Those saves are refused by the 1.9 gate now, so the only
+    // unsigned JSON left is one written by hand -- which is how a career got
+    // edited without the game noticing.
     with_data_dir(|_| {
         let p = Profile::named("Unsigned");
         let mut data = p.to_dict();
         data.remove(SIGNATURE_FIELD);
+        data.insert("money".to_string(), json!(250_000.0));
         let legacy = p.path().with_extension("json");
         write_text(&legacy, &data);
 
         let loaded = load(&legacy);
 
         assert_eq!(loaded.name, "Unsigned");
-        assert!(!loaded.integrity_modified);
+        assert!(loaded.integrity_modified);
+        assert!(loaded.integrity_notice_pending);
         // Converted in place: packed and signed, old file kept as a rollback copy.
         let migrated = read_save(&p.path());
         assert!(migrated.contains_key(SIGNATURE_FIELD));
         assert!(!legacy.exists());
         assert!(legacy.with_extension("json.bak").exists());
     });
+}
+
+#[test]
+fn test_balance_no_career_could_hold_is_marked_even_when_the_game_signed_it() {
+    // A balance rewritten in memory is saved by the game under a valid
+    // signature. One delivery and a typed-in fortune, as seen on staging.
+    with_data_dir(|_| {
+        let mut p = Profile::named("Memory Edit");
+        p.career.total_earnings = 338.36;
+        p.money = 999_999_999_999_717_400.0;
+        let path = p.save().unwrap();
+
+        let loaded = load(&path);
+
+        assert!(loaded.integrity_modified);
+        assert!(loaded.integrity_notice_pending);
+        // The career still loads and keeps its numbers; it is marked, not mended.
+        assert_eq!(loaded.money, p.money);
+    });
+}
+
+#[test]
+fn test_a_balance_the_career_earned_is_never_marked() {
+    with_data_dir(|_| {
+        // A long career that kept nearly all of it.
+        let mut rich = Profile::named("Earned It");
+        rich.career.total_earnings = 4_000_000.0;
+        rich.money = 3_900_000.0;
+        let path = rich.save().unwrap();
+        assert!(!load(&path).integrity_modified);
+
+        // Nothing delivered yet, and every catalog tractor and trailer handed
+        // back to the carrier at once on top of the richest start: the most a
+        // career with no earnings can hold.
+        let mut returned = Profile::named("Handed Back");
+        returned.money = plausibility::money_ceiling(0.0) - 2.0;
+        let path = returned.save().unwrap();
+        assert!(!load(&path).integrity_modified);
+
+        // A debt career carries negative money by design.
+        let mut broke = Profile::named("In The Red");
+        broke.money = -40_000.0;
+        let path = broke.save().unwrap();
+        assert!(!load(&path).integrity_modified);
+    });
+}
+
+#[test]
+fn test_the_ceiling_is_built_from_the_catalog_not_a_guess() {
+    let hand_back = plausibility::equipment_hand_back_ceiling();
+    // Every priced tractor and trailer is in it...
+    let dearest = TRUCK_CATALOG.values().map(|m| m.price).fold(0.0, f64::max);
+    assert!(hand_back >= dearest * REPOSSESSION_EQUITY_SHARE);
+    // ...and earnings move it dollar for dollar.
+    let base = plausibility::money_ceiling(0.0);
+    assert_eq!(plausibility::money_ceiling(50_000.0), base + 50_000.0);
+    assert!(plausibility::money_is_impossible(base + 1.0, 0.0));
+    assert!(!plausibility::money_is_impossible(base, 0.0));
+    assert!(plausibility::money_is_impossible(f64::NAN, 0.0));
 }
 
 #[test]

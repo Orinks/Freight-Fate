@@ -169,7 +169,20 @@ local signature no longer quarantines: the save loads, the player hears a
 one-time notice, and the profile carries the sticky `integrity_modified`
 mark from then on (mark, don't block — local play is the player's own;
 the mark is what shared features read). Quarantine (`.invalid` rename) is
-reserved for files too damaged to decode at all. Plain unsigned `.json`
-saves keep amnesty as the honest pre-signing legacy shape and convert to
-signed containers on load; an unsigned *container* is always a tamper,
-because the game never writes one.
+reserved for files too damaged to decode at all. An unsigned save is
+always a tamper, packed or plain: every build of the 1.9 line signs what
+it writes, and saves from before the line are refused by the load gate, so
+nothing honest arrives unsigned. (Plain unsigned `.json` kept an amnesty
+as the pre-signing legacy shape until 2026-09-17; by then it was only the
+easy way to edit a career, because the game signed the file on load.)
+Signed plain `.json` still converts to a signed container on load.
+
+The load gate makes one arithmetic check of its own, in
+`models/profile/plausibility.rs`: a balance above the richest start plus
+lifetime earnings plus the pay advance limit plus the equity share of the
+whole equipment catalog marks the save, valid signature or not. That is
+what a balance rewritten in memory looks like, since the game signs it
+itself. The ceiling is derived from the game's own credit sites and is
+deliberately looser than the server's to-the-dollar money rule: the server
+refuses an upload and marks nothing, while a mark made here is sticky and
+spoken, so it must never land on an honest career.

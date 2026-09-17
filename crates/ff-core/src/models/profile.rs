@@ -47,6 +47,7 @@ use crate::sim::vehicle::{TruckSpecs, TruckState};
 
 pub mod condition;
 pub mod paths;
+pub mod plausibility;
 pub mod serialize;
 pub mod signing;
 mod traits;
@@ -112,9 +113,10 @@ pub const LEGACY_CONDITION_FIELDS: &[&str] = &[
 
 // Packed save container: this magic header, then zlib-deflated profile JSON.
 // The container stops accidental and casual hand-editing; the HMAC signature
-// inside the JSON remains the actual tamper check. Legacy plain-JSON saves
+// inside the JSON remains the actual tamper check. Signed plain-JSON saves
 // still load and are converted on their next save (the old file is kept as
-// `.json.bak` so an older game version can still be rolled back to).
+// `.json.bak` so an older game version can still be rolled back to); an
+// unsigned one loads marked as modified.
 pub const SAVE_MAGIC: &[u8] = b"FFSAVE1\x00";
 pub const SAVE_SUFFIX: &str = ".ffsave";
 pub const LEGACY_SAVE_SUFFIX: &str = ".json";
@@ -957,15 +959,30 @@ impl Profile {
             } else {
                 tampered = true;
             }
-        } else if !signed && packed && !skip {
-            // The game only ever writes packed saves signed; a packed save with
-            // no signature was unpacked, edited, and repacked. Plain unsigned
-            // JSON, by contrast, is how every save from before signing looks,
-            // so that legacy shape keeps its amnesty (it is re-signed and
-            // packed by the resave below).
+        } else if !signed && !skip {
+            // Every build of the 1.9 line signs what it writes, and a save
+            // from before the line was refused above, so a save that reaches
+            // here unsigned had its signature taken off by hand -- packed or
+            // plain. Plain unsigned JSON used to keep an amnesty as the shape
+            // of saves from before signing; none of those load any more, and
+            // the amnesty had become the easy way to edit a career: write the
+            // numbers as JSON and the game signed them for you.
             tampered = true;
         }
         let mut profile = Profile::from_dict(&data);
+        if !skip && plausibility::money_is_impossible(profile.money, profile.career.total_earnings)
+        {
+            // Signed or not: a balance rewritten while the game ran is signed
+            // by the game itself, so the file looks honest and the number
+            // does not.
+            log::warn!(
+                "{}: balance {} is more than {} of lifetime earnings could hold",
+                path.display(),
+                profile.money,
+                profile.career.total_earnings
+            );
+            tampered = true;
+        }
         if tampered && !profile.integrity_modified {
             profile.integrity_modified = true;
             profile.integrity_notice_pending = true;

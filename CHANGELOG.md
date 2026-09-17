@@ -4,6 +4,8 @@
 
 ### Changed
 
+- **A career edited outside the game is always marked as modified now.** The notice plays once when you open it.
+
 - **Hazmat, doubles, TWIC and LCV holders see their freight on the board.** Bulk fuel and placarded loads move between many more shippers and receivers.
 
 - **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.

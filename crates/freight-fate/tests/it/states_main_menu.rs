@@ -394,6 +394,45 @@ fn test_modified_notice_shows_once_then_enters_world() {
     assert!(is::<CityMenuState>(&app));
 }
 
+/// The two edits the signature alone never caught: a balance rewritten while
+/// the game ran (the game signs it), and a career written out as plain
+/// unsigned JSON (the game used to sign that for you).
+#[test]
+fn test_a_typed_in_fortune_is_heard_about_however_it_got_into_the_save() {
+    let mut app = TestApp::new();
+
+    let mut memory_edit = Profile::named("Memory Edit");
+    memory_edit.career.total_earnings = 338.36;
+    memory_edit.money = 999_999_999.0;
+    let signed_by_the_game = memory_edit.save().unwrap();
+
+    let by_hand = Profile::named("By Hand");
+    let mut data = by_hand.to_dict();
+    data.remove("_signature");
+    data.insert("money".into(), serde_json::json!(250_000.0));
+    let plain_json = by_hand.path().with_extension("json");
+    std::fs::write(
+        &plain_json,
+        serde_json::to_string(&serde_json::Value::Object(data)).unwrap(),
+    )
+    .unwrap();
+
+    for path in [signed_by_the_game, plain_json] {
+        app.ctx.profile = Some(Profile::load(&path).unwrap());
+        assert!(app.ctx.profile.as_ref().unwrap().integrity_modified);
+        enter_world(&mut app.ctx, false);
+        app.ctx.run_deferred();
+        assert!(is::<SaveModifiedNoticeState>(&app), "{}", path.display());
+        assert!(app
+            .main_lines()
+            .iter()
+            .any(|text| text.contains("marked as modified")));
+        // The career is marked, never locked: Enter goes on to the city.
+        key(&mut app, Key::Return);
+        assert!(is::<CityMenuState>(&app));
+    }
+}
+
 // -- manage careers -----------------------------------------------------------------
 
 #[test]
