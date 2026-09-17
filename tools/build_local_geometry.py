@@ -561,6 +561,7 @@ def collapse_segments(
             lead_link_miles = 0.0
         if mph is not None:
             segments[-1]["speed_miles"][mph] += miles
+    segments = _merge_same_street(segments, coords)
     out: list[dict[str, Any]] = []
     for i, segment in enumerate(segments):
         miles = round(max(segment["miles"], 0.05), 2)
@@ -594,6 +595,85 @@ def collapse_segments(
         out = out[-MAX_SPOKEN_SEGMENTS:]
         out[0]["cue"] = f"Start on {out[0]['road']}."
     return out
+
+
+def _street_name(road: str) -> str:
+    """The label without its trailing route ref: "Gateway Drive (US 2)" and
+    "Gateway Drive" are one street whose ways are tagged unevenly."""
+    if road.endswith(")") and " (" in road:
+        return road[: road.rindex(" (")]
+    return road
+
+
+def _merge_same_street(
+    segments: list[dict[str, Any]],
+    coords: list[tuple[float, float]] | None,
+) -> list[dict[str, Any]]:
+    """Join runs that are one street heard as several.
+
+    Measured on the checked-in facility chains (2026-09-17): 271 of 1,713
+    spoke one street two or more times in a row because OSM carries the route
+    ref on some of its ways and not others -- one chain spent five of its
+    eight streets on "Saint John Avenue" under five refs. Two rules, neither
+    with a threshold:
+
+    * neighbouring runs with the same street name are one run, labelled as
+      the longer of the two;
+    * a run with no name of its own between two runs of the same street, with
+      no turn at either end, is a gap in that street's name tag, not a side
+      street. With a turn at either end it is a real detour and is kept.
+      Without ``coords`` there is no way to tell, so nothing is folded.
+    """
+
+    def join(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
+        keep = first if first["miles"] >= second["miles"] else second
+        speed_miles: defaultdict[float, float] = defaultdict(float)
+        for part in (first, second):
+            for mph, miles in part["speed_miles"].items():
+                speed_miles[mph] += miles
+        return {
+            "road": keep["road"],
+            "miles": first["miles"] + second["miles"],
+            "start_edge": first["start_edge"],
+            "end_edge": second["end_edge"],
+            "speed_miles": speed_miles,
+        }
+
+    def same_street(a: dict[str, Any], b: dict[str, Any]) -> bool:
+        return is_named(a["road"]) and _street_name(a["road"]) == _street_name(b["road"])
+
+    def straight_into(i: int) -> bool:
+        return coords is not None and not turn_direction(
+            coords,
+            boundary=segments[i]["start_edge"],
+            prev_start=segments[i - 1]["start_edge"],
+            next_end=segments[i]["end_edge"],
+        )
+
+    segments = list(segments)
+    merged = True
+    while merged:
+        merged = False
+        for i in range(1, len(segments)):
+            if same_street(segments[i - 1], segments[i]):
+                segments[i - 1 : i + 1] = [join(segments[i - 1], segments[i])]
+                merged = True
+                break
+        if merged:
+            continue
+        for i in range(1, len(segments) - 1):
+            if (
+                not is_named(segments[i]["road"])
+                and same_street(segments[i - 1], segments[i + 1])
+                and straight_into(i)
+                and straight_into(i + 1)
+            ):
+                gap = join(segments[i - 1], segments[i])
+                gap["road"] = segments[i - 1]["road"]
+                segments[i - 1 : i + 2] = [join(gap, segments[i + 1])]
+                merged = True
+                break
+    return segments
 
 
 # A junction only counts as a real turn once the heading swings this far;

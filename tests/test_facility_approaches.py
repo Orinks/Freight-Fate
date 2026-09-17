@@ -87,6 +87,7 @@ def test_facility_approach_records_are_clean_and_honest(world):
 
 
 def test_facility_route_prefers_turn_level_source_approach(world):
+    from freight_fate.data.world_services import _spoken_road_text
     from freight_fate.sim.trip import Trip, TripEvent, TripEventKind
     from freight_fate.sim.vehicle import TruckState
     from freight_fate.sim.weather import WeatherSystem
@@ -103,7 +104,9 @@ def test_facility_route_prefers_turn_level_source_approach(world):
     assert approach is not None
     assert approach.turn_level
     assert route.miles == pytest.approx(approach.total_miles)
-    assert route.highways == [segment.road for segment in approach.segments]
+    # The route speaks the first ref of a list ("(US 281;CR 13)" is heard as
+    # "(US 281)"), so compare what is spoken, not the baked label.
+    assert route.highways == [_spoken_road_text(segment.road) for segment in approach.segments]
     trip = Trip(route, TruckState(), WeatherSystem())
     start_cue = next(cue for cue in trip.navigation_cues if cue.key == "local:start")
     assert start_cue.direction == "ahead"
@@ -456,6 +459,34 @@ def test_long_chain_keeps_the_streets_at_the_facility_and_folds_junction_links()
     assert [(segment["road"], segment["miles"]) for segment in folded] == [
         ("Main Street", 0.6),
         ("Redwood Highway (US 101)", 1.0),
+    ]
+    # One street under several route refs is heard once, as its longest run.
+    one_street = local_geometry.collapse_segments(
+        [
+            ("Pine Street", 0.3, None),
+            ("Saint John Avenue (US 51 Bus)", 0.2, None),
+            ("Saint John Avenue", 0.1, None),
+            ("Saint John Avenue (TN 211)", 0.6, None),
+            ("West Main Street", 0.4, None),
+        ]
+    )
+    assert [(segment["road"], segment["miles"]) for segment in one_street] == [
+        ("Pine Street", 0.3),
+        ("Saint John Avenue (TN 211)", 0.9),
+        ("West Main Street", 0.4),
+    ]
+    # A nameless stretch inside one street is a gap in its name tag when the
+    # road runs straight through it, and a real detour when it turns.
+    east = [(41.0, -87.0 + 0.005 * i) for i in range(4)]
+    gap = [("Main Street", 0.26, None), ("a side street", 0.26, None), ("Main Street", 0.26, None)]
+    assert [segment["road"] for segment in local_geometry.collapse_segments(gap, east)] == [
+        "Main Street"
+    ]
+    dogleg = [east[0], east[1], (41.005, east[1][1]), (41.005, east[2][1])]
+    assert [segment["road"] for segment in local_geometry.collapse_segments(gap, dogleg)] == [
+        "Main Street",
+        "a side street",
+        "Main Street",
     ]
     # A town's main street classed `trunk` is a street; a motorway is not.
     assert local_geometry.road_label({"highway": "trunk", "name": "Main Street"}) == "Main Street"
