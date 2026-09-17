@@ -31,9 +31,9 @@
         },
         {
           "name": "Kenosha Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 83.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.9 miles away carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11366,29 +11366,6 @@
             "restrooms"
           ],
           "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 126.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -15938,29 +15915,6 @@
           "exit_ref": "133",
           "interchange_mi": 165.69,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I65, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 183.99,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,

@@ -3083,31 +3083,6 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "99",
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I65, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 44.95,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer",
-          "exit_ref": "111",
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I65, 0.56 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -3568,7 +3543,7 @@
           "name": "George N. Craig Travel Plaza EB",
           "type": "service_plaza",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6866,7 +6841,7 @@
           "name": "George N. Craig Travel Plaza EB",
           "type": "service_plaza",
           "at_mi": 67.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14136,7 +14111,7 @@
           "name": "William Shaw Travel Plaza WB",
           "type": "service_plaza",
           "at_mi": 42.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 0.3 miles away is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15162,29 +15137,6 @@
         }
       },
       "stops": [
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.28,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Murphy USA",
           "type": "fuel_station",
@@ -16467,29 +16419,6 @@
         }
       },
       "stops": [
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Flying J Travel Center Indianapolis",
           "type": "travel_center",
@@ -18202,29 +18131,6 @@
       },
       "stops": [
         {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Flying J Travel Center Marion",
           "type": "travel_center",
           "at_mi": 78.9,
@@ -19371,29 +19277,6 @@
         }
       },
       "stops": [
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.15,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Speedway",
           "type": "fuel_station",
@@ -23252,29 +23135,6 @@
       },
       "stops": [
         {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Road Ranger",
           "type": "travel_center",
           "at_mi": 13.2,
@@ -23573,29 +23433,6 @@
           "lon": -86.525612,
           "exit_ref": "6",
           "exit_source": "exit_ref read: the stop's own source names exit 6; this leg has no interchange record with that number."
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 286.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -24761,29 +24598,6 @@
         }
       },
       "stops": [
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.07,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
         {
           "name": "Pacific Pride",
           "type": "fuel_station",
@@ -26602,29 +26416,6 @@
       },
       "stops": [
         {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Speedway",
           "type": "fuel_station",
           "at_mi": 29.6,
@@ -26671,9 +26462,9 @@
         },
         {
           "name": "Gallahan Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 80.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29737,29 +29528,6 @@
       },
       "stops": [
         {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Cloverdale Travel Plaza",
           "type": "travel_center",
           "at_mi": 26.9,
@@ -31284,36 +31052,10 @@
       },
       "stops": [
         {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 0.1,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Cloverdale Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 38.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33316,29 +33058,6 @@
           "exit_ref": "130",
           "interchange_mi": 45.1,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I65, 0.11 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "Horner Industrial Group",
-          "type": "service_plaza",
-          "at_mi": 62.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the indianapolis_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 39.76675,
-          "lon": -86.13311,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true,
@@ -36622,7 +36341,7 @@
           "name": "William Shaw Travel Plaza WB",
           "type": "service_plaza",
           "at_mi": 23.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 0.3 miles away is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

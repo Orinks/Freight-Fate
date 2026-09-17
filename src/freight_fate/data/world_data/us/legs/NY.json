@@ -14022,7 +14022,7 @@
           "name": "Guilderland Travel Plaza",
           "type": "service_plaza",
           "at_mi": 126.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20353,7 +20353,7 @@
           "name": "Angola Travel Plaza",
           "type": "service_plaza",
           "at_mi": 21.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Angola Travel Plaza EB with 40 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Angola Travel Plaza EB with 40 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 0.6 miles away is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -20380,7 +20380,7 @@
           "name": "Angola Travel Plaza",
           "type": "service_plaza",
           "at_mi": 27.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27032,7 +27032,7 @@
           "name": "Clifton Springs Travel Plaza",
           "type": "service_plaza",
           "at_mi": 94.12,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27164,7 +27164,7 @@
           "name": "Port Byron Travel Plaza",
           "type": "service_plaza",
           "at_mi": 127.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -27191,7 +27191,7 @@
           "name": "Indian Castle Travel Plaza",
           "type": "service_plaza",
           "at_mi": 219.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27240,7 +27240,7 @@
           "name": "Ulster Travel Plaza",
           "type": "service_plaza",
           "at_mi": 338.67,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28822,7 +28822,7 @@
           "name": "Ontario Travel Plaza",
           "type": "service_plaza",
           "at_mi": 55.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 3.8 miles away is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34177,7 +34177,7 @@
           "name": "Ulster Travel Plaza",
           "type": "service_plaza",
           "at_mi": 99.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ulster Travel Plaza with 41 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ulster Travel Plaza with 41 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -38593,29 +38593,6 @@
           ]
         },
         {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 58.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.23750129190995,
-          "lon": -73.05789062135072,
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 65.8,
@@ -38646,32 +38623,6 @@
           "exit_ref": "40",
           "interchange_mi": 60.5,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "service_plaza",
-          "at_mi": 79.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.42561400917265,
-          "lon": -72.82101421198672,
-          "directions": [
-            "both"
-          ]
         },
         {
           "name": "Madison Service Plaza",
@@ -48725,7 +48676,7 @@
           "name": "Clifton Springs Travel Plaza",
           "type": "service_plaza",
           "at_mi": 31.55,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 2.4 miles away is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -48857,7 +48808,7 @@
           "name": "Port Byron Travel Plaza",
           "type": "service_plaza",
           "at_mi": 55.25,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -48884,7 +48835,7 @@
           "name": "DeWitt Travel Plaza",
           "type": "service_plaza",
           "at_mi": 94.44,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): the OpenStreetMap feature at the record's coordinate is highway=services, the name says travel plaza and the leg carries a toll authority's charge. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -48951,7 +48902,7 @@
           "name": "Guilderland Travel Plaza",
           "type": "service_plaza",
           "at_mi": 215.68,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Guilderland Travel Plaza with 65 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Guilderland Travel Plaza with 65 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -49001,7 +48952,7 @@
           "name": "Ulster Travel Plaza",
           "type": "service_plaza",
           "at_mi": 277.54,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49050,7 +49001,7 @@
           "name": "DeWitt Travel Plaza",
           "type": "service_plaza",
           "at_mi": 3.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): the OpenStreetMap feature at the record's coordinate is highway=services, the name says travel plaza and the leg carries a toll authority's charge. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49073,7 +49024,7 @@
           "name": "Chittenango Travel Plaza",
           "type": "service_plaza",
           "at_mi": 18.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49121,7 +49072,7 @@
           "name": "Pattersonville Travel Plaza",
           "type": "service_plaza",
           "at_mi": 116.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 1.7 miles away is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51310,7 +51261,7 @@
           "name": "Port Byron Travel Plaza",
           "type": "service_plaza",
           "at_mi": 29.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -51447,7 +51398,7 @@
           "name": "Clifton Springs Travel Plaza",
           "type": "service_plaza",
           "at_mi": 57.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -53614,7 +53565,7 @@
           "name": "Port Byron Travel Plaza",
           "type": "service_plaza",
           "at_mi": 30.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -53754,7 +53705,7 @@
           "name": "Clifton Springs Travel Plaza",
           "type": "service_plaza",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -56235,7 +56186,7 @@
           "name": "Oneida Travel Plaza",
           "type": "service_plaza",
           "at_mi": 41.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -58085,7 +58036,7 @@
           "name": "Indian Castle Travel Plaza",
           "type": "service_plaza",
           "at_mi": 23.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Indian Castle Travel Plaza EB with 35 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Indian Castle Travel Plaza EB with 35 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -58109,7 +58060,7 @@
           "name": "Pattersonville Travel Plaza",
           "type": "service_plaza",
           "at_mi": 70.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by New York State Thruway Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
