@@ -18,6 +18,7 @@ use crate::sim::enforcement_posts::{
     EnforcementPost, METHOD_LIDAR, METHOD_PACING, METHOD_RADAR, METHOD_SCALE_SCREEN, METHOD_VISUAL,
     PACING_MIN_MI,
 };
+use crate::sim::roadside_inspection::{TIRE_CITATION_PCT, TIRE_OUT_OF_SERVICE_PCT};
 
 /// Tolerance before a speed is a speed at all; `driving_core.SPEEDING_LEEWAY_MPH`
 /// is this constant, so the number lives in one place.
@@ -46,6 +47,15 @@ pub const WHAT_CHAINS: &str = "no chains";
 pub const WHAT_LIGHTS: &str = "no lights";
 pub const WHAT_FOLLOWING: &str = "following too close";
 pub const WHAT_LANE: &str = "lane misuse";
+/// Worn tires or a hooked trailer's lamp or tire, seen on the move by a
+/// unit alongside or on the shoulder: the rolling look that decides a
+/// Level 2 walk-around in real enforcement.
+pub const WHAT_EQUIPMENT: &str = "worn equipment";
+/// How sure a trooper alongside is of a trailer lamp or tire they can see.
+pub const TRAILER_DEFECT_SEVERITY: f64 = 0.6;
+/// Severity of worn tires at the citation line; it climbs to certain at the
+/// out-of-service line.
+pub const TIRE_NOTICE_SEVERITY: f64 = 0.3;
 
 /// Python `COVER_FACTOR = {0: 1.0, 1: 0.70}` with `COVER_FACTOR_PACK` beyond.
 pub fn cover_factor_for(neighbours: i64) -> f64 {
@@ -98,6 +108,13 @@ pub struct RoadSample {
     pub paced_mi: f64,
     /// How far the truck has run continuously over the limit.
     pub over_limit_mi: f64,
+    /// Tire wear on the tractor, what a rolling look can read from the
+    /// tread.
+    pub tire_wear_pct: f64,
+    /// The hooked trailer's visible defect, as its walk-around would read it
+    /// (a lamp out, a worn tire); empty when there is none or it is under the
+    /// trailer where nobody driving past can see it.
+    pub trailer_defect: String,
 }
 
 impl RoadSample {
@@ -120,6 +137,8 @@ impl RoadSample {
             crest_between: false,
             paced_mi: 0.0,
             over_limit_mi: 0.0,
+            tire_wear_pct: 0.0,
+            trailer_defect: String::new(),
         }
     }
 
@@ -168,9 +187,40 @@ fn candidates(post: &EnforcementPost, sample: &RoadSample) -> Vec<(&'static str,
             format!("{} over", fmt_f(sample.mph_over(), 0)),
         ));
     }
-    if post.method != METHOD_VISUAL && post.method != METHOD_SCALE_SCREEN {
-        // Radar, lidar, and a pacing unit are looking at speed. Everything
-        // below needs eyes on the truck.
+    let eyes = post.method == METHOD_VISUAL || post.method == METHOD_SCALE_SCREEN;
+    let alongside = post.method == METHOD_PACING;
+    if !eyes && !alongside {
+        // Radar and lidar are looking at speed. Everything below needs eyes
+        // on the truck.
+        return found;
+    }
+    // The rolling look: a unit alongside or on the shoulder reads the tread
+    // and the trailer's lights as it passes, which is how most equipment
+    // pull-ins start. Under the trailer is out of sight; that is the scale's
+    // job.
+    let mut equipment: Option<(f64, String)> = None;
+    if sample.tire_wear_pct >= TIRE_CITATION_PCT {
+        let span = (TIRE_OUT_OF_SERVICE_PCT - TIRE_CITATION_PCT).max(1e-6);
+        let severity = TIRE_NOTICE_SEVERITY
+            + (1.0 - TIRE_NOTICE_SEVERITY)
+                * clamp01((sample.tire_wear_pct - TIRE_CITATION_PCT) / span);
+        equipment = Some((
+            severity,
+            format!("tires worn to {} percent", fmt_f(sample.tire_wear_pct, 0)),
+        ));
+    }
+    if !sample.trailer_defect.is_empty()
+        && equipment
+            .as_ref()
+            .is_none_or(|(severity, _)| *severity < TRAILER_DEFECT_SEVERITY)
+    {
+        equipment = Some((TRAILER_DEFECT_SEVERITY, sample.trailer_defect.clone()));
+    }
+    if let Some((severity, detail)) = equipment {
+        found.push((WHAT_EQUIPMENT, severity, detail));
+    }
+    if !eyes {
+        // A pacing unit is looking at speed and at what it can see beside it.
         return found;
     }
     let damage = sample.damage_pct;
@@ -344,6 +394,36 @@ mod tests {
         let seen = observe(&p, &sample).expect("flagrant speed is seen");
         assert!(seen.certain());
         assert_eq!(seen.what, WHAT_SPEEDING);
+    }
+
+    #[test]
+    fn a_unit_alongside_sees_bald_tires_but_not_the_brakes() {
+        use crate::sim::enforcement_posts::{KIND_CMV, KIND_ROVING};
+        // A pacing unit at the limit: nothing to see on a sound truck.
+        let roving = post(KIND_ROVING);
+        let mut sample = RoadSample::new(9.5, 65.0, 65.0);
+        sample.paced_mi = 2.0 * PACING_MIN_MI;
+        assert!(observe(&roving, &sample).is_none());
+        // Bald tires are read from alongside, and worse tires are surer.
+        sample.tire_wear_pct = TIRE_CITATION_PCT;
+        let near = observe(&roving, &sample).expect("worn tires are seen");
+        assert_eq!(near.what, WHAT_EQUIPMENT);
+        sample.tire_wear_pct = TIRE_OUT_OF_SERVICE_PCT;
+        let bald = observe(&roving, &sample).expect("bald tires are seen");
+        assert!(bald.confidence > near.confidence);
+        assert!(bald.detail.contains("percent"));
+        // A trailer lamp is visible from the shoulder too; a brake is not,
+        // and the caller never puts one in the sample.
+        let shoulder = post(KIND_CMV);
+        let mut sample = RoadSample::new(9.8, 65.0, 65.0);
+        sample.trailer_defect = "trailer marker lamp out".to_string();
+        let lamp = observe(&shoulder, &sample).expect("a lamp out is seen");
+        assert_eq!(lamp.what, WHAT_EQUIPMENT);
+        assert_eq!(lamp.detail, "trailer marker lamp out");
+        // Radar has no eyes: nothing about the equipment.
+        let radar = post(KIND_MEDIAN);
+        sample.tire_wear_pct = 100.0;
+        assert!(observe(&radar, &sample).is_none());
     }
 
     #[test]

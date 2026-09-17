@@ -498,6 +498,7 @@ impl DrivingState {
             descent_cue_s: 0.0,
             trailer_refused: false,
             trailer_repaired: false,
+            visible_trailer_defect: (String::new(), f64::NEG_INFINITY),
             nice_speed_mi: 0.0,
             jake_descent_mi: 0.0,
             radio_states_station: String::new(),

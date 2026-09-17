@@ -47,6 +47,8 @@
 
 ### Added
 
+- **A trooper passing you can see worn tires and a dead trailer lamp.** Seeing one pulls you in for a Level 2 walk-around, so walk around the truck first.
+
 - **Gilley's and the Longhorn Ballroom are on the Texas billboards.** Houston remembers the Urban Cowboy honky-tonk; Dallas advertises the bull and Bob Wills' ballroom.
 
 - **The scale's inspection lane is a real Level 1 inspection.** Worn tires, brakes, damage and trailer defects are written up; a critical one parks you.

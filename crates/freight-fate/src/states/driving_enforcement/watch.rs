@@ -8,7 +8,7 @@ use ff_core::pyfmt::{py_str_float, round_py_n};
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::enforcement_observe::{
     observe, Observation, RoadSample, COVER_RADIUS_MI, COVER_SPEED_TOLERANCE_MPH, TAILGATE_GAP_S,
-    WHAT_CHAINS, WHAT_DAMAGE, WHAT_FOLLOWING, WHAT_LIGHTS, WHAT_SPEEDING,
+    WHAT_CHAINS, WHAT_DAMAGE, WHAT_EQUIPMENT, WHAT_FOLLOWING, WHAT_LIGHTS, WHAT_SPEEDING,
 };
 use ff_core::sim::enforcement_posts::{
     post_seed, EnforcementPost, METHOD_PACING, PACING_WINDOW_MI,
@@ -89,7 +89,25 @@ impl DrivingState {
             crest_between,
             paced_mi: self.pacing_mi.get(&post.id()).copied().unwrap_or(0.0),
             over_limit_mi: self.over_limit_mi,
+            tire_wear_pct: self.trip.truck.tire_wear_pct,
+            trailer_defect: self.visible_trailer_defect.0.clone(),
         }
+    }
+
+    /// Keep the trailer defect a passing trooper could see current: the
+    /// pickup plan is read again every half mile, not every frame, and only
+    /// the visible items count -- a brake out of adjustment is under the
+    /// trailer, where the scale finds it and a unit driving past does not.
+    pub fn refresh_visible_trailer_defect(&mut self, ctx: &GameContext) {
+        let position = self.trip.position_mi;
+        if (position - self.visible_trailer_defect.1).abs() < 0.5 {
+            return;
+        }
+        let defect = self
+            .hooked_trailer_defect(ctx)
+            .filter(|defect| !defect.contains("brake"))
+            .unwrap_or_default();
+        self.visible_trailer_defect = (defect, position);
     }
 
     /// Whether the road hides the post from an optical method.
@@ -191,6 +209,7 @@ impl DrivingState {
         if self.enforcement_bypassed(ctx) {
             return;
         }
+        self.refresh_visible_trailer_defect(ctx);
         if self.enforcement_busy() {
             // Defer, never drop. The look is TAKEN here and held: the officer
             // saw what they saw, and only the lights wait for the cab to be
@@ -397,6 +416,32 @@ impl DrivingState {
             let position = self.trip.position_mi;
             let (limit, _) = self.trip.speed_limit_at(position);
             self.begin_pull_over(ctx, limit);
+            return;
+        }
+        if observation.what == WHAT_EQUIPMENT {
+            // The rolling look found something: the stop is a Level 2
+            // walk-around, and the report prices it, not this stop.
+            let summary = format!(
+                "A trooper on this {reason} looked the truck over as they passed and saw {}. \
+                 They are pulling you in for a walk-around inspection.",
+                observation.detail
+            );
+            let lights_message = format!(
+                "Lights and siren behind you. A trooper on this {reason} saw {} and wants a look \
+                 at the truck. Signal with {} and stop on the shoulder.",
+                observation.detail,
+                ctx.control_hint("take_exit")
+            );
+            self.begin_enforcement_pull_over(
+                ctx,
+                "roadside_walkaround",
+                "Roadside inspection",
+                &summary,
+                0.0,
+                0.0,
+                "Back on the highway.",
+                &lights_message,
+            );
             return;
         }
         let (summary, fine, return_message) = self.observed_stop_terms(observation);

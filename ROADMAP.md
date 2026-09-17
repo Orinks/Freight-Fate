@@ -305,9 +305,13 @@ its status or release decision.
       service), the fines (150 equipment, 300 critical), the durations
       (45/30/15 minutes) and the 6,000-mile clean-driver interval (the
       real rate is about one per driver-year, which a career here
-      never reaches). Not built: Level 2 and Level 5 on the road, the
-      CMV-unit posts still only ticket, cargo securement (no data),
-      and a CSA-style carrier score.
+      never reaches). Same day, the rolling look: a pacing unit or a
+      commercial-vehicle unit on the shoulder reads the tread and the
+      hooked trailer's lamp or tire as it passes (never under the trailer)
+      and pulls the truck in for a Level 2 walk-around, so most equipment
+      pull-ins start with something seen, the way they do in life. Not
+      built: Level 5, cargo securement (no data), and a CSA-style carrier
+      score.
 - [x] A career that is over stays readable (owner ruling 2026-09-12, over
       automatic deletion): the second major offense lands as a terminal
       notice, the greeting says the career is over, the buy-in waits for a

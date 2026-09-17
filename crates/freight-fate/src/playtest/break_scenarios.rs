@@ -112,6 +112,12 @@ pub static SCENARIOS: &[Scenario] = &[
         run: enforcement::scale_check_in_guidance,
     },
     Scenario {
+        name: "bald_tires_get_a_walk_around",
+        description: "Roll past staffed commercial-vehicle units on bald tires; one must see the \
+                      tread, pull the truck in for a Level 2, write the tire up and replace it.",
+        run: enforcement::bald_tires_get_a_walk_around,
+    },
+    Scenario {
         name: "scale_pull_over_stands_down_exit",
         description: "Blow past the scale with a truck-stop exit armed: the pull-over must \
                       own the road.",

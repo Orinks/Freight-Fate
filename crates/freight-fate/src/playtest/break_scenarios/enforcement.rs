@@ -12,7 +12,10 @@
 use crate::playtest::breaker::{outcome, Outcome, Rig, RigOptions, DT};
 use crate::states::base::Key;
 
-use ff_core::sim::enforcement_posts::{EnforcementPost, KIND_FIXED_SCALE, METHOD_SCALE_SCREEN};
+use ff_core::sim::enforcement_posts::{
+    EnforcementPost, KIND_CMV, KIND_FIXED_SCALE, METHOD_SCALE_SCREEN, METHOD_VISUAL,
+};
+use ff_core::sim::roadside_inspection::TIRE_OUT_OF_SERVICE_PCT;
 use ff_core::sim::trip::Trip;
 use ff_core::sim::trip_models::RoadStop;
 
@@ -175,4 +178,80 @@ pub fn scale_pull_over_stands_down_exit() -> Outcome {
         findings,
         "the pull-over stood the armed exit down; one demand on the driver",
     )
+}
+
+/// A row of staffed commercial-vehicle units on the shoulder, each able to
+/// look the truck over as it passes. Several, because whether one looks is
+/// a seeded roll and one post would report nothing on most seeds.
+fn staffed_cmv_units(trip: &mut Trip, miles: &[f64]) {
+    trip.posts = miles
+        .iter()
+        .map(|mi| {
+            let mut post = EnforcementPost::new(*mi, KIND_CMV);
+            post.method = METHOD_VISUAL.to_string();
+            post.reach_mi = 0.6;
+            post.staffed = true;
+            post
+        })
+        .collect();
+}
+
+/// Roll past a row of commercial-vehicle units on bald tires at the limit:
+/// one of them must see the tread and pull the truck in for a walk-around
+/// that names the tire, replaces it, and lets the truck go.
+pub fn bald_tires_get_a_walk_around() -> Outcome {
+    let mut rig = Rig::new(RigOptions {
+        keep_patrols: true,
+        ..RigOptions::default()
+    });
+    let mut findings: Vec<String> = Vec::new();
+    staffed_cmv_units(&mut rig.drive.trip, &[3.0, 4.5, 6.0, 7.5, 9.0, 10.5]);
+    rig.drive.truck_mut().tire_wear_pct = TIRE_OUT_OF_SERVICE_PCT + 5.0;
+    rig.prepare(60.0, None);
+    rig.press(Key::K);
+
+    rig.step(
+        30000,
+        DT,
+        Some(&|rig: &Rig| rig.drive.pull_over.is_some() || rig.drive.trip.position_mi > 12.0),
+    );
+    if rig.drive.pull_over.is_none() {
+        findings.push(
+            "six staffed commercial-vehicle units let a truck on bald tires roll past".to_string(),
+        );
+        return outcome("bald_tires_get_a_walk_around", &rig, findings, "");
+    }
+    if rig.drive.pull_over_kind != "roadside_walkaround" {
+        findings.push(format!(
+            "the stop was {:?}, not the walk-around the tread should have drawn",
+            rig.drive.pull_over_kind
+        ));
+    }
+    if rig.said("tires worn") == 0 {
+        findings.push("the lights line never said what the trooper saw".to_string());
+    }
+    // Do as told: signal, stop, and take the inspection.
+    rig.press(Key::X);
+    rig.drive.truck_mut().velocity_mps = 0.0;
+    rig.step(600, DT, Some(&|rig: &Rig| rig.drive.pull_over.is_none()));
+    if rig.said("Level 2 walk-around inspection") == 0 {
+        findings.push("the stop never ran the Level 2".to_string());
+    }
+    if rig.said("a tire below the minimum tread depth") == 0 {
+        findings.push("the walk-around did not write up the tire it was pulled in for".to_string());
+    }
+    if rig.said("fitted new tires") == 0 {
+        findings.push("the out-of-service tire was never replaced".to_string());
+    }
+    let wear = rig.drive.truck().tire_wear_pct;
+    if wear > 1.0 {
+        findings.push(format!(
+            "tire wear is still {wear:.0} percent after the repair"
+        ));
+    }
+    let note = format!(
+        "stop kind {:?}; tire wear after {wear:.0} percent",
+        rig.drive.pull_over_kind
+    );
+    outcome("bald_tires_get_a_walk_around", &rig, findings, &note)
 }

@@ -511,6 +511,10 @@ pub struct DrivingState {
     // The hooked trailer's defect was fixed on the shoulder after an
     // inspector parked the truck for it: no later inspection finds it again.
     pub trailer_repaired: bool,
+    // The hooked trailer's visible defect for the enforcement watch, read
+    // from the pickup plan once per half mile rather than every frame:
+    // (defect or empty, mile it was read at).
+    pub visible_trailer_defect: (String, f64),
     pub nice_speed_mi: f64,   // distance held at a very particular speed
     pub jake_descent_mi: f64, // downgrade held on the engine alone
     pub radio_states_station: String, // station the state tally belongs to

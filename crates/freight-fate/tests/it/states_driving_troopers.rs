@@ -30,9 +30,9 @@ use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::pyfmt::fmt_f;
 use ff_core::pyrandom::PyRandom;
-use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
+use ff_core::sim::enforcement_observe::{OBSERVE_HOLD_MI, WHAT_EQUIPMENT};
 use ff_core::sim::enforcement_posts::{
-    method_by_kind, EnforcementPost, KIND_FIXED_SCALE, KIND_MEDIAN, KIND_SCALE_APRON,
+    method_by_kind, EnforcementPost, KIND_CMV, KIND_FIXED_SCALE, KIND_MEDIAN, KIND_SCALE_APRON,
 };
 use ff_core::sim::roadside_inspection::InspectionLevel;
 use ff_core::sim::trip_models::{RoadStop, Zone};
@@ -784,6 +784,47 @@ fn test_unsafe_damage_in_patrol_starts_safety_stop() {
     assert!(approx(
         app.ctx.profile.as_ref().expect("a career").money,
         money_before - expected
+    ));
+}
+
+#[test]
+fn test_a_trooper_alongside_sees_bald_tires_and_runs_a_walk_around() {
+    // The rolling look: a commercial-vehicle unit on the shoulder reads the
+    // tread as the truck passes and pulls it in for a Level 2, which writes
+    // the tire up, replaces it out of service, and lets the truck go.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, None);
+    drive.trip.position_mi = 10.0;
+    drive.trip.posts = vec![always_observing_post(10.2, KIND_CMV, 0.6, 1.0)];
+    drive.trip.truck.tire_wear_pct = 95.0;
+    drive.trip.truck.velocity_mps = mph_to_mps(60.0);
+
+    let seen = drive
+        .observed_now()
+        .expect("bald tires are seen from the shoulder");
+    assert_eq!(seen.what, WHAT_EQUIPMENT);
+    drive.begin_observed_stop(&mut app.ctx, &seen);
+    assert_eq!(drive.pull_over_kind, "roadside_walkaround");
+
+    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    drive.trip.truck.velocity_mps = 0.0;
+    drive.update_pull_over(&mut app.ctx, 1.0, false);
+    app.ctx.run_deferred();
+
+    let text =
+        with_top::<EnforcementStopState, _>(&mut app, |stop, _| stop.outcome_text().to_string());
+    assert!(text.contains("Level 2 walk-around inspection"), "{text}");
+    assert!(
+        text.contains("a tire below the minimum tread depth"),
+        "{text}"
+    );
+    assert!(text.contains("fitted new tires"), "{text}");
+    assert_eq!(drive.trip.truck.tire_wear_pct, 0.0);
+    // The report priced the stop: one out-of-service fine, nothing else.
+    let money_after = app.ctx.profile.as_ref().expect("a career").money;
+    assert!(approx(
+        money_after,
+        money_before - ff_core::sim::roadside_inspection::OUT_OF_SERVICE_FINE
     ));
 }
 
