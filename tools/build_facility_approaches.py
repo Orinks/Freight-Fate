@@ -89,13 +89,12 @@ HIGH_CONFIDENCE_TYPES = {
 # whole word in the name. 45 of their 193 sourced endpoints pass. With
 # `--no-endpoint-screen` they stay out, as before.
 #
-# 2026-09-17, after the endpoint re-sweep: the sibling types of the set above
-# (an "intermodal" or "rail" facility is an intermodal ramp by another name,
-# "manufacturing" a manufacturing plant) route on the same terms. They were
-# left out because nobody trusted their endpoints; the screen is that trust.
-SCREENED_SIBLING_TYPES = frozenset(
-    {"air_cargo", "food_terminal", "industrial_park", "intermodal", "manufacturing", "rail"}
-)
+# Still out after the 2026-09-17 endpoint re-sweep: intermodal, rail,
+# manufacturing, air_cargo, food_terminal and industrial_park, 36 facilities
+# of which 26 now have a screened endpoint. Nothing about their endpoints
+# argues against routing them any more; what does is that Chicago's first
+# facility (Cicero Rail Hub, an "intermodal") is the stock single-leg approach
+# of a dozen game tests. Widen in a change that re-points those tests.
 SCREEN_REFUSAL_PREFIX = "Sourced endpoint failed the freight-site screen: "
 
 
@@ -155,9 +154,7 @@ def build_facility_approaches(
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
     state_set = set(states)
-    eligible_types = HIGH_CONFIDENCE_TYPES | (
-        NAME_MATCHED_TYPES | SCREENED_SIBLING_TYPES if endpoint_screen else set()
-    )
+    eligible_types = HIGH_CONFIDENCE_TYPES | (NAME_MATCHED_TYPES if endpoint_screen else set())
     routable = [
         target
         for target in targets
@@ -167,6 +164,7 @@ def build_facility_approaches(
         and target.facility_type in eligible_types
         and routed_approach_miles(target) <= max_route_mi
     ]
+    row_refusals = endpoint_row_refusals()
     routed: dict[str, Any] = {}
     # Why each unrouted target failed, straight from the path search.
     failures: dict[str, str] = {}
@@ -190,6 +188,8 @@ def build_facility_approaches(
                     target.endpoint_name,
                     tags.get(target.endpoint_source_ref),
                 )
+                if accepted and target.facility_id in row_refusals:
+                    accepted, why = False, row_refusals[target.facility_id]
                 if accepted:
                     passed.append(target)
                 else:
@@ -345,6 +345,27 @@ def chain_is_current(old: dict[str, Any], fresh: dict[str, Any]) -> bool:
     return old.get("endpoint_name") == fresh.get("endpoint_name") and old.get(
         "source_note"
     ) == fresh.get("source_note")
+
+
+def endpoint_row_refusals() -> dict[str, str]:
+    """Facility id -> reason for every endpoint row the re-sweep labelled
+    ``endpoint_screen: refused``. READ from the endpoints file. The tag screen
+    alone cannot see two of its reasons: an endpoint across the national
+    border, and a row the matcher wrote and has since stopped accepting."""
+    if not FACILITY_ENDPOINTS_PATH.exists():
+        return {}
+    world = get_world()
+    rows = json.loads(FACILITY_ENDPOINTS_PATH.read_text(encoding="utf-8")).get("endpoints") or {}
+    refusals: dict[str, str] = {}
+    for key, row in rows.items():
+        if row.get("endpoint_screen") != "refused":
+            continue
+        try:
+            facility_id = world.facility_by_id(key).id
+        except KeyError:
+            continue
+        refusals[facility_id] = str(row.get("endpoint_screen_reason") or "")
+    return refusals
 
 
 def shared_turn_level(existing: dict[str, Any], merged: dict[str, Any]) -> tuple[int, int]:
@@ -545,9 +566,7 @@ def fallback_reason(
         return "Source-backed endpoint is outside this bounded Midwest road-snap batch."
     if route_failure.startswith(SCREEN_REFUSAL_PREFIX):
         return f"{route_failure} A street chain to it is not claimed."
-    if target.facility_type not in (
-        HIGH_CONFIDENCE_TYPES | NAME_MATCHED_TYPES | SCREENED_SIBLING_TYPES
-    ):
+    if target.facility_type not in HIGH_CONFIDENCE_TYPES | NAME_MATCHED_TYPES:
         return "Facility type was outside the high-confidence road-snap category set."
     if routed_approach_miles(target) > MAX_ROUTE_MI:
         return "Facility is beyond the bounded local route distance for this pass."

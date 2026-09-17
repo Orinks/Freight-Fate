@@ -66,7 +66,8 @@ happens to contain a trade word, and nothing is guessed from position.
    * food terminal: produce, food or farmers with terminal, market or
      distribution.
    * parcel hub: ``amenity=post_depot``; or UPS, FedEx, DHL, USPS, postal,
-     parcel, package, sortation, fulfillment, Amazon.
+     parcel, package, sortation, fulfillment, Amazon. A parcel STORE is left
+     out by name ("The UPS Store" is tagged a post depot in Atlanta).
    * air cargo: the words air cargo, cargo or air freight.
    * steel, automotive, chemical and petroleum: the screen's own trade rules
      (an ``industrial`` or ``product`` value of the right kind, or the trade
@@ -75,8 +76,9 @@ happens to contain a trade word, and nothing is guessed from position.
 
    Two name vetoes, both read from the name. A UTILITY name (water, sewage,
    treatment, power, heating plant, landfill, recycling), a "former ..."
-   name, or the name of a building turned to another use (lofts, museum,
-   brewery, school, church) vetoes the warehouse, manufacturing, food, steel,
+   name, a military or pipeline name, or the name of a building turned to
+   another use (lofts, museum, brewery, school, church) vetoes the warehouse,
+   manufacturing, food, steel,
    automotive and chemical rules outright: ``man_made=works`` is put on
    treatment plants and ``building=warehouse`` kept on loft conversions often
    enough that the tag cannot be allowed to win. A CIVIC or service name
@@ -89,7 +91,7 @@ happens to contain a trade word, and nothing is guessed from position.
    reads as a business (Inc, Co, Corporation, Industries, Supply ...) is
    offered last, and the record says the trade is ASSUMED. The facilities
    are templates ("Aberdeen Company Yard"), so a real industrial business in
-   the right town is a truthful end for the street chain even though nobody
+   the right town is a usable end for the street chain even though nobody
    claims it is a cross-dock. Builders, contractors and farms are left out.
 
 RANK (derived). ``tier`` = 1 + (trade stated by tag) + (trade stated by
@@ -175,14 +177,18 @@ UTILITY_NAME = _words(
     # A works or warehouse turned to another use keeps its building tag.
     r"lofts?|apartments?|condos?|condominiums?|museum|gallery|theat(?:er|re)|studios?|church|"
     r"ministries|temple|brewery|brewing|winery|distillery|cemetery|gym|fitness|club|"
-    r"schools?|university|college|academy|institute|hotel|restaurant|library"
+    r"schools?|university|college|academy|institute|hotel|restaurant|library|"
+    # Behind a gate no carrier drives through unannounced, or a pipeline yard.
+    r"army|navy|naval|air force|afb|national guard|coast guard|squadron|military|"
+    r"marine corps|armory|ammunition|base supply|pipeline|gas"
 )
 CIVIC_NAME = _words(
     r"fire|police|sheriff|county|city of|town of|village of|township|district|department|"
     r"public works|maintenance|fleet|garage|transit|bus|airport|airline|hangar|aviation|arts?|"
-    r"hospital|clinic|medical|jail|prison|correctional|armory|national guard|army|navy|"
-    r"air force|military|animal|humane|caltrans|dot|highway|road (?:&|and) bridge|parks?|"
-    r"body shop|auto body|collision|repair|tires?|car wash"
+    r"hospital|clinic|medical|jail|prison|correctional|animal|humane|caltrans|dot|highway|"
+    r"road (?:&|and) bridge|parks?|body shop|auto body|collision|repair|tires?|car wash|"
+    r"post office|cbp|customs|border patrol|port of entry|federal|municipal|authority|"
+    r"traffic|housing"
 )
 INDUSTRIAL_PARK_NAME = _words(
     r"(?:industrial|business|commerce|logistics|distribution|trade) "
@@ -234,6 +240,8 @@ PARCEL_NAME = _words(
     r"ups|fedex|dhl|usps|postal|parcel|packages?|sortation|sort (?:center|facility)|"
     r"fulfillment|amazon|ontrac|lasership|purolator"
 )
+# A parcel counter is not a hub, whatever amenity it was given.
+NOT_PARCEL_NAME = _words(r"store|fedex office|mailbox(?:es)?|pak ?mail|postnet|lockers?|drop ?box")
 AIR_CARGO_NAME = _words(r"air cargo|cargo|air ?freight")
 BUSINESS_NAME = _words(
     r"inc|incorporated|llc|ltd|co|company|companies|corp|corporation|industries|industrial|"
@@ -374,11 +382,12 @@ def match_roles(tags: dict[str, str], name: str) -> dict[str, RoleMatch]:
         offer({"food_terminal"}, "", "food terminal words in the name")
 
     # Parcel and air cargo.
-    offer(
-        {"parcel_hub"},
-        "amenity=post_depot tag" if tags.get("amenity") == "post_depot" else "",
-        "parcel carrier words in the name" if PARCEL_NAME.search(text) else "",
-    )
+    if not NOT_PARCEL_NAME.search(text):
+        offer(
+            {"parcel_hub"},
+            "amenity=post_depot tag" if tags.get("amenity") == "post_depot" else "",
+            "parcel carrier words in the name" if PARCEL_NAME.search(text) else "",
+        )
     offer({"air_cargo"}, "", "air cargo words in the name" if AIR_CARGO_NAME.search(text) else "")
 
     # Steel, automotive, chemical: the screen's trade rule IS the match.

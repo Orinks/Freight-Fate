@@ -33,7 +33,9 @@ is the base and only the named states are read:
 
 * a sourced endpoint whose own OSM object PASSES the screen is kept byte for
   byte apart from the verdict, and its object is reserved: it is never
-  replaced by a worse one and never lost;
+  replaced by a worse one and never lost. A row this matcher wrote itself
+  (it carries ``match_kind``) must also still satisfy the matcher, so a rule
+  that turns out too broad can be tightened and re-judged by a re-run;
 * a sourced endpoint that FAILS is replaced when the fixed matcher finds a
   candidate; when it finds none the row keeps its endpoint and carries the
   verdict (``endpoint_screen: refused`` and the sentence why), so nobody
@@ -124,6 +126,9 @@ SITE_KEYS = (
     "harbour",
 )
 BORDER_REFUSAL = "The sourced endpoint lies across the national border from its city."
+MATCHER_REFUSAL = (
+    "The sourced endpoint no longer states this facility's trade under the matcher's rules."
+)
 
 
 @dataclass(frozen=True)
@@ -670,6 +675,10 @@ def resweep(
                     accepted, why = screen_endpoint(
                         kind, row["endpoint_name"], object_tags.get(row["source_ref"])
                     )
+                    if accepted and row.get("match_kind"):
+                        tags = object_tags.get(row["source_ref"]) or {}
+                        if kind not in match_roles(tags, row["endpoint_name"]):
+                            accepted, why = False, MATCHER_REFUSAL
                     if accepted and crosses_border(
                         cities[city], (float(row["lat"]), float(row["lon"])), border
                     ):
