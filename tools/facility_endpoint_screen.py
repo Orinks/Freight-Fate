@@ -23,10 +23,11 @@ The rule is a POSITIVE list, read from the object's own tags, never from a
 substring of the tag dump:
 
 1. Refused outright: any ``highway``, ``power``, ``shop``, ``tourism``,
-   ``leisure``, ``historic``, ``waterway``, ``public_transport`` or
-   ``barrier`` object; any ``amenity`` except a post depot; any ``railway``
-   except a yard; a pipeline; a lifecycle-prefixed site (``disused:``,
-   ``abandoned:``, ``demolished:``).
+   ``leisure``, ``historic``, ``waterway`` or ``public_transport`` object
+   (a ``barrier`` is NOT refused: a fenced industrial area is often drawn as
+   its own fence, and a bare gate fails rule 2 anyway); any ``amenity``
+   except a post depot; any ``railway`` except a yard; a pipeline; a
+   lifecycle-prefixed site (``disused:``, ``abandoned:``, ``demolished:``).
 2. Accepted as a freight site: ``building`` = warehouse, industrial, factory
    or manufacture; ``landuse=industrial``; ``man_made=works``; any
    ``industrial=*``; ``office`` = logistics or freight_forwarder;
@@ -57,7 +58,6 @@ REFUSED_KEYS = (
     "historic",
     "waterway",
     "public_transport",
-    "barrier",
     "pipeline",
 )
 LIFECYCLE_PREFIXES = ("disused:", "abandoned:", "demolished:", "razed:", "was:")

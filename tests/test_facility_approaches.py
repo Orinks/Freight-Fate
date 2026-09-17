@@ -26,15 +26,20 @@ def test_facility_approach_data_covers_full_facility_set(world):
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 5037
-    # Synced with facility_endpoints after far-pin regeocode (419 estimated).
-    assert coverage["source_backed_endpoints"] == 2779
-    assert coverage["road_snapped"] == 1928
-    assert coverage["turn_level"] == 1913
-    assert coverage["nearest_road_fallback"] == 851
+    # Synced with facility_endpoints after far-pin regeocode (419 estimated)
+    # and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
+    # had every chain to one of them rebuilt toward the new endpoint.
+    assert coverage["source_backed_endpoints"] == 2934
+    assert coverage["road_snapped"] == 2396
+    assert coverage["turn_level"] == 2364
+    assert coverage["nearest_road_fallback"] == 538
     # Sourced endpoints with no chain whose own OSM object is not a freight site
     # (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert coverage["endpoint_screen_refused"] == 783
-    assert coverage["representative_fallback"] == 2258
+    assert coverage["endpoint_screen_refused"] == 419
+    # Chains that still lead to a replaced endpoint because no public-road
+    # path reaches the new one; kept until a chain replaces them, and labelled.
+    assert coverage["stale_chain_kept"] == 82
+    assert coverage["representative_fallback"] == 2103
     assert coverage["gate_yard_dock_hints"] == 0
 
     # The 2026-07-14 regen keys records by current slug facility ids and
@@ -412,6 +417,22 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
     )
     assert unscreened["approaches"]["fixture:cross_dock"]["turn_level"]
 
+    # The endpoint row's own verdict counts too: the tag screen cannot see an
+    # endpoint across the border, or one the matcher has stopped accepting.
+    warehouse = osm_path.read_text(encoding="utf-8").replace(
+        '<tag k="power" v="substation" />', '<tag k="building" v="warehouse" />'
+    )
+    osm_path.write_text(warehouse, encoding="utf-8")
+    assert tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)[
+        "approaches"
+    ]["fixture:cross_dock"]["turn_level"]
+    across = "The sourced endpoint lies across the national border from its city."
+    monkeypatch.setattr(tool, "endpoint_row_refusals", lambda: {"fixture:cross_dock": across})
+    labelled = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    record = labelled["approaches"]["fixture:cross_dock"]
+    assert not record["turn_level"]
+    assert across in record["fallback_reason"]
+
 
 def test_search_budget_follows_the_endpoint_being_routed_to():
     """The path search was sized from the facility's representative pin, a
@@ -690,6 +711,98 @@ def test_merge_existing_refreshes_only_what_the_batch_attempted():
     assert merged["generated"]["states"] == ["Indiana", "Ohio"]
     assert merged["generated"]["merge"]["refreshed"] == 1
     assert merged["generated"]["merge"]["kept"] == 1
+
+
+def test_merge_rebuilds_a_chain_whose_endpoint_the_resweep_replaced():
+    """A chain belongs to the endpoint it was routed to. The endpoint re-sweep
+    swaps a railway line for a real warehouse; the chain must then follow.
+    When the new endpoint cannot be reached the old streets stay (owner
+    ruling: a chain is kept until one replaces it) and the row says so. A
+    chain whose endpoint merely failed the screen, with no replacement, is
+    left exactly as it was."""
+    tool = _load_tool()
+
+    def row(facility_id, *, turn_level, endpoint, note, reason=""):
+        stub = _approach_stub(facility_id, turn_level=turn_level, reason=reason)
+        return {**stub, "endpoint_name": endpoint, "source_note": note, "state": "Ohio"}
+
+    existing = {
+        "generated": {"states": ["Ohio"]},
+        "sources": [],
+        "approaches": {
+            "oh:rebuilt": row("oh:rebuilt", turn_level=True, endpoint="UP Subdivision", note="old"),
+            "oh:no_path": row("oh:no_path", turn_level=True, endpoint="Elm Substation", note="old"),
+            "oh:refused": row("oh:refused", turn_level=True, endpoint="Bus Terminal", note="old"),
+            "oh:good": row("oh:good", turn_level=True, endpoint="Acme Freight", note="same"),
+            "oh:rail": row(
+                "oh:rail", turn_level=False, endpoint="NS Main Line", note="old", reason="type"
+            ),
+        },
+    }
+    disconnected = tool.ROUTE_FAILURE_REASONS["disconnected"]
+    refused = tool.SCREEN_REFUSAL_PREFIX + "railway track. A street chain to it is not claimed."
+    fresh = {
+        "version": 1,
+        "generated": {
+            "family": "f",
+            "source_policy": "s",
+            "road_policy": "r",
+            "gate_policy": "g",
+            "max_route_mi": 18.0,
+            "states": ["Ohio"],
+        },
+        "sources": [],
+        "approaches": {
+            "oh:rebuilt": row(
+                "oh:rebuilt", turn_level=True, endpoint="Lakefront Warehouse", note="resweep"
+            ),
+            "oh:no_path": row(
+                "oh:no_path",
+                turn_level=False,
+                endpoint="Island Cold Storage",
+                note="resweep",
+                reason=disconnected,
+            ),
+            # Same endpoint as before, refused by the screen: nothing replaced it.
+            "oh:refused": row(
+                "oh:refused", turn_level=False, endpoint="Bus Terminal", note="old", reason=refused
+            ),
+            "oh:good": row(
+                "oh:good", turn_level=False, endpoint="Acme Freight", note="same", reason="x"
+            ),
+            # A type the tool does not route, whose endpoint was replaced.
+            "oh:rail": row(
+                "oh:rail", turn_level=False, endpoint="Corwith Yard", note="resweep", reason="type"
+            ),
+        },
+    }
+
+    merged = tool.merge_existing(
+        existing,
+        fresh,
+        {"oh:rebuilt", "oh:no_path", "oh:refused", "oh:good"},
+        accessed="2026-09-17",
+    )
+    rows = merged["approaches"]
+
+    assert rows["oh:rebuilt"] is fresh["approaches"]["oh:rebuilt"]
+    kept = rows["oh:no_path"]
+    assert kept["turn_level"]
+    assert kept["endpoint_name"] == "Elm Substation"
+    assert kept["stale_endpoint"] == {
+        "leads_to": "Elm Substation",
+        "endpoint_now": "Island Cold Storage",
+        "rebuild_failed": disconnected,
+        "accessed": "2026-09-17",
+    }
+    assert rows["oh:refused"] is existing["approaches"]["oh:refused"]
+    assert rows["oh:good"] is existing["approaches"]["oh:good"]
+    assert rows["oh:rail"]["endpoint_name"] == "Corwith Yard"
+    assert merged["coverage"]["turn_level"] == 4
+    assert merged["coverage"]["stale_chain_kept"] == 1
+    assert merged["generated"]["merge"]["rebuilt_to_new_endpoint"] == 1
+    assert merged["generated"]["merge"]["stale_chain_kept"] == 1
+    assert tool.shared_turn_level(existing, merged) == (4, 4)
 
 
 def test_facility_approach_status_names_the_dock_not_the_town():

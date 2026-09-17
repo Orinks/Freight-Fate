@@ -28,8 +28,20 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     assert coverage["facilities"] == 5037
     # After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
     # unresolvable pins became estimated-near-city fallbacks (2779/2258).
-    assert coverage["source_backed"] == 2779
-    assert coverage["fallback"] == 2258
+    # The 2026-09-17 re-sweep with the matcher that reads an object's own
+    # tags then filled 155 fallbacks (2934/2103) and replaced 1,224 endpoints
+    # that were railway lines, substations and shops. What the screen says of
+    # every sourced row is in the row: 1,939 are freight sites, 995 still are
+    # not (nothing better within 6.4 miles), and 175 of the sites state no
+    # trade, so the match to this facility's trade is assumed and says so.
+    assert coverage["source_backed"] == 2934
+    assert coverage["fallback"] == 2103
+    assert coverage["screen"] == {
+        "passed": 1939,
+        "refused": 995,
+        "not_screened": 0,
+        "trade_assumed": 175,
+    }
     assert coverage["nearest_road_context"] == 0
     assert coverage["turn_level_geometry"] == 0
     assert coverage["gate_yard_dock_hints"] == 0
@@ -80,6 +92,14 @@ def test_facility_endpoint_records_are_clean_and_honest(world):
         if record["source_backed"]:
             assert not record["fallback"]
             assert record["source_type"] == "osm_facility_endpoint"
+            # The screen verdict rides in the row, so a railway line that
+            # found no replacement is never mistaken for a yard gate.
+            assert record["endpoint_screen"] in ("passed", "refused")
+            if record["endpoint_screen"] == "refused":
+                assert record["endpoint_screen_reason"]
+            if "match_kind" in record:
+                assert record["match_kind"] in ("read", "assumed")
+            assert record["approach_miles"] <= 8.0
             assert record["approach_miles"] > 0
             assert record["approach_road"] == "local facility access road"
             assert "not claimed by this layer" in record["source_note"]
@@ -98,14 +118,17 @@ def test_facility_endpoint_records_are_clean_and_honest(world):
 
 
 def test_facility_route_prefers_source_backed_endpoint_when_available(world):
-    facility = world.facility_by_id("abilene:chemical_petroleum_terminal:abilene-energy-terminal")
-    endpoint = world.facility_endpoint("Abilene", facility.id)
-    route = world.facility_approach_route("Abilene", facility.name)
+    # A sourced endpoint with NO street chain (it sits a few blocks from the
+    # city anchor, under the chain floor). The Abilene energy terminal this
+    # used to pin gained a chain in the 2026-09-17 re-sweep.
+    facility = world.facility_by_id("muncie-in-us:cross_dock:muncie-cross-dock")
+    endpoint = world.facility_endpoint("muncie_in_us", facility.id)
+    route = world.facility_approach_route("muncie_in_us", facility.name)
 
     assert endpoint is not None
     assert endpoint.source_backed
     assert route.miles == pytest.approx(endpoint.approach_miles)
-    assert route.highways == [world.facility_approach("Abilene", facility.name).road]
+    assert route.highways == [world.facility_approach("muncie_in_us", facility.name).road]
 
 
 def test_facility_route_falls_back_to_local_approach_for_representative_endpoint(world):

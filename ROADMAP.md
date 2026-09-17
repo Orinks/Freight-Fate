@@ -163,30 +163,77 @@ These items are part of the release-gate sweep:
       Steel, automotive and chemical endpoints: 193 were matched by name
       substring, 45 pass the screen plus a stated-trade rule (14 steel, 14
       automotive, 17 chemical), and 37 of those carry chains now.
-- [ ] Re-sweep facility endpoints with a classifier that reads tags the way
-      the endpoint screen does, not substrings of the tag dump. About 2,200
-      sourced endpoints are not freight sites, so only 517 of the 1,913
-      chains lead to one until they are re-matched. OWNER DECISION
-      first: the 1,396 existing chains whose endpoint is a railway line, a
-      substation, a shop or a road play as real streets in the right town
-      but end at the wrong door. Keep them until the re-sweep replaces
-      them (recommended: a real street chain still beats departing straight
-      onto the highway), or demote them now. The 419 estimated-near-city
-      residuals stay estimated by owner ruling.
-- [ ] Departure chains behind private yard roads (8 of 132 CA/NY/TX
-      failures): the sourced endpoint sits on a road fragment joined to the
-      street network only by access=private ways. Option: route over the
-      private ways to find the right street, then end the chain at the
-      last public node. Not built; needs the owner's yes, because a chain
-      must never claim a gated road.
+      Endpoint re-sweep, also 2026-09-17, all 49 extracts: chains went from
+      1,913 to 2,364 of 5,037 (47 percent), and the ones that end at a
+      freight site from 517 to 1,722. Sourced endpoints that are freight
+      sites went from 568 to 1,939 of 2,934. 1,224 railway lines,
+      substations and shops were replaced by a freight site inside the
+      6.4-mile city bound, 155 fallbacks were filled, and 995 found nothing
+      better and carry the screen's refusal in their own row. 175 of the
+      sites state no trade (a named industrial business standing in for a
+      template cross-dock), and those rows say the trade is assumed. Every
+      endpoint that already passed was kept byte for byte, and the 419
+      estimated rows were not touched. 642 chains still end at a non-site:
+      560 whose endpoint found no replacement, kept by owner ruling, and 82
+      whose endpoint was replaced but whose new site no public road reaches
+      (61 behind private yard roads, a motorway or water, 12 under the
+      chain floor), kept with a stale_endpoint note until a chain replaces
+      them.
+- [x] Re-sweep facility endpoints with a matcher that reads an object's own
+      tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
+      ruling that the 1,396 chains to non-sites stay until a re-sweep
+      replaces them. tools/facility_endpoint_match.py states every rule
+      and the kind of each value: the endpoint screen is the gate, the
+      trade must be stated by a tag or by whole words of the name, rail
+      yards serve the intermodal types and industrial=port the ports, and
+      the 6.4-mile bound is the far-pin regeocode's, not tuned. A border
+      screen reads admin_level=2 relation ways, because the Arizona extract
+      holds the maquiladoras on the fence at Douglas. The re-sweep is a
+      merge and can be re-run a state at a time. The approach builder
+      rebuilds a chain whose endpoint was replaced and labels the ones it
+      could not. Numbers are in the item above.
+- [ ] 995 sourced endpoints are still not freight sites, 560 of them under
+      a chain. Named sites ran out: OpenStreetMap names few warehouses in
+      small towns. OWNER DECISION: 365 of the 995 have an UNNAMED
+      building=warehouse, works or rail yard of their own family inside the
+      bound (measured from the cached extracts, before two facilities
+      compete for one building). The tag states the trade, so the match
+      would be read, but a tool shed is a building=industrial too, and a
+      floor area to keep sheds out has to be calibrated against named
+      warehouses first. Recommended: yes for the warehouse and
+      manufacturing families, with the floor reported and the row labelled
+      unnamed. Not built.
+- [ ] Facility types the endpoint sweep has no rule for: 261 grain
+      elevators, 144 quarries, 94 construction materials yards, 63 lumber
+      and paper sites. Each needs a rule in the matcher and an accepted
+      site tag in the screen (man_made=silo, landuse=quarry). The long
+      synthetic approach tests use Payson Quarry because it has no sourced
+      endpoint; re-point them in the same change.
+- [ ] Route the sibling types the approach builder still skips:
+      intermodal, rail, manufacturing, air cargo, food terminal and
+      industrial park, 36 facilities, 26 of them with a screened endpoint
+      now. Nothing about the endpoints argues against it. A dozen core and
+      game tests use Chicago's first facility (Cicero Rail Hub, an
+      intermodal) as the stock single-leg approach and need re-pointing in
+      the same change.
+- [ ] Departure chains behind private yard roads. After the endpoint
+      re-sweep this is the largest routing loss: 81 screened endpoints
+      with no chain and 61 stale chains sit on a road fragment joined to
+      the street network only by access=private ways, a motorway or water
+      (8 of 132 CA/NY/TX failures were the private kind when classified).
+      Option: route over the private ways to find the right street, then
+      end the chain at the last public node. Not built; needs the owner's
+      yes, because a chain must never claim a gated road.
 
 #### World data and sound licensing blockers
 
 World-data geometry for 1.9 (curves, refuse legs, far approach pins)
 closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
 world-data item (see above): every state was re-swept 2026-09-17 with the
-path failures fixed, and what is left is the endpoint re-sweep, because
-four in five sourced endpoints are not freight sites.
+path failures fixed, and the endpoint re-sweep landed the same day (2,364
+chains, 47 percent, 1,722 of them to a freight site). What is left is the
+third of sourced endpoints with no named freight site in reach, the
+facility types with no matcher rule, and the private yard road decision.
 
 - [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry.
       CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
