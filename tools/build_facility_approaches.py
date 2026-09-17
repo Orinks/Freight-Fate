@@ -14,6 +14,13 @@ run did not attempt keeps its record byte for byte (so the estimated-near-city
 residuals from the far-pin regeocode keep their honest reason), and the
 ``generated.regeocode_far_pins`` block survives. ``--no-merge-existing``
 is the old whole-file rebuild.
+
+A chain belongs to the endpoint it was routed to. When the endpoint re-sweep
+(``build_facility_endpoints``) has REPLACED a facility's endpoint, the chain
+is rebuilt toward the new one and the fresh chain wins. If the rebuild finds
+no path the old streets stay (owner ruling, 2026-09-17: a chain is kept until
+one replaces it) but the row says so: ``stale_endpoint`` names the endpoint
+the streets still lead to and why the rebuild failed.
 """
 
 from __future__ import annotations
@@ -81,6 +88,14 @@ HIGH_CONFIDENCE_TYPES = {
 # reads the endpoint's own OSM tags and wants the trade stated by tag or by a
 # whole word in the name. 45 of their 193 sourced endpoints pass. With
 # `--no-endpoint-screen` they stay out, as before.
+#
+# 2026-09-17, after the endpoint re-sweep: the sibling types of the set above
+# (an "intermodal" or "rail" facility is an intermodal ramp by another name,
+# "manufacturing" a manufacturing plant) route on the same terms. They were
+# left out because nobody trusted their endpoints; the screen is that trust.
+SCREENED_SIBLING_TYPES = frozenset(
+    {"air_cargo", "food_terminal", "industrial_park", "intermodal", "manufacturing", "rail"}
+)
 SCREEN_REFUSAL_PREFIX = "Sourced endpoint failed the freight-site screen: "
 
 
@@ -140,7 +155,9 @@ def build_facility_approaches(
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
     state_set = set(states)
-    eligible_types = HIGH_CONFIDENCE_TYPES | (NAME_MATCHED_TYPES if endpoint_screen else set())
+    eligible_types = HIGH_CONFIDENCE_TYPES | (
+        NAME_MATCHED_TYPES | SCREENED_SIBLING_TYPES if endpoint_screen else set()
+    )
     routable = [
         target
         for target in targets
@@ -237,10 +254,14 @@ def merge_existing(
     """Fold a batch payload into the checked-in one without losing chains.
 
     Per facility, in order: a facility the batch routed to turn level takes
-    the fresh record; a prior turn-level chain the batch could not better is
-    kept (so ``turn_level`` never falls below the base file); a facility the
-    batch attempted and still could not route takes the fresh fallback, whose
-    reason is this run's real routing outcome; anything else keeps its prior
+    the fresh record, which is also how a chain whose endpoint the re-sweep
+    replaced gets rebuilt; a prior turn-level chain the batch could not better
+    is kept (so ``turn_level`` never falls below the base file), and when its
+    endpoint has been replaced and the batch tried and failed to reach the new
+    one it is kept WITH a ``stale_endpoint`` note (:func:`chain_is_current`); a
+    facility the batch attempted and still could not route takes the fresh
+    fallback, whose reason is this run's real routing outcome (so does a
+    chainless row whose endpoint changed); anything else keeps its prior
     record untouched, which is what protects the estimated-near-city
     residuals and every state outside the batch. Facilities the world no
     longer knows drop, as in a whole rebuild. ``generated`` keeps every prior
@@ -248,7 +269,9 @@ def merge_existing(
     list becomes the union, and ``merge`` records what the batch did.
     """
     prior = existing.get("approaches") or {}
+    batch_state_set = set(fresh["generated"]["states"])
     summary = {"new_geometry": 0, "kept_turn_level": 0, "refreshed": 0, "kept": 0, "added": 0}
+    rebuilt = stale = 0
     approaches: dict[str, Any] = {}
     for facility_id, record in fresh["approaches"].items():
         old = prior.get(facility_id)
@@ -258,10 +281,29 @@ def merge_existing(
         elif record["turn_level"]:
             approaches[facility_id] = record
             summary["new_geometry"] += 1
+            if old.get("turn_level") and not chain_is_current(old, record):
+                rebuilt += 1
         elif old.get("turn_level"):
+            if facility_id in attempted and not chain_is_current(old, record):
+                old = {
+                    **old,
+                    "stale_endpoint": {
+                        "leads_to": old.get("endpoint_name", ""),
+                        "endpoint_now": record.get("endpoint_name", ""),
+                        "rebuild_failed": record.get("fallback_reason", ""),
+                        "accessed": accessed,
+                    },
+                }
+                stale += 1
             approaches[facility_id] = old
             summary["kept_turn_level"] += 1
-        elif facility_id in attempted:
+        elif facility_id in attempted or (
+            record.get("state") in batch_state_set
+            and record.get("endpoint_source_backed")
+            and old.get("endpoint_name") != record.get("endpoint_name")
+        ):
+            # Tried and failed, or a chainless row of a type this tool does
+            # not route whose endpoint the re-sweep has since replaced.
             approaches[facility_id] = record
             summary["refreshed"] += 1
         else:
@@ -274,8 +316,11 @@ def merge_existing(
         generated[key] = fresh["generated"][key]
     generated["states"] = sorted(set(generated.get("states") or []) | set(batch_states))
     generated["merge"] = {"accessed": accessed, "batch_states": batch_states, **summary}
+    if rebuilt or stale:
+        # Only a batch that met a re-swept endpoint reports these.
+        generated["merge"]["rebuilt_to_new_endpoint"] = rebuilt
+        generated["merge"]["stale_chain_kept"] = stale
 
-    batch_state_set = set(batch_states)
     sources = [
         source
         for source in existing.get("sources") or []
@@ -290,6 +335,16 @@ def merge_existing(
         "coverage": coverage_summary(approaches),
         "approaches": approaches,
     }
+
+
+def chain_is_current(old: dict[str, Any], fresh: dict[str, Any]) -> bool:
+    """Whether the prior chain was routed to the endpoint the facility has
+    NOW. READ from the two rows: a row copies its endpoint's name and source
+    note when it is built, and the endpoint re-sweep rewrites both when it
+    replaces an endpoint (and neither when it keeps or merely labels one)."""
+    return old.get("endpoint_name") == fresh.get("endpoint_name") and old.get(
+        "source_note"
+    ) == fresh.get("source_note")
 
 
 def shared_turn_level(existing: dict[str, Any], merged: dict[str, Any]) -> tuple[int, int]:
@@ -490,7 +545,9 @@ def fallback_reason(
         return "Source-backed endpoint is outside this bounded Midwest road-snap batch."
     if route_failure.startswith(SCREEN_REFUSAL_PREFIX):
         return f"{route_failure} A street chain to it is not claimed."
-    if target.facility_type not in HIGH_CONFIDENCE_TYPES | NAME_MATCHED_TYPES:
+    if target.facility_type not in (
+        HIGH_CONFIDENCE_TYPES | NAME_MATCHED_TYPES | SCREENED_SIBLING_TYPES
+    ):
         return "Facility type was outside the high-confidence road-snap category set."
     if routed_approach_miles(target) > MAX_ROUTE_MI:
         return "Facility is beyond the bounded local route distance for this pass."
@@ -544,6 +601,9 @@ def coverage_summary(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "representative_fallback": sum(
             1 for item in records.values() if item["representative_fallback"]
         ),
+        # Chains still leading to an endpoint the re-sweep replaced, because
+        # no path to the new endpoint was found.
+        "stale_chain_kept": sum(1 for item in records.values() if item.get("stale_endpoint")),
         "gate_yard_dock_hints": sum(
             1
             for item in records.values()

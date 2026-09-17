@@ -692,6 +692,98 @@ def test_merge_existing_refreshes_only_what_the_batch_attempted():
     assert merged["generated"]["merge"]["kept"] == 1
 
 
+def test_merge_rebuilds_a_chain_whose_endpoint_the_resweep_replaced():
+    """A chain belongs to the endpoint it was routed to. The endpoint re-sweep
+    swaps a railway line for a real warehouse; the chain must then follow.
+    When the new endpoint cannot be reached the old streets stay (owner
+    ruling: a chain is kept until one replaces it) and the row says so. A
+    chain whose endpoint merely failed the screen, with no replacement, is
+    left exactly as it was."""
+    tool = _load_tool()
+
+    def row(facility_id, *, turn_level, endpoint, note, reason=""):
+        stub = _approach_stub(facility_id, turn_level=turn_level, reason=reason)
+        return {**stub, "endpoint_name": endpoint, "source_note": note, "state": "Ohio"}
+
+    existing = {
+        "generated": {"states": ["Ohio"]},
+        "sources": [],
+        "approaches": {
+            "oh:rebuilt": row("oh:rebuilt", turn_level=True, endpoint="UP Subdivision", note="old"),
+            "oh:no_path": row("oh:no_path", turn_level=True, endpoint="Elm Substation", note="old"),
+            "oh:refused": row("oh:refused", turn_level=True, endpoint="Bus Terminal", note="old"),
+            "oh:good": row("oh:good", turn_level=True, endpoint="Acme Freight", note="same"),
+            "oh:rail": row(
+                "oh:rail", turn_level=False, endpoint="NS Main Line", note="old", reason="type"
+            ),
+        },
+    }
+    disconnected = tool.ROUTE_FAILURE_REASONS["disconnected"]
+    refused = tool.SCREEN_REFUSAL_PREFIX + "railway track. A street chain to it is not claimed."
+    fresh = {
+        "version": 1,
+        "generated": {
+            "family": "f",
+            "source_policy": "s",
+            "road_policy": "r",
+            "gate_policy": "g",
+            "max_route_mi": 18.0,
+            "states": ["Ohio"],
+        },
+        "sources": [],
+        "approaches": {
+            "oh:rebuilt": row(
+                "oh:rebuilt", turn_level=True, endpoint="Lakefront Warehouse", note="resweep"
+            ),
+            "oh:no_path": row(
+                "oh:no_path",
+                turn_level=False,
+                endpoint="Island Cold Storage",
+                note="resweep",
+                reason=disconnected,
+            ),
+            # Same endpoint as before, refused by the screen: nothing replaced it.
+            "oh:refused": row(
+                "oh:refused", turn_level=False, endpoint="Bus Terminal", note="old", reason=refused
+            ),
+            "oh:good": row(
+                "oh:good", turn_level=False, endpoint="Acme Freight", note="same", reason="x"
+            ),
+            # A type the tool does not route, whose endpoint was replaced.
+            "oh:rail": row(
+                "oh:rail", turn_level=False, endpoint="Corwith Yard", note="resweep", reason="type"
+            ),
+        },
+    }
+
+    merged = tool.merge_existing(
+        existing,
+        fresh,
+        {"oh:rebuilt", "oh:no_path", "oh:refused", "oh:good"},
+        accessed="2026-09-17",
+    )
+    rows = merged["approaches"]
+
+    assert rows["oh:rebuilt"] is fresh["approaches"]["oh:rebuilt"]
+    kept = rows["oh:no_path"]
+    assert kept["turn_level"]
+    assert kept["endpoint_name"] == "Elm Substation"
+    assert kept["stale_endpoint"] == {
+        "leads_to": "Elm Substation",
+        "endpoint_now": "Island Cold Storage",
+        "rebuild_failed": disconnected,
+        "accessed": "2026-09-17",
+    }
+    assert rows["oh:refused"] is existing["approaches"]["oh:refused"]
+    assert rows["oh:good"] is existing["approaches"]["oh:good"]
+    assert rows["oh:rail"]["endpoint_name"] == "Corwith Yard"
+    assert merged["coverage"]["turn_level"] == 4
+    assert merged["coverage"]["stale_chain_kept"] == 1
+    assert merged["generated"]["merge"]["rebuilt_to_new_endpoint"] == 1
+    assert merged["generated"]["merge"]["stale_chain_kept"] == 1
+    assert tool.shared_turn_level(existing, merged) == (4, 4)
+
+
 def test_facility_approach_status_names_the_dock_not_the_town():
     # Owner playtest 2026-07-19: 14 miles of "toward Camp Verde" while
     # pulling out of Camp Verde for its own warehouse read as a wrong turn.
