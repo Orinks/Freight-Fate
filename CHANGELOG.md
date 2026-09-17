@@ -47,6 +47,8 @@
 
 ### Added
 
+- **Gilley's and the Longhorn Ballroom are on the Texas billboards.** Houston remembers the Urban Cowboy honky-tonk; Dallas advertises the bull and Bob Wills' ballroom.
+
 - **The scale's inspection lane is a real Level 1 inspection.** Worn tires, brakes, damage and trailer defects are written up; a critical one parks you.
 
 - **A clean Level 1 earns an inspection decal.** Open scales wave you through for three months unless your record is targeted.

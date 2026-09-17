@@ -471,6 +471,11 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Phoenix, Houston, Baton Rouge, Biloxi, El Paso, and the Big Thicket.
         approaching("Phoenix ahead, eventually. The desert gives you time to think. Glen Campbell got By the Time I Get to Phoenix out of it.", &["phoenix_az_us"]),
         approaching("Houston ahead. Larry Gatlin measured this trip in days and just called the song Houston.", &["houston_tx_us"]),
+        // Gilley's, the Urban Cowboy honky-tonk, stood in Pasadena outside
+        // Houston until it closed in nineteen eighty-nine and burned the year
+        // after; the bull El Toro went to Gilley's Dallas. Past tense on
+        // purpose: a board promising the Pasadena room would be a lie.
+        approaching("Houston ahead. Gilley's, the Urban Cowboy honky-tonk, stood in Pasadena until the eighties. The bull moved to Dallas. The boots stayed.", &["houston_tx_us"]),
         approaching("Baton Rouge ahead. Kris Kristofferson set Me and Bobby McGee hitchhiking out of here. Pick up the song, not the hitchhikers.", &["baton_rouge_la_us"]),
         in_states("Biloxi by two? Only if you keep it moving. Ellis Bullard makes it sound easy.", &["MS"]),
         approaching("El Paso, out past the haze. Marty Robbins sang El Paso City and the Streets of Laredo. West Texas gave him the material.", &["el_paso_tx_us"]),
@@ -569,6 +574,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // an unmapped shield. Laredo and San Antonio keep the I-35 Tejano lane.
         // Paying venue -- Billy Bob's Texas, Fort Worth.
         approaching("Fort Worth ahead. Billy Bob's Texas is a real honky-tonk with a zip code. Bob Wills already got the other board.", &["fort_worth_tx_us"]),
+        // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
+        // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
+        // reopened restored in twenty twenty-three.
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
         // Kolache stands at West, Texas on I-35 -- invented copy, no stolen bakery slogan.
         approaching("Waco ahead. West, Texas, is kolache country. The bakery has been stopping traffic since the interstate was new.", &["waco_tx_us"]),
         in_states("Flattest stretch in Kansas: wheat, sky, and telephone poles. Glen Campbell got Wichita Lineman out of one of those poles. Plenty left.", &["KS"]),
@@ -669,6 +678,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     // Song tribute -- Hope, Arkansas (Brennen Leigh).
     ("I-30", &[
         in_states("Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.", &["AR"]),
+        // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
+        // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
+        // reopened restored in twenty twenty-three.
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
     ]),
     // I-8 Mexican Radio / Wall of Voodoo was radio memory of Rio Grande
     // border-blasters, not a paid board on Interstate 8. Pulled.
@@ -685,6 +698,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.", &["TX"]),
         in_states("Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.", &["TX"]),
         approaching("Abilene ahead. George Hamilton the Fourth made the town sound gentle as a Sunday. Watch for crosswinds.", &["abilene_tx_us"]),
+        // Gilley's Dallas, open since two thousand three with the original
+        // bull from the film; an event hall now, not a nightly honky-tonk.
+        approaching("Dallas ahead. Gilley's Dallas keeps the original bull from Urban Cowboy. Eight seconds is the ride. The dock appointment is not.", &["dallas_tx_us"]),
     ]),
     // Theme-park approach boards on I-4 -- tourism OOH, no Disney slogans.
     ("I-4", &[
@@ -693,6 +709,18 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     // Space Center Houston tourism on I-45.
     ("I-45", &[
         approaching("Houston ahead. Space Center Houston is a real room they flew from. The trailer stays on the planet.", &["houston_tx_us"]),
+        // Gilley's, the Urban Cowboy honky-tonk, stood in Pasadena outside
+        // Houston until it closed in nineteen eighty-nine and burned the year
+        // after; the bull El Toro went to Gilley's Dallas. Past tense on
+        // purpose: a board promising the Pasadena room would be a lie.
+        approaching("Houston ahead. Gilley's, the Urban Cowboy honky-tonk, stood in Pasadena until the eighties. The bull moved to Dallas. The boots stayed.", &["houston_tx_us"]),
+        // Gilley's Dallas, open since two thousand three with the original
+        // bull from the film; an event hall now, not a nightly honky-tonk.
+        approaching("Dallas ahead. Gilley's Dallas keeps the original bull from Urban Cowboy. Eight seconds is the ride. The dock appointment is not.", &["dallas_tx_us"]),
+        // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
+        // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
+        // reopened restored in twenty twenty-three.
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
     ]),
 ];
 
@@ -1142,6 +1170,8 @@ mod tests {
             "Blueberry Hill",
             "Billy Bob",
             "Birthplace of Country Music",
+            "Gilley",
+            "Longhorn Ballroom",
             "Kentucky Horse Park",
             "Cajun",
             "Sheetz",

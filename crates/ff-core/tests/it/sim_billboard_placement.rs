@@ -160,6 +160,8 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Gateway Arch", &["MO", "IL", "KS"]),
     ("Blueberry Hill", &["MO", "IL", "KS"]),
     ("Billy Bob's Texas", &["TX"]),
+    ("Gilley's", &["TX", "LA", "OK", "AR", "NM"]),
+    ("Longhorn Ballroom", &["TX", "OK", "AR", "LA"]),
     ("kolache country", &["TX"]),
     ("Crystal Palace", &["CA"]),
     ("Ryman Auditorium", &["TN", "KY", "AL"]),
