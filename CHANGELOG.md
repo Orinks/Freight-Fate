@@ -32,12 +32,16 @@
 - **The map's fuel-gap search no longer hammers the shared map server.** It backs off when asked and never records a failed lookup as an empty corridor; convenience plazas stay bobtail-only unless the name says travel center.
 
 - **Traffic lights announce only their color, and the approach countdown says only the distance.**
+  Contributed by Tim ([@trssharp](https://github.com/trssharp)) in [PR #191](https://github.com/Orinks/Freight-Fate/pull/191).
 
 - **Route status starts with your location or arrival information instead of saying "Route status."**
+  Contributed by Tim ([@trssharp](https://github.com/trssharp)) in [PR #192](https://github.com/Orinks/Freight-Fate/pull/192).
 
 - **The exit blinker keeps clicking until you take, cancel, or miss the exit.**
+  Contributed by Tim ([@trssharp](https://github.com/trssharp)) in [PR #190](https://github.com/Orinks/Freight-Fate/pull/190).
 
 - **Canceling an exit stops its countdown and lane guidance until you signal again.**
+  Contributed by Tim ([@trssharp](https://github.com/trssharp)) in [PR #190](https://github.com/Orinks/Freight-Fate/pull/190).
 
 ### Added
 
@@ -232,7 +236,8 @@
 - **Thousands more real stations on the dial.** Local commercial stations
   come in near their real transmitters, and a new Web radio band carries
   internet stations from everywhere (station catalog contributed by
-  CatalystForChaos in pull request 150).
+  CatalystForChaos, [@CatalystForChaos](https://github.com/CatalystForChaos),
+  [PR #150](https://github.com/Orinks/Freight-Fate/pull/150)).
 
 - **Save your stations with O.** O keeps the current station as a favorite
   and lets it go on a second press; Favorites are their own dial category
@@ -414,6 +419,11 @@
 - **A new Place callouts setting controls how much you hear.** Sparse, the
   default, names only the towns that explain a limit change; all adds the
   towns you pass through; off silences place names.
+
+- **Roadside chatter has its own switches.** Landmarks, billboards, and
+  truck stop flavor each have a setting, so you choose what the road tells
+  you. Contributed by Noel Romey ([@nromey](https://github.com/nromey)) in
+  [PR #54](https://github.com/Orinks/Freight-Fate/pull/54).
 
 - **Every stop the game announces is one your truck can enter.** Car-scale
   gas stations are no longer announced or offered as exits, and hundreds of
@@ -1039,7 +1049,8 @@
   one mile per hour.**
 
 - **The engine now sounds like you are sitting in the cab, not standing beside
-  the truck.**
+  the truck.** Contributed by Noel Romey
+  ([@nromey](https://github.com/nromey)) in [PR #162](https://github.com/Orinks/Freight-Fate/pull/162).
 
 - **Running off the pavement no longer talks in a loop.** It speaks when it
   happens, again if it gets worse, and once more when you are back on the
@@ -1356,7 +1367,8 @@
 
 - **Snow chains and chain laws have arrived on the steep grades.** Buy a
   chain set at the garage, and chain up from the pause menu when a sign
-  calls the chain law.
+  calls the chain law. Contributed by Noel Romey
+  ([@nromey](https://github.com/nromey)) in [PR #75](https://github.com/Orinks/Freight-Fate/pull/75).
 
 - **Chains grind apart if you run them fast or on bare pavement.** Rolling
   into an active chain law out of compliance gets a warning and maybe a
@@ -1487,7 +1499,8 @@
 
 - **G announces an upcoming grade directly.** When a gentler hill or short
   steep stretch is ahead, the terrain report names it without first saying
-  there is nothing steep ahead.
+  there is nothing steep ahead. Contributed by trssharp
+  ([@trssharp](https://github.com/trssharp)) in [PR #189](https://github.com/Orinks/Freight-Fate/pull/189).
 
 - **Running the light or the stop sign at a ramp end can now cost you a
   ticket.** Cross traffic varies each time, and a trooper at the crossroad may
@@ -1538,7 +1551,7 @@
 
 - **Exit assistance slows early enough and gives the pedals back.** Ramp-end
   assistance no longer crawls toward a distant stop, and holding the
-  accelerator overrides it (thanks to Tower, @TowerAlphaTheta15, for the
+  accelerator overrides it (thanks to Tower, [@TowerAlphaTheta15](https://github.com/TowerAlphaTheta15), for the
   report and original fix in
   [PR #185](https://github.com/Orinks/Freight-Fate/pull/185)).
 
@@ -1853,7 +1866,9 @@
   arrival says the dock menu is opening and leaves it there.
 
 - **Driving keys now work with JAWS without the pass-through key.** Hold Up,
-  Down, Left, or Right to drive, the same as everyone else.
+  Down, Left, or Right to drive, the same as everyone else. Contributed by
+  Noel Romey ([@nromey](https://github.com/nromey)) in [PR #167](https://github.com/Orinks/Freight-Fate/pull/167) and
+  [PR #168](https://github.com/Orinks/Freight-Fate/pull/168).
 
 - **Through JAWS, letting go of a pedal or the wheel lands a moment late, and
   the double tap and hold that latches a pedal cannot be caught.**
@@ -2551,7 +2566,8 @@
   still carries over the engine.
 
 - **The stop bar's steady tone always stops.** It ends the moment the bar is
-  behind you, and pausing or arriving silences it.
+  behind you, and pausing or arriving silences it. Contributed by Noel Romey
+  ([@nromey](https://github.com/nromey)) in [PR #149](https://github.com/Orinks/Freight-Fate/pull/149).
 
 - **Rumble strip sound no longer keeps playing when you pause on the
   strip.**
@@ -3019,7 +3035,8 @@
   old credentials remain intact instead of being removed, and Windows will
   not put a new token into a plain text fallback file. The setup menu explains
   how to retry without claiming that unsaved credentials connected. Thanks
-  to trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
+  to Tyler Rodick, [@trodick](https://github.com/trodick),
+  [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
 
 ### Fixed
 
@@ -3100,7 +3117,8 @@
   first or latest message, switch categories, and copy the current message to
   the clipboard. Contributed by Day Garwood
   ([@day-garwood](https://github.com/day-garwood)) in
-  [PR #122](https://github.com/Orinks/Freight-Fate/pull/122).
+  [PR #122](https://github.com/Orinks/Freight-Fate/pull/122) and
+  [PR #124](https://github.com/Orinks/Freight-Fate/pull/124).
 
 - **Tire sounds now react to your speed.** On supported audio systems, the tire
   hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
@@ -3177,7 +3195,8 @@
   already fully rested at a rest stop, choosing a sleep option now warns you
   that it would only move the clock and your deadline forward, and asks you to
   press Enter again to confirm. This is the same safeguard the terminal bunk
-  room already had.
+  room already had. Contributed by Brandon Cross
+  ([@ironcross32](https://github.com/ironcross32)) in [PR #112](https://github.com/Orinks/Freight-Fate/pull/112).
 - **Everything online now lives in one Online menu on the main menu.** The
   drivers board, orinks.net account setup, Profile sharing, cloud backup and
   restore, Mastodon sharing, and Discord presence moved out of Settings into
@@ -3282,7 +3301,8 @@
   really are, so the status readout no longer puts you in the mountains where
   no Texan would. The real climbs you brace for still call out as mountain
   grades, and every famous grade -- the Grapevine, Monteagle, the Siskiyous,
-  the run up to the Continental Divide -- keeps its name. Thanks to nromey,
+  the run up to the Continental Divide -- keeps its name. Thanks to Noel
+  Romey, [@nromey](https://github.com/nromey),
   [PR #107](https://github.com/Orinks/Freight-Fate/pull/107).
 
 - **Starting a new career no longer talks over itself.** Naming your driver
@@ -3329,6 +3349,7 @@
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
   career still begins on March 21. Thanks to TowerAlphaTheta15,
+  [@TowerAlphaTheta15](https://github.com/TowerAlphaTheta15),
   [PR #88](https://github.com/Orinks/Freight-Fate/pull/88).
 - **Map stops now open a full details view, and you can plan your next
   stop.** On the driving Map screen, pressing Enter on a stop now opens its
@@ -3339,7 +3360,8 @@
   the upcoming and clock readouts then call it your planned stop, so you know
   exactly when to signal for the exit. Plans can be canceled or replaced any
   time, survive saving and resuming, and clear themselves when you pull in or
-  drive past. Thanks to ironcross32,
+  drive past. Thanks to Brandon Cross,
+  [@ironcross32](https://github.com/ironcross32),
   [PR #94](https://github.com/Orinks/Freight-Fate/pull/94).
 - **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
 
@@ -3360,8 +3382,8 @@
   game. A save that was changed outside the game, or copied over from another
   computer, still loads and plays normally, but the game tells you once and
   marks that career as modified; shared features may not accept a modified
-  career. Thanks to nromey, [PR
-  #96](https://github.com/Orinks/Freight-Fate/pull/96).
+  career. Thanks to Noel Romey, [@nromey](https://github.com/nromey),
+  [PR #96](https://github.com/Orinks/Freight-Fate/pull/96).
 
 - **Moving a planned stop now asks first, and each stop only cancels its own
   plan.** A stop's details screen shows the cancel option only when that stop
@@ -3382,7 +3404,8 @@
   versions: the truck you were driving keeps its condition, and your other
   trucks start fueled and fresh. Back up your career save before opening it in
   this version. If the conversion causes a problem, include both the original
-  backup and the updated save with your issue report. Thanks to ironcross32,
+  backup and the updated save with your issue report. Thanks to Brandon
+  Cross, [@ironcross32](https://github.com/ironcross32),
   [PR #91](https://github.com/Orinks/Freight-Fate/pull/91).
 
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
@@ -3428,7 +3451,8 @@
   over promptly and cleanly gives a small chance a ticket is waived to a warning.
   Keep accelerating, coast along without slowing, or ignore the lights and it
   still ends in a felony stop. You no longer have to hold the emergency brake
-  the entire time; braking steadily is enough. Thanks to ironcross32,
+  the entire time; braking steadily is enough. Thanks to Brandon Cross,
+  [@ironcross32](https://github.com/ironcross32),
   [PR #103](https://github.com/Orinks/Freight-Fate/pull/103).
 
 - **Taking your planned stop's exit no longer warns that you drove past it.**
@@ -3437,7 +3461,8 @@
   were stopping there. Now the warning only speaks when the stop is truly out of
   reach: if you drive past the exit without signaling, if you signal but are
   going too fast to make the ramp, or if you take the exit but never stop and
-  roll on past the end of the ramp. Thanks to ironcross32,
+  roll on past the end of the ramp. Thanks to Brandon Cross,
+  [@ironcross32](https://github.com/ironcross32),
   [PR #102](https://github.com/Orinks/Freight-Fate/pull/102).
 - **Taking an exit and never stopping no longer strands you on the ramp.**
   If you took an exit but kept driving without ever coming to a stop, the game
@@ -3455,6 +3480,7 @@
   now names cities whose observations are loading or unavailable instead of
   silently skipping them, and weather-change announcements identify live
   observations and simulated fallback conditions. Thanks to TowerAlphaTheta15,
+  [@TowerAlphaTheta15](https://github.com/TowerAlphaTheta15),
   [PR #99](https://github.com/Orinks/Freight-Fate/pull/99).
 - **Cloud Backup works again on test builds.** Careers from a recent test
   build were being turned away with a message about the backup being
@@ -3563,12 +3589,13 @@
   its own folder is read only and keeps your saves in your personal user
   folder instead, so the game saves and plays normally wherever you install
   it. Saves that are already beside the game are still used as before. Thanks
-  to ryanb96, [PR #92](https://github.com/Orinks/Freight-Fate/pull/92).
+  to Ryan Bishop, [@ryanb96](https://github.com/ryanb96),
+  [PR #92](https://github.com/Orinks/Freight-Fate/pull/92).
 - **The engine load now follows throttle smoothly.** Engine effort remains
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine
   volume jump. Automatic shifts retain a brief, gentle unload and recovery.
-  Thanks to TowerAlphaTheta15,
+  Thanks to TowerAlphaTheta15, [@TowerAlphaTheta15](https://github.com/TowerAlphaTheta15),
   [PR #89](https://github.com/Orinks/Freight-Fate/pull/89).
 - **Terminal weather now agrees with the live report on the road.** Time and
   weather uses the real station temperature even when live weather does not
@@ -3583,7 +3610,8 @@
   speeding. Every such sample is gone (no US interstate mainline posts
   below 45), and an automatic check now keeps them from ever coming back.
   Small-town limits on US and state highways are real and unchanged. Thanks
-  to nromey, [PR #86](https://github.com/Orinks/Freight-Fate/pull/86).
+  to Noel Romey, [@nromey](https://github.com/nromey),
+  [PR #86](https://github.com/Orinks/Freight-Fate/pull/86).
 
 - **The destination exit can no longer show up a state early.** On routes
   that finish on rural highways, the game could announce the destination
@@ -3608,7 +3636,7 @@
   you to thirty miles per hour for miles of open road. Those stray
   readings are gone: the limit you hear at the wheel now matches the
   road you are actually on, and speeding enforcement judges you against
-  that honest number. Thanks to nromey,
+  that honest number. Thanks to Noel Romey, [@nromey](https://github.com/nromey),
   [PR #82](https://github.com/Orinks/Freight-Fate/pull/82).
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
@@ -3626,7 +3654,8 @@
   wear between zero and one hundred, honest delivery counts, a fuel tank
   that fits in a truck. A file that fails is refused with a plainly spoken
   reason instead of being loaded, and saves from newer versions of the
-  game still restore fine.
+  game still restore fine. Contributed by Noel Romey
+  ([@nromey](https://github.com/nromey)) in [PR #76](https://github.com/Orinks/Freight-Fate/pull/76).
 
 ### Fixed
 
@@ -3660,12 +3689,15 @@
   to sit at the same volume as the rest of the soundtrack.
 
 - **Controllers are left alone when controller support is off.** With the setting disabled, the game no longer starts up the controller system or grabs a connected pad; turning support on in Settings, Gameplay activates it, and turning it back off releases the controller again.
+  Contributed by Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in
+  [PR #67](https://github.com/Orinks/Freight-Fate/pull/67).
 
 - **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
 
 - **Starting the engine no longer dips in volume.** The running engine sound now
   meets the tail of the ignition sound at the same level, then settles smoothly
-  down to idle instead of briefly dropping out.
+  down to idle instead of briefly dropping out. Contributed by Brandon Cross
+  ([@ironcross32](https://github.com/ironcross32)) in [PR #66](https://github.com/Orinks/Freight-Fate/pull/66).
 
 - **Manual and automatic transmissions behave reliably on steep grades.** The
   diesel governor now holds a safe low-gear road speed without quietly damaging
@@ -3723,9 +3755,14 @@
   mountain West, the northern plains, the Nevada Great Basin, Appalachia, the
   Gulf coast -- now connect city to city on the real roads, town by town.
   The entries below tour the new country region by region; each nightly
-  snapshot's notes carried the town-by-town detail. Special thanks to nromey
-  for the mapping work behind it. And watch your fuel out there -- some of
-  the new country is a long way between diesel pumps.
+  snapshot's notes carried the town-by-town detail. Special thanks to Noel
+  Romey, [@nromey](https://github.com/nromey), for the mapping work behind
+  it in [PR #50](https://github.com/Orinks/Freight-Fate/pull/50),
+  [PR #51](https://github.com/Orinks/Freight-Fate/pull/51),
+  [PR #52](https://github.com/Orinks/Freight-Fate/pull/52),
+  [PR #58](https://github.com/Orinks/Freight-Fate/pull/58), and
+  [PR #68](https://github.com/Orinks/Freight-Fate/pull/68). And watch your fuel
+  out there -- some of the new country is a long way between diesel pumps.
 
 - **New England and the Northeast fill in.** Rutland, Keene, Lewiston, and
   Barnstable bring Vermont, New Hampshire, Maine, and Cape Cod onto the map;
@@ -3804,7 +3841,8 @@
   Effingham break the long Indianapolis-to-St. Louis drive, Dubuque anchors
   the US-20 Mississippi crossing, and every city comes with real, named
   freight facilities: haul taconite pellets from the Hibbing mine, steel out
-  of Gary Works, and new Subarus from Lafayette.
+  of Gary Works, and new Subarus from Lafayette. Contributed by Liam Erven
+  ([@liamerven](https://github.com/liamerven)) in [PR #43](https://github.com/Orinks/Freight-Fate/pull/43).
 
 - **The Rockies and the Great Basin connect end to end.** Wolf Creek Pass and
   the Million Dollar Highway open Colorado's steepest crossings, with grades
@@ -3878,7 +3916,8 @@
   the map went from about 550 of them to over 2,500. Instead of empty miles, a
   haul now names the towns you pass and the state lines along the way, all from
   real geography, and real elevation data means the grades are felt and not
-  smoothed flat. Thanks to nromey.
+  smoothed flat. Thanks to Noel Romey, [@nromey](https://github.com/nromey),
+  [PR #50](https://github.com/Orinks/Freight-Fate/pull/50).
 
 - **Over 1,700 truck stops are now named along your routes.** Real travel centers, truck
   stops, and rest areas -- Love's, Pilot, Flying J, TA, Petro, and independents
@@ -3886,13 +3925,15 @@
   to fuel or park, and even the emptiest rural stretches point you to a real
   diesel pump you can pull a rig into. For now these are just named on the map;
   making them do something -- rest, showers, repairs, and buffs -- comes in a
-  later update. Thanks to nromey.
+  later update. Thanks to Noel Romey, [@nromey](https://github.com/nromey),
+  [PR #50](https://github.com/Orinks/Freight-Fate/pull/50).
 
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
   a faster interstate or a shorter back road -- instead of a single fixed path.
   Is it winter, and you'd rather take a southern route than a mountainous
-  northern one? We've got you covered. Thanks to nromey.
+  northern one? We've got you covered. Thanks to Noel Romey,
+  [@nromey](https://github.com/nromey), [PR #50](https://github.com/Orinks/Freight-Fate/pull/50).
 
 - **See who else is hauling right now with the new drivers board.** A new
   Drivers online item in the main menu reads the live board from orinks.net:
@@ -3968,11 +4009,15 @@
   for as long as you press it, and when you let go the horn rings out and fades
   the way a real one does rather than cutting off abruptly. Pressing the horn
   again while it is still sounding no longer layers a second horn on top.
+  Contributed by Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in
+  [PR #55](https://github.com/Orinks/Freight-Fate/pull/55).
 
 - **Abandoning a job now asks you to confirm.** Choosing Abandon job from the
   pause menu opens a Yes or No prompt that starts on No, so you have to arrow
   down to Yes to actually give up the load and pay the penalty. Choosing No
-  takes you straight back to the pause menu with the job intact.
+  takes you straight back to the pause menu with the job intact. Contributed
+  by Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in
+  [PR #53](https://github.com/Orinks/Freight-Fate/pull/53).
 - **Cities that share a name now always say their state.** With two Jacksons,
   two Portlands, and three Springfields on the map, dispatch offers, route
   planning, GPS announcements, and delivery summaries now say "Jackson,
@@ -3980,7 +4025,8 @@
   ambiguous. Cities with a unique name keep their short spoken form, and a few
   places that used to stutter their state twice, like "toward Jackson,
   Michigan, Michigan", now say it once. Existing careers and saved trips carry
-  over unchanged.
+  over unchanged. Contributed by Noel Romey
+  ([@nromey](https://github.com/nromey)) in [PR #46](https://github.com/Orinks/Freight-Fate/pull/46).
 
 - **Job details always tell you the state.** Not sure where Baton Rouge is?
   Open a job's detail view from the dispatch board and the origin and
@@ -3995,7 +4041,8 @@
   Chicago through Detroit to Buffalo; and the new Corn Belt takes interior
   Illinois, Indiana, and southern Ohio. Each has its own weather, fuel
   prices, freight market flavor, and road hazards, so a winter run out of
-  Duluth no longer sounds like a summer haul into Cincinnati.
+  Duluth no longer sounds like a summer haul into Cincinnati. Contributed by
+  Liam Erven ([@liamerven](https://github.com/liamerven)) in [PR #43](https://github.com/Orinks/Freight-Fate/pull/43).
 
 ### Fixed
 
@@ -4046,13 +4093,15 @@
   brake. The game now recovers from the hot-plug instead of crashing, and
   fully re-acquires the controller when it returns -- even when the system hands
   it back under a new identity -- so braking, throttle, and the bumpers work
-  again right away.
+  again right away. Contributed by Brandon Cross
+  ([@ironcross32](https://github.com/ironcross32)) in [PR #60](https://github.com/Orinks/Freight-Fate/pull/60).
 
 - **Controller toggle actions no longer fire twice.** On some controllers --
   notably the Xbox Elite -- setting or releasing the parking brake, or starting
   or shutting down the engine, could trigger twice from a single press, so the
   action immediately undid itself. Each button press now counts once, even when
-  the controller reports itself to the system more than once.
+  the controller reports itself to the system more than once. Contributed by
+  Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in [PR #60](https://github.com/Orinks/Freight-Fate/pull/60).
 
 - **Construction zones no longer stack or chain together.** Slow zones were
   placed independently, so a construction zone could land inside another
@@ -4077,13 +4126,15 @@
 - **Using the accelerator to brake in reverse no longer speeds you up.** In an
   automatic, pressing the accelerator while rolling backward is meant to slow
   and stop the truck, but at higher reverse speeds it could push you faster
-  instead. It now brakes reliably all the way to a stop.
+  instead. It now brakes reliably all the way to a stop. Contributed by
+  Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in [PR #59](https://github.com/Orinks/Freight-Fate/pull/59).
 
 - **Adaptive cruise no longer revs the engine when you press the clutch to
   shift.** With a manual gearbox, holding the clutch under cruise control used
   to send the engine screaming toward the redline. Now cruise eases off the
   moment the clutch goes in, the engine settles back toward idle, and the speed
-  is picked back up smoothly once you let the clutch out.
+  is picked back up smoothly once you let the clutch out. Contributed by
+  Brandon Cross ([@ironcross32](https://github.com/ironcross32)) in [PR #59](https://github.com/Orinks/Freight-Fate/pull/59).
 
 - **The engine no longer re-cranks when you pick a trip back up.** Resuming a
   saved haul with the engine already running -- or coming back from a menu
@@ -4091,7 +4142,8 @@
   key. Now the running engine simply fades back in, and the starter is heard
   only when you actually start the engine yourself. When you do start it, the
   crank now blends smoothly into the running engine instead of being drowned
-  out the instant it catches.
+  out the instant it catches. Contributed by Brandon Cross
+  ([@ironcross32](https://github.com/ironcross32)) in [PR #55](https://github.com/Orinks/Freight-Fate/pull/55).
 
 - **Your truck no longer idles all night while you sleep.** Bedding down for
   the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on
@@ -4109,12 +4161,14 @@
 - **Asking for job details on Back to terminal no longer crashes the game.**
   On the dispatch board, pressing F1 while on the Back to terminal entry used
   to crash; it now simply reads the entry back, like any other menu item.
-  Thanks to ironcross32.
+  Thanks to Brandon Cross, [@ironcross32](https://github.com/ironcross32),
+  [PR #47](https://github.com/Orinks/Freight-Fate/pull/47).
 
 - **Resuming a trip no longer repeats a stop it already called out.** When you
   continued a saved run, the game could re-announce a truck stop or rest area
   just ahead that it had already told you about before you saved. It now
-  remembers what it said and stays quiet. Thanks to nromey.
+  remembers what it said and stays quiet. Thanks to Noel Romey,
+  [@nromey](https://github.com/nromey), [PR #50](https://github.com/Orinks/Freight-Fate/pull/50).
 
 ## 1.8.0 - 2026-07-05
 
@@ -4138,7 +4192,8 @@
   and unplugging are detected mid-game (unplugging pauses the drive), and spoken
   prompts name controller buttons when you are on a pad and keys when you are on
   the keyboard. Turn it off under Settings, Gameplay, Controller. The keyboard
-  always stays active. Thanks to ironcross32.
+  always stays active. Thanks to Brandon Cross, [@ironcross32](https://github.com/ironcross32),
+  [PR #28](https://github.com/Orinks/Freight-Fate/pull/28).
 
 - **Set the parking brake to let time pass while you wait.** Pressing your
   parking brake while stopped now means deliberate waiting: the clock runs at
@@ -4156,7 +4211,8 @@
   ports, mills, and freight facilities, and real truck stops along the way.
   The region finally has short local runs -- Seattle to Tacoma is a
   34-mile hop instead of nothing closer than Portland -- and the empty I-84
-  corridor gets its first stop at Pendleton. Thanks to liamerven.
+  corridor gets its first stop at Pendleton. Thanks to Liam Erven,
+  [@liamerven](https://github.com/liamerven), [PR #32](https://github.com/Orinks/Freight-Fate/pull/32).
 
 - **Appalachia, the Heartland, and the Southern Plains grow by eighteen
   cities.** Appalachia becomes a real Valley-and-Ridge region: Asheville,
@@ -4168,7 +4224,10 @@
   I-80, and I-44; the Southern Plains add Salina, Dodge City, Garden City,
   Enid, Lawton, and San Angelo with their grain, beef, and oilfield freight.
   Every new city carries real named facilities and every corridor has named
-  truck stops. Thanks to liamerven.
+  truck stops. Thanks to Liam Erven, [@liamerven](https://github.com/liamerven),
+  [PR #36](https://github.com/Orinks/Freight-Fate/pull/36),
+  [PR #37](https://github.com/Orinks/Freight-Fate/pull/37), and
+  [PR #38](https://github.com/Orinks/Freight-Fate/pull/38).
 
 ### Fixed
 
@@ -4213,7 +4272,8 @@
 - **The dispatch board no longer offers trivially short hauls.** Because each
   city stands for a whole freight area, a job to a neighbor under 25 miles was a
   pointless across-town hop; the board now skips those destinations and fills
-  from real routes instead.
+  from real routes instead. Contributed by Liam Erven
+  ([@liamerven](https://github.com/liamerven)) in [PR #29](https://github.com/Orinks/Freight-Fate/pull/29).
 - **The dispatch hours warning now respects a fresh clock.** Sleeping off your
   hours before visiting the dispatch board no longer leaves every long haul
   flagged with "may not fit your duty clock." The warning compared your time
@@ -4236,7 +4296,8 @@
   Right Control already silenced the driving event voice; it now also stops the
   current speech in every menu and in the how-to-play reader, so a long readout
   -- job details, cargo loading, a full help page -- can be cut short with the
-  same key everywhere.
+  same key everywhere. Contributed by Liam Erven
+  ([@liamerven](https://github.com/liamerven)) in [PR #26](https://github.com/Orinks/Freight-Fate/pull/26).
 - **Dispatch, garage, and driving tools feel clearer.** F1 on a dispatch job now opens a
   reviewable job-detail view with line-by-line facts, long-haul pay has a stronger
   floor, drive-start speech is shorter in terse mode, the horn loops while held,
@@ -4244,8 +4305,9 @@
   wash road grime.
 - **Reverse now has its own backing cue.** Shifting into reverse with the engine
   running now starts a backing loop through the main audio backend, and automatic
-  reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04
-  for the original reverse-loop PR.
+  reverse selection still gets a spoken confirmation. Thanks to ashleygrobler04,
+  [@ashleygrobler04](https://github.com/ashleygrobler04), for the original
+  reverse-loop [PR #24](https://github.com/Orinks/Freight-Fate/pull/24).
 - **Lane drift now cues direction before the rumble strip.** When lane drift is
   enabled, a short beep now plays from the side you drift toward, and a dedicated
   centered-lane chime confirms when you are back in the lane.
@@ -4303,6 +4365,8 @@
   make an in-progress load suddenly late.
 - **Metric weather readouts use metric safe speed.** Pressing V with metric
   units enabled now reports the weather safe speed in kilometers per hour.
+  Contributed by ashleygrobler04 ([@ashleygrobler04](https://github.com/ashleygrobler04))
+  in [PR #22](https://github.com/Orinks/Freight-Fate/pull/22).
 - **No more "dot dot" at the end of menu items.** A menu or list item that was
   already a full sentence (like a settlement summary line) got a second period
   appended before its "N of M" position, which a screen reader voiced as "dot
@@ -4335,13 +4399,15 @@
   the first time with the air tanks low used to stay silent; the warning now
   plays as soon as the engine is running with pressure below the threshold,
   so you know to wait for the compressor before releasing the brakes. Thanks
-  to hannes16.
+  to hannes16, [@hannes16](https://github.com/hannes16),
+  [PR #35](https://github.com/Orinks/Freight-Fate/pull/35).
 - **Erie and Evansville moved to their right regions.** Erie sits on the Lake
   Erie shore between Buffalo and Cleveland, so it is now Great Lakes country
   rather than Appalachia; Evansville, down on Indiana's Ohio River border, is
   now the Mid-South rather than the Great Lakes. Spoken region names, weather
   flavor, and regional hazards on runs through both cities now match the
-  geography. Thanks to liamerven.
+  geography. Thanks to Liam Erven, [@liamerven](https://github.com/liamerven),
+  [PR #33](https://github.com/Orinks/Freight-Fate/pull/33).
 
 ### Fixed
 - **Exit warnings now arrive early enough to act on.** At highway speed on
@@ -4394,6 +4460,9 @@
   exactly as before, the sound and music credits ship as a readable file
   next to the game, and source checkouts keep their editable sound files.
 - **During a manual drive.** hold down the clutch (shift) then press W to shift up gears, and q to shift down gears .
+  Contributed by ashleygrobler04 ([@ashleygrobler04](https://github.com/ashleygrobler04))
+  in [PR #27](https://github.com/Orinks/Freight-Fate/pull/27) and
+  [PR #31](https://github.com/Orinks/Freight-Fate/pull/31).
 - **Hours-of-service rules are more realistic.** Realistic mode now tracks the
   11-hour driving limit, 14-hour duty window, 30-minute break requirement,
   60/70-hour weekly limits, roadside inspections, and legal sleeper-berth split
@@ -4485,6 +4554,8 @@
 - **Repeat the market watch on the dispatch board.** The board speaks which
   freight is tight or loose when you open it; pressing Tab now repeats just that
   market watch, so you can re-check it without leaving and reopening the board.
+  Contributed by Liam Erven ([@liamerven](https://github.com/liamerven)) in
+  [PR #30](https://github.com/Orinks/Freight-Fate/pull/30).
 - **State troopers can pull you over for speeding.** Routes now have patrol
   windows -- hotter on busy interstates, in construction, and in dense regions,
   cooler out on the plains, with a night DUI bump. Speed badly inside one and a
@@ -4693,6 +4764,8 @@
 - **Empty reposition arrivals.** Finishing a bobtail (empty reposition) run no
   longer crashes on arrival. The "Repositioned" summary screen now opens and
   reads its relocation summary instead of failing as you reach the new city.
+  Contributed by Shane Popplestone ([@stickbear2015](https://github.com/stickbear2015))
+  in [PR #16](https://github.com/Orinks/Freight-Fate/pull/16).
 - **Speech setting previews.** Adjusting speech rate, pitch, volume, or voice
   now previews with the voice being changed, so a selected SAPI or OneCore
   voice speaks its own new setting.
@@ -4712,7 +4785,8 @@
   units instead of mixing in mph or miles.
 - **Metric traffic speed.** The traffic-queue speed shown in the route line now
   reads in kilometers per hour in metric mode, instead of staying in miles per
-  hour next to the already-metric distance.
+  hour next to the already-metric distance. Contributed by Shane Popplestone
+  ([@stickbear2015](https://github.com/stickbear2015)) in [PR #16](https://github.com/Orinks/Freight-Fate/pull/16).
 - **Metric navigation cues.** Spoken GPS guidance -- onramp, continue, stop,
   exit, traffic, and construction-zone callouts -- and the Map status screen now
   give distances in kilometers in metric mode instead of miles, matching the
@@ -4952,7 +5026,8 @@
   and troopers will not clock construction-zone speeding until you have
   had about a mile inside the zone to react. Speech-first players can
   slow down in time again instead of being fined on the same update that
-  first announces the zone.
+  first announces the zone. Contributed by Shane Popplestone
+  ([@stickbear2015](https://github.com/stickbear2015)) in [PR #9](https://github.com/Orinks/Freight-Fate/pull/9).
 
 ### Changed
 - **How-to-play driving guidance.** The main-menu guidance for driving controls
