@@ -365,7 +365,26 @@ impl DrivingState {
         let mut best: Option<Observation> = None;
         for post in &watching {
             let sample = self.road_sample(post);
-            if let Some(found) = observe(post, &sample) {
+            let found = observe(post, &sample);
+            // The look, for a tester's log: which post, what it could read,
+            // and what it made of it. Never spoken.
+            log::debug!(
+                target: "freight_fate::enforcement",
+                "look: {} {} at {:.2} (truck {:.2}) announced={} declined={} tires={:.0} trailer={:?} -> {}",
+                post.kind,
+                post.method,
+                post.at_mi,
+                sample.position_mi,
+                post.announced,
+                post.declined,
+                sample.tire_wear_pct,
+                sample.trailer_defect,
+                found
+                    .as_ref()
+                    .map(|f| format!("{} {:.2}", f.what, f.confidence))
+                    .unwrap_or_else(|| "nothing".to_string())
+            );
+            if let Some(found) = found {
                 if best
                     .as_ref()
                     .is_none_or(|b| found.confidence > b.confidence)
@@ -390,6 +409,16 @@ impl DrivingState {
             &format!("observe:{violation_key}"),
         ))
         .random();
+        log::info!(
+            target: "freight_fate::enforcement",
+            "{} at {:.1}: {} ({}) confidence {:.2}, roll {:.2}",
+            best.post.kind,
+            position,
+            best.what,
+            best.detail,
+            best.confidence,
+            roll
+        );
         if roll >= best.confidence {
             // Noticed and let go. A post does not re-decide: this is what
             // makes "five over near a post is ignored" a state rather than a

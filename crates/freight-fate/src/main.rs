@@ -689,6 +689,7 @@ fn road_options(args: &[String]) -> road::RoadOptions {
         hour: flag_f64(args, "--hour"),
         log: flag_value(args, "--log"),
         sandbox: !has(args, "--no-sandbox"),
+        unit: None,
     };
     if has(args, "--no-cruise") {
         opts.cruise = 0.0;

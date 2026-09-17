@@ -341,6 +341,13 @@ pub fn observe(post: &EnforcementPost, sample: &RoadSample) -> Option<Observatio
             // question. No pack, no weather, no luck.
             confidence = 1.0;
         }
+        if what == WHAT_EQUIPMENT && severity >= 1.0 && visibility_product >= 0.2 {
+            // Bald is bald from the far edge of the reach. The one look a
+            // post gets comes at that edge, where geometry is half strength,
+            // and a bald tire that rolled a coin there was let go for good
+            // (found live 2026-09-16).
+            confidence = 1.0;
+        }
         confidence = clamp01(confidence);
         if confidence < IGNORE_FLOOR {
             continue;
@@ -411,6 +418,12 @@ mod tests {
         sample.tire_wear_pct = TIRE_OUT_OF_SERVICE_PCT;
         let bald = observe(&roving, &sample).expect("bald tires are seen");
         assert!(bald.confidence > near.confidence);
+        assert!(bald.certain(), "bald tires are not a coin toss");
+        // From the far edge of a shoulder unit's reach, still certain.
+        let far = post(KIND_CMV);
+        let mut edge = RoadSample::new(far.at_mi - far.reach_mi, 65.0, 65.0);
+        edge.tire_wear_pct = TIRE_OUT_OF_SERVICE_PCT;
+        assert!(observe(&far, &edge).expect("seen at the edge").certain());
         assert!(bald.detail.contains("percent"));
         // A trailer lamp is visible from the shoulder too; a brake is not,
         // and the caller never puts one in the sample.

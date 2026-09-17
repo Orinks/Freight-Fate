@@ -198,13 +198,17 @@ fn tools_list() -> Value {
              feature must be one of: downgrade, upgrade, zone, limit-drop, stop, \
              scale, curve, interchange, toll, chain-law, destination, departure. \
              Same seed, same road. pick chooses among multiple matches (1-based). \
-             Listen after staging for the truck's actual starting condition.",
+             unit plants a staffed enforcement unit unit_ahead_mi up the road (default \
+             3) so an encounter can be staged on purpose; the road's own seeded posts \
+             stay. Listen after staging for the truck's actual starting condition.",
             json!({
                 "feature": {"type": "string"},
                 "origin": {"type": "string", "description": "search one corridor from this city (fast and thorough)"},
                 "destination": {"type": "string", "description": "with origin: the corridor's far end"},
                 "seed": {"type": "integer", "description": "default 7"},
                 "pick": {"type": "integer", "description": "1-based match index, default 1"},
+                "unit": {"type": "string", "description": "plant a staffed enforcement unit ahead of the start: one of median_crossover, roving_patrol, work_zone_post, scale_apron_post, fixed_scale, urban_unit, cmv_unit, chain_control"},
+                "unit_ahead_mi": {"type": "number", "description": "how far up the road the planted unit sits, default 3"},
             }),
             &["feature"],
         ),
@@ -506,7 +510,28 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
                 .get("destination")
                 .and_then(Value::as_str)
                 .map(str::to_string);
-            let (hit, opts, found, picked) = discover(&feature, origin, destination, seed, pick)?;
+            let unit = match args.get("unit").and_then(Value::as_str) {
+                None => None,
+                Some(kind) => {
+                    let kind = kind.trim().to_ascii_lowercase();
+                    if !ff_core::sim::enforcement_posts::POST_KINDS.contains(&kind.as_str()) {
+                        return Err(format!(
+                            "unit must be one of {}",
+                            ff_core::sim::enforcement_posts::POST_KINDS.join(", ")
+                        ));
+                    }
+                    let ahead = args
+                        .get("unit_ahead_mi")
+                        .and_then(Value::as_f64)
+                        .unwrap_or(3.0);
+                    if ahead < 0.5 {
+                        return Err("unit_ahead_mi must be at least half a mile".to_string());
+                    }
+                    Some((kind, ahead))
+                }
+            };
+            let (hit, opts, found, picked) =
+                discover(&feature, origin, destination, seed, pick, unit)?;
             Ok(Command::StageHit {
                 hit: Box::new(hit),
                 found,
@@ -538,6 +563,7 @@ pub(super) fn discover(
     destination: Option<String>,
     seed: i64,
     pick: usize,
+    unit: Option<(String, f64)>,
 ) -> Result<
     (
         crate::playtest::road::Hit,
@@ -563,6 +589,7 @@ pub(super) fn discover(
         seed: Some(seed),
         trip_seed: Some(seed),
         pick,
+        unit,
         sandbox: false, // the whole server already runs sandboxed
         ..Default::default()
     };
@@ -706,7 +733,8 @@ mod tests {
 
     #[test]
     fn scale_discovery_only_stages_scales_open_in_the_built_drive() {
-        let (hit, _opts, found, picked) = discover("scale", None, None, 83, usize::MAX).unwrap();
+        let (hit, _opts, found, picked) =
+            discover("scale", None, None, 83, usize::MAX, None).unwrap();
 
         assert!(found > 0);
         assert_eq!(picked, found);

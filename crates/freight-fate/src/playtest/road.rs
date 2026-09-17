@@ -28,10 +28,11 @@
 use ff_core::data::world::{get_world, World};
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::career_ladder::MAX_CAREER_LEVEL;
+use ff_core::models::carrier_fleet::slip_seat_pool;
 use ff_core::models::jobs::{cargo_type, Job, JobBoard};
 use ff_core::models::profile::Profile;
 use ff_core::pyrandom::PyRandom;
-use ff_core::sim::enforcement_posts::KIND_FIXED_SCALE;
+use ff_core::sim::enforcement_posts::{method_by_kind, EnforcementPost, KIND_FIXED_SCALE};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
@@ -178,6 +179,11 @@ pub struct RoadOptions {
     pub hour: Option<f64>,
     pub log: Option<String>,
     pub sandbox: bool,
+    /// A staffed enforcement unit planted ahead of the staged start: the
+    /// post kind (`enforcement_posts::KIND_*`) and how many miles up the
+    /// road. The world's own seeded posts stay; this one is added so a
+    /// live check can meet a unit on purpose instead of by lottery.
+    pub unit: Option<(String, f64)>,
 }
 
 impl Default for RoadOptions {
@@ -216,6 +222,7 @@ impl Default for RoadOptions {
             weather: None,
             hour: None,
             log: None,
+            unit: None,
             sandbox: true,
         }
     }
@@ -1251,6 +1258,25 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         profile.driving_record = previous.driving_record.clone();
         profile.out_of_service_events = previous.out_of_service_events;
         profile.career.reputation = previous.career.reputation;
+        // A slip-seating driver's yard spares are drawn from the career's
+        // own name, so this bench career's pool is not the scenario's: the
+        // record the scenario set would sit under keys this drive never
+        // reads, and the spare it draws would be provisioned fresh (found
+        // live 2026-09-16, a 95 percent tire reading as zero). Stamp the
+        // active truck's record onto every spare this career can draw.
+        let stamp = previous
+            .truck_conditions
+            .get(&previous.active_truck_key())
+            .cloned();
+        if let Some(record) = stamp {
+            for key in slip_seat_pool(&profile) {
+                profile
+                    .truck_conditions
+                    .insert(key.to_string(), record.clone());
+            }
+            let own = profile.truck.clone();
+            profile.truck_conditions.insert(own, record);
+        }
     }
     ctx.profile = Some(profile);
 
@@ -1339,6 +1365,21 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     let total = driving.trip.total_miles();
     let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
     driving.trip.position_mi = start_mi;
+    if let Some((kind, ahead_mi)) = &opts.unit {
+        // Staffed and alert, but not yet announced: the marker cue still
+        // has to play before it may look, the same contract every seeded
+        // post lives under.
+        let at_mi = (start_mi + ahead_mi.max(0.0)).min(total - 0.5);
+        let (leg_index, _) = driving.trip.leg_at_mile(at_mi);
+        let mut post = EnforcementPost::new(at_mi, kind);
+        post.leg_index = leg_index;
+        post.method = method_by_kind(kind).to_string();
+        post.reach_mi = 0.6;
+        post.facing = "both".to_string();
+        post.staffed = true;
+        post.notice = 1.0;
+        driving.trip.posts.push(post);
+    }
     if let Some(name) = &opts.weather {
         if let Some(kind) = weather_kind(name) {
             driving.weather_mut().current = kind;

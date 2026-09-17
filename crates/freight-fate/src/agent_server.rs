@@ -781,7 +781,7 @@ pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool) -> i32 {
     // search should refuse cleanly rather than boot a game.
     let staged = match launch {
         None => None,
-        Some(at) => match discover(&at.feature, at.origin, at.destination, at.seed, 1) {
+        Some(at) => match discover(&at.feature, at.origin, at.destination, at.seed, 1, None) {
             Ok((hit, opts, found, _)) => {
                 eprintln!("Launching at ({found} match(es)): {}", hit.describe());
                 Some((hit, opts))
