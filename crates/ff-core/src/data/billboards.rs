@@ -297,22 +297,22 @@ pub const FAITH_BILLBOARDS: &[&str] = &[
     "Got faith? Keep both hands on the wheel anyway.",
 ];
 
-// The mystery-spot / two-headed-snake / see-the-thing genre.
+// The mystery-spot / two-headed-snake / see-the-thing genre. Invented
+// attractions only: a sign naming a real one (the twine ball, the rocking
+// chair, the ketchup bottle, petrified wood) lives in `PLACED_ODDITIES`
+// with the states it is true in, because a billboard is one of the few
+// things telling a blind driver where they are (owner, 2026-09-16).
 pub const ROADSIDE_ODDITIES: &[&str] = &[
     "Mystery Spot ahead. Gravity is a suggestion here. Nine ninety-five.",
     "See the two-headed rattlesnake. Alive-ish. Next exit.",
     "Alligator farm and fudge shop. Yes, the same building.",
     "Living through chemistry, get your chemistry fix next four exits.",
-    "World's largest ball of twine. Bigger than your problems. Probably.",
     "Zoo! Visit the animals or be one!",
-    "World's largest rocking chair. You may not sit in it. Next exit.",
     "See the albino alligator. He is on break. The gift shop is not.",
     "Gravity hill ahead. Your truck already knew.",
     "Mystery house. Crooked floors. Straight prices. Nine ninety-five.",
     "Live rattlesnakes. Dead air conditioning. Next exit.",
-    "Petrified wood, petrified staff, very lively gift shop.",
     "The cave is real. The gift crystals are optimistic. Next exit.",
-    "World's largest ketchup bottle. French fries not included.",
     "Two-headed calf, stuffed. One-headed cashier, not. Next exit.",
     "See the thing in a jar. We will not say which jar. Nine dollars.",
     "Miniature village, next exit. Your rig will not fit down Main Street.",
@@ -842,6 +842,34 @@ pub fn corridor_signs(highway: &str) -> &'static [CorridorSign] {
         .unwrap_or(&[])
 }
 
+/// Real roadside attractions from the oddities genre, each true only in
+/// the states where a driver could actually turn off for it. Sources: the
+/// Cawker City, Kansas ball (off Interstate 70 on US-24) and Darwin,
+/// Minnesota's one-man ball (US-12); the Casey, Illinois rocking chair
+/// (Interstate 70) and the Fanning, Missouri one (old Route 66 beside
+/// Interstate 44); the Collinsville, Illinois ketchup bottle water tower
+/// (Interstates 55 and 70 east of Saint Louis); and the Petrified Forest
+/// gift shops on Interstate 40 through Holbrook, Arizona, with the trade
+/// running into New Mexico.
+pub const PLACED_ODDITIES: &[CorridorSign] = &[
+    in_states(
+        "World's largest ball of twine. Bigger than your problems. Probably.",
+        &["KS", "MN"],
+    ),
+    in_states(
+        "World's largest rocking chair. You may not sit in it. Next exit.",
+        &["IL", "MO"],
+    ),
+    in_states(
+        "World's largest ketchup bottle. French fries not included.",
+        &["IL", "MO"],
+    ),
+    in_states(
+        "Petrified wood, petrified staff, very lively gift shop.",
+        &["AZ", "NM"],
+    ),
+];
+
 /// State-gated genre signs that are true on any interstate inside those
 /// states -- fireworks barns, pecan stands, and named regional travel plazas.
 /// The placer concatenates this with `corridor_signs` so a fireworks barn can
@@ -865,6 +893,7 @@ static REGIONAL_GENRE: Lazy<Vec<CorridorSign>> = Lazy::new(|| {
     out.push(in_states(WAWA_BILLBOARD, WAWA_STATES));
     out.push(in_states(RACETRAC_BILLBOARD, RACETRAC_STATES));
     out.push(in_states(CRACKER_BARREL_BILLBOARD, CRACKER_BARREL_STATES));
+    out.extend(PLACED_ODDITIES.iter().copied());
     out
 });
 
@@ -934,6 +963,31 @@ mod tests {
             CRACKER_BARREL_BILLBOARD,
         ]);
         out
+    }
+
+    #[test]
+    fn test_real_attractions_are_placed_never_anywhere() {
+        // A sign naming a real thing is a claim about where the truck is.
+        let real = [
+            "ball of twine",
+            "rocking chair",
+            "ketchup bottle",
+            "petrified wood",
+        ];
+        for line in roadside_billboards() {
+            let lowered = line.to_lowercase();
+            for thing in real {
+                assert!(!lowered.contains(thing), "{line} is in the anywhere pool");
+            }
+        }
+        let twine = regional_genre_signs()
+            .iter()
+            .find(|sign| sign.text.contains("ball of twine"))
+            .expect("the twine ball is a placed sign");
+        assert_eq!(twine.anchor, SignAnchor::States(&["KS", "MN"]));
+        for sign in PLACED_ODDITIES {
+            assert!(matches!(sign.anchor, SignAnchor::States(states) if !states.is_empty()));
+        }
     }
 
     #[test]

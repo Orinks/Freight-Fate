@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- **Real roadside attractions on billboards stay near the real thing.** The twine ball, rocking chair, ketchup bottle and petrified wood signs no longer appear just anywhere.
+
 - **Alt 3 names the town you just heard the game pass.** Route towns and the leg's own cities count now, not only villages off the corridor.
 
 - **A facility placed only by estimate now says so.** Its approach miles come from that estimate.
