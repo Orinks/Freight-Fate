@@ -591,6 +591,13 @@ its status or release decision.
       as evidence; 48 stops name an exit their leg puts over 5.3 miles away
       (Love's Heyburn appears at mile 121.9 and again at 143.6 of Idaho Falls
       to Boise, and exit 211 is at 119.9) and are listed, not linked.
+      Re-run the same day on the map after the store import, which gave 563
+      more stops read coordinates: of 3,772 stops reached by an exit, 965
+      carry their interchange, ramp controls read from the map go from 118
+      (3.1%) to 616 (16.3%), exit numbers spoken from 1,797 (47.6%) to
+      2,136 (56.6%), and the mile marker had named another exit for 527 of
+      the 1,506 now decided by identity. 41 stops name an exit their leg
+      puts elsewhere.
 - [ ] What still leaves a truck stop's ramp to the seeded control, in order
       of size: 1,353 stops are on the 532 legs with no interchange records
       (the interchange build only reads Interstate shields); 390 snapped to

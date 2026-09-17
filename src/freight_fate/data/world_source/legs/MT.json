@@ -30,7 +30,9 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "455",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Christiansen-Graham-Rest-Area",
@@ -78,7 +80,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 45.749514,
-          "lon": -107.610625
+          "lon": -107.610625,
+          "exit_ref": "495",
+          "interchange_mi": 45.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 495; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Black Diamond Trail Rest Area",
@@ -145,7 +150,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "58",
+          "exit_source": "exit_ref read: the stop's own source names exit 58; this leg has no interchange record with that number."
         },
         {
           "name": "Kaycee Rest Area",
@@ -194,7 +201,9 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "185",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-25 Mile 129 Turnout Northbound",
@@ -242,7 +251,10 @@
           ],
           "lat": 42.65718,
           "lon": -105.1912,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "126",
+          "interchange_mi": 336.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.49 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Dwyer Junction Rest Area",
@@ -5681,7 +5693,9 @@
           ],
           "lat": 45.8148636,
           "lon": -108.416727,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "455",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Christiansen-Graham-Rest-Area",
@@ -5729,7 +5743,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 45.749514,
-          "lon": -107.610625
+          "lon": -107.610625,
+          "exit_ref": "495",
+          "interchange_mi": 45.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 495; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Black Diamond Trail Rest Area",
@@ -5793,7 +5810,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "58",
+          "exit_source": "exit_ref read: the stop's own source names exit 58; this leg has no interchange record with that number."
         },
         {
           "name": "Kaycee Rest Area",
@@ -5842,7 +5861,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "185",
+          "interchange_mi": 277.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-25 Mile 129 Turnout Northbound",
@@ -5893,7 +5915,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "126",
+          "interchange_mi": 336.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.49 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Dwyer Junction Rest Area",
@@ -5934,7 +5959,9 @@
           ],
           "lat": 41.0976319,
           "lon": -104.848781,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "7",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.19 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Southeast Wyoming Welcome Center",
@@ -5985,7 +6012,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 40.30515,
-          "lon": -104.983977
+          "lon": -104.983977,
+          "exit_ref": "250",
+          "exit_source": "exit_ref read: the stop's own source names exit 250; this leg has no interchange record with that number."
         }
       ],
       "corridor": {
@@ -13609,7 +13638,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 43.439746,
-          "lon": -112.115273
+          "lon": -112.115273,
+          "exit_ref": "113",
+          "interchange_mi": 349.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center McCammon",
@@ -13638,7 +13670,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.660227,
-          "lon": -112.206479
+          "lon": -112.206479,
+          "exit_ref": "47",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flags West Truck Stop",
@@ -13664,7 +13698,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "31",
+          "interchange_mi": 431.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Cherry Creek Rest Area, I-15 Northbound",
@@ -13739,7 +13776,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.509088,
-          "lon": -112.054242
+          "lon": -112.054242,
+          "exit_ref": "363",
+          "interchange_mi": 499.8,
+          "exit_source": "exit_ref read: the stop's own source names exit 363; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center Willard",
@@ -13765,7 +13805,9 @@
           "lon": -112.051825,
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "357",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.30 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "ONE9 Travel Center Ogden",
@@ -13791,7 +13833,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "344",
+          "interchange_mi": 518.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center North Salt Lake",
@@ -20195,7 +20240,10 @@
           ],
           "lat": 45.7489536,
           "lon": -107.6099256,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "495",
+          "interchange_mi": 45.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Wyoming information Rest Area",
@@ -21776,7 +21824,10 @@
           ],
           "lat": 45.64186,
           "lon": -110.57384,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "333",
+          "interchange_mi": 25.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Columbus",
@@ -21799,7 +21850,10 @@
           ],
           "lat": 45.6447457,
           "lon": -109.2466575,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "408",
+          "interchange_mi": 101.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.19 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "TA Travel Center Laurel",
@@ -21822,7 +21876,10 @@
           ],
           "lat": 45.6825711,
           "lon": -108.7035666,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "437",
+          "interchange_mi": 129.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -25959,7 +26016,10 @@
           ],
           "lat": 46.00518,
           "lon": -112.61253,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "122",
+          "interchange_mi": 4.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Divide Rest Area, I-15 Southbound",
@@ -26022,7 +26082,10 @@
           ],
           "lat": 43.71749,
           "lon": -112.13159,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "135",
+          "interchange_mi": 188.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -28041,7 +28104,10 @@
           ],
           "lat": 46.99098,
           "lon": -104.1883,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "241",
+          "interchange_mi": 27.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.45 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Circle K",
@@ -28061,7 +28127,10 @@
           ],
           "lat": 46.89388,
           "lon": -102.78872,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "61",
+          "interchange_mi": 97.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -29846,7 +29915,10 @@
           ],
           "lat": 48.5124,
           "lon": -111.87273,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "363",
+          "interchange_mi": 83.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -33329,7 +33401,10 @@
           ],
           "lat": 47.47505,
           "lon": -111.36114,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "277",
+          "interchange_mi": 88.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I15, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-15 Weigh Station",
@@ -37143,7 +37218,10 @@
           ],
           "lat": 46.79241,
           "lon": -105.30294,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "176",
+          "interchange_mi": 38.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Holiday",
@@ -40671,7 +40749,10 @@
           ],
           "lat": 46.8745737,
           "lon": -113.8877877,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "109",
+          "interchange_mi": 5.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.13 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Anaconda",
@@ -40716,7 +40797,10 @@
           ],
           "lat": 46.0085374,
           "lon": -112.6099631,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "122",
+          "interchange_mi": 113.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Dealer Three Forks",
@@ -40745,7 +40829,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 45.917055,
-          "lon": -111.599366
+          "lon": -111.599366,
+          "exit_ref": "274",
+          "interchange_mi": 167.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Greycliff EB",
@@ -40791,7 +40878,10 @@
           ],
           "lat": 45.6825711,
           "lon": -108.7035666,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "437",
+          "interchange_mi": 329.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90 Weigh Station",
@@ -41965,7 +42055,10 @@
           ],
           "lat": 46.8751006,
           "lon": -113.8881969,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "109",
+          "interchange_mi": 5.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Rock Creek Parking Area",
@@ -42008,7 +42101,9 @@
           ],
           "lat": 46.00518,
           "lon": -112.61253,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "122",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-90 Weigh Station",
@@ -43054,7 +43149,9 @@
           ],
           "lat": 46.8745737,
           "lon": -113.8877877,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "109",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US12, 0.13 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "lanes": 2
@@ -45186,7 +45283,9 @@
           "source": "Love's official store feed lists store 753 in Missoula, MT on I-90; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=10.0 off_mi=0.29",
           "at_mi": 10.0,
           "lat": 46.947602,
-          "lon": -114.133598
+          "lon": -114.133598,
+          "exit_ref": "96",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US93, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J Licensed Location Missoula",
@@ -45213,7 +45312,9 @@
           "source": "Pilot Flying J official locator lists Flying J Licensed Location store 914 in Missoula, MT with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=10.5 off_mi=0.11",
           "at_mi": 10.5,
           "lat": 46.95510997530376,
-          "lon": -114.13232162153055
+          "lon": -114.13232162153055,
+          "exit_ref": "96",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US93, 0.41 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Mission Mountains Viewpoint and Picnic Area",
@@ -48245,7 +48346,9 @@
           ],
           "lat": 47.18974,
           "lon": -114.88638,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "47",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.05 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Cenex",
@@ -48265,7 +48368,10 @@
           ],
           "lat": 47.00345,
           "lon": -114.47981,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "75",
+          "interchange_mi": 27.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.44 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Muralt's Travel Plaza",
@@ -48288,7 +48394,10 @@
           ],
           "lat": 46.95495,
           "lon": -114.13005,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "96",
+          "interchange_mi": 48.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90 Weigh Station",

@@ -1075,7 +1075,9 @@
           ],
           "lat": 42.67663,
           "lon": -83.75767,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "70",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US23, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Fenton Rest Area 624",
@@ -1174,7 +1176,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "25",
+          "interchange_mi": 71.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I69, 0.58 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "truck parking",
@@ -1216,7 +1221,10 @@
           ],
           "lat": 41.7483899,
           "lon": -84.992069,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "357",
+          "interchange_mi": 96.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I69, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Angola",
@@ -1244,7 +1252,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.633631,
-          "lon": -85.050771
+          "lon": -85.050771,
+          "exit_ref": "348",
+          "interchange_mi": 105.7,
+          "exit_source": "exit_ref read: the stop's own source names exit 348; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot",
@@ -3627,7 +3638,10 @@
           ],
           "lat": 42.78792,
           "lon": -84.67796,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "90",
+          "interchange_mi": 75.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "truck parking",
@@ -3693,7 +3707,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.883154,
-          "lon": -85.073818
+          "lon": -85.073818,
+          "exit_ref": "67",
+          "interchange_mi": 98.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Saranac Rest Area 532",
@@ -8034,7 +8051,9 @@
           ],
           "lat": 42.07641,
           "lon": -83.66843,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "25",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US23, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Speedway",
@@ -8054,7 +8073,9 @@
           ],
           "lat": 41.95882,
           "lon": -83.67085,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "17",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US23, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -9097,7 +9118,10 @@
           ],
           "lat": 42.3017836,
           "lon": -83.8768253,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "167",
+          "interchange_mi": 49.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Chelsea Rest Area",
@@ -9188,7 +9212,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "112",
+          "interchange_mi": 105.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Battle Creek",
@@ -9215,7 +9242,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.302808,
-          "lon": -85.082346
+          "lon": -85.082346,
+          "exit_ref": "104",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Benton Harbor",
@@ -9244,7 +9273,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.089692,
-          "lon": -86.412386
+          "lon": -86.412386,
+          "exit_ref": "30",
+          "interchange_mi": 187.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "TA Sawyer",
@@ -9292,7 +9324,9 @@
           ],
           "lat": 41.65215,
           "lon": -86.8959,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "34B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.43 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Gary",
@@ -9315,7 +9349,9 @@
           ],
           "lat": 41.57258,
           "lon": -87.40132,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "6",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Road Ranger Chicago",
@@ -15593,7 +15629,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.136523,
-          "lon": -83.240162
+          "lon": -83.240162,
+          "exit_ref": "32A-B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I75, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Monroe",
@@ -15622,7 +15660,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.963449,
-          "lon": -83.35375
+          "lon": -83.35375,
+          "exit_ref": "18",
+          "interchange_mi": 33.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I75, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Frenchtown",
@@ -15650,7 +15691,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.965185,
-          "lon": -83.344997
+          "lon": -83.344997,
+          "exit_ref": "18",
+          "interchange_mi": 33.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 18; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center",
@@ -16964,7 +17008,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.136523,
-          "lon": -83.240162
+          "lon": -83.240162,
+          "exit_ref": "32A-B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I75, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Monroe",
@@ -16993,7 +17039,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.963449,
-          "lon": -83.35375
+          "lon": -83.35375,
+          "exit_ref": "18",
+          "interchange_mi": 34.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I75, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Frenchtown",
@@ -17021,7 +17070,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.965185,
-          "lon": -83.344997
+          "lon": -83.344997,
+          "exit_ref": "18",
+          "interchange_mi": 34.0,
+          "exit_source": "exit_ref read: the stop's own source names exit 18; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center",
@@ -23562,7 +23614,9 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 43.348353,
-          "lon": -83.861564
+          "lon": -83.861564,
+          "exit_ref": "144A",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I75, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -26148,7 +26202,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.782449,
-          "lon": -86.023474
+          "lon": -86.023474,
+          "exit_ref": "52",
+          "interchange_mi": 24.2,
+          "exit_source": "exit_ref read: the stop's own source names exit 52; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Holland",
@@ -26177,7 +26234,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.740978,
-          "lon": -86.070235
+          "lon": -86.070235,
+          "exit_ref": "49",
+          "interchange_mi": 27.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I196, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Glenn Rest Area 726",
@@ -28981,7 +29041,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.883154,
-          "lon": -85.073818
+          "lon": -85.073818,
+          "exit_ref": "67",
+          "interchange_mi": 34.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-96 Weigh Station (mile 37)",
@@ -29047,7 +29110,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.787394,
-          "lon": -84.677642
+          "lon": -84.677642,
+          "exit_ref": "90",
+          "interchange_mi": 56.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Okemos Rest Area 811",
@@ -35196,7 +35262,10 @@
           ],
           "lat": 42.29611,
           "lon": -83.87933,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "167",
+          "interchange_mi": 29.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -36489,7 +36558,10 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 42.279713,
-          "lon": -84.930622
+          "lon": -84.930622,
+          "exit_ref": "112",
+          "interchange_mi": 29.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Battle Creek",
@@ -36516,7 +36588,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.302808,
-          "lon": -85.082346
+          "lon": -85.082346,
+          "exit_ref": "104",
+          "interchange_mi": 37.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -39576,7 +39651,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.302808,
-          "lon": -85.082346
+          "lon": -85.082346,
+          "exit_ref": "104",
+          "interchange_mi": 28.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Marshall",
@@ -39599,7 +39677,10 @@
           ],
           "lat": 42.2793966,
           "lon": -84.9306198,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "112",
+          "interchange_mi": 36.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "The 115 Truck Stop",
@@ -39685,7 +39766,10 @@
           ],
           "lat": 42.3017836,
           "lon": -83.8768253,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "167",
+          "interchange_mi": 91.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -44449,7 +44533,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "90",
+          "interchange_mi": 10.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "truck parking",
@@ -44512,7 +44599,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.883154,
-          "lon": -85.073818
+          "lon": -85.073818,
+          "exit_ref": "67",
+          "interchange_mi": 33.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I96, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Saranac Rest Area 532",
@@ -56086,7 +56176,10 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 42.863608,
-          "lon": -82.559619
+          "lon": -82.559619,
+          "exit_ref": "262",
+          "interchange_mi": 11.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -59995,7 +60088,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "251",
+          "exit_source": "exit_ref read: the stop's own source names exit 251; this leg has no interchange record with that number."
         }
       ],
       "divided": false,

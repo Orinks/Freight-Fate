@@ -462,7 +462,14 @@ mod tests {
         std::fs::write(&path, &bytes).expect("write");
         let err = BakedData::open(&path).expect_err("refused");
         let text = err.to_string();
-        assert!(text.contains("format 42"), "{text}");
+        // Whatever the build reads today, plus the 41 written above: this
+        // said "format 42" while the format was 1, and broke when it moved.
+        let written = format!("format {}", FORMAT_VERSION + 41);
+        assert!(text.contains(&written), "{text}");
+        assert!(
+            text.contains(&format!("reads format {FORMAT_VERSION}")),
+            "{text}"
+        );
         assert!(text.contains("ff-bake"), "{text}");
     }
 }

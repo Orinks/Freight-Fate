@@ -5491,7 +5491,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "284",
+          "interchange_mi": 48.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near Presho",
@@ -5563,7 +5566,10 @@
           "lat": 43.8861261,
           "lon": -100.70499,
           "vehicle_access": "tractor_trailer",
-          "parking_spaces": 10
+          "parking_spaces": 10,
+          "exit_ref": "192",
+          "interchange_mi": 140.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near Cactus Flats",
@@ -5631,7 +5637,10 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "interchange_mi": 265.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center Rapid City",
@@ -5654,7 +5663,10 @@
           ],
           "lat": 44.1034616,
           "lon": -103.1493874,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "61",
+          "interchange_mi": 271.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Rapid City",
@@ -9799,7 +9811,9 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US14, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J Licensed Location Rapid City",
@@ -9826,7 +9840,9 @@
           "source": "Pilot Flying J official locator lists Flying J Licensed Location store 931 in Rapid City, SD with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=172.0 off_mi=0.38; Store coordinates read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Rapid City; matched by position, the only Flying J within 5 mi of mile 172 of this leg (0.2 mi); coordinates read from the mapped site.",
           "at_mi": 172.0,
           "lat": 44.103671,
-          "lon": -103.1494
+          "lon": -103.1494,
+          "exit_ref": "61",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US14, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Rapid City",
@@ -13507,7 +13523,10 @@
           ],
           "lat": 44.11306,
           "lon": -103.27354,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "55",
+          "interchange_mi": 4.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "CBH Co-Op Belle Fourche Travel Center",
@@ -13580,7 +13599,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 45.749514,
-          "lon": -107.610625
+          "lon": -107.610625,
+          "exit_ref": "495",
+          "interchange_mi": 276.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 495; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Hardin EB",
@@ -16922,7 +16944,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "61",
+          "interchange_mi": 5.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Box Elder",
@@ -16945,7 +16970,10 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "interchange_mi": 11.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Wall Drug",
@@ -17014,7 +17042,10 @@
           "lat": 43.8861261,
           "lon": -100.70499,
           "vehicle_access": "tractor_trailer",
-          "parking_spaces": 10
+          "parking_spaces": 10,
+          "exit_ref": "192",
+          "interchange_mi": 137.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90E truck parking near Presho",
@@ -17085,7 +17116,10 @@
           ],
           "lat": 43.7365664,
           "lon": -98.9565376,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "284",
+          "interchange_mi": 229.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near White Lake",
@@ -25016,7 +25050,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.434747,
-          "lon": -96.379997
+          "lon": -96.379997,
+          "exit_ref": "143",
+          "exit_source": "exit_ref read: the stop's own source names exit 143; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Sioux City",
@@ -25045,7 +25081,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.435519,
-          "lon": -96.372901
+          "lon": -96.372901,
+          "exit_ref": "143",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-29 Weigh Station",
@@ -26024,7 +26062,10 @@
           ],
           "lat": 44.39818,
           "lon": -103.50843,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "32",
+          "interchange_mi": 20.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Big D Oil",
@@ -26044,7 +26085,9 @@
           ],
           "lat": 44.22461,
           "lon": -103.38035,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "46",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.07 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Rapid City",
@@ -26067,7 +26110,10 @@
           ],
           "lat": 44.11306,
           "lon": -103.27354,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "55",
+          "interchange_mi": 43.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,

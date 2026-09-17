@@ -3351,7 +3351,9 @@
           "lon": -75.072756,
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "7",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I78, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Hampton",
@@ -3380,7 +3382,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 40.636708,
-          "lon": -74.967575
+          "lon": -74.967575,
+          "exit_ref": "12",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I78, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-95 Fairfield SB Service Plaza",
@@ -6752,7 +6756,9 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 40.659527,
-          "lon": -75.072756
+          "lon": -75.072756,
+          "exit_ref": "7",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I78, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Hampton",
@@ -6781,7 +6787,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 40.636708,
-          "lon": -74.967575
+          "lon": -74.967575,
+          "exit_ref": "12",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I78, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "corridor": {
@@ -11991,7 +11999,10 @@
           ],
           "lat": 40.72249,
           "lon": -78.18522,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "52",
+          "interchange_mi": 18.86,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I99, 0.59 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -14738,7 +14749,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.258948,
-          "lon": -79.744037
+          "lon": -79.744037,
+          "exit_ref": "61",
+          "interchange_mi": 22.24,
+          "exit_source": "exit_ref read: the stop's own source names exit 61; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Angola Travel Plaza",
@@ -16613,7 +16627,10 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 41.785521,
-          "lon": -80.853804
+          "lon": -80.853804,
+          "exit_ref": "223",
+          "interchange_mi": 50.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -22170,7 +22187,9 @@
           ],
           "lat": 40.23098,
           "lon": -77.14084,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "52A",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I81, 0.58 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -30236,7 +30255,9 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 40.449285,
-          "lon": -76.515175
+          "lon": -76.515175,
+          "exit_ref": "90",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I81, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Nelly Travel Plaza",
@@ -34012,7 +34033,9 @@
           ],
           "lat": 41.03762,
           "lon": -80.1281,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "105",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I79, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-79 Weigh Station",
@@ -37795,7 +37818,9 @@
           ],
           "lat": 39.27868,
           "lon": -76.54885,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "57",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.40 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -56929,7 +56954,10 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 41.824621,
-          "lon": -75.68282
+          "lon": -75.68282,
+          "exit_ref": "219",
+          "interchange_mi": 32.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I81, 0.13 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Truck Parking",
@@ -63071,7 +63099,9 @@
           ],
           "lat": 41.18064,
           "lon": -77.32609,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "118",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US220, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Lamar",

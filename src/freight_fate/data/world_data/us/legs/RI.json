@@ -2361,7 +2361,10 @@
           "lat": 41.2903995,
           "lon": -72.580404,
           "vehicle_access": "tractor_trailer",
-          "parking_spaces": 16
+          "parking_spaces": 16,
+          "exit_ref": "62",
+          "interchange_mi": 84.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Branford Service Plaza Northbound",
@@ -8909,7 +8912,9 @@
           ],
           "lat": 41.2904,
           "lon": -72.5804,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "62",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Milford",
@@ -8938,7 +8943,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.23682,
-          "lon": -73.022328
+          "lon": -73.022328,
+          "exit_ref": "40",
+          "interchange_mi": 110.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Rest Area CT-15 (South Bound)",

@@ -135,7 +135,7 @@ fn test_the_flying_j_at_albuquerque_exit_153_reads_its_own_light() {
     let stop = leg
         .stops
         .iter()
-        .find(|stop| stop.name == "Flying J Travel Center" && stop.at_mi < 10.0)
+        .find(|stop| stop.name.starts_with("Flying J Travel Center") && stop.at_mi < 10.0)
         .expect("the Albuquerque Flying J");
     let served = served_interchange(leg, stop).expect("matched to its interchange");
     assert_eq!(served.exit_ref, "153");

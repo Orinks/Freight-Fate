@@ -337,6 +337,20 @@ pub fn ramp_speed_control_handback() -> Outcome {
     }
     // 3. Route-transition assistance brings the truck to the bar. Nothing may
     //    re-engage on the creep toward it.
+    //
+    //    The bar is pinned to a stop sign, which is what this run is about: a
+    //    sign always stops the truck, and the handback is measured from that
+    //    stop. Left to the map, the ramp's control is whatever this exit
+    //    carries that day -- a seeded stop sign until 2026-09-17, then exit
+    //    48A's own traffic light once stops read their interchange -- and a
+    //    light that turns green releases a truck nobody is braking, which
+    //    rolls past the entrance and off down the road. Lights have their own
+    //    suite (`states_driving_ramps`).
+    //    The crossroad goes with it: it was seeded for the control the ramp
+    //    began with, and a sign waits for a gap in it.
+    rig.drive.ramp_control = "stop".to_string();
+    rig.drive.cross_bubble = None;
+    rig.drive.ramp_waiting_at_light = false;
     rig.step(
         60000,
         DT,

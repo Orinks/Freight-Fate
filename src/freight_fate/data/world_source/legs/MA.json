@@ -5412,7 +5412,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.065917,
-          "lon": -72.108135
+          "lon": -72.108135,
+          "exit_ref": "3",
+          "interchange_mi": 61.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Willington",
@@ -5435,7 +5438,9 @@
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 41.926262,
-          "lon": -72.259673
+          "lon": -72.259673,
+          "exit_ref": "71",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -12722,7 +12727,10 @@
           ],
           "lat": 42.09109,
           "lon": -72.58296,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "4",
+          "interchange_mi": 1.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I91, 0.06 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -14615,7 +14623,9 @@
           ],
           "lat": 42.09109,
           "lon": -72.58296,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "4",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I91, 0.06 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Wallingford Rest Area",
@@ -17727,7 +17737,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.926262,
-          "lon": -72.259673
+          "lon": -72.259673,
+          "exit_ref": "71",
+          "interchange_mi": 37.7,
+          "exit_source": "exit_ref read: the stop's own source names exit 71; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -21742,7 +21755,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.065917,
-          "lon": -72.108135
+          "lon": -72.108135,
+          "exit_ref": "3",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Love's Travel Stop Willington",
@@ -21770,7 +21785,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.926262,
-          "lon": -72.259673
+          "lon": -72.259673,
+          "exit_ref": "71",
+          "interchange_mi": 37.6,
+          "exit_source": "exit_ref read: the stop's own source names exit 71; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "TA Travel Center Southington",

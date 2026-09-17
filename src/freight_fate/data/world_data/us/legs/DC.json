@@ -11808,7 +11808,10 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "104",
+          "interchange_mi": 81.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 104; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -13374,7 +13377,9 @@
           ],
           "lat": 38.98512,
           "lon": -76.54634,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "23B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US50, 0.14 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "BP",
