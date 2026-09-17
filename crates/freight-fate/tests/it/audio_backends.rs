@@ -713,6 +713,22 @@ fn test_horn_uses_reserved_loop_slot() {
 }
 
 #[test]
+fn test_stop_world_drops_the_liquid_surge_wash() {
+    // A tank still sloshing when the pause menu opens must not be heard
+    // through it: stop_world is what the pause menu calls, and the surge
+    // wash is a gated world loop like the jake and the air, not music or a
+    // menu sound that should survive a pause.
+    let Some(mut r) = bass_rig_with_recordings() else {
+        return;
+    };
+    r.engine
+        .start_loop_with(CH_SURGE, "vehicle/liquid_wash", 0.5, 90);
+    assert!(r.engine.backend().loop_entry(CH_SURGE).is_some());
+    r.engine.stop_world();
+    assert!(r.engine.backend().loop_entry(CH_SURGE).is_none());
+}
+
+#[test]
 fn test_bass_horn_sustains_then_rings_out_on_release() {
     let Some(mut r) = bass_rig_with_recordings() else {
         return;

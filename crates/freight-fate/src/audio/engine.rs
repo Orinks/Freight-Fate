@@ -11,9 +11,9 @@ use ff_core::pyrandom::PyRandom;
 use super::{
     asset_bytes, Audio, AudioBackend, AudioError, BassBackend, Buses, KeyProbe, NullBackend,
     SustainLoopSpec, VolumeUpdate, ALERT_HOLD_TIMEOUT_S, BASS_NO_SOUND_DEVICE, CH_AIR, CH_ALERT,
-    CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_RADIO_FX, CH_ROAD, CH_WEATHER, CH_WEATHER_B,
-    CUE_HOLD_TIMEOUT_S, HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY, JAKE_RECORDED_KEY,
-    SFX_EXTENSIONS,
+    CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_RADIO_FX, CH_ROAD, CH_SURGE, CH_WEATHER,
+    CH_WEATHER_B, CUE_HOLD_TIMEOUT_S, HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY,
+    JAKE_RECORDED_KEY, SFX_EXTENSIONS,
 };
 
 /// Facade over the active backend; the rest of the game talks only to this.
@@ -767,6 +767,11 @@ impl Audio for AudioEngine {
             // who paused with a tire on the rumble strip took the strip into
             // the menu with them. It comes back on its own when the drive does.
             CH_EDGE,
+            // The liquid wash is gated like the jake and the air, so it gets
+            // the same treatment: a tank still sloshing when the menu opened
+            // must not be heard through it, and update_liquid_cues restarts
+            // it on its own once driving resumes if the wave is still live.
+            CH_SURGE,
         ] {
             self.stop_loop_with(ch, 400);
         }

@@ -34,6 +34,8 @@
 
 - **Twenty-five more runs got the same curve cleanup.** Glenwood Canyon and the US-550 switchbacks stay.
 
+- **Opening the pause menu now stops the tank surge sound.** It no longer keeps playing through the menu and back into the drive.
+
 
 ### Changed
 
