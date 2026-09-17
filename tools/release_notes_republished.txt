@@ -1,6 +1,0 @@
-# Read by tools/release_notes.py (see republished_entries): the changelog at
-# this commit only reworded two entries the 2026-09-15 snapshot already
-# carried, so a snapshot must not list them as new. Delete this file once a
-# snapshot tag carries the reworded text (the first snapshot after
-# 2026-09-15).
-ref = d0563bb8
