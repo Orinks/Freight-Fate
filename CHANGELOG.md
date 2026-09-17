@@ -28,6 +28,8 @@
 
 - **Street directions name one road, not a list of route numbers.** A street with several numbers is spoken by its first.
 
+- **Businesses that are not truck stops are off the map.** Independent truck stops are announced as travel centers, not service plazas.
+
 - **Station names keep their apostrophes.** Fifteen imported stations no longer read as, for example, Birmingham s Beautiful QEZ.
 
 - **Stepping the dial visits each terrestrial station once.** The band no longer re-sorts by signal under a moving truck between presses.

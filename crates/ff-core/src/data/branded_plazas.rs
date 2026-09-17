@@ -3,10 +3,11 @@
 //! A service plaza in this game is on the highway: a toll road's own plaza,
 //! entered from the mainline. A Love's or a Pilot is a travel center beside
 //! an interchange, reached by an exit. The map import (an OpenStreetMap
-//! amenity query) had no such distinction to read, so `service_plaza` was its
-//! default, and 1,400 of the map's 1,819 service plazas carry nothing but a
-//! truck-stop chain's name. A driver heard "service plaza: Love's Travel
-//! Stop" for a store on a county road (roadmap, 2026-09-17).
+//! amenity query) typed every `highway=services` feature a `service_plaza`,
+//! and U.S. mappers draw that tag around truck-stop lots, so 1,400 of the
+//! map's 1,819 service plazas carried nothing but a truck-stop chain's name.
+//! A driver heard "service plaza: Love's Travel Stop" for a store on a county
+//! road (roadmap, 2026-09-17).
 //!
 //! This screens the type at load and never edits the bake, so the rule can be
 //! re-judged: the records still say `service_plaza` in the data.
@@ -22,6 +23,22 @@
 //!
 //! "Travel Plaza" in a name does not count: it is what Flying J and Onvo
 //! call their stores (7 records, none on a leg that charges a toll).
+//!
+//! # An independent that names itself a truck stop
+//!
+//! The same contradiction without a chain: the type says toll-road plaza and
+//! the name says truck stop ([`TRUCK_STOP_NAME_PHRASES`]: "Flags West Truck
+//! Stop", "Radford Travel Center"). It is read as a `travel_center` too, and
+//! that value is also **derived** from the name. "Travel Plaza" is left out
+//! on purpose, because the New York Thruway's own plazas are named that way
+//! ("Clifton Springs Travel Plaza"), and so is every other word the name
+//! alone cannot settle.
+//!
+//! Where OpenStreetMap had something to READ at the record's coordinate (a
+//! toll authority as operator, HGV fuel lanes, a truck scale, nothing at
+//! all), `tools/nonchain_plazas.py` corrected the data itself on 2026-09-17
+//! and wrote what it read into the record's `source`. This screen is only for
+//! what the name alone decides: 32 records on that day's map.
 //!
 //! The retyped value is **derived** (input: the record's name; rule: the one
 //! above), not read. The chain list is the operator's knowledge of the
@@ -65,11 +82,17 @@ use crate::data::world_models::Stop;
 /// What a name says when the stop really is a toll road's own plaza.
 const PLAZA_NAME_PHRASES: &[&str] = &["service plaza", "service area"];
 
+/// What a name says when the stop is a truck stop beside an interchange.
+/// `tools/nonchain_plazas.py` mirrors this list; change them together.
+pub const TRUCK_STOP_NAME_PHRASES: &[&str] =
+    &["truck", "travel center", "travel centre", "travel stop"];
+
 /// The stop type a record's own name supports.
 ///
-/// Everything but a chain-named `service_plaza` is returned as recorded.
+/// Everything but a `service_plaza` named for a chain or as a truck stop is
+/// returned as recorded.
 pub fn screened_stop_type<'a>(name: &str, stop_type: &'a str) -> &'a str {
-    if stop_type != "service_plaza" || chain_of(name).is_none() {
+    if stop_type != "service_plaza" {
         return stop_type;
     }
     let lower = name.to_lowercase();
@@ -79,7 +102,14 @@ pub fn screened_stop_type<'a>(name: &str, stop_type: &'a str) -> &'a str {
     {
         return stop_type;
     }
-    "travel_center"
+    let names_a_truck_stop = TRUCK_STOP_NAME_PHRASES
+        .iter()
+        .any(|phrase| lower.contains(phrase));
+    if chain_of(name).is_some() || names_a_truck_stop {
+        "travel_center"
+    } else {
+        stop_type
+    }
 }
 
 /// A leg's stops with each chain truck stop typed as what it is.
@@ -125,6 +155,28 @@ mod tests {
                 "{name}"
             );
         }
+    }
+
+    #[test]
+    fn test_an_independent_that_names_itself_a_truck_stop_is_a_travel_center() {
+        for name in [
+            "Flags West Truck Stop",
+            "Baker Truck Corral",
+            "Radford Travel Center",
+            "Miller's Travel Centers",
+            "Fred's State Line - Casino and Truck Stop",
+        ] {
+            assert_eq!(
+                screened_stop_type(name, "service_plaza"),
+                "travel_center",
+                "{name}"
+            );
+        }
+        // A plaza that parks trucks says so under its own name.
+        assert_eq!(
+            screened_stop_type("Sideling Hill Service Plaza Truck Parking", "service_plaza"),
+            "service_plaza"
+        );
     }
 
     #[test]

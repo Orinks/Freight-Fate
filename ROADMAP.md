@@ -606,12 +606,40 @@ its status or release decision.
       serves a truck stop; 375 matched records carry no control because the
       map tags none. Remove the copied coordinates and the 48 misplaced
       copies at the source, in `tools/reverse_pair_stops.py`.
-- [ ] 419 service plazas carry no chain name, and only 99 of them name
-      themselves a service plaza or service area. The other 320 are still
-      the import's default type: independents (Eagles Landing Travel Plaza,
-      Castaic Truck Stop), convenience stores the access screen already
-      hides behind a trailer (QuikTrip 25), and places that are not stops
-      (Horner Industrial Group 15, "Auto Repair", "Bay 2").
+- [x] The 320 service plazas with no chain name that do not name
+      themselves a service plaza or service area are each typed as what
+      OpenStreetMap says they are (`tools/nonchain_plazas.py`, with what it
+      read committed beside it in `nonchain_plazas_evidence.json`). The type
+      was never an import default: the import gave `service_plaza` to every
+      `highway=services` feature, a tag U.S. mappers also put on truck-stop
+      lots, convenience stores and now and then a welder. Each record's
+      feature was looked up in the Geofabrik state extracts, read
+      2026-09-17. Of 151 places with a same-named feature, 110 sit within
+      0.0004 miles of the record (coordinate rounding) and the next is at
+      0.025, so the cut is 0.001; past it a place is identified by name
+      only, and never when the name is a multi-store brand. Corrected in the
+      data, with what was read appended to `source`: 156 travel centers (134
+      read from HGV fuel lanes, HGV parking or a truck scale, 22 derived
+      from the name), 18 fuel stations (9 read, 9 derived), 1 public rest
+      area, and 38 confirmed as service plazas (28 read from a toll
+      authority's operator tag, 10 derived). Removed as not stops, 75
+      records of 18 places, most of them a bare `highway=services` feature
+      under another business's name: Horner Industrial Group 15, Bay 2 12 (a
+      Nashville bus bay), Lucky Spot 8, Auto Repair 4, and a rest area on
+      CT-15, where trucks are banned, listed 9 times on I-95 and I-91. Two
+      legs now list no stop (Fortuna to Eureka, Stockton to San Francisco).
+      The 32 records that only their name decides ("Flags West Truck
+      Stop") are read as travel centers at load (`data::branded_plazas`).
+      5 stay service plazas on no evidence: Modena Travel Plaza 2, Super S
+      Travel Plaza, one QuikTrip, one Circle K. `tools/reverse_pair_stops.py` now
+      asks a fuel-type stop for the access screen's evidence before copying
+      it; the type alone had carried 4 of the removed records onto partner
+      legs.
+- [ ] 21 convenience-brand records (QuikTrip 16, Casey's, Speedway, OnCue)
+      have HGV fuel lanes and a truck scale mapped in OpenStreetMap, and the
+      access screen still reads them bobtail-only because their services
+      list no scale. Adding the scale as a read service would open them to
+      a trailer, with parking that is only assumed: the owner's call.
 
 ### September 16 radio range and the cruise floor
 

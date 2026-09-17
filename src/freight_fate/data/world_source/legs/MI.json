@@ -40738,7 +40738,7 @@
           "name": "George N. Craig Travel Plaza EB",
           "type": "service_plaza",
           "at_mi": 60.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the elkhart_in_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42560,7 +42560,7 @@
           "name": "George N. Craig Travel Plaza EB",
           "type": "service_plaza",
           "at_mi": 56.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature of the same name 2.2 miles away is highway=services operated by Indiana Toll Road Concession Company. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
