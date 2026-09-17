@@ -2,9 +2,11 @@
 //! the cross-traffic bubble, the stop bar's countdown and its held tone, the
 //! route-transition assist, and the crossing itself.
 
+use ff_core::data::world_models::Interchange;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::cross_traffic::{cross_sound_lead_s, CrossTraffic, CrossVehicle};
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::trip_route_helpers::INTERCHANGE_IDENTITY_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::units::spoken_feet_or_meters;
 
@@ -48,7 +50,15 @@ impl DrivingState {
             // "Stop sign at ramp end. Limit 70").
             return "none".to_string();
         }
-        let mut control = self.trip.ramp_control_at(stop.at_mi, 0.15);
+        // A stop matched to its interchange at bake time reads that record
+        // and no other. The mile-marker search is only for a stop with no
+        // match: a stop's mile is a projection, a mile or three off as often
+        // as not, so the search found a recorded control for one ramp in
+        // thirty and the dice spoke for the rest as if they were the ramp's.
+        let mut control = match self.served_interchange(stop) {
+            Some(interchange) => interchange.ramp_control.clone(),
+            None => self.trip.ramp_control_at(stop.at_mi, 0.15),
+        };
         if control.is_empty() && self.ramp_meets_a_freeway(stop) {
             // A system interchange: this ramp ends in a merge onto another
             // freeway, and nothing stops traffic there. Decided before the
@@ -83,6 +93,13 @@ impl DrivingState {
         control
     }
 
+    /// The interchange record this stop was matched to at bake time, by
+    /// identity: the stop carries the record's own route mile.
+    fn served_interchange(&self, stop: &RoadStop) -> Option<&Interchange> {
+        self.trip
+            .interchange_at(stop.interchange_mi?, INTERCHANGE_IDENTITY_MI)
+    }
+
     /// Whether this exit's ramp lands on another freeway.
     ///
     /// The baked `ramp_far_end` answers first: it is walked link topology, a
@@ -98,7 +115,10 @@ impl DrivingState {
     /// handed stop signs to roughly half the rural ones -- a stop sign where
     /// an interstate meets an interstate does not exist (owner, 2026-08-17).
     pub fn ramp_meets_a_freeway(&self, stop: &RoadStop) -> bool {
-        let Some(interchange) = self.trip.interchange_at(stop.at_mi, 0.15) else {
+        let interchange = self
+            .served_interchange(stop)
+            .or_else(|| self.trip.interchange_at(stop.at_mi, 0.15));
+        let Some(interchange) = interchange else {
             return false;
         };
         if interchange.ramp_far_end == "motorway" {

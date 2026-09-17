@@ -558,11 +558,47 @@ its status or release decision.
       Exit numbers and ramp controls are found by mile marker, so re-project
       each from the store coordinates it now carries. Exits and parking
       counts still need the chains' written consent to use their locators.
-- [ ] A stop's ramp control is looked up within 0.15 miles of a projected
-      mile marker, which only one stop in twenty meets, so most ramps take
-      the seeded urban or rural control. Snapping each stop to the
-      interchange that serves it needs coordinates on both sides;
-      interchanges carry a mile marker only.
+- [x] A stop carries the interchange that serves it, decided once when the
+      data is built (`tools/snap_stops_to_interchanges.py`), and the exit
+      number, the ramp's control and the ramp's advisory speed are looked up
+      by that identity with no tolerance. The old lookup searched within 0.15
+      miles of the stop's mile marker, which is a projection: measured on
+      1,223 stops whose read coordinates put them beside a junction, it is
+      within 0.15 miles of that junction for one in six and over a mile off
+      for half. The stop gains `exit_ref` (read), `interchange_mi` (derived:
+      the `at_mi` of the leg's record with that exit number) and
+      `exit_source`. Evidence in order: the stop's own source names its exit
+      (a chain's store listing) and the leg's record of that number lies
+      within 5.3 miles, the measured 99th percentile of mile marker error;
+      else read coordinates within 0.6 miles of a junction node on the leg's
+      own highway (within 200 m of the leg's geometry, on a motorway or trunk
+      way that shares the leg's route number, read from the cached state
+      extracts in 48 seconds); else the same store under another name on the
+      leg. 0.6 is where the distance cluster (peak at 0.20 to 0.25) meets the
+      flat rate of stops that are merely somewhere along the road, which
+      bounds chance snaps at 8%. The one check independent of the snap, a
+      store's listed exit against its coordinate twin's snap, agrees 40
+      times in 40. Measured 2026-09-17 on 3,936 stops reached by an exit:
+      ramp control read from the map 133 (3.4%) to 574 (14.6%), seeded 3,803
+      to 3,362, exit number spoken 1,926 (48.9%) to 2,230 (56.7%), and of the
+      1,390 exit numbers now decided by identity the mile marker had named
+      another exit 464 times. On the loaded map after the twin screen, 828
+      stops are matched, 476 read a control, and the 0.15 mile search reached
+      59 of those. The controls are still mostly assumed. A stop with no
+      evidence keeps the old lookup. 485 opposite-direction copies carry
+      coordinates that are their own mile marker again (a point on the source
+      leg's line, written by `tools/reverse_pair_stops.py`) and are ignored
+      as evidence; 48 stops name an exit their leg puts over 5.3 miles away
+      (Love's Heyburn appears at mile 121.9 and again at 143.6 of Idaho Falls
+      to Boise, and exit 211 is at 119.9) and are listed, not linked.
+- [ ] What still leaves a truck stop's ramp to the seeded control, in order
+      of size: 1,353 stops are on the 532 legs with no interchange records
+      (the interchange build only reads Interstate shields); 390 snapped to
+      an exit their leg does not record, because the build drops an exit
+      within two miles of a richer neighbour, and should keep one that
+      serves a truck stop; 375 matched records carry no control because the
+      map tags none. Remove the copied coordinates and the 48 misplaced
+      copies at the source, in `tools/reverse_pair_stops.py`.
 - [ ] 419 service plazas carry no chain name, and only 99 of them name
       themselves a service plaza or service area. The other 320 are still
       the import's default type: independents (Eagles Landing Travel Plaza,

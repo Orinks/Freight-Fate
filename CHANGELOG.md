@@ -44,6 +44,8 @@
 
 - **Twenty-five more runs got the same curve cleanup.** Glenwood Canyon and the US-550 switchbacks stay.
 
+- **More truck stops announce their own exit number and the light or stop sign on their own ramp.** Many had a neighbouring exit's number.
+
 
 ### Changed
 

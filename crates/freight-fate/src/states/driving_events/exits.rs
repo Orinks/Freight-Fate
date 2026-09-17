@@ -263,10 +263,13 @@ impl DrivingState {
         // The caller may hand the stop in: the exit callout builds its
         // sentence BEFORE _exit_stop is assigned, and without it this fell
         // back to the old flat number and quietly undid the whole change.
+        // Asked at the interchange that serves the stop when the bake matched
+        // one, so the posted advisory and the far end are that ramp's and not
+        // whichever exit sits nearest the stop's projected mile.
         let at_mi = stop
             .or(self.ramp_stop.as_ref())
             .or(self.exit_stop.as_ref())
-            .map(|stop| stop.at_mi);
+            .map(|stop| stop.interchange_mi.unwrap_or(stop.at_mi));
         match at_mi {
             None => RAMP_MAX_MPH,
             Some(at_mi) => self.trip.ramp_speed_at(at_mi),

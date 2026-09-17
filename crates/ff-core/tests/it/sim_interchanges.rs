@@ -402,6 +402,49 @@ fn test_place_stops_attaches_exit_label() {
 }
 
 #[test]
+fn test_a_matched_stop_takes_its_own_exit_not_the_nearest() {
+    // The bake matched the stop to the interchange three miles on; the exit
+    // half a mile away by mile marker is a neighbour, and used to win.
+    let route = first_route_option(world(), "Chicago", "Indianapolis");
+    let (mut leg, target) = leg0_curated_stop(&route);
+    let exit = |at_mi: f64, exit_ref: &str| Interchange {
+        at_mi,
+        exit_ref: exit_ref.to_string(),
+        highway: leg.highway.clone(),
+        source: "OSM".to_string(),
+        ..Default::default()
+    };
+    let exits = vec![exit(target.at_mi + 0.5, "7"), exit(target.at_mi + 3.0, "9")];
+    for stop in leg.stops.iter_mut().filter(|s| s.name == target.name) {
+        stop.exit_ref = "9".to_string();
+        stop.interchange_mi = Some(target.at_mi + 3.0);
+    }
+    let matched = with_corridor(&leg, |detail| detail.interchanges = exits.clone());
+    let trip = trip_on(replace_leg(&route, 0, matched), true);
+    let placed = trip
+        .stops
+        .iter()
+        .find(|s| s.name == target.name)
+        .expect("the curated stop was placed");
+    assert_eq!(placed.exit_label, "exit 9");
+    let served = trip
+        .interchange_at(placed.interchange_mi.expect("the match rides along"), 1e-6)
+        .expect("the match names a record on the route");
+    assert_eq!(served.exit_ref, "9");
+
+    // The leg records no such exit: the stop's own number still speaks.
+    let unrecorded = with_corridor(&leg, |detail| detail.interchanges = vec![exits[0].clone()]);
+    let trip = trip_on(replace_leg(&route, 0, unrecorded), true);
+    let placed = trip
+        .stops
+        .iter()
+        .find(|s| s.name == target.name)
+        .expect("the curated stop was placed");
+    assert_eq!(placed.exit_label, "exit 9");
+    assert_eq!(placed.interchange_mi, None);
+}
+
+#[test]
 fn test_rest_stop_cue_names_exit_when_linked() {
     let route = first_route_option(world(), "Chicago", "Indianapolis");
     let (leg, target) = leg0_curated_stop(&route);

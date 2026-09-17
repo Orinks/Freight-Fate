@@ -90,7 +90,10 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 
 /// Bumped whenever a section's encoding changes. A file written by another
 /// version is refused with a message naming both, never half-read.
-pub const FORMAT_VERSION: u32 = 1;
+///
+/// 2: a stop carries the interchange that serves it (`exit_ref`,
+/// `interchange_mi`).
+pub const FORMAT_VERSION: u32 = 2;
 
 const HEADER_LEN: usize = 32;
 
