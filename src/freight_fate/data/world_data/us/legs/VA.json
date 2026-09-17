@@ -4024,10 +4024,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Danville",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the danville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the danville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Danville; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4048,9 +4048,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 24.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Carolina extract dated 2026-06-22, read 2026-09-17): Love's store 741; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5439,10 +5439,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Danville",
+          "type": "travel_center",
           "at_mi": 1.05,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the danville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the danville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Danville; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10581,10 +10581,10 @@
       "miles": 30,
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Glade Spring",
+          "type": "travel_center",
           "at_mi": 15.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Petro store 0372 at Glade Spring; town read from the store page the mapped site links to; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10604,10 +10604,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Meadowview",
           "type": "travel_center",
           "at_mi": 21.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Love's store 613 at Meadowview; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17845,7 +17845,7 @@
           "name": "Pilot Travel Center Providence Forge",
           "type": "travel_center",
           "at_mi": 72.7,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 159 in Providence Forge, VA with 30 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/va/providence-forge/6721-emmaus-church-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 159 in Providence Forge, VA with 30 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/va/providence-forge/6721-emmaus-church-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Providence Forge; matched by position, the only Pilot within 5 mi of mile 72.7 of this leg (0.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -17866,8 +17866,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 37.50675549771116,
-          "lon": -77.10203484252331
+          "lat": 37.499841,
+          "lon": -77.089533
         },
         {
           "name": "New Kent Safety Rest Area East/Welcome Center",
@@ -20702,10 +20702,10 @@
       },
       "stops": [
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Warfield",
+          "type": "travel_center",
           "at_mi": 32.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): TA Express store at Warfield; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21525,10 +21525,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Colonial Heights",
+          "type": "travel_center",
           "at_mi": 6.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Colonial Heights; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28219,7 +28219,7 @@
           "name": "Pilot Travel Center Providence Forge",
           "type": "travel_center",
           "at_mi": 20.1,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 159 in Providence Forge, VA with 30 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/va/providence-forge/6721-emmaus-church-rd",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 159 in Providence Forge, VA with 30 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/va/providence-forge/6721-emmaus-church-rd; Store coordinates read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Providence Forge; matched by position, the only Pilot within 5 mi of mile 20.1 of this leg (0.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28239,7 +28239,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.499841,
+          "lon": -77.089533
         }
       ],
       "divided": true,
@@ -31748,9 +31750,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 81.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Carolina extract dated 2026-06-22, read 2026-09-17): Love's store 741; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31773,7 +31775,7 @@
           "name": "ONE9 Travel Center McLeansville",
           "type": "travel_center",
           "at_mi": 97.2,
-          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 7937 in McLeansville, NC; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/mcleansville/907-knox-rd",
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 7937 in McLeansville, NC; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.5 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/mcleansville/907-knox-rd; Store coordinates read from OpenStreetMap (Geofabrik North Carolina extract dated 2026-06-22, read 2026-09-17): ONE9 store at McLeansville; matched by name, the only ONE9 the map has at McLeansville within 40 mi of mile 97.2 of this leg (12.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -31792,13 +31794,15 @@
           ],
           "parking": "limited",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.060874,
+          "lon": -79.662048
         },
         {
           "name": "Flying J Travel Center Haw River",
           "type": "travel_center",
           "at_mi": 111.13,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 682 in Haw River, NC with 251 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/haw-river/1043-jimmie-kerr-rd",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 682 in Haw River, NC with 251 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nc/haw-river/1043-jimmie-kerr-rd; Store coordinates read from OpenStreetMap (Geofabrik North Carolina extract dated 2026-06-22, read 2026-09-17): Flying J store at Haw River; matched by position, the only Flying J within 5 mi of mile 111.13 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -31819,7 +31823,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.071908,
+          "lon": -79.354094
         }
       ],
       "corridor": {
@@ -34910,10 +34916,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Raphine",
+          "type": "travel_center",
           "at_mi": 65.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Raphine; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44313,10 +44319,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Winchester",
+          "type": "travel_center",
           "at_mi": 11.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Flying J store 752 at Winchester; town read from the mapped site's address; matched by position, the only Flying J within 5 mi of mile 11 of this leg (2.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44331,13 +44337,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.290208,
+          "lon": -78.086967
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Hagerstown",
+          "type": "travel_center",
           "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44358,9 +44366,9 @@
         },
         {
           "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 39.7,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44393,10 +44401,10 @@
       "miles": 27,
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wytheville",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): TA store 0143 at Wytheville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -46867,10 +46875,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wytheville",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): TA store 0143 at Wytheville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

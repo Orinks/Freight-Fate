@@ -33,7 +33,7 @@
           "name": "Love's Travel Stop Canaan",
           "type": "travel_center",
           "at_mi": 32.54,
-          "source": "Love's official store feed lists store 611 in Canaan, NY on I-90, exit B3; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 611 in Canaan, NY on I-90, exit B3; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 611 at Canaan; matched by position, the only Love's within 5 mi of mile 32.54 of this leg (0.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -53,7 +53,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.362499,
+          "lon": -73.429623
         }
       ],
       "corridor": {
@@ -13972,10 +13974,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Binghamton",
+          "type": "travel_center",
           "at_mi": 4.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 403 at Binghamton; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20397,8 +20399,8 @@
         {
           "name": "Love's Travel Stop Ripley",
           "type": "travel_center",
-          "at_mi": 63.4,
-          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "at_mi": 68.7,
+          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 833 at Ripley; matched by name, the only Love's the map has at Ripley within 40 mi of mile 68.7 of this leg (6.6 mi); coordinates read from the mapped site. Mile marker moved from 63.4 to 68.7: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 63.4 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -20418,33 +20420,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 68.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
           "vehicle_access": "tractor_trailer",
-          "lat": 42.27193572605037,
-          "lon": -79.72539661148352,
-          "directions": [
-            "both"
-          ]
+          "lat": 42.258948,
+          "lon": -79.744037
         },
         {
           "name": "Love's Travel Stop Austinburg",
@@ -26987,36 +26965,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 29.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 42.98675408394173,
-          "lon": -78.46064798278911,
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Flying J Travel Center Corfu",
           "type": "travel_center",
           "at_mi": 31.8,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Flying J store at Corfu; matched by position, the only Flying J within 5 mi of mile 31.8 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -27038,8 +26990,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 43.00280034725901,
-          "lon": -78.41349301033081
+          "lat": 43.001194,
+          "lon": -78.407196
         },
         {
           "name": "Pembroke Service Area",
@@ -27115,7 +27067,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 117.3,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 117.3 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -27136,8 +27088,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.967892864519534,
-          "lon": -76.84617966436133
+          "lat": 42.964509,
+          "lon": -76.847925
         },
         {
           "name": "Love's Travel Stop Waterloo",
@@ -28792,36 +28744,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 25.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 42.98675408394173,
-          "lon": -78.46064798278911,
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Flying J Travel Center Corfu",
           "type": "travel_center",
           "at_mi": 27.9,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Flying J store at Corfu; matched by position, the only Flying J within 5 mi of mile 27.9 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28842,7 +28768,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.001194,
+          "lon": -78.407196
         },
         {
           "name": "Pembroke Service Area",
@@ -31408,10 +31336,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Erie",
+          "type": "travel_center",
           "at_mi": 36.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): TA store 0215 at Erie; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34159,10 +34087,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Mahwah",
+          "type": "travel_center",
           "at_mi": 29.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Mahwah; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38644,29 +38572,6 @@
           ]
         },
         {
-          "name": "Pilot",
-          "type": "travel_center",
-          "at_mi": 58.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.23658,
-          "lon": -73.02254,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Rest Area CT-15 (South Bound)",
           "type": "public_rest_area",
           "at_mi": 58.9,
@@ -38693,7 +38598,7 @@
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 65.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Pilot store at Milford; matched by position, the only Pilot within 5 mi of mile 65.8 of this leg (4.9 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -38715,8 +38620,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.283304465378514,
-          "lon": -72.95185740834604
+          "lat": 41.23682,
+          "lon": -73.022328
         },
         {
           "name": "Rest Area CT-15 (South Bound)",
@@ -38773,7 +38678,7 @@
           "name": "Pilot Travel Center Sturbridge",
           "type": "travel_center",
           "at_mi": 165.9,
-          "source": "Pilot Flying J official Sturbridge, Massachusetts location page lists truck parking; at_mi estimated from the I-84/Massachusetts Turnpike approach west of Boston, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st",
+          "source": "Pilot Flying J official Sturbridge, Massachusetts location page lists truck parking; at_mi estimated from the I-84/Massachusetts Turnpike approach west of Boston, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by name, the only Pilot the map has at Sturbridge within 40 mi of mile 165.9 of this leg (22.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -38792,7 +38697,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.065917,
+          "lon": -72.108135
         },
         {
           "name": "Newton Service Plaza",
@@ -40486,10 +40393,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Bordentown",
+          "type": "travel_center",
           "at_mi": 80.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Petro store 0314 at Bordentown; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -48838,7 +48745,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 45.72,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 45.72 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -48859,8 +48766,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.967892864519534,
-          "lon": -76.84617966436133
+          "lat": 42.964509,
+          "lon": -76.847925
         },
         {
           "name": "Love's Travel Stop Waterloo",
@@ -48988,10 +48895,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rotterdam",
+          "type": "travel_center",
           "at_mi": 208.86,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Rotterdam; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49156,10 +49063,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Fultonville",
+          "type": "travel_center",
           "at_mi": 102.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Fultonville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51451,7 +51358,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 40.2,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -51472,8 +51379,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 42.967892864519534,
-          "lon": -76.84617966436133
+          "lat": 42.964509,
+          "lon": -76.847925
         },
         {
           "name": "Pilot Travel Center",
@@ -51559,7 +51466,7 @@
           "name": "Flying J Travel Center Corfu",
           "type": "travel_center",
           "at_mi": 121.5,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Flying J store at Corfu; matched by position, the only Flying J within 5 mi of mile 121.5 of this leg (0.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -51581,29 +51488,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 43.00280034725901,
-          "lon": -78.41349301033081
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 124.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "vehicle_access": "tractor_trailer"
+          "lat": 43.001194,
+          "lon": -78.407196
         }
       ],
       "corridor": {
@@ -53773,7 +53659,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 40.2,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -53793,7 +53679,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.964509,
+          "lon": -76.847925
         },
         {
           "name": "Pilot Travel Center",
@@ -59608,10 +59496,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Watertown",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -61156,10 +61044,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Watertown",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

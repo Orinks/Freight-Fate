@@ -3698,10 +3698,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Cleveland",
+          "type": "travel_center",
           "at_mi": 27.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Cleveland; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 27.8 of this leg (1.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3716,13 +3716,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.152524,
+          "lon": -84.953333
         },
         {
           "name": "Love's Travel Stop Charleston",
           "type": "travel_center",
           "at_mi": 40.6,
-          "source": "Love's official store feed lists store 364 in Charleston, TN on I-75, exit 33; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 364 in Charleston, TN on I-75, exit 33; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 364 at Charleston; matched by position, the only Love's within 5 mi of mile 40.6 of this leg (1.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -3743,8 +3745,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 35.31105697585078,
-          "lon": -84.80587690846647
+          "lat": 35.291497,
+          "lon": -84.817222
         },
         {
           "name": "McMinn County Rest Area Northbound",
@@ -3773,7 +3775,7 @@
           "name": "Pilot Travel Center Niota",
           "type": "travel_center",
           "at_mi": 61.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 4598 in Niota, TN with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tn/niota/507-hwy-309",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 4598 in Niota, TN with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tn/niota/507-hwy-309; Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Niota; matched by position, the only Pilot within 5 mi of mile 61.9 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -3794,7 +3796,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.544783,
+          "lon": -84.5655
         }
       ],
       "divided": true,
@@ -6048,9 +6052,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 21.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 490; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6073,10 +6077,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Monteagle",
+          "type": "travel_center",
           "at_mi": 51.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Monteagle; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 51.6 of this leg (4.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6092,8 +6096,8 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 35.27785084182713,
-          "lon": -85.89182656904377,
+          "lat": 35.232788,
+          "lon": -85.825969,
           "directions": [
             "both"
           ]
@@ -6102,7 +6106,7 @@
           "name": "Love's Travel Stop Hillsboro",
           "type": "travel_center",
           "at_mi": 63.2,
-          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 764 at Hillsboro; matched by position, the only Love's within 5 mi of mile 63.2 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -6122,7 +6126,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.419411,
+          "lon": -86.014988
         },
         {
           "name": "I-24 Truck Plaza",
@@ -6151,10 +6157,10 @@
           ]
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center La Vergne",
+          "type": "travel_center",
           "at_mi": 116.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at La Vergne; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6213,7 +6219,7 @@
           "name": "Love's Travel Stop Nashville",
           "type": "travel_center",
           "at_mi": 45.8,
-          "source": "Love's official store feed lists store 429 in Nashville, TN on I-65, exit 87; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 429 in Nashville, TN on I-65, exit 87; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 429 at Nashville; matched by position, the only Love's within 5 mi of mile 45.8 of this leg (2.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -6233,7 +6239,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.205419,
+          "lon": -86.771701
         },
         {
           "name": "The Bug Man",
@@ -11594,10 +11602,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
+          "name": "Pilot Travel Center Cookeville",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cookeville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cookeville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Cookeville; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12458,9 +12466,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dyersburg_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dyersburg_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 641; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13957,9 +13965,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dyersburg_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dyersburg_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 641; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16207,10 +16215,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Jackson",
+          "type": "travel_center",
           "at_mi": 4.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Jackson; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16251,9 +16259,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 47.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 791; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16273,10 +16281,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Kingston Springs",
+          "type": "travel_center",
           "at_mi": 104.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Petro store 0349 at Kingston Springs; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22223,10 +22231,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Meadowview",
           "type": "travel_center",
           "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Love's store 613 at Meadowview; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22246,10 +22254,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Glade Spring",
+          "type": "travel_center",
           "at_mi": 55.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Petro store 0372 at Glade Spring; town read from the store page the mapped site links to; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22272,10 +22280,10 @@
           ]
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wytheville",
+          "type": "travel_center",
           "at_mi": 97.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wytheville_va_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): TA store 0143 at Wytheville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28047,7 +28055,7 @@
           "name": "Pilot Travel Center Niota",
           "type": "travel_center",
           "at_mi": 49.5,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 4598 in Niota, TN with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tn/niota/507-hwy-309 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 4598 in Niota, TN with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/tn/niota/507-hwy-309 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Niota; matched by position, the only Pilot within 5 mi of mile 49.5 of this leg (0.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28069,8 +28077,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 35.54479629953371,
-          "lon": -84.56879292407177
+          "lat": 35.544783,
+          "lon": -84.5655
         },
         {
           "name": "McMinn County Rest Area Northbound",
@@ -28094,7 +28102,7 @@
           "name": "Love's Travel Stop Charleston",
           "type": "travel_center",
           "at_mi": 71.0,
-          "source": "Love's official store feed lists store 364 in Charleston, TN on I-75, exit 33; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted.",
+          "source": "Love's official store feed lists store 364 in Charleston, TN on I-75, exit 33; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 364 at Charleston; matched by position, the only Love's within 5 mi of mile 71 of this leg (1.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28114,13 +28122,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.291497,
+          "lon": -84.817222
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Cleveland",
+          "type": "travel_center",
           "at_mi": 83.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Cleveland; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 83.9 of this leg (1.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28136,17 +28146,17 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 35.16289752403358,
-          "lon": -84.93271250516895,
+          "lat": 35.152524,
+          "lon": -84.953333,
           "directions": [
             "both"
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Resaca",
+          "type": "travel_center",
           "at_mi": 140.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Flying J store at Resaca; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28172,7 +28182,7 @@
           "name": "Love's Travel Stop Calhoun",
           "type": "travel_center",
           "at_mi": 147.7,
-          "source": "Love's official store feed lists store 735 in Calhoun, GA on I-75, exit 310; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted.",
+          "source": "Love's official store feed lists store 735 in Calhoun, GA on I-75, exit 310; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Store coordinates read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Love's store 735 at Calhoun; matched by position, the only Love's within 5 mi of mile 147.7 of this leg (2.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28192,39 +28202,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 149.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 34.44409,
-          "lon": -84.91587,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 34.443373,
+          "lon": -84.915574
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Cartersville",
+          "type": "travel_center",
           "at_mi": 164.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): TA store 0146 at Cartersville; town read from the mapped site's branch name; matched by coordinate, 0.06 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28268,36 +28254,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 177.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 34.11882,
-          "lon": -84.7431,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
           "name": "Love's Travel Stop Emerson",
           "type": "travel_center",
           "at_mi": 178.7,
-          "source": "Love's official store feed lists store 359 in Emerson, GA on I-75, exit 283; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 359 in Emerson, GA on I-75, exit 283; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Love's store 359 at Emerson; matched by position, the only Love's within 5 mi of mile 178.7 of this leg (1.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28318,8 +28278,8 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 34.108152616504135,
-          "lon": -84.72893720835144
+          "lat": 34.119065,
+          "lon": -84.743017
         }
       ],
       "lanes": 3,
@@ -30345,10 +30305,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Lenoir City",
+          "type": "travel_center",
           "at_mi": 25.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 480 at Lenoir City; town read from the mapped site's address; matched by coordinate, 0.09 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30388,10 +30348,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
+          "name": "Pilot Travel Center Cookeville",
           "type": "travel_center",
           "at_mi": 102.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cookeville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cookeville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Cookeville; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31349,10 +31309,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Strawberry Plains",
+          "type": "travel_center",
           "at_mi": 11.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Strawberry Plains; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -32862,9 +32822,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 58.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 388; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34304,10 +34264,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Stanton",
+          "type": "travel_center",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Stanton; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34327,10 +34287,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Denmark",
+          "type": "travel_center",
           "at_mi": 63.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): TA store 0245 at Denmark; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34364,7 +34324,7 @@
           "name": "Love's Travel Stop West Memphis",
           "type": "travel_center",
           "at_mi": 8.1,
-          "source": "Love's Travel Stop West Memphis official location page, I-40 Exit 280, lists truck services and parking: https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450",
+          "source": "Love's Travel Stop West Memphis official location page, I-40 Exit 280, lists truck services and parking: https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450; Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 450 at West Memphis; matched by position, the only Love's within 5 mi of mile 8.1 of this leg (1.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -34383,13 +34343,15 @@
             "both"
           ],
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.154191,
+          "lon": -90.139033
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center West Memphis",
+          "type": "travel_center",
           "at_mi": 27.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): TA store 0033 at West Memphis; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34432,10 +34394,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
-          "type": "service_plaza",
+          "name": "Road Ranger Brinkley",
+          "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Brinkley; town read from the mapped site's address; matched by position, the only Road Ranger within 5 mi of mile 69 of this leg (1.7 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34450,7 +34412,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.912908,
+          "lon": -91.194589
         },
         {
           "name": "I 40 Truck Rest Area Eastbound",
@@ -38980,10 +38944,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Stanton",
+          "type": "travel_center",
           "at_mi": 42.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Stanton; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39004,9 +38968,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 127.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 791; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39026,10 +38990,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Kingston Springs",
+          "type": "travel_center",
           "at_mi": 185.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Petro store 0349 at Kingston Springs; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42190,10 +42154,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center West Memphis",
+          "type": "travel_center",
           "at_mi": 3.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Petro store 0311 at West Memphis; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42216,7 +42180,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 66.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 671; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -42255,7 +42219,7 @@
           "name": "ONE9 Travel Center Marston",
           "type": "travel_center",
           "at_mi": 102.7,
-          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 301 in Marston, MO with 70 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/marston/917-e-elm-st",
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 301 in Marston, MO with 70 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/marston/917-e-elm-st; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): ONE9 store at Marston; matched by name, the only ONE9 the map has at Marston within 40 mi of mile 102.7 of this leg (12.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -42276,7 +42240,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.518313,
+          "lon": -89.597835
         },
         {
           "name": "Rhodes Travel Center",
@@ -42303,7 +42269,7 @@
           "name": "Love's Travel Stop Bloomsdale",
           "type": "travel_center",
           "at_mi": 233.0,
-          "source": "Love's official store feed lists store 488 in Bloomsdale, MO on I-55, exit 157; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 488 in Bloomsdale, MO on I-55, exit 157; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 488 at Bloomsdale; matched by position, the only Love's within 5 mi of mile 233 of this leg (0.5 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -42323,7 +42289,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.005881,
+          "lon": -90.225513
         },
         {
           "name": "Mr. Fuel Travel Center",
@@ -42349,10 +42317,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 284.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43762,7 +43730,7 @@
           "name": "Love's Travel Stop Hillsboro",
           "type": "travel_center",
           "at_mi": 38.8,
-          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 764 at Hillsboro; matched by position, the only Love's within 5 mi of mile 38.8 of this leg (0.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -43783,14 +43751,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 35.412606727512234,
-          "lon": -86.01124580720881
+          "lat": 35.419411,
+          "lon": -86.014988
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Monteagle",
+          "type": "travel_center",
           "at_mi": 50.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Monteagle; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 50.5 of this leg (4.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43805,13 +43773,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.232788,
+          "lon": -85.825969
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 75.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 490; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51273,10 +51243,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center La Vergne",
+          "type": "travel_center",
           "at_mi": 16.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at La Vergne; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51323,7 +51293,7 @@
           "name": "Love's Travel Stop Hillsboro",
           "type": "travel_center",
           "at_mi": 67.2,
-          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Love's official store feed lists store 764 in Hillsboro, TN on I-24, exit 117; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 764 at Hillsboro; matched by position, the only Love's within 5 mi of mile 67.2 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -51344,14 +51314,14 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 35.412606727512234,
-          "lon": -86.01124580720881
+          "lat": 35.419411,
+          "lon": -86.014988
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Monteagle",
+          "type": "travel_center",
           "at_mi": 78.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at Monteagle; town read from the store page the mapped site links to; matched by position, the only Pilot within 5 mi of mile 78.1 of this leg (4.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51367,17 +51337,17 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer",
-          "lat": 35.27785084182713,
-          "lon": -85.89182656904377,
+          "lat": 35.232788,
+          "lon": -85.825969,
           "directions": [
             "both"
           ]
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 105.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Love's store 490; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51469,7 +51439,7 @@
           "name": "Flying J Travel Center Resaca",
           "type": "travel_center",
           "at_mi": 191.7,
-          "source": "Pilot Flying J official Resaca, Georgia location page lists truck parking; at_mi estimated from Ringgold toward Resaca on the Nashville-to-Atlanta I-75 segment, accessed 2026-06-18: https://locations.pilotflyingj.com/us/ga/resaca/288-resaca-beach-blvd-nw",
+          "source": "Pilot Flying J official Resaca, Georgia location page lists truck parking; at_mi estimated from Ringgold toward Resaca on the Nashville-to-Atlanta I-75 segment, accessed 2026-06-18: https://locations.pilotflyingj.com/us/ga/resaca/288-resaca-beach-blvd-nw; Store coordinates read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Flying J store at Resaca; matched by name, the only Flying J the map has at Resaca within 40 mi of mile 191.7 of this leg (26.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -51488,7 +51458,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.576607,
+          "lon": -84.947116
         }
       ],
       "divided": true,
@@ -52342,10 +52314,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center La Vergne",
+          "type": "travel_center",
           "at_mi": 18.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Tennessee extract dated 2026-06-22, read 2026-09-17): Pilot store at La Vergne; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

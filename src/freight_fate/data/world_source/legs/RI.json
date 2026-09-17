@@ -2390,7 +2390,7 @@
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 103.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Pilot store at Milford; matched by name, the only Pilot the map has at Milford within 40 mi of mile 103.4 of this leg (6.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -2412,8 +2412,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.283304465378514,
-          "lon": -72.95185740834604
+          "lat": 41.23682,
+          "lon": -73.022328
         }
       ],
       "divided": true,
@@ -8914,8 +8914,8 @@
         {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
-          "at_mi": 103.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln",
+          "at_mi": 109.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Pilot store at Milford; matched by name, the only Pilot the map has at Milford within 40 mi of mile 109.5 of this leg (5.4 mi); coordinates read from the mapped site. Mile marker moved from 103.8 to 109.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 103.8 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -8936,33 +8936,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot",
-          "type": "travel_center",
-          "at_mi": 109.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.23658,
-          "lon": -73.02254,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 41.23682,
+          "lon": -73.022328
         },
         {
           "name": "Rest Area CT-15 (South Bound)",

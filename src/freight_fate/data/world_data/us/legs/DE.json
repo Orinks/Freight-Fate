@@ -3726,10 +3726,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Elkton",
+          "type": "travel_center",
           "at_mi": 18.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Flying J store at Elkton; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6687,7 +6687,7 @@
           "name": "Flying J Travel Center North East",
           "type": "travel_center",
           "at_mi": 17.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 784 in North East, MD with 185 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (18.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/md/north-east/1-center-dr",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 784 in North East, MD with 185 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (18.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/md/north-east/1-center-dr; Store coordinates read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Flying J store at North East; matched by name, the only Flying J the map has at North East within 40 mi of mile 17.2 of this leg (15.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -6708,7 +6708,9 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.625462,
+          "lon": -75.949579
         },
         {
           "name": "Royal Farms",
