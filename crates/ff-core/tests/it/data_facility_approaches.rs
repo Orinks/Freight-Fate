@@ -31,9 +31,12 @@ fn test_facility_approach_data_covers_full_facility_set() {
     assert_eq!(coverage["facilities"], 5037);
     // Synced with facility_endpoints after far-pin regeocode (419 estimated).
     assert_eq!(coverage["source_backed_endpoints"], 2779);
-    assert_eq!(coverage["road_snapped"], 1908);
-    assert_eq!(coverage["turn_level"], 1713);
-    assert_eq!(coverage["nearest_road_fallback"], 871);
+    assert_eq!(coverage["road_snapped"], 1928);
+    assert_eq!(coverage["turn_level"], 1913);
+    assert_eq!(coverage["nearest_road_fallback"], 851);
+    // Sourced endpoints with no chain whose own OSM object is not a freight site
+    // (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
+    assert_eq!(coverage["endpoint_screen_refused"], 783);
     assert_eq!(coverage["representative_fallback"], 2258);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 

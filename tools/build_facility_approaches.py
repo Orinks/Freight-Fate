@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import math
 import sys
 import time
 from dataclasses import dataclass
@@ -28,6 +29,9 @@ from pathlib import Path
 from typing import Any
 
 from freight_fate.data.world import get_world
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_DIR = ROOT / "tools"
@@ -38,6 +42,7 @@ DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 DEFAULT_STATES = ("Illinois", "Indiana", "Ohio")
 MAX_ROUTE_MI = 18.0
+EARTH_RADIUS_MI = 3958.7613
 # A single-segment path shorter than this adds nothing over the fallback leg,
 # but a genuine multi-turn chain stays playable well below it now that the
 # runtime drives surface segments (Phases 2-3 of docs/surface-roads-plan.md).
@@ -70,6 +75,13 @@ HIGH_CONFIDENCE_TYPES = {
 # whose endpoints were matched by name substring ("Steele Street", "Assembly
 # of God", "Refinery Ballpark") -- a confident street chain to the wrong door
 # is worse than the fallback. Widen those after the endpoint re-sweep.
+#
+# 2026-09-17: those three now route when the endpoint screen is on (the
+# default), because the screen is the stricter rule they were waiting for: it
+# reads the endpoint's own OSM tags and wants the trade stated by tag or by a
+# whole word in the name. 45 of their 193 sourced endpoints pass. With
+# `--no-endpoint-screen` they stay out, as before.
+SCREEN_REFUSAL_PREFIX = "Sourced endpoint failed the freight-site screen: "
 
 
 @dataclass(frozen=True)
@@ -89,6 +101,8 @@ class FacilityTarget:
     endpoint_source_note: str
     local_approach_miles: float
     local_approach_road: str
+    # `node/123` or `way/456`: the OSM object the endpoint sweep matched.
+    endpoint_source_ref: str = ""
 
 
 def _load_local_geometry_tool():
@@ -109,8 +123,14 @@ def build_facility_approaches(
     max_route_mi: float = MAX_ROUTE_MI,
     existing: dict[str, Any] | None = None,
     accessed: str = ACCESSED_DATE,
+    endpoint_screen: bool = True,
 ) -> dict[str, Any]:
     """Route the batch and return the payload to write.
+
+    With ``endpoint_screen`` (the default) a target is only routed when its
+    endpoint's own OSM object reads as a freight site; see
+    ``facility_endpoint_screen``. A refused target is still an attempted one:
+    its row takes the refusal as its fallback reason.
 
     With ``existing`` (the checked-in payload) the result is a merge: only
     facilities this run attempted, or found new geometry for, change; see
@@ -120,16 +140,19 @@ def build_facility_approaches(
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
     state_set = set(states)
+    eligible_types = HIGH_CONFIDENCE_TYPES | (NAME_MATCHED_TYPES if endpoint_screen else set())
     routable = [
         target
         for target in targets
         if target.endpoint_source_backed
         and not target.endpoint_fallback
         and target.state in state_set
-        and target.facility_type in HIGH_CONFIDENCE_TYPES
-        and target.local_approach_miles <= max_route_mi
+        and target.facility_type in eligible_types
+        and routed_approach_miles(target) <= max_route_mi
     ]
     routed: dict[str, Any] = {}
+    # Why each unrouted target failed, straight from the path search.
+    failures: dict[str, str] = {}
     # Facilities a state extract was actually searched for; a missing extract
     # leaves its state's facilities unattempted so a merge keeps their rows.
     attempted: set[str] = set()
@@ -137,20 +160,44 @@ def build_facility_approaches(
     for state_index, state in enumerate(states, start=1):
         extract = local_geometry.state_extract_path(cache_dir, state)
         sources.append(local_geometry.source_record(state, extract))
-        state_targets = [
-            _geometry_target(local_geometry, target) for target in routable if target.state == state
-        ]
+        in_state = [target for target in routable if target.state == state]
+        refused = 0
+        if extract.exists() and in_state and endpoint_screen:
+            tags = local_geometry.read_object_tags(
+                extract, {target.endpoint_source_ref for target in in_state}
+            )
+            passed = []
+            for target in in_state:
+                accepted, why = screen_endpoint(
+                    target.facility_type,
+                    target.endpoint_name,
+                    tags.get(target.endpoint_source_ref),
+                )
+                if accepted:
+                    passed.append(target)
+                else:
+                    attempted.add(target.facility_id)
+                    failures[target.facility_id] = SCREEN_REFUSAL_PREFIX + why
+            refused = len(in_state) - len(passed)
+            in_state = passed
+        state_targets = [_geometry_target(local_geometry, target) for target in in_state]
         print(
             f"[{state_index}/{len(states)}] {state}: {len(state_targets)} routable targets"
+            + (f", {refused} refused by the endpoint screen" if endpoint_screen else "")
             + ("" if extract.exists() else " (extract missing, skipped)"),
             flush=True,
         )
         if extract.exists() and state_targets:
             attempted.update(target.target_id for target in state_targets)
-            routed.update(local_geometry.route_state_targets(extract, state_targets))
+            routed.update(local_geometry.route_state_targets(extract, state_targets, failures))
 
     approaches = {
-        target.facility_id: approach_record(target, routed.get(target.facility_id), state_set)
+        target.facility_id: approach_record(
+            target,
+            routed.get(target.facility_id),
+            state_set,
+            failures.get(target.facility_id, ""),
+        )
         for target in targets
     }
     payload = {
@@ -288,9 +335,41 @@ def collect_targets() -> list[FacilityTarget]:
                     endpoint_source_note=endpoint.source_note,
                     local_approach_miles=approach.approach_miles,
                     local_approach_road=approach.road,
+                    endpoint_source_ref=endpoint.source_ref,
                 )
             )
     return targets
+
+
+def routed_approach_miles(target: FacilityTarget) -> float:
+    """Expected road miles from the city context to the point being ROUTED TO.
+
+    DERIVED: straight line from the city context to the source-backed
+    endpoint times 1.25, the detour factor `build_local_approaches` and
+    `build_facility_endpoints` both use. It sizes the path search
+    (`shortest_geometry` gives up past 1.8 times this) and the
+    `--max-route-mi` gate.
+
+    Until 2026-09-17 both read `local_approach_miles`, which is measured to
+    the facility's REPRESENTATIVE pin. That pin sits near the city centre, so
+    the figure was the 2.1-mile floor and the search stopped at 3.78 road
+    miles while the endpoint it was routing to lay three to seven miles out.
+    It was the largest single cause of "no connected public-road path": 52 of
+    88 such failures in California, New York and Texas had a path and ran out
+    of budget. The representative figure is kept as a lower bound so a
+    facility routed before the fix is searched at least as far as it was.
+    """
+    straight_line = _haversine_mi(target.start_lat, target.start_lon, target.lat, target.lon)
+    to_endpoint = round(min(35.0, straight_line * 1.25), 1)
+    return max(to_endpoint, target.local_approach_miles)
+
+
+def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = p2 - p1
+    dlmb = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
+    return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(a))
 
 
 def _geometry_target(local_geometry, target: FacilityTarget):
@@ -308,7 +387,7 @@ def _geometry_target(local_geometry, target: FacilityTarget):
         estimated=False,
         fallback_reason="",
         approach_road=target.local_approach_road,
-        approach_miles=target.local_approach_miles,
+        approach_miles=routed_approach_miles(target),
         source_note=target.endpoint_source_note,
     )
 
@@ -317,13 +396,14 @@ def approach_record(
     target: FacilityTarget,
     geometry,
     state_set: set[str],
+    route_failure: str = "",
 ) -> dict[str, Any]:
     too_short = geometry is not None and (
         geometry.miles <= MIN_CHAIN_ROUTE_MI
         or (geometry.miles <= MIN_PLAYABLE_ROUTE_MI and len(geometry.segments) < 2)
     )
     turn_level = geometry is not None and not too_short
-    reason = fallback_reason(target, state_set, turn_level)
+    reason = fallback_reason(target, state_set, turn_level, route_failure)
     if too_short:
         reason = "Public-road path is shorter than the playable facility approach floor."
     segments = (
@@ -376,7 +456,30 @@ def approach_record(
     }
 
 
-def fallback_reason(target: FacilityTarget, state_set: set[str], turn_level: bool) -> str:
+# One sentence per way the path search can come back empty (the codes are
+# `build_local_geometry.ROUTE_FAILURE_*`). Read from the search, not assumed.
+ROUTE_FAILURE_REASONS = {
+    "no_start_road": "No public road was found near the city context in the local extract.",
+    "no_target_road": (
+        "No public surface road was found within the snap distance of the sourced endpoint."
+    ),
+    "over_budget": (
+        "A public-road path to the sourced endpoint exists but is longer than the "
+        "bounded search for a facility at this distance."
+    ),
+    "disconnected": (
+        "The roads at the sourced endpoint do not join the city context over public "
+        "surface roads; a private yard road, a motorway or water lies between."
+    ),
+}
+
+
+def fallback_reason(
+    target: FacilityTarget,
+    state_set: set[str],
+    turn_level: bool,
+    route_failure: str = "",
+) -> str:
     if turn_level:
         return ""
     if not target.endpoint_source_backed or target.endpoint_fallback:
@@ -385,11 +488,16 @@ def fallback_reason(target: FacilityTarget, state_set: set[str], turn_level: boo
         )
     if target.state not in state_set:
         return "Source-backed endpoint is outside this bounded Midwest road-snap batch."
-    if target.facility_type not in HIGH_CONFIDENCE_TYPES:
+    if route_failure.startswith(SCREEN_REFUSAL_PREFIX):
+        return f"{route_failure} A street chain to it is not claimed."
+    if target.facility_type not in HIGH_CONFIDENCE_TYPES | NAME_MATCHED_TYPES:
         return "Facility type was outside the high-confidence road-snap category set."
-    if target.local_approach_miles > MAX_ROUTE_MI:
+    if routed_approach_miles(target) > MAX_ROUTE_MI:
         return "Facility is beyond the bounded local route distance for this pass."
-    return "No connected public-road path was found between the city context and sourced endpoint."
+    return ROUTE_FAILURE_REASONS.get(
+        route_failure,
+        "No connected public-road path was found between the city context and sourced endpoint.",
+    )
 
 
 def clean_segment(segment: dict[str, Any]) -> dict[str, Any]:
@@ -425,6 +533,13 @@ def coverage_summary(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
             1
             for item in records.values()
             if item["endpoint_source_backed"] and not item["road_snapped"]
+        ),
+        # Sourced endpoints the freight-site screen would not route to: the
+        # share of "source-backed" that is a railway line, a substation, a shop.
+        "endpoint_screen_refused": sum(
+            1
+            for item in records.values()
+            if str(item.get("fallback_reason", "")).startswith(SCREEN_REFUSAL_PREFIX)
         ),
         "representative_fallback": sum(
             1 for item in records.values() if item["representative_fallback"]
@@ -463,6 +578,15 @@ def main() -> int:
         default=time.strftime("%Y-%m-%d"),
         help="Date stamped on this batch (default: today)",
     )
+    parser.add_argument(
+        "--endpoint-screen",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Route only to endpoints whose own OSM tags read as a freight site "
+            "(default on; off restores the pre-2026-09-17 behaviour)"
+        ),
+    )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
 
@@ -480,6 +604,7 @@ def main() -> int:
         max_route_mi=args.max_route_mi,
         existing=existing,
         accessed=args.accessed,
+        endpoint_screen=args.endpoint_screen,
     )
     if existing is not None:
         print("Merge:", json.dumps(payload["generated"]["merge"], sort_keys=True), flush=True)

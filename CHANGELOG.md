@@ -12,6 +12,10 @@
 
 - **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.
 
+- **Steel works, energy terminals, auto supplier parks and more warehouses in every state now start with street-by-street directions.**
+
+- **Street directions at a facility now cover the streets nearest the facility.** Long routes used to name streets near the city centre instead.
+
 - **The shared Duff sound cues stay as they are.** No replacements are planned for them.
 
 ### Fixed

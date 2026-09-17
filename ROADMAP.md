@@ -128,19 +128,65 @@ These items are part of the release-gate sweep:
       streets. A California, New York and Texas sweep the same day took
       it to 1,713 chains (34 percent): California 103 to 130 of 316, New
       York 37 to 46 of 76, Texas 81 to 111 of 412. Every state on the map
-      (48 plus DC) is in the extract set now. About 66 percent of facilities
-      still depart straight onto the highway. Leftovers: path failures
-      inside swept states (in CA/NY/TX alone, 88 source-backed endpoints
-      with no connected public-road path and 44 whose path is one block
-      under the chain floor), the endpoint re-sweep for steel/auto/chemical
-      name matches, and the deferred 419 estimated-near-city residuals.
+      (48 plus DC) is in the extract set now.
+      Leftovers worked 2026-09-17, all 49 extracts re-swept: 1,713 to 1,913
+      chains (38 percent); California 130 to 135, New York 46 to 51, Texas
+      111 to 128. Every one of the 88 CA/NY/TX "no connected path" failures
+      was classified. 52 had a path and ran out of search budget, because
+      the budget was sized from the facility's representative pin near the
+      city centre while the route went to a sourced endpoint three to seven
+      miles out. 22 were a town cut in two because its main street is a US
+      highway OSM classes as trunk, or the only join is a link way. Both
+      were builder bugs and are fixed; no threshold moved. The other 14 are
+      correct refusals: 8 behind private yard roads, 2 reachable only by
+      motorway, 2 across water, 1 inside a site, 1 too far from any road.
+      The 44 "under the chain floor" rows are true negatives (the endpoint
+      is within a few blocks of the city context) and stay refused. Also
+      fixed: a path longer than eight streets kept the first eight out of
+      the city centre and dropped the ones at the yard (109 of 287 CA/NY/TX
+      chains; the kept part covered a median 68 percent of the path); it
+      keeps the facility end now. One street heard several times under
+      different route refs (271 of 1,713 chains) is one street now.
+      What limits this layer now: reading the OSM tags of all 2,779
+      "source-backed" endpoints back out of the extracts shows only 567 are
+      freight sites. 906 are railway track (main lines named for their
+      subdivision), 313 power-grid objects (a substation tagged
+      substation=distribution matched "distribution"), 223 shops, 174 roads
+      and bus stops, 128 public amenities, and 236 carry no industrial tag.
+      The endpoint sweep matches substrings of the name plus every tag
+      value. Only 317 of the 1,713 chains that existed before today lead to
+      a freight site. The approach builder now screens the endpoint's own
+      tags before it routes (read, positive list, in
+      tools/facility_endpoint_screen.py) and records the refusal as the
+      row's reason: 783 chainless rows are refused, and the screen can be
+      switched off with one flag. Existing chains were not demoted.
+      Steel, automotive and chemical endpoints: 193 were matched by name
+      substring, 45 pass the screen plus a stated-trade rule (14 steel, 14
+      automotive, 17 chemical), and 37 of those carry chains now.
+- [ ] Re-sweep facility endpoints with a classifier that reads tags the way
+      the endpoint screen does, not substrings of the tag dump. About 2,200
+      sourced endpoints are not freight sites, so only 517 of the 1,913
+      chains lead to one until they are re-matched. OWNER DECISION
+      first: the 1,396 existing chains whose endpoint is a railway line, a
+      substation, a shop or a road play as real streets in the right town
+      but end at the wrong door. Keep them until the re-sweep replaces
+      them (recommended: a real street chain still beats departing straight
+      onto the highway), or demote them now. The 419 estimated-near-city
+      residuals stay estimated by owner ruling.
+- [ ] Departure chains behind private yard roads (8 of 132 CA/NY/TX
+      failures): the sourced endpoint sits on a road fragment joined to the
+      street network only by access=private ways. Option: route over the
+      private ways to find the right street, then end the chain at the
+      last public node. Not built; needs the owner's yes, because a chain
+      must never claim a gated road.
 
 #### World data and sound licensing blockers
 
 World-data geometry for 1.9 (curves, refuse legs, far approach pins)
 closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
-world-data item (see above): every state has been swept once, and the
-leftovers are path failures inside swept states and the endpoint re-sweep.
+world-data item (see above): every state was re-swept 2026-09-17 with the
+path failures fixed, and what is left is the endpoint re-sweep, because
+four in five sourced endpoints are not freight sites.
 
 - [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry.
       CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
