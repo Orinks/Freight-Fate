@@ -28,9 +28,12 @@ def test_facility_approach_data_covers_full_facility_set(world):
     assert coverage["facilities"] == 5037
     # Synced with facility_endpoints after far-pin regeocode (419 estimated).
     assert coverage["source_backed_endpoints"] == 2779
-    assert coverage["road_snapped"] == 1908
-    assert coverage["turn_level"] == 1713
-    assert coverage["nearest_road_fallback"] == 871
+    assert coverage["road_snapped"] == 1928
+    assert coverage["turn_level"] == 1913
+    assert coverage["nearest_road_fallback"] == 851
+    # Sourced endpoints with no chain whose own OSM object is not a freight site
+    # (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
+    assert coverage["endpoint_screen_refused"] == 783
     assert coverage["representative_fallback"] == 2258
     assert coverage["gate_yard_dock_hints"] == 0
 
@@ -729,9 +732,9 @@ def test_long_synthetic_approach_steps_down_45_25_15(world):
 
     # Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
     # regeocode; Kenosha Dry Warehouse gained an 0.81-mile turn-level chain in
-    # the 2026-09-16 departure-route sweep. Cottonwood Dry Warehouse still has
-    # a long synthetic approach (no connected public-road path).
-    route = world.facility_approach_route("cottonwood_az_us", "Cottonwood Dry Warehouse")
+    # the 2026-09-16 departure-route sweep. Payson Quarry has no source-backed
+    # endpoint, so no sweep can route it (the Rust test made the same choice).
+    route = world.facility_approach_route("payson_az_us", "Payson Quarry")
     assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
     truck = TruckState()
     truck.transmission.automatic = True
