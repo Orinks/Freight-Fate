@@ -415,6 +415,18 @@ its status or release decision.
       pause. Server side deployed first; builds before it keep the old
       behaviour.
 
+### September 17 the dial follows the road
+
+- [x] A station that fades out of range hands the dial to the strongest
+      terrestrial station still in range, named in the same line; the route
+      playlist is the landing only when nothing is on the air (Brandon,
+      2026-09-17). Only a clean signal counts, at or above the static
+      threshold, so the dial is not handed a station that fades again a few
+      miles on, and a sibling site of the lost station is a handover, not a
+      landing. A stream that will not open still goes through the existing
+      two-strike fallback, and the line names what the radio actually landed
+      on.
+
 ### September 16 radio range and the cruise floor
 
 - [x] Driving out of a station's range is announced and retuned again. The

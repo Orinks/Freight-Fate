@@ -14,7 +14,8 @@ use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::radio::{
-    RadioPlaybackBackend, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE, SAFE_ROUTE_PLAYLIST,
+    dial_group, RadioPlaybackBackend, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE,
+    SAFE_ROUTE_PLAYLIST, TERRESTRIAL_GROUP,
 };
 use ff_core::radio_content::content_duration_s;
 
@@ -764,6 +765,20 @@ fn a_ranged_stream(id: &str) -> RadioStation {
     }
 }
 
+/// A regional station on the same mast with a contour that still covers the
+/// truck once the short one has dropped away.
+fn a_regional_stream(id: &str) -> RadioStation {
+    RadioStation {
+        lat: Some(39.7392),
+        lon: Some(-104.9903),
+        range_miles: 75.0,
+        real_stream: true,
+        stream_url: format!("https://radio.test/{id}"),
+        source_type: "regional".to_string(),
+        ..RadioStation::new(id, "Front Range Country", "KTST", "country", "test fixture")
+    }
+}
+
 /// One drive frame's worth of radio work, in the order the frame runs it:
 /// the settings sync first, then the reception tick.
 fn radio_frame(d: &mut DrivingState, app: &mut TestApp) {
@@ -787,6 +802,9 @@ fn test_driving_out_of_a_stations_range_says_so_and_retunes_the_cab() {
     d.trip.truck.start_engine();
     d.update_audio(&mut app.ctx, 0.0);
     let mut catalog = d.radio.catalog.clone();
+    // Nothing else on the air out here: with another local station in range
+    // the dial goes there instead (the next test).
+    catalog.retain(|station| dial_group(station) != TERRESTRIAL_GROUP);
     catalog.push(a_ranged_stream("kmhf-denver"));
     d.radio.set_catalog(catalog);
     tune(&mut d, &mut app, "kmhf-denver");
@@ -828,4 +846,50 @@ fn test_driving_out_of_a_stations_range_says_so_and_retunes_the_cab() {
         "{}",
         presence.detail
     );
+}
+
+#[test]
+fn test_a_station_fading_out_hands_the_dial_to_the_strongest_local_signal() {
+    // Brandon, 2026-09-17: listening to local radio and driving out of range
+    // sent the dial back to the Freight Fate stations. A driver on local
+    // radio wants the next station the truck can hear.
+    let mut app = TestApp::new();
+    app.ctx.settings.radio_streamer_safe = false;
+    let mut d = a_denver_drive(&mut app, 916);
+    let tape = MusicAudio::install(&mut app);
+    d.trip.truck.start_engine();
+    d.update_audio(&mut app.ctx, 0.0);
+    let mut catalog = d.radio.catalog.clone();
+    catalog.retain(|station| dial_group(station) != TERRESTRIAL_GROUP);
+    catalog.push(a_ranged_stream("kmhf-denver"));
+    catalog.push(a_regional_stream("ktst-denver"));
+    d.radio.set_catalog(catalog);
+    tune(&mut d, &mut app, "kmhf-denver");
+    radio_frame(&mut d, &mut app);
+    assert_eq!(d.radio.tuned_station().id, "kmhf-denver");
+    app.clear_speech();
+
+    // Past the short contour, still inside the regional one.
+    d.trip.position_mi = 120.0;
+    radio_frame(&mut d, &mut app);
+
+    assert_eq!(d.radio.tuned_station().id, "ktst-denver");
+    assert_eq!(
+        tape.last_stream().as_deref(),
+        Some("https://radio.test/ktst-denver"),
+        "the cab plays what the dial says"
+    );
+    let said = app.event_lines();
+    assert!(
+        said.iter().any(|line| line.contains(
+            "Mile High 91.5 faded out of range. Tuned to KTST, Front Range Country, the \
+             strongest signal here."
+        )),
+        "{said:?}"
+    );
+    // One fade, one line: the landing station is in range, so the next tick
+    // has nothing to say.
+    app.clear_speech();
+    radio_frame(&mut d, &mut app);
+    assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
 }

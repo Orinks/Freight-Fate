@@ -840,6 +840,46 @@ fn terrestrial_at(station_id: &str, call_sign: &str, degrees_east: f64) -> Radio
 }
 
 #[test]
+fn test_a_lost_station_hands_the_dial_to_the_strongest_clean_local_signal() {
+    // Brandon, 2026-09-17. Contours here are 150 miles; a degree of longitude
+    // at Dallas is about 58.
+    let lost = terrestrial_at("kold-dallas", "KOLD", 0.0);
+    let near = terrestrial_at("kner-dallas", "KNER", 0.3);
+    let far = terrestrial_at("kfar-dallas", "KFAR", 1.7);
+    let edge = terrestrial_at("kedg-dallas", "KEDG", 2.5);
+    let mut all: Vec<RadioStation> = catalog()
+        .into_iter()
+        .filter(|station| dial_group(station) != TERRESTRIAL_GROUP)
+        .collect();
+    all.extend([lost.clone(), near, far, edge]);
+    let mut radio = RadioState::new(all).with_position(Some(DALLAS));
+
+    let landing = radio
+        .strongest_terrestrial(&lost)
+        .expect("a station in range");
+    assert_eq!(landing.station.id, "kner-dallas");
+
+    // A stream that would not open is off the dial, so the next one takes it.
+    radio.mark_unplayable("kner-dallas");
+    let landing = radio
+        .strongest_terrestrial(&lost)
+        .expect("a station in range");
+    assert_eq!(landing.station.id, "kfar-dallas");
+
+    // The static smear at the edge of a contour is not a landing: the driver
+    // would be handed a station that fades again a few miles on.
+    radio.mark_unplayable("kfar-dallas");
+    let edge_signal = radio
+        .receivable_stations()
+        .into_iter()
+        .find(|r| r.station.id == "kedg-dallas")
+        .expect("the edge station is still receivable")
+        .signal;
+    assert!(edge_signal > 0.0 && edge_signal < STATIC_SIGNAL_THRESHOLD);
+    assert!(radio.strongest_terrestrial(&lost).is_none());
+}
+
+#[test]
 fn test_no_imported_station_name_has_a_stripped_apostrophe() {
     // "Birmingham s Beautiful QEZ" is what a stripped apostrophe sounds like.
     let catalog = default_radio_catalog();

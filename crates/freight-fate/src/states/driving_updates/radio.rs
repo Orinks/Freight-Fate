@@ -80,8 +80,16 @@ impl DrivingState {
             ctx.award_achievement("radio_faded_out");
             self.radio_states_held.clear();
             ctx.audio.play_with("radio/static_burst", 0.5, 0.0);
+            // A driver on local radio stays on local radio: the strongest
+            // station the truck can hear from here takes the dial, and the
+            // in-house playlist is only where it lands when nothing is on
+            // the air (Brandon, 2026-09-17).
+            let next = self.radio.strongest_terrestrial(&before);
+            let landing = next
+                .as_ref()
+                .map_or(SAFE_ROUTE_PLAYLIST.to_string(), |r| r.station.id.clone());
             let action = self.with_radio_backend(ctx, |radio, backend| {
-                radio.select_station(SAFE_ROUTE_PLAYLIST, Some(backend))
+                radio.select_station(&landing, Some(backend))
             });
             // The dead station's fringe must die with it: without this the
             // cached signal keeps the hiss bed and pickets crackling over
@@ -90,14 +98,23 @@ impl DrivingState {
             self.radio_fringe_signal = None;
             self.stop_radio_fringe(ctx);
             self.write_radio_settings(ctx);
-            ctx.say_event_with(
+            // Named from what the radio actually landed on: a stream that
+            // would not open has already been swapped for the fallback.
+            let retuned = next.is_some() && !action.fallback_used;
+            let line = if retuned {
+                format!(
+                    "{} faded out of range. Tuned to {}, the strongest signal here.",
+                    before.display_name(),
+                    action.station.display_name()
+                )
+            } else {
                 format!(
                     "{} faded out of range. Falling back to {}.",
                     before.display_name(),
                     action.station.display_name()
-                ),
-                SayEvent::queued().category(SpeechCategory::Status),
-            );
+                )
+            };
+            ctx.say_event_with(line, SayEvent::queued().category(SpeechCategory::Status));
             return;
         }
         self.radio_signal_factor = signal_volume_factor(&reception);

@@ -6,6 +6,8 @@
 
 - **A career edited outside the game is always marked as modified now.** The notice plays once when you open it.
 
+- **When a station fades out of range, the radio tunes to the strongest local station still in range.** The Roadhouse is the fallback only when nothing else is on the air. (Suggested by Brandon.)
+
 - **Hazmat, doubles, TWIC and LCV holders see their freight on the board.** Bulk fuel and placarded loads move between many more shippers and receivers.
 
 - **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.

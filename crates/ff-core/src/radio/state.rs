@@ -12,7 +12,7 @@ use super::playlists::{load_personal_playlists, PERSONAL_PLAYLIST_SOURCE_TYPE};
 use super::{
     dial_category_name, dial_group, estimate_signal, identity_siblings, station_distance_miles,
     station_identity, RadioAction, RadioPlaybackBackend, RadioReception, RadioStation,
-    RADIO_SEARCH_LIMIT, SAFE_ROUTE_PLAYLIST, SIGNAL_FULL_VOLUME,
+    RADIO_SEARCH_LIMIT, SAFE_ROUTE_PLAYLIST, SIGNAL_FULL_VOLUME, STATIC_SIGNAL_THRESHOLD,
 };
 use crate::pyfmt::{fmt_f, round_py_int};
 
@@ -263,6 +263,31 @@ impl RadioState {
         }
         solo.extend(best.into_values());
         solo
+    }
+
+    /// Where the dial goes when `lost` drops out of range: the strongest
+    /// terrestrial station the truck can hear from here, or `None` when there
+    /// is nothing on the air (Brandon, 2026-09-17: a driver listening to
+    /// local radio wants the next town's station, not to be sent back to the
+    /// in-house ones).
+    ///
+    /// Only a clean signal counts. Below [`STATIC_SIGNAL_THRESHOLD`] a station
+    /// is the static smear at the edge of its own contour, and landing there
+    /// would trade one fading station for another that fades a few miles on.
+    /// A sibling site of the lost station is not a landing either: a stronger
+    /// site of the same station is a handover, which the dial already does.
+    pub fn strongest_terrestrial(&self, lost: &RadioStation) -> Option<RadioReception> {
+        let lost_identity = station_identity(lost);
+        self.receivable_stations()
+            .into_iter()
+            .filter(|r| dial_group(&r.station) == TERRESTRIAL_GROUP)
+            .filter(|r| r.signal >= STATIC_SIGNAL_THRESHOLD)
+            .filter(|r| r.station.id != lost.id && station_identity(&r.station) != lost_identity)
+            .max_by(|a, b| {
+                a.signal
+                    .partial_cmp(&b.signal)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
     }
 
     pub fn available_stations(&self) -> Vec<RadioStation> {

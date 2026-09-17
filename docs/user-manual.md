@@ -1801,8 +1801,10 @@ country, classic rock, and blues and soul formats with their own song pools --
 and behave like real FM signals: full volume near the market, thinner audio and
 static crackle at the fringe of the range, and a fade to static as you drive
 past the edge. When a station drops out of range the radio announces it and
-falls back to the Roadhouse, which is receivable everywhere along with the
-Night Line and the satellite fallback.
+tunes to the strongest local station the truck can still hear clearly, and
+names it. Only when nothing else is on the air does it fall back to the
+Roadhouse, which is receivable everywhere along with the Night Line and the
+satellite fallback.
 
 Real public stream stations, including AFN choices, play out of the box; turning
 streamer-safe mode on hides them, for anyone streaming or recording their
