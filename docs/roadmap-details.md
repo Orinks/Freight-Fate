@@ -7288,6 +7288,16 @@ city service drives below.)
       percent), 200 new, 227 refreshed, none demoted. 567 of the 2,779
       sourced endpoints are freight sites, so the endpoint sweep itself
       is the next piece of work.
+      Endpoint re-sweep done the same day (details in ROADMAP.md):
+      `tools/facility_endpoint_match.py` reads an object's own tags and
+      whole words of its name behind the same screen, and
+      `tools/build_facility_endpoints.py` merges a state at a time
+      (passing endpoints kept, failing ones replaced or labelled). 1,939
+      of 2,934 sourced endpoints are freight sites now, 1,224 were
+      replaced, 995 are labelled refused. Chains rebuilt toward the new
+      endpoints: 1,913 to 2,364 (47 percent), 1,722 of them to a freight
+      site, 82 kept with a `stale_endpoint` note because no public road
+      reaches the new site.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim

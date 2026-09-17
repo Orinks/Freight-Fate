@@ -22,6 +22,8 @@
 
 ### Fixed
 
+- **Street directions now end at the facility.** Hundreds used to end at a railway line, a power substation or a shop nearby.
+
 - **A truck stop that was on the map twice is announced once.** Signalling for it arms the real exit, with its exit number and the stop at the end of the ramp.
 
 - **Chain truck stops like Love's, Pilot and Flying J are announced as travel centers.** Many were called service plazas, which are on toll roads.

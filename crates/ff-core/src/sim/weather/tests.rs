@@ -1660,12 +1660,31 @@ fn test_the_approach_speaks_no_more_often_than_it_used_to() {
     assert_eq!(arrival, vec!["destination approach", "facility gate"]);
 }
 
+/// A Chicago facility whose approach is the short synthetic single leg: no
+/// street chain, and short enough that the whole of it is access road. It
+/// used to be written as "Chicago's first facility", which held only while
+/// that facility's endpoint sat on the 2.1-mile floor; the 2026-09-17
+/// endpoint re-sweep moved it from a commuter line to a real intermodal
+/// yard 3.6 miles out, and a long approach starts as an arterial.
+fn short_synthetic_approach(world: &crate::data::world::World) -> crate::data::world_models::Route {
+    world
+        .city("Chicago")
+        .unwrap()
+        .locations
+        .iter()
+        .filter_map(|location| {
+            world
+                .facility_approach_route("Chicago", &location.name)
+                .ok()
+        })
+        .find(|route| route.legs.len() == 1 && route.miles() <= 2.5)
+        .expect("Chicago has a facility with a short synthetic approach")
+}
+
 #[test]
 fn test_pickup_deadhead_route_uses_local_facility_limits() {
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
 
     let (limit, reason) = trip.speed_limit_at(0.1);
@@ -1891,9 +1910,7 @@ fn test_facility_gate_warns_before_final_low_speed_zone() {
     use crate::sim::trip_models::TripEventKind;
 
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
 
     trip.position_mi = trip.total_miles() - 2.0;
@@ -1918,9 +1935,7 @@ fn test_zone_entry_is_worded_apart_from_its_advance_warning() {
     use crate::sim::trip_models::TripEventKind;
 
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
     let gate = trip
         .zones

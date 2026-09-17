@@ -26,15 +26,20 @@ def test_facility_approach_data_covers_full_facility_set(world):
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 5037
-    # Synced with facility_endpoints after far-pin regeocode (419 estimated).
-    assert coverage["source_backed_endpoints"] == 2779
-    assert coverage["road_snapped"] == 1928
-    assert coverage["turn_level"] == 1913
-    assert coverage["nearest_road_fallback"] == 851
+    # Synced with facility_endpoints after far-pin regeocode (419 estimated)
+    # and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
+    # had every chain to one of them rebuilt toward the new endpoint.
+    assert coverage["source_backed_endpoints"] == 2934
+    assert coverage["road_snapped"] == 2396
+    assert coverage["turn_level"] == 2364
+    assert coverage["nearest_road_fallback"] == 538
     # Sourced endpoints with no chain whose own OSM object is not a freight site
     # (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert coverage["endpoint_screen_refused"] == 783
-    assert coverage["representative_fallback"] == 2258
+    assert coverage["endpoint_screen_refused"] == 419
+    # Chains that still lead to a replaced endpoint because no public-road
+    # path reaches the new one; kept until a chain replaces them, and labelled.
+    assert coverage["stale_chain_kept"] == 82
+    assert coverage["representative_fallback"] == 2103
     assert coverage["gate_yard_dock_hints"] == 0
 
     # The 2026-07-14 regen keys records by current slug facility ids and
@@ -411,6 +416,22 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
         tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False
     )
     assert unscreened["approaches"]["fixture:cross_dock"]["turn_level"]
+
+    # The endpoint row's own verdict counts too: the tag screen cannot see an
+    # endpoint across the border, or one the matcher has stopped accepting.
+    warehouse = osm_path.read_text(encoding="utf-8").replace(
+        '<tag k="power" v="substation" />', '<tag k="building" v="warehouse" />'
+    )
+    osm_path.write_text(warehouse, encoding="utf-8")
+    assert tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)[
+        "approaches"
+    ]["fixture:cross_dock"]["turn_level"]
+    across = "The sourced endpoint lies across the national border from its city."
+    monkeypatch.setattr(tool, "endpoint_row_refusals", lambda: {"fixture:cross_dock": across})
+    labelled = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    record = labelled["approaches"]["fixture:cross_dock"]
+    assert not record["turn_level"]
+    assert across in record["fallback_reason"]
 
 
 def test_search_budget_follows_the_endpoint_being_routed_to():
