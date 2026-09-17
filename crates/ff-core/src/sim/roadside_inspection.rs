@@ -315,10 +315,15 @@ pub fn walk_around(
         .findings
         .iter()
         .map(|f| {
+            // Each line opens a sentence of its own in the readout.
+            let mut what = f.what.clone();
+            if let Some(first) = what.get(..1) {
+                what.replace_range(..1, &first.to_uppercase());
+            }
             if f.out_of_service {
-                format!("{}: an inspector would park you for this.", f.what)
+                format!("{what}: an inspector would park you for this.")
             } else {
-                format!("{}: an inspector would write this up.", f.what)
+                format!("{what}: an inspector would write this up.")
             }
         })
         .collect()
@@ -486,6 +491,7 @@ mod tests {
             Some("trailer marker lamp out"),
         );
         assert_eq!(lines.len(), 3, "{lines:?}");
+        assert!(lines[0].starts_with("A tire below"), "{}", lines[0]);
         assert!(lines[0].ends_with("an inspector would park you for this."));
         assert!(lines[1].ends_with("an inspector would write this up."));
     }

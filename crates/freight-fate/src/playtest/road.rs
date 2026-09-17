@@ -1241,6 +1241,17 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     // run -- so a quiet rung reported "quiet" and changed nothing, and every
     // rung sounded identical (owner, 2026-08-17).
     profile.tutorial_done = true;
+    // A scenario staged before this carries its truck and its record into
+    // the drive: `start_at` after `scenario` keeps the damage, the wear and
+    // the citations that were asked for, so an inspection has something to
+    // find. A fresh process has no profile and gets the sound bench truck.
+    if let Some(previous) = ctx.profile.as_ref() {
+        profile.truck = previous.truck.clone();
+        profile.truck_conditions = previous.truck_conditions.clone();
+        profile.driving_record = previous.driving_record.clone();
+        profile.out_of_service_events = previous.out_of_service_events;
+        profile.career.reputation = previous.career.reputation;
+    }
     ctx.profile = Some(profile);
 
     let route = ctx

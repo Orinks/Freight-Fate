@@ -166,7 +166,7 @@ impl DrivingState {
                 let wear = self.trip.truck.tire_wear_pct;
                 self.trip.truck.tire_wear_pct = 0.0;
                 (
-                    "new tires",
+                    "fitted new tires",
                     (wear * ROAD_TIRE_COST_PER_PCT).max(ROAD_TIRE_MIN),
                 )
             }
@@ -174,7 +174,7 @@ impl DrivingState {
                 let wear = self.trip.truck.brake_wear_pct;
                 self.trip.truck.brake_wear_pct = 0.0;
                 (
-                    "a brake adjustment and reline",
+                    "adjusted and relined the brakes",
                     (wear * ROAD_BRAKE_COST_PER_PCT).max(ROAD_BRAKE_MIN),
                 )
             }
@@ -182,13 +182,13 @@ impl DrivingState {
                 let damage = self.trip.truck.damage_pct;
                 self.trip.truck.damage_pct = damage.min(FIELD_REPAIR_DAMAGE_PCT);
                 (
-                    "a patch on the damage",
+                    "patched the damage",
                     road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE),
                 )
             }
             Repair::Trailer => {
                 self.trailer_repaired = true;
-                ("the trailer's defect", MECHANIC_CALLOUT_FEE)
+                ("fixed the trailer's defect", MECHANIC_CALLOUT_FEE)
             }
             Repair::None => return String::new(),
         };
@@ -209,7 +209,7 @@ impl DrivingState {
             format!("for {} dollars", fmt_grouped(cost, 0))
         };
         format!(
-            "Out of service until repaired: a roadside mechanic did {what} {billing}, {} minutes.",
+            "Out of service until repaired: a roadside mechanic {what} {billing}, {} minutes.",
             fmt_f(MECHANIC_WAIT_MIN, 0)
         )
     }

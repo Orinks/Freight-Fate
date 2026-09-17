@@ -215,7 +215,10 @@ fn tools_list() -> Value {
              with no miles driven), level (1 to 30), deliveries, money, reputation, \
              business (company, leased or independent), endorsements (a list of \
              credential keys bought outright, replacing what was held), hour (local \
-             clock 0 to 24, moved forward to), fuel_pct and damage_pct (0 to 100), \
+             clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and \
+             brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
+             out_of_service_events (counts on the record; with damage they set the \
+             safety band that decides who is pulled into the inspection lane), \
              rested (true takes a full sleep), clear_load (true drops a load in \
              progress first), market_seed and board_seed (the dispatch board rolls \
              from them), settings (an object of setting name to value, for this \
@@ -234,6 +237,10 @@ fn tools_list() -> Value {
                 "hour": {"type": "number"},
                 "fuel_pct": {"type": "number"},
                 "damage_pct": {"type": "number"},
+                "tire_wear_pct": {"type": "number"},
+                "brake_wear_pct": {"type": "number"},
+                "citations": {"type": "integer"},
+                "out_of_service_events": {"type": "integer"},
                 "rested": {"type": "boolean"},
                 "clear_load": {"type": "boolean"},
                 "market_seed": {"type": "integer"},

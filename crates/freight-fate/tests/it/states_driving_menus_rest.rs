@@ -1032,12 +1032,12 @@ fn test_the_walk_around_says_what_an_inspector_would_find_first() {
     let said = app.main_lines().join(" ");
     assert!(
         said.contains(
-            "a tire below the minimum tread depth: an inspector would park you for this."
+            "A tire below the minimum tread depth: an inspector would park you for this."
         ),
         "{said}"
     );
     assert!(
-        said.contains("brakes close to the adjustment limit: an inspector would write this up."),
+        said.contains("Brakes close to the adjustment limit: an inspector would write this up."),
         "{said}"
     );
 }
