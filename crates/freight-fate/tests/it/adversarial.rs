@@ -134,6 +134,7 @@ scenarios!(
     ramp_speed_control_handback,
     // enforcement
     scale_check_in_guidance,
+    bald_tires_get_a_walk_around,
     scale_pull_over_stands_down_exit,
     // resources
     fuel_rescue_farming,
