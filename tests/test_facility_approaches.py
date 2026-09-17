@@ -149,6 +149,12 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
     <tag k="highway" v="service" />
     <tag k="name" v="Warehouse Drive" />
   </way>
+  <way id="40">
+    <nd ref="3" />
+    <nd ref="2" />
+    <tag k="building" v="warehouse" />
+    <tag k="name" v="Real Warehouse" />
+  </way>
 </osm>
 """,
         encoding="utf-8",
@@ -169,6 +175,7 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
         endpoint_source_note="fixture",
         local_approach_miles=0.8,
         local_approach_road="Terminal Road",
+        endpoint_source_ref="way/40",
     )
     monkeypatch.setattr(tool, "collect_targets", lambda: [target])
     monkeypatch.setattr(tool, "MIN_PLAYABLE_ROUTE_MI", 0.1)
@@ -223,6 +230,12 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
     <nd ref="4" />
     <tag k="highway" v="service" />
   </way>
+  <way id="40">
+    <nd ref="3" />
+    <nd ref="2" />
+    <tag k="building" v="warehouse" />
+    <tag k="name" v="Real Warehouse" />
+  </way>
 </osm>
 """,
         encoding="utf-8",
@@ -243,6 +256,7 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
         endpoint_source_note="fixture",
         local_approach_miles=0.8,
         local_approach_road="Terminal Road",
+        endpoint_source_ref="way/40",
     )
     monkeypatch.setattr(tool, "collect_targets", lambda: [target])
     monkeypatch.setattr(tool, "MIN_PLAYABLE_ROUTE_MI", 0.1)
@@ -273,6 +287,182 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
     # The generic labels keep the 15 mph zone a nameless way gets; the named
     # street keeps its 25.
     assert [segment["speed_mph"] for segment in record["segments"]] == [25.0, 15.0, 15.0]
+
+
+def test_endpoint_screen_reads_the_object_not_a_substring_of_its_tags():
+    """2026-09-17: 2,212 of 2,779 "source-backed" endpoints turned out to be
+    railway main lines, substations, shops, roads and churches, because the
+    endpoint sweep substring-matches the whole tag dump. The approach builder
+    only routes a street chain to an object that reads as a freight site."""
+    _load_tool()
+    from facility_endpoint_screen import screen_endpoint
+
+    def accepted(facility_type, name, tags):
+        return screen_endpoint(facility_type, name, tags)[0]
+
+    # `substation=distribution` is how a substation became a cross-dock.
+    assert not accepted(
+        "cross_dock", "Veterans Substation", {"power": "substation", "substation": "distribution"}
+    )
+    assert not accepted(
+        "intermodal_ramp", "UP Coast Subdivision", {"railway": "rail", "usage": "main"}
+    )
+    assert not accepted("dry_warehouse", "Redwood Highway", {"highway": "trunk"})
+    assert not accepted("dry_warehouse", "Costco", {"building": "warehouse", "shop": "wholesale"})
+    assert not accepted("cross_dock", "Gone", None)
+    assert accepted("cold_storage", "Americold", {"building": "warehouse"})
+    assert accepted("intermodal_ramp", "Oak Point Yard", {"railway": "yard"})
+    # The three name-matched types must also state their trade.
+    assert not accepted(
+        "automotive_plant", "First Assembly of God", {"amenity": "place_of_worship"}
+    )
+    assert not accepted("steel_industrial", "General Mills", {"landuse": "industrial"})
+    assert not accepted("steel_industrial", "Steele Street Storage", {"building": "industrial"})
+    assert accepted(
+        "steel_industrial",
+        "Nucor Steel Birmingham",
+        {"landuse": "industrial", "industrial": "steel_mill"},
+    )
+    assert accepted(
+        "automotive_plant",
+        "Flint Truck Assembly",
+        {"landuse": "industrial", "product": "automobiles"},
+    )
+    assert accepted(
+        "chemical_petroleum_terminal",
+        "Houma Terminal",
+        {"landuse": "industrial", "industrial": "petroleum_terminal"},
+    )
+
+
+def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
+    tmp_path, monkeypatch
+):
+    tool = _load_tool()
+    osm_path = tmp_path / "facility.osm"
+    osm_path.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="fixture">
+  <node id="1" lat="41.0000" lon="-87.0000" />
+  <node id="2" lat="41.0000" lon="-86.9950" />
+  <node id="3" lat="41.0000" lon="-86.9900" />
+  <way id="10">
+    <nd ref="1" />
+    <nd ref="2" />
+    <tag k="highway" v="tertiary" />
+    <tag k="name" v="Terminal Road" />
+  </way>
+  <way id="20">
+    <nd ref="2" />
+    <nd ref="3" />
+    <tag k="highway" v="service" />
+    <tag k="name" v="Warehouse Drive" />
+  </way>
+  <way id="40">
+    <nd ref="3" />
+    <nd ref="2" />
+    <tag k="power" v="substation" />
+    <tag k="substation" v="distribution" />
+    <tag k="name" v="Fixture Substation" />
+  </way>
+</osm>
+""",
+        encoding="utf-8",
+    )
+    target = tool.FacilityTarget(
+        facility_id="fixture:cross_dock",
+        city="Fixture City",
+        state="Illinois",
+        facility_name="Fixture Cross-Dock",
+        facility_type="cross_dock",
+        endpoint_name="Fixture Substation",
+        lat=41.0000,
+        lon=-86.9900,
+        start_lat=41.0000,
+        start_lon=-87.0000,
+        endpoint_source_backed=True,
+        endpoint_fallback=False,
+        endpoint_source_note="fixture",
+        local_approach_miles=0.8,
+        local_approach_road="Terminal Road",
+        endpoint_source_ref="way/40",
+    )
+    monkeypatch.setattr(tool, "collect_targets", lambda: [target])
+    monkeypatch.setattr(tool, "MIN_PLAYABLE_ROUTE_MI", 0.1)
+    local_geometry = tool._load_local_geometry_tool()
+    monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
+    monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
+
+    screened = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    record = screened["approaches"]["fixture:cross_dock"]
+    assert not record["turn_level"]
+    assert record["fallback_reason"].startswith(tool.SCREEN_REFUSAL_PREFIX)
+    assert "power-grid" in record["fallback_reason"]
+    assert screened["coverage"]["endpoint_screen_refused"] == 1
+
+    # The screen is a switch, not an edit: off, the same endpoint routes.
+    unscreened = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False
+    )
+    assert unscreened["approaches"]["fixture:cross_dock"]["turn_level"]
+
+
+def test_search_budget_follows_the_endpoint_being_routed_to():
+    """The path search was sized from the facility's representative pin, a
+    2.1-mile floor near the city centre, while routing to a sourced endpoint
+    miles further out: 52 of 88 "no connected path" failures in California,
+    New York and Texas had a path and ran out of budget."""
+    import dataclasses
+
+    tool = _load_tool()
+    target = tool.FacilityTarget(
+        facility_id="fixture:far",
+        city="Fixture City",
+        state="Illinois",
+        facility_name="Fixture Warehouse",
+        facility_type="warehouse",
+        endpoint_name="Real Warehouse",
+        lat=41.0000,
+        lon=-86.9000,  # about 5.2 miles east of the city context
+        start_lat=41.0000,
+        start_lon=-87.0000,
+        endpoint_source_backed=True,
+        endpoint_fallback=False,
+        endpoint_source_note="fixture",
+        local_approach_miles=2.1,
+        local_approach_road="Terminal Road",
+    )
+    assert 6.4 <= tool.routed_approach_miles(target) <= 6.6
+    # Never below the representative figure a facility was searched at before.
+    near = dataclasses.replace(target, lon=-86.9950, local_approach_miles=3.0)
+    assert tool.routed_approach_miles(near) == 3.0
+
+
+def test_long_chain_keeps_the_streets_at_the_facility_and_folds_junction_links():
+    tool = _load_tool()
+    local_geometry = tool._load_local_geometry_tool()
+    # Twelve streets, city context first; the last one is the facility's own.
+    edges = [(f"Street {i}", 0.2, None) for i in range(12)]
+    kept = local_geometry.collapse_segments(edges)
+    assert [segment["road"] for segment in kept] == [f"Street {i}" for i in range(4, 12)]
+    assert kept[0]["cue"] == "Start on Street 4."
+
+    # An unnamed slip lane is part of the turn, never a street of its own.
+    link = local_geometry.road_label({"highway": "primary_link"})
+    assert link == local_geometry.JUNCTION_LINK
+    folded = local_geometry.collapse_segments(
+        [("Main Street", 0.5, None), (link, 0.1, None), ("Redwood Highway (US 101)", 1.0, None)]
+    )
+    assert [(segment["road"], segment["miles"]) for segment in folded] == [
+        ("Main Street", 0.6),
+        ("Redwood Highway (US 101)", 1.0),
+    ]
+    # A town's main street classed `trunk` is a street; a motorway is not.
+    assert local_geometry.road_label({"highway": "trunk", "name": "Main Street"}) == "Main Street"
+    assert (
+        local_geometry.road_label({"highway": "trunk", "motorroad": "yes", "ref": "US 101"}) == ""
+    )
+    assert local_geometry.road_label({"highway": "motorway", "ref": "I 5"}) == ""
 
 
 def _approach_stub(facility_id, *, turn_level, reason="", source_backed=True, estimated=False):
