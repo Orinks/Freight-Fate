@@ -238,8 +238,8 @@ fn test_facility_chains_never_say_unnamed_public_road() {
 
     // A chain spoken end to end: the last turn in, and the outbound start on
     // the same road. The report was Chicago Cross-Dock, whose endpoint (a
-    // railway line) the 2026-09-17 re-sweep replaced, and its new chain ends
-    // on a named street. Amarillo's truck terminal kept its endpoint, a real
+    // transit stop, Museum Campus) the 2026-09-17 re-sweep replaced, and its
+    // new chain ends on a named street. Amarillo's truck terminal kept its endpoint, a real
     // carrier's yard, and still ends on an unnamed service road.
     let arrival = w
         .facility_approach_route("amarillo_tx_us", "Route 66 Truck Terminal")
