@@ -70,3 +70,65 @@ fn test_convenience_stations_typed_as_travel_centers_hide_behind_a_trailer() {
         "{quiktrip_hidden} of {quiktrip_total} QuikTrips hide behind a trailer"
     );
 }
+
+// -- one truck stop, listed once (`data::stop_twins`) ---------------------------------
+
+#[test]
+fn test_the_corfu_flying_j_is_one_stop_in_both_directions() {
+    // The pair the adversarial battery rolled through, 2026-09-17: the map
+    // import's bare "Flying J Travel Center" 2.8 miles short of the locator's
+    // "Flying J Travel Center Corfu" at exit 48A, on all three Thruway legs.
+    let world = get_world();
+    let mut legs_checked = 0usize;
+    for leg in &world.legs {
+        let flying_js: Vec<&str> = leg
+            .stops
+            .iter()
+            .filter(|stop| stop.name.starts_with("Flying J"))
+            .filter(|stop| stop.name.ends_with("Corfu") || stop.name == "Flying J Travel Center")
+            .map(|stop| stop.name.as_str())
+            .collect();
+        if flying_js.iter().any(|name| name.ends_with("Corfu")) {
+            legs_checked += 1;
+            assert_eq!(
+                flying_js,
+                ["Flying J Travel Center Corfu"],
+                "{} to {}",
+                leg.a,
+                leg.b
+            );
+        }
+    }
+    assert!(
+        legs_checked >= 3,
+        "the Thruway legs carry it: {legs_checked}"
+    );
+}
+
+#[test]
+fn test_no_leg_lists_a_bare_chain_record_beside_the_named_one() {
+    use ff_core::data::stop_twins::TWIN_STOP_MILES;
+    let world = get_world();
+    let bare = |name: &str| {
+        matches!(
+            name,
+            "Flying J Travel Center" | "Pilot Travel Center" | "Love's Travel Stop" | "Love's"
+        )
+    };
+    let chain = |name: &str| name.split(' ').next().unwrap_or_default().to_lowercase();
+    for leg in &world.legs {
+        for a in leg.stops.iter().filter(|stop| bare(&stop.name)) {
+            for b in leg.stops.iter().filter(|stop| !bare(&stop.name)) {
+                let twin = chain(&a.name) == chain(&b.name)
+                    && (a.at_mi - b.at_mi).abs() <= TWIN_STOP_MILES
+                    && (a.directions.iter().any(|d| d == "both")
+                        || b.directions.iter().any(|d| d == "both"));
+                assert!(
+                    !twin,
+                    "{} to {}: {} at {} beside {} at {}",
+                    leg.a, leg.b, a.name, a.at_mi, b.name, b.at_mi
+                );
+            }
+        }
+    }
+}

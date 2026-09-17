@@ -19,6 +19,7 @@ use serde_json::Value;
 use super::baked::{BakedData, CorridorRef};
 use super::data_resources::{baked_at, data_root, read_text_at};
 use super::legacy_aliases::LEGACY_CITY_SLUGS;
+use super::stop_twins::screen_twin_stops;
 use super::world_constants::{
     ALTERNATE_ROUTE_EXTRA_RATIO, ALTERNATE_ROUTE_MAX_EXTRA_MILES, ALTERNATE_ROUTE_MIN_EXTRA_MILES,
 };
@@ -189,6 +190,8 @@ impl World {
                 .iter()
                 .map(|s| parse_stop(s, miles, &leg_from, &leg_to))
                 .collect::<Result<Vec<_>, _>>()?;
+            // One chain truck stop listed twice is one stop (`stop_twins`).
+            let stops = screen_twin_stops(stops);
             let corridor = leg.corridor;
             let from_state = cities
                 .get(&leg_from)

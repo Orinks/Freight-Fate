@@ -196,6 +196,66 @@ def _one_way_only(stop: dict[str, Any]) -> bool:
     return dirs in ({"forward"}, {"reverse"})
 
 
+# Mirrors ff-core `data::stop_twins`; change them together.
+TWIN_STOP_MILES = 4.0
+_CHAINS = (
+    "love's", "pilot", "flying j", "ta ", "travelcenters", "petro", "road ranger",
+    "one9", "sapp bros", "bosselman", "iowa 80", "little america", "ambest",
+    "roady's", "stamart", "onvo", "kwik trip", "kwik star",
+)  # fmt: skip
+_GENERIC_NAME_WORDS = frozenset(
+    [
+        "travel",
+        "center",
+        "centre",
+        "centers",
+        "travelcenter",
+        "travelcenters",
+        "stop",
+        "stopping",
+        "plaza",
+        "truck",
+        "the",
+        "service",
+        "area",
+        "station",
+        "store",
+        "country",
+        "dealer",
+        "of",
+        "america",
+        "and",
+        "express",
+        "fuel",
+        "shopping",
+    ]
+)
+
+
+def _chain(name: str) -> str | None:
+    lowered = _norm_name(name)
+    for chain in _CHAINS:
+        if lowered.startswith(chain) or lowered == chain.strip():
+            return chain
+    return None
+
+
+def _place_words(name: str, chain: str) -> frozenset[str]:
+    rest = _norm_name(name).removeprefix(chain.strip())
+    words = "".join(ch if ch.isalnum() else " " for ch in rest).split()
+    return frozenset(
+        w for w in words if len(w) > 1 and not w.isdigit() and w not in _GENERIC_NAME_WORDS
+    )
+
+
+def _same_chain_store(a: str, b: str) -> bool:
+    chain = _chain(a)
+    if chain is None or chain != _chain(b):
+        return False
+    place_a, place_b = _place_words(a, chain), _place_words(b, chain)
+    return not place_a or not place_b or place_a == place_b
+
+
 def _already_on_leg(
     dest: dict[str, Any],
     name: str,
@@ -209,6 +269,15 @@ def _already_on_leg(
             _norm_name(stop.get("name")) == target
             and abs(float(stop.get("at_mi", 0.0)) - at_mi) <= NEAR_MI
         ):
+            return True
+        if _same_chain_store(name, str(stop.get("name") or "")) and (
+            abs(float(stop.get("at_mi", 0.0)) - at_mi) <= TWIN_STOP_MILES
+        ):
+            # The partner already lists this store under another name: the
+            # map import's bare "Flying J Travel Center" and the locator's
+            # "Flying J Travel Center Corfu" are one Flying J. Copying it
+            # would hand the leg a twin (ff-core `data::stop_twins` screens
+            # the ones already in the data, and owns the four-mile figure).
             return True
         if lat is None or lon is None:
             continue
@@ -307,7 +376,10 @@ def copy_stop(stop: dict[str, Any], at_mi: float, lat: float, lon: float) -> dic
     copied["vehicle_access"] = "tractor_trailer"
     note = str(copied.get("source") or "").strip()
     suffix = "Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16."
-    copied["source"] = f"{note} {suffix}".strip() if note else suffix
+    # A copy of a copy (A to B, then B to its other partner C) is still one
+    # copy of the original; the note used to stack once per hop.
+    if suffix not in note:
+        copied["source"] = f"{note} {suffix}".strip() if note else suffix
     # default both unless the original was already both
     if not copied.get("directions"):
         copied["directions"] = ["both"]

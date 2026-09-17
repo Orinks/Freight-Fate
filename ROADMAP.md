@@ -427,6 +427,46 @@ its status or release decision.
       two-strike fallback, and the line names what the radio actually landed
       on.
 
+### September 17 truck stops listed twice
+
+- [x] A chain truck stop listed twice on one leg is read as one stop, at
+      load, across the whole map (`data::stop_twins`). The map import typed
+      many chain truck stops as service plazas under the chain's bare name
+      ("Flying J Travel Center"); the curated pass later added the same
+      stores from the chains' own locators under their full names, with the
+      exit and the ramp's control. Both stayed, a mile or three apart by mile
+      marker, and the opposite-direction copy of 2026-09-16 carried the pairs
+      to legs that had held only one. A driver signalling for the Flying J at
+      Corfu seven miles out was armed for the bare record: no exit number, no
+      stop sign for route-transition assistance to brake for, and the truck
+      rolled through the stop. Found by the adversarial battery
+      (`ramp_speed_control_handback`, odd from that copy until this screen).
+      The rule: same chain, within four miles, a common direction, and either
+      one record carries only the chain's name or both name the same place;
+      two records that name different places are never merged. The
+      better-documented record stays. Screened, not deleted, so the rule can
+      be re-judged. It drops 90 records on 61 legs (Love's 54, Flying J 21,
+      Pilot 15), and every leg keeps its to and from stops.
+- [x] Where four miles comes from, measured 2026-09-17: for bare records
+      beside a named record of the same chain, 77 pairs sit inside three
+      miles (36 under one, 29 at one to two, 12 at two to three), then a
+      trough of 8 at three to four, then a second rise that keeps going (27
+      at four to six, 31 at six to ten), which is real neighbours an
+      interchange or more apart. Four is the bottom of the trough. A false
+      merge hides one of two same-chain stores under four miles apart and
+      leaves the driver the other; a missed twin is a phantom exit.
+- [x] `tools/reverse_pair_stops.py` no longer copies a store onto a partner
+      leg that already lists it under another name (the same rule, mirrored),
+      and a copy of a copy no longer stacks the source note: 257 of its 960
+      copies carry the note twice, one per hop.
+- [ ] 1,300 of the map's 1,819 service plazas carry a truck-stop chain's
+      name (Love's 445, Pilot 371, Flying J 233, Petro 117, TA 91), so the
+      type is mostly the map import's guess and not a reading. The ones with
+      no named twin still announce as service plazas, with no exit number or
+      ramp control of their own. Retyping them wants the chains' locator
+      records, which would also replace the four-mile calibration with
+      facility coordinates.
+
 ### September 16 radio range and the cruise floor
 
 - [x] Driving out of a station's range is announced and retuned again. The

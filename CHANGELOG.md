@@ -16,6 +16,8 @@
 
 ### Fixed
 
+- **A truck stop that was on the map twice is announced once.** Signalling for it arms the real exit, with its exit number and the stop at the end of the ramp.
+
 - **Station names keep their apostrophes.** Fifteen imported stations no longer read as, for example, Birmingham s Beautiful QEZ.
 
 - **Stepping the dial visits each terrestrial station once.** The band no longer re-sorts by signal under a moving truck between presses.
