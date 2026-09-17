@@ -447,6 +447,20 @@ impl Rig {
             .count()
     }
 
+    /// How many times the GAME announced `phrase`, as against how many times
+    /// the voice received it ([`Self::said`]).
+    ///
+    /// The two differ by the pacer's hand-backs: a ROUTE line cut by an
+    /// interrupt is delivered again to finish it, and the capture records
+    /// that as a second line. A driver whose line was cut the instant it
+    /// started hears it once. Use this for "did the game decide this twice",
+    /// and `said` for "how many times did it reach the ear" -- a line handed
+    /// back over and over is a chant, and that one is `said`'s to catch.
+    pub fn announced(&self, phrase: &str) -> usize {
+        self.said(phrase)
+            .saturating_sub(self.app.ctx.handed_back_count(phrase))
+    }
+
     pub fn lines_with(&self, phrase: &str) -> Vec<String> {
         self.transcript()
             .into_iter()

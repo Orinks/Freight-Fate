@@ -20,7 +20,7 @@
 //! duck) is in `app::speech_delivery`.
 
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -187,6 +187,12 @@ pub struct GameContext {
     /// change of state.
     pub(crate) ladder_said: HashSet<(String, String)>,
     pub(crate) ladder_last: HashMap<String, String>,
+    /// The cut lines the pacer has handed back, newest last (see
+    /// `requeue_cut_event`). A hand-back reaches the voice as a second
+    /// delivery of the same text, so anything counting what the GAME announced
+    /// from what the VOICE received has to be able to tell the two apart; the
+    /// playtest rig reads this. Bounded: only the recent ones are kept.
+    pub(crate) handed_back: VecDeque<String>,
 
     // -- music rotation ----------------------------------------------------------------
     music_pool_positions: HashMap<(String, Vec<String>), usize>,
@@ -259,6 +265,7 @@ impl GameContext {
             speech_requested: false,
             ladder_said: HashSet::new(),
             ladder_last: HashMap::new(),
+            handed_back: VecDeque::new(),
             music_pool_positions: HashMap::new(),
             music_pool_last: HashMap::new(),
             music_rotation_pool: None,

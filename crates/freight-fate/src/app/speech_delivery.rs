@@ -32,6 +32,10 @@ macro_rules! transcript {
     };
 }
 
+/// How many hand-backs `GameContext::handed_back` keeps. An audit trail for a
+/// bench run, not a history: a long session must not grow it without end.
+const HANDED_BACK_KEPT: usize = 512;
+
 /// The keyword arguments of `GameContext.say`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Say {
@@ -431,6 +435,10 @@ impl GameContext {
         // the text here, a playtest log answers the question by itself --
         // grep the requeues, read each one, ask whether it was still true.
         transcript!("[pacer] cut line requeued: {}", text);
+        if self.handed_back.len() == HANDED_BACK_KEPT {
+            self.handed_back.pop_front();
+        }
+        self.handed_back.push_back(text.clone());
         self.event_pacer.note_queued(&text, priority, None, None);
         self.event_pacer.resume_delivery(&text);
         if self.settings.sapi_events {
@@ -438,6 +446,15 @@ impl GameContext {
         } else {
             self.speech.say(&text, false);
         }
+    }
+
+    /// How many of the voice's deliveries containing `phrase` were the pacer
+    /// finishing a cut line rather than the game announcing something.
+    pub fn handed_back_count(&self, phrase: &str) -> usize {
+        self.handed_back
+            .iter()
+            .filter(|line| line.contains(phrase))
+            .count()
     }
 
     /// Name the ROUTE or CRITICAL line the latest cut destroyed because the

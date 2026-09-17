@@ -371,11 +371,25 @@ pub fn ramp_speed_control_handback() -> Outcome {
 
     // 5. And the drive stayed sane by ear: no resume announced on the ramp,
     //    and the pause never announced itself twice.
-    if rig.said("Automatic speed control paused") > 1 {
+    //    Counted as what the game announced, not what the voice received:
+    //    where a ramp ends at a street speed zone, the zone line lands in the
+    //    same frame as the return and cuts it, and the pacer finishes the cut
+    //    line. That is one announcement, heard once, and the rig's transcript
+    //    shows it twice.
+    if rig.announced("Automatic speed control paused") > 1 {
         findings.push("the ramp pause announced itself more than once".to_string());
     }
-    if rig.said("resuming") > 1 {
+    if rig.announced("resuming") > 1 {
         findings.push("automatic speed control announced its return more than once".to_string());
+    }
+    // A line handed back again and again is still a chant at the ear.
+    for phrase in ["Automatic speed control paused", "resuming"] {
+        let heard = rig.said(phrase);
+        if heard > 2 * rig.announced(phrase).max(1) {
+            findings.push(format!(
+                "\"{phrase}\" reached the voice {heard} times: the pacer kept handing it back"
+            ));
+        }
     }
 
     let note = format!(
