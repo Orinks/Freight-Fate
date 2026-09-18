@@ -32,16 +32,20 @@ fn test_facility_approach_data_covers_full_facility_set() {
     // Synced with facility_endpoints after far-pin regeocode (419 estimated)
     // and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
     // had every chain to one of them rebuilt toward the new endpoint.
+    // The 2026-09-17 yard-road rule then gave 89 facilities the public roads
+    // do not reach a chain over the facility's own private road (52 new chains,
+    // 37 stale ones rebuilt).
     assert_eq!(coverage["source_backed_endpoints"], 2934);
-    assert_eq!(coverage["road_snapped"], 2396);
-    assert_eq!(coverage["turn_level"], 2364);
-    assert_eq!(coverage["nearest_road_fallback"], 538);
+    assert_eq!(coverage["road_snapped"], 2449);
+    assert_eq!(coverage["turn_level"], 2416);
+    assert_eq!(coverage["nearest_road_fallback"], 485);
     // Sourced endpoints with no chain whose own OSM object is not a freight site
     // (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
     assert_eq!(coverage["endpoint_screen_refused"], 419);
     // Chains that still lead to a replaced endpoint because no public-road
-    // path reaches the new one; kept until a chain replaces them, and labelled.
-    assert_eq!(coverage["stale_chain_kept"], 82);
+    // path reaches the new one, not even over its own private road; kept until
+    // a chain replaces them, and labelled.
+    assert_eq!(coverage["stale_chain_kept"], 45);
     assert_eq!(coverage["representative_fallback"], 2103);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
