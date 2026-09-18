@@ -58767,7 +58767,7 @@
    "format": "variety",
    "id": "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf",
    "name": "The Radio Storm",
-   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the curated Radiostorm.com station, whose four 104 channels and the four Star104 channels are one Topeka network: star104.net and radiostorm.com serve the same site, and those eight streams report an icy-url at one of those two domains. This one is its own Shoutcast at theradiostorm.com, genre Various; re-checked 2026-09-18.",
+   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. A free-form station in Louisville, Kentucky, started by three alumni of the Kentucky School for the Blind and carrying blind and visually impaired DJs from the Kentucky and Indiana schools; its own Shoutcast, genre Various. NOT the curated Radiostorm.com station: that one is a Topeka network whose four 104 channels and four Star104 channels all report an icy-url at radiostorm.com or star104.net, two domains serving one site. theradiostorm.com names neither. Read from both sites and all nine streams, 2026-09-18.",
    "real_stream": true,
    "safe_for_streaming": false,
    "source": "community radio directory",
