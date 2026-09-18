@@ -321,6 +321,23 @@ impl DrivingState {
         RAMP_MIN_DESIGN_MPH.max(self.armed_ramp_mph(stop) - RAMP_CRUISE_HEADROOM_MPH)
     }
 
+    /// The speed route-transition assistance stays engaged down to, once it
+    /// has engaged at the ramp cap.
+    ///
+    /// A NAMED number of its own, deliberately, because the bug it fixes was
+    /// this one being borrowed from [`Self::armed_ramp_cruise_mph`]. That is a
+    /// cruise TARGET and floors at `RAMP_MIN_DESIGN_MPH` so cruise is never
+    /// set below a ramp's design minimum -- correct for a target, wrong for a
+    /// release threshold, which only ever has to sit below the engage
+    /// threshold. With the floor in it, any ramp posted at or under
+    /// `RAMP_MIN_DESIGN_MPH + RAMP_CRUISE_HEADROOM_MPH` clamped both numbers
+    /// to the same value, the hysteresis band collapsed to a point, and the
+    /// assist announced itself slowing and released on alternate frames all
+    /// the way down (owner, live drive on a 30 mph ramp, 2026-09-18).
+    pub fn ramp_assist_release_mph(cap_mph: f64) -> f64 {
+        cap_mph - RAMP_CRUISE_HEADROOM_MPH
+    }
+
     /// Bring automatic speed control down to ramp speed for an armed exit.
     ///
     /// Arming an exit commits the truck to leaving the highway, so the cruise

@@ -298,10 +298,14 @@ impl DrivingState {
         // limit announced itself slowing and released over and over down a
         // single ramp -- and re-made the brake application, and paid the air
         // for it, every time round (bench, 2026-08-11).
+        //
+        // The release number has its own name rather than borrowing the cruise
+        // target's; see `ramp_assist_release_mph` for the whole story.
+        let ramp_cap_mph = self.armed_ramp_mph(None);
         let ramp_hold_mph = if self.transition_assist_active {
-            self.armed_ramp_cruise_mph(None)
+            DrivingState::ramp_assist_release_mph(ramp_cap_mph)
         } else {
-            self.armed_ramp_mph(None)
+            ramp_cap_mph
         };
         let transition_assisting = ctx.settings.route_transition_assist
             && self.ramp_mi.is_some()

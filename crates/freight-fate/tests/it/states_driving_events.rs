@@ -220,6 +220,40 @@ fn test_transition_assist_brakes_for_the_red() {
 }
 
 #[test]
+fn test_the_ramp_assists_release_number_always_sits_under_its_engage_number() {
+    // Owner, live drive 2026-09-18: about twenty "Route-transition assistance
+    // slowing / released" pairs down one 30 mph ramp, burying the stop-bar
+    // countdown underneath them.
+    //
+    // The hysteresis band is what should prevent that -- engage at the ramp
+    // cap, release only below it -- and it had been broken since 2026-08-11 by
+    // borrowing the release number from `armed_ramp_cruise_mph`, a CRUISE
+    // TARGET that floors at RAMP_MIN_DESIGN_MPH. On a slow ramp both numbers
+    // clamped to that floor and the band became a point.
+    //
+    // Asserted as the invariant rather than by counting spoken lines, because
+    // the invariant is what was violated and it holds for EVERY ramp speed,
+    // including the ones no fixture in this suite happens to produce.
+    for cap in [15.0, 25.0, 30.0, 35.0, 40.0, 45.0, 55.0] {
+        let release = DrivingState::ramp_assist_release_mph(cap);
+        assert!(
+            release < cap,
+            "a {cap} mph ramp releases at {release}, so the band is not a band"
+        );
+    }
+
+    // And specifically on the ramp the owner drove, where borrowing the cruise
+    // target collapsed it. This is the case that regressed.
+    let cap = RAMP_MIN_DESIGN_MPH;
+    assert_eq!(
+        RAMP_MIN_DESIGN_MPH.max(cap - RAMP_CRUISE_HEADROOM_MPH),
+        cap,
+        "the cruise target still floors -- that part is correct and deliberate"
+    );
+    assert!(DrivingState::ramp_assist_release_mph(cap) < cap);
+}
+
+#[test]
 fn test_transition_assist_holds_the_stop_at_the_bar() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
