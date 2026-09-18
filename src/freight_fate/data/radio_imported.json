@@ -48121,8 +48121,8 @@
    "source": "community radio directory",
    "source_type": "web",
    "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "http://streamer.radio.co/sa3ccfdb33/listen",
+   "stream_format": "mp3",
+   "stream_url": "https://stream.zeno.fm/tjpxkkpbvnetv",
    "supported": true
   },
   {

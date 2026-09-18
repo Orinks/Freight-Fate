@@ -260,12 +260,20 @@ def main(argv: list[str] | None = None) -> int:
     # Stations that only answered at the Shoutcast mount: alive, but the
     # URL in the data points at the status page. These want editing, not
     # dropping, so they are reported apart from the casualties.
+    #
+    # An earlier repair is carried forward unless this sweep repaired the
+    # same station again. The built catalog already carries the repaired
+    # URL, so a repaired station probes clean -- and forgetting the repair
+    # on a clean probe would send the next build back to the broken URL.
+    # That covers hand-entered rows too: a station that moved hosts while
+    # its old address still answers with a sign-off loop.
+    repaired_now = {r["id"] for r in results if r.get("repaired_url")}
     previous_repairs = []
     if args.output.exists():
         previous_repairs = [
             row
             for row in json.loads(args.output.read_text(encoding="utf-8")).get("repaired", [])
-            if row["id"] not in probed
+            if row["id"] not in repaired_now
         ]
     repaired = sorted(
         [r for r in results if r.get("repaired_url")] + previous_repairs,

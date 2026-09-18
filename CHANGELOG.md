@@ -26,6 +26,8 @@
 
 ### Fixed
 
+- **z103.com plays music again.** The station moved its stream and the old address played only a sign-off message.
+
 - **Now playing works on more radio stations.** Stations that send the song a different way used to say they had no song information. (Reported by js730.)
 
 - **Rest areas on roads with no truck-usable stop are now on the map.** Twenty-two of them, including Heath Creek on I-35 north of Owatonna.
