@@ -16418,6 +16418,57 @@
       "stream_format": "aac",
       "stream_url": "https://ice24.securenetsystems.net/WGPA2",
       "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "various music",
+      "id": "the-radio-storm",
+      "name": "The Radio Storm",
+      "notes": "Free-form internet radio from Louisville, Kentucky, started by three alumni of the Kentucky School for the Blind and carrying blind and visually impaired DJs from the Kentucky and Indiana schools for the blind. Verified live 2026-09-18: HTTP 200, Content-Type audio/mpeg, Shoutcast, 128 kbps, icy-genre Various, icy-description \"Freeform internet Radio At It's Best\". The name here is the station's own site title; its icy-name is the bare domain, which a screen reader spells out. NOT the curated Radiostorm.com channels: those are one Topeka network whose four 104 channels and four Star104 channels all report an icy-url at radiostorm.com or star104.net, and this station's site names neither. The stream answers on http only; https does not connect. The community directory carried this stream as an import; this curated row replaces it.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "station site (theradiostorm.com) and its own Shoutcast mount, checked 2026-09-18",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "http://listen.theradiostorm.com:8242/stream",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "rock",
+      "id": "hkc-radio",
+      "name": "HKC Radio",
+      "notes": "Verified live 2026-09-18: HTTP 200, Content-Type audio/mpeg, Icecast 2.5.0, icy-genre Rock, icy-url hkcradio.com. The name here is the station's own icy-name. Its icy-description is empty, so there is no station blurb to quote. The community directory carried this stream with no format, so it read as \"web radio\"; this curated row replaces that import.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "station site (hkcradio.com) and its own Icecast mount, checked 2026-09-18",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://listen.hkcradio.com/hkc.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "various music",
+      "id": "dodge-radio",
+      "name": "Dodge Radio",
+      "notes": "A United Kingdom station; its own tagline is \"Dodge the world, enjoy the music!\". Verified live 2026-09-18: HTTP 200, Content-Type audio/mpeg, Icecast, 192 kbps, icy-genre Various. The name here is the station's own icy-name. Carried at the https address, which answers with the same mount and icy-name as the http one the directory lists. The station also runs a Christmas channel at /christmas on the same server, left off the dial: that mount reports no station name of its own.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "community radio directory entry, confirmed against the station's own site (dodgeradio.net) and mount, checked 2026-09-18",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://server.dodgeradio.net/stream",
+      "supported": true
     }
   ]
 }

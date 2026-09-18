@@ -2,7 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
+
 ### Changed
+
+- **HKC Radio tells you it plays rock.** It used to give no format at all.
+
 
 - **F1 on a course under Licenses and training says what it unlocks.** Also the sponsor level, or the level you can pay early.
 

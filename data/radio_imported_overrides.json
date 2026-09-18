@@ -3,7 +3,7 @@
   {
    "id": "rb-web-3e9560a2-b36e-4e44-b3bb-c4368835b2f4",
    "name": "TheRadioStorm.com",
-   "why": "read: the same station as rb-web-ab534ac4 (The Radio Storm), listed twice by the directory. Both addresses resolve to 198.37.123.243 port 8242 and answer with icy-name TheRadioStorm.com; checked 2026-09-18."
+   "why": "read: the same station as the curated the-radio-storm, listed twice by the directory. Both addresses resolve to 198.37.123.243 port 8242 and answer with icy-name TheRadioStorm.com; checked 2026-09-18. The curated row drops the other listing on its URL, but this one's hostname differs, so it needs saying here."
   }
  ],
  "notes": "Hand curation the importer cannot derive, applied by tools/import_radio_catalog.py on top of what it builds. Every entry carries a why, and each one is a judgement about a single station: a name the source mangled past any rule, a format its keyword tags do not give, or a station the directory lists twice. Rules that hold for many stations belong in the cleaners instead, not here. An id no longer in the build is an error, not a no-op: the tool says so, so a stale entry is noticed rather than silently ignored.",
@@ -29,11 +29,6 @@
    "format": "christmas",
    "name": "Christmas104 (Star104)",
    "why": "read: the stream identifies itself as 'Christmas104' at star104.net; the network is named in brackets, as with the other Star104 channels."
-  },
-  "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf": {
-   "format": "variety",
-   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. A free-form station in Louisville, Kentucky, started by three alumni of the Kentucky School for the Blind and carrying blind and visually impaired DJs from the Kentucky and Indiana schools; its own Shoutcast, genre Various. NOT the curated Radiostorm.com station: that one is a Topeka network whose four 104 channels and four Star104 channels all report an icy-url at radiostorm.com or star104.net, two domains serving one site. theradiostorm.com names neither. Read from both sites and all nine streams, 2026-09-18.",
-   "why": "read: its tags list an advocacy organisation and two genres; the stream's own genre is Various. The rename, and how it differs from the Radiostorm network, are in notes."
   },
   "rb-web-b4844481-c223-4fa0-9229-e0a19541c163": {
    "format": "country",
