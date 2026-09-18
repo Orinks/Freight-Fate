@@ -3995,8 +3995,16 @@ repository root; Markdown links are relative to this document.
       The advisory still stays quiet for a crawling truck; the clock no
       longer does.
 
-- [ ] **Corner speed from real geometry, not a clamp (researched 2026-08-21,
-      owner asked for real numbers).** Today `_turn_speed_mph` is the street's
+- [x] **Corner speed from real geometry, not a clamp (SHIPPED 2026-09-18;
+      researched 2026-08-21, owner asked for real numbers).** A turn's speed
+      is now `ff_core::data::corners`: its measured angle picks TxDOT's design
+      radius, and the radius is priced at the lateral a loaded combination
+      holds. The 15 mph floor is gone, so a truck the keeper is holding at
+      14-15 is over every corner and hears all of them. The angle itself is
+      baked by `tools/build_local_geometry.py`, which computed and discarded
+      it before; a route with no measured angle is priced as a square corner
+      and the bake reports that ratio on stdout and in the layer's coverage.
+      The old behaviour, for the record: `_turn_speed_mph` was the street's
       posted limit clamped between `FACILITY_GATE_LIMIT_MPH` (15) and
       `TURN_CORNER_MAX_MPH` (20). Both ends are assumed constants with no
       cited basis, and the 15 floor is why the assist stayed SILENT on the
@@ -4033,19 +4041,34 @@ repository root; Markdown links are relative to this document.
           target, and mostly passenger cars, so a loaded truck belongs at or
           under the bottom of that band.
 
-      THE OPEN DECISION, and why this is not landed yet: which radius
-      governs. `V = sqrt(15 R (e+f))` with e = 0 at an at-grade intersection
-      gives 22-24 mph off TxDOT's 125 ft edge curve for a 90 deg turn --
-      FASTER than today's clamp, and plainly wrong for a loaded semi. Off the
-      vehicle's own 41 ft path it gives about 10 mph at 0.15 g, which matches
-      CDL practice (5-10 mph through a corner) and the bottom of the TTI
-      band. The edge curve is what the swept path uses; the vehicle radius is
-      what the tractor tracks. Picking one, or the smaller of the two, is a
-      real modelling choice and wants deciding on purpose rather than by
-      whichever makes the number look right -- which AGENTS.md forbids.
+      THE OPEN DECISION IS DECIDED, and the answer was a third radius
+      neither option named. TxDOT Table 13-7 gives three designs per angle,
+      not one: the simple curve (125 ft at 90 deg, which prices at 22-24 mph
+      and is plainly wrong for a loaded semi), a tapered curve, and a
+      3-CENTERED COMPOUND whose MIDDLE radius is the tightest arc the corner
+      actually contains -- 440-65-440 at 90 deg, so 65 ft. That is the one
+      used. What settles it is the table's own 120 deg row, whose middle
+      radius is 45 ft: the WB-67's minimum design turning radius, i.e. the
+      design has the truck at full lock, which is what a 120 deg corner means.
+      The 41 ft centreline figure is that same full-lock number and belongs to
+      a parking-lot maneuver, not a corner taken at speed.
 
-      Whatever lands: the 15 mph FLOOR has to go, or the advisory stays
-      silent at exactly the speeds that need it.
+      The LATERAL is derived rather than picked, on a stated principle: a
+      truck driver holds the same margin below their vehicle's rollover
+      threshold that a car driver holds below theirs. TTI's own regression
+      (Table 23, `V85 = 14.87 + 0.06 CR` mph at a raised island) puts a car
+      at 18.8 mph through a 65 ft corner, which is 0.361 g against a passenger
+      car's 1.41 g static stability factor (NHTSA sales-weighted average) --
+      about a quarter of what would roll it. The same quarter of the truck's
+      0.35 g is 0.090 g, and the model is `V = sqrt(15 R f)` from there.
+
+      WHAT IT PRODUCES: 60 deg 11.6 mph, 75 deg 10.0, 90 deg 9.4, 105 deg 8.2,
+      120 deg 7.8, against a measured 18.8 for a car at 90 deg. The
+      calibration gate the brief set BEFORE the model existed -- a 90 deg
+      corner inside 5-12 mph, never above the measured car speed -- passes on
+      both counts, and passes without a constant having been moved: CDL
+      practice was never an input, so its agreement is a check rather than a
+      fit.
 
 - [x] **T plans the next sleep stop at any distance (FIXED 2026-08-22).**
       The planner's candidate filter was bounded by `_exit_window_mi()` -- the

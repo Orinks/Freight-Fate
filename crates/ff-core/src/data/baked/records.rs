@@ -267,6 +267,7 @@ pub struct BakedLeg {
     pub lanes: i64,
     pub local_cue: String,
     pub local_speed_mph: f64,
+    pub local_turn_deg: f64,
     pub divided: Option<bool>,
     pub meta_complete: Option<bool>,
     pub corridor_offset: u64,
@@ -294,7 +295,7 @@ mirror!(BakedFacilityEndpoint => FacilityEndpoint {
 });
 
 mirror!(BakedLocalGeometrySegment => LocalGeometrySegment {
-    road: String, miles: f64, cue: String, speed_mph: f64,
+    road: String, miles: f64, cue: String, speed_mph: f64, turn_deg: f64,
 });
 
 mirror!(BakedLocalApproach => LocalApproach {

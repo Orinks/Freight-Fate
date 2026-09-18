@@ -830,6 +830,8 @@ pub struct LocalGeometrySegment {
     pub miles: f64,
     pub cue: String,
     pub speed_mph: f64,
+    /// Turn angle at the junction onto this segment, degrees; 0.0 unmeasured.
+    pub turn_deg: f64,
 }
 
 impl Default for LocalGeometrySegment {
@@ -839,6 +841,7 @@ impl Default for LocalGeometrySegment {
             miles: 0.0,
             cue: String::new(),
             speed_mph: 25.0,
+            turn_deg: 0.0,
         }
     }
 }

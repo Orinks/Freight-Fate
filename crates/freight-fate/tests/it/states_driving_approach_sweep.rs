@@ -258,6 +258,8 @@ fn regrade_chain(d: &mut DrivingState, grade_pct: f64) {
                 &leg.local_cue,
                 leg.local_speed_mph,
             )
+            // Same streets, same cues, same corners -- only the hill is new.
+            .with_turn_deg(leg.local_turn_deg)
             .with_detail(detail)
         })
         .collect();

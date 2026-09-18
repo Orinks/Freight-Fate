@@ -371,6 +371,7 @@ impl World {
             built.lanes = baked.lanes;
             built.local_cue = baked.local_cue;
             built.local_speed_mph = baked.local_speed_mph;
+            built.local_turn_deg = baked.local_turn_deg;
             built.divided = baked.divided;
             built.truck_advisory = baked.truck_advisory;
             built.meta_complete = baked.meta_complete;

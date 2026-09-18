@@ -121,13 +121,13 @@ fn reversed_local_legs(city: &str, legs: &[std::sync::Arc<Leg>]) -> Vec<Leg> {
                 _ => format!("Turn onto {}.", src.highway),
             }
         };
-        out.push(Leg::local(
-            city,
-            src.miles,
-            &src.highway,
-            &cue,
-            src.local_speed_mph,
-        ));
+        out.push(
+            Leg::local(city, src.miles, &src.highway, &cue, src.local_speed_mph)
+                // The corner is the same corner driven the other way, so its
+                // angle is unchanged -- only the hand it falls on flips, and
+                // the cue above has already flipped that.
+                .with_turn_deg(src.local_turn_deg),
+        );
     }
     out
 }
@@ -342,6 +342,7 @@ impl World {
                             &spoken_road_text(&segment.cue),
                             segment.speed_mph,
                         )
+                        .with_turn_deg(segment.turn_deg)
                     })
                     .collect();
                 let cities = vec![city.clone(); legs.len() + 1];

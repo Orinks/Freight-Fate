@@ -18,6 +18,7 @@
 //!
 //! `transcript_cruise_support` documents what replaced each monkeypatch.
 
+use ff_core::data::corners::corner_speed_mph;
 use ff_core::sim::trip_models::{NPCVehicle, Zone};
 use ff_core::sim::vehicle::{HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM};
 use freight_fate::states::base::Key;
@@ -447,12 +448,13 @@ fn keeper_on_a_street_chain(
 
 #[test]
 fn test_speed_keeper_is_under_the_turn_speed_before_the_corner() {
-    // The tester report: the keeper held the street's 25 into a corner that
-    // advises 20, so the corner was taken over its speed and the safe
+    // The tester report: the keeper held the street's 25 into a corner it
+    // could not take, so the corner was taken over its speed and the safe
     // turnaround was charged. It now sheds the speed on the approach.
     let (mut harness, cue) = keeper_on_a_street_chain("Corner Keeper", 0.25);
     let advise = harness.read_drive(|d| d.turn_speed_mph(&cue));
-    assert_eq!(advise, 20.0); // a 25 mph street, capped at what a trailer turns
+    // An unmeasured corner on this fixture, so the square-corner price.
+    assert_eq!(advise, corner_speed_mph(None));
 
     let trace = roll_to(&mut harness, cue.at_mi, 60 * 300);
     // Under the number BEFORE the corner, not arriving at it on the spot: the
@@ -521,8 +523,10 @@ fn test_speed_keeper_makes_the_second_corner_of_a_short_block() {
         25.0,
         0.5
     ));
-    assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&first)), 20.0);
-    assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&second)), 15.0);
+    // Unmeasured corners on this fixture, so both price as square ones.
+    let square = corner_speed_mph(None);
+    assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&first)), square);
+    assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&second)), square);
     assert!(second.at_mi - first.at_mi < 0.15); // inside the first corner's tail
 
     roll_to(&mut harness, first.at_mi, 60 * 300);
@@ -535,13 +539,13 @@ fn test_speed_keeper_makes_the_second_corner_of_a_short_block() {
     // advise or the service way's posted 15 -- and both are the truth. The
     // number is the behavior under test.
     let ahead = harness.with_drive(|d, ctx| d.keeper_speed_ahead(ctx));
-    assert_eq!(ahead.map(|(mph, _)| mph), Some(15.0));
+    assert_eq!(ahead.map(|(mph, _)| mph), Some(square));
     let trace = roll_to(&mut harness, second.at_mi, 60 * 300);
     assert!(
-        trace.iter().any(|(_, mph)| *mph <= 15.0),
+        trace.iter().any(|(_, mph)| *mph <= square),
         "the keeper never reached the service road's corner speed"
     );
-    assert!(harness.read_drive(|d| d.truck().speed_mph()) <= 15.0);
+    assert!(harness.read_drive(|d| d.truck().speed_mph()) <= square);
 
     frame(&mut harness, DT);
     assert_eq!(harness.read_drive(|d| d.turn_miss_count), 0);

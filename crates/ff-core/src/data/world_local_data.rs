@@ -313,6 +313,11 @@ struct RawSegment {
     miles: f64,
     #[serde(default = "default_speed")]
     speed_mph: f64,
+    /// Signed heading change through the junction onto this segment, in
+    /// degrees, absolute value. Absent on every route baked before the turn
+    /// geometry landed, which `data::corners` prices as a square corner.
+    #[serde(default)]
+    turn_deg: f64,
 }
 
 fn default_speed() -> f64 {
@@ -399,6 +404,7 @@ pub fn load_local_geometries(path: &Path) -> Result<IndexMap<String, LocalGeomet
                 miles: round_py_n(raw_segment.miles, 2),
                 cue,
                 speed_mph: raw_segment.speed_mph,
+                turn_deg: raw_segment.turn_deg,
             });
         }
         let total_miles = round_py_n(entry.total_miles, 2);
@@ -681,6 +687,7 @@ pub fn load_facility_approaches(
                 miles: round_py_n(raw_segment.miles, 2),
                 cue,
                 speed_mph: raw_segment.speed_mph,
+                turn_deg: raw_segment.turn_deg,
             });
         }
         if entry.turn_level && segments.is_empty() {

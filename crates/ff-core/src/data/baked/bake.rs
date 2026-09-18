@@ -251,6 +251,7 @@ pub fn bake_bytes(data_dir: &Path) -> Result<(Vec<u8>, BakeReport), DataError> {
             lanes: leg.lanes,
             local_cue: leg.local_cue.clone(),
             local_speed_mph: leg.local_speed_mph,
+            local_turn_deg: leg.local_turn_deg,
             divided: leg.divided,
             meta_complete: leg.meta_complete,
             corridor_offset: offset,

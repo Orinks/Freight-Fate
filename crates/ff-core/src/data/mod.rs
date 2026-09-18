@@ -5,6 +5,7 @@ pub mod big_bucks;
 pub mod billboards;
 pub mod branded_plazas;
 pub mod buffs;
+pub mod corners;
 pub mod curves;
 pub mod data_resources;
 pub mod grades;

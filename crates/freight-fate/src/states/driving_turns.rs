@@ -14,12 +14,17 @@
 //!
 //! The turn speed is anchored to the road, never invented: the street the truck
 //! is turning ONTO carries a baked `local_speed_mph` (25 named, 15 unnamed
-//! service ways), and the corner itself is capped at `TURN_CORNER_MAX_MPH`. A
-//! 53-foot trailer off-tracks through a signalised city corner; CDL training
-//! teaches completing one at 10 to 15, entering at no more than 20. Twenty also
-//! sits honestly between the two speeds the game already posts -- a sweeping
-//! ramp at 45 and the gate crawl at 15 -- so the ladder a player learns by ear
-//! stays ordered.
+//! service ways), and the CORNER's own speed comes from its measured turn angle
+//! through `ff_core::data::corners` -- TxDOT's design radius for that angle,
+//! priced at the lateral a loaded combination actually holds. A square city
+//! corner lands a little over 9 mph, a sweeping 60-degree one near 12, a
+//! switchback under 8, and the advisory is the lower of that and the street.
+//!
+//! Until 2026-09-18 both ends were assumed constants instead -- the street
+//! limit clamped between 15 and 20 -- so every corner in the game got the same
+//! answer, and a truck already held at 14-15 by the speed keeper was under all
+//! of them and never heard an advisory at all. `docs/turn-geometry-brief.md`
+//! is the standing record of that directive and the sources behind the model.
 //!
 //! The miss is the fourth instance of the shipped loop-back pattern (blown ramp
 //! stop, missed destination exit, missed facility gate) and inherits the two
@@ -42,10 +47,9 @@
 //! direction, radius, or lane ordinal, and `docs/nav-phrasing-brief.md` forbids
 //! speaking a lane ordinal that was never harvested.
 
+use ff_core::data::corners::corner_speed_mph;
 use ff_core::data::curves::RouteCurve;
-use ff_core::sim::trip_models::{
-    NavigationCue, FACILITY_ACCESS_LIMIT_MPH, FACILITY_GATE_LIMIT_MPH,
-};
+use ff_core::sim::trip_models::{NavigationCue, FACILITY_ACCESS_LIMIT_MPH};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
@@ -61,7 +65,10 @@ pub const TURN_WARNING_REAL_S: f64 = 25.0;
 /// should arrive two miles of arterial before the corner exists.
 pub const TURN_WINDOW_MIN_MI: f64 = 0.25;
 pub const TURN_WINDOW_MAX_MI: f64 = 2.0;
-/// The corner ceiling for a tractor-trailer, whatever the street is posted at.
+/// The nominal corner speed the APPROACH WINDOW is sized against -- not a
+/// ceiling on the corner itself, which `data::corners` derives per angle.
+/// A crawling truck still gets a window sized as if it were doing twenty, so
+/// the call arrives with road left to brake in rather than on top of the turn.
 pub const TURN_CORNER_MAX_MPH: f64 = 20.0;
 /// Brake deadband: the truck may be a few mph over without failing, the same
 /// forgiveness the curve assist's hysteresis grants.
@@ -190,24 +197,29 @@ impl DrivingState {
     }
 
     /// `_turn_speed_mph(cue)`: the speed the corner has to be taken under --
-    /// the street's own posted limit, capped at what a trailer can turn,
-    /// floored at the gate crawl so the gate stays the slowest thing on the
-    /// route.
+    /// the lower of the street's own posted limit and what the corner's own
+    /// geometry allows a loaded combination.
+    ///
+    /// There is deliberately NO floor. The old one clamped every corner to at
+    /// least the 15 mph gate crawl, which made a truck already held at 14-15 by
+    /// the speed keeper faster than every corner on the route, so the advisory
+    /// never spoke and the owner drove past a turn in Spokane (2026-08-21).
+    /// A corner is now as slow as its own angle says it is, which for a square
+    /// city corner is a little over 9.
     pub fn turn_speed_mph(&self, cue: &NavigationCue) -> f64 {
         let index = self.turn_leg_index(cue);
-        let posted = self
-            .trip
-            .route
-            .legs
-            .get(index)
-            .map(|leg| leg.local_speed_mph)
-            .unwrap_or(0.0);
+        let leg = self.trip.route.legs.get(index);
+        let posted = leg.map(|leg| leg.local_speed_mph).unwrap_or(0.0);
         let street = if posted != 0.0 {
             posted
         } else {
             FACILITY_ACCESS_LIMIT_MPH
         };
-        FACILITY_GATE_LIMIT_MPH.max(street.min(TURN_CORNER_MAX_MPH))
+        // 0.0 is a corner nobody measured -- a legacy or estimated route --
+        // and `corners` prices that as a square one rather than inventing a
+        // shape for it.
+        let measured = leg.map(|leg| leg.local_turn_deg).filter(|deg| *deg > 0.0);
+        street.min(corner_speed_mph(measured))
     }
 
     /// `_turn_window_mi()`: how far out the corner is called, and how far back

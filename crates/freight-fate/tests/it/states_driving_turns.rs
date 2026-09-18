@@ -7,6 +7,7 @@
 
 use std::sync::Arc;
 
+use ff_core::data::corners::corner_speed_mph;
 use ff_core::data::curves::{curve_severity, leg_curves, route_curves, RouteCurve};
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{CorridorDetail, Landmark, Leg, Route, RouteCheckpoint};
@@ -84,20 +85,24 @@ fn street_chain(d: &mut DrivingState, time_scale: f64, short_block_mi: f64) {
             "Start on East Navarre Street.",
             25.0,
         ),
+        // A square city corner, and a sharper one into the service way, so the
+        // chain exercises two different baked angles rather than one.
         Leg::local(
             &city,
             short_block_mi,
             "North Michigan Street",
             "Turn left onto North Michigan Street.",
             25.0,
-        ),
+        )
+        .with_turn_deg(90.0),
         Leg::local(
             &city,
             0.5,
             "West Sample Street",
             "Turn right onto West Sample Street.",
             15.0,
-        ),
+        )
+        .with_turn_deg(105.0),
     ];
     let route = Route::from_legs(vec![city.clone(); 4], legs);
     let truck = d.trip.truck.clone();
@@ -176,7 +181,7 @@ fn test_approach_call_names_the_side_street_distance_and_speed() {
     assert_eq!(spoken.len(), 1);
     assert_eq!(
         spoken[0],
-        "Left turn onto North Michigan Street, a quarter mile. Advise 20 miles per hour."
+        "Left turn onto North Michigan Street, a quarter mile. Advise 9 miles per hour."
     );
     assert!(d.turn_grace_s > 0.0);
     d.update_turn_commitment(&mut app.ctx, 0.016);
@@ -217,7 +222,7 @@ fn test_the_approach_call_says_the_speed_keeper_is_taking_the_corner() {
     d.update_turn_commitment(&mut app.ctx, 0.016);
     assert_eq!(
         app.event_lines()[0],
-        "Left turn onto North Michigan Street, a quarter mile. Advise 20 miles per hour. \
+        "Left turn onto North Michigan Street, a quarter mile. Advise 9 miles per hour. \
          Speed keeper easing."
     );
 }
@@ -232,15 +237,15 @@ fn test_the_approach_call_stays_quiet_about_a_keeper_with_nothing_to_shed() {
     // Manual speed control leaves the call exactly as it was.
     mph(&mut d, 30.0);
     d.update_turn_commitment(&mut app.ctx, 0.016);
-    assert!(app.event_lines()[0].ends_with("Advise 20 miles per hour."));
+    assert!(app.event_lines()[0].ends_with("Advise 9 miles per hour."));
     // So does a keeper already under the corner speed: there is nothing
     // for it to shed, so there is nothing to say about it.
-    mph(&mut d, 18.0);
-    d.keeper_mph = Some(20.0);
+    mph(&mut d, 8.0);
+    d.keeper_mph = Some(8.0);
     let cue = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d
         .turn_approach_text(&app.ctx, &cue, 0.2)
-        .ends_with("Advise 20 miles per hour."));
+        .ends_with("Advise 9 miles per hour."));
 }
 
 #[test]
@@ -256,8 +261,8 @@ fn test_the_planner_sees_past_the_corner_it_is_already_easing_for() {
     street_chain(&mut d, 1.0, 0.08);
     let cues = d.turn_cues_in_play();
     let (first, second) = (cues[0].clone(), cues[1].clone());
-    assert_eq!(d.turn_speed_mph(&first), 20.0);
-    assert_eq!(d.turn_speed_mph(&second), 15.0);
+    assert_eq!(d.turn_speed_mph(&first), corner_speed_mph(Some(90.0)));
+    assert_eq!(d.turn_speed_mph(&second), corner_speed_mph(Some(105.0)));
     assert!(second.at_mi - first.at_mi < 0.15); // inside the first corner's tail
 
     // Easing for the first corner, well before the second one is close.
@@ -265,7 +270,7 @@ fn test_the_planner_sees_past_the_corner_it_is_already_easing_for() {
     mph(&mut d, 25.0);
     assert_eq!(
         d.keeper_speed_ahead(&mut app.ctx),
-        Some((20.0, "turn".to_string()))
+        Some((corner_speed_mph(Some(90.0)), "turn".to_string()))
     );
 
     // One block on, with the second corner's own window open, the planner
@@ -274,7 +279,7 @@ fn test_the_planner_sees_past_the_corner_it_is_already_easing_for() {
     mph(&mut d, 19.0);
     assert_eq!(
         d.keeper_speed_ahead(&mut app.ctx),
-        Some((15.0, "turn".to_string()))
+        Some((corner_speed_mph(Some(105.0)), "turn".to_string()))
     );
 }
 
@@ -330,7 +335,7 @@ fn test_the_approach_decompresses_the_clock() {
 // -- the turn speed ----------------------------------------------------------
 
 #[test]
-fn test_turn_speed_anchors_to_the_street_and_caps_at_the_trailer_limit() {
+fn test_turn_speed_comes_from_the_corners_own_angle() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     a_street_chain(&mut d);
@@ -342,10 +347,36 @@ fn test_turn_speed_anchors_to_the_street_and_caps_at_the_trailer_limit() {
         .cloned()
         .collect();
     assert_eq!(cues.len(), 2);
-    // A 25 mph street is still only turnable at the trailer cap.
-    assert_eq!(d.turn_speed_mph(&cues[0]), TURN_CORNER_MAX_MPH);
-    // A 15 mph service way keeps its own, slower, posted limit.
-    assert_eq!(d.turn_speed_mph(&cues[1]), 15.0);
+    // The square corner and the sharper one get DIFFERENT speeds -- the whole
+    // point of the change. Both come from the angle, not the 25 mph street.
+    let square = d.turn_speed_mph(&cues[0]);
+    let sharp = d.turn_speed_mph(&cues[1]);
+    assert_eq!(square, corner_speed_mph(Some(90.0)));
+    assert_eq!(sharp, corner_speed_mph(Some(105.0)));
+    assert!(sharp < square, "{sharp} should be under {square}");
+    // And neither is the old flat clamp any more.
+    assert!(square < TURN_CORNER_MAX_MPH);
+}
+
+#[test]
+fn test_an_unmeasured_corner_is_priced_as_a_square_one() {
+    // Most of the map's approaches are estimated and carry no angle. They must
+    // still get a corner speed, and it must be the square-corner one rather
+    // than the street's posted limit.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    for leg in d.trip.route.legs.iter_mut() {
+        std::sync::Arc::make_mut(leg).local_turn_deg = 0.0;
+    }
+    let cue = d
+        .trip
+        .navigation_cues
+        .iter()
+        .find(|cue| cue.key.starts_with("local:turn:"))
+        .cloned()
+        .expect("a turn cue");
+    assert_eq!(d.turn_speed_mph(&cue), corner_speed_mph(None));
 }
 
 #[test]
@@ -354,7 +385,9 @@ fn test_under_the_turn_speed_passes_cleanly() {
     let mut d = a_drive(&mut app);
     a_street_chain(&mut d);
     let minutes = d.trip.game_minutes;
-    at_turn(&mut d, &mut app, 0.6, 18.0);
+    // Under the square corner's own advised speed, which is a little over 9
+    // now that the corner is priced from its angle rather than clamped at 20.
+    at_turn(&mut d, &mut app, 0.6, 8.0);
     assert_eq!(d.turn_miss_count, 0);
     assert_eq!(d.trip.game_minutes, minutes);
     assert_eq!(d.trip.position_mi, 0.6);
@@ -468,7 +501,7 @@ fn test_the_loop_back_resets_every_say_once_latch() {
     assert!(!d.trip.announced_navigation.contains("local:turn:1:near"));
     assert!(!d.trip.controlled_turn);
     // And the re-approach really does speak and pass.
-    at_turn(&mut d, &mut app, 0.6, 18.0);
+    at_turn(&mut d, &mut app, 0.6, 8.0);
     assert_eq!(d.turn_miss_count, 1);
 }
 
@@ -501,7 +534,7 @@ fn test_a_repeat_miss_appends_help_to_an_identical_core_sentence() {
         .find(|line| line.contains("Brake to"))
         .expect("the repeat miss appends help");
     assert!(second.starts_with("You missed the turn onto West Sample Street."));
-    assert!(second.contains("Brake to 15 miles per hour"));
+    assert!(second.contains("Brake to 8 miles per hour"));
     assert!(second.contains("Down arrow")); // the brake key this driver actually has
 }
 
@@ -672,7 +705,7 @@ fn test_a_corner_you_are_already_slow_enough_for_still_buys_real_seconds() {
     d.trip.position_mi = 0.4;
     // Under the corner's own advised speed, the way the keeper holds a
     // truck through a facility zone.
-    mph(&mut d, 10.0);
+    mph(&mut d, 8.0);
     let cue = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.trip.truck.speed_mph() <= d.turn_speed_mph(&cue));
     assert!(d.trip.effective_time_scale() > 1.0);

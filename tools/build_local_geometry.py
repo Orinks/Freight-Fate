@@ -684,12 +684,15 @@ def collapse_segments(
     for i, segment in enumerate(segments):
         miles = round(max(segment["miles"], 0.05), 2)
         road = segment["road"]
+        # 0.0 is "no corner here": the first segment has no junction onto it,
+        # and a route with no coordinates never measured one.
+        turn_deg = 0.0
         if i == 0:
             cue = f"Start on {road}."
         else:
             direction = ""
             if coords is not None:
-                direction = turn_direction(
+                direction, turn_deg = turn_geometry(
                     coords,
                     boundary=segment["start_edge"],
                     prev_start=segments[i - 1]["start_edge"],
@@ -707,6 +710,7 @@ def collapse_segments(
                 "miles": miles,
                 "cue": cue,
                 "speed_mph": _resolve_speed(segment["speed_miles"], road),
+                "turn_deg": round(turn_deg, 1),
             }
         )
     if len(out) > MAX_SPOKEN_SEGMENTS:
@@ -761,11 +765,14 @@ def _merge_same_street(
         return is_named(a["road"]) and _street_name(a["road"]) == _street_name(b["road"])
 
     def straight_into(i: int) -> bool:
-        return coords is not None and not turn_direction(
-            coords,
-            boundary=segments[i]["start_edge"],
-            prev_start=segments[i - 1]["start_edge"],
-            next_end=segments[i]["end_edge"],
+        return (
+            coords is not None
+            and not turn_geometry(
+                coords,
+                boundary=segments[i]["start_edge"],
+                prev_start=segments[i - 1]["start_edge"],
+                next_end=segments[i]["end_edge"],
+            )[0]
         )
 
     segments = list(segments)
@@ -803,31 +810,38 @@ TURN_MIN_DEG = 28.0
 TURN_LOOKOUT_MI = 0.04
 
 
-def turn_direction(
+def turn_geometry(
     coords: list[tuple[float, float]],
     *,
     boundary: int,
     prev_start: int,
     next_end: int,
-) -> str:
-    """Signed heading change at a road-name boundary: "left", "right", or ""
-    for near-straight. ``boundary`` indexes the shared junction node; the
+) -> tuple[str, float]:
+    """Signed heading change at a road-name boundary, as ``(direction,
+    degrees)``: "left", "right", or "" for near-straight, and the ANGLE the
+    truck turns through. ``boundary`` indexes the shared junction node; the
     incoming and outgoing bearings are sampled ``TURN_LOOKOUT_MI`` along each
     road, clamped to that road's own extent so a short next street cannot
-    borrow the maneuver after it."""
+    borrow the maneuver after it.
+
+    The magnitude is READ: it is the heading change between two bearings taken
+    from OSM way geometry, with no model in between. It used to be computed
+    here and thrown away, so every corner in the game was priced at the same
+    assumed clamp (owner directive 2026-08-21, docs/turn-geometry-brief.md).
+    A near-straight boundary reports 0.0 -- there is no corner to price."""
     junction = coords[boundary]
     before = _point_along(coords, boundary, -1, stop=prev_start)
     after = _point_along(coords, boundary, +1, stop=next_end)
     if before == junction or after == junction:
-        return ""
+        return "", 0.0
     inbound = _bearing_deg(*before, *junction)
     outbound = _bearing_deg(*junction, *after)
     delta = ((outbound - inbound + 180.0) % 360.0) - 180.0
     if delta >= TURN_MIN_DEG:
-        return "right"
+        return "right", abs(delta)
     if delta <= -TURN_MIN_DEG:
-        return "left"
-    return ""
+        return "left", abs(delta)
+    return "", 0.0
 
 
 def _point_along(
@@ -959,11 +973,28 @@ def coverage_summary(geometries: dict[str, dict[str, Any]]) -> dict[str, Any]:
             item["fallback"] += 1
         if record["estimated"]:
             item["estimated"] += 1
+    # Corner-angle provenance. A corner whose angle was READ off OSM geometry
+    # is priced from its own shape; one without is priced as a square corner,
+    # which is an ASSUMPTION. The ratio is reported here and on stdout so a bake
+    # that mostly assumed says so, per AGENTS.md.
+    corners = 0
+    measured = 0
+    for record in geometries.values():
+        for segment in record.get("segments", []):
+            if not segment["cue"].lower().startswith("turn "):
+                continue
+            corners += 1
+            if segment.get("turn_deg", 0.0) > 0.0:
+                measured += 1
     return {
         "targets": len(geometries),
         "turn_level": sum(1 for record in geometries.values() if record["turn_level"]),
         "fallback": sum(1 for record in geometries.values() if record["fallback"]),
         "estimated": sum(1 for record in geometries.values() if record["estimated"]),
+        "corners": corners,
+        "corners_angle_read": measured,
+        "corners_angle_assumed": corners - measured,
+        "corners_angle_read_ratio": round(measured / corners, 4) if corners else 0.0,
         "by_type": by_type,
     }
 
@@ -1130,6 +1161,17 @@ def main() -> int:
     only_states = set(args.state) if args.state else None
     payload = build_local_geometry(args.cache_dir, only_states=only_states)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
+    coverage = payload["coverage"]
+    corners = coverage.get("corners", 0)
+    if corners:
+        ratio = coverage["corners_angle_read_ratio"]
+        print(
+            f"corner angles: {coverage['corners_angle_read']} of {corners} READ "
+            f"from OSM geometry ({ratio:.1%}); the rest are priced as square "
+            f"corners, which is an ASSUMPTION."
+        )
+        if ratio < 0.5:
+            print("WARNING: most corner angles in this bake are assumed, not read.")
     if args.write:
         args.output.write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"

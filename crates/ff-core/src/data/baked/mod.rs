@@ -93,7 +93,10 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 ///
 /// 2: a stop carries the interchange that serves it (`exit_ref`,
 /// `interchange_mi`).
-pub const FORMAT_VERSION: u32 = 2;
+///
+/// 3: a local segment carries the measured turn angle at the junction onto it
+/// (`local_turn_deg`), which `data::corners` prices the corner from.
+pub const FORMAT_VERSION: u32 = 3;
 
 const HEADER_LEN: usize = 32;
 

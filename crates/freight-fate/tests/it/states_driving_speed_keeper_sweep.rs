@@ -37,6 +37,7 @@
 //!   come from the zone bench below, which is where the defect was: see
 //!   `keeper_holds_the_posted_number_up_a_grade`.
 
+use ff_core::data::corners::corner_speed_mph;
 use ff_core::data::curves::RouteCurve;
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{Leg, Route};
@@ -49,7 +50,6 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{KEEPER_DROOP_MPH, KEEPER_MAX_THROTTLE};
-use freight_fate::states::driving_turns::TURN_CORNER_MAX_MPH;
 
 use crate::transcript_cruise_support::{
     bench_road_segments, frame, hold, quiet, release_keys, start_drive, BENCH_MILES, DT,
@@ -468,11 +468,17 @@ fn take_the_corner(street_mph: f64) -> CornerRun {
 fn the_keeper_eases_for_a_corner_only_when_the_corner_asks_for_less() {
     // (street posted, what a trailer may take the corner at, may the keeper
     //  ease for it)
+    // The corner's own geometry sets the advise speed now, so every street
+    // here gets the same number -- these fixtures carry no measured angle, so
+    // they price as square corners. What the street still decides is whether
+    // there is anything to EASE: a street already at or under the corner's
+    // speed has nothing to shed.
+    let square = corner_speed_mph(None);
     let cases = [
-        (35.0f64, TURN_CORNER_MAX_MPH, true),
-        (25.0, TURN_CORNER_MAX_MPH, true),
-        (20.0, 20.0, false),
-        (15.0, 15.0, false),
+        (35.0f64, square, true),
+        (25.0, square, true),
+        (20.0, square, true),
+        (15.0, square, true),
     ];
     for (street_mph, advise_mph, may_ease) in cases {
         let run = take_the_corner(street_mph);

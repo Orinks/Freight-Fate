@@ -956,8 +956,18 @@ fn test_pickup_facility_waits_for_full_stop() {
     // speed above the gate's stop threshold exercises the same branch.
     arrive_at_pickup(&mut app, 6.0);
     assert!(is::<DrivingState>(&app));
-    let last = app.event_lines().last().cloned().unwrap_or_default();
-    assert!(last.contains("Pickup ahead"), "{last}");
+    // Found by its own text rather than taken as the last line: 6 m/s is over
+    // the corner's advise speed now that corners are priced from their angle,
+    // so the corner call legitimately lands after this one. What this case is
+    // about is what the pickup cue SAYS.
+    let lines = app.event_lines();
+    let last = lines
+        .iter()
+        .rev()
+        .find(|line| line.contains("Pickup ahead"))
+        .cloned()
+        .unwrap_or_default();
+    assert!(last.contains("Pickup ahead"), "{lines:?}");
     assert!(last.to_lowercase().contains("stop at the gate"), "{last}");
 
     // Inside the creep band (DELIVERY_PARK_MPH) but not stopped. The creep

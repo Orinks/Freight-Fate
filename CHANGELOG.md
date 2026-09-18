@@ -10,6 +10,10 @@
 
 ### Changed
 
+- **A turn now takes the speed its own shape allows.** A sweeping turn lets you carry more speed than a tight one into a yard.
+
+- **A turn is called out even when you are already crawling.** Turns used to go unannounced while the speed keeper held you at fifteen.
+
 - **HKC Radio tells you it plays rock.** It used to give no format at all.
 
 

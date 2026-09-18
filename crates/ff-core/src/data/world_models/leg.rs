@@ -125,6 +125,13 @@ pub struct Leg {
     /// zone the street instead of a whole-route blanket. Empty on highways.
     pub local_cue: String,
     pub local_speed_mph: f64,
+    /// The turn angle at the junction ONTO this segment, in degrees, baked
+    /// from the signed heading change read out of OSM geometry. 0.0 means the
+    /// corner's angle was never measured -- a legacy or estimated route -- and
+    /// `data::corners` prices those as a square corner and says so. The
+    /// magnitude survives a route reversal unchanged: an inbound 90-degree
+    /// right is an outbound 90-degree left at the same corner.
+    pub local_turn_deg: f64,
     /// Whether the leg runs on a divided carriageway, baked from real OSM
     /// oneway-pair geometry (Track D2). None where the bake was mixed or
     /// thin -- honest absence; the runtime infers from road class instead.
@@ -163,6 +170,7 @@ impl Leg {
             lanes: 0,
             local_cue: String::new(),
             local_speed_mph: 0.0,
+            local_turn_deg: 0.0,
             divided: None,
             meta_complete: None,
             corridor: OnceCell::new(),
@@ -182,6 +190,16 @@ impl Leg {
         leg.local_cue = local_cue.to_string();
         leg.local_speed_mph = local_speed_mph;
         leg
+    }
+
+    /// The measured turn angle at the junction onto this local segment.
+    ///
+    /// Separate from [`Leg::local`] rather than a sixth positional argument:
+    /// most callers (and every legacy route) have no angle to give, and a
+    /// corner with no measurement is a real, expected state.
+    pub fn with_turn_deg(mut self, degrees: f64) -> Self {
+        self.local_turn_deg = degrees;
+        self
     }
 
     /// A leg whose corridor detail is parsed from `source` on first read.
@@ -390,6 +408,7 @@ impl Clone for Leg {
             lanes: self.lanes,
             local_cue: self.local_cue.clone(),
             local_speed_mph: self.local_speed_mph,
+            local_turn_deg: self.local_turn_deg,
             divided: self.divided,
             meta_complete: self.meta_complete,
             corridor,
