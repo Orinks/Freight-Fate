@@ -80,6 +80,10 @@ pub struct Credential {
     /// Booking requires a clean recent driving record (no recent serious
     /// violations, no live suspension) -- the 49 CFR 380.203 shape.
     pub needs_clean_record: bool,
+    /// What holding it opens, as the freight board names it ("fresh food
+    /// and refrigerated goods"); spoken by F1 on the course screen so a
+    /// driver knows what a course buys before booking it.
+    pub unlocks: &'static str,
     /// Spoken when the credential lands.
     pub announcement: &'static str,
 }
@@ -112,6 +116,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "a manual-spec pay differential on drives made on a manual gearbox",
         announcement: "You retook the skills test in a manual truck, and the automatic-only \
              restriction is off your license. Drives made on a manual gearbox now \
              pay a small manual-spec differential in the settlement.",
@@ -129,6 +134,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "fresh food and refrigerated goods",
         announcement: "You earned the refrigerated certificate. \
              Food and refrigerated cargo jobs are now available.",
     },
@@ -144,6 +150,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "steel products, and lumber and paper products",
         announcement: "You earned the flatbed securement certificate. Steel and lumber \
              jobs are now available.",
     },
@@ -159,6 +166,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "heavy machinery",
         announcement: "You earned the heavy-haul certificate. Heavy machinery jobs are now \
              available.",
     },
@@ -174,6 +182,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "electronics and packaged industrial chemicals",
         announcement: "You earned the high-value certificate. Electronics jobs are now \
              available.",
     },
@@ -190,6 +199,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "twin-trailer parcel freight",
         announcement: "You passed the written test for the doubles endorsement, the letter \
              T on a real license. Twin-trailer parcel freight is now available. \
              Two short trailers, legal nationwide, and the rear one wanders.",
@@ -206,6 +216,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
+        unlocks: "liquid food products from level 21, and bulk fuel once the hazmat endorsement joins it",
         announcement: "You earned the tank vehicle endorsement, the letter N on a real \
              license. Liquid bulk opens from here, bulk fuel once the hazmat \
              endorsement joins it, and liquid food at level 21.",
@@ -225,6 +236,7 @@ pub const CREDENTIALS: &[Credential] = &[
         // wait real without stalling an act-two career.
         wait_days: 30.0,
         needs_clean_record: false,
+        unlocks: "placarded hazardous materials, and bulk fuel once the tank vehicle endorsement joins it",
         announcement: "Your hazmat background check cleared, and the hazmat endorsement, \
              the letter H, is on your license. Placarded chemical freight is now \
              available. Placards mean every scale is watching.",
@@ -242,6 +254,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 20.0,
         needs_clean_record: false,
+        unlocks: "port containers",
         announcement: "Your TWIC enrollment cleared. Container freight out of the port \
              terminals is now available.",
     },
@@ -257,6 +270,7 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &["doubles_triples"],
         wait_days: 0.0,
         needs_clean_record: true,
+        unlocks: "turnpike doubles freight, between the states whose networks allow them",
         announcement: "You finished LCV training and hold the longer-combination-vehicle \
              certificate. Turnpike doubles are now available, only between the \
              states whose networks allow them.",
@@ -340,6 +354,51 @@ pub fn course_eligibility(
     (reasons.is_empty(), reasons)
 }
 
+/// F1 on a course row: what the credential opens, and how it is gained.
+///
+/// A sponsored certificate names both roads to it: the level the carrier
+/// pays at, and the one level earlier a driver may pay for it (owner,
+/// 2026-09-18: the row's cost and level said nothing about what the
+/// course was FOR). A course-only credential names its level, cost,
+/// prerequisites and any background-check wait.
+pub fn course_help_text(cred: &Credential) -> String {
+    let mut text = format!("Unlocks {}. ", cred.unlocks);
+    match cred.grant_level {
+        Some(level) => text.push_str(&format!(
+            "The carrier sponsors it free at level {level}, or you can pay {} dollars for it \
+             yourself from level {}.",
+            fmt_grouped(cred.course_cost, 0),
+            cred.min_level
+        )),
+        None => text.push_str(&format!(
+            "Course only: {} dollars from level {}.",
+            fmt_grouped(cred.course_cost, 0),
+            cred.min_level
+        )),
+    }
+    let needs: Vec<String> = cred
+        .prereqs
+        .iter()
+        .filter_map(|key| credential(key))
+        .map(|c| format!("the {}", c.gate_label))
+        .chain(
+            cred.needs_clean_record
+                .then(|| "a clean recent record".to_string()),
+        )
+        .collect();
+    if !needs.is_empty() {
+        text.push_str(&format!(" Needs {} first.", needs.join(" and ")));
+    }
+    if cred.wait_days > 0.0 {
+        text.push_str(&format!(
+            " The background check takes about {} days and clears while you drive.",
+            cred.wait_days as i64
+        ));
+    }
+    text.push_str(" Enter books it, or says why you do not qualify.");
+    text
+}
+
 /// The one-line menu row for a course: cost, and what makes it activate.
 pub fn course_offer_text(cred: &Credential) -> String {
     let mut text = format!("{} dollars", fmt_grouped(cred.course_cost, 0));
@@ -375,6 +434,43 @@ mod tests {
             }
             assert!(!cred.announcement.is_empty());
             assert!(!cred.gate_label.is_empty());
+        }
+    }
+
+    #[test]
+    fn the_help_line_says_what_a_course_unlocks_and_both_roads_to_it() {
+        let help = course_help_text(credential("refrigerated").unwrap());
+        assert_eq!(
+            help,
+            "Unlocks fresh food and refrigerated goods. The carrier sponsors it free at \
+             level 2, or you can pay 900 dollars for it yourself from level 1. Enter books \
+             it, or says why you do not qualify."
+        );
+        let help = course_help_text(credential("hazmat").unwrap());
+        assert!(
+            help.starts_with("Unlocks placarded hazardous materials"),
+            "{help}"
+        );
+        assert!(
+            help.contains("Course only: 185 dollars from level 10."),
+            "{help}"
+        );
+        assert!(
+            help.contains("background check takes about 30 days"),
+            "{help}"
+        );
+        assert!(!help.contains("sponsors"), "{help}");
+        let help = course_help_text(credential("lcv").unwrap());
+        assert!(
+            help.contains("Needs the doubles endorsement and a clean recent record first."),
+            "{help}"
+        );
+        for cred in CREDENTIALS {
+            assert!(
+                !cred.unlocks.is_empty(),
+                "{} says nothing it unlocks",
+                cred.key
+            );
         }
     }
 

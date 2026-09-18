@@ -548,6 +548,12 @@ its status or release decision.
       annotate pass's one-mile corridor bound, not the 20-mile search
       radius chain stops are offered from. The same run confirmed parking
       on 51 stops added or renamed since the July annotate pass.
+- [x] F1 on a course row under Licenses and training says what the
+      credential opens, as the board names the freight, and both roads to
+      it: the carrier's sponsor level or the one level earlier it can be
+      paid for, or course only with its level, cost, prerequisites and
+      background-check wait. Earned and pending rows say it too. The row
+      used to give cost and level and nothing about what the course was for.
 - [ ] 196 legs still have no sleep stop a loaded truck can use and no
       inventory record on the road. US-12 Willmar to Minneapolis is one:
       its only stop is a Kwik Trip typed bobtail-only. Needs another
