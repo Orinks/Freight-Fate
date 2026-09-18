@@ -313,7 +313,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |
 | Career stats | Review level, reputation, deliveries, career totals, the endorsements you hold, your dispatch trust, your safety record and CDL status, and any balance you owe. Its last row, Citations and violations, opens the list newest first: what each was, why, what it cost, when, and where. Citations from before this build are counted but carry no reason. |
-| Endorsement courses | Pay for refrigerated, heavy-haul, high-value, or tank training early; the carrier sponsors each course for free at its unlock level. |
+| Licenses and training | Book any credential course, from manual transmission training to the LCV certificate. F1 on a row says what the credential unlocks and how you get it: the level the carrier sponsors it at, or the level you can pay for it early. The table under Licenses and training below lists them all. |
 | Truck status | Review truck model, fuel, tank size, damage and its band, tire wear, and road grime. |
 | Time and weather | A screen of lines: the clock, the date and season, the career day, and the weather in the city, with the live reading's age when there is one. |
 | Logbook | Review your Record of Duty Status: what you are doing now, your hours limits, today's totals, and the recent entries. |
@@ -329,6 +329,32 @@ garage can do partial fuel or repair work when you cannot afford a full tank or
 full repair. Owner-operators also start with a dry van trailer program and can
 add reefer, flatbed, or bulk programs. Company drivers do not lease trailers;
 the carrier supplies the right trailer for approved loads.
+
+### Licenses and training
+
+Every license add-on sits in one list at the terminal, in the order the career
+reaches them. Certificates are carrier training: the carrier sponsors each one
+free at its listed level, and you can pay for it yourself one level earlier.
+Endorsements and cards are only ever earned by course, and never before their
+level. A course takes game time at the school, and hazmat and the port card
+then wait on a background check that clears while you drive. F1 on any row
+reads the same facts for that credential.
+
+| Credential | Unlocks | How you get it |
+| --- | --- | --- |
+| Manual transmission training | A manual-spec pay differential on drives made on a manual gearbox. | Course only, 220 dollars from level 1. |
+| Refrigerated certificate | Fresh food and refrigerated goods. | Free from the carrier at level 2, or 900 dollars from level 1. |
+| Flatbed securement certificate | Steel products, and lumber and paper products. | Free from the carrier at level 2, or 450 dollars from level 1. |
+| Heavy-haul certificate | Heavy machinery. | Free from the carrier at level 3, or 1,600 dollars from level 2. |
+| High-value certificate | Electronics and packaged industrial chemicals. | Free from the carrier at level 4, or 1,300 dollars from level 3. |
+| Doubles endorsement | Twin-trailer parcel freight. | Course only, 60 dollars from level 8. |
+| Hazmat endorsement | Placarded hazardous materials, and bulk fuel once the tank vehicle endorsement joins it. | Course only, 185 dollars from level 10, then a background check of about 30 days. |
+| Tank vehicle endorsement | Liquid food products from level 21, and bulk fuel once the hazmat endorsement joins it. | Free from the carrier at level 16, or 2,400 dollars from level 15. |
+| TWIC port card | Port containers. | Course only, 125 dollars from level 18, then a background check of about 20 days. |
+| LCV certificate | Turnpike doubles freight, between the states whose networks allow them. | Course only, 2,000 dollars from level 20. Needs the doubles endorsement and a clean recent record. |
+
+Holding both the tank vehicle and hazmat endorsements is the X combination,
+and bulk fuel opens the day the second one lands.
 
 ## Business status
 
