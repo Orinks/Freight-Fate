@@ -26,6 +26,12 @@ from freight_fate.data.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
+from yard_roads import (  # noqa: E402
+    bans_trucks,
+    is_blocking_barrier,
+    is_yard_road,
+    yard_road_path,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
@@ -76,6 +82,16 @@ SERVICE_CLASSES = frozenset({"service", "living_street"})
 # default used to compare against one literal string, so adding a second
 # generic label would have silently moved 1,179 segments from 15 to 25 mph.
 GENERIC_ROADS = frozenset({UNNAMED_SERVICE, UNNAMED_STREET, "unnamed public road"})
+# A `*_link` way with no name of its own: the slip lane or short connector
+# inside a junction. It is never spoken. Calling it "a side street" would be
+# untrue and would announce a turn that is only the middle of one, so
+# `collapse_segments` folds its length into the street it leaves and this
+# label never reaches a segment.
+JUNCTION_LINK = "<junction link>"
+LINK_CLASSES = frozenset({"trunk_link", "primary_link", "secondary_link", "tertiary_link"})
+# The most streets one chain speaks. A longer path keeps the streets at the
+# DESTINATION end (see `collapse_segments`).
+MAX_SPOKEN_SEGMENTS = 8
 
 
 def is_named(road: str) -> bool:
@@ -83,10 +99,28 @@ def is_named(road: str) -> bool:
     return bool(road) and road not in GENERIC_ROADS
 
 
+# Surface roads a truck can be routed over. Motorways and their ramps stay
+# out on purpose: a local chain is the streets between the yard and the
+# highway, and the highway itself is the leg.
+#
+# `trunk` and the `*_link` connectors were missing until 2026-09-17, and that
+# was the second-largest cause of "no connected public-road path": in
+# California, New York and Texas 22 of 88 such failures were a town cut in two
+# because its main street IS the US highway and OSM classes that at-grade road
+# `trunk` (Main Street in Susanville, Redwood Highway in Crescent City), or
+# because the only join between two carriageways is a `primary_link`. The
+# endpoint then snapped to a fragment the start could not reach. A trunk road
+# signed `motorroad=yes` is a motorway in all but class and stays out with
+# them (see `road_label`).
 ROUTABLE_HIGHWAYS = {
+    "trunk",
+    "trunk_link",
     "primary",
+    "primary_link",
     "secondary",
+    "secondary_link",
     "tertiary",
+    "tertiary_link",
     "unclassified",
     "residential",
     "service",
@@ -130,15 +164,35 @@ class RouteGraph:
         default_factory=lambda: defaultdict(list)
     )
 
+    # The four below are only filled when a caller asks for yard roads (see
+    # `yard_roads.py`). Private ways live apart from `nodes`/`edges` so the
+    # public search and the public snap cannot see them.
+    yard_nodes: dict[int, tuple[float, float]] = field(default_factory=dict)
+    yard_edges: dict[int, list[tuple[int, float]]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+    # Public edges signed against trucks, both directions; only the yard-road
+    # fallback honours them (the public search predates the rule).
+    no_truck: set[tuple[int, int]] = field(default_factory=set)
+    # Blocking barrier nodes (gates, bollards), shared by every graph of a run.
+    barriers: set[int] = field(default_factory=set)
+
     def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
         self.edges[a].append((b, miles, road, mph))
         self.edges[b].append((a, miles, road, mph))
+
+    def add_yard_edge(self, a: int, b: int, miles: float) -> None:
+        self.yard_edges[a].append((b, miles))
+        self.yard_edges[b].append((a, miles))
 
 
 @dataclass(frozen=True, slots=True)
 class GeometryPath:
     miles: float
     segments: tuple[dict[str, Any], ...]
+    # Miles of the facility's own private road at the target end, already
+    # inside `miles` and spoken as `UNNAMED_SERVICE`. Zero for a public path.
+    yard_miles: float = 0.0
 
 
 def build_local_geometry(cache_dir: Path, only_states: set[str] | None = None) -> dict[str, Any]:
@@ -289,23 +343,75 @@ def collect_targets() -> list[Target]:
     return targets
 
 
-def route_state_targets(osm_path: Path, targets: list[Target]) -> dict[str, GeometryPath]:
-    graphs = {target.target_id: RouteGraph() for target in targets}
+def read_object_tags(osm_path: Path, refs: set[str]) -> dict[str, dict[str, str]]:
+    """The tags of the named OSM objects (``node/123``, ``way/456``), READ
+    from the extract. A ref the extract no longer holds is simply absent."""
+    wanted: dict[str, list[int]] = {"node": [], "way": []}
+    for ref in refs:
+        kind, _, number = ref.partition("/")
+        if kind in wanted and number.isdigit():
+            wanted[kind].append(int(number))
+    if not wanted["node"] and not wanted["way"]:
+        return {}
+    bits = osmium.osm.osm_entity_bits
+    processor = (
+        osmium.FileProcessor(str(osm_path), entities=bits.NODE | bits.WAY)
+        .with_filter(osmium.filter.EmptyTagFilter())
+        # An id filter only judges the entity kind it is enabled for, and an
+        # empty list would pass everything, hence the impossible id 0.
+        .with_filter(osmium.filter.IdFilter(sorted(wanted["node"]) or [0]).enable_for(bits.NODE))
+        .with_filter(osmium.filter.IdFilter(sorted(wanted["way"]) or [0]).enable_for(bits.WAY))
+    )
+    found: dict[str, dict[str, str]] = {}
+    for obj in processor:
+        kind = "way" if hasattr(obj, "nodes") else "node"
+        found[f"{kind}/{obj.id}"] = {str(tag.k): str(tag.v) for tag in obj.tags}
+    return found
+
+
+def route_state_targets(
+    osm_path: Path,
+    targets: list[Target],
+    failures: dict[str, str] | None = None,
+    *,
+    yard_roads: bool = False,
+) -> dict[str, GeometryPath]:
+    """Route every target over its own clipped graph.
+
+    ``failures``, when given, receives a ``ROUTE_FAILURE_*`` code per target
+    that got no path, so a caller can record WHY instead of one catch-all
+    sentence.
+
+    ``yard_roads`` also reads ``access=private`` ways and barrier nodes, so a
+    target the public roads do not reach may be reached over its own private
+    road (``yard_roads.py`` holds the rule). Off, nothing changes."""
+    barriers: set[int] = set()
+    graphs = {target.target_id: RouteGraph(barriers=barriers) for target in targets}
     boxes = {target.target_id: target_bounds(target) for target in targets}
     grid = target_grid(targets, boxes)
     entities = osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY
     processor = (
         osmium.FileProcessor(str(osm_path), entities=entities)
         .with_locations()
-        .with_filter(osmium.filter.KeyFilter("highway"))
+        .with_filter(
+            osmium.filter.KeyFilter("highway", "barrier")
+            if yard_roads
+            else osmium.filter.KeyFilter("highway")
+        )
     )
     for way in processor:
         if not hasattr(way, "nodes"):
+            # Nodes come before ways in an extract, so the barrier set is
+            # complete by the time the first way is read.
+            if yard_roads and is_blocking_barrier({str(t.k): str(t.v) for t in way.tags}):
+                barriers.add(int(way.id))
             continue
         tags = {str(tag.k): str(tag.v) for tag in way.tags}
         road = road_label(tags)
-        if not road:
+        private = not road and yard_roads and is_yard_road(tags, ROUTABLE_HIGHWAYS)
+        if not road and not private:
             continue
+        no_truck = yard_roads and bool(road) and bans_trucks(tags)
         coords = way_coords(way)
         if len(coords) < 2:
             continue
@@ -322,31 +428,69 @@ def route_state_targets(osm_path: Path, targets: list[Target]) -> dict[str, Geom
             graph = graphs[target_id]
             prev: tuple[int, float, float] | None = None
             for ref, lat, lon in coords:
-                graph.nodes[ref] = (lat, lon)
+                (graph.yard_nodes if private else graph.nodes)[ref] = (lat, lon)
                 if prev is not None:
                     miles = haversine_mi(prev[1], prev[2], lat, lon)
-                    if miles > 0:
+                    if miles > 0 and private:
+                        graph.add_yard_edge(prev[0], ref, miles)
+                    elif miles > 0:
                         graph.add_edge(prev[0], ref, road, miles, way_mph)
+                        if no_truck:
+                            graph.no_truck.update({(prev[0], ref), (ref, prev[0])})
                 prev = (ref, lat, lon)
     routed: dict[str, GeometryPath] = {}
     for target in targets:
-        path = shortest_geometry(target, graphs[target.target_id])
+        path = shortest_geometry(target, graphs[target.target_id], failures)
         if path is not None:
             routed[target.target_id] = path
     return routed
 
 
-def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
+# Why `shortest_geometry` returned nothing. Four different facts used to share
+# one "no connected path" sentence, which is how a search that merely ran out
+# of budget read as a town with no roads for three sweeps.
+ROUTE_FAILURE_NO_START_ROAD = "no_start_road"
+ROUTE_FAILURE_NO_TARGET_ROAD = "no_target_road"
+ROUTE_FAILURE_OVER_BUDGET = "over_budget"
+ROUTE_FAILURE_DISCONNECTED = "disconnected"
+
+
+def _connected(graph: RouteGraph, start_ref: int, end_ref: int) -> bool:
+    """Is there any path at all, however long? Only asked after a failure."""
+    seen = {start_ref}
+    stack = [start_ref]
+    while stack:
+        node = stack.pop()
+        if node == end_ref:
+            return True
+        for nxt, _miles, _road, _mph in graph.edges.get(node, ()):
+            if nxt not in seen:
+                seen.add(nxt)
+                stack.append(nxt)
+    return False
+
+
+def shortest_geometry(
+    target: Target,
+    graph: RouteGraph,
+    failures: dict[str, str] | None = None,
+) -> GeometryPath | None:
+    def fail(code: str) -> None:
+        if failures is not None:
+            failures[target.target_id] = code
+
     if not graph.nodes:
-        return None
+        return fail(ROUTE_FAILURE_NO_START_ROAD)
     start = nearest_node(graph, target.start_lat, target.start_lon)
     end = nearest_node(graph, target.lat, target.lon)
     if start is None or end is None:
-        return None
+        return fail(ROUTE_FAILURE_NO_START_ROAD)
     start_ref, start_dist = start
     end_ref, end_dist = end
-    if start_dist > CITY_SNAP_RADIUS_MI or end_dist > TARGET_SNAP_RADIUS_MI:
-        return None
+    if start_dist > CITY_SNAP_RADIUS_MI:
+        return fail(ROUTE_FAILURE_NO_START_ROAD)
+    if end_dist > TARGET_SNAP_RADIUS_MI:
+        return fail(ROUTE_FAILURE_NO_TARGET_ROAD)
     dist: dict[int, float] = {start_ref: 0.0}
     prev: dict[int, tuple[int, str, float | None]] = {}
     heap: list[tuple[float, int]] = [(0.0, start_ref)]
@@ -365,7 +509,11 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
                 prev[nxt] = (node, road, mph)
                 heapq.heappush(heap, (nd, nxt))
     if end_ref not in dist:
-        return None
+        if _connected(graph, start_ref, end_ref):
+            return fail(ROUTE_FAILURE_OVER_BUDGET)
+        if graph.yard_edges:
+            return yard_road_geometry(target, graph, start_ref, fail)
+        return fail(ROUTE_FAILURE_DISCONNECTED)
     node = end_ref
     path_nodes = [node]
     reversed_roads: list[str] = []
@@ -385,11 +533,82 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
     ]
     segments = collapse_segments(raw_edges, coords)
     if not segments:
-        return None
+        return fail(ROUTE_FAILURE_DISCONNECTED)
     total = round(sum(segment["miles"] for segment in segments), 2)
     if total > max(target.approach_miles * 1.8, 3.0):
-        return None
+        return fail(ROUTE_FAILURE_OVER_BUDGET)
     return GeometryPath(total, tuple(segments))
+
+
+def yard_road_geometry(
+    target: Target, graph: RouteGraph, start_ref: int, fail
+) -> GeometryPath | None:
+    """The fallback for a target the public roads do not reach: a path whose
+    last link is the target's own private road (rule: ``yard_roads.py``).
+
+    The target is snapped again, this time to the nearest node of ANY road,
+    public or private, inside the same snap radius: the yard's own road is
+    the road the endpoint stands on. Every edge of the yard stretch is
+    labelled ``UNNAMED_SERVICE`` with no posted limit of its own; nothing is
+    read from a private way but its geometry."""
+    every_node = {**graph.yard_nodes, **graph.nodes}
+    end: tuple[int, float] | None = None
+    for ref, (lat, lon) in every_node.items():
+        miles = haversine_mi(target.lat, target.lon, lat, lon)
+        if end is None or miles < end[1]:
+            end = (ref, miles)
+    if end is None or end[1] > TARGET_SNAP_RADIUS_MI:
+        return fail(ROUTE_FAILURE_NO_TARGET_ROAD)
+    found = yard_road_path(graph, start_ref, end[0])
+    if found is None:
+        print(
+            f"  yard road refused: {target.target_id}: " + _yard_refusal(graph, start_ref, end[0]),
+            flush=True,
+        )
+        return fail(ROUTE_FAILURE_DISCONNECTED)
+    path_nodes, in_yard = found
+    coords = [every_node[ref] for ref in path_nodes]
+    raw_edges: list[tuple[str, float, float | None]] = []
+    yard_miles = 0.0
+    for i, yard in enumerate(in_yard):
+        miles = haversine_mi(*coords[i], *coords[i + 1])
+        if yard:
+            yard_miles += miles
+            raw_edges.append((UNNAMED_SERVICE, miles, None))
+            continue
+        # The public edge this step used: the shortest one between the pair.
+        _nxt, _miles, road, mph = min(
+            (edge for edge in graph.edges[path_nodes[i]] if edge[0] == path_nodes[i + 1]),
+            key=lambda edge: edge[1],
+        )
+        raw_edges.append((road, miles, mph))
+    segments = collapse_segments(raw_edges, coords)
+    if not segments:
+        return fail(ROUTE_FAILURE_DISCONNECTED)
+    total = round(sum(segment["miles"] for segment in segments), 2)
+    if total > max(target.approach_miles * 1.8, 3.0):
+        return fail(ROUTE_FAILURE_OVER_BUDGET)
+    return GeometryPath(total, tuple(segments), round(yard_miles, 2))
+
+
+def _yard_refusal(graph: RouteGraph, start_ref: int, end_ref: int) -> str:
+    """Why the yard-road rule found nothing, for the run log only: is the
+    endpoint cut off even with every private way open, or did the rule's own
+    limits (one stretch at the facility end, no gate on a public way, no
+    way signed against trucks) refuse the only way through?"""
+    seen = {end_ref}
+    stack = [end_ref]
+    while stack:
+        node = stack.pop()
+        steps = [edge[0] for edge in graph.edges.get(node, ())]
+        steps += [edge[0] for edge in graph.yard_edges.get(node, ())]
+        for nxt in steps:
+            if nxt not in seen:
+                seen.add(nxt)
+                stack.append(nxt)
+    if start_ref not in seen:
+        return "cut off even over private ways (water, a motorway or a closed road between)"
+    return "the only way through breaks the rule (private mid-route, a public gate, no trucks)"
 
 
 def _resolve_speed(speed_miles: dict[float, float], road: str) -> float:
@@ -418,9 +637,32 @@ def collapse_segments(
 
     Each edge carries its way's posted limit (or None); a merged run keeps the
     real limit covering the most of its miles and otherwise falls back to the
-    named/unnamed default -- honest absence, never a guessed number."""
+    named/unnamed default -- honest absence, never a guessed number.
+
+    An unnamed junction link is not a street: its miles join the run it
+    leaves (or, at the very start, the run it enters), so the turn is heard
+    once, onto the road the link delivers the truck to.
+
+    A path with more than ``MAX_SPOKEN_SEGMENTS`` streets keeps the LAST
+    ones. Paths run from the city context to the target, so the far end is
+    the facility's own streets. Until 2026-09-17 the cap kept the first eight
+    streets out of the city centre instead and dropped the ones at the yard:
+    measured on the 287 California, New York and Texas chains, 109 real paths
+    were longer than eight streets and the kept part covered a median 68
+    percent of the path (19 percent at worst), so the chain stopped short of
+    the facility it claimed to reach and a departure began on a street the
+    yard is not on. The kept part is relabelled to start on its first street,
+    and ``miles`` is the kept part only, as before."""
     segments: list[dict[str, Any]] = []
+    lead_link_miles = 0.0
     for i, (road, miles, mph) in enumerate(edges):
+        if road == JUNCTION_LINK:
+            if segments:
+                segments[-1]["miles"] += miles
+                segments[-1]["end_edge"] = i + 1
+            else:
+                lead_link_miles += miles
+            continue
         if segments and segments[-1]["road"] == road:
             segments[-1]["miles"] += miles
             segments[-1]["end_edge"] = i + 1
@@ -428,14 +670,16 @@ def collapse_segments(
             segments.append(
                 {
                     "road": road,
-                    "miles": miles,
+                    "miles": miles + lead_link_miles,
                     "start_edge": i,
                     "end_edge": i + 1,
                     "speed_miles": defaultdict(float),
                 }
             )
+            lead_link_miles = 0.0
         if mph is not None:
             segments[-1]["speed_miles"][mph] += miles
+    segments = _merge_same_street(segments, coords)
     out: list[dict[str, Any]] = []
     for i, segment in enumerate(segments):
         miles = round(max(segment["miles"], 0.05), 2)
@@ -465,7 +709,89 @@ def collapse_segments(
                 "speed_mph": _resolve_speed(segment["speed_miles"], road),
             }
         )
-    return out[:8]
+    if len(out) > MAX_SPOKEN_SEGMENTS:
+        out = out[-MAX_SPOKEN_SEGMENTS:]
+        out[0]["cue"] = f"Start on {out[0]['road']}."
+    return out
+
+
+def _street_name(road: str) -> str:
+    """The label without its trailing route ref: "Gateway Drive (US 2)" and
+    "Gateway Drive" are one street whose ways are tagged unevenly."""
+    if road.endswith(")") and " (" in road:
+        return road[: road.rindex(" (")]
+    return road
+
+
+def _merge_same_street(
+    segments: list[dict[str, Any]],
+    coords: list[tuple[float, float]] | None,
+) -> list[dict[str, Any]]:
+    """Join runs that are one street heard as several.
+
+    Measured on the checked-in facility chains (2026-09-17): 271 of 1,713
+    spoke one street two or more times in a row because OSM carries the route
+    ref on some of its ways and not others -- one chain spent five of its
+    eight streets on "Saint John Avenue" under five refs. Two rules, neither
+    with a threshold:
+
+    * neighbouring runs with the same street name are one run, labelled as
+      the longer of the two;
+    * a run with no name of its own between two runs of the same street, with
+      no turn at either end, is a gap in that street's name tag, not a side
+      street. With a turn at either end it is a real detour and is kept.
+      Without ``coords`` there is no way to tell, so nothing is folded.
+    """
+
+    def join(first: dict[str, Any], second: dict[str, Any]) -> dict[str, Any]:
+        keep = first if first["miles"] >= second["miles"] else second
+        speed_miles: defaultdict[float, float] = defaultdict(float)
+        for part in (first, second):
+            for mph, miles in part["speed_miles"].items():
+                speed_miles[mph] += miles
+        return {
+            "road": keep["road"],
+            "miles": first["miles"] + second["miles"],
+            "start_edge": first["start_edge"],
+            "end_edge": second["end_edge"],
+            "speed_miles": speed_miles,
+        }
+
+    def same_street(a: dict[str, Any], b: dict[str, Any]) -> bool:
+        return is_named(a["road"]) and _street_name(a["road"]) == _street_name(b["road"])
+
+    def straight_into(i: int) -> bool:
+        return coords is not None and not turn_direction(
+            coords,
+            boundary=segments[i]["start_edge"],
+            prev_start=segments[i - 1]["start_edge"],
+            next_end=segments[i]["end_edge"],
+        )
+
+    segments = list(segments)
+    merged = True
+    while merged:
+        merged = False
+        for i in range(1, len(segments)):
+            if same_street(segments[i - 1], segments[i]):
+                segments[i - 1 : i + 1] = [join(segments[i - 1], segments[i])]
+                merged = True
+                break
+        if merged:
+            continue
+        for i in range(1, len(segments) - 1):
+            if (
+                not is_named(segments[i]["road"])
+                and same_street(segments[i - 1], segments[i + 1])
+                and straight_into(i)
+                and straight_into(i + 1)
+            ):
+                gap = join(segments[i - 1], segments[i])
+                gap["road"] = segments[i - 1]["road"]
+                segments[i - 1 : i + 2] = [join(gap, segments[i + 1])]
+                merged = True
+                break
+    return segments
 
 
 # A junction only counts as a real turn once the heading swings this far;
@@ -709,11 +1035,20 @@ def road_label(tags: dict[str, str]) -> str:
     highway = tags.get("highway", "")
     if highway not in ROUTABLE_HIGHWAYS:
         return ""
-    if tags.get("access") in {"private", "no"}:
+    # `private` ways come back in only as a facility's own yard road
+    # (`yard_roads.py`); a base's roads (`military`) never do.
+    if tags.get("access") in {"private", "no", "military"}:
+        return ""
+    if tags.get("motorroad") == "yes":
         return ""
     name = clean_text(tags.get("name", ""))
+    if highway in LINK_CLASSES:
+        # A link's `ref` is as often an exit number as a route number, so
+        # only a real name is spoken; without one it is part of the junction.
+        return name or JUNCTION_LINK
     ref = clean_text(tags.get("ref", ""))
-    if name and ref:
+    if name and ref and name.lower() != ref.lower():
+        # "FM 3183 (FM 3183)" is one fact said twice.
         return f"{name} ({ref})"
     if name or ref:
         return name or ref

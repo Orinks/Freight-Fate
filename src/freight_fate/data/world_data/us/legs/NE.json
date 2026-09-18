@@ -537,10 +537,10 @@
       },
       "stops": [
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Columbus",
+          "type": "travel_center",
           "at_mi": 1.16,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Columbus; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1251,10 +1251,10 @@
       },
       "stops": [
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Columbus",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Columbus; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1274,10 +1274,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Norfolk",
+          "type": "travel_center",
           "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 680 at Norfolk; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2313,10 +2313,10 @@
       },
       "stops": [
         {
-          "name": "Sapp Bros",
+          "name": "Sapp Brothers Travel Center Columbus",
           "type": "fuel_station",
           "at_mi": 1.07,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Columbus; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2333,10 +2333,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Fremont",
+          "type": "travel_center",
           "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Fremont; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2356,10 +2356,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Valley",
+          "type": "travel_center",
           "at_mi": 64.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 631 at Valley; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2379,10 +2379,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 84.92,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2930,10 +2930,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Grand Island",
+          "type": "travel_center",
           "at_mi": 12.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Pilot store at Grand Island; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4174,10 +4174,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Grand Island",
+          "type": "travel_center",
           "at_mi": 8.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Pilot store at Grand Island; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5961,10 +5961,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Odessa",
+          "type": "travel_center",
           "at_mi": 12.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Odessa; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6459,10 +6459,10 @@
       },
       "stops": [
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Odessa",
+          "type": "travel_center",
           "at_mi": 10.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Odessa; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6479,13 +6479,16 @@
           ],
           "lat": 40.67835,
           "lon": -99.25681,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "263",
+          "interchange_mi": 11.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "ONE9 Travel Center",
-          "type": "service_plaza",
+          "name": "ONE9 Travel Center Elm Creek",
+          "type": "travel_center",
           "at_mi": 20.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): ONE9 store at Elm Creek; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6502,7 +6505,10 @@
           ],
           "lat": 40.69219,
           "lon": -99.3818,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "257",
+          "interchange_mi": 17.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -7136,13 +7142,16 @@
           ],
           "lat": 40.84842,
           "lon": -99.98492,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "222",
+          "interchange_mi": 52.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center North Platte",
+          "type": "travel_center",
           "at_mi": 98.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at North Platte; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7159,7 +7168,10 @@
           ],
           "lat": 41.10114,
           "lon": -100.72723,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "179",
+          "interchange_mi": 95.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.40 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -7614,7 +7626,10 @@
           ],
           "lat": 40.84842,
           "lon": -99.98492,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "222",
+          "interchange_mi": 17.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Brady Rest Area Westbound",
@@ -7637,10 +7652,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center North Platte",
+          "type": "travel_center",
           "at_mi": 63.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at North Platte; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7657,7 +7672,10 @@
           ],
           "lat": 41.10114,
           "lon": -100.72723,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "179",
+          "interchange_mi": 60.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.40 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -10998,7 +11016,7 @@
           "name": "Flying J Travel Center Gretna",
           "type": "travel_center",
           "at_mi": 34.7,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at Gretna; matched by position, the only Flying J within 5 mi of mile 34.7 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -11020,40 +11038,17 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.08805079184902,
-          "lon": -96.266029837758
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 35.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.091522,
-          "lon": -96.2551577,
-          "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 41.09166,
+          "lon": -96.255122,
+          "exit_ref": "432",
+          "interchange_mi": 35.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "QuikTrip Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 41.8,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; a truck scale (amenity=weighbridge); amenity=fuel with HGV lanes or HGV diesel. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11073,7 +11068,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "439",
+          "interchange_mi": 41.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.44 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Council Bluffs",
@@ -11099,13 +11097,15 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "1B",
+          "exit_source": "exit_ref read: the stop's own source names exit 1B; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 59.5,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11126,9 +11126,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 91.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 426 at Shelby; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11148,7 +11148,9 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "34",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J Dealer Avoca",
@@ -11175,7 +11177,10 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "40",
+          "interchange_mi": 97.8,
+          "exit_source": "derived: inherited from Flying J - Avoca at mile 98.2 of this leg, the same store under another name (same chain within 4 mi); that record says how its exit was decided."
         },
         {
           "name": "Flying J - Avoca",
@@ -11201,7 +11206,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "40",
+          "interchange_mi": 97.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Shelby",
@@ -11229,7 +11237,9 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.51250207851663,
-          "lon": -94.19775543509225
+          "lon": -94.19775543509225,
+          "exit_ref": "34",
+          "exit_source": "exit_ref read: the stop's own source names exit 34; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -13523,10 +13533,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Junction City",
+          "type": "travel_center",
           "at_mi": 151.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the junction_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the junction_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Junction City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14874,7 +14884,7 @@
           "name": "Flying J Travel Center Gretna",
           "type": "travel_center",
           "at_mi": 34.5,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31; Store coordinates read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at Gretna; matched by position, the only Flying J within 5 mi of mile 34.5 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -14895,39 +14905,18 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 35.2,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.091522,
-          "lon": -96.2551577,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 41.09166,
+          "lon": -96.255122,
+          "exit_ref": "432",
+          "interchange_mi": 35.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "QuikTrip Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 41.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; a truck scale (amenity=weighbridge); amenity=fuel with HGV lanes or HGV diesel. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14947,13 +14936,16 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "439",
+          "interchange_mi": 41.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.44 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -17517,10 +17509,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Norfolk",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 680 at Norfolk; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17580,10 +17572,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Fremont",
+          "type": "travel_center",
           "at_mi": 74.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Fremont; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17603,10 +17595,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Valley",
           "type": "fuel_station",
           "at_mi": 90.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 631 at Valley; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -17623,10 +17615,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 112.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -18888,10 +18880,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Norfolk",
+          "type": "travel_center",
           "at_mi": 1.28,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 680 at Norfolk; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20352,10 +20344,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center North Platte",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at North Platte; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20375,10 +20367,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Colby",
+          "type": "travel_center",
           "at_mi": 145.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the colby_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the colby_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Petro store 0386 at Colby; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20756,10 +20748,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center North Platte",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the north_platte_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at North Platte; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20796,13 +20788,16 @@
           ],
           "lat": 41.14051,
           "lon": -101.00348,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "164",
+          "interchange_mi": 13.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Ogallala",
+          "type": "travel_center",
           "at_mi": 51.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogallala_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogallala_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): TA store 0090 at Ogallala; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20819,7 +20814,10 @@
           ],
           "lat": 41.11371,
           "lon": -101.71289,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "126",
+          "interchange_mi": 50.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -21464,10 +21462,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Ogallala",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogallala_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogallala_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): TA store 0090 at Ogallala; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21484,13 +21482,16 @@
           ],
           "lat": 41.11371,
           "lon": -101.71289,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "126",
+          "interchange_mi": 1.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.47 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Big Springs",
+          "type": "travel_center",
           "at_mi": 17.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at Big Springs; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21507,13 +21508,16 @@
           ],
           "lat": 41.05228,
           "lon": -102.06894,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "107",
+          "interchange_mi": 20.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Sidney",
+          "type": "travel_center",
           "at_mi": 70.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Sidney; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21530,7 +21534,10 @@
           ],
           "lat": 41.11804,
           "lon": -102.95021,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "59",
+          "interchange_mi": 66.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.52 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -25468,10 +25475,10 @@
       },
       "stops": [
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -25489,9 +25496,9 @@
         },
         {
           "name": "QuikTrip Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 16.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; a truck scale (amenity=weighbridge); amenity=fuel with HGV lanes or HGV diesel. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25508,36 +25515,16 @@
           ],
           "lat": 41.1480863,
           "lon": -96.1614776,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
-          "at_mi": 23.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.091522,
-          "lon": -96.2551577,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "439",
+          "interchange_mi": 16.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.44 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center Gretna",
           "type": "travel_center",
           "at_mi": 23.6,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 686 in Gretna, NE with 155 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ne/gretna/15010-ne-31 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at Gretna; matched by position, the only Flying J within 5 mi of mile 23.6 of this leg (0.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25559,8 +25546,11 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.08805079184902,
-          "lon": -96.266029837758
+          "lat": 41.09166,
+          "lon": -96.255122,
+          "exit_ref": "432",
+          "interchange_mi": 22.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-80 Weigh Station",
@@ -25633,10 +25623,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Grand Island",
+          "type": "travel_center",
           "at_mi": 143.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Pilot store at Grand Island; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25656,10 +25646,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Odessa",
+          "type": "travel_center",
           "at_mi": 191.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Odessa; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25676,13 +25666,15 @@
           ],
           "lat": 40.678352,
           "lon": -99.2568104,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "263",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "ONE9 Travel Center",
-          "type": "service_plaza",
+          "name": "ONE9 Travel Center Elm Creek",
+          "type": "travel_center",
           "at_mi": 198.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): ONE9 store at Elm Creek; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25699,13 +25691,15 @@
           ],
           "lat": 40.6921895,
           "lon": -99.3817967,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "257",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Love's Travel Stop North Platte",
           "type": "travel_center",
           "at_mi": 271.8,
-          "source": "Love's official store feed lists store 390 in North Platte, NE on I-80, exit 179; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 390 in North Platte, NE on I-80, exit 179; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Love's store 390 at North Platte; matched by position, the only Love's within 5 mi of mile 271.8 of this leg (4.0 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25725,13 +25719,18 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.10276,
+          "lon": -100.723592,
+          "exit_ref": "179",
+          "interchange_mi": 275.9,
+          "exit_source": "exit_ref read: the stop's own source names exit 179; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Ogallala",
+          "type": "travel_center",
           "at_mi": 328.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): TA store 0090 at Ogallala; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25748,13 +25747,16 @@
           ],
           "lat": 41.1137079,
           "lon": -101.7128931,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "126",
+          "interchange_mi": 328.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Big Springs",
           "type": "travel_center",
           "at_mi": 347.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Flying J store at Big Springs; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25771,7 +25773,10 @@
           ],
           "lat": 41.0521895,
           "lon": -102.0705214,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "107",
+          "interchange_mi": 347.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Sidney",
@@ -25797,7 +25802,10 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "59",
+          "interchange_mi": 394.8,
+          "exit_source": "exit_ref read: the stop's own source names exit 59; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Exxon",
@@ -25820,13 +25828,16 @@
           ],
           "lat": 41.1600885,
           "lon": -104.5214488,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "377",
+          "interchange_mi": 479.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 496.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26976,10 +26987,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Cheyenne",
+          "type": "travel_center",
           "at_mi": 108.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Cheyenne; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26999,10 +27010,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 114.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27928,10 +27939,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Sidney",
+          "type": "travel_center",
           "at_mi": 86.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Sidney; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28954,10 +28965,10 @@
       },
       "stops": [
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Sidney",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sidney_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nebraska extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Sidney; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28977,10 +28988,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Cheyenne",
+          "type": "travel_center",
           "at_mi": 84.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): TA store 0187 at Cheyenne; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28997,13 +29008,16 @@
           ],
           "lat": 41.1599333,
           "lon": -104.5200784,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "377",
+          "interchange_mi": 84.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Cheyenne",
+          "type": "travel_center",
           "at_mi": 95.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Pilot store at Cheyenne; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29020,13 +29034,16 @@
           ],
           "lat": 41.1360971,
           "lon": -104.7072436,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "367",
+          "interchange_mi": 94.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I80, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Cheyenne",
+          "type": "travel_center",
           "at_mi": 101.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cheyenne_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Wyoming extract dated 2026-06-22, read 2026-09-17): Love's store 220 at Cheyenne; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

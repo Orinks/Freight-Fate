@@ -3349,7 +3349,10 @@
           ],
           "lat": 42.58617,
           "lon": -72.62462,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "43",
+          "interchange_mi": 40.28,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I91, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Roady's Truck Stops",
@@ -3421,10 +3424,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Willington",
+          "type": "travel_center",
           "at_mi": 112.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Store identity read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3441,7 +3444,9 @@
           ],
           "lat": 41.92716,
           "lon": -72.25926,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "71",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "corridor": {
@@ -12095,10 +12100,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Greenland",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Hampshire extract dated 2026-06-22, read 2026-09-17): TA store 0211 at Greenland; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13169,10 +13174,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Greenland",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Hampshire extract dated 2026-06-22, read 2026-09-17): TA store 0211 at Greenland; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14303,10 +14308,10 @@
       },
       "stops": [
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Greenland",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portsmouth_nh_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Hampshire extract dated 2026-06-22, read 2026-09-17): TA store 0211 at Greenland; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14402,8 +14407,8 @@
           "name": "Kennebunk Service Plaza",
           "type": "service_plaza",
           "at_mi": 27.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95 truck parking near Kennebunk with 37 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -14422,7 +14427,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 37
         }
       ],
       "divided": true,

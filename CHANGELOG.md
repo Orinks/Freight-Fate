@@ -4,6 +4,10 @@
 
 ### Changed
 
+- **F1 on a course under Licenses and training says what it unlocks.** Also the sponsor level, or the level you can pay early.
+
+- **More facilities start and end with street directions, beginning on the yard's own road.** That first link is spoken as a service road.
+
 - **A career edited outside the game is always marked as modified now.** The notice plays once when you open it.
 
 - **When a station fades out of range, the radio tunes to the strongest local station still in range.** The Roadhouse is the fallback only when nothing else is on the air. (Suggested by Brandon.)
@@ -12,11 +16,27 @@
 
 - **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.
 
+- **Steel works, energy terminals, auto supplier parks and more warehouses in every state now start with street-by-street directions.**
+
+- **Street directions at a facility now cover the streets nearest the facility.** Long routes used to name streets near the city centre instead.
+
 - **The shared Duff sound cues stay as they are.** No replacements are planned for them.
+
+- **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
 
+- **Rest areas on roads with no truck-usable stop are now on the map.** Twenty-two of them, including Heath Creek on I-35 north of Owatonna.
+
+- **Street directions now end at the facility.** Hundreds used to end at a railway line, a power substation or a shop nearby.
+
 - **A truck stop that was on the map twice is announced once.** Signalling for it arms the real exit, with its exit number and the stop at the end of the ramp.
+
+- **Chain truck stops like Love's, Pilot and Flying J are announced as travel centers.** Many were called service plazas, which are on toll roads.
+
+- **Street directions name one road, not a list of route numbers.** A street with several numbers is spoken by its first.
+
+- **Businesses that are not truck stops are off the map.** Independent truck stops are announced as travel centers, not service plazas.
 
 - **Station names keep their apostrophes.** Fifteen imported stations no longer read as, for example, Birmingham s Beautiful QEZ.
 
@@ -35,6 +55,7 @@
 - **Twenty-five more runs got the same curve cleanup.** Glenwood Canyon and the US-550 switchbacks stay.
 
 - **Opening the pause menu now stops the tank surge sound.** It no longer keeps playing through the menu and back into the drive.
+- **More truck stops announce their own exit number and the light or stop sign on their own ramp.** Many had a neighbouring exit's number.
 
 
 ### Changed
@@ -58,6 +79,8 @@
   Contributed by Tim ([@trssharp](https://github.com/trssharp)) in [PR #190](https://github.com/Orinks/Freight-Fate/pull/190).
 
 ### Added
+
+- **Your playlists can shuffle.** Settings, Audio, Shuffle personal playlists plays every track once in a random order before any repeats. (Suggested by Hailey.)
 
 - **A trooper passing you can see worn tires and a dead trailer lamp.** Seeing one pulls you in for a Level 2 walk-around, so walk around the truck first.
 

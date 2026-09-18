@@ -1660,12 +1660,31 @@ fn test_the_approach_speaks_no_more_often_than_it_used_to() {
     assert_eq!(arrival, vec!["destination approach", "facility gate"]);
 }
 
+/// A Chicago facility whose approach is the short synthetic single leg: no
+/// street chain, and short enough that the whole of it is access road. It
+/// used to be written as "Chicago's first facility", which held only while
+/// that facility's endpoint sat on the 2.1-mile floor; the 2026-09-17
+/// endpoint re-sweep moved it from a commuter line to a real intermodal
+/// yard 3.6 miles out, and a long approach starts as an arterial.
+fn short_synthetic_approach(world: &crate::data::world::World) -> crate::data::world_models::Route {
+    world
+        .city("Chicago")
+        .unwrap()
+        .locations
+        .iter()
+        .filter_map(|location| {
+            world
+                .facility_approach_route("Chicago", &location.name)
+                .ok()
+        })
+        .find(|route| route.legs.len() == 1 && route.miles() <= 2.5)
+        .expect("Chicago has a facility with a short synthetic approach")
+}
+
 #[test]
 fn test_pickup_deadhead_route_uses_local_facility_limits() {
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
 
     let (limit, reason) = trip.speed_limit_at(0.1);
@@ -1747,6 +1766,42 @@ fn test_a_merged_city_stop_keeps_an_exit_label() {
     assert_eq!(merged[0].exit_label, "exit 2A");
 }
 
+/// Two stops on the trip that share a name, nearest first.
+///
+/// New York to Miami used to pass a run of stops all called "Love's Travel
+/// Stop", and these cases leaned on that. The 2026-09-17 store import gave
+/// each its town, so the map no longer promises a namesake anywhere. One is
+/// made when the route has none: the rule under test keys a plan by name AND
+/// mile, and needs only two stops that differ in the mile alone.
+fn namesakes_on(trip: &mut crate::sim::trip::Trip) -> Vec<crate::sim::trip_models::RoadStop> {
+    use crate::sim::trip_models::RoadStop;
+    let mut by_name: std::collections::BTreeMap<String, Vec<RoadStop>> = Default::default();
+    for stop in &trip.stops {
+        by_name
+            .entry(stop.name.clone())
+            .or_default()
+            .push(stop.clone());
+    }
+    let mut namesakes = by_name
+        .into_values()
+        .find(|group| group.len() >= 2)
+        .unwrap_or_else(|| {
+            let first = trip
+                .stops
+                .iter()
+                .find(|s| s.stop_type == "travel_center")
+                .cloned()
+                .expect("a travel center on the route");
+            let mut twin = first.clone();
+            twin.at_mi = first.at_mi + 60.0;
+            trip.stops.push(twin.clone());
+            trip.stops.sort_by(|a, b| a.at_mi.total_cmp(&b.at_mi));
+            vec![first, twin]
+        });
+    namesakes.sort_by(|a, b| a.at_mi.total_cmp(&b.at_mi));
+    namesakes
+}
+
 #[test]
 fn test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit() {
     let world = crate::data::world::get_world();
@@ -1760,13 +1815,7 @@ fn test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit() {
         .unwrap()
         .expect("a route");
     let mut trip = trip_on(route, system("southeast", 1), seeded(7));
-    let mut namesakes: Vec<_> = trip
-        .stops
-        .iter()
-        .filter(|s| s.name == "Love's Travel Stop")
-        .cloned()
-        .collect();
-    namesakes.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).unwrap());
+    let namesakes = namesakes_on(&mut trip);
     let (planned, other) = (namesakes[0].clone(), namesakes[1].clone());
     trip.planned_stop_key = Some(planned.key());
 
@@ -1805,13 +1854,7 @@ fn test_a_plan_survives_passing_a_stop_that_shares_its_name() {
         .unwrap()
         .expect("a route");
     let mut trip = trip_on(route, system("southeast", 1), seeded(7));
-    let mut namesakes: Vec<_> = trip
-        .stops
-        .iter()
-        .filter(|s| s.name == "Love's Travel Stop")
-        .cloned()
-        .collect();
-    namesakes.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).unwrap());
+    let namesakes = namesakes_on(&mut trip);
     assert!(namesakes.len() >= 2);
     let (target, earlier) = (namesakes[namesakes.len() - 1].clone(), namesakes[0].clone());
     trip.planned_stop_key = Some(target.key());
@@ -1891,9 +1934,7 @@ fn test_facility_gate_warns_before_final_low_speed_zone() {
     use crate::sim::trip_models::TripEventKind;
 
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
 
     trip.position_mi = trip.total_miles() - 2.0;
@@ -1918,9 +1959,7 @@ fn test_zone_entry_is_worded_apart_from_its_advance_warning() {
     use crate::sim::trip_models::TripEventKind;
 
     let world = crate::data::world::get_world();
-    let route = world
-        .facility_approach_route("Chicago", &world.city("Chicago").unwrap().locations[0].name)
-        .unwrap();
+    let route = short_synthetic_approach(world);
     let mut trip = trip_on(route, system("great_lakes", 1), seeded(2));
     let gate = trip
         .zones

@@ -8106,7 +8106,7 @@
           "name": "Pilot Travel Center Sutton",
           "type": "travel_center",
           "at_mi": 71.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 474 in Sutton, WV with 56 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wv/sutton/270-scott-fork-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 474 in Sutton, WV with 56 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wv/sutton/270-scott-fork-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Sutton; matched by position, the only Pilot within 5 mi of mile 71.8 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -8127,14 +8127,16 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 38.7235524399274,
-          "lon": -80.66890792255535
+          "lat": 38.705095,
+          "lon": -80.663925,
+          "exit_ref": "67",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I79, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wheeling",
+          "type": "travel_center",
           "at_mi": 177.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Store identity read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): TA store 0032 at Wheeling; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8155,21 +8157,18 @@
         },
         {
           "name": "Stucks Fleet Fueling",
-          "type": "service_plaza",
+          "type": "fuel_station",
           "at_mi": 186.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Type corrected from service_plaza to fuel_station (derived): the name says fuel and the OpenStreetMap feature at the record's coordinate maps nothing for trucks. Geofabrik extract, accessed 2026-09-17. Services, actions and parking are the import's assumptions for that type.",
+          "parking": "limited",
           "actions": [
             "park",
             "save",
             "fuel",
-            "food",
-            "break",
-            "sleep"
+            "break"
           ],
           "services": [
             "diesel",
-            "food",
             "parking"
           ],
           "lat": 40.1130796,
@@ -8196,7 +8195,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 17
         }
       ],
       "divided": true,
@@ -13620,10 +13620,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Covington",
+          "type": "travel_center",
           "at_mi": 147.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Love's store 707 at Covington; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13640,13 +13640,16 @@
           ],
           "lat": 37.7948142,
           "lon": -79.8842188,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "21",
+          "interchange_mi": 147.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I64, 0.13 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Raphine",
+          "type": "travel_center",
           "at_mi": 194.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Raphine; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13663,13 +13666,16 @@
           ],
           "lat": 37.9324137,
           "lon": -79.2327734,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "205",
+          "interchange_mi": 196.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I64, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Staunton",
           "type": "travel_center",
           "at_mi": 206.3,
-          "source": "Love's official store feed lists store 706 in Staunton, VA on I-64, exit 213; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 706 in Staunton, VA on I-64, exit 213; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Virginia extract dated 2026-06-22, read 2026-09-17): Love's store 706 at Staunton; matched by position, the only Love's within 5 mi of mile 206.3 of this leg (2.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -13689,7 +13695,12 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.021825,
+          "lon": -79.142617,
+          "exit_ref": "213",
+          "interchange_mi": 204.2,
+          "exit_source": "exit_ref read: the stop's own source names exit 213; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Charlottesville Safety Rest Area West",
@@ -17325,7 +17336,10 @@
           ],
           "lat": 38.2409098,
           "lon": -81.5594354,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "89",
+          "interchange_mi": 11.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I64, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Elkridge Rest Stop SB",
@@ -18845,13 +18859,16 @@
           ],
           "lat": 38.4383,
           "lon": -82.0175,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "34",
+          "interchange_mi": 28.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I64, 0.32 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Nitro",
+          "type": "travel_center",
           "at_mi": 39.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Nitro; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18868,7 +18885,9 @@
           ],
           "lat": 38.44383,
           "lon": -81.83056,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "45",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I64, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-64 Weigh Station",
@@ -23093,10 +23112,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Sutton",
+          "type": "travel_center",
           "at_mi": 84.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Sutton; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23113,7 +23132,9 @@
           ],
           "lat": 38.70506,
           "lon": -80.66352,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US19, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -26254,7 +26275,7 @@
           "name": "Pilot Travel Center Sutton",
           "type": "travel_center",
           "at_mi": 85.3,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 474 in Sutton, WV with 56 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wv/sutton/270-scott-fork-rd",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 474 in Sutton, WV with 56 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wv/sutton/270-scott-fork-rd; Store coordinates read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Sutton; matched by position, the only Pilot within 5 mi of mile 85.3 of this leg (1.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -26274,7 +26295,12 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.705095,
+          "lon": -80.663925,
+          "exit_ref": "67",
+          "interchange_mi": 86.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I79, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop",
@@ -27958,10 +27984,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Grantsville",
+          "type": "travel_center",
           "at_mi": 54.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Grantsville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27978,13 +28004,16 @@
           ],
           "lat": 39.69194,
           "lon": -79.10088,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "22",
+          "interchange_mi": 51.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I68, 0.49 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Pleasant Grove",
+          "type": "travel_center",
           "at_mi": 72.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Love's store 537 at Pleasant Grove; town DERIVED, not read: the nearest mapped place, 1.8 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31591,7 +31620,10 @@
           ],
           "lat": 38.82037,
           "lon": -81.72538,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "138",
+          "interchange_mi": 39.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I77, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -33736,10 +33768,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Morgantown",
+          "type": "travel_center",
           "at_mi": 106.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): Pilot store at Morgantown; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35122,10 +35154,10 @@
       },
       "stops": [
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Wheeling",
+          "type": "travel_center",
           "at_mi": 14.55,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik West Virginia extract dated 2026-06-22, read 2026-09-17): TA store 0032 at Wheeling; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35142,7 +35174,9 @@
           ],
           "lat": 40.06937,
           "lon": -80.567,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "11",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.07 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "GetGo",

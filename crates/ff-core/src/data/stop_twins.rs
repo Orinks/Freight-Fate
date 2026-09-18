@@ -41,6 +41,14 @@
 //! that are under four miles apart, and the driver still has the other; a
 //! missed twin is a phantom exit. At four miles the screen drops 90 records
 //! on 61 legs.
+//!
+//! # Since the store import
+//!
+//! `tools/import_chain_locators.py` (2026-09-17) matched the chain records to
+//! stores by coordinate, named the bare ones and deleted the twins in the
+//! data, so most of what is measured above is no longer on the map. This
+//! screen stays as the net for the records no store was found for. The
+//! numbers above are the map before that import; ROADMAP has the ones after.
 
 use crate::data::world_constants::TRUCK_STOP_CHAINS;
 use crate::data::world_models::Stop;
@@ -79,7 +87,7 @@ const GENERIC_NAME_WORDS: &[&str] = &[
 ];
 
 /// The chain at the head of a stop's name, if any.
-fn chain_of(name: &str) -> Option<&'static str> {
+pub(crate) fn chain_of(name: &str) -> Option<&'static str> {
     let lower = name.trim().to_lowercase();
     TRUCK_STOP_CHAINS
         .iter()

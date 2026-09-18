@@ -216,7 +216,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "The radio is optional; speech and safety cues always come first. It has power only while the engine runs.",
             "{{radio}} toggles the radio. Page Down tunes to the next station, Page Up to the previous; semicolon and apostrophe do the same.",
             "Control with any of those jumps a whole category, like AFN to terrestrial. Shift with any of those changes the radio volume in 10 percent steps, on or off. {{radio_status}} speaks the station, signal, volume, and streamer-safe status.",
-            "M3U playlist files in the Playlists folder next to your saves each become a station under Your playlists. They play only with streamer-safe mode off.",
+            "M3U playlist files in the Playlists folder next to your saves each become a station under Your playlists. They play only with streamer-safe mode off. Settings, Audio, Shuffle personal playlists plays each one in a random order, every track once before any repeats.",
             "The {{status}} status menu has a Radio screen listing receivable stations.",
             "The Freight Fate Roadhouse plays road music everywhere, day and night, with a host between songs. The Night Line does the same after dark, quieter.",
             "Fictional regional stations cover markets across the map with country, classic rock, and blues and soul.",

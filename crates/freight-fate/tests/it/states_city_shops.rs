@@ -792,6 +792,29 @@ fn endorsement_courses_price_each_unearned_endorsement() {
         .any(|t| t.starts_with("Hazmat endorsement course:")
             && t.contains("background check")
             && !t.contains("carrier-sponsored")));
+    // F1 on a course says what it opens and both roads to it: the sponsor
+    // level, and the level a driver can pay for it early (owner, 2026-09-18).
+    move_to::<EndorsementCourseState>(&mut app, "Refrigerated certificate course:");
+    let help = current_help::<EndorsementCourseState>(&app);
+    assert!(
+        help.starts_with("Unlocks fresh food and refrigerated goods."),
+        "{help}"
+    );
+    assert!(help.contains("sponsors it free at level 2"), "{help}");
+    assert!(
+        help.contains("900 dollars for it yourself from level 1"),
+        "{help}"
+    );
+    move_to::<EndorsementCourseState>(&mut app, "Hazmat endorsement course:");
+    let help = current_help::<EndorsementCourseState>(&app);
+    assert!(
+        help.starts_with("Unlocks placarded hazardous materials"),
+        "{help}"
+    );
+    assert!(
+        help.contains("Course only: 185 dollars from level 10."),
+        "{help}"
+    );
     let before = profile(&app).money;
     select::<EndorsementCourseState>(&mut app, "Refrigerated certificate course:");
     assert!(profile(&app).money < before);
@@ -803,6 +826,12 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     assert!(labels::<EndorsementCourseState>(&app)
         .iter()
         .any(|t| t.contains("earned, self-paid course")));
+    move_to::<EndorsementCourseState>(&mut app, "earned, self-paid course");
+    let help = current_help::<EndorsementCourseState>(&app);
+    assert!(
+        help.contains("unlocks fresh food and refrigerated goods"),
+        "{help}"
+    );
 }
 
 #[test]

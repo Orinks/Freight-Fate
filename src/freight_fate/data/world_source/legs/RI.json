@@ -2343,7 +2343,7 @@
           "name": "Madison, CT - North",
           "type": "service_plaza",
           "at_mi": 84.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists CT Service Plaza- Madison NB with 11 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists CT Service Plaza- Madison NB with 11 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -2361,7 +2361,10 @@
           "lat": 41.2903995,
           "lon": -72.580404,
           "vehicle_access": "tractor_trailer",
-          "parking_spaces": 16
+          "parking_spaces": 16,
+          "exit_ref": "62",
+          "interchange_mi": 84.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Branford Service Plaza Northbound",
@@ -2390,7 +2393,7 @@
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
           "at_mi": 103.4,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Pilot store at Milford; matched by name, the only Pilot the map has at Milford within 40 mi of mile 103.4 of this leg (6.7 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -2412,8 +2415,8 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 41.283304465378514,
-          "lon": -72.95185740834604
+          "lat": 41.23682,
+          "lon": -73.022328
         }
       ],
       "divided": true,
@@ -3509,29 +3512,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pat's Service Center",
-          "type": "service_plaza",
-          "at_mi": 25.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.6968,
-          "lon": -71.52253,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -8892,7 +8872,7 @@
           "name": "Madison, CT - North",
           "type": "service_plaza",
           "at_mi": 86.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): a curated pass surveyed the truck parking and kept the type. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8909,13 +8889,15 @@
           ],
           "lat": 41.2904,
           "lon": -72.5804,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "62",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Milford",
           "type": "travel_center",
-          "at_mi": 103.8,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln",
+          "at_mi": 109.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Pilot store at Milford; matched by name, the only Pilot the map has at Milford within 40 mi of mile 109.5 of this leg (5.4 mi); coordinates read from the mapped site. Mile marker moved from 103.8 to 109.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 103.8 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -8936,56 +8918,12 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot",
-          "type": "travel_center",
-          "at_mi": 109.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 41.23658,
-          "lon": -73.02254,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
-        },
-        {
-          "name": "Rest Area CT-15 (South Bound)",
-          "type": "public_rest_area",
-          "at_mi": 111.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
-          "actions": [
-            "park",
-            "save",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "parking",
-            "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer",
-          "lat": 41.23750129190995,
-          "lon": -73.05789062135072,
-          "directions": [
-            "both"
-          ]
+          "lat": 41.23682,
+          "lon": -73.022328,
+          "exit_ref": "40",
+          "interchange_mi": 110.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "RT. 15 New Canaan NB Service Plaza",

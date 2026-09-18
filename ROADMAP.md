@@ -128,19 +128,141 @@ These items are part of the release-gate sweep:
       streets. A California, New York and Texas sweep the same day took
       it to 1,713 chains (34 percent): California 103 to 130 of 316, New
       York 37 to 46 of 76, Texas 81 to 111 of 412. Every state on the map
-      (48 plus DC) is in the extract set now. About 66 percent of facilities
-      still depart straight onto the highway. Leftovers: path failures
-      inside swept states (in CA/NY/TX alone, 88 source-backed endpoints
-      with no connected public-road path and 44 whose path is one block
-      under the chain floor), the endpoint re-sweep for steel/auto/chemical
-      name matches, and the deferred 419 estimated-near-city residuals.
+      (48 plus DC) is in the extract set now.
+      Leftovers worked 2026-09-17, all 49 extracts re-swept: 1,713 to 1,913
+      chains (38 percent); California 130 to 135, New York 46 to 51, Texas
+      111 to 128. Every one of the 88 CA/NY/TX "no connected path" failures
+      was classified. 52 had a path and ran out of search budget, because
+      the budget was sized from the facility's representative pin near the
+      city centre while the route went to a sourced endpoint three to seven
+      miles out. 22 were a town cut in two because its main street is a US
+      highway OSM classes as trunk, or the only join is a link way. Both
+      were builder bugs and are fixed; no threshold moved. The other 14 are
+      correct refusals: 8 behind private yard roads, 2 reachable only by
+      motorway, 2 across water, 1 inside a site, 1 too far from any road.
+      The 44 "under the chain floor" rows are true negatives (the endpoint
+      is within a few blocks of the city context) and stay refused. Also
+      fixed: a path longer than eight streets kept the first eight out of
+      the city centre and dropped the ones at the yard (109 of 287 CA/NY/TX
+      chains; the kept part covered a median 68 percent of the path); it
+      keeps the facility end now. One street heard several times under
+      different route refs (271 of 1,713 chains) is one street now.
+      What limits this layer now: reading the OSM tags of all 2,779
+      "source-backed" endpoints back out of the extracts shows only 567 are
+      freight sites. 906 are railway track (main lines named for their
+      subdivision), 313 power-grid objects (a substation tagged
+      substation=distribution matched "distribution"), 223 shops, 174 roads
+      and bus stops, 128 public amenities, and 236 carry no industrial tag.
+      The endpoint sweep matches substrings of the name plus every tag
+      value. Only 317 of the 1,713 chains that existed before today lead to
+      a freight site. The approach builder now screens the endpoint's own
+      tags before it routes (read, positive list, in
+      tools/facility_endpoint_screen.py) and records the refusal as the
+      row's reason: 783 chainless rows are refused, and the screen can be
+      switched off with one flag. Existing chains were not demoted.
+      Steel, automotive and chemical endpoints: 193 were matched by name
+      substring, 45 pass the screen plus a stated-trade rule (14 steel, 14
+      automotive, 17 chemical), and 37 of those carry chains now.
+      Endpoint re-sweep, also 2026-09-17, all 49 extracts: chains went from
+      1,913 to 2,364 of 5,037 (47 percent), and the ones that end at a
+      freight site from 517 to 1,722. Sourced endpoints that are freight
+      sites went from 568 to 1,939 of 2,934. 1,224 railway lines,
+      substations and shops were replaced by a freight site inside the
+      6.4-mile city bound, 155 fallbacks were filled, and 995 found nothing
+      better and carry the screen's refusal in their own row. 175 of the
+      sites state no trade (a named industrial business standing in for a
+      template cross-dock), and those rows say the trade is assumed. Every
+      endpoint that already passed was kept byte for byte, and the 419
+      estimated rows were not touched. 642 chains still end at a non-site:
+      560 whose endpoint found no replacement, kept by owner ruling, and 82
+      whose endpoint was replaced but whose new site no public road reaches
+      (61 behind private yard roads, a motorway or water, 12 under the
+      chain floor), kept with a stale_endpoint note until a chain replaces
+      them.
+      Yard roads, 2026-09-17 (owner ruling the same day): a chain may begin
+      on the facility's own access=private road, at the facility end only,
+      spoken as "a service road". The 142 rows whose cause was
+      "disconnected" were re-routed: 89 gained a chain (52 new, 37 stale
+      ones rebuilt), so chains stand at 2,416 of 5,037 (48 percent), 1,811
+      of them to a freight site, and 45 are still stale. The other 53 stay
+      refused: 47 are cut off even with private ways open (the Mississippi
+      at Baton Rouge and New Orleans, the Connecticut at Hartford, a
+      motorway or water elsewhere), 2 would need a private road mid-route
+      or a gate on a public street, 1 has under half a mile of public
+      street, and 3 have a private stretch past the cut (see below).
+- [x] Re-sweep facility endpoints with a matcher that reads an object's own
+      tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
+      ruling that the 1,396 chains to non-sites stay until a re-sweep
+      replaces them. tools/facility_endpoint_match.py states every rule
+      and the kind of each value: the endpoint screen is the gate, the
+      trade must be stated by a tag or by whole words of the name, rail
+      yards serve the intermodal types and industrial=port the ports, and
+      the 6.4-mile bound is the far-pin regeocode's, not tuned. A border
+      screen reads admin_level=2 relation ways, because the Arizona extract
+      holds the maquiladoras on the fence at Douglas. The re-sweep is a
+      merge and can be re-run a state at a time. The approach builder
+      rebuilds a chain whose endpoint was replaced and labels the ones it
+      could not. Numbers are in the item above.
+- [ ] 995 sourced endpoints are still not freight sites, 560 of them under
+      a chain. Named sites ran out: OpenStreetMap names few warehouses in
+      small towns. OWNER DECISION: 365 of the 995 have an UNNAMED
+      building=warehouse, works or rail yard of their own family inside the
+      bound (measured from the cached extracts, before two facilities
+      compete for one building). The tag states the trade, so the match
+      would be read, but a tool shed is a building=industrial too, and a
+      floor area to keep sheds out has to be calibrated against named
+      warehouses first. Recommended: yes for the warehouse and
+      manufacturing families, with the floor reported and the row labelled
+      unnamed. Not built.
+- [ ] Facility types the endpoint sweep has no rule for: 261 grain
+      elevators, 144 quarries, 94 construction materials yards, 63 lumber
+      and paper sites. Each needs a rule in the matcher and an accepted
+      site tag in the screen (man_made=silo, landuse=quarry). The long
+      synthetic approach tests use Payson Quarry because it has no sourced
+      endpoint; re-point them in the same change.
+- [ ] Route the sibling types the approach builder still skips:
+      intermodal, rail, manufacturing, air cargo, food terminal and
+      industrial park, 36 facilities, 26 of them with a screened endpoint
+      now. Nothing about the endpoints argues against it. A dozen core and
+      game tests use Chicago's first facility (Cicero Rail Hub, an
+      intermodal) as the stock single-leg approach and need re-pointing in
+      the same change.
+- [x] Departure chains behind private yard roads. DONE 2026-09-17 on the
+      owner's ruling: a truck leaves a yard over the yard's own road, so a
+      chain may use access=private ways as one stretch at the facility end,
+      never anywhere else, spoken as "a service road" and never by the
+      private way's name, and the half-mile chain floor is held against
+      public miles alone (tools/yard_roads.py states each rule and its
+      kind). access=no, military, no-truck ways and gates on public streets
+      stay refused. The private stretches found run 0.03 to 0.85 miles with
+      a clear gap before 1.49, so the cut is one mile; the owner allowed
+      three sites past it by name (Gary Works steel mill 1.49, Tampa cold
+      storage 1.94, Port Tampa Bay bulk docks 1.97).
+- [ ] Two endpoints reached only over five to eight miles of private road,
+      left unbuilt by owner ruling 2026-09-17 because that reads like a
+      wrong endpoint: Huntsville cross-dock (endpoint "Kuskokwin Building",
+      tagged only building=warehouse, whose coordinates put it inside
+      Redstone Arsenal, so the 4.86 miles are the arsenal's roads) and
+      Ukiah company yard (endpoint "Retech Systems LLC", an industrial area
+      with the trade assumed, 7.4 miles south of town beside US 101, which
+      is a motorway there, so the graph's only join is 7.69 miles of
+      private road). Both want an endpoint fix, not a routing one. San Diego cross-dock (2.06 miles of port road)
+      also sits past the cut, unruled.
+- [ ] The public road graph still ignores barrier nodes and ways signed
+      motor_vehicle=no or hgv=no; only the yard-road fallback honours them.
+      Noted 2026-09-17; measure how many existing chains cross one before
+      changing the public search.
 
 #### World data and sound licensing blockers
 
 World-data geometry for 1.9 (curves, refuse legs, far approach pins)
 closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
-world-data item (see above): every state has been swept once, and the
-leftovers are path failures inside swept states and the endpoint re-sweep.
+world-data item (see above): every state was re-swept 2026-09-17 with the
+path failures fixed, the endpoint re-sweep landed the same day, and the
+yard-road rule after it (2,416 chains, 48 percent, 1,811 of them to a
+freight site). What is left is the third of sourced endpoints with no named
+freight site in reach, the facility types with no matcher rule, and two
+endpoints behind miles of private road.
 
 - [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry.
       CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
@@ -415,6 +537,40 @@ its status or release decision.
       pause. Server side deployed first; builds before it keep the old
       behaviour.
 
+### September 18 a night's parking on every road
+
+- [x] A leg with no stop a loaded truck can sleep at takes the federal
+      truck-parking inventory's rest areas on its own road, whatever its
+      stop count. Two bobtail-only Kwik Trips had met the minimum for the
+      65 miles of I-35 from Owatonna to Minneapolis while Heath Creek and
+      New Market sat unlisted, and the cab answered "no sleep-capable route
+      stop ahead". 22 rest areas on 14 legs; on the road means within the
+      annotate pass's one-mile corridor bound, not the 20-mile search
+      radius chain stops are offered from. The same run confirmed parking
+      on 51 stops added or renamed since the July annotate pass.
+- [x] F1 on a course row under Licenses and training says what the
+      credential opens, as the board names the freight, and both roads to
+      it: the carrier's sponsor level or the one level earlier it can be
+      paid for, or course only with its level, cost, prerequisites and
+      background-check wait. Earned and pending rows say it too. The row
+      used to give cost and level and nothing about what the course was for.
+- [x] Settings, Audio, Shuffle personal playlists: a playlist of the
+      player's own files plays every track once per lap in a seeded
+      random order, a new order each lap that never opens on the track
+      that just ended; off resumes top to bottom. Asked for by Hailey on
+      the drivers board: the Playlists folder was built for M3U stream
+      lists and is being used for MP3 collections.
+- [ ] 196 legs still have no sleep stop a loaded truck can use and no
+      inventory record on the road. US-12 Willmar to Minneapolis is one:
+      its only stop is a Kwik Trip typed bobtail-only. Needs another
+      source, state DOT rest-area lists or truck parking read from the OSM
+      extracts, before the rest key can plan a stop on them.
+- [ ] Inventory rest areas are one per carriageway (Heath Creek serves
+      I-35 north, New Market I-35 south) and the map stores each as serving
+      both directions, so a pair is announced twice within a mile. The
+      runtime only knows forward and reverse relative to a leg; deriving
+      that from the leg's heading and the record's route suffix is the fix.
+
 ### September 17 the dial follows the road
 
 - [x] A station that fades out of range hands the dial to the strongest
@@ -459,13 +615,143 @@ its status or release decision.
       leg that already lists it under another name (the same rule, mirrored),
       and a copy of a copy no longer stacks the source note: 257 of its 960
       copies carry the note twice, one per hop.
-- [ ] 1,300 of the map's 1,819 service plazas carry a truck-stop chain's
-      name (Love's 445, Pilot 371, Flying J 233, Petro 117, TA 91), so the
-      type is mostly the map import's guess and not a reading. The ones with
-      no named twin still announce as service plazas, with no exit number or
-      ramp control of their own. Retyping them wants the chains' locator
-      records, which would also replace the four-mile calibration with
-      facility coordinates.
+- [x] A chain truck stop the map import typed as a service plaza is read as
+      a travel center, at load (`data::branded_plazas`). A service plaza is a
+      toll road's own plaza on the highway, and the import had no such
+      distinction to read, so the type was its default. The rule is a
+      self-contradiction screen: the type says toll-road plaza and the name
+      begins with a national truck-stop chain. A record whose own name also
+      says service plaza or service area would stay. Measured 2026-09-17,
+      after the twin screen: 1,317 records retyped (Love's 396, Pilot 356,
+      Flying J 212, TA 137, Petro 117, Road Ranger 32, Sapp Brothers 32,
+      ONE9 28, Stamart 3, Onvo 3, Roady's 1) and none kept. All 1,317 are
+      sourced to the amenity query and none to a toll authority's listing;
+      the 99 plazas that name themselves are separate records and are left
+      alone. 29 of the retyped records sit on a leg that charges a toll, and
+      each is a store at an interchange. The value is derived from the name,
+      not read, and the data keeps the recorded type so the rule can be
+      re-judged. "Sapp Brothers" joined the chain list, which only knew
+      "Sapp Bros".
+- [x] What the type changes, checked 2026-09-17: the spoken label and
+      nothing else. Actions, assumed parking, vehicle access and loyalty are
+      the same for both types. The exit number and the ramp's control are
+      found by mile marker for every stop, so the retyped records were never
+      short of them because of their type: 58% have a numbered exit within
+      two miles and 5% a recorded ramp control within 0.15, against 62% and
+      3% for the map's other travel centers. 312 of the ones with no exit
+      number are on legs with no interchange records at all.
+- [x] The chain truck stops carry their store (`tools/import_chain_locators.py`,
+      2026-09-17). The terms-of-use check came first and ruled the locators
+      out: Love's, TA and Petro, and Road Ranger forbid automated access, and
+      Pilot Flying J (with ONE9) forbids copying its listing. Sapp Bros posts
+      no terms; its one page lists 17 towns. So the store table is read from
+      the cached OpenStreetMap state extracts: 1,764 stores, a town for 1,556
+      (read from the address, branch or linked store page for 1,275, the
+      curated record's own town for 39, derived from the nearest mapped town
+      within two miles for 239 and labelled so),
+      a store number for 897, a truck parking count for 8. No exits. Records
+      match a store by coordinate inside 0.1 mile (1,462 records under it,
+      none between 0.1 and 5 miles). A record with no coordinates matches the
+      only store of its brand within 5 miles of its mile marker, or the one
+      store carrying its own town's name. Of 1,726 bare records 1,326 are
+      named, 126 are typed and sourced with no town to name them by, 52 match
+      a store nothing says serves trucks, 77 found no store, 9 would repeat a
+      name already on the leg, and 145 were twins. 164 twins deleted in all,
+      38 kept records took the deleted twin's better mile marker, and 563
+      records gained coordinates. The two load-time screens stay as the net:
+      the twin screen now drops 2 records where it dropped 90, and the retype
+      acts on 52 where it acted on 1,317 (counted with a Python mirror of both
+      rules that reproduces the 90 and the 1,317 on the map before).
+- [ ] Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
+      percentile of 3.4 from where the store projects onto the leg's own
+      line, and 5 to 40 miles for about 110 curated records on long legs.
+      Exit numbers and ramp controls are found by mile marker, so re-project
+      each from the store coordinates it now carries. Exits and parking
+      counts would need the chains' written consent to use their locators.
+      Owner ruling 2026-09-17: not asking; the OpenStreetMap store table
+      stands.
+- [x] A stop carries the interchange that serves it, decided once when the
+      data is built (`tools/snap_stops_to_interchanges.py`), and the exit
+      number, the ramp's control and the ramp's advisory speed are looked up
+      by that identity with no tolerance. The old lookup searched within 0.15
+      miles of the stop's mile marker, which is a projection: measured on
+      1,223 stops whose read coordinates put them beside a junction, it is
+      within 0.15 miles of that junction for one in six and over a mile off
+      for half. The stop gains `exit_ref` (read), `interchange_mi` (derived:
+      the `at_mi` of the leg's record with that exit number) and
+      `exit_source`. Evidence in order: the stop's own source names its exit
+      (a chain's store listing) and the leg's record of that number lies
+      within 5.3 miles, the measured 99th percentile of mile marker error;
+      else read coordinates within 0.6 miles of a junction node on the leg's
+      own highway (within 200 m of the leg's geometry, on a motorway or trunk
+      way that shares the leg's route number, read from the cached state
+      extracts in 48 seconds); else the same store under another name on the
+      leg. 0.6 is where the distance cluster (peak at 0.20 to 0.25) meets the
+      flat rate of stops that are merely somewhere along the road, which
+      bounds chance snaps at 8%. The one check independent of the snap, a
+      store's listed exit against its coordinate twin's snap, agrees 40
+      times in 40. Measured 2026-09-17 on 3,936 stops reached by an exit:
+      ramp control read from the map 133 (3.4%) to 574 (14.6%), seeded 3,803
+      to 3,362, exit number spoken 1,926 (48.9%) to 2,230 (56.7%), and of the
+      1,390 exit numbers now decided by identity the mile marker had named
+      another exit 464 times. On the loaded map after the twin screen, 828
+      stops are matched, 476 read a control, and the 0.15 mile search reached
+      59 of those. The controls are still mostly assumed. A stop with no
+      evidence keeps the old lookup. 485 opposite-direction copies carry
+      coordinates that are their own mile marker again (a point on the source
+      leg's line, written by `tools/reverse_pair_stops.py`) and are ignored
+      as evidence; 48 stops name an exit their leg puts over 5.3 miles away
+      (Love's Heyburn appears at mile 121.9 and again at 143.6 of Idaho Falls
+      to Boise, and exit 211 is at 119.9) and are listed, not linked.
+      Re-run the same day on the map after the store import, which gave 563
+      more stops read coordinates: of 3,772 stops reached by an exit, 965
+      carry their interchange, ramp controls read from the map go from 118
+      (3.1%) to 616 (16.3%), exit numbers spoken from 1,797 (47.6%) to
+      2,136 (56.6%), and the mile marker had named another exit for 527 of
+      the 1,506 now decided by identity. 41 stops name an exit their leg
+      puts elsewhere.
+- [ ] What still leaves a truck stop's ramp to the seeded control, in order
+      of size: 1,353 stops are on the 532 legs with no interchange records
+      (the interchange build only reads Interstate shields); 390 snapped to
+      an exit their leg does not record, because the build drops an exit
+      within two miles of a richer neighbour, and should keep one that
+      serves a truck stop; 375 matched records carry no control because the
+      map tags none. Remove the copied coordinates and the 48 misplaced
+      copies at the source, in `tools/reverse_pair_stops.py`.
+- [x] The 320 service plazas with no chain name that do not name
+      themselves a service plaza or service area are each typed as what
+      OpenStreetMap says they are (`tools/nonchain_plazas.py`, with what it
+      read committed beside it in `nonchain_plazas_evidence.json`). The type
+      was never an import default: the import gave `service_plaza` to every
+      `highway=services` feature, a tag U.S. mappers also put on truck-stop
+      lots, convenience stores and now and then a welder. Each record's
+      feature was looked up in the Geofabrik state extracts, read
+      2026-09-17. Of 151 places with a same-named feature, 110 sit within
+      0.0004 miles of the record (coordinate rounding) and the next is at
+      0.025, so the cut is 0.001; past it a place is identified by name
+      only, and never when the name is a multi-store brand. Corrected in the
+      data, with what was read appended to `source`: 156 travel centers (134
+      read from HGV fuel lanes, HGV parking or a truck scale, 22 derived
+      from the name), 18 fuel stations (9 read, 9 derived), 1 public rest
+      area, and 38 confirmed as service plazas (28 read from a toll
+      authority's operator tag, 10 derived). Removed as not stops, 75
+      records of 18 places, most of them a bare `highway=services` feature
+      under another business's name: Horner Industrial Group 15, Bay 2 12 (a
+      Nashville bus bay), Lucky Spot 8, Auto Repair 4, and a rest area on
+      CT-15, where trucks are banned, listed 9 times on I-95 and I-91. Two
+      legs now list no stop (Fortuna to Eureka, Stockton to San Francisco).
+      The 32 records that only their name decides ("Flags West Truck
+      Stop") are read as travel centers at load (`data::branded_plazas`).
+      5 stay service plazas on no evidence: Modena Travel Plaza 2, Super S
+      Travel Plaza, one QuikTrip, one Circle K. `tools/reverse_pair_stops.py` now
+      asks a fuel-type stop for the access screen's evidence before copying
+      it; the type alone had carried 4 of the removed records onto partner
+      legs.
+- [x] 21 convenience-brand records (QuikTrip 16, Casey's, Speedway, OnCue)
+      have HGV fuel lanes and a truck scale mapped in OpenStreetMap, and the
+      access screen still reads them bobtail-only because their services
+      list no scale. Owner ruling 2026-09-17: left as they are. Their truck
+      parking is only assumed, so they stay closed to a trailer.
 
 ### September 16 radio range and the cruise floor
 

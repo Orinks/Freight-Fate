@@ -59,12 +59,32 @@ pub fn spoken_road_text(text: &str) -> String {
     if text.is_empty() || !text.contains(';') {
         return text;
     }
-    ROAD_REF_LIST
+    let text = ROAD_REF_LIST
         .replace_all(&text, |caps: &regex::Captures| {
             let first = caps[1].split(';').next().unwrap_or("").trim().to_string();
             format!("({first})")
         })
-        .into_owned()
+        .into_owned();
+    first_of_a_bare_list(&text)
+}
+
+/// The same trim for a list that is not in parentheses: a road with no name
+/// of its own is baked under its refs ("Continue onto I 70 BUS;US 6;US 50."),
+/// and a street the map gives two names carries both ("Ellsworth Street
+/// Southwest;Albany-Corvallis Highway (US 20)"). Keep the first, and keep
+/// whatever follows the list: the parenthetical ref, the cue's full stop.
+fn first_of_a_bare_list(text: &str) -> String {
+    let mut out = text.to_string();
+    while let Some(start) = out.find(';') {
+        let rest = &out[start..];
+        let end = rest
+            .find(" (")
+            .or_else(|| rest.strip_suffix('.').map(str::len))
+            .unwrap_or(rest.len());
+        let kept = out[..start].trim_end().len();
+        out.replace_range(kept..start + end, "");
+    }
+    out
 }
 
 /// Maneuver direction baked in a local segment cue, or "".
@@ -402,11 +422,30 @@ mod tests {
             spoken_road_text("Richard G. Hatcher Boulevard"),
             "Richard G. Hatcher Boulevard"
         );
-        // Prose parentheticals with semicolons only lose text after the semicolon,
-        // never the sentence around them.
+    }
+
+    #[test]
+    fn test_spoken_road_text_keeps_the_first_of_a_list_outside_parentheses() {
+        // A road baked under its refs because it has no name of its own, and
+        // a street the map gives two names. 79 such strings reached the
+        // facility approaches in the 2026-09-17 sweep; read aloud each was
+        // tag soup. This used to assert the opposite on an invented sentence
+        // ("no parens; still fine"), before the data showed the real case.
         assert_eq!(
-            spoken_road_text("no parens; still fine"),
-            "no parens; still fine"
+            spoken_road_text("Continue onto I 70 BUS;US 6;US 50."),
+            "Continue onto I 70 BUS."
+        );
+        assert_eq!(
+            spoken_road_text("I 75 Business; US 41; GA 7"),
+            "I 75 Business"
+        );
+        assert_eq!(
+            spoken_road_text("Ellsworth Street Southwest;Albany-Corvallis Highway (US 20)"),
+            "Ellsworth Street Southwest (US 20)"
+        );
+        assert_eq!(
+            spoken_road_text("Turn right onto Main Street;Old Post Road (US 11;NY 12)."),
+            "Turn right onto Main Street (US 11)."
         );
     }
 

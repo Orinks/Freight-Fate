@@ -378,9 +378,18 @@ fn arrive_with(
     let mut max_creep_hold_throttle = 0.0f64;
     let mut min_creep_speed_mph: Option<f64> = None;
     let mut min_creep_gear: Option<i32> = None;
-    // Enough for a mile of city streets at a crawl, and no more: a truck that
-    // has not arrived by then is not going to.
-    for _ in 0..(60 * 600) {
+    // Ten minutes for each mile of city streets at a crawl, and no more: a
+    // truck that has not arrived by then is not going to. Per mile, because
+    // the streets are as long as the facility is far: this was a flat ten
+    // minutes while no sampled chain ran much past a mile, and the 2026-09-17
+    // sweep gave Aurora Company Yard its real 3.9 miles of them.
+    let chain_mi = world
+        .facility_source_approach(&destination.city, &destination.location)
+        .ok()
+        .flatten()
+        .map_or(1.0, |approach| approach.total_miles.max(1.0));
+    let budget_frames = (60.0 * 600.0 * chain_mi).ceil() as usize;
+    for _ in 0..budget_frames {
         if !harness.has_drive() {
             // The automatic pull-in first replaces the drive with a timed
             // spoken transition. Finish it and require the real dock menu;

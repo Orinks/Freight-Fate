@@ -2627,7 +2627,9 @@
           ],
           "lat": 46.82989,
           "lon": -100.72868,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "161",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.19 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Love's",
@@ -2647,7 +2649,10 @@
           ],
           "lat": 46.83874,
           "lon": -100.2867,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "182",
+          "interchange_mi": 24.89,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -4104,10 +4109,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Minot",
+          "type": "travel_center",
           "at_mi": 109.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4774,10 +4779,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 89.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6430,9 +6435,9 @@
         },
         {
           "name": "Wild Bison Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 104.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6502,7 +6507,10 @@
           "lon": -96.00334721281308,
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "61",
+          "interchange_mi": 63.9,
+          "exit_source": "exit_ref read: the stop's own source names exit 61; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Truckers Inn",
@@ -6532,9 +6540,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 166.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 842; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6551,13 +6559,15 @@
           ],
           "lat": 45.5114984,
           "lon": -94.2865671,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "164B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center St. Cloud",
+          "type": "travel_center",
           "at_mi": 172.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at St. Cloud; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6574,13 +6584,16 @@
           ],
           "lat": 45.4962812,
           "lon": -94.1487305,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "171",
+          "interchange_mi": 174.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.57 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Clearwater",
+          "type": "travel_center",
           "at_mi": 182.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 182.8 of this leg (1.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6595,7 +6608,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.412138,
+          "lon": -94.05365,
+          "exit_ref": "178",
+          "interchange_mi": 181.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Kwik Trip",
@@ -6615,7 +6633,10 @@
           ],
           "lat": 45.21739,
           "lon": -93.59833,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "205A",
+          "interchange_mi": 208.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.13 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "corridor": {
@@ -10536,9 +10557,9 @@
         },
         {
           "name": "Coffee Cup Travel Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 119.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (derived): the name carries a word the access screen already reads as truck-serving, the OpenStreetMap feature of the same name 0.1 miles away names no toll authority and the leg carries no toll. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10555,7 +10576,10 @@
           ],
           "lat": 45.31163,
           "lon": -97.04742,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "207",
+          "interchange_mi": 117.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -11489,10 +11513,10 @@
       },
       "stops": [
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12331,10 +12355,10 @@
       },
       "stops": [
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12351,7 +12375,10 @@
           ],
           "lat": 47.88796,
           "lon": -97.09338,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "138",
+          "interchange_mi": 6.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Sorum Oil",
@@ -13578,7 +13605,10 @@
           ],
           "lat": 46.87596,
           "lon": -97.20993,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "331",
+          "interchange_mi": 73.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Loaf 'N Jug",
@@ -14424,10 +14454,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Minot",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15493,10 +15523,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Sidney",
+          "type": "travel_center",
           "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Montana extract dated 2026-06-22, read 2026-09-17): Pilot store at Sidney; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16966,10 +16996,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Minot",
+          "type": "travel_center",
           "at_mi": 124.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

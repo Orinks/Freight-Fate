@@ -1042,10 +1042,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ardmore",
+          "type": "travel_center",
           "at_mi": 58.91,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Ardmore; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4445,7 +4445,9 @@
           ],
           "lat": 34.63818,
           "lon": -98.38333,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "40B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US62, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -5513,10 +5515,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Wichita Falls",
           "type": "travel_center",
           "at_mi": 83.3,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wichita_falls_tx_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wichita_falls_tx_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Flying J store at Wichita Falls; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7863,10 +7865,10 @@
       },
       "stops": [
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ardmore",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Ardmore; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7906,10 +7908,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Road Ranger",
-          "type": "service_plaza",
+          "name": "Road Ranger Gainesville",
+          "type": "travel_center",
           "at_mi": 36.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Road Ranger store at Gainesville; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7926,7 +7928,10 @@
           ],
           "lat": 33.6697877,
           "lon": -97.1528869,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "500",
+          "interchange_mi": 36.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "ONE9 Dealer Valley View",
@@ -7974,7 +7979,9 @@
           ],
           "lat": 33.36671,
           "lon": -97.18139,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "479",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -7987,10 +7994,10 @@
       "miles": 81,
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Atoka",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Atoka; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8010,10 +8017,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Savanna",
+          "type": "travel_center",
           "at_mi": 40.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): TA Express store 0966 at Savanna; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8034,9 +8041,9 @@
         },
         {
           "name": "QuikTrip",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 80.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the henryetta_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the henryetta_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8053,7 +8060,9 @@
           ],
           "lat": 35.43977,
           "lon": -95.9697,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "104B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US75, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "corridor": {
@@ -9283,10 +9292,10 @@
       "miles": 44,
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Atoka",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Atoka; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9306,10 +9315,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Savanna",
+          "type": "travel_center",
           "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): TA Express store 0966 at Savanna; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9326,7 +9335,9 @@
           ],
           "lat": 34.83384,
           "lon": -95.8395,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "82",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US69, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "corridor": {
@@ -10811,10 +10822,10 @@
       "miles": 96,
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Boise City",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_city_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_city_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 302 at Boise City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10877,10 +10888,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "TA Express",
-          "type": "service_plaza",
+          "name": "TA Express Lamar",
+          "type": "travel_center",
           "at_mi": 95.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the lamar_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the lamar_co_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): TA Express store 0929 at Lamar; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11732,9 +11743,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the durant_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the durant_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 821; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11771,13 +11782,15 @@
           ],
           "lat": 34.13038,
           "lon": -96.27246,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "27",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US75, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Atoka",
+          "type": "travel_center",
           "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the atoka_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Atoka; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15105,9 +15118,9 @@
       "stops": [
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 630; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15183,10 +15196,10 @@
       "miles": 14,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Okmulgee",
+          "type": "travel_center",
           "at_mi": 13.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the okmulgee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the okmulgee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 675 at Okmulgee; town DERIVED, not read: the nearest mapped place, 1.0 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17401,7 +17414,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 52.0,
-          "source": "Love's/Pilot travel center on the corridor (both dominant in the KS/OK/TX plains), verified against operator directory listings (development-time); curated into a gameplay POI.",
+          "source": "Love's/Pilot travel center on the corridor (both dominant in the KS/OK/TX plains), verified against operator directory listings (development-time); curated into a gameplay POI. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 167; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 52 of this leg (4.3 mi); coordinates read from the mapped site.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -17418,7 +17431,9 @@
             "showers",
             "scale"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.081981,
+          "lon": -97.889283
         }
       ],
       "divided": true,
@@ -18368,7 +18383,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 30.0,
-          "source": "Love's/Pilot travel center on the corridor (both dominant in the KS/OK/TX plains), verified against operator directory listings (development-time); curated into a gameplay POI.",
+          "source": "Love's/Pilot travel center on the corridor (both dominant in the KS/OK/TX plains), verified against operator directory listings (development-time); curated into a gameplay POI. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 734; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 30 of this leg (3.0 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18385,13 +18400,17 @@
             "showers",
             "scale"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.172827,
+          "lon": -98.498676,
+          "exit_ref": "5",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Wichita Falls",
           "type": "travel_center",
           "at_mi": 53.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wichita_falls_tx_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wichita_falls_tx_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Flying J store at Wichita Falls; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18421,10 +18440,10 @@
       "miles": 66,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Eufaula",
+          "type": "travel_center",
           "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 204 at Eufaula; town DERIVED, not read: the nearest mapped place, 1.3 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18464,10 +18483,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Muskogee",
+          "type": "travel_center",
           "at_mi": 65.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Muskogee; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20652,10 +20671,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Muskogee",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Muskogee; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24346,7 +24365,7 @@
           "name": "Love's Travel Stop Clinton",
           "type": "travel_center",
           "at_mi": 76.7,
-          "source": "Love's official store feed lists store 248 in Clinton, OK on I-40, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 248 in Clinton, OK on I-40, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 248 at Clinton; matched by position, the only Love's within 5 mi of mile 76.7 of this leg (2.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -24366,13 +24385,18 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.518167,
+          "lon": -98.870801,
+          "exit_ref": "71",
+          "interchange_mi": 78.9,
+          "exit_source": "exit_ref read: the stop's own source names exit 71; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Sayre",
+          "type": "travel_center",
           "at_mi": 129.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Sayre; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 129 of this leg (0.9 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24387,13 +24411,18 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.265385,
+          "lon": -99.640814,
+          "exit_ref": "20",
+          "interchange_mi": 130.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.11 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Erick",
           "type": "travel_center",
           "at_mi": 142.4,
-          "source": "Love's official store feed lists store 253 in Erick, OK on I-40, exit 7; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 253 in Erick, OK on I-40, exit 7; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 253 at Erick; matched by position, the only Love's within 5 mi of mile 142.4 of this leg (1.1 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -24413,7 +24442,12 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.224004,
+          "lon": -99.869794,
+          "exit_ref": "7",
+          "interchange_mi": 143.5,
+          "exit_source": "exit_ref read: the stop's own source names exit 7; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Donley County Eastbound Rest Area",
@@ -24435,9 +24469,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 229.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Love's store 229; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 229.3 of this leg (1.8 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24452,7 +24486,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.218696,
+          "lon": -101.381763,
+          "exit_ref": "96",
+          "interchange_mi": 231.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Public Diesel",
@@ -26527,10 +26566,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Norman",
+          "type": "travel_center",
           "at_mi": 24.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 260 at Norman; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26547,7 +26586,9 @@
           ],
           "lat": 35.18394,
           "lon": -97.4993,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "106",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.41 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Phillips 66",
@@ -26567,7 +26608,10 @@
           ],
           "lat": 34.82681,
           "lon": -97.3073,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "79",
+          "interchange_mi": 49.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.32 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Pauls Valley",
@@ -26595,7 +26639,10 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 34.70595483284471,
-          "lon": -97.24476191722421
+          "lon": -97.24476191722421,
+          "exit_ref": "70",
+          "interchange_mi": 58.6,
+          "exit_source": "exit_ref read: the stop's own source names exit 70; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-35 Weigh Station",
@@ -26639,10 +26686,10 @@
           ]
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Ardmore",
+          "type": "travel_center",
           "at_mi": 98.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ardmore_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Ardmore; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26659,7 +26706,9 @@
           ],
           "lat": 34.2006,
           "lon": -97.16679,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "33",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -28325,7 +28374,7 @@
           "name": "Love's Travel Stop Stroud",
           "type": "travel_center",
           "at_mi": 52.9,
-          "source": "Love's official store feed lists store 169 in Stroud, OK on I-44, exit Mile 178 (Westbound Only); at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 169 in Stroud, OK on I-44, exit Mile 178 (Westbound Only); at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store at Stroud; matched by position, the only Love's within 5 mi of mile 52.9 of this leg (2.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -28345,7 +28394,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.751791,
+          "lon": -96.689939
         }
       ],
       "divided": true,
@@ -30668,9 +30719,9 @@
         },
         {
           "name": "OnCue",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 80.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30687,7 +30738,10 @@
           ],
           "lat": 36.53447,
           "lon": -97.34022,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "203",
+          "interchange_mi": 79.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop Belle Plaine",
@@ -30741,10 +30795,10 @@
       "miles": 38,
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Okmulgee",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the okmulgee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the okmulgee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 675 at Okmulgee; town DERIVED, not read: the nearest mapped place, 1.0 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30765,9 +30819,9 @@
         },
         {
           "name": "QuikTrip",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 28.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34640,9 +34694,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 66.76,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 630; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35726,10 +35780,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Guthrie",
+          "type": "travel_center",
           "at_mi": 34.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 604 at Guthrie; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35749,10 +35803,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Edmond",
+          "type": "travel_center",
           "at_mi": 51.05,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Edmond; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39048,7 +39102,7 @@
           "name": "Lone Chimney Concessions Plaza",
           "type": "service_plaza",
           "at_mi": 47.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (derived): the name says concession, a turnpike authority's word for its own plazas. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39089,9 +39143,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 114.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the enid_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 630; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -41252,13 +41306,15 @@
           ],
           "lat": 36.168,
           "lon": -95.96731,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "7",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US412, 0.59 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Tulsa",
+          "type": "travel_center",
           "at_mi": 9.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Flying J store at Tulsa; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -41275,7 +41331,9 @@
           ],
           "lat": 36.1624259,
           "lon": -95.8314322,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "15",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US412, 0.41 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Stone Creek",
@@ -41298,10 +41356,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Chouteau",
+          "type": "travel_center",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 295 at Chouteau; town DERIVED, not read: the nearest mapped place, 1.6 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44104,10 +44162,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Joplin",
+          "type": "travel_center",
           "at_mi": 107.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Petro store 0354 at Joplin; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44219,10 +44277,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Peculiar",
+          "type": "travel_center",
           "at_mi": 244.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Peculiar; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -45166,7 +45224,7 @@
           "name": "Muskogee Turnpike Concession",
           "type": "service_plaza",
           "at_mi": 36.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Confirmed a service plaza (read): the OpenStreetMap feature at the record's coordinate is highway=services operated by Oklahoma Turnpike Authority. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -45186,10 +45244,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Muskogee",
+          "type": "travel_center",
           "at_mi": 48.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the muskogee_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Pilot store at Muskogee; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",

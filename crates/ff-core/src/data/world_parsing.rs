@@ -640,6 +640,22 @@ pub fn parse_stop(
             )));
         }
     }
+    // The interchange that serves the stop, when the bake decided one. The
+    // corridor is the lazy half of a leg and is not parsed yet, so whether a
+    // record sits at that mile is proved by `data_stop_exits`, not here.
+    let interchange_mi = if raw.contains_key("interchange_mi") {
+        let mi = req_float(raw, "interchange_mi")?;
+        if !(0.0..=leg_miles).contains(&mi) {
+            return Err(err(format!(
+                "stop {rname} has interchange_mi {}, outside leg mileage 0-{}",
+                py_str_float(mi),
+                py_str_float(leg_miles)
+            )));
+        }
+        Some(mi)
+    } else {
+        None
+    };
     Ok(Stop {
         name,
         at_mi,
@@ -652,6 +668,8 @@ pub fn parse_stop(
         curation,
         parking_spaces,
         vehicle_access,
+        exit_ref: get_str(raw, "exit_ref"),
+        interchange_mi,
     })
 }
 

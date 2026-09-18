@@ -676,10 +676,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Albert Lea",
+          "type": "travel_center",
           "at_mi": 1.27,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1474,33 +1474,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 43.65972,
-          "lon": -93.31555,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
-          "at_mi": 17.9,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "at_mi": 1.0,
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 1 of this leg (14.4 mi); coordinates read from the mapped site. Mile marker moved from 17.9 to 1: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 17.9 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -1521,8 +1498,10 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 43.86562739150087,
-          "lon": -93.27722705767962
+          "lat": 43.65965,
+          "lon": -93.315752,
+          "exit_ref": "11",
+          "exit_source": "exit_ref read: the stop's own source names exit 11; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -4936,7 +4915,10 @@
           ],
           "lat": 46.7607881,
           "lon": -92.1317561,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "254",
+          "interchange_mi": 2.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Thompson Hill Travel Information Center",
@@ -7132,7 +7114,10 @@
           ],
           "lat": 46.433001,
           "lon": -92.7558568,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "214",
+          "interchange_mi": 41.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.40 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Kettle River",
@@ -7174,13 +7159,16 @@
           ],
           "lat": 46.00969,
           "lon": -92.92625,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "183",
+          "interchange_mi": 72.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Columbus",
+          "type": "travel_center",
           "at_mi": 126.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 832 at Columbus; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7197,7 +7185,10 @@
           ],
           "lat": 45.2485,
           "lon": -93.02336,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "129",
+          "interchange_mi": 125.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -12353,10 +12344,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "TA",
-          "type": "service_plaza",
+          "name": "TA Travel Center Rogers",
+          "type": "travel_center",
           "at_mi": 187.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): TA store 0190 at Rogers; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18021,8 +18012,8 @@
         {
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
-          "at_mi": 80.0,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "at_mi": 94.8,
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 94.8 of this leg (14.3 mi); coordinates read from the mapped site. Mile marker moved from 80 to 94.8: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 80 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -18042,33 +18033,9 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 94.8,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 43.65972,
-          "lon": -93.31555,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 43.65965,
+          "lon": -93.315752
         },
         {
           "name": "Love's Travel Stop Ellsworth",
@@ -18100,8 +18067,8 @@
           "name": "I-35 Dows Rest Stop",
           "type": "public_rest_area",
           "at_mi": 165.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-35 truck parking near Dows with 50 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -18117,7 +18084,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 50
         },
         {
           "name": "Casey's Truck Stop",
@@ -18142,9 +18110,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 192.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 426 at Ellsworth; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18164,7 +18132,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "133",
+          "interchange_mi": 192.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Casey's Truck Stop",
@@ -18190,7 +18161,9 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "89",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.40 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -19604,6 +19577,28 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Heath Creek",
+          "type": "public_rest_area",
+          "at_mi": 27.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Heath Creek on I-35N in Dundas, MN with 20 truck parking spaces, mile post 68; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 20
+        },
+        {
           "name": "Kwik Trip #1116",
           "type": "fuel_station",
           "at_mi": 32.5,
@@ -19622,6 +19617,28 @@
           "lat": 44.57246,
           "lon": -93.32946,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "New Market",
+          "type": "public_rest_area",
+          "at_mi": 33.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists New Market on I-35S in Elko, MN with 15 truck parking spaces, mile post 75; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 15
         }
       ],
       "divided": true,
@@ -20805,10 +20822,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Albert Lea",
+          "type": "travel_center",
           "at_mi": 63.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22283,9 +22300,9 @@
         },
         {
           "name": "Nodine Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 55.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23837,13 +23854,15 @@
           ],
           "lat": 44.28248,
           "lon": -92.66737,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "77",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US52, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Inver Grove Heights",
+          "type": "travel_center",
           "at_mi": 62.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at Inver Grove Heights; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 62.3 of this leg (1.5 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23858,7 +23877,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.780786,
+          "lon": -93.033739
         }
       ],
       "divided": true,
@@ -24825,10 +24846,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Saint Charles",
+          "type": "travel_center",
           "at_mi": 26.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 844 at Saint Charles; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by position, the only Love's within 5 mi of mile 26.5 of this leg (2.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24843,7 +24864,9 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.954069,
+          "lon": -92.064173
         }
       ],
       "divided": true,
@@ -26772,7 +26795,10 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "61",
+          "interchange_mi": 107.5,
+          "exit_source": "exit_ref read: the stop's own source names exit 61; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Co Hwy 88 Rest Area",
@@ -28002,10 +28028,10 @@
           ]
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Clearwater",
+          "type": "travel_center",
           "at_mi": 16.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 16.4 of this leg (3.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28020,7 +28046,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.412138,
+          "lon": -94.05365,
+          "exit_ref": "178",
+          "interchange_mi": 12.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Kwik Trip",
@@ -29056,29 +29087,6 @@
             "diesel",
             "food"
           ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Divine House Inc.",
-          "type": "service_plaza",
-          "at_mi": 61.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the willmar_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.12099,
-          "lon": -95.04823,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -30639,29 +30647,6 @@
       },
       "stops": [
         {
-          "name": "Divine House Inc.",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the willmar_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.12099,
-          "lon": -95.04823,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 47.0,
@@ -31825,29 +31810,6 @@
           "lat": 45.10209,
           "lon": -95.04347,
           "vehicle_access": "bobtail_only"
-        },
-        {
-          "name": "Quick Pro Lube",
-          "type": "service_plaza",
-          "at_mi": 83.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 45.22546,
-          "lon": -96.61669,
-          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": false,
@@ -32633,9 +32595,9 @@
       "stops": [
         {
           "name": "Nodine Truck Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 15.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.1 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",

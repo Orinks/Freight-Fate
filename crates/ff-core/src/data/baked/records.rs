@@ -188,7 +188,7 @@ mirror!(BakedStop => Stop {
     name: String, at_mi: f64, stop_type: String, source: String,
     actions: Vec<String>, services: Vec<String>, parking: String,
     directions: Vec<String>, curation: String, parking_spaces: i64,
-    vehicle_access: String,
+    vehicle_access: String, exit_ref: String, interchange_mi: Option<f64>,
 });
 
 mirror!(BakedLocation => Location {

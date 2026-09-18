@@ -6,7 +6,7 @@ use std::f64::consts::PI;
 use regex::Regex;
 
 use crate::data::world::World;
-use crate::data::world_models::Leg;
+use crate::data::world_models::{Interchange, Leg, Stop};
 use crate::pyfmt::fmt_f;
 use crate::sim::trip_models::Zone;
 
@@ -66,6 +66,38 @@ pub fn nearest_exit_label(leg: &Leg, at_mi: f64, tol_mi: f64) -> String {
         }
     }
     best_label
+}
+
+/// How close two mile markers must be to be the same record. A stop's
+/// `interchange_mi` is a copy of its interchange's `at_mi`, so the two differ
+/// by float arithmetic on the way to a route mile and by nothing else.
+pub const INTERCHANGE_IDENTITY_MI: f64 = 1e-6;
+
+/// The interchange record a stop was matched to at bake time, in the leg's
+/// native frame. None when the stop carries no match or the record is gone.
+pub fn served_interchange<'a>(leg: &'a Leg, stop: &Stop) -> Option<&'a Interchange> {
+    let mi = stop.interchange_mi?;
+    leg.interchanges()
+        .iter()
+        .find(|ix| (ix.at_mi - mi).abs() <= INTERCHANGE_IDENTITY_MI)
+}
+
+/// A stop's signed exit label. The interchange decided at bake time answers
+/// first, then the stop's own recorded exit number; only a stop with neither
+/// falls back to the nearest numbered interchange within `tol_mi`. Where
+/// the exit is known that search named another one 464 times in 1,086
+/// (measured by `tools/snap_stops_to_interchanges.py`, 2026-09-17).
+pub fn stop_exit_label(leg: &Leg, stop: &Stop, tol_mi: f64) -> String {
+    let served = served_interchange(leg, stop)
+        .map(Interchange::exit_label)
+        .unwrap_or_default();
+    if !served.is_empty() {
+        return served;
+    }
+    if !stop.exit_ref.is_empty() {
+        return format!("exit {}", stop.exit_ref);
+    }
+    nearest_exit_label(leg, stop.at_mi, tol_mi)
 }
 
 /// Keyed by place and reason only: a congestion zone's limit_mph is the live

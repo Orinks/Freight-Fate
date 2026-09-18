@@ -3508,13 +3508,16 @@
           ],
           "lat": 37.93682,
           "lon": -90.11943,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "150",
+          "interchange_mi": 58.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I55, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Mr. Fuel Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 89.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs. Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3531,13 +3534,16 @@
           ],
           "lat": 38.28582,
           "lon": -90.40519,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "180",
+          "interchange_mi": 89.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I55, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 118.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5751,11 +5757,11 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Boonville",
+          "type": "travel_center",
           "at_mi": 25.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 347 at Boonville; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Boonville WB (RA) with 21 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -5771,13 +5777,16 @@
           ],
           "lat": 38.93379,
           "lon": -92.77992,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "101",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number.",
+          "parking_spaces": 21
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Higginsville",
+          "type": "travel_center",
           "at_mi": 75.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Pilot store at Higginsville; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 75.6 of this leg (3.2 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5792,13 +5801,18 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.002993,
+          "lon": -93.734252,
+          "exit_ref": "49",
+          "interchange_mi": 78.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Oak Grove",
+          "type": "travel_center",
           "at_mi": 100.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Petro store 0460 at Oak Grove; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 100.8 of this leg (0.6 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5813,7 +5827,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.014832,
+          "lon": -94.132634,
+          "exit_ref": "28",
+          "interchange_mi": 100.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.10 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -7587,10 +7606,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Rolla",
+          "type": "travel_center",
           "at_mi": 92.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 341 at Rolla; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9848,10 +9867,10 @@
       },
       "stops": [
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Kingdom City",
+          "type": "travel_center",
           "at_mi": 25.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Petro store 0318 at Kingdom City; town read from the mapped site's branch name; matched by position, the only Petro within 5 mi of mile 25 of this leg (2.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9866,7 +9885,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.940417,
+          "lon": -91.938624,
+          "exit_ref": "148",
+          "interchange_mi": 22.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's Travel Stop New Florence",
@@ -9898,9 +9922,9 @@
         },
         {
           "name": "Mr. Fuel Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 75.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9918,10 +9942,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 124.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11464,7 +11488,7 @@
           "name": "Flying J Travel Center Joplin",
           "type": "travel_center",
           "at_mi": 10.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 669 in Joplin, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/joplin/11570-hwy-ff Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 669 in Joplin, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/joplin/11570-hwy-ff Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Joplin; matched by position, the only Flying J within 5 mi of mile 10.2 of this leg (1.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -11486,8 +11510,10 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "lat": 37.07022554523422,
-          "lon": -94.40142254984025
+          "lat": 37.055982,
+          "lon": -94.429157,
+          "exit_ref": "11A",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J Travel Center",
@@ -13455,7 +13481,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 28.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 73 at Miami; matched by position, the only Love's within 5 mi of mile 28.2 of this leg (2.3 mi); coordinates read from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -13467,13 +13493,15 @@
             "diesel",
             "parking"
           ],
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "lat": 36.871364,
+          "lon": -94.868044
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Big Cabin",
+          "type": "travel_center",
           "at_mi": 56.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 727 at Big Cabin; town as this map's curated record of the same store names it; matched by position, the only Love's within 5 mi of mile 56.5 of this leg (0.3 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13488,7 +13516,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.567898,
+          "lon": -95.217907,
+          "exit_ref": "283",
+          "interchange_mi": 56.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -20085,7 +20118,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 28.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Store coordinates read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Love's store at Lawrence; matched by position, the only Love's within 5 mi of mile 28.7 of this leg (3.9 mi); coordinates read from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -20097,13 +20130,15 @@
             "diesel",
             "parking"
           ],
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "lat": 39.020173,
+          "lon": -95.134842
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Topeka",
+          "type": "travel_center",
           "at_mi": 66.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Love's store 769 at Topeka; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20123,10 +20158,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Junction City",
+          "type": "travel_center",
           "at_mi": 130.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Junction City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20143,7 +20178,9 @@
           ],
           "lat": 39.0009695,
           "lon": -96.8636147,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "295",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Petro Stopping Centers",
@@ -20170,7 +20207,7 @@
           "name": "Pilot Travel Center Salina",
           "type": "travel_center",
           "at_mi": 180.4,
-          "source": "Pilot Flying J official Salina, Kansas location page at 1944 N 9th St lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from Kansas City-to-Salina route distance, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ks/salina/1944-n-9th-st",
+          "source": "Pilot Flying J official Salina, Kansas location page at 1944 N 9th St lists diesel, showers, food, CAT scale, and truck parking; at_mi estimated from Kansas City-to-Salina route distance, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ks/salina/1944-n-9th-st; Store coordinates read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Salina; matched by name, the only Pilot the map has at Salina within 40 mi of mile 180.4 of this leg (7.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -20189,7 +20226,11 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.874473,
+          "lon": -97.610675,
+          "exit_ref": "252",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Love's Travel Stop Abilene",
@@ -20259,13 +20300,15 @@
           ],
           "lat": 39.1855878,
           "lon": -100.86925,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "70",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Colby",
+          "type": "travel_center",
           "at_mi": 369.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Colby; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20282,7 +20325,9 @@
           ],
           "lat": 39.3638955,
           "lon": -101.0321699,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "54",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.09 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J",
@@ -20303,10 +20348,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Limon",
+          "type": "travel_center",
           "at_mi": 514.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Colorado extract dated 2026-06-22, read 2026-09-17): Flying J store at Limon; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20323,7 +20368,9 @@
           ],
           "lat": 39.2749942,
           "lon": -103.709403,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "359",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.22 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Shell",
@@ -20346,7 +20393,9 @@
           ],
           "lat": 39.7419903,
           "lon": -104.6040341,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "295",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -22749,10 +22798,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Peculiar",
+          "type": "travel_center",
           "at_mi": 26.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Peculiar; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22769,13 +22818,16 @@
           ],
           "lat": 38.72278,
           "lon": -94.45168,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "167",
+          "interchange_mi": 28.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Harrisonville",
+          "type": "travel_center",
           "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 616 at Harrisonville; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22792,13 +22844,15 @@
           ],
           "lat": 38.6366321,
           "lon": -94.3571146,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "158",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.17 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Nevada",
+          "type": "travel_center",
           "at_mi": 94.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Pilot store at Nevada; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22815,7 +22869,9 @@
           ],
           "lat": 37.835376,
           "lon": -94.3253145,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "101",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         }
       ],
       "divided": true,
@@ -24122,10 +24178,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Faucett",
+          "type": "travel_center",
           "at_mi": 40.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Pilot store at Faucett; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24142,13 +24198,16 @@
           ],
           "lat": 39.6011,
           "lon": -94.79073,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "35",
+          "interchange_mi": 39.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop St. Joseph",
+          "type": "travel_center",
           "at_mi": 53.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the saint_joseph_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the saint_joseph_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 235 at St. Joseph; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26364,10 +26423,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Peculiar",
+          "type": "travel_center",
           "at_mi": 27.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Peculiar; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26387,10 +26446,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Harrisonville",
+          "type": "travel_center",
           "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 616 at Harrisonville; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26410,10 +26469,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Collins",
+          "type": "travel_center",
           "at_mi": 113.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Pilot store at Collins; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33214,9 +33273,9 @@
         },
         {
           "name": "Garden Inn Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 112.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35369,10 +35428,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Rolla",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 341 at Rolla; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35416,9 +35475,9 @@
         },
         {
           "name": "B&D Auto/Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37572,10 +37631,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Rolla",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 341 at Rolla; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37592,13 +37651,16 @@
           ],
           "lat": 37.982,
           "lon": -91.7193,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "189",
+          "interchange_mi": 4.0,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "TA Travel Center",
-          "type": "service_plaza",
+          "name": "TA Travel Center Cuba",
+          "type": "travel_center",
           "at_mi": 26.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): TA store 0461 at Cuba; town read from the store page the mapped site links to; matched by position, the only TA within 5 mi of mile 26.4 of this leg (4.1 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37613,7 +37675,12 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.075182,
+          "lon": -91.409397,
+          "exit_ref": "208",
+          "interchange_mi": 22.5,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Saint Clair Rest Area (Westbound)",
@@ -37634,10 +37701,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 105.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39343,10 +39410,10 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop St. Joseph",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the saint_joseph_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the saint_joseph_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 235 at St. Joseph; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39386,10 +39453,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Sapp Brothers Travel Center",
-          "type": "service_plaza",
+          "name": "Sapp Brothers Travel Center Nebraska City",
+          "type": "travel_center",
           "at_mi": 85.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Sapp Bros. store at Nebraska City; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39406,13 +39473,16 @@
           ],
           "lat": 40.690316,
           "lon": -95.7903484,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "10",
+          "interchange_mi": 86.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.30 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 131.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -39426,7 +39496,9 @@
           ],
           "lat": 41.23562,
           "lon": -95.87878,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "50",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.36 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-29 Weigh Station",
@@ -46854,9 +46926,9 @@
       "stops": [
         {
           "name": "B&D Auto/Truck Plaza",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 54.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 2.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -46905,7 +46977,7 @@
           "name": "Love's Travel Stop Rolla",
           "type": "travel_center",
           "at_mi": 113.8,
-          "source": "Love's official store feed lists store 341 in Rolla, MO on I-44, exit 189; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 341 in Rolla, MO on I-44, exit 189; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 341 at Rolla; matched by position, the only Love's within 5 mi of mile 113.8 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -46925,39 +46997,18 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Love's",
-          "type": "travel_center",
-          "at_mi": 113.9,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.98186,
-          "lon": -91.71896,
           "vehicle_access": "tractor_trailer",
-          "directions": [
-            "both"
-          ]
+          "lat": 37.98177,
+          "lon": -91.719404,
+          "exit_ref": "189",
+          "interchange_mi": 114.1,
+          "exit_source": "exit_ref read: the stop's own source names exit 189; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Flying J Travel Center Sullivan",
           "type": "travel_center",
           "at_mi": 150.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 673 in Sullivan, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/sullivan/825-n-loop-dr",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 673 in Sullivan, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/sullivan/825-n-loop-dr; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Sullivan; matched by position, the only Flying J within 5 mi of mile 150.2 of this leg (0.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -46978,7 +47029,11 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.225393,
+          "lon": -91.158343,
+          "exit_ref": "226",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Saint Clair Rest Area (Westbound)",
@@ -46999,10 +47054,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 215.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49404,7 +49459,7 @@
           "name": "Flying J Travel Center Joplin",
           "type": "travel_center",
           "at_mi": 65.0,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 669 in Joplin, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/joplin/11570-hwy-ff",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 669 in Joplin, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/joplin/11570-hwy-ff; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Flying J store at Joplin; matched by position, the only Flying J within 5 mi of mile 65 of this leg (1.8 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -49425,13 +49480,17 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.055982,
+          "lon": -94.429157,
+          "exit_ref": "11A",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I44, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 90.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 73 at Miami; matched by position, the only Love's within 5 mi of mile 90.5 of this leg (4.3 mi); coordinates read from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -49443,13 +49502,15 @@
             "diesel",
             "parking"
           ],
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "lat": 36.871364,
+          "lon": -94.868044
         },
         {
           "name": "Love's Travel Stop Big Cabin",
           "type": "travel_center",
           "at_mi": 124.9,
-          "source": "Love's official store feed lists store 727 in Big Cabin, OK on I-44, exit 283/Highway 69; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 727 in Big Cabin, OK on I-44, exit 283/Highway 69; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Oklahoma extract dated 2026-06-22, read 2026-09-17): Love's store 727 at Big Cabin; matched by position, the only Love's within 5 mi of mile 124.9 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -49469,7 +49530,12 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 36.567898,
+          "lon": -95.217907,
+          "exit_ref": "283",
+          "interchange_mi": 125.2,
+          "exit_source": "exit_ref read: the stop's own source names exit 283; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -50564,10 +50630,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50587,10 +50653,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Hamel",
+          "type": "travel_center",
           "at_mi": 29.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Love's store 578 at Hamel; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54405,10 +54471,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center East St Louis",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_louis_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Pilot store 313 at East St Louis; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54429,9 +54495,9 @@
         },
         {
           "name": "Mr. Fuel Travel Center",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 49.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.4 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54480,10 +54546,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Petro Stopping Centers",
-          "type": "service_plaza",
+          "name": "Petro Stopping Center Kingdom City",
+          "type": "travel_center",
           "at_mi": 102.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Petro store 0318 at Kingdom City; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54500,13 +54566,16 @@
           ],
           "lat": 38.939803,
           "lon": -91.9386955,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "148",
+          "interchange_mi": 102.2,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Pilot Travel Center Higginsville",
           "type": "travel_center",
           "at_mi": 172.0,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 443 in Higginsville, MO with 125 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/higginsville/6676-mo-13",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 443 in Higginsville, MO with 125 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/higginsville/6676-mo-13; Store coordinates read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Pilot store at Higginsville; matched by name, the only Pilot the map has at Higginsville within 40 mi of mile 172 of this leg (28.3 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -54527,7 +54596,12 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.002993,
+          "lon": -93.734252,
+          "exit_ref": "49",
+          "interchange_mi": 200.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Love's",
@@ -54548,10 +54622,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Bates City",
+          "type": "travel_center",
           "at_mi": 220.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Missouri extract dated 2026-06-22, read 2026-09-17): Love's store 809 at Bates City; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54568,7 +54642,10 @@
           ],
           "lat": 39.01297,
           "lon": -94.06611,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "31",
+          "interchange_mi": 218.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I70, 0.14 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -58038,9 +58115,9 @@
         },
         {
           "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 77.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Illinois extract dated 2026-06-22, read 2026-09-17): Love's store 824; no town is mapped for it, so the record keeps the chain's name; matched by position, the only Love's within 5 mi of mile 77.2 of this leg (4.0 mi); coordinates read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -58055,13 +58132,15 @@
             "food",
             "parking"
           ],
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.27716,
+          "lon": -88.903364
         },
         {
           "name": "Pilot Travel Center Paducah",
           "type": "travel_center",
-          "at_mi": 156.9,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 358 in Paducah, KY with 52 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/paducah/5353-cairo-rd",
+          "at_mi": 168.5,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 358 in Paducah, KY with 52 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ky/paducah/5353-cairo-rd; Store coordinates read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Pilot store at Paducah; matched by name, the only Pilot the map has at Paducah within 40 mi of mile 168.5 of this leg (11.8 mi); coordinates read from the mapped site. Mile marker moved from 156.9 to 168.5: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 156.9 is more than 5 mi from the store.",
           "actions": [
             "park",
             "save",
@@ -58082,30 +58161,11 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 168.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 37.09776,
-          "lon": -88.69139,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.097609,
+          "lon": -88.691256,
+          "exit_ref": "3",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I24, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Dealer Kuttawa",
@@ -58156,10 +58216,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J",
+          "name": "Flying J Travel Center Oak Grove",
           "type": "fuel_station",
           "at_mi": 252.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Kentucky extract dated 2026-06-22, read 2026-09-17): Flying J store at Oak Grove; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -58173,30 +58233,9 @@
           ],
           "lat": 36.69691,
           "lon": -87.45471,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "Bay 2",
-          "type": "service_plaza",
-          "at_mi": 308.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nashville_tn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 36.18557,
-          "lon": -86.81813,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "86",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I24, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-24 Weigh Station",

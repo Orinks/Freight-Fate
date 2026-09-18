@@ -7278,6 +7278,35 @@ city service drives below.)
       single segment under `MIN_CHAIN_ROUTE_MI`, both kept as fallbacks),
       endpoint re-sweep for steel/auto/chemical name matches, and the
       deferred 419 estimated-near-city residuals.
+      Leftovers worked 2026-09-17 (details in ROADMAP.md): the search
+      budget now follows the endpoint being routed to, trunk roads and
+      link ways are routable, a long path keeps the streets at the yard,
+      one street under several route refs is spoken once, and the builder
+      screens each endpoint's own OSM tags before routing to it
+      (`tools/facility_endpoint_screen.py`, `--no-endpoint-screen` to turn
+      it off). All 49 extracts re-swept: 1,713 to 1,913 chains (38
+      percent), 200 new, 227 refreshed, none demoted. 567 of the 2,779
+      sourced endpoints are freight sites, so the endpoint sweep itself
+      is the next piece of work.
+      Endpoint re-sweep done the same day (details in ROADMAP.md):
+      `tools/facility_endpoint_match.py` reads an object's own tags and
+      whole words of its name behind the same screen, and
+      `tools/build_facility_endpoints.py` merges a state at a time
+      (passing endpoints kept, failing ones replaced or labelled). 1,939
+      of 2,934 sourced endpoints are freight sites now, 1,224 were
+      replaced, 995 are labelled refused. Chains rebuilt toward the new
+      endpoints: 1,913 to 2,364 (47 percent), 1,722 of them to a freight
+      site, 82 kept with a `stale_endpoint` note because no public road
+      reaches the new site.
+      Yard roads, same day, by owner ruling: a chain may begin on the
+      facility's own `access=private` road, at the facility end only and
+      spoken as "a service road" (`tools/yard_roads.py`; the public search
+      never sees a private way, so nothing cuts through another site, and
+      the chain floor is held against public miles alone). 89 of the 142
+      disconnected rows gained a chain: 2,416 chains (48 percent), 1,811 to
+      a freight site, 45 stale. The private stretches run 0.03 to 0.85
+      miles, then a gap to 1.49; the cut is one mile, with three sites
+      allowed past it by name.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim

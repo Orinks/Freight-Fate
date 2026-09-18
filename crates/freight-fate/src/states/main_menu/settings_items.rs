@@ -374,6 +374,7 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.volume(ctx, "music_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.volume(ctx, "radio_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_radio_shuffle_playlists(ctx, d)),
                 adjust(|s, ctx, d| s.toggle_duck_for_speech(ctx, d)),
                 adjust(|s, ctx, d| s.volume(ctx, "ui_volume", 0.1 * d as f64)),
             ],
@@ -773,6 +774,17 @@ impl SettingsCategoryState {
                 "Off plays the full dial, including real public streams and \
                  personal playlists. On keeps the radio to built-in safe \
                  stations, for streaming or recording.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!(
+                        "Shuffle personal playlists: {}",
+                        on_off(s.radio_shuffle_playlists)
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_radio_shuffle_playlists(ctx, d)),
+                "On plays each of your playlists in a random order, every track \
+                 once before any repeats. Off plays the file top to bottom.",
             ),
             row(
                 dyn_label(|s| {

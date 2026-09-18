@@ -743,6 +743,9 @@ pub struct RoadStop {
     /// Surveyed truck-parking spot count; 0 means unsurveyed.
     pub parking_spaces: i64,
     pub vehicle_access: String,
+    /// Route mile of the interchange record that serves this stop, when the
+    /// bake decided one: matched exactly, never searched near.
+    pub interchange_mi: Option<f64>,
 }
 
 impl RoadStop {
@@ -757,6 +760,7 @@ impl RoadStop {
             exit_label: String::new(),
             parking_spaces: 0,
             vehicle_access: DEFAULT_VEHICLE_ACCESS.to_string(),
+            interchange_mi: None,
         }
     }
 

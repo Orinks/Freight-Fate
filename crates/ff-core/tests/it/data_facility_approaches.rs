@@ -29,12 +29,24 @@ fn test_facility_approach_data_covers_full_facility_set() {
     let coverage = &data["coverage"];
 
     assert_eq!(coverage["facilities"], 5037);
-    // Synced with facility_endpoints after far-pin regeocode (419 estimated).
-    assert_eq!(coverage["source_backed_endpoints"], 2779);
-    assert_eq!(coverage["road_snapped"], 1908);
-    assert_eq!(coverage["turn_level"], 1713);
-    assert_eq!(coverage["nearest_road_fallback"], 871);
-    assert_eq!(coverage["representative_fallback"], 2258);
+    // Synced with facility_endpoints after far-pin regeocode (419 estimated)
+    // and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
+    // had every chain to one of them rebuilt toward the new endpoint.
+    // The 2026-09-17 yard-road rule then gave 89 facilities the public roads
+    // do not reach a chain over the facility's own private road (52 new chains,
+    // 37 stale ones rebuilt).
+    assert_eq!(coverage["source_backed_endpoints"], 2934);
+    assert_eq!(coverage["road_snapped"], 2449);
+    assert_eq!(coverage["turn_level"], 2416);
+    assert_eq!(coverage["nearest_road_fallback"], 485);
+    // Sourced endpoints with no chain whose own OSM object is not a freight site
+    // (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
+    assert_eq!(coverage["endpoint_screen_refused"], 419);
+    // Chains that still lead to a replaced endpoint because no public-road
+    // path reaches the new one, not even over its own private road; kept until
+    // a chain replaces them, and labelled.
+    assert_eq!(coverage["stale_chain_kept"], 45);
+    assert_eq!(coverage["representative_fallback"], 2103);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
     // The 2026-07-14 regen keys records by current slug facility ids and
@@ -228,16 +240,19 @@ fn test_facility_chains_never_say_unnamed_public_road() {
     }
     assert!(checked > 0);
 
-    // The reported chain, spoken end to end: the last turn in, and the
-    // outbound start on the same road.
+    // A chain spoken end to end: the last turn in, and the outbound start on
+    // the same road. The report was Chicago Cross-Dock, whose endpoint (a
+    // transit stop, Museum Campus) the 2026-09-17 re-sweep replaced, and its
+    // new chain ends on a named street. Amarillo's truck terminal kept its endpoint, a real
+    // carrier's yard, and still ends on an unnamed service road.
     let arrival = w
-        .facility_approach_route("chicago_il_us", "Chicago Cross-Dock")
+        .facility_approach_route("amarillo_tx_us", "Route 66 Truck Terminal")
         .expect("approach route");
     let last = arrival.legs.last().expect("a turn-level chain");
     assert_eq!(last.highway, "a service road");
     assert_eq!(last.local_cue, "Turn left onto a service road.");
     let departure = w
-        .facility_departure_route("chicago_il_us", "Chicago Cross-Dock")
+        .facility_departure_route("amarillo_tx_us", "Route 66 Truck Terminal")
         .expect("departure route")
         .expect("a multi-leg chain");
     assert_eq!(departure.legs[0].local_cue, "Start on a service road.");

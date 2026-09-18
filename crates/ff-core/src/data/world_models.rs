@@ -297,6 +297,14 @@ pub struct Stop {
     /// Whether a combination vehicle can physically get in here. Defaults to
     /// tractor_trailer so unclassified data keeps behaving as it always has.
     pub vehicle_access: String,
+    /// Signed exit number of the interchange that serves this stop, decided
+    /// once at bake time (`tools/snap_stops_to_interchanges.py`); "" when
+    /// nothing decided it and the mile-marker lookup still stands in.
+    pub exit_ref: String,
+    /// `at_mi` of this leg's interchange record for that exit. An identity to
+    /// match exactly, never a mile to search near; None when the leg records
+    /// no such exit.
+    pub interchange_mi: Option<f64>,
 }
 
 impl Default for Stop {
@@ -313,6 +321,8 @@ impl Default for Stop {
             curation: "curated".to_string(),
             parking_spaces: 0,
             vehicle_access: DEFAULT_VEHICLE_ACCESS.to_string(),
+            exit_ref: String::new(),
+            interchange_mi: None,
         }
     }
 }

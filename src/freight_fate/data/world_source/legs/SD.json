@@ -1862,10 +1862,10 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 59.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5468,10 +5468,10 @@
           "lon": -98.6520989776728
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Kimball",
           "type": "travel_center",
           "at_mi": 48.3,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 266 at Kimball; town DERIVED, not read: the nearest mapped place, 0.7 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5491,7 +5491,10 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "284",
+          "interchange_mi": 48.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near Presho",
@@ -5542,10 +5545,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Murdo",
           "type": "travel_center",
           "at_mi": 140.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Murdo; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site; 10 truck parking spaces read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5562,7 +5565,11 @@
           ],
           "lat": 43.8861261,
           "lon": -100.70499,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 10,
+          "exit_ref": "192",
+          "interchange_mi": 140.7,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near Cactus Flats",
@@ -5610,10 +5617,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Box Elder",
+          "type": "travel_center",
           "at_mi": 267.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 602 at Box Elder; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5630,13 +5637,16 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "interchange_mi": 265.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 273.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5653,13 +5663,16 @@
           ],
           "lat": 44.1034616,
           "lon": -103.1493874,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "61",
+          "interchange_mi": 271.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 277.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9778,10 +9791,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Box Elder",
+          "type": "travel_center",
           "at_mi": 169.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 602 at Box Elder; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9798,7 +9811,9 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US14, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Flying J Licensed Location Rapid City",
@@ -9822,10 +9837,12 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator lists Flying J Licensed Location store 931 in Rapid City, SD with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=172.0 off_mi=0.38",
+          "source": "Pilot Flying J official locator lists Flying J Licensed Location store 931 in Rapid City, SD with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=172.0 off_mi=0.38; Store coordinates read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Rapid City; matched by position, the only Flying J within 5 mi of mile 172 of this leg (0.2 mi); coordinates read from the mapped site.",
           "at_mi": 172.0,
-          "lat": 44.103422478945994,
-          "lon": -103.14955142195129
+          "lat": 44.103671,
+          "lon": -103.1494,
+          "exit_ref": "61",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on US14, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Rapid City",
@@ -9849,10 +9866,10 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 918 in Rapid City, SD with 75 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=176.5 off_mi=1.93",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 918 in Rapid City, SD with 75 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=176.5 off_mi=1.93; Store coordinates read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; matched by position, the only Pilot within 5 mi of mile 176.5 of this leg (2.0 mi); coordinates read from the mapped site.",
           "at_mi": 176.5,
-          "lat": 44.11272659584743,
-          "lon": -103.2730744950718
+          "lat": 44.112699,
+          "lon": -103.272865
         }
       ],
       "lanes": 2
@@ -13486,10 +13503,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13506,7 +13523,10 @@
           ],
           "lat": 44.11306,
           "lon": -103.27354,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "55",
+          "interchange_mi": 4.1,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "CBH Co-Op Belle Fourche Travel Center",
@@ -13557,7 +13577,7 @@
           "name": "Love's Travel Stop Hardin",
           "type": "travel_center",
           "at_mi": 275.4,
-          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 679 in Hardin, MT on I-90, exit 495/Hwy 47; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Montana extract dated 2026-06-22, read 2026-09-17): Love's store 679 at Hardin; matched by position, the only Love's within 5 mi of mile 275.4 of this leg (0.2 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -13577,7 +13597,12 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.749514,
+          "lon": -107.610625,
+          "exit_ref": "495",
+          "interchange_mi": 276.4,
+          "exit_source": "exit_ref read: the stop's own source names exit 495; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Hardin EB",
@@ -16873,10 +16898,10 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16896,10 +16921,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Flying J Travel Center",
-          "type": "service_plaza",
+          "name": "Flying J Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 6.8,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16919,13 +16944,16 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "exit_ref": "61",
+          "interchange_mi": 5.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
+          "name": "Love's Travel Stop Box Elder",
+          "type": "travel_center",
           "at_mi": 10.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 602 at Box Elder; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16942,7 +16970,10 @@
           ],
           "lat": 44.1200197,
           "lon": -103.052485,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "67B",
+          "interchange_mi": 11.4,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Wall Drug",
@@ -16990,10 +17021,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Murdo",
           "type": "travel_center",
           "at_mi": 137.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Murdo; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site; 10 truck parking spaces read from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17010,7 +17041,11 @@
           ],
           "lat": 43.8861261,
           "lon": -100.70499,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 10,
+          "exit_ref": "192",
+          "interchange_mi": 137.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90E truck parking near Presho",
@@ -17061,10 +17096,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Kimball",
           "type": "travel_center",
           "at_mi": 229.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 266 at Kimball; town DERIVED, not read: the nearest mapped place, 0.7 mi away; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17081,7 +17116,10 @@
           ],
           "lat": 43.7365664,
           "lon": -98.9565376,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "284",
+          "interchange_mi": 229.3,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.24 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "I-90W truck parking near White Lake",
@@ -17110,8 +17148,8 @@
           "name": "Salem Rest Area Eastbound",
           "type": "public_rest_area",
           "at_mi": 308.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-90E truck parking near Salem with 16 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -17127,7 +17165,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 16
         }
       ],
       "divided": true,
@@ -17993,6 +18032,28 @@
         }
       },
       "stops": [
+        {
+          "name": "I-29N truck parking near Ward",
+          "type": "public_rest_area",
+          "at_mi": 43.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29N truck parking near Ward on I-29N in Ward, SD with 16 truck parking spaces, mile post 121; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 16
+        },
         {
           "name": "Kwik Star",
           "type": "fuel_station",
@@ -22264,10 +22325,10 @@
       },
       "stops": [
         {
-          "name": "Love's",
+          "name": "Love's Travel Stop Sioux Falls",
           "type": "travel_center",
           "at_mi": 2.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Love's store 445 at Sioux Falls; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24967,9 +25028,9 @@
         },
         {
           "name": "Coffee Cub Travel Plaza - TA Express",
-          "type": "service_plaza",
+          "type": "travel_center",
           "at_mi": 51.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature of the same name 3.0 miles away carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24990,7 +25051,7 @@
           "name": "Love's Travel Stop Sioux City",
           "type": "travel_center",
           "at_mi": 87.9,
-          "source": "Love's official store feed lists store 479 in Sioux City, IA on I-29, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores",
+          "source": "Love's official store feed lists store 479 in Sioux City, IA on I-29, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 479 at Sioux City; matched by position, the only Love's within 5 mi of mile 87.9 of this leg (1.6 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25010,13 +25071,17 @@
           ],
           "parking": "likely",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.434747,
+          "lon": -96.379997,
+          "exit_ref": "143",
+          "exit_source": "exit_ref read: the stop's own source names exit 143; this leg has no interchange record with that number."
         },
         {
           "name": "Pilot Travel Center Sioux City",
           "type": "travel_center",
           "at_mi": 88.0,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 594 in Sioux City, IA with 90 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ia/sioux-city/2815-singing-hills-blvd",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 594 in Sioux City, IA with 90 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ia/sioux-city/2815-singing-hills-blvd; Store coordinates read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store 594 at Sioux City; matched by position, the only Pilot within 5 mi of mile 88 of this leg (1.4 mi); coordinates read from the mapped site.",
           "actions": [
             "park",
             "save",
@@ -25037,7 +25102,11 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.435519,
+          "lon": -96.372901,
+          "exit_ref": "143",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I29, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
           "name": "I-29 Weigh Station",
@@ -25055,10 +25124,10 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot",
+          "name": "Pilot Travel Center Council Bluffs",
           "type": "fuel_station",
           "at_mi": 180.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the omaha_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Pilot store at Council Bluffs; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
           "parking": "limited",
           "actions": [
             "park",
@@ -26016,7 +26085,10 @@
           ],
           "lat": 44.39818,
           "lon": -103.50843,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "32",
+          "interchange_mi": 20.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.15 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         },
         {
           "name": "Big D Oil",
@@ -26036,13 +26108,15 @@
           ],
           "lat": 44.22461,
           "lon": -103.38035,
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "exit_ref": "46",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.07 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number."
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
+          "name": "Pilot Travel Center Rapid City",
+          "type": "travel_center",
           "at_mi": 47.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik South Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store at Rapid City; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26059,7 +26133,10 @@
           ],
           "lat": 44.11306,
           "lon": -103.27354,
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "55",
+          "interchange_mi": 43.8,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I90, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
         }
       ],
       "divided": true,
@@ -26737,6 +26814,50 @@
           "lat": 44.88979,
           "lon": -97.10855,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "I-29S truck parking near Hidewood",
+          "type": "public_rest_area",
+          "at_mi": 20.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29S truck parking near Hidewood on I-29S in Hidewood, SD with 13 truck parking spaces, mile post 160; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
+        },
+        {
+          "name": "I-29N truck parking near Hidewood",
+          "type": "public_rest_area",
+          "at_mi": 20.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29N truck parking near Hidewood on I-29N in Hidewood, SD with 13 truck parking spaces, mile post 160; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
         },
         {
           "name": "Kwik Star",
