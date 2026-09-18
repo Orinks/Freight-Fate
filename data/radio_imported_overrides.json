@@ -23,22 +23,22 @@
   "rb-web-69e1e6ac-272f-4fb2-9f14-9bab8df14959": {
    "format": "80s",
    "name": "Star104 The 80s Channel",
-   "why": "hand: named to match the curated Star104 family. Its tags are directory keywords ('#80s, 1980s, 1980s hits'), not a format."
+   "why": "read: the stream identifies itself as 'Star104 - The 80s Channel' at star104.net. Its tags are directory keywords ('#80s, 1980s, 1980s hits'), not a format."
   },
   "rb-web-a20f2c78-374d-49fc-96eb-d73bfd28bacb": {
    "format": "christmas",
    "name": "Christmas104 (Star104)",
-   "why": "hand: named to match the curated Star104 family; tags are directory keywords."
+   "why": "read: the stream identifies itself as 'Christmas104' at star104.net; the network is named in brackets, as with the other Star104 channels."
   },
   "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf": {
    "format": "variety",
-   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the same broadcaster as the curated Radiostorm.com (Topeka) channels -- different outfit, own Shoutcast host, verified live 2026-08-20.",
-   "why": "hand: tags list an advocacy organisation and two genres; 'variety' is what it plays. The rename is recorded in notes."
+   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the curated Radiostorm.com station, whose four 104 channels and the four Star104 channels are one Topeka network: star104.net and radiostorm.com serve the same site, and those eight streams report an icy-url at one of those two domains. This one is its own Shoutcast at theradiostorm.com, genre Various; re-checked 2026-09-18.",
+   "why": "read: its tags list an advocacy organisation and two genres; the stream's own genre is Various. The rename, and how it differs from the Radiostorm network, are in notes."
   },
   "rb-web-b4844481-c223-4fa0-9229-e0a19541c163": {
    "format": "country",
    "name": "Country104 (Star104)",
-   "why": "hand: named to match the curated Star104 family; tags are directory keywords."
+   "why": "read: the stream identifies itself as 'Country104' at star104.net; the network is named in brackets so the four Star104 channels read as one station's channels."
   },
   "rb-web-b7f92f2e-0f4b-486d-a3c4-8d5051c37e6c": {
    "stream_format": "mp3",
@@ -47,7 +47,7 @@
   "rb-web-e5e93ea0-6405-4451-92a9-28cb3e38d762": {
    "format": "classic r&b",
    "name": "Classic RnB from Star104",
-   "why": "hand: named to match the curated Star104 family. 'RnB' spelled out because a screen reader reads 'R&B' as 'R and B' only on some voices."
+   "why": "read: the stream identifies itself as 'Classic RnB from Star104.net'. The domain ending is dropped because a screen reader spells it out; 'RnB' is the station's own spelling."
   }
  },
  "schema": 1

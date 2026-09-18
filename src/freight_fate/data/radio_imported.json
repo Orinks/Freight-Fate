@@ -58767,7 +58767,7 @@
    "format": "variety",
    "id": "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf",
    "name": "The Radio Storm",
-   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the same broadcaster as the curated Radiostorm.com (Topeka) channels -- different outfit, own Shoutcast host, verified live 2026-08-20.",
+   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the curated Radiostorm.com station, whose four 104 channels and the four Star104 channels are one Topeka network: star104.net and radiostorm.com serve the same site, and those eight streams report an icy-url at one of those two domains. This one is its own Shoutcast at theradiostorm.com, genre Various; re-checked 2026-09-18.",
    "real_stream": true,
    "safe_for_streaming": false,
    "source": "community radio directory",
