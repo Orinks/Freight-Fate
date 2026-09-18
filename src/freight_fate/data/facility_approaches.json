@@ -443,16 +443,22 @@
         },
         {
           "cue": "Turn left onto Loop 322.",
-          "miles": 0.05,
+          "miles": 0.07,
           "road": "Loop 322",
           "speed_mph": 25.0
+        },
+        {
+          "cue": "Turn right onto a service road.",
+          "miles": 0.11,
+          "road": "a service road",
+          "speed_mph": 15.0
         }
       ],
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for abilene_tx_us, Texas; matched to chemical_petroleum_terminal by industrial=oil tag (trade read); road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-09-17.",
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 4.63,
+      "total_miles": 4.76,
       "turn_level": true,
       "yard_hint": false
     },
@@ -3380,7 +3386,7 @@
       "yard_road": {
         "miles": 0.36,
         "public_miles": 3.65,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -7129,7 +7135,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for amarillo_tx_us, Texas; matched to cross_dock by logistics/warehouse/freight tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Plains Dairy Distribution",
         "leads_to": "Amarillo Transit Terminal",
         "rebuild_failed": "Public-road path is shorter than the playable facility approach floor."
@@ -7357,7 +7363,7 @@
       "yard_hint": false
     },
     "amarillo-tx-us:intermodal_ramp:amarillo-intermodal-ramp": {
-      "approach_road": "North Pierce Street (US 60;US 87;HR 66 Access)",
+      "approach_road": "a service road",
       "city": "amarillo_tx_us",
       "dock_hint": false,
       "endpoint_name": "Amarillo South Yard",
@@ -7375,34 +7381,34 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on North Pierce Street (US 60;US 87;HR 66 Access).",
-          "miles": 0.57,
-          "road": "North Pierce Street (US 60;US 87;HR 66 Access)",
-          "speed_mph": 35.0
+          "cue": "Start on a service road.",
+          "miles": 0.07,
+          "road": "a service road",
+          "speed_mph": 15.0
         },
         {
-          "cue": "Continue onto South Pierce Street (US 60;US 87;HR 66 Access).",
-          "miles": 0.67,
-          "road": "South Pierce Street (US 60;US 87;HR 66 Access)",
+          "cue": "Turn left onto Southeast 11th Avenue.",
+          "miles": 0.05,
+          "road": "Southeast 11th Avenue",
           "speed_mph": 30.0
         },
         {
-          "cue": "Turn left onto a service road.",
+          "cue": "Turn right onto a service road.",
           "miles": 0.05,
           "road": "a service road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn left onto Southeast 10th Avenue (Loop 395;US 287 Hist).",
+          "cue": "Turn left onto One Broadcast Center.",
           "miles": 0.05,
-          "road": "Southeast 10th Avenue (Loop 395;US 287 Hist)",
+          "road": "One Broadcast Center",
           "speed_mph": 25.0
         },
         {
           "cue": "Turn right onto South Buchanan Street.",
-          "miles": 0.62,
+          "miles": 0.53,
           "road": "South Buchanan Street",
-          "speed_mph": 30.0
+          "speed_mph": 25.0
         },
         {
           "cue": "Continue onto a side street.",
@@ -7427,7 +7433,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 2.21,
+      "total_miles": 1.0,
       "turn_level": true,
       "yard_hint": false
     },
@@ -14152,7 +14158,7 @@
           "cue": "Turn left onto East Oltorf Street.",
           "miles": 1.27,
           "road": "East Oltorf Street",
-          "speed_mph": 25.0
+          "speed_mph": 40.0
         },
         {
           "cue": "Continue onto a service road.",
@@ -14278,7 +14284,7 @@
           "cue": "Start on East Oltorf Street.",
           "miles": 1.27,
           "road": "East Oltorf Street",
-          "speed_mph": 25.0
+          "speed_mph": 40.0
         },
         {
           "cue": "Continue onto a service road.",
@@ -14743,15 +14749,15 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn right onto Union Avenue (CA 204;CA 99 BUS).",
+          "cue": "Turn right onto Union Avenue (CA 204;CA 99 BUS;US 99 Hist).",
           "miles": 0.14,
-          "road": "Union Avenue (CA 204;CA 99 BUS)",
+          "road": "Union Avenue (CA 204;CA 99 BUS;US 99 Hist)",
           "speed_mph": 25.0
         },
         {
-          "cue": "Continue onto South Union Avenue (CA 99 BUS).",
+          "cue": "Continue onto South Union Avenue (CA 99 BUS;US 99 Hist).",
           "miles": 1.04,
-          "road": "South Union Avenue (CA 99 BUS)",
+          "road": "South Union Avenue (CA 99 BUS;US 99 Hist)",
           "speed_mph": 25.0
         },
         {
@@ -14852,13 +14858,13 @@
         },
         {
           "cue": "Turn right onto White Lane.",
-          "miles": 0.24,
+          "miles": 0.29,
           "road": "White Lane",
           "speed_mph": 25.0
         },
         {
           "cue": "Turn left onto a service road.",
-          "miles": 0.1,
+          "miles": 0.06,
           "road": "a service road",
           "speed_mph": 15.0
         },
@@ -14891,7 +14897,7 @@
       "source_type": "osm_local_road_graph",
       "state": "California",
       "target_type": "facility",
-      "total_miles": 5.6,
+      "total_miles": 5.61,
       "turn_level": true,
       "yard_hint": false
     },
@@ -16960,9 +16966,9 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto North 4th Street.",
+          "cue": "Turn right onto 4th Street.",
           "miles": 0.05,
-          "road": "North 4th Street",
+          "road": "4th Street",
           "speed_mph": 25.0
         }
       ],
@@ -17987,7 +17993,7 @@
       "yard_road": {
         "miles": 0.85,
         "public_miles": 5.99,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -20624,16 +20630,22 @@
         },
         {
           "cue": "Continue onto East Interstate 20.",
-          "miles": 0.67,
+          "miles": 0.59,
           "road": "East Interstate 20",
           "speed_mph": 65.0
+        },
+        {
+          "cue": "Turn left onto a service road.",
+          "miles": 0.11,
+          "road": "a service road",
+          "speed_mph": 15.0
         }
       ],
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for big_spring_tx_us, Texas; matched to cross_dock by freight site by tag with a business name; trade assumed (trade assumed); road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-09-17.",
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 2.87,
+      "total_miles": 2.9,
       "turn_level": true,
       "yard_hint": false
     },
@@ -21110,21 +21122,9 @@
       "segments": [
         {
           "cue": "Start on Court Street (US 11).",
-          "miles": 0.34,
+          "miles": 4.27,
           "road": "Court Street (US 11)",
           "speed_mph": 30.0
-        },
-        {
-          "cue": "Continue onto US 11.",
-          "miles": 0.05,
-          "road": "US 11",
-          "speed_mph": 25.0
-        },
-        {
-          "cue": "Continue onto Court Street (US 11).",
-          "miles": 3.93,
-          "road": "Court Street (US 11)",
-          "speed_mph": 45.0
         },
         {
           "cue": "Continue onto US 11.",
@@ -21155,7 +21155,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 5.89,
+      "total_miles": 5.84,
       "turn_level": true,
       "yard_hint": false
     },
@@ -21436,12 +21436,6 @@
           "speed_mph": 30.0
         },
         {
-          "cue": "Continue onto US 11.",
-          "miles": 0.05,
-          "road": "US 11",
-          "speed_mph": 25.0
-        },
-        {
           "cue": "Turn right onto Exchange Street.",
           "miles": 0.45,
           "road": "Exchange Street",
@@ -21458,7 +21452,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 1.08,
+      "total_miles": 1.03,
       "turn_level": true,
       "yard_hint": false
     },
@@ -27691,9 +27685,9 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto South Expressway (US 77;US 83).",
+          "cue": "Turn right onto South Expressway (I 69E;US 77;US 83).",
           "miles": 0.05,
-          "road": "South Expressway (US 77;US 83)",
+          "road": "South Expressway (I 69E;US 77;US 83)",
           "speed_mph": 35.0
         },
         {
@@ -27703,9 +27697,9 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto South Expressway (US 77;US 83).",
+          "cue": "Turn right onto South Expressway (I 69E;US 77;US 83).",
           "miles": 0.08,
-          "road": "South Expressway (US 77;US 83)",
+          "road": "South Expressway (I 69E;US 77;US 83)",
           "speed_mph": 25.0
         },
         {
@@ -27760,9 +27754,9 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto South Expressway (US 77;US 83).",
+          "cue": "Turn right onto South Expressway (I 69E;US 77;US 83).",
           "miles": 0.05,
-          "road": "South Expressway (US 77;US 83)",
+          "road": "South Expressway (I 69E;US 77;US 83)",
           "speed_mph": 35.0
         },
         {
@@ -27772,9 +27766,9 @@
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto South Expressway (US 77;US 83).",
+          "cue": "Turn right onto South Expressway (I 69E;US 77;US 83).",
           "miles": 0.08,
-          "road": "South Expressway (US 77;US 83)",
+          "road": "South Expressway (I 69E;US 77;US 83)",
           "speed_mph": 25.0
         },
         {
@@ -29348,7 +29342,7 @@
       "yard_road": {
         "miles": 0.18,
         "public_miles": 3.55,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -45403,7 +45397,7 @@
           "cue": "Continue onto West Dodge Street.",
           "miles": 0.19,
           "road": "West Dodge Street",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         }
       ],
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for college_station_tx_us, Texas; matched to company_yard by industrial=distributor tag (trade read); road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-09-17.",
@@ -51110,7 +51104,7 @@
       "yard_road": {
         "miles": 0.07,
         "public_miles": 4.84,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -53702,7 +53696,7 @@
       "yard_road": {
         "miles": 0.43,
         "public_miles": 3.55,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -71020,7 +71014,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for eureka_ca_us, California; matched to cross_dock by logistics/warehouse/freight tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "USCG",
         "leads_to": "Redwood Marine Terminal Berth 1",
         "rebuild_failed": "The roads at the sourced endpoint do not join the city context over public surface roads, nor over a private road of the facility's own; a motorway, water, a closed road or a gate on a public road lies between."
@@ -100682,7 +100676,7 @@
         },
         {
           "cue": "Continue onto Navigation Boulevard.",
-          "miles": 2.71,
+          "miles": 2.72,
           "road": "Navigation Boulevard",
           "speed_mph": 25.0
         },
@@ -100703,7 +100697,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 4.51,
+      "total_miles": 4.52,
       "turn_level": true,
       "yard_hint": false
     },
@@ -107353,7 +107347,7 @@
       "yard_hint": false
     },
     "jamestown-ny-us:cross_dock:jamestown-cross-dock": {
-      "approach_road": "Jamestown High School Bus Loop (No Cars)",
+      "approach_road": "Jamestown High School Bus Loop",
       "city": "jamestown_ny_us",
       "dock_hint": false,
       "endpoint_name": "Hope's Windows, Inc.",
@@ -107371,9 +107365,9 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on Jamestown High School Bus Loop (No Cars).",
+          "cue": "Start on Jamestown High School Bus Loop.",
           "miles": 0.05,
-          "road": "Jamestown High School Bus Loop (No Cars)",
+          "road": "Jamestown High School Bus Loop",
           "speed_mph": 10.0
         },
         {
@@ -107416,7 +107410,7 @@
       "yard_hint": false
     },
     "jamestown-ny-us:dry_warehouse:jamestown-dry-warehouse": {
-      "approach_road": "Jamestown High School Bus Loop (No Cars)",
+      "approach_road": "Jamestown High School Bus Loop",
       "city": "jamestown_ny_us",
       "dock_hint": false,
       "endpoint_name": "Fancher Chair Company",
@@ -107434,9 +107428,9 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on Jamestown High School Bus Loop (No Cars).",
+          "cue": "Start on Jamestown High School Bus Loop.",
           "miles": 0.05,
-          "road": "Jamestown High School Bus Loop (No Cars)",
+          "road": "Jamestown High School Bus Loop",
           "speed_mph": 10.0
         },
         {
@@ -107518,7 +107512,7 @@
       "yard_hint": false
     },
     "jamestown-ny-us:food_processor:jamestown-food-processing-plant": {
-      "approach_road": "Prendergast Avenue",
+      "approach_road": "East 3rd Street",
       "city": "jamestown_ny_us",
       "dock_hint": false,
       "endpoint_name": "Pepsi Bottling Group",
@@ -107536,15 +107530,15 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on Prendergast Avenue.",
-          "miles": 0.83,
-          "road": "Prendergast Avenue",
+          "cue": "Start on East 3rd Street.",
+          "miles": 0.12,
+          "road": "East 3rd Street",
           "speed_mph": 30.0
         },
         {
-          "cue": "Continue onto a side street.",
-          "miles": 0.11,
-          "road": "a side street",
+          "cue": "Turn right onto Prendergast Avenue.",
+          "miles": 0.95,
+          "road": "Prendergast Avenue",
           "speed_mph": 30.0
         },
         {
@@ -107588,7 +107582,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 1.43,
+      "total_miles": 1.56,
       "turn_level": true,
       "yard_hint": false
     },
@@ -107626,7 +107620,7 @@
       "yard_hint": false
     },
     "jamestown-ny-us:manufacturing_plant:jamestown-manufacturing-plant": {
-      "approach_road": "West 4th Street",
+      "approach_road": "West 6th Street (NY 394)",
       "city": "jamestown_ny_us",
       "dock_hint": false,
       "endpoint_name": "Ben Weitsman of Jamestown",
@@ -107644,37 +107638,37 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on West 4th Street.",
-          "miles": 0.25,
-          "road": "West 4th Street",
+          "cue": "Start on West 6th Street (NY 394).",
+          "miles": 0.14,
+          "road": "West 6th Street (NY 394)",
+          "speed_mph": 30.0
+        },
+        {
+          "cue": "Turn right onto Jefferson Street.",
+          "miles": 0.06,
+          "road": "Jefferson Street",
+          "speed_mph": 30.0
+        },
+        {
+          "cue": "Turn left onto West 7th Street.",
+          "miles": 0.06,
+          "road": "West 7th Street",
           "speed_mph": 30.0
         },
         {
           "cue": "Turn right onto Clinton Street.",
-          "miles": 0.05,
+          "miles": 0.06,
           "road": "Clinton Street",
           "speed_mph": 30.0
         },
         {
-          "cue": "Turn left onto a service road.",
+          "cue": "Turn left onto West 8th Street.",
           "miles": 0.05,
-          "road": "a service road",
-          "speed_mph": 10.0
-        },
-        {
-          "cue": "Turn left onto West 5th Street (NY 394).",
-          "miles": 0.05,
-          "road": "West 5th Street (NY 394)",
+          "road": "West 8th Street",
           "speed_mph": 30.0
         },
         {
-          "cue": "Turn right onto Martyn Alley.",
-          "miles": 0.16,
-          "road": "Martyn Alley",
-          "speed_mph": 15.0
-        },
-        {
-          "cue": "Turn left onto a service road.",
+          "cue": "Continue onto a service road.",
           "miles": 0.05,
           "road": "a service road",
           "speed_mph": 15.0
@@ -107696,7 +107690,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 0.71,
+      "total_miles": 0.52,
       "turn_level": true,
       "yard_hint": false
     },
@@ -109541,7 +109535,7 @@
       "facility_name": "Junction Company Yard",
       "facility_type": "company_yard",
       "fallback": true,
-      "fallback_reason": "Sourced endpoint failed the freight-site screen: The sourced endpoint is a power-grid object, not a freight site. A street chain to it is not claimed.",
+      "fallback_reason": "Sourced endpoint failed the freight-site screen: The endpoint's source object is no longer in the local extract. A street chain to it is not claimed.",
       "final_hint": "Facility approach uses fallback road context; final gate, yard, dock, and driveway are not source-backed.",
       "gate_hint": false,
       "nearest_road_context": false,
@@ -120401,7 +120395,7 @@
       "yard_road": {
         "miles": 0.04,
         "public_miles": 2.26,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -121666,7 +121660,7 @@
       "yard_hint": false
     },
     "laredo-tx-us:cross_dock:laredo-cross-dock": {
-      "approach_road": "Scott Street",
+      "approach_road": "Salinas Avenue",
       "city": "laredo_tx_us",
       "dock_hint": false,
       "endpoint_name": "Camel Services Inc",
@@ -121684,26 +121678,26 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on Scott Street.",
-          "miles": 0.06,
-          "road": "Scott Street",
-          "speed_mph": 25.0
-        },
-        {
-          "cue": "Turn right onto Salinas Avenue.",
-          "miles": 0.45,
+          "cue": "Start on Salinas Avenue.",
+          "miles": 0.38,
           "road": "Salinas Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn left onto Park Street.",
-          "miles": 0.11,
-          "road": "Park Street",
+          "cue": "Turn left onto Sanchez Street.",
+          "miles": 0.09,
+          "road": "Sanchez Street",
           "speed_mph": 25.0
         },
         {
+          "cue": "Turn right onto a service road.",
+          "miles": 0.05,
+          "road": "a service road",
+          "speed_mph": 15.0
+        },
+        {
           "cue": "Turn right onto Santa Maria Avenue.",
-          "miles": 1.4,
+          "miles": 1.45,
           "road": "Santa Maria Avenue",
           "speed_mph": 25.0
         },
@@ -121736,7 +121730,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 2.81,
+      "total_miles": 2.76,
       "turn_level": true,
       "yard_hint": false
     },
@@ -129218,15 +129212,15 @@
         },
         {
           "cue": "Turn right onto North High Street (Spur 502).",
-          "miles": 0.19,
+          "miles": 0.23,
           "road": "North High Street (Spur 502)",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Continue onto Judson Road (Spur 502).",
-          "miles": 5.48,
+          "miles": 5.45,
           "road": "Judson Road (Spur 502)",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Turn left onto L L Mackey Parkway.",
@@ -129251,13 +129245,13 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 6.82,
+      "total_miles": 6.83,
       "turn_level": true,
       "yard_hint": false,
       "yard_road": {
         "miles": 0.37,
-        "public_miles": 6.45,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "public_miles": 6.46,
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -129289,7 +129283,7 @@
           "cue": "Turn left onto North High Street (Spur 502).",
           "miles": 0.05,
           "road": "North High Street (Spur 502)",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Turn right onto West Marshall Avenue (US 80).",
@@ -129344,15 +129338,15 @@
         },
         {
           "cue": "Turn right onto North High Street (Spur 502).",
-          "miles": 0.19,
+          "miles": 0.23,
           "road": "North High Street (Spur 502)",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Continue onto Judson Road (Spur 502).",
-          "miles": 5.23,
+          "miles": 5.19,
           "road": "Judson Road (Spur 502)",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Turn left onto Bill Stoudt Parkway (FM 2275).",
@@ -130484,7 +130478,7 @@
       "yard_road": {
         "miles": 0.43,
         "public_miles": 4.39,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -131770,7 +131764,7 @@
       "yard_hint": false
     },
     "lubbock-tx-us:grocery_retail_dc:lubbock-grocery-distribution-center": {
-      "approach_road": "Avenue Q (US 84)",
+      "approach_road": "19th Street (US 62;TX 114)",
       "city": "lubbock_tx_us",
       "dock_hint": false,
       "endpoint_name": "McLane",
@@ -131788,16 +131782,22 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on Avenue Q (US 84).",
-          "miles": 0.05,
-          "road": "Avenue Q (US 84)",
+          "cue": "Start on 19th Street (US 62;TX 114).",
+          "miles": 0.74,
+          "road": "19th Street (US 62;TX 114)",
+          "speed_mph": 35.0
+        },
+        {
+          "cue": "Continue onto US 62;TX 114.",
+          "miles": 0.2,
+          "road": "US 62;TX 114",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn left onto 19th Street (US 62;TX 114).",
-          "miles": 1.09,
+          "cue": "Continue onto 19th Street (US 62;TX 114).",
+          "miles": 0.15,
           "road": "19th Street (US 62;TX 114)",
-          "speed_mph": 35.0
+          "speed_mph": 25.0
         },
         {
           "cue": "Continue onto East 19th Street (US 62;TX 114).",
@@ -131834,7 +131834,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 4.23,
+      "total_miles": 4.18,
       "turn_level": true,
       "yard_hint": false
     },
@@ -139531,7 +139531,7 @@
       "yard_hint": false
     },
     "mckinney-tx-us:cross_dock:mckinney-cross-dock": {
-      "approach_road": "North Tennessee Street",
+      "approach_road": "Latham Drive",
       "city": "mckinney_tx_us",
       "dock_hint": false,
       "endpoint_name": "Andrew's Distributing",
@@ -139549,44 +139549,44 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on North Tennessee Street.",
+          "cue": "Start on Latham Drive.",
           "miles": 0.05,
-          "road": "North Tennessee Street",
+          "road": "Latham Drive",
+          "speed_mph": 40.0
+        },
+        {
+          "cue": "Turn left onto Convention Drive.",
+          "miles": 0.06,
+          "road": "Convention Drive",
           "speed_mph": 25.0
         },
         {
-          "cue": "Continue onto South Tennessee Street.",
-          "miles": 1.17,
-          "road": "South Tennessee Street",
-          "speed_mph": 25.0
-        },
-        {
-          "cue": "Continue onto South McDonald Street (TX 5).",
-          "miles": 1.81,
-          "road": "South McDonald Street (TX 5)",
-          "speed_mph": 45.0
-        },
-        {
-          "cue": "Continue onto State Highway 5 (TX 5).",
-          "miles": 2.14,
-          "road": "State Highway 5 (TX 5)",
-          "speed_mph": 45.0
-        },
-        {
-          "cue": "Continue onto North Greenville Avenue.",
-          "miles": 0.08,
-          "road": "North Greenville Avenue",
-          "speed_mph": 45.0
-        },
-        {
-          "cue": "Turn right onto a service road.",
-          "miles": 0.5,
+          "cue": "Continue onto a service road.",
+          "miles": 0.55,
           "road": "a service road",
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn left onto Andrews Parkway.",
-          "miles": 0.78,
+          "cue": "Turn right onto East Stacy Road.",
+          "miles": 0.1,
+          "road": "East Stacy Road",
+          "speed_mph": 45.0
+        },
+        {
+          "cue": "Turn left onto a side street.",
+          "miles": 0.05,
+          "road": "a side street",
+          "speed_mph": 15.0
+        },
+        {
+          "cue": "Turn right onto a service road.",
+          "miles": 0.51,
+          "road": "a service road",
+          "speed_mph": 15.0
+        },
+        {
+          "cue": "Turn right onto Andrews Parkway.",
+          "miles": 0.16,
           "road": "Andrews Parkway",
           "speed_mph": 35.0
         },
@@ -139601,7 +139601,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 6.65,
+      "total_miles": 1.6,
       "turn_level": true,
       "yard_hint": false
     },
@@ -142193,7 +142193,7 @@
       "yard_road": {
         "miles": 0.16,
         "public_miles": 3.95,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -159343,7 +159343,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for new_york_ny_us, New York; matched to distribution by logistics/warehouse/freight tags or name; rail/intermodal tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Queens Processing and Distribution Center",
         "leads_to": "Hunts Point Market Spur",
         "rebuild_failed": "The roads at the sourced endpoint do not join the city context over public surface roads, nor over a private road of the facility's own; a motorway, water, a closed road or a gate on a public road lies between."
@@ -159400,7 +159400,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for new_york_ny_us, New York; matched to dry_warehouse by logistics/warehouse/freight tags or name; rail/intermodal tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Shops and Warehouse",
         "leads_to": "Hunts Point Market Spur",
         "rebuild_failed": "Public-road path is shorter than the playable facility approach floor."
@@ -164372,7 +164372,7 @@
       "yard_road": {
         "miles": 0.17,
         "public_miles": 3.52,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -171319,7 +171319,7 @@
           "cue": "Continue onto Saviers Road.",
           "miles": 2.67,
           "road": "Saviers Road",
-          "speed_mph": 25.0
+          "speed_mph": 40.0
         },
         {
           "cue": "Turn left onto East Clara Street.",
@@ -171356,7 +171356,7 @@
       "yard_road": {
         "miles": 0.21,
         "public_miles": 3.9,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -173920,7 +173920,7 @@
       "yard_hint": false
     },
     "pampa-tx-us:dry_warehouse:pampa-dry-warehouse": {
-      "approach_road": "West Foster Avenue",
+      "approach_road": "East Foster Avenue",
       "city": "pampa_tx_us",
       "dock_hint": false,
       "endpoint_name": "W & W Fiberglass Tank Co",
@@ -173938,7 +173938,13 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on West Foster Avenue.",
+          "cue": "Start on East Foster Avenue.",
+          "miles": 0.08,
+          "road": "East Foster Avenue",
+          "speed_mph": 30.0
+        },
+        {
+          "cue": "Continue onto West Foster Avenue.",
           "miles": 0.67,
           "road": "West Foster Avenue",
           "speed_mph": 30.0
@@ -173963,14 +173969,8 @@
         },
         {
           "cue": "Turn left onto West Carter Avenue.",
-          "miles": 0.13,
+          "miles": 0.21,
           "road": "West Carter Avenue",
-          "speed_mph": 30.0
-        },
-        {
-          "cue": "Continue onto Chisum Trail Road.",
-          "miles": 0.08,
-          "road": "Chisum Trail Road",
           "speed_mph": 30.0
         },
         {
@@ -173980,9 +173980,9 @@
           "speed_mph": 15.0
         },
         {
-          "cue": "Turn right onto West Rham Street.",
+          "cue": "Turn right onto Royal Avenue.",
           "miles": 0.17,
-          "road": "West Rham Street",
+          "road": "Royal Avenue",
           "speed_mph": 30.0
         }
       ],
@@ -173990,7 +173990,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 1.9,
+      "total_miles": 1.98,
       "turn_level": true,
       "yard_hint": false
     },
@@ -191534,7 +191534,7 @@
       "yard_road": {
         "miles": 0.13,
         "public_miles": 2.7,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -191897,7 +191897,7 @@
       "yard_road": {
         "miles": 0.31,
         "public_miles": 3.16,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -193133,7 +193133,7 @@
         },
         {
           "cue": "Continue onto Lake Avenue.",
-          "miles": 4.54,
+          "miles": 4.55,
           "road": "Lake Avenue",
           "speed_mph": 35.0
         },
@@ -193154,7 +193154,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 5.66,
+      "total_miles": 5.67,
       "turn_level": true,
       "yard_hint": false
     },
@@ -193322,16 +193322,16 @@
         },
         {
           "cue": "Continue onto Atlantic Avenue.",
-          "miles": 0.41,
+          "miles": 0.42,
           "road": "Atlantic Avenue",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         }
       ],
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for rochester_ny_us, New York; matched to intermodal_ramp by railway land named a yard, ramp or terminal (trade read); road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-09-17.",
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 1.73,
+      "total_miles": 1.74,
       "turn_level": true,
       "yard_hint": false
     },
@@ -193487,7 +193487,7 @@
       "yard_road": {
         "miles": 0.35,
         "public_miles": 4.77,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -197188,7 +197188,7 @@
           "cue": "Continue onto Folsom Boulevard.",
           "miles": 0.05,
           "road": "Folsom Boulevard",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         },
         {
           "cue": "Turn left onto 69th Street.",
@@ -197314,7 +197314,7 @@
           "cue": "Start on 29th Street.",
           "miles": 0.08,
           "road": "29th Street",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         },
         {
           "cue": "Turn left onto J Street.",
@@ -197332,13 +197332,13 @@
           "cue": "Turn left onto Folsom Boulevard.",
           "miles": 1.4,
           "road": "Folsom Boulevard",
-          "speed_mph": 35.0
+          "speed_mph": 40.0
         },
         {
           "cue": "Continue onto a side street.",
           "miles": 0.07,
           "road": "a side street",
-          "speed_mph": 15.0
+          "speed_mph": 40.0
         },
         {
           "cue": "Continue onto Jackson Road (CA 16).",
@@ -197369,7 +197369,7 @@
       "yard_road": {
         "miles": 0.36,
         "public_miles": 5.52,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -201500,13 +201500,13 @@
         },
         {
           "cue": "Turn left onto Sunset Drive.",
-          "miles": 0.2,
+          "miles": 0.1,
           "road": "Sunset Drive",
           "speed_mph": 25.0
         },
         {
           "cue": "Turn right onto a service road.",
-          "miles": 0.19,
+          "miles": 0.18,
           "road": "a service road",
           "speed_mph": 15.0
         }
@@ -201515,7 +201515,7 @@
       "source_type": "osm_local_road_graph",
       "state": "Texas",
       "target_type": "facility",
-      "total_miles": 2.98,
+      "total_miles": 2.87,
       "turn_level": true,
       "yard_hint": false
     },
@@ -202306,7 +202306,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for san_diego_ca_us, California; matched to distribution by logistics/warehouse/freight tags or name; rail/intermodal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Building 825",
         "leads_to": "NCTC San Diego Subdivision",
         "rebuild_failed": "The roads at the sourced endpoint do not join the city context over public surface roads, nor over a private road of the facility's own; a motorway, water, a closed road or a gate on a public road lies between."
@@ -202580,7 +202580,7 @@
       "yard_road": {
         "miles": 0.36,
         "public_miles": 1.03,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -202655,7 +202655,7 @@
       "yard_road": {
         "miles": 0.15,
         "public_miles": 1.73,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -203095,7 +203095,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for san_francisco_ca_us, California; matched to port_terminal by port/container terminal tags or name; manufacturing/industrial tags; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Port Of Oakland Berths 32-34",
         "leads_to": "Mary Ellen Pleasant",
         "rebuild_failed": "The roads at the sourced endpoint do not join the city context over public surface roads, nor over a private road of the facility's own; a motorway, water, a closed road or a gate on a public road lies between."
@@ -205534,7 +205534,7 @@
           "cue": "Turn right onto West Betteravia Road.",
           "miles": 0.6,
           "road": "West Betteravia Road",
-          "speed_mph": 25.0
+          "speed_mph": 45.0
         },
         {
           "cue": "Turn left onto South Oakley Avenue.",
@@ -205603,7 +205603,7 @@
           "cue": "Turn right onto West Stowell Road.",
           "miles": 1.69,
           "road": "West Stowell Road",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Turn left onto E Street.",
@@ -205958,7 +205958,7 @@
       "segments": [
         {
           "cue": "Start on 4th Street.",
-          "miles": 0.07,
+          "miles": 0.09,
           "road": "4th Street",
           "speed_mph": 25.0
         },
@@ -206009,7 +206009,7 @@
       "source_type": "osm_local_road_graph",
       "state": "California",
       "target_type": "facility",
-      "total_miles": 1.07,
+      "total_miles": 1.09,
       "turn_level": true,
       "yard_hint": false
     },
@@ -221845,7 +221845,7 @@
       "yard_hint": false
     },
     "stockton-ca-us:intermodal_ramp:stockton-intermodal-ramp": {
-      "approach_road": "East Miner Avenue",
+      "approach_road": "North Aurora Street",
       "city": "stockton_ca_us",
       "dock_hint": false,
       "endpoint_name": "Stockton Yard",
@@ -221863,13 +221863,7 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on East Miner Avenue.",
-          "miles": 0.42,
-          "road": "East Miner Avenue",
-          "speed_mph": 25.0
-        },
-        {
-          "cue": "Turn right onto North Aurora Street.",
+          "cue": "Start on North Aurora Street.",
           "miles": 0.21,
           "road": "North Aurora Street",
           "speed_mph": 25.0
@@ -221905,8 +221899,14 @@
           "speed_mph": 25.0
         },
         {
+          "cue": "Continue onto South Union Street.",
+          "miles": 0.05,
+          "road": "South Union Street",
+          "speed_mph": 25.0
+        },
+        {
           "cue": "Turn left onto a service road.",
-          "miles": 1.33,
+          "miles": 1.32,
           "road": "a service road",
           "speed_mph": 15.0
         }
@@ -221915,7 +221915,7 @@
       "source_type": "osm_local_road_graph",
       "state": "California",
       "target_type": "facility",
-      "total_miles": 3.4,
+      "total_miles": 3.02,
       "turn_level": true,
       "yard_hint": false
     },
@@ -223909,7 +223909,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for syracuse_ny_us, New York; matched to company_yard by logistics/warehouse/freight tags or name; rail/intermodal tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "C. W. Snow and Co. Warehouse",
         "leads_to": "Syracuse Main Line",
         "rebuild_failed": "Public-road path is shorter than the playable facility approach floor."
@@ -234911,7 +234911,7 @@
       "yard_road": {
         "miles": 0.51,
         "public_miles": 1.25,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -235339,7 +235339,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for ukiah_ca_us, California; matched to company_yard by logistics/warehouse/freight tags or name; port/container terminal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "Retech Systems LLC",
         "leads_to": "Costco",
         "rebuild_failed": "The sourced endpoint is reached only over a long private road inside a large site; whether a chain may run that far on private ground is left to the owner."
@@ -235568,13 +235568,13 @@
         },
         {
           "cue": "Turn right onto Genesee Street.",
-          "miles": 4.39,
+          "miles": 4.47,
           "road": "Genesee Street",
           "speed_mph": 30.0
         },
         {
-          "cue": "Turn left onto North-South Arterial Highway (NY 5).",
-          "miles": 0.17,
+          "cue": "Continue onto North-South Arterial Highway (NY 5).",
+          "miles": 0.08,
           "road": "North-South Arterial Highway (NY 5)",
           "speed_mph": 40.0
         },
@@ -235601,7 +235601,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 6.23,
+      "total_miles": 6.22,
       "turn_level": true,
       "yard_hint": false
     },
@@ -235718,13 +235718,19 @@
         },
         {
           "cue": "Turn right onto Seneca Street.",
-          "miles": 0.07,
+          "miles": 0.05,
           "road": "Seneca Street",
           "speed_mph": 25.0
         },
         {
-          "cue": "Continue onto Oriskany Street West (NY 5S).",
-          "miles": 0.11,
+          "cue": "Continue onto a side street.",
+          "miles": 0.05,
+          "road": "a side street",
+          "speed_mph": 15.0
+        },
+        {
+          "cue": "Turn left onto Oriskany Street West (NY 5S).",
+          "miles": 0.1,
           "road": "Oriskany Street West (NY 5S)",
           "speed_mph": 30.0
         },
@@ -235739,7 +235745,7 @@
       "source_type": "osm_local_road_graph",
       "state": "New York",
       "target_type": "facility",
-      "total_miles": 0.51,
+      "total_miles": 0.53,
       "turn_level": true,
       "yard_hint": false
     },
@@ -235777,13 +235783,13 @@
           "cue": "Continue onto North Genesee Street.",
           "miles": 1.01,
           "road": "North Genesee Street",
-          "speed_mph": 25.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Continue onto a side street.",
           "miles": 0.11,
           "road": "a side street",
-          "speed_mph": 15.0
+          "speed_mph": 35.0
         },
         {
           "cue": "Turn left onto River Road.",
@@ -235858,13 +235864,13 @@
           "cue": "Turn right onto Broad Street.",
           "miles": 1.33,
           "road": "Broad Street",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         },
         {
           "cue": "Turn right onto Dwyer Avenue.",
           "miles": 0.23,
           "road": "Dwyer Avenue",
-          "speed_mph": 25.0
+          "speed_mph": 30.0
         },
         {
           "cue": "Turn right onto a service road.",
@@ -240043,7 +240049,7 @@
       "yard_hint": false
     },
     "visalia-ca-us:company_yard:visalia-company-yard": {
-      "approach_road": "a service road",
+      "approach_road": "East Main Street",
       "city": "visalia_ca_us",
       "dock_hint": false,
       "endpoint_name": "Olive Plant Business Park",
@@ -240061,7 +240067,19 @@
       "road_snapped": true,
       "segments": [
         {
-          "cue": "Start on a service road.",
+          "cue": "Start on East Main Street.",
+          "miles": 0.05,
+          "road": "East Main Street",
+          "speed_mph": 25.0
+        },
+        {
+          "cue": "Turn left onto South Court Street (CA 63).",
+          "miles": 0.27,
+          "road": "South Court Street (CA 63)",
+          "speed_mph": 25.0
+        },
+        {
+          "cue": "Turn left onto a service road.",
           "miles": 0.08,
           "road": "a service road",
           "speed_mph": 15.0
@@ -240074,25 +240092,13 @@
         },
         {
           "cue": "Turn left onto East Myrtle Avenue.",
-          "miles": 0.05,
+          "miles": 0.06,
           "road": "East Myrtle Avenue",
           "speed_mph": 25.0
         },
         {
-          "cue": "Turn right onto a service road.",
-          "miles": 0.16,
-          "road": "a service road",
-          "speed_mph": 15.0
-        },
-        {
-          "cue": "Turn left onto East Sequoia Avenue.",
-          "miles": 0.05,
-          "road": "East Sequoia Avenue",
-          "speed_mph": 25.0
-        },
-        {
           "cue": "Turn right onto South Garden Street.",
-          "miles": 0.17,
+          "miles": 0.33,
           "road": "South Garden Street",
           "speed_mph": 25.0
         },
@@ -240113,7 +240119,7 @@
       "source_type": "osm_local_road_graph",
       "state": "California",
       "target_type": "facility",
-      "total_miles": 0.68,
+      "total_miles": 0.96,
       "turn_level": true,
       "yard_hint": false
     },
@@ -240302,7 +240308,7 @@
       "yard_road": {
         "miles": 0.06,
         "public_miles": 0.88,
-        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-17.",
+        "source": "Read: the last link of this chain, at the facility, is the facility's own road, tagged access=private in the local OpenStreetMap extract; the public roads alone do not reach the endpoint. Only its geometry is used: it is spoken as a service road, never by a name or ref of its own, and its miles do not count toward the chain floor. Accessed 2026-09-18.",
         "spoken_as": "a service road"
       }
     },
@@ -252892,7 +252898,7 @@
       "source_note": "Source-backed freight facility endpoint from a local OpenStreetMap extract for yuba_city_ca_us, California; matched to cross_dock by logistics/warehouse/freight tags or name; rail/intermodal tags or name; road snapping, gates, yards, and docks are not claimed by this layer; accessed 2026-06-27.",
       "source_type": "osm_local_road_graph",
       "stale_endpoint": {
-        "accessed": "2026-09-17",
+        "accessed": "2026-09-18",
         "endpoint_now": "PG&E North Valley Material Distribution Center",
         "leads_to": "UP Valley Subdivision",
         "rebuild_failed": "Sourced endpoint failed the freight-site screen: The sourced endpoint no longer states this facility's trade under the matcher's rules. A street chain to it is not claimed."
@@ -253995,16 +254001,19 @@
     "gate_policy": "No gate, yard, dock, driveway, or private entrance is claimed unless future source data explicitly proves it.",
     "max_route_mi": 18.0,
     "merge": {
-      "accessed": "2026-09-17",
+      "accessed": "2026-09-18",
       "added": 0,
       "batch_states": [
-        "Indiana",
-        "Florida"
+        "California",
+        "Texas",
+        "New York"
       ],
-      "kept": 2621,
-      "kept_turn_level": 2413,
-      "new_geometry": 3,
-      "refreshed": 0
+      "kept": 2539,
+      "kept_turn_level": 2149,
+      "new_geometry": 267,
+      "rebuilt_to_new_endpoint": 0,
+      "refreshed": 82,
+      "stale_chain_kept": 9
     },
     "regeocode_far_pins": {
       "accessed": "2026-09-16",
@@ -254092,9 +254101,9 @@
     },
     {
       "available": true,
-      "bytes": 1316751894,
-      "file": "C:\\Users\\joshu\\.cache\\freight-fate-osm\\regions\\california-latest.osm.pbf",
-      "modified": 1782257512.3477306,
+      "bytes": 1328688632,
+      "file": "/home/box/.cache/freight-fate-osm/regions/california-latest.osm.pbf",
+      "modified": 1789749890.256792,
       "state": "California"
     },
     {
@@ -254281,9 +254290,9 @@
     },
     {
       "available": true,
-      "bytes": 492101738,
-      "file": "C:\\Users\\joshu\\.cache\\freight-fate-osm\\regions\\new-york-latest.osm.pbf",
-      "modified": 1782257746.8287628,
+      "bytes": 496433783,
+      "file": "/home/box/.cache/freight-fate-osm/regions/new-york-latest.osm.pbf",
+      "modified": 1789749816.024956,
       "state": "New York"
     },
     {
@@ -254358,9 +254367,9 @@
     },
     {
       "available": true,
-      "bytes": 707252301,
-      "file": "C:\\Users\\joshu\\.cache\\freight-fate-osm\\regions\\texas-latest.osm.pbf",
-      "modified": 1782258063.7825096,
+      "bytes": 720482367,
+      "file": "/home/box/.cache/freight-fate-osm/regions/texas-latest.osm.pbf",
+      "modified": 1789749841.7006385,
       "state": "Texas"
     },
     {
