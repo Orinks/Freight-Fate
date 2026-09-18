@@ -51184,6 +51184,28 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Culbertson",
+          "type": "public_rest_area",
+          "at_mi": 54.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Culbertson on US-2 in Culbertson, MT with 12 truck parking spaces, mile post 645; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 12
+        },
+        {
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 95.0,

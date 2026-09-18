@@ -40259,7 +40259,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.09743804329619,
-          "lon": -73.44210161049223
+          "lon": -73.44210161049223,
+          "parking_spaces": 20
         },
         {
           "name": "RT. 15 New Canaan NB Service Plaza",

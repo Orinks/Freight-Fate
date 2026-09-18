@@ -17148,8 +17148,8 @@
           "name": "Salem Rest Area Eastbound",
           "type": "public_rest_area",
           "at_mi": 308.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-90E truck parking near Salem with 16 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -17165,7 +17165,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 16
         }
       ],
       "divided": true,
@@ -18031,6 +18032,28 @@
         }
       },
       "stops": [
+        {
+          "name": "I-29N truck parking near Ward",
+          "type": "public_rest_area",
+          "at_mi": 43.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29N truck parking near Ward on I-29N in Ward, SD with 16 truck parking spaces, mile post 121; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 16
+        },
         {
           "name": "Kwik Star",
           "type": "fuel_station",
@@ -26791,6 +26814,50 @@
           "lat": 44.88979,
           "lon": -97.10855,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "I-29S truck parking near Hidewood",
+          "type": "public_rest_area",
+          "at_mi": 20.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29S truck parking near Hidewood on I-29S in Hidewood, SD with 13 truck parking spaces, mile post 160; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
+        },
+        {
+          "name": "I-29N truck parking near Hidewood",
+          "type": "public_rest_area",
+          "at_mi": 20.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-29N truck parking near Hidewood on I-29N in Hidewood, SD with 13 truck parking spaces, mile post 160; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
         },
         {
           "name": "Kwik Star",

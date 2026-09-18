@@ -16095,7 +16095,7 @@
           "name": "Funks Grove Rest Area",
           "type": "public_rest_area",
           "at_mi": 145.5,
-          "source": "IDOT truck parking page, I-55 Funks Grove Rest Area near mile marker 149: https://idot.illinois.gov/programs-and-projects/rail-and-freight/truck-parking.html Mile carried across proportionally when the leg was rerouted.",
+          "source": "IDOT truck parking page, I-55 Funks Grove Rest Area near mile marker 149: https://idot.illinois.gov/programs-and-projects/rail-and-freight/truck-parking.html Mile carried across proportionally when the leg was rerouted. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Funks Grove NB with 20 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
           "actions": [
             "park",
             "save",
@@ -16109,9 +16109,10 @@
           "directions": [
             "both"
           ],
-          "parking": "limited",
+          "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 20
         },
         {
           "name": "Road Ranger McLean",
@@ -22912,6 +22913,50 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Krisdala Baka WB",
+          "type": "public_rest_area",
+          "at_mi": 21.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Krisdala Baka WB on I-74WB in Alpha, IL with 15 truck parking spaces, mile post 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 15
+        },
+        {
+          "name": "Krisdala Baka EB",
+          "type": "public_rest_area",
+          "at_mi": 22.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Krisdala Baka EB on I-74EB in Opheim, IL with 14 truck parking spaces, mile post 28; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 14
+        },
+        {
           "name": "Shell",
           "type": "fuel_station",
           "at_mi": 42.05,
@@ -28531,6 +28576,50 @@
           "exit_ref": "82",
           "interchange_mi": 11.63,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I74, 0.25 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+        },
+        {
+          "name": "Spoon River WB",
+          "type": "public_rest_area",
+          "at_mi": 31.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Spoon River WB on I-74WB in Williamsfield, IL with 12 truck parking spaces, mile post 62; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 12
+        },
+        {
+          "name": "Spoon River EB",
+          "type": "public_rest_area",
+          "at_mi": 31.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Spoon River EB on I-74EB in Williamsfield, IL with 13 truck parking spaces, mile post 62; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
         }
       ],
       "divided": true,
@@ -38394,7 +38483,7 @@
           "name": "Funks Grove Rest Area",
           "type": "public_rest_area",
           "at_mi": 57.6,
-          "source": "IDOT truck parking page, I-55 Funks Grove Rest Area near mile marker 149: https://idot.illinois.gov/programs-and-projects/rail-and-freight/truck-parking.html Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "IDOT truck parking page, I-55 Funks Grove Rest Area near mile marker 149: https://idot.illinois.gov/programs-and-projects/rail-and-freight/truck-parking.html Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Funks Grove NB with 20 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
           "actions": [
             "park",
             "save",
@@ -38408,11 +38497,12 @@
           "directions": [
             "both"
           ],
-          "parking": "limited",
+          "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 40.372867464741084,
-          "lon": -89.09804675271651
+          "lon": -89.09804675271651,
+          "parking_spaces": 20
         },
         {
           "name": "Pilot Travel Center Bloomington",

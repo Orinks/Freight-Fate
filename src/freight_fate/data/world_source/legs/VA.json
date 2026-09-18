@@ -7,6 +7,28 @@
       "miles": 16,
       "stops": [
         {
+          "name": "Abingdon Truck-Only Safety Rest Area North",
+          "type": "public_rest_area",
+          "at_mi": 3.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Abingdon Truck-Only Safety Rest Area North on I-81N in Abingdon, VA with 48 truck parking spaces, mile post 13; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 48
+        },
+        {
           "name": "Sunoco",
           "type": "fuel_station",
           "at_mi": 8.0,

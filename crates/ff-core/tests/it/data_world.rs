@@ -724,6 +724,36 @@ fn test_southern_sleep_stop_gaps_are_no_longer_extreme() {
 }
 
 #[test]
+fn test_a_leg_with_only_bobtail_stops_carries_the_rest_areas_on_its_road() {
+    // Two bobtail-only Kwik Trips met the stop minimum for I-35 Owatonna to
+    // Minneapolis, so the federal inventory's own rest areas on that road
+    // were never curated in and the cab answered "no sleep-capable route
+    // stop ahead" (owner, 2026-09-18). A loaded truck must find a night's
+    // parking on the leg.
+    let world = world();
+    let route = supported(world, "Owatonna", "Minneapolis");
+    let stops = route.stop_details();
+    let sleepable: Vec<&str> = stops
+        .iter()
+        .filter(|stop| {
+            stop.actions.iter().any(|a| a == "sleep") && stop.vehicle_access != "bobtail_only"
+        })
+        .map(|stop| stop.name.as_str())
+        .collect();
+    assert!(
+        sleepable.contains(&"Heath Creek"),
+        "Heath Creek rest area missing from I-35 north of Owatonna: {sleepable:?}"
+    );
+    let heath = stops
+        .iter()
+        .find(|stop| stop.name == "Heath Creek")
+        .unwrap();
+    assert_eq!(heath.stop_type, "public_rest_area");
+    assert_eq!(heath.parking, "confirmed");
+    assert!(heath.source.contains("Jason's Law"), "{}", heath.source);
+}
+
+#[test]
 fn test_toll_metadata_is_explicit_and_separate_from_service_plazas() {
     let world = world();
     let route = world

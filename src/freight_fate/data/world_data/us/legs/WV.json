@@ -8195,7 +8195,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 17
         }
       ],
       "divided": true,

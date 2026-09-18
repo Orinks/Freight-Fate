@@ -24,6 +24,8 @@
 
 ### Fixed
 
+- **Rest areas on roads with no truck-usable stop are now on the map.** Twenty-two of them, including Heath Creek on I-35 north of Owatonna.
+
 - **Street directions now end at the facility.** Hundreds used to end at a railway line, a power substation or a shop nearby.
 
 - **A truck stop that was on the map twice is announced once.** Signalling for it arms the real exit, with its exit number and the stop at the end of the ramp.

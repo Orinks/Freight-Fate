@@ -5989,8 +5989,8 @@
           "name": "Valley Wells Rest Area",
           "type": "public_rest_area",
           "at_mi": 87.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Valley Wells Northbound with 17 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -6006,7 +6006,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 17
         },
         {
           "name": "Flying J",
@@ -7563,7 +7564,7 @@
           "name": "Flying J Travel Center Ehrenberg",
           "type": "travel_center",
           "at_mi": 7.2,
-          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (2.6 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (2.6 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ehrenberg (WB) with 16 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
           "actions": [
             "park",
             "save",
@@ -7587,7 +7588,8 @@
           "lon": -114.523265,
           "exit_ref": "1",
           "interchange_mi": 4.8,
-          "exit_source": "exit_ref read: the stop's own source names exit 1; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: the stop's own source names exit 1; interchange_mi derived: this leg's interchange record with that exit number.",
+          "parking_spaces": 16
         },
         {
           "name": "Love's Travel Stop Quartzsite",
@@ -147530,7 +147532,30 @@
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         }
       },
-      "stops": [],
+      "stops": [
+        {
+          "name": "Westley Southbound",
+          "type": "public_rest_area",
+          "at_mi": 20.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Westley Southbound on I-5 S in Vernalis, CA with 16 truck parking spaces, mile post PM 27.2; at_mi estimated by projecting source coordinates onto checked-in route geometry (14.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 16
+        }
+      ],
       "divided": true,
       "lanes": 4
     },
@@ -150228,6 +150253,28 @@
           "lat": 40.43094,
           "lon": -120.65649,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Honey Lake",
+          "type": "public_rest_area",
+          "at_mi": 15.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Honey Lake on US 395 S in Buntingville, CA with 13 truck parking spaces, mile post PM 49.6; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13
         },
         {
           "name": "Winners Corner",

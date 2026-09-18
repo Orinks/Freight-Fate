@@ -5552,7 +5552,7 @@
           "name": "Bliss W",
           "type": "public_rest_area",
           "at_mi": 210.8,
-          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Derived: the inventory's paired directional record Bliss W lists 49 truck parking spaces, and the larger lot's count is kept.",
           "actions": [
             "park",
             "save",
@@ -5570,7 +5570,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.93892256938626,
-          "lon": -115.07103440171676
+          "lon": -115.07103440171676,
+          "parking_spaces": 49
         },
         {
           "name": "Pilot Travel Center Mountain Home",

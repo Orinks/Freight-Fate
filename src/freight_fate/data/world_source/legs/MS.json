@@ -33974,6 +33974,28 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "NHS Welcome Center Warren County Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 70.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists NHS Welcome Center Warren County Welcome Center on I-20 @ Old US 61 in Vicksburg, MS with 8 truck parking spaces, mile post 1; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 8
+        },
+        {
           "name": "Circle K",
           "type": "fuel_station",
           "at_mi": 73.0,

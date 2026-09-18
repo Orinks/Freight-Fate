@@ -3555,7 +3555,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.60695375139988,
-          "lon": -83.96654878447177
+          "lon": -83.96654878447177,
+          "parking_spaces": 21
         },
         {
           "name": "truck parking",
@@ -5876,7 +5877,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.60695375139988,
-          "lon": -83.96654878447177
+          "lon": -83.96654878447177,
+          "parking_spaces": 21
         },
         {
           "name": "truck parking",
@@ -9192,8 +9194,8 @@
           "name": "Love's Travel Stop Marshall",
           "type": "travel_center",
           "at_mi": 104.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Love's store 336 at Marshall; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Love's store 336 at Marshall; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-94W truck parking near Marshall with 21 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -9215,7 +9217,8 @@
           ],
           "exit_ref": "112",
           "interchange_mi": 105.1,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "parking_spaces": 21
         },
         {
           "name": "Pilot Travel Center Battle Creek",
@@ -29192,7 +29195,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.60695375139988,
-          "lon": -83.96654878447177
+          "lon": -83.96654878447177,
+          "parking_spaces": 21
         },
         {
           "name": "truck parking",
@@ -39660,8 +39664,8 @@
           "name": "Love's Travel Stop Marshall",
           "type": "travel_center",
           "at_mi": 36.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Love's store 336 at Marshall; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Michigan extract dated 2026-06-22, read 2026-09-17): Love's store 336 at Marshall; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-94W truck parking near Marshall with 21 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -39680,7 +39684,8 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "112",
           "interchange_mi": 36.2,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "parking_spaces": 21
         },
         {
           "name": "The 115 Truck Stop",
@@ -60047,7 +60052,7 @@
           "name": "Holiday St. Ignace",
           "type": "fuel_station",
           "at_mi": 50.0,
-          "source": "Holiday, 924 US-2 W, St. Ignace, MI -- 24-hour diesel just north of the Mackinac Bridge on the I-75 corridor; accessed 2026-07-03: https://www.gasbuddy.com/station/25809 Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Mile carried across proportionally when the leg was rerouted.",
+          "source": "Holiday, 924 US-2 W, St. Ignace, MI -- 24-hour diesel just north of the Mackinac Bridge on the I-75 corridor; accessed 2026-07-03: https://www.gasbuddy.com/station/25809 Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Mile carried across proportionally when the leg was rerouted. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-75S truck parking near Saint Ignace with 12 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
           "actions": [
             "park",
             "save",
@@ -60061,9 +60066,10 @@
           "directions": [
             "both"
           ],
-          "parking": "limited",
+          "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "bobtail_only"
+          "vehicle_access": "bobtail_only",
+          "parking_spaces": 12
         },
         {
           "name": "Fick & Sons Travel Center Grayling",

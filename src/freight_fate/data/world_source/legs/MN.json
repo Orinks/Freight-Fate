@@ -18067,8 +18067,8 @@
           "name": "I-35 Dows Rest Stop",
           "type": "public_rest_area",
           "at_mi": 165.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
-          "parking": "limited",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-35 truck parking near Dows with 50 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -18084,7 +18084,8 @@
           "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ]
+          ],
+          "parking_spaces": 50
         },
         {
           "name": "Casey's Truck Stop",
@@ -19576,6 +19577,28 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Heath Creek",
+          "type": "public_rest_area",
+          "at_mi": 27.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Heath Creek on I-35N in Dundas, MN with 20 truck parking spaces, mile post 68; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 20
+        },
+        {
           "name": "Kwik Trip #1116",
           "type": "fuel_station",
           "at_mi": 32.5,
@@ -19594,6 +19617,28 @@
           "lat": 44.57246,
           "lon": -93.32946,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "New Market",
+          "type": "public_rest_area",
+          "at_mi": 33.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists New Market on I-35S in Elko, MN with 15 truck parking spaces, mile post 75; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 15
         }
       ],
       "divided": true,

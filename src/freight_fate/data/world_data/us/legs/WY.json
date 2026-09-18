@@ -25377,7 +25377,7 @@
           "name": "Turnout westbound",
           "type": "public_rest_area",
           "at_mi": 25.0,
-          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Turnout westbound on I-80 in NA, WY with 16 truck parking spaces, mile post MM 190; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Turnout westbound on I-80 in NA, WY with 16 truck parking spaces, mile post MM 190; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Derived: the inventory's paired directional record Turnout eastbound lists 25 truck parking spaces, and the larger lot's count is kept.",
           "actions": [
             "park",
             "save",
@@ -25393,7 +25393,7 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 16,
+          "parking_spaces": 25,
           "vehicle_access": "tractor_trailer",
           "lat": 41.733832999649955,
           "lon": -107.7034983153973

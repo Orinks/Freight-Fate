@@ -24018,6 +24018,50 @@
       },
       "stops": [
         {
+          "name": "Rest Area #13",
+          "type": "public_rest_area",
+          "at_mi": 28.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area #13 on I-94E in Lake Mills, WI with 28 truck parking spaces, mile post 261; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 28
+        },
+        {
+          "name": "Rest Area #14",
+          "type": "public_rest_area",
+          "at_mi": 30.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area #14 on I-94W in Johnson Creek, WI with 30 truck parking spaces, mile post 263; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 30
+        },
+        {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 59.2,
@@ -38495,6 +38539,50 @@
             "both"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Rest Area #52",
+          "type": "public_rest_area",
+          "at_mi": 44.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area #52 on I-43N in Denmark, WI with 20 truck parking spaces, mile post 168; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 20
+        },
+        {
+          "name": "Rest Area #51",
+          "type": "public_rest_area",
+          "at_mi": 44.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Rest Area #51 on I-43S in Maribel, WI with 20 truck parking spaces, mile post 168; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 20
         }
       ],
       "divided": true,

@@ -4661,7 +4661,7 @@
           "name": "Vince Lombardi Service Area",
           "type": "service_plaza",
           "at_mi": 14.5,
-          "source": "New Jersey Turnpike Authority service area listing and development-time Overpass/OSM corridor review. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "New Jersey Turnpike Authority service area listing and development-time Overpass/OSM corridor review. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Vince Lombardi with 164 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
           "actions": [
             "park",
             "save",
@@ -4682,7 +4682,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 40.81923859388657,
-          "lon": -74.03997480593861
+          "lon": -74.03997480593861,
+          "parking_spaces": 164
         }
       ],
       "divided": true,

@@ -6100,8 +6100,8 @@
           "name": "Love's Travel Stop Ontario",
           "type": "travel_center",
           "at_mi": 57.4,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
-          "parking": "likely",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ontario with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
           "actions": [
             "park",
             "save",
@@ -6123,7 +6123,8 @@
           ],
           "exit_ref": "374",
           "interchange_mi": 57.8,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I84, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "parking_spaces": 24
         },
         {
           "name": "Midvale Hill Rest Area",
@@ -10976,7 +10977,7 @@
           "name": "Bliss W",
           "type": "public_rest_area",
           "at_mi": 82.6,
-          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Derived: the inventory's paired directional record Bliss W lists 49 truck parking spaces, and the larger lot's count is kept.",
           "actions": [
             "park",
             "save",
@@ -10994,7 +10995,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.93892256938626,
-          "lon": -115.07103440171676
+          "lon": -115.07103440171676,
+          "parking_spaces": 49
         },
         {
           "name": "Love's Travel Stop Bliss",
@@ -12964,7 +12966,7 @@
           "name": "Bliss W",
           "type": "public_rest_area",
           "at_mi": 197.7,
-          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Derived: the inventory's paired directional record Bliss W lists 49 truck parking spaces, and the larger lot's count is kept.",
           "actions": [
             "park",
             "save",
@@ -12982,7 +12984,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 42.93892256938626,
-          "lon": -115.07103440171676
+          "lon": -115.07103440171676,
+          "parking_spaces": 49
         },
         {
           "name": "Pilot Travel Center Mountain Home",
@@ -34695,7 +34698,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.55540374707836,
-          "lon": -112.06904641941142
+          "lon": -112.06904641941142,
+          "parking_spaces": 12
         },
         {
           "name": "Love's Travel Stop Brigham City",

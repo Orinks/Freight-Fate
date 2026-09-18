@@ -537,6 +537,28 @@ its status or release decision.
       pause. Server side deployed first; builds before it keep the old
       behaviour.
 
+### September 18 a night's parking on every road
+
+- [x] A leg with no stop a loaded truck can sleep at takes the federal
+      truck-parking inventory's rest areas on its own road, whatever its
+      stop count. Two bobtail-only Kwik Trips had met the minimum for the
+      65 miles of I-35 from Owatonna to Minneapolis while Heath Creek and
+      New Market sat unlisted, and the cab answered "no sleep-capable route
+      stop ahead". 22 rest areas on 14 legs; on the road means within the
+      annotate pass's one-mile corridor bound, not the 20-mile search
+      radius chain stops are offered from. The same run confirmed parking
+      on 51 stops added or renamed since the July annotate pass.
+- [ ] 196 legs still have no sleep stop a loaded truck can use and no
+      inventory record on the road. US-12 Willmar to Minneapolis is one:
+      its only stop is a Kwik Trip typed bobtail-only. Needs another
+      source, state DOT rest-area lists or truck parking read from the OSM
+      extracts, before the rest key can plan a stop on them.
+- [ ] Inventory rest areas are one per carriageway (Heath Creek serves
+      I-35 north, New Market I-35 south) and the map stores each as serving
+      both directions, so a pair is announced twice within a mile. The
+      runtime only knows forward and reverse relative to a leg; deriving
+      that from the leg's heading and the record's route suffix is the fix.
+
 ### September 17 the dial follows the road
 
 - [x] A station that fades out of range hands the dial to the strongest

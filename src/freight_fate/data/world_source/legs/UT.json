@@ -12163,7 +12163,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
           "lat": 41.55540374707836,
-          "lon": -112.06904641941142
+          "lon": -112.06904641941142,
+          "parking_spaces": 12
         },
         {
           "name": "Cherry Creek Rest Area, I-15 Northbound",
