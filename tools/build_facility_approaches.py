@@ -21,6 +21,15 @@ is rebuilt toward the new one and the fresh chain wins. If the rebuild finds
 no path the old streets stay (owner ruling, 2026-09-17: a chain is kept until
 one replaces it) but the row says so: ``stale_endpoint`` names the endpoint
 the streets still lead to and why the rebuild failed.
+
+A chain may begin on the facility's own private road (owner ruling,
+2026-09-17; the rule and the kind of fact behind each part of it are in
+``yard_roads.py``). Only when the public roads do not reach the endpoint, only
+as one stretch at the facility end, spoken as ``a service road`` and never by
+a private way's name, and the chain floor ``MIN_CHAIN_ROUTE_MI`` is held
+against the PUBLIC miles alone. Such a row carries a ``yard_road`` block.
+
+``--only-ids`` narrows a batch to named facilities, for a targeted re-route.
 """
 
 from __future__ import annotations
@@ -55,6 +64,27 @@ EARTH_RADIUS_MI = 3958.7613
 # runtime drives surface segments (Phases 2-3 of docs/surface-roads-plan.md).
 MIN_PLAYABLE_ROUTE_MI = 2.0
 MIN_CHAIN_ROUTE_MI = 0.5
+# The longest private stretch a chain may begin on. CALIBRATED against the
+# 2026-09-17 re-route of the 142 facilities the public roads did not reach:
+# of the 92 chains it found, 86 have a private stretch from 0.03 to 0.85
+# miles with no step over 0.21, then nothing until 1.49, then 1.94, 1.97,
+# 2.06, 4.86 and 7.69. The cut sits in that 0.64-mile gap; not one row lies
+# between 0.86 and 1.48. A row above it is left unbuilt with the reason
+# below, unless the owner has allowed the site by name.
+MAX_YARD_STRETCH_MI = 1.0
+# Owner ruling, 2026-09-17, by name: a steel mill and a port genuinely have
+# miles of internal road, so these three take their chain past the cut. The
+# two he did not allow (Huntsville cross-dock 4.86 mi, Ukiah company yard
+# 7.69 mi) read like a wrong endpoint rather than a real road and stay out.
+OWNER_ALLOWED_LONG_YARD_ROADS = {
+    "gary-in-us:steel_industrial:gary-works-steel-mill",
+    "tampa-fl-us:cold_storage:tampa-cold-storage",
+    "tampa-fl-us:port:port-tampa-bay-bulk-docks",
+}
+YARD_STRETCH_TOO_LONG_REASON = (
+    "The sourced endpoint is reached only over a long private road inside a large "
+    "site; whether a chain may run that far on private ground is left to the owner."
+)
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "relation/")
 HIGH_CONFIDENCE_TYPES = {
     "cold_storage",
@@ -138,8 +168,12 @@ def build_facility_approaches(
     existing: dict[str, Any] | None = None,
     accessed: str = ACCESSED_DATE,
     endpoint_screen: bool = True,
+    only_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """Route the batch and return the payload to write.
+
+    ``only_ids`` narrows the batch to those facilities; with a merge every
+    other row keeps its record.
 
     With ``endpoint_screen`` (the default) a target is only routed when its
     endpoint's own OSM object reads as a freight site; see
@@ -163,6 +197,7 @@ def build_facility_approaches(
         and target.state in state_set
         and target.facility_type in eligible_types
         and routed_approach_miles(target) <= max_route_mi
+        and (only_ids is None or target.facility_id in only_ids)
     ]
     row_refusals = endpoint_row_refusals()
     routed: dict[str, Any] = {}
@@ -206,7 +241,19 @@ def build_facility_approaches(
         )
         if extract.exists() and state_targets:
             attempted.update(target.target_id for target in state_targets)
-            routed.update(local_geometry.route_state_targets(extract, state_targets, failures))
+            routed.update(
+                local_geometry.route_state_targets(
+                    extract, state_targets, failures, yard_roads=True
+                )
+            )
+            for target in state_targets:
+                path = routed.get(target.target_id)
+                if path is not None and path.yard_miles:
+                    print(
+                        f"  yard road: {target.target_id} private {path.yard_miles:.2f} mi, "
+                        f"public {path.miles - path.yard_miles:.2f} mi",
+                        flush=True,
+                    )
 
     approaches = {
         target.facility_id: approach_record(
@@ -214,6 +261,7 @@ def build_facility_approaches(
             routed.get(target.facility_id),
             state_set,
             failures.get(target.facility_id, ""),
+            accessed=accessed,
         )
         for target in targets
     }
@@ -473,15 +521,30 @@ def approach_record(
     geometry,
     state_set: set[str],
     route_failure: str = "",
+    *,
+    accessed: str = ACCESSED_DATE,
 ) -> dict[str, Any]:
+    # The floors are held against PUBLIC miles: the facility's own private
+    # road (`yard_miles`, zero for a public path) is not a street.
+    yard_miles = float(getattr(geometry, "yard_miles", 0.0) or 0.0)
+    public_miles = geometry.miles - yard_miles if geometry is not None else 0.0
     too_short = geometry is not None and (
-        geometry.miles <= MIN_CHAIN_ROUTE_MI
-        or (geometry.miles <= MIN_PLAYABLE_ROUTE_MI and len(geometry.segments) < 2)
+        public_miles <= MIN_CHAIN_ROUTE_MI
+        or (public_miles <= MIN_PLAYABLE_ROUTE_MI and len(geometry.segments) < 2)
     )
-    turn_level = geometry is not None and not too_short
+    owner_allowed = target.facility_id in OWNER_ALLOWED_LONG_YARD_ROADS
+    too_long_yard = (
+        geometry is not None
+        and not too_short
+        and yard_miles > MAX_YARD_STRETCH_MI
+        and not owner_allowed
+    )
+    turn_level = geometry is not None and not too_short and not too_long_yard
     reason = fallback_reason(target, state_set, turn_level, route_failure)
     if too_short:
         reason = "Public-road path is shorter than the playable facility approach floor."
+    if too_long_yard:
+        reason = YARD_STRETCH_TOO_LONG_REASON
     segments = (
         list(geometry.segments)
         if turn_level
@@ -498,7 +561,32 @@ def approach_record(
         ]
     )
     cleaned = [clean_segment(segment) for segment in segments]
+    yard_road = (
+        {
+            "yard_road": {
+                "miles": round(yard_miles, 2),
+                "public_miles": round(public_miles, 2),
+                "spoken_as": cleaned[-1]["road"],
+                "source": (
+                    "Read: the last link of this chain, at the facility, is the "
+                    "facility's own road, tagged access=private in the local "
+                    "OpenStreetMap extract; the public roads alone do not reach the "
+                    "endpoint. Only its geometry is used: it is spoken as a service "
+                    "road, never by a name or ref of its own, and its miles do not "
+                    f"count toward the chain floor. Accessed {accessed}."
+                    + (
+                        " The owner allowed this site's long private road by name on 2026-09-17."
+                        if owner_allowed and yard_miles > MAX_YARD_STRETCH_MI
+                        else ""
+                    )
+                ),
+            }
+        }
+        if turn_level and yard_miles
+        else {}
+    )
     return {
+        **yard_road,
         "target_type": "facility",
         "facility_id": target.facility_id,
         "city": target.city,
@@ -522,8 +610,13 @@ def approach_record(
         "approach_road": cleaned[0]["road"],
         "segments": cleaned,
         "final_hint": (
-            "Route reaches the sourced facility vicinity; final gate, yard, dock, "
-            "and driveway are not source-backed."
+            (
+                "Route reaches the sourced facility over its own private road; the "
+                "gate, dock, and position in the yard are not source-backed."
+                if yard_road
+                else "Route reaches the sourced facility vicinity; final gate, yard, dock, "
+                "and driveway are not source-backed."
+            )
             if turn_level
             else "Facility approach uses fallback road context; final gate, yard, dock, "
             "and driveway are not source-backed."
@@ -545,7 +638,8 @@ ROUTE_FAILURE_REASONS = {
     ),
     "disconnected": (
         "The roads at the sourced endpoint do not join the city context over public "
-        "surface roads; a private yard road, a motorway or water lies between."
+        "surface roads, nor over a private road of the facility's own; a motorway, "
+        "water, a closed road or a gate on a public road lies between."
     ),
 }
 
@@ -666,6 +760,18 @@ def main() -> int:
             "(default on; off restores the pre-2026-09-17 behaviour)"
         ),
     )
+    parser.add_argument(
+        "--only-ids",
+        nargs="*",
+        default=None,
+        help="Route only these facility ids (a targeted re-route; pairs with the merge)",
+    )
+    parser.add_argument(
+        "--only-ids-file",
+        type=Path,
+        default=None,
+        help="The same, one facility id per line",
+    )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
 
@@ -677,8 +783,12 @@ def main() -> int:
     elif args.merge_existing:
         print(f"No base file at {args.existing}; building the whole file.", flush=True)
 
+    only_ids = set(args.only_ids or [])
+    if args.only_ids_file is not None:
+        only_ids.update(args.only_ids_file.read_text(encoding="utf-8").split())
     payload = build_facility_approaches(
         args.cache_dir,
+        only_ids=only_ids or None,
         states=tuple(args.states),
         max_route_mi=args.max_route_mi,
         existing=existing,
