@@ -1,11 +1,12 @@
 {
  "counts": {
+  "dropped_by_hand": 1,
   "dropped_collisions": 2346,
   "dropped_unreachable": 848,
   "fcc_placed": 648,
-  "stations": 5241
+  "stations": 5240
  },
- "notes": "Automated tier under the curated radio_catalog.json. Built by tools/import_radio_catalog.py from the PR #150 catalog (CatalystForChaos): Radio Browser stream URLs joined to Wikidata transmitter coordinates (CC0) on FCC call sign. Coverage radii are that catalog's per-band defaults, not FCC contours. Curated call signs win: collisions are dropped at build and load time. Streams tools/check_radio_streams.py could not reach are left out; see radio_stream_health.json. Rows with id rb-fcc-* are Radio Browser stations placed at their FCC-licensed transmitter site, with coverage from licensed power rather than a per-band default.",
+ "notes": "Automated tier under the curated radio_catalog.json. Built by tools/import_radio_catalog.py from the PR #150 catalog (CatalystForChaos): Radio Browser stream URLs joined to Wikidata transmitter coordinates (CC0) on FCC call sign. Coverage radii are that catalog's per-band defaults, not FCC contours. Curated call signs win: collisions are dropped at build and load time. Streams tools/check_radio_streams.py could not reach are left out; see radio_stream_health.json. Names and formats a rule cannot derive, and stations the directory lists twice, come from radio_imported_overrides.json. Rows with id rb-fcc-* are Radio Browser stations placed at their FCC-licensed transmitter site, with coverage from licensed power rather than a per-band default.",
  "schema": 1,
  "stations": [
   {
@@ -58766,6 +58767,7 @@
    "format": "variety",
    "id": "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf",
    "name": "The Radio Storm",
+   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the same broadcaster as the curated Radiostorm.com (Topeka) channels -- different outfit, own Shoutcast host, verified live 2026-08-20.",
    "real_stream": true,
    "safe_for_streaming": false,
    "source": "community radio directory",
@@ -58773,8 +58775,7 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://listen.theradiostorm.com:8242/stream",
-   "supported": true,
-   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the same broadcaster as the curated Radiostorm.com (Topeka) channels -- different outfit, own Shoutcast host, verified live 2026-08-20."
+   "supported": true
   },
   {
    "always_available": true,

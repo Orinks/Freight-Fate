@@ -32,6 +32,13 @@ repos:
         files: ^src/freight_fate/data/world_source/.*\.json$
         pass_filenames: false
         stages: [pre-commit]
+      - id: radio-imported-catalog
+        name: radio_imported.json matches a rebuild
+        entry: uv run python tools/import_radio_catalog.py --check
+        language: system
+        files: ^(data/radio_(imported_overrides|stream_health)\.json|tools/import_radio_catalog\.py|src/freight_fate/data/radio_imported\.json)$
+        pass_filenames: false
+        stages: [pre-commit]
       - id: freight-fate-release-notes
         name: Freight Fate release-note gate
         entry: uv run python -m tools.release_notes check --base auto --head HEAD
