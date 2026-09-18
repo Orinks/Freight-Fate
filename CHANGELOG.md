@@ -26,6 +26,8 @@
 
 ### Fixed
 
+- **Now playing works on more radio stations.** Stations that send the song a different way used to say they had no song information. (Reported by js730.)
+
 - **Rest areas on roads with no truck-usable stop are now on the map.** Twenty-two of them, including Heath Creek on I-35 north of Owatonna.
 
 - **Street directions now end at the facility.** Hundreds used to end at a railway line, a power substation or a shop nearby.

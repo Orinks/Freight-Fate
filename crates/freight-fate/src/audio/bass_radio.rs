@@ -5,11 +5,13 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use bass_sys::safe::{self, Stream};
-use bass_sys::{BASS_ATTRIB_VOL, BASS_STREAM_AUTOFREE};
+use bass_sys::{BASS_ATTRIB_VOL, BASS_STREAM_AUTOFREE, BASS_TAG_HLS_EXTINF, BASS_TAG_OGG};
 
 use super::assets::{asset_bytes, MUSIC_EXTENSIONS};
 use super::bass::{is_playing, set_volume, slide, BassBackend};
-use super::{parse_icy_stream_title_text, AudioError};
+use super::{
+    parse_hls_stream_title, parse_icy_stream_title_text, parse_ogg_stream_title, AudioError,
+};
 
 /// The radio-connect state shared between the game thread and the connect
 /// workers, every field guarded by the one mutex. The generation counter
@@ -326,7 +328,9 @@ impl BassBackend {
             .unwrap_or(false)
     }
 
-    /// The song title the playing stream reports in its ICY metadata.
+    /// The song title the playing stream reports, wherever its kind of
+    /// stream carries one: the ICY metadata block (MP3 and AAC stations),
+    /// the codec's comments (Ogg, Opus, FLAC), or the playlist entry (HLS).
     ///
     /// Read straight off the BASS channel each call: the tag block is a
     /// pointer into BASS's own buffer, so this is a string copy, not a
@@ -337,8 +341,17 @@ impl BassBackend {
         if !self.music_playing() {
             return None;
         }
-        let raw = safe::tags_meta(stream.handle())?;
-        parse_icy_stream_title_text(&raw)
+        let handle = stream.handle();
+        safe::tags_meta(handle)
+            .and_then(|raw| parse_icy_stream_title_text(&raw))
+            .or_else(|| {
+                safe::tags_strings(handle, BASS_TAG_OGG)
+                    .and_then(|comments| parse_ogg_stream_title(&comments))
+            })
+            .or_else(|| {
+                safe::tags_string(handle, BASS_TAG_HLS_EXTINF)
+                    .and_then(|extinf| parse_hls_stream_title(&extinf))
+            })
     }
 
     pub(super) fn stop_music(&mut self, fade_ms: u32) {

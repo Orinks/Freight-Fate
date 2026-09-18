@@ -308,13 +308,82 @@ pub fn parse_icy_stream_title_text(text: &str) -> Option<String> {
     let start = text.find(OPEN)? + OPEN.len();
     let rest = &text[start..];
     let end = rest.find(CLOSE)?;
-    let title: Vec<&str> = rest[..end].split_whitespace().collect();
-    let title = title.join(" ");
-    if title.is_empty() {
-        None
-    } else {
-        Some(title)
+    spoken_stream_title(&rest[..end])
+}
+
+/// The song an Ogg, Opus or FLAC stream names in its comment block, or None.
+///
+/// Those streams carry no ICY block: the title rides in the codec's own
+/// `TITLE=` and `ARTIST=` comments, keys in whatever case the encoder chose.
+/// Joined as "Artist - Title", the shape an ICY station sends, so every
+/// station reads the same way.
+pub fn parse_ogg_stream_title(comments: &[String]) -> Option<String> {
+    let field = |key: &str| {
+        comments.iter().find_map(|comment| {
+            let (name, value) = comment.split_once('=')?;
+            let value = value.trim();
+            (name.trim().eq_ignore_ascii_case(key) && !value.is_empty()).then_some(value)
+        })
+    };
+    let title = field("title")?;
+    match field("artist") {
+        Some(artist) => spoken_stream_title(&format!("{artist} - {title}")),
+        None => spoken_stream_title(title),
     }
+}
+
+/// The song an HLS station names on its current segment, or None.
+///
+/// BASSHLS hands back the `#EXTINF` line after the colon: `duration,title`.
+/// Most stations leave the title empty; "no desc" is an encoder's placeholder
+/// for the same thing.
+pub fn parse_hls_stream_title(extinf: &str) -> Option<String> {
+    let (_duration, title) = extinf.split_once(',')?;
+    spoken_stream_title(title).filter(|title| !title.eq_ignore_ascii_case("no desc"))
+}
+
+/// A station's raw title as one speakable line, or None when it is blank.
+///
+/// Network encoders pack ad-insertion fields into the title slot, in two
+/// shapes: `title="Song",artist="Band",url="..."`, and
+/// `Band - text="Song" song_spot="M" ...`. Only the song survives; anything
+/// else is whitespace-collapsed and kept as sent.
+fn spoken_stream_title(raw: &str) -> Option<String> {
+    let title = if let Some(title) = quoted_field(raw, "title") {
+        // An empty song field between tracks is "no information", and the
+        // fields around it are never worth reading out.
+        if title.is_empty() {
+            return None;
+        }
+        match quoted_field(raw, "artist").filter(|artist| !artist.is_empty()) {
+            Some(artist) => format!("{artist} - {title}"),
+            None => title.to_string(),
+        }
+    } else if let Some(text) = quoted_field(raw, "text") {
+        if text.is_empty() {
+            return None;
+        }
+        let lead = raw.find("text=\"").map_or("", |at| &raw[..at]);
+        format!("{lead}{text}")
+    } else {
+        raw.to_string()
+    };
+    let title = title.split_whitespace().collect::<Vec<_>>().join(" ");
+    (!title.is_empty()).then_some(title)
+}
+
+/// The value of `key="..."` in an encoder's field list, when the key stands
+/// on its own (so `title` never matches inside `subtitle`).
+fn quoted_field<'a>(raw: &'a str, key: &str) -> Option<&'a str> {
+    let open = format!("{key}=\"");
+    let at = raw.match_indices(&open).map(|(at, _)| at).find(|&at| {
+        raw[..at]
+            .chars()
+            .next_back()
+            .is_none_or(|before| !before.is_alphanumeric())
+    })?;
+    let value = &raw[at + open.len()..];
+    Some(value[..value.find('"')?].trim())
 }
 
 /// Playback-frequency multiplier for the BASS engine loop at `rpm`.

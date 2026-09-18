@@ -316,6 +316,9 @@ pub const BASS_TAG_VENDOR: DWORD = 9;
 pub const BASS_TAG_LYRICS3: DWORD = 10;
 pub const BASS_TAG_WAVEFORMAT: DWORD = 14;
 pub const BASS_TAG_RIFF_INFO: DWORD = 0x100;
+/// BASSHLS: the current segment's `#EXTINF` line after the colon
+/// (`duration,title`): one UTF-8 string.
+pub const BASS_TAG_HLS_EXTINF: DWORD = 0x14000;
 
 // --- Channel types (BASS_CHANNELINFO.ctype) -----------------------------------
 

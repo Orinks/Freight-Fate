@@ -5,7 +5,10 @@
 //!
 use std::time::Duration;
 
-use freight_fate::audio::{parse_icy_stream_title, Audio, AudioEngine, NullBackend};
+use freight_fate::audio::{
+    parse_hls_stream_title, parse_icy_stream_title, parse_ogg_stream_title, Audio, AudioEngine,
+    NullBackend,
+};
 
 use crate::audio_support::{bass_rig, sine_wav, wait_for, IcyServer};
 
@@ -43,6 +46,91 @@ fn test_icy_stream_title_parsing() {
     ];
     for (raw, expected) in cases {
         assert_eq!(parse_icy_stream_title(raw).as_deref(), expected, "{raw:?}");
+    }
+}
+
+#[test]
+fn test_network_encoder_fields_are_not_read_out() {
+    // Both shapes as captured off live stations on 2026-09-18: the song is
+    // what the driver hears, never the ad-insertion fields around it.
+    let cases: [(&[u8], Option<&str>); 4] = [
+        (
+            b"StreamTitle='title=\"18 And Life\",artist=\"SKID ROW\",url=\"song_spot=\"F\" MediaBaseId=\"0\"\"';",
+            Some("SKID ROW - 18 And Life"),
+        ),
+        (
+            b"StreamTitle='Beatles - text=\"This Boy\" song_spot=\"M\" length=\"00:02:13\"';",
+            Some("Beatles - This Boy"),
+        ),
+        (
+            b"StreamTitle='title=\"\",artist=\"\",url=\"song_spot=\"T\"\"';",
+            None,
+        ),
+        // A key inside a longer word is not the key.
+        (
+            b"StreamTitle='Band - subtitle=\"x\"';",
+            Some("Band - subtitle=\"x\""),
+        ),
+    ];
+    for (raw, expected) in cases {
+        assert_eq!(
+            parse_icy_stream_title(Some(raw)).as_deref(),
+            expected,
+            "{}",
+            String::from_utf8_lossy(raw)
+        );
+    }
+}
+
+#[test]
+fn test_ogg_comments_give_artist_and_title() {
+    let comments = |items: &[&str]| items.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    let cases: [(&[&str], Option<&str>); 6] = [
+        (
+            &["title=Policemen", "artist=Siistema Sangria"],
+            Some("Siistema Sangria - Policemen"),
+        ),
+        // Upper-case keys and a trailing line ending, as one encoder sends.
+        (
+            &["ARTIST=The Weeknd", "TITLE=The Abyss\r\n"],
+            Some("The Weeknd - The Abyss"),
+        ),
+        (
+            &["TITLE=Rob Hubbard - Spellbound"],
+            Some("Rob Hubbard - Spellbound"),
+        ),
+        (&["artist=Nobody", "ENCODER=Liquidsoap"], None),
+        (&["title=  "], None),
+        (&[], None),
+    ];
+    for (raw, expected) in cases {
+        assert_eq!(
+            parse_ogg_stream_title(&comments(raw)).as_deref(),
+            expected,
+            "{raw:?}"
+        );
+    }
+}
+
+#[test]
+fn test_hls_segment_titles() {
+    let cases: [(&str, Option<&str>); 6] = [
+        (
+            "5.01551,THIS STATION WILL CONTINUE AFTER THIS BREAK",
+            Some("THIS STATION WILL CONTINUE AFTER THIS BREAK"),
+        ),
+        (
+            "10,title=\"Armstrong & Getty\",artist=\"KOGA\",url=\"song_spot=\"T\"\"",
+            Some("KOGA - Armstrong & Getty"),
+        ),
+        // A bare duration, and one encoder's placeholder, are no information.
+        ("10.031,", None),
+        ("9.984", None),
+        ("4.99, no desc", None),
+        ("", None),
+    ];
+    for (raw, expected) in cases {
+        assert_eq!(parse_hls_stream_title(raw).as_deref(), expected, "{raw:?}");
     }
 }
 
