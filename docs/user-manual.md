@@ -1726,6 +1726,7 @@ quiets it, and settling back under the limit disarms it.
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. |
+| Shuffle personal playlists | Off by default: each of your playlists plays top to bottom and resumes where it left off. On plays it in a random order, every track once before any repeats, with a new order each time through. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 ### Speech settings
@@ -1855,6 +1856,9 @@ fix mid-drive appears on the dial without starting a new run. Personal
 playlists ride the same streamer-safe gate as real streams -- turning the mode
 on hides them, because the game cannot vouch for what your files are licensed
 for. Ctrl with any tune key jumps straight to the Your playlists category.
+A playlist of your own music files plays in the file's order unless Settings,
+Audio, Shuffle personal playlists is on, which plays every track once in a
+random order before any repeats.
 
 The dial is grouped into categories -- route playlist, Freight Fate stations,
 your playlists, favorites, terrestrial, AFN, satellite, international,

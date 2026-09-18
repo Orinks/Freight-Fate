@@ -73,6 +73,16 @@ pub type DestinationExitScan = (f64, Option<(f64, String, String)>);
 /// group's fields are listed in the order `__init__` (or the module's own
 /// `_reset_*`/`_*_init` helper) assigned them. Leading underscores are
 /// dropped (`self._cruise_mph` -> `cruise_mph`).
+/// One lap of a shuffled personal playlist: every entry index once, in the
+/// order this lap plays them, and the cursor into that order.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct PlaylistShuffleLap {
+    pub order: Vec<usize>,
+    pub cursor: usize,
+    /// Which lap this is, so each one seeds a different order.
+    pub lap: u64,
+}
+
 pub struct DrivingState {
     // ---- driving.py: identity -----------------------------------------------------------
     pub job: Job,
@@ -136,6 +146,9 @@ pub struct DrivingState {
     // and a hold between entries so neither a fade-in nor a stream still
     // connecting ever reads as a finished track.
     pub playlist_positions: HashMap<String, usize>,
+    // With shuffle on, the order this lap plays each playlist's entries in
+    // and how far along it is; rebuilt for the next lap when it runs out.
+    pub playlist_shuffle: HashMap<String, PlaylistShuffleLap>,
     pub playlist_wait_s: f64,
     pub playlist_stream_tries: u32,
     pub playlist_stream_skips: u32,

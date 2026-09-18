@@ -656,6 +656,69 @@ fn test_a_personal_playlist_still_starts_its_tracks_at_the_top() {
 }
 
 #[test]
+fn test_shuffle_plays_every_track_once_before_any_repeats() {
+    // Hailey (drivers board, 2026-09-18): the Playlists folder is being used
+    // for MP3 collections, and those want a shuffle. A lap plays every entry
+    // once in a seeded random order, the next lap is a different order that
+    // never opens on the track that just ended, and turning shuffle off
+    // resumes top-to-bottom from wherever the playlist is.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 42);
+    app.ctx.settings.radio_shuffle_playlists = true;
+    let tape = MusicAudio::install(&mut app);
+    let entries = [
+        "C:/music/a.mp3",
+        "C:/music/b.mp3",
+        "C:/music/c.mp3",
+        "C:/music/d.mp3",
+        "C:/music/e.mp3",
+        "C:/music/f.mp3",
+    ];
+    let station = a_playlist_station("pl-shuffle", &entries);
+
+    d.start_playlist_station(&mut app.ctx, &station, 900, false);
+    for _ in 0..5 {
+        d.start_playlist_station(&mut app.ctx, &station, 900, true);
+    }
+    let first_lap = tape.tracks();
+    assert_eq!(first_lap.len(), 6);
+    let mut sorted = first_lap.clone();
+    sorted.sort();
+    assert_eq!(
+        sorted,
+        entries.map(str::to_string).to_vec(),
+        "a lap is every track once"
+    );
+    // The seed is fixed, so this pins that the order is not the file's own.
+    assert_ne!(first_lap, entries.map(str::to_string).to_vec());
+
+    for _ in 0..6 {
+        d.start_playlist_station(&mut app.ctx, &station, 900, true);
+    }
+    let all = tape.tracks();
+    let second_lap = &all[6..12];
+    let mut sorted = second_lap.to_vec();
+    sorted.sort();
+    assert_eq!(sorted, entries.map(str::to_string).to_vec());
+    assert_ne!(
+        second_lap[0], first_lap[5],
+        "a new lap never repeats the last track"
+    );
+    assert_ne!(second_lap.to_vec(), first_lap, "each lap is its own order");
+
+    // Shuffle off: the next advance is the file's next line after the
+    // current entry, top to bottom.
+    app.ctx.settings.radio_shuffle_playlists = false;
+    let current = d.playlist_entry(&station);
+    let at = entries.iter().position(|e| *e == current).unwrap();
+    d.start_playlist_station(&mut app.ctx, &station, 900, true);
+    assert_eq!(
+        d.playlist_entry(&station),
+        entries[(at + 1) % entries.len()]
+    );
+}
+
+#[test]
 fn test_the_route_station_swaps_its_pool_at_nightfall() {
     // `_station_rotation_pool`: the route playlist is the drive's own
     // day/night sequence, and the rotation restarts when the flag flips.

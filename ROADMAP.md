@@ -554,6 +554,12 @@ its status or release decision.
       paid for, or course only with its level, cost, prerequisites and
       background-check wait. Earned and pending rows say it too. The row
       used to give cost and level and nothing about what the course was for.
+- [x] Settings, Audio, Shuffle personal playlists: a playlist of the
+      player's own files plays every track once per lap in a seeded
+      random order, a new order each lap that never opens on the track
+      that just ended; off resumes top to bottom. Asked for by Hailey on
+      the drivers board: the Playlists folder was built for M3U stream
+      lists and is being used for MP3 collections.
 - [ ] 196 legs still have no sleep stop a loaded truck can use and no
       inventory record on the road. US-12 Willmar to Minneapolis is one:
       its only stop is a Kwik Trip typed bobtail-only. Needs another

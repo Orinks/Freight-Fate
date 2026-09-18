@@ -79,6 +79,8 @@
 
 ### Added
 
+- **Your playlists can shuffle.** Settings, Audio, Shuffle personal playlists plays every track once in a random order before any repeats. (Suggested by Hailey.)
+
 - **A trooper passing you can see worn tires and a dead trailer lamp.** Seeing one pulls you in for a Level 2 walk-around, so walk around the truck first.
 
 - **Gilley's and the Longhorn Ballroom are on the Texas billboards.** Houston remembers the Urban Cowboy honky-tonk; Dallas advertises the bull and Bob Wills' ballroom.

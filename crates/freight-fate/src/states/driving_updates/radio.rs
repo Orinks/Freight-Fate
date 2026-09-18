@@ -2,6 +2,7 @@
 //! playlists, the dial keys, and the badges the dial earns.
 
 use ff_core::music::RADIO_TRACKS_PER_HOST_BREAK;
+use ff_core::pyrandom::PyRandom;
 use ff_core::radio::{
     effective_range_miles, is_stream_entry, signal_volume_factor, station_identity,
     truck_elevation_ft, truck_position, RadioAction, RadioPlaybackError, RadioReception,
@@ -13,13 +14,37 @@ use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
 use crate::audio::{VolumeUpdate, CH_RADIO_FX, RADIO_TUNE_FADE_MS};
-use crate::states::driving::DrivingState;
+use crate::states::driving::{DrivingState, PlaylistShuffleLap};
 use crate::states::driving_core::*;
 use crate::states::driving_updates::{
     FM_DEFAULT_MHZ, FRINGE_BED_MAX_VOLUME, FRINGE_BED_SIGNAL, PICKET_DUCK, PICKET_MAX_RATE_HZ,
     PICKET_MIN_RATE_HZ, PICKET_SIGNAL, PLAYLIST_CONNECT_HOLD_S, PLAYLIST_CONNECT_TRIES,
     PLAYLIST_FADE_HOLD_S, PLAYLIST_RETRY_S, RADIO_VOLUME_STEP,
 };
+
+/// One lap's order for a shuffled playlist: `random.shuffle` on the entry
+/// indices, then, when `avoid` is the track that just ended, the first slot
+/// swapped away from it so a new lap never repeats it back to back.
+fn shuffled_lap(
+    trip_seed: i64,
+    station_id: &str,
+    lap: u64,
+    len: usize,
+    avoid: Option<usize>,
+) -> Vec<usize> {
+    let mut rng =
+        PyRandom::new_from_str(&format!("{trip_seed}:playlist-shuffle:{station_id}:{lap}"));
+    let mut order: Vec<usize> = (0..len).collect();
+    // CPython's random.shuffle: for i in reversed(range(1, len)): j = randbelow(i + 1); swap.
+    for i in (1..len).rev() {
+        let j = rng.randbelow(i as u64 + 1) as usize;
+        order.swap(i, j);
+    }
+    if len > 1 && avoid.is_some() && order.first().copied() == avoid {
+        order.swap(0, 1);
+    }
+    order
+}
 
 impl DrivingState {
     /// Keep the radio spinning while a menu covers the drive.
@@ -433,16 +458,23 @@ impl DrivingState {
         if entries.is_empty() {
             return Err(RadioPlaybackError("playlist is empty".to_string()));
         }
-        let mut start = self
-            .playlist_positions
-            .get(&station.id)
-            .copied()
-            .unwrap_or(0);
-        if advance {
-            start = (start + 1) % entries.len();
-        }
-        for attempt in 0..entries.len() {
-            let index = (start + attempt) % entries.len();
+        let shuffle = ctx.settings.radio_shuffle_playlists && entries.len() > 1;
+        let candidates: Vec<usize> = if shuffle {
+            self.shuffled_candidates(&station.id, entries.len(), advance)
+        } else {
+            let mut start = self
+                .playlist_positions
+                .get(&station.id)
+                .copied()
+                .unwrap_or(0);
+            if advance {
+                start = (start + 1) % entries.len();
+            }
+            (0..entries.len())
+                .map(|attempt| (start + attempt) % entries.len())
+                .collect()
+        };
+        for index in candidates {
             let entry = &entries[index];
             let stream = is_stream_entry(entry);
             let played = if stream {
@@ -454,6 +486,11 @@ impl DrivingState {
                 continue;
             }
             self.playlist_positions.insert(station.id.clone(), index);
+            if shuffle {
+                if let Some(lap) = self.playlist_shuffle.get_mut(&station.id) {
+                    lap.cursor = lap.order.iter().position(|&i| i == index).unwrap_or(0);
+                }
+            }
             self.radio_station_id = station.id.clone();
             self.radio_playlist = Vec::new();
             self.radio_break_queue = Vec::new();
@@ -471,6 +508,53 @@ impl DrivingState {
         Err(RadioPlaybackError(
             "no playable entry in this playlist".to_string(),
         ))
+    }
+
+    /// The entry indices to try, in order, with shuffle on: the rest of this
+    /// lap from its cursor (the next slot when advancing, the current one
+    /// when tuning back in), then the slots already played, so a lap of
+    /// unreadable files still tries every entry once. A lap that has run
+    /// out is replaced first: a fresh permutation, and one that never opens
+    /// on the track that just ended.
+    ///
+    /// Each lap is a Fisher-Yates shuffle on a PyRandom seeded from the trip
+    /// seed, the playlist and the lap number, the way every other roll in
+    /// the drive is seeded, so a transcript replays and a test can pin it.
+    fn shuffled_candidates(&mut self, station_id: &str, len: usize, advance: bool) -> Vec<usize> {
+        let last = self.playlist_positions.get(station_id).copied();
+        let trip_seed = self.trip_seed;
+        let lap = self
+            .playlist_shuffle
+            .entry(station_id.to_string())
+            .or_insert_with(|| PlaylistShuffleLap {
+                order: shuffled_lap(trip_seed, station_id, 0, len, None),
+                cursor: 0,
+                lap: 0,
+            });
+        if lap.order.len() != len {
+            // The file was re-read with a different track count mid-drive.
+            *lap = PlaylistShuffleLap {
+                order: shuffled_lap(trip_seed, station_id, lap.lap + 1, len, last),
+                cursor: 0,
+                lap: lap.lap + 1,
+            };
+            return lap.order.clone();
+        }
+        let mut cursor = lap.cursor;
+        if advance {
+            cursor += 1;
+            if cursor >= len {
+                *lap = PlaylistShuffleLap {
+                    order: shuffled_lap(trip_seed, station_id, lap.lap + 1, len, last),
+                    cursor: 0,
+                    lap: lap.lap + 1,
+                };
+                return lap.order.clone();
+            }
+        }
+        let mut out: Vec<usize> = lap.order[cursor..].to_vec();
+        out.extend_from_slice(&lap.order[..cursor]);
+        out
     }
 
     /// `_start_playlist_station` as the playback backend calls it, where the

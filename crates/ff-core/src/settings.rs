@@ -484,6 +484,13 @@ settings_fields! {
     /// mode is the explicit choice a streamer makes. (The former separate
     /// real-streams opt-in folded into this switch, 2026-08-12.)
     radio_streamer_safe: bool = false => bool_truthy,
+    /// Personal playlists play in a random order: every track once before
+    /// any repeats, a fresh order each lap, and a lap never opens on the
+    /// track that just ended. Off plays the file top to bottom and resumes
+    /// where it left off. The Playlists folder was built for M3U stream
+    /// lists and is being used for MP3 collections (Hailey, drivers board,
+    /// 2026-09-18).
+    radio_shuffle_playlists: bool = false => bool_truthy,
     weather_volume: f64 = 0.65 => level,
     engine_volume: f64 = 0.55 => level,
     ui_volume: f64 = 0.9 => level,

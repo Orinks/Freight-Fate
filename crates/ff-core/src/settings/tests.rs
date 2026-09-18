@@ -80,16 +80,17 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_eight_persisted_fields_in_python_order() {
+fn the_struct_carries_the_seventy_nine_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
-    // (2026-09-12) and the two shortcut tables (2026-09-14) were added on
-    // the Rust side; lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 78);
+    // (2026-09-12), the two shortcut tables (2026-09-14) and
+    // radio_shuffle_playlists (2026-09-18) were added on the Rust side;
+    // lane_centering_assist was retired for 1.9.
+    assert_eq!(Settings::FIELD_NAMES.len(), 79);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[75], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[76], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 78);
+    assert_eq!(pairs.len(), 79);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -122,6 +123,7 @@ fn the_defaults_match_the_python_dataclass() {
         "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
         "sfx_volume": 0.8, "music_volume": 0.5, "radio_volume": 0.25, "radio_enabled": true,
         "radio_station_id": "route_playlist", "radio_streamer_safe": false,
+        "radio_shuffle_playlists": false,
         "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
         "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
         "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
@@ -143,7 +145,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 78);
+    assert_eq!(expected.len(), 79);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -898,6 +900,8 @@ fn test_radio_defaults_are_full_dial_and_quiet() {
     assert_eq!(s.radio_volume, 0.25);
     // Streamer-safe mode is the opt-out a broadcaster takes, not the default.
     assert!(!s.radio_streamer_safe);
+    // A playlist file plays in its own order unless the player asks otherwise.
+    assert!(!s.radio_shuffle_playlists);
 }
 
 #[test]

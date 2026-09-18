@@ -295,6 +295,7 @@ impl DrivingState {
             // The stations were already on the air before this drive began.
             radio_airtime_s: initial_airtime_s(trip_seed),
             playlist_positions: HashMap::new(),
+            playlist_shuffle: HashMap::new(),
             playlist_wait_s: 0.0,
             playlist_stream_tries: 0,
             playlist_stream_skips: 0,
