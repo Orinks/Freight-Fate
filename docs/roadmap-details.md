@@ -7298,6 +7298,15 @@ city service drives below.)
       endpoints: 1,913 to 2,364 (47 percent), 1,722 of them to a freight
       site, 82 kept with a `stale_endpoint` note because no public road
       reaches the new site.
+      Yard roads, same day, by owner ruling: a chain may begin on the
+      facility's own `access=private` road, at the facility end only and
+      spoken as "a service road" (`tools/yard_roads.py`; the public search
+      never sees a private way, so nothing cuts through another site, and
+      the chain floor is held against public miles alone). 89 of the 142
+      disconnected rows gained a chain: 2,416 chains (48 percent), 1,811 to
+      a freight site, 45 stale. The private stretches run 0.03 to 0.85
+      miles, then a gap to 1.49; the cut is one mile, with three sites
+      allowed past it by name.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim

@@ -3,7 +3,7 @@
 //! until `sim::trip` lands; `spoken_road_text` is tested inline in
 //! `world_services.rs`.
 
-use crate::data_support::world;
+use crate::data_support::{read_json, world};
 use ff_core::data::world_models::{Leg, Route};
 
 /// A synthetic three-block facility street chain (same-city route).
@@ -165,4 +165,64 @@ fn test_no_facility_street_is_spoken_with_a_semicolon_anywhere_on_the_map() {
         }
     }
     assert!(lists > 0, "the source data still carries raw lists to trim");
+}
+
+#[test]
+fn test_a_chain_that_begins_on_the_yards_own_road_speaks_it_as_a_service_road() {
+    // Owner ruling 2026-09-17: a facility the public roads do not reach may
+    // have a chain over its own `access=private` road, at the facility end
+    // only. The bake marks such rows with a `yard_road` block. Driven, that
+    // link is the last leg in and the first leg out, and it is spoken with
+    // the canonical phrase for a nameless service way, never by the private
+    // way's own name and never as "private" (docs/ontology.md).
+    let w = world();
+    let data = read_json("facility_approaches.json");
+    let mut yard_chains = 0;
+    for (facility_id, record) in data["approaches"].as_object().expect("approaches") {
+        let Ok(facility) = w.facility_by_id(facility_id) else {
+            continue;
+        };
+        let city = record["city"].as_str().expect("city").to_string();
+        let name = facility.name.clone();
+        let arrival = w
+            .facility_approach_route(&city, &name)
+            .expect("approach route");
+        let departure = w
+            .facility_departure_route(&city, &name)
+            .expect("departure route");
+        let legs: Vec<_> = arrival
+            .legs
+            .iter()
+            .chain(departure.iter().flat_map(|route| route.legs.iter()))
+            .collect();
+        if record["yard_road"].is_null() {
+            continue;
+        }
+        yard_chains += 1;
+        // (Only on these rows: Hot Springs has a public street the map
+        // really does call "Private Drive".)
+        for leg in &legs {
+            assert!(
+                !leg.highway.to_lowercase().contains("private")
+                    && !leg.local_cue.to_lowercase().contains("private"),
+                "{facility_id}: {:?} / {:?}",
+                leg.highway,
+                leg.local_cue
+            );
+        }
+        let last_in = arrival.legs.last().expect("a chain");
+        assert_eq!(last_in.highway, "a service road", "{facility_id}");
+        assert!(
+            last_in.local_cue.ends_with("onto a service road."),
+            "{facility_id}: {:?}",
+            last_in.local_cue
+        );
+        let first_out = &departure.expect("a multi-leg chain").legs[0];
+        assert_eq!(first_out.highway, "a service road", "{facility_id}");
+        assert_eq!(
+            first_out.local_cue, "Start on a service road.",
+            "{facility_id}"
+        );
+    }
+    assert_eq!(yard_chains, 89, "the 2026-09-17 yard-road re-route");
 }

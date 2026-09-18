@@ -26,6 +26,12 @@ from freight_fate.data.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
+from yard_roads import (  # noqa: E402
+    bans_trucks,
+    is_blocking_barrier,
+    is_yard_road,
+    yard_road_path,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
@@ -158,15 +164,35 @@ class RouteGraph:
         default_factory=lambda: defaultdict(list)
     )
 
+    # The four below are only filled when a caller asks for yard roads (see
+    # `yard_roads.py`). Private ways live apart from `nodes`/`edges` so the
+    # public search and the public snap cannot see them.
+    yard_nodes: dict[int, tuple[float, float]] = field(default_factory=dict)
+    yard_edges: dict[int, list[tuple[int, float]]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+    # Public edges signed against trucks, both directions; only the yard-road
+    # fallback honours them (the public search predates the rule).
+    no_truck: set[tuple[int, int]] = field(default_factory=set)
+    # Blocking barrier nodes (gates, bollards), shared by every graph of a run.
+    barriers: set[int] = field(default_factory=set)
+
     def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
         self.edges[a].append((b, miles, road, mph))
         self.edges[b].append((a, miles, road, mph))
+
+    def add_yard_edge(self, a: int, b: int, miles: float) -> None:
+        self.yard_edges[a].append((b, miles))
+        self.yard_edges[b].append((a, miles))
 
 
 @dataclass(frozen=True, slots=True)
 class GeometryPath:
     miles: float
     segments: tuple[dict[str, Any], ...]
+    # Miles of the facility's own private road at the target end, already
+    # inside `miles` and spoken as `UNNAMED_SERVICE`. Zero for a public path.
+    yard_miles: float = 0.0
 
 
 def build_local_geometry(cache_dir: Path, only_states: set[str] | None = None) -> dict[str, Any]:
@@ -347,28 +373,45 @@ def route_state_targets(
     osm_path: Path,
     targets: list[Target],
     failures: dict[str, str] | None = None,
+    *,
+    yard_roads: bool = False,
 ) -> dict[str, GeometryPath]:
     """Route every target over its own clipped graph.
 
     ``failures``, when given, receives a ``ROUTE_FAILURE_*`` code per target
     that got no path, so a caller can record WHY instead of one catch-all
-    sentence."""
-    graphs = {target.target_id: RouteGraph() for target in targets}
+    sentence.
+
+    ``yard_roads`` also reads ``access=private`` ways and barrier nodes, so a
+    target the public roads do not reach may be reached over its own private
+    road (``yard_roads.py`` holds the rule). Off, nothing changes."""
+    barriers: set[int] = set()
+    graphs = {target.target_id: RouteGraph(barriers=barriers) for target in targets}
     boxes = {target.target_id: target_bounds(target) for target in targets}
     grid = target_grid(targets, boxes)
     entities = osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY
     processor = (
         osmium.FileProcessor(str(osm_path), entities=entities)
         .with_locations()
-        .with_filter(osmium.filter.KeyFilter("highway"))
+        .with_filter(
+            osmium.filter.KeyFilter("highway", "barrier")
+            if yard_roads
+            else osmium.filter.KeyFilter("highway")
+        )
     )
     for way in processor:
         if not hasattr(way, "nodes"):
+            # Nodes come before ways in an extract, so the barrier set is
+            # complete by the time the first way is read.
+            if yard_roads and is_blocking_barrier({str(t.k): str(t.v) for t in way.tags}):
+                barriers.add(int(way.id))
             continue
         tags = {str(tag.k): str(tag.v) for tag in way.tags}
         road = road_label(tags)
-        if not road:
+        private = not road and yard_roads and is_yard_road(tags, ROUTABLE_HIGHWAYS)
+        if not road and not private:
             continue
+        no_truck = yard_roads and bool(road) and bans_trucks(tags)
         coords = way_coords(way)
         if len(coords) < 2:
             continue
@@ -385,11 +428,15 @@ def route_state_targets(
             graph = graphs[target_id]
             prev: tuple[int, float, float] | None = None
             for ref, lat, lon in coords:
-                graph.nodes[ref] = (lat, lon)
+                (graph.yard_nodes if private else graph.nodes)[ref] = (lat, lon)
                 if prev is not None:
                     miles = haversine_mi(prev[1], prev[2], lat, lon)
-                    if miles > 0:
+                    if miles > 0 and private:
+                        graph.add_yard_edge(prev[0], ref, miles)
+                    elif miles > 0:
                         graph.add_edge(prev[0], ref, road, miles, way_mph)
+                        if no_truck:
+                            graph.no_truck.update({(prev[0], ref), (ref, prev[0])})
                 prev = (ref, lat, lon)
     routed: dict[str, GeometryPath] = {}
     for target in targets:
@@ -462,11 +509,11 @@ def shortest_geometry(
                 prev[nxt] = (node, road, mph)
                 heapq.heappush(heap, (nd, nxt))
     if end_ref not in dist:
-        return fail(
-            ROUTE_FAILURE_OVER_BUDGET
-            if _connected(graph, start_ref, end_ref)
-            else ROUTE_FAILURE_DISCONNECTED
-        )
+        if _connected(graph, start_ref, end_ref):
+            return fail(ROUTE_FAILURE_OVER_BUDGET)
+        if graph.yard_edges:
+            return yard_road_geometry(target, graph, start_ref, fail)
+        return fail(ROUTE_FAILURE_DISCONNECTED)
     node = end_ref
     path_nodes = [node]
     reversed_roads: list[str] = []
@@ -491,6 +538,77 @@ def shortest_geometry(
     if total > max(target.approach_miles * 1.8, 3.0):
         return fail(ROUTE_FAILURE_OVER_BUDGET)
     return GeometryPath(total, tuple(segments))
+
+
+def yard_road_geometry(
+    target: Target, graph: RouteGraph, start_ref: int, fail
+) -> GeometryPath | None:
+    """The fallback for a target the public roads do not reach: a path whose
+    last link is the target's own private road (rule: ``yard_roads.py``).
+
+    The target is snapped again, this time to the nearest node of ANY road,
+    public or private, inside the same snap radius: the yard's own road is
+    the road the endpoint stands on. Every edge of the yard stretch is
+    labelled ``UNNAMED_SERVICE`` with no posted limit of its own; nothing is
+    read from a private way but its geometry."""
+    every_node = {**graph.yard_nodes, **graph.nodes}
+    end: tuple[int, float] | None = None
+    for ref, (lat, lon) in every_node.items():
+        miles = haversine_mi(target.lat, target.lon, lat, lon)
+        if end is None or miles < end[1]:
+            end = (ref, miles)
+    if end is None or end[1] > TARGET_SNAP_RADIUS_MI:
+        return fail(ROUTE_FAILURE_NO_TARGET_ROAD)
+    found = yard_road_path(graph, start_ref, end[0])
+    if found is None:
+        print(
+            f"  yard road refused: {target.target_id}: " + _yard_refusal(graph, start_ref, end[0]),
+            flush=True,
+        )
+        return fail(ROUTE_FAILURE_DISCONNECTED)
+    path_nodes, in_yard = found
+    coords = [every_node[ref] for ref in path_nodes]
+    raw_edges: list[tuple[str, float, float | None]] = []
+    yard_miles = 0.0
+    for i, yard in enumerate(in_yard):
+        miles = haversine_mi(*coords[i], *coords[i + 1])
+        if yard:
+            yard_miles += miles
+            raw_edges.append((UNNAMED_SERVICE, miles, None))
+            continue
+        # The public edge this step used: the shortest one between the pair.
+        _nxt, _miles, road, mph = min(
+            (edge for edge in graph.edges[path_nodes[i]] if edge[0] == path_nodes[i + 1]),
+            key=lambda edge: edge[1],
+        )
+        raw_edges.append((road, miles, mph))
+    segments = collapse_segments(raw_edges, coords)
+    if not segments:
+        return fail(ROUTE_FAILURE_DISCONNECTED)
+    total = round(sum(segment["miles"] for segment in segments), 2)
+    if total > max(target.approach_miles * 1.8, 3.0):
+        return fail(ROUTE_FAILURE_OVER_BUDGET)
+    return GeometryPath(total, tuple(segments), round(yard_miles, 2))
+
+
+def _yard_refusal(graph: RouteGraph, start_ref: int, end_ref: int) -> str:
+    """Why the yard-road rule found nothing, for the run log only: is the
+    endpoint cut off even with every private way open, or did the rule's own
+    limits (one stretch at the facility end, no gate on a public way, no
+    way signed against trucks) refuse the only way through?"""
+    seen = {end_ref}
+    stack = [end_ref]
+    while stack:
+        node = stack.pop()
+        steps = [edge[0] for edge in graph.edges.get(node, ())]
+        steps += [edge[0] for edge in graph.yard_edges.get(node, ())]
+        for nxt in steps:
+            if nxt not in seen:
+                seen.add(nxt)
+                stack.append(nxt)
+    if start_ref not in seen:
+        return "cut off even over private ways (water, a motorway or a closed road between)"
+    return "the only way through breaks the rule (private mid-route, a public gate, no trucks)"
 
 
 def _resolve_speed(speed_miles: dict[float, float], road: str) -> float:
@@ -917,7 +1035,9 @@ def road_label(tags: dict[str, str]) -> str:
     highway = tags.get("highway", "")
     if highway not in ROUTABLE_HIGHWAYS:
         return ""
-    if tags.get("access") in {"private", "no"}:
+    # `private` ways come back in only as a facility's own yard road
+    # (`yard_roads.py`); a base's roads (`military`) never do.
+    if tags.get("access") in {"private", "no", "military"}:
         return ""
     if tags.get("motorroad") == "yes":
         return ""

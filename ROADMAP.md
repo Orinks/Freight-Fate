@@ -179,6 +179,17 @@ These items are part of the release-gate sweep:
       (61 behind private yard roads, a motorway or water, 12 under the
       chain floor), kept with a stale_endpoint note until a chain replaces
       them.
+      Yard roads, 2026-09-17 (owner ruling the same day): a chain may begin
+      on the facility's own access=private road, at the facility end only,
+      spoken as "a service road". The 142 rows whose cause was
+      "disconnected" were re-routed: 89 gained a chain (52 new, 37 stale
+      ones rebuilt), so chains stand at 2,416 of 5,037 (48 percent), 1,811
+      of them to a freight site, and 45 are still stale. The other 53 stay
+      refused: 47 are cut off even with private ways open (the Mississippi
+      at Baton Rouge and New Orleans, the Connecticut at Hartford, a
+      motorway or water elsewhere), 2 would need a private road mid-route
+      or a gate on a public street, 1 has under half a mile of public
+      street, and 3 have a private stretch past the cut (see below).
 - [x] Re-sweep facility endpoints with a matcher that reads an object's own
       tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
       ruling that the 1,396 chains to non-sites stay until a re-sweep
@@ -216,24 +227,42 @@ These items are part of the release-gate sweep:
       game tests use Chicago's first facility (Cicero Rail Hub, an
       intermodal) as the stock single-leg approach and need re-pointing in
       the same change.
-- [ ] Departure chains behind private yard roads. After the endpoint
-      re-sweep this is the largest routing loss: 81 screened endpoints
-      with no chain and 61 stale chains sit on a road fragment joined to
-      the street network only by access=private ways, a motorway or water
-      (8 of 132 CA/NY/TX failures were the private kind when classified).
-      Option: route over the private ways to find the right street, then
-      end the chain at the last public node. Not built; needs the owner's
-      yes, because a chain must never claim a gated road.
+- [x] Departure chains behind private yard roads. DONE 2026-09-17 on the
+      owner's ruling: a truck leaves a yard over the yard's own road, so a
+      chain may use access=private ways as one stretch at the facility end,
+      never anywhere else, spoken as "a service road" and never by the
+      private way's name, and the half-mile chain floor is held against
+      public miles alone (tools/yard_roads.py states each rule and its
+      kind). access=no, military, no-truck ways and gates on public streets
+      stay refused. The private stretches found run 0.03 to 0.85 miles with
+      a clear gap before 1.49, so the cut is one mile; the owner allowed
+      three sites past it by name (Gary Works steel mill 1.49, Tampa cold
+      storage 1.94, Port Tampa Bay bulk docks 1.97).
+- [ ] Two endpoints reached only over five to eight miles of private road,
+      left unbuilt by owner ruling 2026-09-17 because that reads like a
+      wrong endpoint: Huntsville cross-dock (endpoint "Kuskokwin Building",
+      tagged only building=warehouse, whose coordinates put it inside
+      Redstone Arsenal, so the 4.86 miles are the arsenal's roads) and
+      Ukiah company yard (endpoint "Retech Systems LLC", an industrial area
+      with the trade assumed, 7.4 miles south of town beside US 101, which
+      is a motorway there, so the graph's only join is 7.69 miles of
+      private road). Both want an endpoint fix, not a routing one. San Diego cross-dock (2.06 miles of port road)
+      also sits past the cut, unruled.
+- [ ] The public road graph still ignores barrier nodes and ways signed
+      motor_vehicle=no or hgv=no; only the yard-road fallback honours them.
+      Noted 2026-09-17; measure how many existing chains cross one before
+      changing the public search.
 
 #### World data and sound licensing blockers
 
 World-data geometry for 1.9 (curves, refuse legs, far approach pins)
 closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
 world-data item (see above): every state was re-swept 2026-09-17 with the
-path failures fixed, and the endpoint re-sweep landed the same day (2,364
-chains, 47 percent, 1,722 of them to a freight site). What is left is the
-third of sourced endpoints with no named freight site in reach, the
-facility types with no matcher rule, and the private yard road decision.
+path failures fixed, the endpoint re-sweep landed the same day, and the
+yard-road rule after it (2,416 chains, 48 percent, 1,811 of them to a
+freight site). What is left is the third of sourced endpoints with no named
+freight site in reach, the facility types with no matcher rule, and two
+endpoints behind miles of private road.
 
 - [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry.
       CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch

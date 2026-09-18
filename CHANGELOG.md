@@ -4,6 +4,8 @@
 
 ### Changed
 
+- **More facilities start and end with street directions, beginning on the yard's own road.** That first link is spoken as a service road.
+
 - **A career edited outside the game is always marked as modified now.** The notice plays once when you open it.
 
 - **When a station fades out of range, the radio tunes to the strongest local station still in range.** The Roadhouse is the fallback only when nothing else is on the air. (Suggested by Brandon.)
