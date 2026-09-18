@@ -6,6 +6,8 @@
 
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
 
+- **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
+
 ### Changed
 
 - **HKC Radio tells you it plays rock.** It used to give no format at all.

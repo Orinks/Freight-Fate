@@ -16469,6 +16469,23 @@
       "stream_format": "mp3",
       "stream_url": "https://server.dodgeradio.net/stream",
       "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "variety, rock, metal and country",
+      "id": "x-transmission-fm",
+      "name": "X Transmission FM",
+      "notes": "An eclectic station with live DJs on a published schedule and an automated DJ between shows; its own description is \"an eclectic mix of alternative, country, classic rock, rock, metal, and electro music\". Verified live 2026-09-18: HTTP 200, Content-Type audio/mpeg, 192 kbps, icy-name X Transmission FM, icy-genre \"Variety, Rock, Metal, Country, Goth, Industrial\", and icy-metaint set, so song titles read out. The address is the default mount its own AzuraCast API publishes as the station's listen URL. The station's website answers non-browser requests with 403, but the stream host does not, so playback is unaffected; that is why the mount comes from the API rather than the page.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "station site (xtransmissionfm.com) and the listen URL its own AzuraCast API publishes, checked 2026-09-18",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://custom-azura1.asurahosting.com/listen/x_transmission_fm/radio.mp3",
+      "supported": true
     }
   ]
 }
