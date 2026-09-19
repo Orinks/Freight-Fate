@@ -54,6 +54,21 @@ pub const LEAD_MI: f64 = 0.12;
 /// Floor on the time a turn is allowed to take, so a truck barely moving
 /// cannot demand an infinite amount of steering.
 pub const MIN_NEEDED_S: f64 = 1.5;
+/// How much of the lean a full-lane-width error is worth.
+///
+/// The whole lean, because `offset` is 1.0 exactly at the lane line (see
+/// [`super::lane`]) and a truck on the line has correcting as its entire job.
+/// On a straight road, drift alone can therefore reach the cap.
+pub const LANE_TERM: f64 = MAX_LEAN;
+/// How much of the lean the TURN ITSELF may use, leaving the rest as headroom
+/// for the driver's error to ride on.
+///
+/// The two share one channel, so the turn cannot have all of it: at the cap
+/// the lean says exactly the same thing whether the driver is making the turn
+/// or driving straight out of it, which is silence about the one mistake the
+/// guide exists to catch. Seven tenths keeps the turn plainly the louder voice
+/// while leaving a margin that is audible when it opens.
+pub const TURN_LEAN: f64 = MAX_LEAN * 0.7;
 
 /// Which way a turn goes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -115,6 +130,31 @@ pub struct TurnInput {
     /// The driver's own steering, -1.0 (full left) to 1.0 (full right).
     pub steering: f64,
     pub speed_mph: f64,
+    /// How far through the turn's own footprint the truck is, 0.0 at its
+    /// start to 1.0 at its end.
+    ///
+    /// The second way the lean closes, and the only one that works when the
+    /// truck is steering itself. With lane keeping on full the driver never
+    /// touches the wheel, so nothing would ever null a lean that waited on
+    /// their input -- and the owner's ruling is that the engine still pans
+    /// there, because the shape of the road is worth hearing whether or not
+    /// you are the one answering it (2026-09-18).
+    pub progress: f64,
+    /// Where the truck sits in its lane, -1.0 (left line) to 1.0 (right).
+    ///
+    /// Folded into the lean so turning the WRONG way is audible: steering
+    /// left through a right-hander pushes the truck left, and the correction
+    /// that error needs points the same way the turn already does, so the lean
+    /// deepens instead of sitting still. Without this the guide went quiet
+    /// about the one mistake it exists to catch.
+    pub lane_offset: f64,
+    /// Steer AWAY from the lean rather than toward it.
+    ///
+    /// The house convention is pursuit -- follow the sound -- but audio racing
+    /// games have taught a lot of players the opposite, and a driver who has
+    /// that reflex will fight a guide built the other way round. Flipping the
+    /// sign is the whole difference; everything above it is unchanged.
+    pub inverted: bool,
 }
 
 /// The engine's lean through turns.
@@ -166,11 +206,17 @@ impl TurnGuide {
     /// Where the lean wants to be, before slewing.
     fn target(&mut self, input: TurnInput, dt: f64) -> f64 {
         let Some(shape) = input.shape.filter(|_| !input.past) else {
-            // Nothing to turn for: the lean closes and the next turn starts
-            // clean.
+            // No turn, so the lean is the driver's lane error alone -- which
+            // on a straight road with a centred truck is silence.
             self.open = false;
             self.steered = 0.0;
-            return 0.0;
+            let correction =
+                (-input.lane_offset.clamp(-1.0, 1.0) * LANE_TERM).clamp(-MAX_LEAN, MAX_LEAN);
+            return if input.inverted {
+                -correction
+            } else {
+                correction
+            };
         };
         if !self.open {
             self.open = true;
@@ -195,8 +241,22 @@ impl TurnGuide {
         } else {
             1.0 - input.to_start_mi / LEAD_MI
         };
-        let remaining = (1.0 - self.steered).clamp(0.0, 1.0);
-        shape.side.sign() * MAX_LEAN * approach * remaining
+        // Whichever has got further through the turn closes the lean: the
+        // driver's wheel, or the turn simply going by underneath. A driver
+        // doing the steering nulls it early and hears it go quiet as a
+        // reward; one being driven hears it close as the corner is used up.
+        let by_wheel = (1.0 - self.steered).clamp(0.0, 1.0);
+        let by_road = (1.0 - input.progress.clamp(0.0, 1.0)).clamp(0.0, 1.0);
+        let remaining = by_wheel.min(by_road);
+        let owed = shape.side.sign() * TURN_LEAN * approach * remaining;
+        // The lane error rides on top, pointing the way that corrects it.
+        let correction = -input.lane_offset.clamp(-1.0, 1.0) * LANE_TERM;
+        let target = (owed + correction).clamp(-MAX_LEAN, MAX_LEAN);
+        if input.inverted {
+            -target
+        } else {
+            target
+        }
     }
 }
 
@@ -219,6 +279,9 @@ mod tests {
             past: false,
             steering,
             speed_mph: 9.0,
+            lane_offset: 0.0,
+            inverted: false,
+            progress: 0.0,
         }
     }
 
@@ -274,26 +337,147 @@ mod tests {
         run(&mut guide, approaching(shape, 0.0, 0.0), 1.0);
         let needed = shape.needed_s(9.0);
         let half = run(&mut guide, approaching(shape, -0.01, 1.0), needed / 2.0);
+        // Half the TURN's share of the lean -- stated against the constant so
+        // it keeps meaning "half" if the share is ever re-split.
         assert!(
-            (0.3..0.6).contains(&half),
-            "half a turn's steering should leave about half the lean; got {half}"
+            ((TURN_LEAN * 0.4)..(TURN_LEAN * 0.6)).contains(&half),
+            "half a turn's steering should leave about half of {TURN_LEAN}; got {half}"
         );
     }
 
     #[test]
-    fn steering_the_wrong_way_never_deepens_the_lean() {
-        // The guide says what the turn still needs. A driver steering away
-        // from it has done none of it -- but the lean must not grow past what
-        // the turn asked for, or steering wrong would be punished with a cue
-        // that reads as a sharper corner than the road actually has.
+    fn steering_the_wrong_way_is_not_progress_through_the_turn() {
         let shape = a_corner(TurnSide::Left);
         let mut guide = TurnGuide::new();
-        let pan = run(&mut guide, approaching(shape, -0.01, 1.0), 6.0);
-        assert!(
-            pan >= -(MAX_LEAN + 1e-9),
-            "the lean ran past its cap: {pan}"
-        );
+        run(&mut guide, approaching(shape, -0.01, 1.0), 6.0);
         assert_eq!(guide.steered(), 0.0, "wrong-way steering is not progress");
+    }
+
+    #[test]
+    fn turning_the_wrong_way_deepens_the_lean_as_the_truck_goes_wrong() {
+        // The owner's question: does the pan reflect it? It has to -- a guide
+        // that says the same thing whether you are making the turn or driving
+        // out of it is silent about the one mistake it exists to catch.
+        //
+        // Steering right through a LEFT-hander pushes the truck right, and
+        // correcting that error points left, which is the way the turn already
+        // leans. So the lean deepens toward its cap rather than sitting still.
+        let shape = a_corner(TurnSide::Left);
+        let mut held = TurnGuide::new();
+        let on_line = run(
+            &mut held,
+            TurnInput {
+                lane_offset: 0.0,
+                ..approaching(shape, -0.01, 1.0)
+            },
+            4.0,
+        );
+        let mut wrong = TurnGuide::new();
+        let drifting = run(
+            &mut wrong,
+            TurnInput {
+                lane_offset: 0.6, // pushed right, out of a left-hander
+                ..approaching(shape, -0.01, 1.0)
+            },
+            4.0,
+        );
+        assert!(
+            drifting < on_line,
+            "going wrong must lean harder: {drifting} against {on_line}"
+        );
+        assert!(drifting >= -(MAX_LEAN + 1e-9), "past the cap: {drifting}");
+    }
+
+    #[test]
+    fn the_inverted_guide_is_the_same_lean_the_other_way_round() {
+        // For drivers whose reflex from other audio racing games is to steer
+        // AWAY from the sound. Nothing else about the guide changes.
+        let shape = a_corner(TurnSide::Right);
+        let mut normal = TurnGuide::new();
+        let toward = run(&mut normal, approaching(shape, 0.0, 0.0), 1.0);
+        let mut flipped = TurnGuide::new();
+        let away = run(
+            &mut flipped,
+            TurnInput {
+                inverted: true,
+                ..approaching(shape, 0.0, 0.0)
+            },
+            1.0,
+        );
+        assert!(
+            toward > 0.0,
+            "a right turn leans right by default: {toward}"
+        );
+        assert!(
+            (away + toward).abs() < 1e-9,
+            "{away} is not the mirror of {toward}"
+        );
+    }
+
+    #[test]
+    fn a_truck_being_steered_for_still_hears_the_turn_close() {
+        // Owner, 2026-09-18: with every assist on, the curve and turn assists
+        // take the turns and the engine STILL pans. The driver's wheel never
+        // moves there, so the turn going by underneath is what closes it.
+        let shape = a_corner(TurnSide::Right);
+        let mut guide = TurnGuide::new();
+        let opened = run(
+            &mut guide,
+            TurnInput {
+                progress: 0.0,
+                ..approaching(shape, 0.0, 0.0)
+            },
+            1.0,
+        );
+        assert!(opened > 0.3, "the lean never opened: {opened}");
+
+        let half = run(
+            &mut guide,
+            TurnInput {
+                progress: 0.5,
+                ..approaching(shape, -0.01, 0.0)
+            },
+            1.0,
+        );
+        assert!(
+            half < opened && half > 0.05,
+            "halfway through it should be part closed, not gone: {half}"
+        );
+
+        let done = run(
+            &mut guide,
+            TurnInput {
+                progress: 1.0,
+                ..approaching(shape, -0.02, 0.0)
+            },
+            1.0,
+        );
+        assert_eq!(
+            done, 0.0,
+            "the corner was used up; the lean must be centred"
+        );
+    }
+
+    #[test]
+    fn a_drifting_truck_leans_toward_the_correction_with_no_turn_at_all() {
+        // The turn guide owns the straight road too now, because the lane
+        // error term does not need a turn to mean something.
+        let mut guide = TurnGuide::new();
+        let pan = run(
+            &mut guide,
+            TurnInput {
+                shape: None,
+                to_start_mi: f64::INFINITY,
+                past: false,
+                steering: 0.0,
+                speed_mph: 55.0,
+                lane_offset: 0.5, // drifted right
+                inverted: false,
+                progress: 0.0,
+            },
+            2.0,
+        );
+        assert!(pan < -0.1, "drifting right must lean left; got {pan}");
     }
 
     #[test]
@@ -309,6 +493,9 @@ mod tests {
                 past: true,
                 steering: 0.0,
                 speed_mph: 9.0,
+                lane_offset: 0.0,
+                inverted: false,
+                progress: 0.0,
             },
             2.0,
         );
@@ -326,6 +513,9 @@ mod tests {
                 past: false,
                 steering: 0.0,
                 speed_mph: 55.0,
+                lane_offset: 0.0,
+                inverted: false,
+                progress: 0.0,
             },
             2.0,
         );
@@ -392,6 +582,9 @@ mod tests {
                 past: false,
                 steering: 0.0,
                 speed_mph: 9.0,
+                lane_offset: 0.0,
+                inverted: false,
+                progress: 0.0,
             },
             0.5,
         );

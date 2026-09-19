@@ -12,6 +12,12 @@
 
 - **The engine pans the way you must turn, and comes back to centre as you turn.** Steer toward it until it goes quiet. It is centred again once you are through.
 
+- **Steering the wrong way in a turn leans the engine harder.** Going wrong is now something you hear straight away, not once you reach the lane line.
+
+- **The engine still leans through turns when the assists are driving.** You hear the shape of the road even when the truck is taking the corner for you.
+
+- **A new Steering guide setting flips which way to steer when the engine leans.** Under Settings, Audio, for drivers used to steering away from the sound.
+
 - **The road noise now tells you where you are in your lane.** It used to carry the steering guide; the engine does that now.
 
 - **Bends no longer chime.** The spoken call and the engine's lean carry the bend, so there is nothing beeping over them.

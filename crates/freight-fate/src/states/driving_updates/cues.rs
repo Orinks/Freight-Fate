@@ -2,7 +2,7 @@
 //! edge-boundary ladder, the curve run's verdict, the dead-man's-curve
 //! strips, the locator and steering tocks, and the guidance director.
 
-use crate::states::driving_turns::TURN_GUIDE_LEAD_MI;
+use crate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_GUIDE_LEAD_MI};
 use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
 use ff_core::data::curves::RouteCurve;
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
@@ -423,14 +423,20 @@ impl DrivingState {
     /// from `data::corners`, which is the same geometry that sets its advise
     /// speed. Whichever is nearer wins, because that is the one the driver has
     /// to steer next.
-    pub fn turn_guide_input(&mut self) -> TurnInput {
+    pub fn turn_guide_input(&mut self, inverted: bool, automated: bool) -> TurnInput {
         let position = self.trip.position_mi;
         let speed = self.trip.truck.speed_mph();
         let steering = self.lane.steering;
-        let mut best: Option<(f64, TurnShape)> = None;
-        let mut consider = |to_start_mi: f64, shape: TurnShape| {
-            if best.is_none_or(|(seen, _)| to_start_mi < seen) {
-                best = Some((to_start_mi, shape));
+        // Automation holds the lane, so there is no drift for the lean to
+        // report -- only the turn itself. The lane model already pins the
+        // offset to centre there; reading it as zero here as well means a
+        // stale value can never be heard as a drift the truck is not making.
+        let lane_offset = if automated { 0.0 } else { self.lane.offset };
+        // `(distance to its start, shape, how far through it the truck is)`.
+        let mut best: Option<(f64, TurnShape, f64)> = None;
+        let mut consider = |to_start_mi: f64, shape: TurnShape, progress: f64| {
+            if best.is_none_or(|(seen, _, _)| to_start_mi < seen) {
+                best = Some((to_start_mi, shape, progress));
             }
         };
 
@@ -438,6 +444,9 @@ impl DrivingState {
         let active = self.trip.curve_at(position).filter(|c| !c.connector);
         if let Some(curve) = active {
             if let Some(side) = TurnSide::parse(&curve.direction.to_string()) {
+                let lo = curve.start_mi.min(curve.end_mi);
+                let hi = curve.start_mi.max(curve.end_mi);
+                let span = (hi - lo).max(1e-6);
                 consider(
                     curve.start_mi - position,
                     TurnShape {
@@ -445,6 +454,7 @@ impl DrivingState {
                         deflection_deg: curve.deflection_deg,
                         radius_ft: curve.min_radius_ft as f64,
                     },
+                    ((position - lo) / span).clamp(0.0, 1.0),
                 );
             }
         } else if let Some((ahead, curve)) = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI) {
@@ -456,6 +466,7 @@ impl DrivingState {
                         deflection_deg: curve.deflection_deg,
                         radius_ft: curve.min_radius_ft as f64,
                     },
+                    0.0,
                 );
             }
         }
@@ -472,6 +483,10 @@ impl DrivingState {
                     .map(|leg| leg.local_turn_deg)
                     .filter(|deg| *deg > 0.0);
                 let degrees = measured.unwrap_or(ASSUMED_TURN_DEG);
+                // A street corner has no footprint of its own, so it is
+                // taken as used up across the commit tail past its milepost --
+                // the same stretch `turn_cues_in_play` keeps it alive for.
+                let through = ((position - cue.at_mi) / TURN_COMMIT_TAIL_MI).clamp(0.0, 1.0);
                 consider(
                     cue.at_mi - position,
                     TurnShape {
@@ -479,17 +494,21 @@ impl DrivingState {
                         deflection_deg: degrees,
                         radius_ft: corner_radius_ft(degrees),
                     },
+                    through,
                 );
             }
         }
 
         match best {
-            Some((to_start_mi, shape)) => TurnInput {
+            Some((to_start_mi, shape, progress)) => TurnInput {
                 shape: Some(shape),
                 to_start_mi,
                 past: false,
                 steering,
                 speed_mph: speed,
+                lane_offset,
+                inverted,
+                progress,
             },
             None => TurnInput {
                 shape: None,
@@ -497,6 +516,9 @@ impl DrivingState {
                 past: true,
                 steering,
                 speed_mph: speed,
+                lane_offset,
+                inverted,
+                progress: 1.0,
             },
         }
     }
@@ -533,14 +555,24 @@ impl DrivingState {
         // and it says how much wheel is still owed rather than how far off
         // centre the truck has wandered. The drift lean underneath only speaks
         // when no turn does, so the engine never carries two meanings at once.
-        let turn_input = self.turn_guide_input();
+        let turn_input = self.turn_guide_input(
+            ctx.settings.steering_guide_inverted,
+            ctx.settings.lane_is_automated(),
+        );
         let turn_pan = self.turn_guide.update(turn_input, dt);
-        // Automated lane keeping is doing the steering itself, so there is
-        // nothing to follow and the engine sits centred.
-        let guide_pan = if ctx.settings.lane_is_automated() || ctx.settings.lane_guide_tone {
+        // The engine pans whether or not the driver is the one steering
+        // (owner, 2026-09-18): with every assist on, the curve and turn
+        // assists take the turns and the lean still reports the road's shape,
+        // closing as the turn is used up rather than as a wheel answers it.
+        // Only the opt-in tone, which leans instead of the engine, silences it.
+        let guide_pan = if ctx.settings.lane_guide_tone {
             0.0
         } else if turn_pan != 0.0 {
             turn_pan
+        } else if ctx.settings.lane_is_automated() {
+            // Automation holds the lane, so there is no drift to report --
+            // but a turn above still leans.
+            0.0
         } else {
             frame.pan
         };

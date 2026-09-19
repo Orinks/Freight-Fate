@@ -869,12 +869,20 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
         );
     }
 
-    // Full lane keeping steers for the driver, so there is nothing to follow
-    // and nothing to report: both channels sit centred.
+    // Full lane keeping holds the lane itself, so there is no DRIFT to
+    // report and both channels come back to centre. A turn still leans there
+    // -- the owner's 2026-09-18 ruling -- which `turn_guide` covers on its
+    // own; this fixture's road is straight.
     harness.app.ctx.settings.lane_keeping = "full".into();
+    harness.with_drive(|drive, _| {
+        drive.engine_guide_pan_applied = 0.5; // so a write back to centre shows
+        drive.road_pan_applied = 0.5;
+    });
     log.borrow_mut().engine_pan.clear();
     log.borrow_mut().loop_pans.clear();
-    for _ in 0..10 {
+    // Long enough for the lean to SLEW home rather than snap: easing back is
+    // the behaviour, so the test has to give it the road to do it in.
+    for _ in 0..120 {
         harness.with_drive(|drive, ctx| drive.update_lane_guidance_audio(ctx, 1.0 / 60.0));
     }
     assert_eq!(log.borrow().engine_pan.last().copied(), Some(0.0));
@@ -882,18 +890,28 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
 }
 
 #[test]
-fn test_the_audio_frame_no_longer_pans_the_engine_for_lane_position() {
-    // The engine's pan belongs to the guide now. update_audio used to set it
-    // from lane.offset every frame, which would fight the guide for the same
-    // channel and leave whichever ran last in charge.
+fn test_the_engine_pan_is_the_guide_and_not_the_lane_position() {
+    // The engine's pan belongs to the guide now. It used to be set straight
+    // from lane.offset as a position readout, which would fight the guide for
+    // the same channel and leave whichever ran last in charge.
     let (mut harness, log) = a_drive("Engine pan ownership");
     harness.app.ctx.settings.lane_keeping = "off".into();
-    harness.with_drive(|drive, _| drive.lane.offset = 0.75);
+    harness.app.ctx.settings.lane_departure_warning = true;
+    harness.with_drive(|drive, _| {
+        drive.trip.truck.engine_on = true;
+        drive.trip.truck.velocity_mps = 55.0 / 2.23694;
+        drive.lane.offset = 0.75; // drifted well right
+    });
     log.borrow_mut().engine_pan.clear();
     update_audio(&mut harness, 1.0 / 60.0);
+    let pan = log
+        .borrow()
+        .engine_pan
+        .last()
+        .copied()
+        .expect("the guide pans the engine from the audio frame");
     assert!(
-        log.borrow().engine_pan.is_empty(),
-        "the audio frame set the engine pan again: {:?}",
-        log.borrow().engine_pan
+        pan <= 0.0,
+        "drifted right, the guide must lean left or sit centred, never mirror          the offset back as a position readout; got {pan}"
     );
 }

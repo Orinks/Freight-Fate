@@ -345,6 +345,12 @@ impl SettingsCategoryState {
         self.announce(ctx);
     }
 
+    pub(super) fn toggle_steering_guide_inverted(&mut self, ctx: &mut GameContext, _d: i64) {
+        ctx.settings.steering_guide_inverted = !ctx.settings.steering_guide_inverted;
+        save_settings(&ctx.settings);
+        self.announce(ctx);
+    }
+
     pub(super) fn toggle_lane_guide_tone(&mut self, ctx: &mut GameContext, _d: i64) {
         ctx.settings.lane_guide_tone = !ctx.settings.lane_guide_tone;
         save_settings(&ctx.settings);

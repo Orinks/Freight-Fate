@@ -366,6 +366,7 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.volume(ctx, "master_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.volume(ctx, "sfx_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.cycle_cue_loudness(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_steering_guide_inverted(ctx, d)),
                 adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
                 adjust(|s, ctx, d| s.volume(ctx, "weather_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.volume(ctx, "engine_volume", 0.1 * d as f64)),
@@ -715,17 +716,26 @@ impl SettingsCategoryState {
             row(
                 dyn_label(|s| {
                     format!(
+                        "Steering guide: {}",
+                        if s.steering_guide_inverted {
+                            "steer away from the lean"
+                        } else {
+                            "steer toward the lean"
+                        }
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_steering_guide_inverted(ctx, d)),
+                "Which way to steer when the engine leans. Toward the lean                  is the default: the engine pans the way you have to turn,                  and comes back to the middle as you turn. Away from the                  lean flips it, for drivers who learned the other habit in                  audio racing games. Everything else about the guide is the                  same either way.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!(
                         "Lane guide sound: {}",
-                        if s.lane_guide_tone { "tone" } else { "road noise" }
+                        if s.lane_guide_tone { "tone" } else { "engine" }
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
-                "What leans toward the side to steer. Road noise is the \
-                 road you already hear, moving toward the side you need \
-                 and going quiet when you are straight. Tone plays a soft \
-                 note instead, panned the same way, for setups where the \
-                 road is too quiet under the engine. Road noise is the \
-                 default; a held note is tiring over a long haul.",
+                "What leans toward the side to steer. The engine is the                  default: the engine you already hear, moving toward the                  side you need and coming back to the middle once you are                  through. Tone plays a soft note instead, panned the same                  way, for setups where the engine is hard to place. A held                  note is tiring over a long haul.",
             ),
             row(
                 dyn_label(|s| format!("Weather sounds volume: {} percent", pct(s.weather_volume))),
