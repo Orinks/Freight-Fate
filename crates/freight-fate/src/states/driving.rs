@@ -49,6 +49,7 @@ use ff_core::sim::lane_guidance::LaneGuidance;
 use ff_core::sim::pedal_latch::PedalLatch;
 use ff_core::sim::trip::Trip;
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::turn_guide::TurnGuide;
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherSystem;
 
@@ -768,6 +769,14 @@ pub struct DrivingState {
     // setting mid-drive cannot leave either one stuck off center.
     pub lane_guide_tone_on: bool,
     pub lane_guide_pan_applied: f64,
+    /// The engine's lean through a turn: how much wheel the driver still owes.
+    pub turn_guide: TurnGuide,
+    /// Last pan written to the ENGINE for the steering guide.
+    ///
+    /// Its own field, not shared with `lane_guide_pan_applied`: that one
+    /// belongs to the opt-in guide TONE, and while both wrote it each frame
+    /// they clobbered the other's tracker and both channels re-panned forever.
+    pub engine_guide_pan_applied: f64,
     // Dead-man's-curve strips: fixed road furniture ahead of each hairpin.
     pub transverse_strip_miles: Vec<f64>,
     /// `set[float]` of the strips already played.

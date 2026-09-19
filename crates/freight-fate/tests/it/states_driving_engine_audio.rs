@@ -837,7 +837,7 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
             drive.trip.truck.engine_on = true;
             drive.trip.truck.velocity_mps = 55.0 / 2.23694;
             drive.lane.offset = 0.8; // well past DRIFT_WAKE, toward the right
-            drive.lane_guide_pan_applied = 0.0;
+            drive.engine_guide_pan_applied = 0.0;
             drive.road_pan_applied = 0.0;
         });
         log.borrow_mut().engine_pan.clear();

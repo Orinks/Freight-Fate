@@ -2,6 +2,8 @@
 //! edge-boundary ladder, the curve run's verdict, the dead-man's-curve
 //! strips, the locator and steering tocks, and the guidance director.
 
+use crate::states::driving_turns::TURN_GUIDE_LEAD_MI;
+use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
 use ff_core::data::curves::RouteCurve;
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
 use ff_core::sim::lane::OFF_ROAD;
@@ -9,6 +11,7 @@ use ff_core::sim::lane_guidance::{
     classify_boundaries, cue_loudness, edge_rung, GuidanceFrame, CURVE_LEAD_MI, TRANSVERSE_KEY,
 };
 use ff_core::sim::trip_models::highway_class;
+use ff_core::sim::turn_guide::{TurnInput, TurnShape, TurnSide};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -411,6 +414,93 @@ impl DrivingState {
         }
     }
 
+    /// The turn the engine should be leaning for, and how far off it is.
+    ///
+    /// A mapped bend and a street corner are the same thing to the guide --
+    /// a direction, an angle and a radius -- so both are read into one
+    /// `TurnShape`. The bend's come from the curve bake; the corner's angle is
+    /// the one `build_local_geometry` measures at the junction and its radius
+    /// from `data::corners`, which is the same geometry that sets its advise
+    /// speed. Whichever is nearer wins, because that is the one the driver has
+    /// to steer next.
+    pub fn turn_guide_input(&mut self) -> TurnInput {
+        let position = self.trip.position_mi;
+        let speed = self.trip.truck.speed_mph();
+        let steering = self.lane.steering;
+        let mut best: Option<(f64, TurnShape)> = None;
+        let mut consider = |to_start_mi: f64, shape: TurnShape| {
+            if best.is_none_or(|(seen, _)| to_start_mi < seen) {
+                best = Some((to_start_mi, shape));
+            }
+        };
+
+        // The bend under the wheels, then the next one inside the lead.
+        let active = self.trip.curve_at(position).filter(|c| !c.connector);
+        if let Some(curve) = active {
+            if let Some(side) = TurnSide::parse(&curve.direction.to_string()) {
+                consider(
+                    curve.start_mi - position,
+                    TurnShape {
+                        side,
+                        deflection_deg: curve.deflection_deg,
+                        radius_ft: curve.min_radius_ft as f64,
+                    },
+                );
+            }
+        } else if let Some((ahead, curve)) = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI) {
+            if let Some(side) = TurnSide::parse(&curve.direction.to_string()) {
+                consider(
+                    ahead,
+                    TurnShape {
+                        side,
+                        deflection_deg: curve.deflection_deg,
+                        radius_ft: curve.min_radius_ft as f64,
+                    },
+                );
+            }
+        }
+
+        // And the street corner the route is asking for.
+        if let Some(cue) = self.turn_cue_in_play() {
+            if let Some(side) = TurnSide::parse(&cue.direction) {
+                let index = self.turn_leg_index(&cue);
+                let measured = self
+                    .trip
+                    .route
+                    .legs
+                    .get(index)
+                    .map(|leg| leg.local_turn_deg)
+                    .filter(|deg| *deg > 0.0);
+                let degrees = measured.unwrap_or(ASSUMED_TURN_DEG);
+                consider(
+                    cue.at_mi - position,
+                    TurnShape {
+                        side,
+                        deflection_deg: degrees,
+                        radius_ft: corner_radius_ft(degrees),
+                    },
+                );
+            }
+        }
+
+        match best {
+            Some((to_start_mi, shape)) => TurnInput {
+                shape: Some(shape),
+                to_start_mi,
+                past: false,
+                steering,
+                speed_mph: speed,
+            },
+            None => TurnInput {
+                shape: None,
+                to_start_mi: f64::INFINITY,
+                past: true,
+                steering,
+                speed_mph: speed,
+            },
+        }
+    }
+
     /// Run the guidance director: the ENGINE leans toward where the wheel
     /// should go (pursuit guide -- follow the sound), wakes for drift or a
     /// bend, and slews home on the centered straight, while the road bed
@@ -439,16 +529,24 @@ impl DrivingState {
             self.lane_guidance
                 .update(&self.lane, dt, assist_on, curve_steer, curve_ahead_mi)
         };
-        // The guide. Automated lane keeping is doing the steering itself, so
-        // there is nothing to follow and the engine sits centred.
+        // The turn's own lean comes first: it is the one the owner asked for,
+        // and it says how much wheel is still owed rather than how far off
+        // centre the truck has wandered. The drift lean underneath only speaks
+        // when no turn does, so the engine never carries two meanings at once.
+        let turn_input = self.turn_guide_input();
+        let turn_pan = self.turn_guide.update(turn_input, dt);
+        // Automated lane keeping is doing the steering itself, so there is
+        // nothing to follow and the engine sits centred.
         let guide_pan = if ctx.settings.lane_is_automated() || ctx.settings.lane_guide_tone {
             0.0
+        } else if turn_pan != 0.0 {
+            turn_pan
         } else {
             frame.pan
         };
-        if guide_pan != self.lane_guide_pan_applied {
+        if guide_pan != self.engine_guide_pan_applied {
             ctx.audio.set_engine_pan(guide_pan);
-            self.lane_guide_pan_applied = guide_pan;
+            self.engine_guide_pan_applied = guide_pan;
         }
         if ctx.settings.lane_guide_tone {
             self.lean_the_tone(ctx, frame);
@@ -482,10 +580,11 @@ impl DrivingState {
     /// merely beside it -- the objection was to a CONTINUOUS tone, and this
     /// one only exists while the truck is actually off center.
     pub fn lean_the_tone(&mut self, ctx: &mut GameContext, frame: GuidanceFrame) {
-        if self.road_pan_applied != 0.0 {
-            ctx.audio.set_loop_pan(CH_ROAD, 0.0);
-            self.road_pan_applied = 0.0;
-        }
+        // The bed is NOT flattened here any more. It used to carry the guide,
+        // so leaving it leaning while the tone led as well would have given a
+        // driver two guides at once; now it carries lane position, which the
+        // tone does not replace and which a driver who switched guides still
+        // wants.
         if frame.awake {
             if !self.lane_guide_tone_on {
                 let volume = LANE_GUIDE_TONE_VOLUME * self.cue_loudness(ctx);

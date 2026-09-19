@@ -642,6 +642,27 @@ impl Trip {
         None
     }
 
+    /// The nearest mainline bend inside `lead_mi`, with how far ahead its
+    /// start is. Unlike `next_curve_approach` this applies no speed test: the
+    /// steering guide leans for the SHAPE of the road whatever the truck is
+    /// doing, where a spoken warning only fires for a bend taken too fast.
+    pub fn next_curve_within(&self, lead_mi: f64) -> Option<(f64, RouteCurve)> {
+        for cr in &self.curves {
+            let ahead = cr.start_mi - self.position_mi;
+            if ahead <= 0.0 {
+                continue;
+            }
+            if ahead > lead_mi {
+                break;
+            }
+            if cr.connector {
+                continue;
+            }
+            return Some((ahead, *cr));
+        }
+        None
+    }
+
     /// The next curve ahead that deserves a spoken approach warning.
     pub fn next_curve_approach(&self) -> Option<RouteCurve> {
         let speed = self.truck.speed_mph();

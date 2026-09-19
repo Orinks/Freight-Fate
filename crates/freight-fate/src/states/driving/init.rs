@@ -25,6 +25,7 @@ use ff_core::sim::season::real_clock_game_hours;
 use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::truck_parking::TruckParkingProvider;
+use ff_core::sim::turn_guide::TurnGuide;
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherProvider;
 
@@ -611,6 +612,8 @@ impl DrivingState {
             road_pan_applied: 0.0,
             lane_guide_tone_on: false,
             lane_guide_pan_applied: 0.0,
+            turn_guide: TurnGuide::new(),
+            engine_guide_pan_applied: 0.0,
             transverse_strip_miles,
             transverse_fired: Vec::new(),
             lane_locator_on: false,

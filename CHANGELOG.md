@@ -10,7 +10,9 @@
 
 ### Changed
 
-- **The engine leans toward where you should steer, instead of the road noise.** Follow the lean. The road noise now tells you where you are in your lane.
+- **The engine pans the way you must turn, and comes back to centre as you turn.** Steer toward it until it goes quiet. It is centred again once you are through.
+
+- **The road noise now tells you where you are in your lane.** It used to carry the steering guide; the engine does that now.
 
 - **Bends no longer chime.** The spoken call and the engine's lean carry the bend, so there is nothing beeping over them.
 
