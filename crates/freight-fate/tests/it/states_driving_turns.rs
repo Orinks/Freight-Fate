@@ -2095,6 +2095,53 @@ fn test_the_servo_holds_a_bend_on_a_downgrade_on_one_application() {
 }
 
 #[test]
+fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
+    // The AZ-260 bend was one grade, one advisory and one entry speed. The
+    // same hold has to be steady on every hill the map has, from a two
+    // percent roll to an eight percent pitch, at a town corner's number and
+    // a highway sweeper's, entered a hair over, just past the band, and hot.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    for grade in [-0.02, -0.03, -0.04, -0.05, -0.061, -0.07, -0.08] {
+        for target in [15.0, 25.0, 30.0, 40.0, 55.0] {
+            for over in [0.5, 1.5, 8.0] {
+                a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, 400, 0.5);
+                d.curve_servo = None;
+                let here = d.trip.position_mi;
+                d.arm_curve_servo(target, here - 0.1, here + 5.0, false);
+
+                let mut applied_total = 0.0;
+                let mut last = 0.0;
+                for _ in 0..(45.0 / DT) as usize {
+                    d.trip.truck.grade = grade;
+                    d.trip.truck.brake = 0.0;
+                    d.update_curve_speed_servo(&app.ctx);
+                    applied_total += (d.trip.truck.brake - last).max(0.0);
+                    last = d.trip.truck.brake;
+                    d.trip.truck.update(DT);
+                }
+
+                let case = format!("{:.1} percent, advise {target}, {over} over", grade * 100.0);
+                assert!(
+                    applied_total < 3.0,
+                    "{case}: {applied_total:.1} applications in one bend"
+                );
+                assert!(
+                    !d.trip.truck.air_low_warning(),
+                    "{case}: tanks down to {:.0} psi",
+                    d.trip.truck.air_pressure_psi()
+                );
+                assert!(
+                    d.trip.truck.speed_mph() < target + 2.0,
+                    "{case}: the hill got away, {:.1} mph",
+                    d.trip.truck.speed_mph()
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
     // driver holding the throttle into the same bend gets the old drift
