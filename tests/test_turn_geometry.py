@@ -100,3 +100,117 @@ def test_a_junction_with_no_room_to_read_a_bearing_reports_nothing(builder):
         "",
         0.0,
     )
+
+
+# -- the angle has to survive being written ----------------------------------
+#
+# `collapse_segments` measured the angle and both builders then rebuilt every
+# segment from a fixed list of four keys, one step before the file was
+# written. The angle was computed and thrown away a second time, and nothing
+# failed: a missing angle reads as "not measured", so every corner in the game
+# was priced as a square one however carefully the shape had been read.
+
+
+def _load_tool(name: str):
+    spec = importlib.util.spec_from_file_location(name, ROOT / "tools" / f"{name}.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+SEGMENTS = [
+    {
+        "road": "East Navarre Street",
+        "miles": 0.4,
+        "cue": "Start on East Navarre Street.",
+        "speed_mph": 30.0,
+        "turn_deg": 0.0,
+    },
+    {
+        "road": "North Michigan Street",
+        "miles": 0.2,
+        "cue": "Turn left onto North Michigan Street.",
+        "speed_mph": 25.0,
+        "turn_deg": 112.0,
+    },
+    {
+        "road": "South Michigan Street",
+        "miles": 0.1,
+        "cue": "Continue onto South Michigan Street.",
+        "speed_mph": 25.0,
+        "turn_deg": 0.0,
+    },
+]
+
+
+def test_the_geometry_builder_writes_the_angle_it_measured(builder):
+    cleaned = builder.clean_segments([dict(segment) for segment in SEGMENTS])
+
+    assert [segment["turn_deg"] for segment in cleaned] == [0.0, 112.0, 0.0]
+
+
+def test_the_facility_builder_writes_the_angle_it_was_handed():
+    # The one file whose segments become the streets a delivery drives.
+    tool = _load_tool("build_facility_approaches")
+
+    cleaned = [tool.clean_segment(dict(segment)) for segment in SEGMENTS]
+
+    assert [segment["turn_deg"] for segment in cleaned] == [0.0, 112.0, 0.0]
+
+
+def test_a_segment_with_no_measured_angle_is_written_as_unmeasured():
+    tool = _load_tool("build_facility_approaches")
+
+    cleaned = tool.clean_segment(
+        {"road": "Dock Road", "miles": 0.1, "cue": "Turn right onto Dock Road.", "speed_mph": 25.0}
+    )
+
+    assert cleaned["turn_deg"] == 0.0
+
+
+def test_the_facility_coverage_says_how_many_corners_were_read():
+    # A bake that mostly assumed has to say so, in the layer's own meta.
+    tool = _load_tool("build_facility_approaches")
+    records = {
+        "yard": {
+            "segments": [dict(segment) for segment in SEGMENTS]
+            + [
+                {
+                    "road": "Dock Road",
+                    "miles": 0.1,
+                    "cue": "Turn right onto Dock Road.",
+                    "speed_mph": 25.0,
+                    "turn_deg": 0.0,
+                }
+            ],
+            "endpoint_source_backed": True,
+            "road_snapped": True,
+            "turn_level": True,
+            "representative_fallback": False,
+            "gate_hint": "",
+            "yard_hint": "",
+            "dock_hint": "",
+        }
+    }
+
+    coverage = tool.coverage_summary(records)
+
+    # Two "Turn" cues; only the one carrying a measured angle counts as read.
+    assert coverage["corners"] == 2
+    assert coverage["corners_angle_read"] == 1
+    assert coverage["corners_angle_assumed"] == 1
+    assert coverage["corners_angle_read_ratio"] == 0.5
+
+
+def test_a_truncated_chain_does_not_keep_the_cut_corners_angle(builder):
+    # The Start leg is whatever survived the cut, and the junction onto it was
+    # cut off with everything before it. An angle left there would be handed to
+    # the reversed route's last corner as if it had been measured.
+    edges = [(f"Street {index}", 0.1, 25.0) for index in range(builder.MAX_SPOKEN_SEGMENTS + 3)]
+
+    segments = builder.collapse_segments(edges)
+
+    assert len(segments) == builder.MAX_SPOKEN_SEGMENTS
+    assert segments[0]["cue"].startswith("Start on ")
+    assert segments[0]["turn_deg"] == 0.0

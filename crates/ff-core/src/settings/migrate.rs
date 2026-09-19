@@ -422,7 +422,7 @@ impl Settings {
         s.lane_keeping_rename_notice_left = s
             .lane_keeping_rename_notice_left
             .clamp(0, LANE_KEEPING_RENAME_NOTICES);
-        if data.is_some_and(|data| !data.contains_key("driving_assistance_preset")) {
+        if let Some(raw) = data.filter(|data| !data.contains_key("driving_assistance_preset")) {
             s.lane_departure_warning = s.lane_keeping != "full";
             for field in DRIVING_ASSIST_FIELDS {
                 match field {
@@ -431,10 +431,21 @@ impl Settings {
                     // difficulty. The blanket "everything off" below must
                     // not reach it, or a pre-preset save would change what
                     // the truck does the moment it is opened.
+                    "lane_departure_warning" | "lane_keeping" => {}
                     // Facility stopping was an explicit opt-in on every
-                    // pre-preset save (its merged rest-stop half too, kept
-                    // above); the blanket off must not take it back.
-                    "lane_departure_warning" | "lane_keeping" | "destination_approach_assist" => {}
+                    // pre-preset save (its merged rest-stop half too), so the
+                    // blanket off must not take it back -- but it must be the
+                    // FILE's opt-in, never the class default. That default is
+                    // on since the Balanced fresh install, and a save written
+                    // before the preset existed has neither key, so reaching
+                    // for the default handed every migrating driver an assist
+                    // that takes the pedals at the gate, with every other
+                    // assist forced off and nothing said.
+                    "destination_approach_assist" => {
+                        let opted_in = |key: &str| raw.get(key) == Some(&Value::Bool(true));
+                        s.destination_approach_assist = opted_in("destination_approach_assist")
+                            || opted_in("selected_stop_assist");
+                    }
                     other => {
                         s.set_assist_value(other, super::AssistValue::Flag(false));
                     }

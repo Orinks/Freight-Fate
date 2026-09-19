@@ -19,11 +19,12 @@ where the wheel should go, never a new tone, and silence-is-centered.
 
 ## Turning it on
 
-Curve steering only exists when **lane keeping** is not on full. Full is
-the default (Settings, Driving assistance, Lane keeping): full means the
-truck holds the lane itself and takes your exits, partial is gentle drift
-with steering help, off is the real wheel. For honest testing use off, and turn
-**Curve speed assistance off** — with it on, the truck brakes for the
+Curve steering only exists when **lane keeping** is not on full. Partial is
+the default since 2026-09-18 (Settings, Driving assistance, Lane keeping):
+full means the truck holds the lane itself and takes your exits, partial is
+gentle drift with steering help, off is the real wheel. For honest testing
+use off, and turn
+**Curve assistance off** — with it on, the truck brakes for the
 bends itself and you'll wonder why nothing is happening. That is not a
 bug; it's the assist doing its job. Related settings: "Lane and edge
 cue loudness" (subtle / standard / prominent) scales all the new

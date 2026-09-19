@@ -1886,7 +1886,7 @@ fn test_cruise_into_a_hot_bend_arrives_at_the_advisory() {
     assert!(
         !run.lines
             .iter()
-            .any(|line| line.contains("Curve speed assistance")),
+            .any(|line| line.contains("Curve assistance")),
         "cruise's line covers the bend; the assist must not speak twice: {:#?}",
         run.lines
     );
@@ -1922,7 +1922,7 @@ fn test_a_manual_driver_off_the_pedals_is_braked_to_the_advisory() {
         .find(|line| line.contains("left, half a mile"))
         .unwrap_or_else(|| panic!("a curve call: {:#?}", run.lines));
     assert!(
-        call.ends_with("Advise 35 miles per hour. Curve speed assistance slowing."),
+        call.ends_with("Advise 35 miles per hour. Curve assistance slowing."),
         "one utterance, the pacenote plus the assist clause: {call:?}"
     );
     // The reactive line inside the bend is the bare sentence; the servo owns
@@ -1930,7 +1930,7 @@ fn test_a_manual_driver_off_the_pedals_is_braked_to_the_advisory() {
     assert!(
         !run.lines
             .iter()
-            .any(|line| line == "Curve speed assistance slowing."),
+            .any(|line| line == "Curve assistance slowing."),
         "the reactive line must not double the approach line: {:#?}",
         run.lines
     );
@@ -1975,7 +1975,7 @@ fn test_a_bend_under_cruises_floor_is_braked_down_and_cruise_comes_back() {
         .find(|line| line.contains("Adaptive cruise paused for the bend"))
         .expect("the pause line");
     assert!(
-        call.contains("curve speed assistance slowing. Cruise resumes past the bend"),
+        call.contains("curve assistance slowing. Cruise resumes past the bend"),
         "{call:?}"
     );
     // Past the tail the pause is spent, and once the driver has the truck
@@ -2046,7 +2046,7 @@ fn test_the_drivers_own_brake_takes_the_bend_back_from_the_servo() {
     assert!(
         run.lines
             .iter()
-            .any(|line| line == "Curve speed assistance released."),
+            .any(|line| line == "Curve assistance released."),
         "{:#?}",
         run.lines
     );
@@ -2214,7 +2214,7 @@ fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     assert!(
         !run.lines
             .iter()
-            .any(|line| line.contains("Curve speed assistance")),
+            .any(|line| line.contains("Curve assistance")),
         "{:#?}",
         run.lines
     );

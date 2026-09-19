@@ -118,6 +118,14 @@ impl DrivingState {
         // 2026-07-22).
         let mut curve_assisting = false;
         let mut excess_now: Option<f64> = None;
+        // How far over the number this assist is answering, whatever named it
+        // -- a baked bend's advisory or a ramp's own geometry. `excess_now`
+        // cannot serve: it stays None on a ramp on purpose, because it is
+        // what gates the retarder, and a ramp is not a grade. Kept apart, the
+        // service brake below read the None as "nothing over" and pressed a
+        // flat tenth of the pedal down a hot ramp at any speed (review
+        // finding, 2026-09-19).
+        let mut over_mph: f64 = 0.0;
         if ctx.settings.curve_speed_assist {
             match active.as_ref().filter(|c| !c.connector) {
                 Some(bend) => {
@@ -126,6 +134,7 @@ impl DrivingState {
                         self.trip.truck.speed_mph() > bend.advisory_mph as f64 + margin;
                     excess_now =
                         Some(0.0f64.max(self.trip.truck.speed_mph() - bend.advisory_mph as f64));
+                    over_mph = excess_now.unwrap_or(0.0);
                 }
                 None => {
                     if curve != 0.0 && !route_transition_owns_ramp {
@@ -141,6 +150,7 @@ impl DrivingState {
                             heuristic -= 3.0;
                         }
                         curve_assisting = self.trip.truck.speed_mph() > heuristic;
+                        over_mph = 0.0f64.max(self.trip.truck.speed_mph() - heuristic);
                     }
                 }
             }
@@ -260,13 +270,19 @@ impl DrivingState {
             // from `curve`: that used to be a severity around 1.0 and is a
             // curvature around 0.002 since the lane model grew a heading, so
             // reading it here quietly turned a third of the brakes into
-            // nothing at all.
-            let over = excess_now.unwrap_or(0.0);
-            self.trip.truck.brake = self.trip.truck.brake.max(0.35f64.min(0.1 + over * 0.02));
+            // nothing at all. `over_mph`, not `excess_now`: a ramp has a
+            // number to be over too, and reading the retarder's gate here
+            // pressed a flat tenth of the pedal down every hot ramp.
+            self.trip.truck.brake = self
+                .trip
+                .truck
+                .brake
+                .max(0.35f64.min(0.1 + over_mph * 0.02));
         }
-        // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp adds 0.35 of curve
-        // weight above, so any exit taken over about 43 mph engages this
-        // assist -- and route-transition assistance is already braking for
+        // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp with no baked bend is
+        // priced off its own radius above, so an exit taken over that number
+        // engages this assist -- and route-transition assistance is already
+        // braking for
         // the sign or the light at the end of it and already says so. With
         // the realistic preset both are on by default, so every hot ramp
         // spoke twice, back to back (logged playtest of the four 1.9 assists,
@@ -278,7 +294,7 @@ impl DrivingState {
         // drive, 2026-08-28).
         let on_ramp = self.ramp_mi.is_some();
         // AND A BEND THE APPROACH SERVO OWNS. The curve call armed the servo
-        // and, with callouts on, already said "Curve speed assistance
+        // and, with callouts on, already said "Curve assistance
         // slowing" for this bend on the approach -- and with callouts off
         // the deceleration is meant to be the only word. Either way the
         // words here are spoken for; the reactive brake above still applies
@@ -296,7 +312,7 @@ impl DrivingState {
                 // the pedals (automation-handoff sweep, 2026-08-20, the
                 // deferred 2026-08-15 audit).
                 ctx.say_event_with(
-                    "Curve speed assistance slowing.",
+                    "Curve assistance slowing.",
                     SayEvent::queued()
                         .priority(EventPriority::Route)
                         .category(SpeechCategory::Confirmation),
@@ -312,7 +328,7 @@ impl DrivingState {
             // pedals back (automation-handoff sweep, 2026-08-20, the deferred
             // 2026-08-15 audit).
             ctx.say_event_with(
-                "Curve speed assistance released.",
+                "Curve assistance released.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Confirmation),
@@ -619,8 +635,7 @@ impl DrivingState {
                     return;
                 };
                 let open_name = lane_label(open_lane, count);
-                self.lane.lane = open_lane;
-                self.lane.offset = 0.0;
+                self.lane.recentre(open_lane);
                 self.lane_change_target = None;
                 self.merge_deadline = None;
                 let volume = 1.0f64.min(0.7 * self.cue_loudness(ctx));
@@ -719,8 +734,7 @@ impl DrivingState {
         self.merge_deadline = Some(left);
         if left <= 0.0 {
             self.merge_deadline = None;
-            self.lane.lane = open_lane;
-            self.lane.offset = 0.0;
+            self.lane.recentre(open_lane);
             self.lane_change_target = None;
             ctx.audio.play("vehicle/collision");
             ctx.controller.rumble.impact(MERGE_BARRELS_DAMAGE);

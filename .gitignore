@@ -149,3 +149,6 @@ crates/bass-sys/vendor/*/libbass*.dylib
 src/freight_fate/data/world_data/us/gameplay/curve_osm.jsonl
 # Local linked worktrees used by agentic implementation plans.
 .worktrees/
+
+# Local code-review reports (paad); findings land in commits and ROADMAP instead.
+paad/

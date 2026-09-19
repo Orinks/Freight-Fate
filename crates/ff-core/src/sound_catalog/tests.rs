@@ -50,6 +50,48 @@ fn test_every_entry_names_itself_plays_something_and_explains_itself() {
 }
 
 #[test]
+fn test_no_entry_text_carries_a_run_of_spaces() {
+    // Five entries lost their backslash line continuations and shipped
+    // fourteen-space runs to the Learn game sounds screen, which reads them
+    // to speech and braille as written (review I9, 2026-09-19). A literal
+    // split across lines has to be joined with `\`; this catches the next
+    // one that is not.
+    for entry in catalog_entries() {
+        for (what, text) in [
+            ("name", entry.name),
+            ("meaning", entry.meaning),
+            ("when", entry.when),
+        ] {
+            assert!(
+                !text.contains("  "),
+                "{}: its {what} has a run of spaces: {text:?}",
+                entry.name
+            );
+        }
+    }
+}
+
+#[test]
+fn test_engine_lean_when_text_says_what_the_director_does() {
+    // Review I10: the text taught that the lean never happens with the
+    // lane-departure warning off, which was false for every bend. It now
+    // has to name the four facts the code has: turns in every mode, drift
+    // only with the warning on, the tone replacing it, and the reversal.
+    let when = entry_by_name("The engine lean")
+        .expect("The engine lean is catalogued")
+        .when;
+    for fact in [
+        "Every bend and street corner, in every lane keeping mode",
+        "lane departure warning is on",
+        "set to tone",
+        "Steering guide row reverses",
+    ] {
+        assert!(when.contains(fact), "missing {fact:?} in {when:?}");
+    }
+    assert!(!when.contains("never happens"), "{when:?}");
+}
+
+#[test]
 fn test_lane_category_teaches_the_edge_ladder_in_order() {
     let lane = CATALOG
         .iter()

@@ -38,8 +38,11 @@ use freight_fate::states::driving_updates::{
 // -- the recording backend --------------------------------------------------------------
 
 /// What the backend was asked to do, in order.
+///
+/// Shared with `states_driving_engine_lean.rs`, which watches the two pans
+/// through the same recording backend rather than growing a second copy.
 #[derive(Default)]
-struct Calls {
+pub(super) struct Calls {
     played: Vec<(String, f64)>,
     /// `play_bank(base, volume)`, kept apart from `played` the way Python's
     /// two separate stubs did.
@@ -50,9 +53,9 @@ struct Calls {
     loops: Vec<LoopCall>,
     reverse: Vec<&'static str>,
     engine_rpm: Vec<(f64, f64)>,
-    engine_pan: Vec<f64>,
+    pub(super) engine_pan: Vec<f64>,
     /// `set_loop_pan(channel, pan)`: the road bed carries lane position now.
-    loop_pans: Vec<(u32, f64)>,
+    pub(super) loop_pans: Vec<(u32, f64)>,
     /// `set_engine_duck(duck)`: the shift-gap disengage, in order.
     ducks: Vec<f64>,
     engine_running: bool,
@@ -69,10 +72,10 @@ enum LoopCall {
     Stop(u32),
 }
 
-type Log = Rc<RefCell<Calls>>;
+pub(super) type Log = Rc<RefCell<Calls>>;
 
-struct TrackingAudio {
-    log: Log,
+pub(super) struct TrackingAudio {
+    pub(super) log: Log,
 }
 
 impl Audio for TrackingAudio {
@@ -837,8 +840,8 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
             drive.trip.truck.engine_on = true;
             drive.trip.truck.velocity_mps = 55.0 / 2.23694;
             drive.lane.offset = 0.8; // well past DRIFT_WAKE, toward the right
-            drive.engine_guide_pan_applied = 0.0;
-            drive.road_pan_applied = 0.0;
+            drive.engine_guide_pan_applied = Some(0.0);
+            drive.road_pan_applied = Some(0.0);
         });
         log.borrow_mut().engine_pan.clear();
         log.borrow_mut().loop_pans.clear();
@@ -855,7 +858,8 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
             .unwrap_or_else(|| panic!("{mode}: the engine was never panned"));
         assert!(
             guide < -0.1,
-            "{mode}: drifting right, the engine must lean LEFT to be followed              back to centre; got {guide}"
+            "{mode}: drifting right, the engine must lean LEFT to be followed \
+             back to centre; got {guide}"
         );
         let seat = log
             .borrow()
@@ -865,7 +869,8 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
             .unwrap_or_else(|| panic!("{mode}: the road bed was never panned"));
         assert!(
             seat.1 > 0.1,
-            "{mode}: the bed reports where the truck IS, which is right of              centre; got {seat:?}"
+            "{mode}: the bed reports where the truck IS, which is right of \
+             centre; got {seat:?}"
         );
     }
 
@@ -875,8 +880,8 @@ fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
     // own; this fixture's road is straight.
     harness.app.ctx.settings.lane_keeping = "full".into();
     harness.with_drive(|drive, _| {
-        drive.engine_guide_pan_applied = 0.5; // so a write back to centre shows
-        drive.road_pan_applied = 0.5;
+        drive.engine_guide_pan_applied = Some(0.5); // so a write back to centre shows
+        drive.road_pan_applied = Some(0.5);
     });
     log.borrow_mut().engine_pan.clear();
     log.borrow_mut().loop_pans.clear();
@@ -912,6 +917,7 @@ fn test_the_engine_pan_is_the_guide_and_not_the_lane_position() {
         .expect("the guide pans the engine from the audio frame");
     assert!(
         pan <= 0.0,
-        "drifted right, the guide must lean left or sit centred, never mirror          the offset back as a position readout; got {pan}"
+        "drifted right, the guide must lean left or sit centred, never mirror \
+         the offset back as a position readout; got {pan}"
     );
 }

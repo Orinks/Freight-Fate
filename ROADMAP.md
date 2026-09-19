@@ -276,6 +276,13 @@ endpoints behind miles of private road.
       quality follow-up are deferred; neither blocks far pins.
 - [x] The Duff-shared sound cues flagged unlicensed by the provenance
       audit. N/A 2026-09-16 (owner): dropped from the release gate.
+- [ ] Every street corner is still priced as a square one. The corner-speed
+      model reads a measured turn angle per junction, but no shipped route
+      carries one: neither the local-geometry layer nor the facility-approach
+      layer writes the angle, so every corner advises the same number and a
+      sweeping turn is no faster than a tight one. Needs both builders to
+      carry the angle through and both layers rebuilt, with the read/assumed
+      ratio reported the way the other bakes report theirs.
 - [ ] Colorado's live traffic and construction are dead (CARS GraphQL
       retired; COtrip's WZDx feed wants a registered key, as do Ohio,
       Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
@@ -348,11 +355,12 @@ its status or release decision.
       (2026-09-18). Inside its hold band it let go, the hill carried the
       truck back over, and the snub came back as a new application ten
       times a second: 125 psi to the spring brakes in one bend of AZ-260,
-      Camp Verde to Payson. With adaptive cruise holding the same bend it did the same on the
-      band's edge. The pedal is feathered now: the snub scales with how
-      far over the number the truck is, the hill is held tapering to a
-      band under it, and the whole run makes 8 applications where it made
-      277. Judged across 140 grade, advisory and entry-speed cases.
+      Camp Verde to Payson. With adaptive cruise holding the same bend it
+      did the same on the band's edge. The pedal is feathered now: the snub
+      scales with how far over the number the truck is, the hill is held
+      tapering to a band under it, and the whole run makes 8 applications
+      where it made 277. Judged across 140 grade, advisory and entry-speed
+      cases.
 - [x] The clock stays real until curve assistance has finished slowing
       for a bend (2026-09-18). The pacenote decompression lets go at the
       advisory plus its margin while the servo aims at the advisory itself,

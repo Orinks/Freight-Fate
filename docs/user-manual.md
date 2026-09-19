@@ -879,8 +879,8 @@ level you choose.
 
 ## Taking curves
 
-With lane keeping on partial or off, the road itself is your steering guide,
-and the whole approach comes down to five habits.
+The engine is your steering guide, and the whole approach comes down to five
+habits.
 
 ### Carry your speed to the bend
 
@@ -892,8 +892,7 @@ nothing -- no push, no steering, and time lost.
 
 ### Know the vocabulary
 
-A bright tone on one side is a curve call, or a
-curve beginning, on that side. Hard double-thuds under the whole truck are
+Hard double-thuds under the whole truck are
 the warning bars real road agencies only cut ahead of a curve that has killed
 people: a hairpin is a quarter mile out, so brake hard now, because 25 means
 25 with fifteen tons pushing you. A thump-roll from one side is your tires
@@ -901,14 +900,27 @@ crossing a lane line's markers.
 
 ### Steer toward the lean
 
-In a bend the road sound leans toward where the
-wheel should go: into the bend as it arrives, through it, and back toward
-lane center when you drift. Hold the arrow that way and keep the sound
-centered. This is the one cue you follow rather than avoid -- every other
-panned cue comes from the side you are drifting toward and you steer away
-from it. Small, held corrections. Sawing at the wheel bounces you across the
-lane line, and you will hear the marker thump each time; that rhythm is the
-sound of overcorrecting.
+The engine leans toward the way to
+steer: into a bend as it arrives and through it, and into a street corner as
+you reach it. Hold the arrow that way and the engine comes back to the middle
+as the truck comes round. This is the one cue you follow rather than avoid --
+every other panned cue comes from the side you are drifting toward and you
+steer away from it. Small, held corrections. Sawing at the wheel bounces you
+across the lane line, and you will hear the marker thump each time; that
+rhythm is the sound of overcorrecting.
+
+With lane keeping on partial or off and lane-departure warning on, the engine
+also leans back toward lane center when you drift, so the same habit covers
+the straight road between the bends.
+
+The road noise underneath answers a different question: it sits where you sit
+in your lane. A road bed off to the right means the truck is riding right of
+center, not that you should steer right.
+
+Two settings change this. Steering guide flips which way to steer when the
+engine leans, for drivers who learned the other habit elsewhere. Lane guide
+sound moves the lean off the engine onto a quiet note of its own, and the
+engine stays centered.
 
 ### Listen to the edge
 
@@ -1615,13 +1627,13 @@ Custom like any other preset row.
 The separate default-off planned-stop control stops at a sleep stop only after
 T plans it and X signals for it.
 
-#### Curve speed assistance
+#### Curve assistance
 
-Curve speed assistance slows the truck for mapped curves before you reach them, whatever is holding the speed: adaptive cruise, the speed keeper, or your own pedals. It starts at the curve call. If you are over the bend's advisory when the call comes, the assist takes the service brakes on the approach so the truck is at the advisory by the start of the bend, holds it through the bend (the tightest number when the call names two bends together), and lets go on the far side.
+Curve assistance slows the truck for mapped curves before you reach them, whatever is holding the speed: adaptive cruise, the speed keeper, or your own pedals. It starts at the curve call. If you are over the bend's advisory when the call comes, the assist takes the service brakes on the approach so the truck is at the advisory by the start of the bend, holds it through the bend (the tightest number when the call names two bends together), and lets go on the far side.
 
-With curve callouts on it says so in the same breath as the call: "Sharp left, half a mile. Advise 35 miles per hour. Curve speed assistance slowing." Under adaptive cruise the call names cruise instead ("Adaptive cruise easing to 35 miles per hour for the bend"), and a bend too tight for cruise to hold pauses cruise while the assist slows the truck; cruise resumes once you are through and back up to speed.
+With curve callouts on it says so in the same breath as the call: "Sharp left, half a mile. Advise 35 miles per hour. Curve assistance slowing." Under adaptive cruise the call names cruise instead ("Adaptive cruise easing to 35 miles per hour for the bend"), and a bend too tight for cruise to hold pauses cruise while the assist slows the truck; cruise resumes once you are through and back up to speed.
 
-Your own brake cancels it for that bend, and it says "Curve speed assistance released." With curve callouts off nothing is said and the slowing is what you hear.
+Your own brake cancels it for that bend, and it says "Curve assistance released." With curve callouts off nothing is said and the slowing is what you hear.
 
 Inside a bend you entered too fast, it brakes and it reaches for the engine brake only when the corner needs about 10 miles per hour or more taken off, or the road under you is a real downgrade. This limits engine braking to bends and descents that need it.
 
@@ -1641,7 +1653,7 @@ Predictive cruise sits outside the presets. It lets cruise read the road about a
 
 Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs your turn signal set and the exit lane held.
 
-On partial or off, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge.
+On partial or off, with lane-departure warning on, the engine leans back toward lane center when you drift, and you steer the way it leans; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. The road noise underneath leans to where you sit in your lane whichever way you are drifting, so it tells you position, not direction. On full the engine still leans for the bends and corners ahead, and the road noise stays centered because the truck is.
 
 Lane keeping is a preset field: Realistic sets it to off, Balanced to partial, and All assists to full, so the preset row can never describe less automation than you actually have.
 

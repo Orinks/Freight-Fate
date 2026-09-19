@@ -308,8 +308,7 @@ impl DrivingState {
         self.trip.weather = weather;
         self.departure_chain = false;
         // Coming up the ramp you are in the right lane, merging left.
-        self.lane.lane = 0;
-        self.lane.offset = 0.0;
+        self.lane.recentre(0);
         let merge_highway = self
             .trip
             .route

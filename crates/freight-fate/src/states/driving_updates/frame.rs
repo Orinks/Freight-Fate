@@ -454,7 +454,7 @@ impl DrivingState {
         // while the assist's own bookkeeping said 0.40. Every earlier fix to
         // this assist tuned a number against a pedal the truck never felt.
         self.update_destination_approach_assist(ctx);
-        // Curve speed assistance's approach servo, for the same reason: its
+        // Curve assistance's approach servo, for the same reason: its
         // pedal has to be set where the physics will see it, and after cruise
         // and the keeper so the max it applies is the one that stands.
         self.update_curve_speed_servo(ctx);

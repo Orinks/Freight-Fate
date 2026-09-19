@@ -763,7 +763,9 @@ pub struct DrivingState {
     pub next_joint_distance_m: f64,
     pub lane_guidance: LaneGuidance,
     pub edge_loop_key: Option<String>, // active edge-ladder rung loop
-    pub road_pan_applied: f64,         // last pursuit-guide pan set on the road bed
+    /// Last lane-position pan set on the road bed; `None` until this drive
+    /// has written one, so its first frame always writes.
+    pub road_pan_applied: Option<f64>,
     // The opt-in guide tone: whether its loop is running, and where it
     // is panned. Separate from the bed's tracker so switching the
     // setting mid-drive cannot leave either one stuck off center.
@@ -776,7 +778,13 @@ pub struct DrivingState {
     /// Its own field, not shared with `lane_guide_pan_applied`: that one
     /// belongs to the opt-in guide TONE, and while both wrote it each frame
     /// they clobbered the other's tracker and both channels re-panned forever.
-    pub engine_guide_pan_applied: f64,
+    ///
+    /// `None` until this drive has written one. The backend keeps the engine's
+    /// pan across stops and across drives, so a tracker that started at 0.0
+    /// claimed a centre nobody had set: a drive that ended leaning left the
+    /// next one's engine panned down a straight road, on the channel that
+    /// means "steer this way" (review I7, 2026-09-19).
+    pub engine_guide_pan_applied: Option<f64>,
     // Dead-man's-curve strips: fixed road furniture ahead of each hairpin.
     pub transverse_strip_miles: Vec<f64>,
     /// `set[float]` of the strips already played.
@@ -877,6 +885,16 @@ impl DrivingState {
         // TX-31, 2026-09-01: "speed keeper didn't build up to traffic
         // speed"). The corner latches reset on the same generation bump.
         self.keeper_ease_target = None;
+        // The curve servo is the same kind of memory and needs the same
+        // treatment: its start and hold mileposts belong to the road just
+        // swapped out. A servo armed for a bend near a destination exit is
+        // never past its hold point on a short street chain, so it stayed
+        // armed for the whole approach -- braking the surface streets down to
+        // a highway bend's advisory, and, since it now pins the clock and
+        // holds a downgrade, doing both of those on a road it never saw
+        // (review finding, 2026-09-19).
+        self.curve_servo = None;
+        self.trip.curve_shed_active = false;
         std::mem::replace(&mut self.trip, trip)
     }
 }

@@ -51,7 +51,7 @@ pub fn assists_fight_descent() -> Outcome {
         }
     }
     rig.check_invariants();
-    let cue_count = rig.said("Curve speed assistance") + rig.said("Descent");
+    let cue_count = rig.said("Curve assistance") + rig.said("Descent");
     if seconds > 0.0 && cue_count as f64 / seconds > 0.2 {
         findings.push(format!(
             "assist cue spam: {cue_count} assist cues in {seconds:.0}s of descent"

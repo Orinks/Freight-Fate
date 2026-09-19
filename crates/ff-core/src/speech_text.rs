@@ -469,20 +469,20 @@ pub fn cruise_curve_easing(pacenote: &SpokenMessage, advisory_speed_text: &str) 
 ///
 /// One utterance, not two. The approach servo (owner ruling, 2026-09-01:
 /// assists should handle curves better to avoid load shifting damage) rides
-/// the pacenote's own lead, and a separate "Curve speed assistance slowing"
+/// the pacenote's own lead, and a separate "Curve assistance slowing"
 /// a breath after the call is the double the ramp fix already removed.
 /// Terse speaks the pacenote alone, exactly as the cruise easing form does:
 /// the advisory number is the number the assist is braking to, and the
 /// deceleration itself is audible.
 pub fn curve_assist_slowing(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("{pacenote} Curve speed assistance slowing."),
+        format!("{pacenote} Curve assistance slowing."),
         pacenote_terse(pacenote),
     )
 }
 
 /// The curve call plus the handback when the bend is under cruise's floor
-/// AND curve speed assistance is on: cruise lets go, the assist takes the
+/// AND curve assistance is on: cruise lets go, the assist takes the
 /// brakes down to the advisory, and cruise comes back past the bend.
 ///
 /// The plain form below told the driver to expect the bend to be theirs;
@@ -493,7 +493,7 @@ pub fn curve_assist_slowing(pacenote: &SpokenMessage) -> SpokenMessage {
 pub fn cruise_curve_paused_assisted(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
         format!(
-            "{pacenote} Adaptive cruise paused for the bend, curve speed assistance slowing. \
+            "{pacenote} Adaptive cruise paused for the bend, curve assistance slowing. \
              Cruise resumes past the bend."
         ),
         format!(

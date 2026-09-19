@@ -725,7 +725,12 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_steering_guide_inverted(ctx, d)),
-                "Which way to steer when the engine leans. Toward the lean                  is the default: the engine pans the way you have to turn,                  and comes back to the middle as you turn. Away from the                  lean flips it, for drivers who learned the other habit in                  audio racing games. Everything else about the guide is the                  same either way.",
+                "Which way to steer when the engine leans. Toward the lean \
+                 is the default: the engine pans the way you have to turn, \
+                 and comes back to the middle as you turn. Away from the \
+                 lean flips it, for drivers who learned the other habit in \
+                 audio racing games. Everything else about the guide is the \
+                 same either way.",
             ),
             row(
                 dyn_label(|s| {
@@ -735,7 +740,12 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
-                "What leans toward the side to steer. The engine is the                  default: the engine you already hear, moving toward the                  side you need and coming back to the middle once you are                  through. Tone plays a soft note instead, panned the same                  way, for setups where the engine is hard to place. A held                  note is tiring over a long haul.",
+                "What leans toward the side to steer. The engine is the \
+                 default: the engine you already hear, moving toward the \
+                 side you need and coming back to the middle once you are \
+                 through. Tone plays a soft note instead, panned the same \
+                 way, for setups where the engine is hard to place. A held \
+                 note is tiring over a long haul.",
             ),
             row(
                 dyn_label(|s| format!("Weather sounds volume: {} percent", pct(s.weather_volume))),

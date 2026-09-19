@@ -15,8 +15,12 @@
 //! That is the difference from [`super::lane_guidance`], which stays exactly
 //! as it was and still owns DRIFT: its target is `curve_steer - offset`, it
 //! answers to where the truck sits between the lines, and on a straight road
-//! it is the only thing leaning. This module owns the turn itself, and the
-//! driving state hands the engine to whichever has something to say.
+//! it is what the opt-in tone leans on. This module owns the turn itself, and
+//! while a turn is in play the engine carries this module's pan and nothing
+//! else -- INCLUDING an honest 0.0 once the turn is steered. The driving state
+//! used to fall back to the other guide whenever this one read zero, which
+//! snapped the engine back into the bend the moment the driver finished it
+//! (review I3, 2026-09-19).
 //!
 //! # How much steering a turn owes
 //!
@@ -125,6 +129,18 @@ impl TurnShape {
 pub struct TurnInput {
     /// The turn being approached or driven, or `None` when there is none.
     pub shape: Option<TurnShape>,
+    /// WHICH turn `shape` is, so the guide can tell one turn from the next.
+    ///
+    /// The game never hands the guide a gap between turns: an active bend
+    /// passes straight to the next one inside the lead, and a street chain
+    /// always has its next corner in play. Without an identity the guide
+    /// could only reset on a frame with no shape, that frame never came, and
+    /// a driver who had steered one turn heard no lean for the rest of the
+    /// chain -- exactly the driver steering by hand (review I2, 2026-09-19).
+    /// Any value that differs between two turns of one drive will do; the
+    /// driving state derives it from a bend's start milepost or a corner's
+    /// leg index. Ignored while `shape` is `None`.
+    pub turn_id: u64,
     /// Miles to the turn's start; negative once inside it.
     pub to_start_mi: f64,
     /// True once the turn is behind the truck.
@@ -150,14 +166,15 @@ pub struct TurnInput {
     /// deepens instead of sitting still. Without this the guide went quiet
     /// about the one mistake it exists to catch.
     pub lane_offset: f64,
-    /// Steer AWAY from the lean rather than toward it.
-    ///
-    /// The house convention is pursuit -- follow the sound -- but audio racing
-    /// games have taught a lot of players the opposite, and a driver who has
-    /// that reflex will fight a guide built the other way round. Flipping the
-    /// sign is the whole difference; everything above it is unchanged.
-    pub inverted: bool,
 }
+
+// There is deliberately no `inverted` flag here. The guide always answers in
+// the house convention -- pursuit, follow the sound -- and the driving state
+// flips the sign ONCE, where it chooses what the engine carries, for drivers
+// whose reflex from other audio racing games is to steer away from the sound.
+// The flag used to live in this struct, which inverted this producer and left
+// the ramp lean and the opt-in tone the other way round on the same setting
+// (review I3, 2026-09-19).
 
 /// The engine's lean through turns.
 #[derive(Debug, Clone, Default)]
@@ -166,9 +183,11 @@ pub struct TurnGuide {
     pan: f64,
     /// How much of this turn's steering the driver has put in, 0 to 1.
     steered: f64,
-    /// Set while a turn is open, cleared when it ends, so a new turn starts
-    /// from a full lean rather than inheriting the last one's progress.
-    open: bool,
+    /// The turn currently open, by [`TurnInput::turn_id`]; `None` between
+    /// turns. A different id is a different turn, so it starts from a full
+    /// lean rather than inheriting the last one's progress -- whether or not
+    /// a straight frame ever came between them.
+    open: Option<u64>,
     /// Whether the DRIFT half of the lean is currently speaking.
     ///
     /// Gated on the same wake and sleep thresholds `lane_guidance` uses, and
@@ -240,19 +259,18 @@ impl TurnGuide {
         let Some(shape) = input.shape.filter(|_| !input.past) else {
             // No turn, so the lean is the driver's lane error alone -- which
             // on a straight road with a centred truck is silence.
-            self.open = false;
+            self.open = None;
             self.steered = 0.0;
-            let correction = self
+            return self
                 .drift_correction(input.lane_offset)
                 .clamp(-MAX_LEAN, MAX_LEAN);
-            return if input.inverted {
-                -correction
-            } else {
-                correction
-            };
         };
-        if !self.open {
-            self.open = true;
+        // A turn the guide was not already leaning for starts from nothing
+        // steered. Keyed on the turn's identity and not on a gap in the road:
+        // corner B arrives the frame corner A is done, and an S-bend's second
+        // half the frame its first ends, with no straight frame between.
+        if self.open != Some(input.turn_id) {
+            self.open = Some(input.turn_id);
             self.steered = 0.0;
         }
         // Inside the turn, the driver's own wheel is what closes the lean.
@@ -285,12 +303,7 @@ impl TurnGuide {
         // The lane error rides on top, pointing the way that corrects it --
         // once the drift is worth reporting at all.
         let correction = self.drift_correction(input.lane_offset);
-        let target = (owed + correction).clamp(-MAX_LEAN, MAX_LEAN);
-        if input.inverted {
-            -target
-        } else {
-            target
-        }
+        (owed + correction).clamp(-MAX_LEAN, MAX_LEAN)
     }
 }
 
@@ -314,7 +327,7 @@ mod tests {
             steering,
             speed_mph: 9.0,
             lane_offset: 0.0,
-            inverted: false,
+            turn_id: 0,
             progress: 0.0,
         }
     }
@@ -422,31 +435,9 @@ mod tests {
         assert!(drifting >= -(MAX_LEAN + 1e-9), "past the cap: {drifting}");
     }
 
-    #[test]
-    fn the_inverted_guide_is_the_same_lean_the_other_way_round() {
-        // For drivers whose reflex from other audio racing games is to steer
-        // AWAY from the sound. Nothing else about the guide changes.
-        let shape = a_corner(TurnSide::Right);
-        let mut normal = TurnGuide::new();
-        let toward = run(&mut normal, approaching(shape, 0.0, 0.0), 1.0);
-        let mut flipped = TurnGuide::new();
-        let away = run(
-            &mut flipped,
-            TurnInput {
-                inverted: true,
-                ..approaching(shape, 0.0, 0.0)
-            },
-            1.0,
-        );
-        assert!(
-            toward > 0.0,
-            "a right turn leans right by default: {toward}"
-        );
-        assert!(
-            (away + toward).abs() < 1e-9,
-            "{away} is not the mirror of {toward}"
-        );
-    }
+    // The inverted guide is pinned where the sign is applied now: the driving
+    // state's `test_the_inverted_guide_is_one_convention_*` cases in
+    // `tests/it/states_driving_engine_lean.rs`.
 
     #[test]
     fn a_truck_being_steered_for_still_hears_the_turn_close() {
@@ -509,7 +500,7 @@ mod tests {
                     steering: 0.0,
                     speed_mph: 55.0,
                     lane_offset: offset,
-                    inverted: false,
+                    turn_id: 0,
                     progress: 0.0,
                 },
                 0.5,
@@ -528,7 +519,7 @@ mod tests {
             steering: 0.0,
             speed_mph: 55.0,
             lane_offset: 0.0,
-            inverted: false,
+            turn_id: 0,
             progress: 0.0,
         };
         // Past the wake line, it speaks.
@@ -578,7 +569,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 55.0,
                 lane_offset: 0.5, // drifted right
-                inverted: false,
+                turn_id: 0,
                 progress: 0.0,
             },
             2.0,
@@ -600,7 +591,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 9.0,
                 lane_offset: 0.0,
-                inverted: false,
+                turn_id: 0,
                 progress: 0.0,
             },
             2.0,
@@ -620,7 +611,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 55.0,
                 lane_offset: 0.0,
-                inverted: false,
+                turn_id: 0,
                 progress: 0.0,
             },
             2.0,
@@ -679,27 +670,65 @@ mod tests {
         run(&mut guide, approaching(shape, -0.01, -1.0), 10.0);
         assert_eq!(guide.pan(), 0.0);
 
-        // The road goes straight for a moment, then the next corner arrives.
-        run(
-            &mut guide,
-            TurnInput {
-                shape: None,
-                to_start_mi: f64::INFINITY,
-                past: false,
-                steering: 0.0,
-                speed_mph: 9.0,
-                lane_offset: 0.0,
-                inverted: false,
-                progress: 0.0,
-            },
-            0.5,
-        );
+        // The next corner arrives the very next frame, with NO straight frame
+        // between them, because that is what the game does: a street chain
+        // always has its next corner in play. This test used to insert a
+        // `None` gap the game never produces, and passed while every corner
+        // after the first stayed silent (review I2, 2026-09-19).
         let next = run(
             &mut guide,
-            approaching(a_corner(TurnSide::Right), 0.0, 0.0),
+            TurnInput {
+                turn_id: 1,
+                ..approaching(a_corner(TurnSide::Right), 0.0, 0.0)
+            },
             1.5,
         );
         assert!(next > 0.5, "the next corner opened only to {next}");
+        assert_eq!(guide.steered(), 0.0, "corner A's steering carried over");
+    }
+
+    #[test]
+    fn the_second_half_of_an_s_bend_leans_the_other_way_from_full() {
+        // Left then right with nothing between: the second bend is active the
+        // frame the first ends. Having steered the first must not leave the
+        // second already nulled.
+        let first = TurnShape {
+            side: TurnSide::Left,
+            deflection_deg: 40.0,
+            radius_ft: 900.0,
+        };
+        let second = TurnShape {
+            side: TurnSide::Right,
+            ..first
+        };
+        let mut guide = TurnGuide::new();
+        let at_speed = |shape, turn_id, steering| TurnInput {
+            turn_id,
+            speed_mph: 45.0,
+            ..approaching(shape, -0.01, steering)
+        };
+        run(&mut guide, at_speed(first, 10, -1.0), 15.0);
+        assert!(guide.steered() >= 1.0, "the first half was never steered");
+        assert_eq!(guide.pan(), 0.0);
+
+        let pan = run(&mut guide, at_speed(second, 11, 0.0), 1.0);
+        assert!(
+            pan > TURN_LEAN * 0.9,
+            "the second half must open to its full lean; got {pan}"
+        );
+    }
+
+    #[test]
+    fn the_same_turn_keeps_its_progress_from_frame_to_frame() {
+        // The other half of the identity rule: an id that does NOT change is
+        // the same turn, and what the driver has steered of it stands.
+        let shape = a_corner(TurnSide::Left);
+        let mut guide = TurnGuide::new();
+        let needed = shape.needed_s(9.0);
+        run(&mut guide, approaching(shape, -0.01, -1.0), needed / 2.0);
+        let before = guide.steered();
+        run(&mut guide, approaching(shape, -0.02, 0.0), 0.5);
+        assert_eq!(guide.steered(), before);
     }
 
     #[test]

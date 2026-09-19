@@ -387,6 +387,20 @@ impl DrivingState {
         }
         if clutch_disengaged {
             self.trip.truck.throttle = 0.0;
+            // A held snub still has to be let go under the number. The
+            // controller below is what releases it, and this return is above
+            // it, so on an automatic's shift the hold lasts the shift and on
+            // a MANUAL driver holding the clutch -- coasting, picking a gear,
+            // rolling up to a queue -- it lasted as long as their foot did,
+            // braking the truck to a stop with nothing said and no way to
+            // release it but letting the clutch out (review finding,
+            // 2026-09-19). The rule is the keeper's own, just applied on a
+            // frame it cannot run.
+            if let Some(keeper_mph) = self.keeper_mph {
+                if self.trip.truck.speed_mph() <= keeper_mph - KEEPER_SNUB_UNDER_MPH {
+                    self.keeper_snub = 0.0;
+                }
+            }
             return;
         }
         if zone_reason.is_none() && self.departure_ramp_mi.is_some() {

@@ -67,10 +67,25 @@ const LANE: SoundCategory = SoundCategory {
                     .delay_s(2.4)
                     .hold_s(2.0),
             ],
-            "Not a sound of its own: it is the engine you are always hearing,              leaning to one side. Steer toward the lean. It leans the way the              wheel should go, so it points into a bend before you reach it,              and away from the edge you are drifting toward. This is the one              cue here you follow rather than avoid, and it eases back to the              middle once you are straight.",
+            "Not a sound of its own: it is the engine you are always hearing, \
+             leaning to one side. Steer toward the lean, unless you have set \
+             the Steering guide row to steer away from it. It leans the way \
+             the wheel should go, so it points into a bend before you reach \
+             it and away from the edge you are drifting toward. This is the \
+             one cue here you follow rather than avoid, and it eases back to \
+             the middle as you make the turn or come straight.",
         )
+        // Says what the code does (states/driving_updates/cues.rs,
+        // update_lane_guidance_audio): the turn half is never gated, the drift
+        // half is, and the tone replaces the whole thing. The old text taught
+        // that the lean never happens with the warning off, which was false
+        // for every bend (review I10, 2026-09-19).
         .when(
-            "Lane keeping partial or off, and lane-departure warning on.              With that warning off the engine stays centered and the lean              never happens; on full lane keeping the truck holds the lane              for you.",
+            "Every bend and street corner, in every lane keeping mode. It \
+             also leans to correct drift when lane keeping is partial or off \
+             and lane departure warning is on. Silent when the lane guide \
+             sound is set to tone, because the tone leans instead. The \
+             Steering guide row reverses which way to steer.",
         ),
         SoundEntry::new(
             "Where you sit in the lane",
@@ -82,10 +97,14 @@ const LANE: SoundCategory = SoundCategory {
                     .delay_s(2.4)
                     .hold_s(2.0),
             ],
-            "The road noise under the truck, sitting where you are in your              lane rather than where you should be going. Drift left and it              goes left with you. It is the quieter half of the pair: the              engine tells you what to do, this tells you what you have done.",
+            "The road noise under the truck, sitting where you are in your \
+             lane rather than where you should be going. Drift left and it \
+             goes left with you. It is the quieter half of the pair: the \
+             engine tells you what to do, this tells you what you have done.",
         )
         .when(
-            "Lane keeping partial or off. On full lane keeping the truck              holds the lane for you and the road stays centered.",
+            "Lane keeping partial or off. On full lane keeping the truck \
+             holds the lane for you and the road stays centered.",
         ),
         SoundEntry::new(
             "Rumble strip, clipped",
@@ -208,14 +227,15 @@ const LANE: SoundCategory = SoundCategory {
                     .delay_s(2.0)
                     .hold_s(1.6),
             ],
-            "A soft note that leans toward the side you are drifting to and \
-             stops when you are straight again. You only hear this if you \
-             have switched the lane guide sound from road noise to tone; the \
-             default is the road itself leaning, with nothing added.",
+            "A soft note that leans toward the side to steer and stops when \
+             you are straight again. You only hear this if you have switched \
+             the lane guide sound from engine to tone; the default is the \
+             engine itself leaning, with nothing added.",
         )
         .when(
             "Lane guide sound set to tone, and lane departure warning \
-             on with lane keeping off or partial.",
+             on with lane keeping off or partial. The Steering guide row \
+             reverses it the same way it reverses the engine.",
         ),
         SoundEntry::new(
             "Rumble strip, single hit",
@@ -416,7 +436,9 @@ const RAMPS: SoundCategory = SoundCategory {
                 Cue::new("vehicle/curve_bink").volume(0.9).delay_s(0.8),
                 Cue::new("vehicle/curve_bink").volume(0.9).delay_s(1.4),
             ],
-            "Beeps that come faster the closer the stop bar gets. When they              run together into the steady tone above, you should already be              nearly stopped.",
+            "Beeps that come faster the closer the stop bar gets. When they \
+             run together into the steady tone above, you should already be \
+             nearly stopped.",
         ),
         SoundEntry::new(
             "Green light",

@@ -95,6 +95,7 @@ mod states_driving_direction;
 mod states_driving_enforcement;
 mod states_driving_enforcement_record;
 mod states_driving_engine_audio;
+mod states_driving_engine_lean;
 mod states_driving_events;
 mod states_driving_events_chains;
 mod states_driving_exit_windows;

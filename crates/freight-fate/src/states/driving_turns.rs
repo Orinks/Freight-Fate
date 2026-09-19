@@ -86,7 +86,13 @@ pub const TURN_COMMIT_TAIL_MI: f64 = 0.15;
 pub const TURN_NOW_MI: f64 = 0.05;
 /// The pursuit guide starts leaning into the corner this far out, reaching its
 /// full lean at the corner itself.
-pub const TURN_GUIDE_LEAD_MI: f64 = 0.2;
+///
+/// The turn guide's own lead, by name and not by a second number. This was
+/// 0.2 beside the turn guide's 0.12, so the lane guide opened a corner's lean
+/// first and the turn guide then took the engine over and started the same
+/// lean again from nothing (review I3, 2026-09-19). One constant, so the
+/// engine's lean and the tone's open at the same place.
+pub const TURN_GUIDE_LEAD_MI: f64 = ff_core::sim::turn_guide::LEAD_MI;
 pub const TURN_GUIDE_DEMAND: f64 = 0.9;
 /// An exit ramp peels right; the lane model already pushes the truck that way,
 /// so the road bed leans with it instead of sitting dead centre.

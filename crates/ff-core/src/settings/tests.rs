@@ -434,6 +434,22 @@ fn test_legacy_settings_preserve_lane_keeping_choice() {
         assert!(!loaded.stop_and_go_assist);
         assert_eq!(loaded.descent_speed_control, "off");
         assert_eq!(loaded.driving_assistance_preset, "custom");
+        // Not the class default, which is on since the Balanced fresh
+        // install: this save predates the setting and never opted in, so the
+        // truck must not start braking itself at the gate.
+        assert!(!loaded.destination_approach_assist);
+    });
+}
+
+#[test]
+fn test_a_legacy_save_that_opted_into_stopping_keeps_it() {
+    // The other half of the same rule. Either old toggle counts as the opt-in
+    // the blanket "everything off" is not allowed to take back.
+    with_data_dir(|_| {
+        write_settings_file(r#"{"steering_assist": "off", "selected_stop_assist": true}"#);
+        let loaded = Settings::load();
+        assert!(loaded.destination_approach_assist);
+        assert!(!loaded.automatic_emergency_braking);
     });
 }
 

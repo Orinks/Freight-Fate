@@ -529,9 +529,9 @@ fn test_curve_assist_cues_do_not_thrash() {
         .app
         .event_lines()
         .into_iter()
-        .filter(|line| line.contains("Curve speed assistance"))
+        .filter(|line| line.contains("Curve assistance"))
         .collect();
-    assert_eq!(cues, vec!["Curve speed assistance slowing.".to_string()]);
+    assert_eq!(cues, vec!["Curve assistance slowing.".to_string()]);
     assert_eq!(engagements, 1, "the assist engaged more than once");
     assert_eq!(releases, 0, "the assist let go inside its own hysteresis");
 }

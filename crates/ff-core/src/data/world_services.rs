@@ -108,25 +108,30 @@ fn local_cue_direction(cue: &str) -> &'static str {
 fn reversed_local_legs(city: &str, legs: &[std::sync::Arc<Leg>]) -> Vec<Leg> {
     let mut out = Vec::with_capacity(legs.len());
     for (i, src) in legs.iter().rev().enumerate() {
-        let cue = if i == 0 {
-            format!("Start on {}.", src.highway)
-        } else {
-            // Outbound, the junction onto this leg is the one the inbound
-            // drive crossed *leaving* it: the cue baked on the leg after it.
-            let inbound = local_cue_direction(&legs[legs.len() - i].local_cue);
-            match inbound {
+        // Outbound, the junction onto this leg is the one the inbound drive
+        // crossed *leaving* it, so everything about that corner -- the hand it
+        // turns and how sharply -- is baked on the leg AFTER this one. The
+        // first leg out is started on, not turned onto, so it has no corner.
+        let inbound = (i > 0).then(|| &legs[legs.len() - i]);
+        let cue = match inbound {
+            None => format!("Start on {}.", src.highway),
+            Some(inbound) => match local_cue_direction(&inbound.local_cue) {
                 "left" => format!("Turn right onto {}.", src.highway),
                 "right" => format!("Turn left onto {}.", src.highway),
                 "ahead" => format!("Continue onto {}.", src.highway),
                 _ => format!("Turn onto {}.", src.highway),
-            }
+            },
         };
         out.push(
             Leg::local(city, src.miles, &src.highway, &cue, src.local_speed_mph)
-                // The corner is the same corner driven the other way, so its
-                // angle is unchanged -- only the hand it falls on flips, and
-                // the cue above has already flipped that.
-                .with_turn_deg(src.local_turn_deg),
+                // The same corner driven the other way, so its angle is
+                // unchanged -- only the hand it falls on flips, and the cue
+                // above has already flipped that. It has to be read off the
+                // SAME leg the cue was, though: read off `src` instead, every
+                // outbound corner was priced and leaned from its neighbour's
+                // shape, a "Continue onto" inherited a corner's angle, and the
+                // last corner of every departure read as unmeasured.
+                .with_turn_deg(inbound.map_or(0.0, |inbound| inbound.local_turn_deg)),
         );
     }
     out
@@ -514,5 +519,49 @@ mod tests {
             ]
         );
         assert_eq!(out[2].local_speed_mph, 25.0);
+    }
+
+    #[test]
+    fn reversed_chain_carries_each_corners_own_angle() {
+        // The angle has to travel with the cue, not with the leg it is baked
+        // on. Read off the wrong leg, the 112-degree corner onto North
+        // Michigan came out on the "Continue onto" that is not a corner at
+        // all, and the real outbound corner read as unmeasured -- so it was
+        // priced and leaned as a square one.
+        let city = "south_bend_in_us";
+        let legs = vec![
+            std::sync::Arc::new(Leg::local(
+                city,
+                0.15,
+                "East Navarre Street",
+                "Start on East Navarre Street.",
+                25.0,
+            )),
+            std::sync::Arc::new(
+                Leg::local(
+                    city,
+                    0.2,
+                    "North Michigan Street",
+                    "Turn left onto North Michigan Street.",
+                    25.0,
+                )
+                .with_turn_deg(112.0),
+            ),
+            std::sync::Arc::new(Leg::local(
+                city,
+                0.5,
+                "South Michigan Street",
+                "Continue onto South Michigan Street.",
+                30.0,
+            )),
+        ];
+
+        let out = reversed_local_legs(city, &legs);
+
+        // Started on, so no corner; the near-straight boundary is not one
+        // either; and the turn back onto East Navarre is the 112 the inbound
+        // drive measured leaving it.
+        let angles: Vec<f64> = out.iter().map(|leg| leg.local_turn_deg).collect();
+        assert_eq!(angles, vec![0.0, 0.0, 112.0]);
     }
 }

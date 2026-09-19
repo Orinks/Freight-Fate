@@ -314,6 +314,20 @@ fn test_no_dead_pointer_stub_rows_remain() {
 }
 
 #[test]
+fn test_no_settings_row_carries_a_run_of_spaces() {
+    // Two help strings lost their backslash line continuations and shipped
+    // eighteen-space runs to speech and braille (review I9, 2026-09-19). A
+    // literal split across lines has to be joined with `\`, and this is
+    // what catches the next one that is not.
+    let mut app = TestApp::new();
+    let runs: Vec<_> = all_settings_rows(&mut app)
+        .into_iter()
+        .filter(|(_, label, help)| label.contains("  ") || help.contains("  "))
+        .collect();
+    assert!(runs.is_empty(), "{runs:?}");
+}
+
+#[test]
 fn test_every_gameplay_setting_stays_reachable_after_the_split() {
     let mut app = TestApp::new();
     let rows = all_settings_rows(&mut app);

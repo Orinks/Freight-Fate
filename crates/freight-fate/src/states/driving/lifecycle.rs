@@ -289,6 +289,14 @@ impl DrivingState {
             self.radio.write_settings(&mut settings);
         }
         let _ = ctx.settings.save();
+        // The engine is handed back centred. The backend keeps the engine's
+        // pan across stops and drives on purpose, so a drive that ended
+        // mid-lean used to leave it leaning for whatever ran the engine next
+        // (review I7, 2026-09-19). The tracker goes back to "nothing written"
+        // with it, so a drive that is re-entered writes its first frame too.
+        ctx.audio.set_engine_pan(0.0);
+        self.engine_guide_pan_applied = None;
+        self.road_pan_applied = None;
         ctx.audio.stop_world();
         ctx.audio.stop_music_with(600);
         ctx.apply_volumes();

@@ -11,7 +11,9 @@ use ff_core::sim::lane_guidance::{
     classify_boundaries, cue_loudness, edge_rung, GuidanceFrame, CURVE_LEAD_MI, TRANSVERSE_KEY,
 };
 use ff_core::sim::trip_models::highway_class;
-use ff_core::sim::turn_guide::{TurnInput, TurnShape, TurnSide};
+use ff_core::sim::turn_guide::{
+    TurnInput, TurnShape, TurnSide, SLEW_PER_S as TURN_GUIDE_SLEW_PER_S,
+};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -19,6 +21,11 @@ use crate::audio::{CH_EDGE, CH_LANE_GUIDE, CH_ROAD};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::LANE_GUIDE_TONE_VOLUME;
+
+/// Marks a street corner's identity apart from a mapped bend's in
+/// `TurnInput::turn_id`. A bend's id is the bits of its start milepost, which
+/// is never negative, so an f64's sign bit is the one bit no bend can set.
+const CORNER_ID_BIT: u64 = 1 << 63;
 
 impl DrivingState {
     /// Stereo pan for the rumble strip: it comes from the side you have
@@ -421,9 +428,24 @@ impl DrivingState {
     /// `TurnShape`. The bend's come from the curve bake; the corner's angle is
     /// the one `build_local_geometry` measures at the junction and its radius
     /// from `data::corners`, which is the same geometry that sets its advise
-    /// speed. Whichever is nearer wins, because that is the one the driver has
-    /// to steer next.
-    pub fn turn_guide_input(&mut self, inverted: bool, automated: bool) -> TurnInput {
+    /// speed.
+    ///
+    /// Which of them the engine leans for is decided by road, not by which
+    /// has the smaller number. The rule used to be the smallest SIGNED
+    /// distance to the start, and a turn already begun has a negative one that
+    /// keeps falling -- so a corner coasting out its commit tail, its lean
+    /// long closed, outranked a bend fifty yards ahead and the bend got no
+    /// lead at all (review S5, 2026-09-19). Each turn now CLAIMS the engine by
+    /// how much lean the road itself gives it: a turn under the wheels claims
+    /// what is left of it, a turn ahead claims how far into its lead the truck
+    /// is. One falls as the other rises, so the engine changes hands exactly
+    /// once, where the two leans would be equally loud, and never back.
+    ///
+    /// `hear_drift` is whether the DRIFT half of the lean may speak: false
+    /// under full lane keeping, and false with the lane-departure warning off
+    /// (owner ruling, 2026-09-19: "turns yes, drift no"). The turn half is
+    /// never gated.
+    pub fn turn_guide_input(&mut self, hear_drift: bool) -> TurnInput {
         let position = self.trip.position_mi;
         let speed = self.trip.truck.speed_mph();
         let steering = self.lane.steering;
@@ -431,48 +453,71 @@ impl DrivingState {
         // report -- only the turn itself. The lane model already pins the
         // offset to centre there; reading it as zero here as well means a
         // stale value can never be heard as a drift the truck is not making.
-        let lane_offset = if automated { 0.0 } else { self.lane.offset };
-        // `(distance to its start, shape, how far through it the truck is)`.
-        let mut best: Option<(f64, TurnShape, f64)> = None;
-        let mut consider = |to_start_mi: f64, shape: TurnShape, progress: f64| {
-            if best.is_none_or(|(seen, _, _)| to_start_mi < seen) {
-                best = Some((to_start_mi, shape, progress));
+        //
+        // And a driver who switched the lane-departure warning off asked not
+        // to be told about drift. The old road lean went quiet for them; when
+        // the guide moved to the engine the drift half came along ungated and
+        // kept correcting a driver who had declined it (review I10).
+        let lane_offset = if hear_drift { self.lane.offset } else { 0.0 };
+        // `(claim, distance to its start, identity, shape, progress)`.
+        let mut best: Option<(f64, f64, u64, TurnShape, f64)> = None;
+        let mut consider = |to_start_mi: f64, turn_id: u64, shape: TurnShape, progress: f64| {
+            let claim = if to_start_mi <= 0.0 {
+                1.0 - progress
+            } else {
+                (1.0 - to_start_mi / TURN_GUIDE_LEAD_MI).max(0.0)
+            };
+            let wins = best.is_none_or(|(held, seen, ..)| {
+                claim > held || (claim == held && to_start_mi < seen)
+            });
+            if wins {
+                best = Some((claim, to_start_mi, turn_id, shape, progress));
             }
         };
+        let bend_shape = |curve: &RouteCurve| {
+            TurnSide::parse(&curve.direction.to_string()).map(|side| TurnShape {
+                side,
+                deflection_deg: curve.deflection_deg,
+                radius_ft: curve.min_radius_ft as f64,
+            })
+        };
+        // A bend is the same bend for as long as its start milepost is, and
+        // no two bends of one route share one. Mileposts are never negative,
+        // so the top bit is free to mark the street corners below.
+        let bend_id = |curve: &RouteCurve| curve.start_mi.to_bits() & !CORNER_ID_BIT;
 
-        // The bend under the wheels, then the next one inside the lead.
-        let active = self.trip.curve_at(position).filter(|c| !c.connector);
-        if let Some(curve) = active {
-            if let Some(side) = TurnSide::parse(&curve.direction.to_string()) {
+        // The bend under the wheels AND the next one inside the lead. They
+        // were an either/or, so the second half of an S-bend was never looked
+        // at until the first had ended and opened with no lead.
+        if let Some(curve) = self.trip.curve_at(position).filter(|c| !c.connector) {
+            if let Some(shape) = bend_shape(&curve) {
                 let lo = curve.start_mi.min(curve.end_mi);
                 let hi = curve.start_mi.max(curve.end_mi);
                 let span = (hi - lo).max(1e-6);
                 consider(
                     curve.start_mi - position,
-                    TurnShape {
-                        side,
-                        deflection_deg: curve.deflection_deg,
-                        radius_ft: curve.min_radius_ft as f64,
-                    },
+                    bend_id(&curve),
+                    shape,
                     ((position - lo) / span).clamp(0.0, 1.0),
                 );
             }
-        } else if let Some((ahead, curve)) = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI) {
-            if let Some(side) = TurnSide::parse(&curve.direction.to_string()) {
-                consider(
-                    ahead,
-                    TurnShape {
-                        side,
-                        deflection_deg: curve.deflection_deg,
-                        radius_ft: curve.min_radius_ft as f64,
-                    },
-                    0.0,
-                );
+        }
+        if let Some((ahead, curve)) = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI) {
+            if let Some(shape) = bend_shape(&curve) {
+                consider(ahead, bend_id(&curve), shape, 0.0);
             }
         }
 
-        // And the street corner the route is asking for.
-        if let Some(cue) = self.turn_cue_in_play() {
+        // And the street corner the route is asking for -- once it is inside
+        // the lead. `turn_cue_in_play` has no upper bound, so a corner two
+        // miles off used to count as a turn in play for the whole approach;
+        // harmless while the engine only listened when the lean was non-zero,
+        // but "a turn is in play" now decides who owns the engine, and a
+        // corner that far away must not take it from the exit ramp's lean.
+        let corner = self
+            .turn_cue_in_play()
+            .filter(|cue| cue.at_mi - position <= TURN_GUIDE_LEAD_MI);
+        if let Some(cue) = corner {
             if let Some(side) = TurnSide::parse(&cue.direction) {
                 let index = self.turn_leg_index(&cue);
                 let measured = self
@@ -489,6 +534,9 @@ impl DrivingState {
                 let through = ((position - cue.at_mi) / TURN_COMMIT_TAIL_MI).clamp(0.0, 1.0);
                 consider(
                     cue.at_mi - position,
+                    // A corner is its leg of the street chain, which is what
+                    // its cue key already ends in.
+                    CORNER_ID_BIT | index as u64,
                     TurnShape {
                         side,
                         deflection_deg: degrees,
@@ -500,24 +548,24 @@ impl DrivingState {
         }
 
         match best {
-            Some((to_start_mi, shape, progress)) => TurnInput {
+            Some((_, to_start_mi, turn_id, shape, progress)) => TurnInput {
                 shape: Some(shape),
+                turn_id,
                 to_start_mi,
                 past: false,
                 steering,
                 speed_mph: speed,
                 lane_offset,
-                inverted,
                 progress,
             },
             None => TurnInput {
                 shape: None,
+                turn_id: 0,
                 to_start_mi: f64::INFINITY,
                 past: true,
                 steering,
                 speed_mph: speed,
                 lane_offset,
-                inverted,
                 progress: 1.0,
             },
         }
@@ -541,44 +589,81 @@ impl DrivingState {
     /// engine that was already running is not a tone the soundscape did not
     /// have.
     pub fn update_lane_guidance_audio(&mut self, ctx: &mut GameContext, dt: f64) {
-        let frame = if !ctx.settings.lane_departure_warning {
+        let warned = ctx.settings.lane_departure_warning;
+        let curve_steer = if warned {
+            self.curve_steer_demand()
+        } else {
+            0.0
+        };
+        let frame = if !warned {
             self.lane_guidance.update(&self.lane, dt, false, 0.0, None)
         } else {
             let assist_on =
                 ctx.settings.lane_is_manual() && self.trip.truck.speed_mph() >= LANE_MIN_MPH;
-            let curve_steer = self.curve_steer_demand();
             let curve_ahead_mi = self.trip.curve_ahead_mi(CURVE_LEAD_MI);
             self.lane_guidance
                 .update(&self.lane, dt, assist_on, curve_steer, curve_ahead_mi)
         };
         // The turn's own lean comes first: it is the one the owner asked for,
         // and it says how much wheel is still owed rather than how far off
-        // centre the truck has wandered. The drift lean underneath only speaks
-        // when no turn does, so the engine never carries two meanings at once.
-        let turn_input = self.turn_guide_input(
-            ctx.settings.steering_guide_inverted,
-            ctx.settings.lane_is_automated(),
-        );
+        // centre the truck has wandered. Its drift half speaks only to a
+        // driver who is holding the lane themselves AND left the
+        // lane-departure warning on ("turns yes, drift no", 2026-09-19).
+        let hear_drift = warned && ctx.settings.lane_is_manual();
+        let turn_input = self.turn_guide_input(hear_drift);
         let turn_pan = self.turn_guide.update(turn_input, dt);
         // The engine pans whether or not the driver is the one steering
         // (owner, 2026-09-18): with every assist on, the curve and turn
         // assists take the turns and the lean still reports the road's shape,
         // closing as the turn is used up rather than as a wheel answers it.
         // Only the opt-in tone, which leans instead of the engine, silences it.
-        let guide_pan = if ctx.settings.lane_guide_tone {
+        //
+        // WHO owns the engine is decided by whether a turn is in play, never
+        // by whether its lean happens to read zero. The selector used to be
+        // "the turn's pan unless it is 0.0, else the lane guide's" -- and 0.0
+        // is exactly what a driver earns by finishing the turn, while the
+        // lane guide's pan is `curve_steer - offset`, non-zero for the whole
+        // bend. So steering a bend correctly snapped the engine from centred
+        // back into the bend: "keep steering", said to the one driver who had
+        // just finished (review I3, 2026-09-19). A turn in play now keeps the
+        // engine through its honest 0.0. The lane guide is left the two
+        // maneuvers the turn guide has no shape for -- the exit ramp's peel
+        // and a connector's arc, both of which reach it as `curve_steer` --
+        // and everything else is the turn guide's own drift-only lean.
+        let lean = if ctx.settings.lane_guide_tone {
             0.0
-        } else if turn_pan != 0.0 {
+        } else if turn_input.shape.is_some() {
             turn_pan
-        } else if ctx.settings.lane_is_automated() {
-            // Automation holds the lane, so there is no drift to report --
-            // but a turn above still leans.
-            0.0
-        } else {
+        } else if curve_steer != 0.0 {
             frame.pan
+        } else {
+            turn_pan
         };
-        if guide_pan != self.engine_guide_pan_applied {
+        let wanted = guide_sign(lean, ctx.settings.steering_guide_inverted);
+        // Eased across the hand-over, so the engine never jumps when the
+        // ramp's lean gives way to the turn guide's or the driver flips the
+        // steering guide mid-bend. Each producer already slews at or under
+        // this rate, so inside one producer this changes nothing. The first
+        // frame of a drive has nothing to ease from and is written as it is:
+        // the backend keeps the engine's pan across stops and drives, so a
+        // tracker that ASSUMED centre left the next drive's engine leaning
+        // down a straight road until something moved it (review I7).
+        let guide_pan = match self.engine_guide_pan_applied {
+            Some(applied) => {
+                let step = TURN_GUIDE_SLEW_PER_S * dt.max(0.0);
+                if (wanted - applied).abs() <= step {
+                    wanted
+                } else if wanted > applied {
+                    applied + step
+                } else {
+                    applied - step
+                }
+            }
+            None => wanted,
+        };
+        if self.engine_guide_pan_applied != Some(guide_pan) {
             ctx.audio.set_engine_pan(guide_pan);
-            self.engine_guide_pan_applied = guide_pan;
+            self.engine_guide_pan_applied = Some(guide_pan);
         }
         if ctx.settings.lane_guide_tone {
             self.lean_the_tone(ctx, frame);
@@ -589,9 +674,9 @@ impl DrivingState {
         } else {
             self.lane.offset.clamp(-1.0, 1.0)
         };
-        if seat_pan != self.road_pan_applied {
+        if self.road_pan_applied != Some(seat_pan) {
             ctx.audio.set_loop_pan(CH_ROAD, seat_pan);
-            self.road_pan_applied = seat_pan;
+            self.road_pan_applied = Some(seat_pan);
         }
         if frame.centered {
             // The drift settled: the old centered earcon still says so.
@@ -624,14 +709,34 @@ impl DrivingState {
                     .start_loop_with(CH_LANE_GUIDE, LANE_GUIDE_TONE_KEY, volume, 120);
                 self.lane_guide_tone_on = true;
             }
-            if frame.pan != self.lane_guide_pan_applied {
-                ctx.audio.set_loop_pan(CH_LANE_GUIDE, frame.pan);
-                self.lane_guide_pan_applied = frame.pan;
+            // The Steering guide row reverses the tone exactly as it reverses
+            // the engine. It used to reach only the turn guide, so with the
+            // tone on the setting did nothing at all (review I3).
+            let pan = guide_sign(frame.pan, ctx.settings.steering_guide_inverted);
+            if pan != self.lane_guide_pan_applied {
+                ctx.audio.set_loop_pan(CH_LANE_GUIDE, pan);
+                self.lane_guide_pan_applied = pan;
             }
         } else if self.lane_guide_tone_on {
             ctx.audio.stop_loop_with(CH_LANE_GUIDE, 180);
             self.lane_guide_tone_on = false;
             self.lane_guide_pan_applied = 0.0;
         }
+    }
+}
+
+/// A guide pan as THIS driver follows it: toward the sound by default, away
+/// from it with the Steering guide row reversed.
+///
+/// The one place the reversal happens, applied to whatever the engine or the
+/// tone is about to carry, so every producer -- the turn guide, the ramp's
+/// lean, the drift correction -- lands in the same convention. Centre stays a
+/// plain 0.0 rather than a negative zero, which compares equal but reads as
+/// "-0" in a session log.
+fn guide_sign(pan: f64, inverted: bool) -> f64 {
+    if inverted && pan != 0.0 {
+        -pan
+    } else {
+        pan
     }
 }

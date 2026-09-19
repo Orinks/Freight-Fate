@@ -409,9 +409,11 @@ impl DrivingState {
         if self.destination_exit_taken {
             self.post_gate_zone(ctx);
         }
-        // The ramp is a single lane peeling off the right side.
-        self.lane.lane = 0;
-        self.lane.offset = 0.0;
+        // The ramp is a single lane peeling off the right side. Squarely in
+        // it and pointing along it: both sides of a ramp are road edges, so a
+        // truck placed here still carrying its mainline heading is off one of
+        // them within a second.
+        self.lane.recentre(0);
         self.lane_change_target = None;
         self.merge_deadline = None;
         self.begin_ramp_terminal(ctx, stop);

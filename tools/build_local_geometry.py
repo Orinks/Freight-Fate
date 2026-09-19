@@ -716,6 +716,10 @@ def collapse_segments(
     if len(out) > MAX_SPOKEN_SEGMENTS:
         out = out[-MAX_SPOKEN_SEGMENTS:]
         out[0]["cue"] = f"Start on {out[0]['road']}."
+        # The junction onto this segment was cut off with the segments before
+        # it, so its angle goes too: 0.0 is "no corner here", and a Start leg
+        # that kept one would hand it to the reversed route's last corner.
+        out[0]["turn_deg"] = 0.0
     return out
 
 
@@ -949,6 +953,11 @@ def clean_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "miles": round(float(segment["miles"]), 2),
                 "cue": cue,
                 "speed_mph": float(segment.get("speed_mph", 25.0)),
+                # READ off the OSM bearings by collapse_segments, or 0.0 where
+                # nothing was measured. This rebuild used to list four keys
+                # and the angle was not one of them, so it was computed and
+                # thrown away one step before the file was written.
+                "turn_deg": round(float(segment.get("turn_deg", 0.0)), 1),
             }
         )
     return out

@@ -29,8 +29,10 @@ rebuilt**, so no shipped route carries a real angle yet and every corner is
 priced as a square one (9.4 mph) by the assumed path. The model is correct and
 the game is playable; it is uniform rather than varied until the bake runs.
 Running it needs the state PBFs in `~/.cache/freight-fate-osm/regions` and a
-long wall clock. Until then the coverage block will report a 0.0 read ratio,
-which is the honest answer and exactly what that field is for.
+long wall clock. Until then there is no ratio to read at all: the shipped
+`local_geometry.json` and `facility_approaches.json` carry no turn-angle keys
+and no `meta` coverage block, so every corner takes the assumed path silently.
+The read/assumed ratio first exists in the layer the bake writes.
 
 Note when the bake does run: 84 percent of approach targets are estimated
 fallbacks with no coordinates at all, so they can never carry an angle. Only

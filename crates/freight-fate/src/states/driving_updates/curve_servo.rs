@@ -126,6 +126,17 @@ impl DrivingState {
         // back on the compressed clock, and a profile priced in real
         // metres there arrives over the number. The keeper prices its ease
         // the same way (`keeper_ease_mi`).
+        //
+        // Set the flag FIRST, then read the scale, because the flag is one of
+        // the things `effective_time_scale` answers with. Read the other way
+        // round it reported last frame's clock, and on the one frame the
+        // truck crossed back over the number -- flag still false, the
+        // pacenote's own decompression already let go -- the demand was
+        // priced seventeen times too high and the pedal took the rise
+        // (review finding, 2026-09-19). The clock stays real while there is
+        // still speed to take off, so the shed is priced in the same seconds
+        // the truck slows in; see `Trip::effective_time_scale`.
+        self.trip.curve_shed_active = v > target;
         let scale = self.trip.effective_time_scale().max(1.0);
         let band = CURVE_SERVO_HOLD_BAND_MPH / MPH_PER_MPS;
         let shed: Option<f64> = if position < servo.start_mi {
@@ -191,10 +202,6 @@ impl DrivingState {
         if let Some(servo) = self.curve_servo.as_mut() {
             servo.brake = applied;
         }
-        // The clock stays real while there is still speed to take off, so
-        // the shed is priced in the same seconds the truck slows in. See
-        // `Trip::effective_time_scale`.
-        self.trip.curve_shed_active = v > target;
         self.trip.truck.brake = self.trip.truck.brake.max(applied);
     }
 
@@ -212,7 +219,7 @@ impl DrivingState {
         // ROUTE, not the ambient default: an automation just released the
         // pedals (the automation-handoff rule, 2026-08-20).
         ctx.say_event_with(
-            "Curve speed assistance released.",
+            "Curve assistance released.",
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),

@@ -10,29 +10,29 @@
 
 ### Changed
 
-- **A new career starts with the Balanced assists, so the truck helps hold your lane.** You can still feel it steer and take the work back whenever you want.
+- **A new install now starts on the Balanced assists.** The truck helps hold your lane and stops for you at the destination gate.
 
-- **Curve assistance now steers through a bend as well as slowing for it.** It is one setting for one job; lane keeping holds you between the lines the rest of the time.
+- **Curve assistance now steers through a bend as well as slowing for it.** Lane keeping holds your line the rest of the time.
 
-- **The truck has a heading now, so steering turns it instead of sliding it sideways.** Leave the wheel alone in a bend and you run wide, the way a real truck does.
+- **Leave the wheel alone in a bend and the truck runs wide.** Steering turns the truck now instead of sliding it sideways.
 
-- **The engine pans the way you must turn, and comes back to centre as you turn.** Steer toward it until it goes quiet. It is centred again once you are through.
+- **The engine leans the way you have to steer.** Follow it into the bend and it comes back to centre as you come round.
 
-- **Steering the wrong way in a turn leans the engine harder.** Going wrong is now something you hear straight away, not once you reach the lane line.
+- **Steering the wrong way in a turn leans the engine harder.** You hear the mistake straight away, not once you reach the lane line.
 
-- **The engine still leans through turns when the assists are driving.** You hear the shape of the road even when the truck is taking the corner for you.
+- **The engine still leans through turns when the assists are driving.** You hear the road's shape even when the truck takes the corner.
 
-- **A new Steering guide setting flips which way to steer when the engine leans.** Under Settings, Audio, for drivers used to steering away from the sound.
+- **Steering guide, under Settings, Audio, flips which way to steer when the engine leans.** For drivers used to steering away from the sound.
 
 - **The road noise now tells you where you are in your lane.** It used to carry the steering guide; the engine does that now.
 
 - **Bends no longer chime.** The spoken call and the engine's lean carry the bend, so there is nothing beeping over them.
 
-- **Route-transition assistance stops announcing itself over and over on a slow ramp.** It said it was slowing and releasing about twenty times down one ramp, burying the countdown to the stop bar.
+- **Route-transition assistance stops announcing itself over and over on a slow ramp.** It used to bury the countdown to the stop bar.
 
 - **Pressing the accelerator now lets the speed keeper's brake off.** The keeper used to hold its brake against you until you lifted.
 
-- **A turn now takes the speed its own shape allows.** A sweeping turn lets you carry more speed than a tight one into a yard.
+- **Street corners are now called at the speed a loaded truck can take.** That is about nine miles an hour, not the posted limit.
 
 - **A turn is called out even when you are already crawling.** Turns used to go unannounced while the speed keeper held you at fifteen.
 
@@ -63,13 +63,13 @@
 
 - **Curve assistance no longer stamps on the brakes just before a bend.** The last few miles an hour come off gently now.
 
-- **Curve assistance no longer runs you out of air on a downhill bend.** It holds one steady brake through the bend now, where it used to pump them until the spring brakes set.
+- **Curve assistance no longer runs you out of air on a downhill bend.** It holds one steady brake through the bend instead of pumping.
 
-- **The speed keeper no longer runs you out of air on the way to a gate.** It used to pump the brakes until the parking brake set itself and stranded you short of the yard.
+- **The speed keeper no longer runs you out of air approaching a gate.** It used to strand you short of the yard.
 
 - **z103.com plays music again.** The station moved its stream and the old address played only a sign-off message.
 
-- **Now playing works on more radio stations.** Stations that send the song a different way used to say they had no song information. (Reported by js730.)
+- **Now playing works on more radio stations.** Some used to say they had no song information. (Reported by js730.)
 
 - **Rest areas on roads with no truck-usable stop are now on the map.** Twenty-two of them, including Heath Creek on I-35 north of Owatonna.
 

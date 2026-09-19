@@ -70,6 +70,19 @@ pub const MAX_STEER_RAD: f64 = 0.52;
 /// the 0.35 g static rollover threshold a loaded combination is built to
 /// (NHTSA DOT HS 811 734), because this is the routine limit, not the edge.
 pub const MAX_STEER_LATERAL_G: f64 = 0.2;
+/// The ceiling on the truck's TOTAL cornering, in g.
+///
+/// The cap above is about the keyboard, and it belongs on what the DRIVER
+/// asks for. It must not bind the wheel the road itself is asking for: the
+/// shipped advisories are priced at 0.30 g plus bank, so a 0.2 g ceiling on
+/// everything meant that at the very number curve assistance brakes to, no
+/// input -- the driver's, the assist's, nothing -- could hold the bend, and
+/// the truck ran wide at its own advisory with partial lane keeping on
+/// (review finding, 2026-09-19). Following the road is not a rollover risk;
+/// taking a bend far above its advisory is, so the total still stops at the
+/// static rollover threshold a loaded combination is built to, and past that
+/// the truck understeers wide exactly as it should.
+pub const MAX_ROAD_LATERAL_G: f64 = 0.35;
 /// Half a twelve-foot lane, feet: what `offset` 1.0 is worth on the ground.
 pub const HALF_LANE_FT: f64 = 6.0;
 /// How hard PARTIAL lane keeping steers for the driver.
@@ -232,6 +245,24 @@ impl LaneKeeping {
         self.lane = self.lane.min(self.lane_count - 1);
     }
 
+    /// Put the truck squarely in the middle of a lane, pointing along it.
+    ///
+    /// For the places the GAME moves the truck rather than the driver: onto a
+    /// ramp at the gore, out of a lane the road just closed, across to the
+    /// open lane after the barrels, onto the highway off a departure chain.
+    /// Every one of those used to write `offset = 0.0` and nothing else,
+    /// which was a complete reset while the model was a position. It is a
+    /// heading now, and the heading is what carries the truck across its
+    /// lane -- so a truck "put in the middle" of a single-lane ramp still
+    /// pointing off the mainline was over the edge within a second, from a
+    /// move it did not make itself (review finding, 2026-09-19).
+    pub fn recentre(&mut self, lane: i64) {
+        self.lane = lane.clamp(0, (self.lane_count - 1).max(0));
+        self.offset = 0.0;
+        self.yaw_rad = 0.0;
+        self.off_road_timer = 0.0;
+    }
+
     /// How far past center toward a road *edge* -- a side with no
     /// neighboring lane. Drifting toward another lane never rumbles; the
     /// rumble strip lives on the shoulder and the median.
@@ -313,15 +344,22 @@ impl LaneKeeping {
         } else {
             0.0
         };
-        let commanded =
-            (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD + tracking;
-        let mut yaw_rate = fps * commanded.tan() / WHEELBASE_FT;
-        let yaw_rate_cap = if fps > 1.0 {
-            MAX_STEER_LATERAL_G * G_FPS2 / fps
-        } else {
-            f64::MAX
+        let commanded = (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD;
+        let rate_at = |g: f64| {
+            if fps > 1.0 {
+                g * G_FPS2 / fps
+            } else {
+                f64::MAX
+            }
         };
-        yaw_rate = yaw_rate.clamp(-yaw_rate_cap, yaw_rate_cap);
+        // The driver's own input is capped; the wheel the ROAD is asking for
+        // is not, or a bend could not be held at the speed its own advisory
+        // names. Both together still stop at the rollover ceiling.
+        let driver_cap = rate_at(MAX_STEER_LATERAL_G);
+        let mut yaw_rate = (fps * commanded.tan() / WHEELBASE_FT).clamp(-driver_cap, driver_cap)
+            + fps * tracking.tan() / WHEELBASE_FT;
+        let road_cap = rate_at(MAX_ROAD_LATERAL_G);
+        yaw_rate = yaw_rate.clamp(-road_cap, road_cap);
         // Understeer: tires that cannot hold the road do not turn the truck as
         // far as the wheel asked, so a bend taken on ice runs wide even with
         // the wheel into it. This is where load and grip live now.
@@ -494,6 +532,128 @@ mod tests {
         assert!(
             lane.offset.abs() < LANE_EDGE,
             "a driver answering the bend should stay in the lane; offset {}",
+            lane.offset
+        );
+    }
+
+    #[test]
+    fn a_bend_can_be_held_at_its_own_advisory() {
+        // The number curve assistance brakes to has to be a number the truck
+        // can hold. Advisories are priced at 0.30 g plus bank; the keyboard
+        // cap is 0.20 g, and while it bound the wheel the ROAD asks for as
+        // well, a 600-foot bend at its own 50 mph advisory ran the truck out
+        // of the lane whatever the driver or the assist did -- on partial
+        // lane keeping, which is what a fresh install now ships (review
+        // finding, 2026-09-19).
+        //
+        // Turn assistance on, hands off the wheel: the bend is the assist's
+        // to hold, and holding it is the whole promise of the settings row.
+        let mut lane = LaneKeeping::new(Some(11));
+        let dt = 0.05;
+        let fifty_mph = 50.0 / MPH_PER_MPS;
+        for _ in 0..400 {
+            lane.update(
+                dt,
+                fifty_mph,
+                RoadConditions {
+                    curvature: left_bend(600.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "partial",
+                true,
+            );
+        }
+
+        assert!(
+            lane.offset.abs() < LANE_EDGE,
+            "the bend could not be held at its own advisory; offset {}",
+            lane.offset
+        );
+    }
+
+    #[test]
+    fn far_above_the_advisory_the_truck_still_runs_wide() {
+        // The other half of the same rule: following the road is exempt from
+        // the driver's cap, not from physics. A 600-foot bend at 75 wants
+        // 0.63 g, well past what a loaded combination will hold, so the truck
+        // understeers wide however hard anything steers -- which is the model
+        // saying in its own terms that the advisory exists for a reason.
+        let mut lane = LaneKeeping::new(Some(11));
+        let dt = 0.05;
+        let seventy_five_mph = 75.0 / MPH_PER_MPS;
+        for _ in 0..200 {
+            lane.steering = -1.0; // full lock into the bend
+            lane.update(
+                dt,
+                seventy_five_mph,
+                RoadConditions {
+                    curvature: left_bend(600.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "partial",
+                true,
+            );
+        }
+
+        assert!(
+            lane.offset > LANE_EDGE,
+            "a bend taken far over its advisory must run wide; offset {}",
+            lane.offset
+        );
+    }
+
+    #[test]
+    fn recentring_the_truck_points_it_along_the_lane() {
+        // The game moves the truck itself at a gore, a lane closure and a
+        // merge. Offset alone was a complete reset while the model was a
+        // position; it is a heading now, and a truck "put in the middle"
+        // still pointing off the road leaves the lane it was just placed in.
+        let mut lane = LaneKeeping::new(Some(11));
+        lane.set_lane_count(2);
+        lane.steering = -1.0;
+        for _ in 0..40 {
+            lane.update(
+                0.05,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
+        }
+        assert!(
+            lane.yaw_rad.abs() > 0.05,
+            "the truck should be pointing off"
+        );
+
+        lane.recentre(0);
+        assert_eq!(lane.lane, 0);
+        assert_eq!(lane.offset, 0.0);
+        assert_eq!(lane.yaw_rad, 0.0);
+
+        // And it stays put with nobody steering.
+        lane.steering = 0.0;
+        for _ in 0..40 {
+            lane.update(
+                0.05,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
+        }
+        assert!(
+            lane.offset.abs() < 0.2,
+            "a recentred truck drifted straight back out; offset {}",
             lane.offset
         );
     }

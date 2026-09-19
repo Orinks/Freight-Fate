@@ -678,7 +678,7 @@ fn test_a_hot_ramp_speaks_one_assist_line_not_two() {
     assert!(
         !app.event_lines()
             .iter()
-            .any(|text| text.contains("Curve speed assistance")),
+            .any(|text| text.contains("Curve assistance")),
         "the ramp's own assist speaks for a ramp; the curve cue must not double it"
     );
 
@@ -694,7 +694,7 @@ fn test_a_hot_ramp_speaks_one_assist_line_not_two() {
     assert!(
         app.event_lines()
             .iter()
-            .any(|text| text.contains("Curve speed assistance slowing.")),
+            .any(|text| text.contains("Curve assistance slowing.")),
         "silencing the ramp case must not silence a real mainline bend"
     );
 }
@@ -703,7 +703,7 @@ fn test_a_hot_ramp_speaks_one_assist_line_not_two() {
 fn test_a_silent_ramp_engagement_never_leaves_a_lone_release() {
     // The release line is paired to the slowing line that opened it.
     //
-    // Suppressing the ramp's engagement cue would otherwise leave "Curve speed
+    // Suppressing the ramp's engagement cue would otherwise leave "Curve
     // assistance released." hanging on its own with nothing before it, which
     // reads as a bug to anyone listening.
     let mut app = TestApp::new();
@@ -727,7 +727,7 @@ fn test_a_silent_ramp_engagement_never_leaves_a_lone_release() {
     assert!(
         !app.event_lines()
             .iter()
-            .any(|text| text.contains("Curve speed assistance")),
+            .any(|text| text.contains("Curve assistance")),
         "a run that never spoke must not announce its own release"
     );
 }

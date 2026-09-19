@@ -680,6 +680,12 @@ def clean_segment(segment: dict[str, Any]) -> dict[str, Any]:
         "miles": round(float(segment["miles"]), 2),
         "cue": cue,
         "speed_mph": float(segment.get("speed_mph", 25.0)),
+        # The corner's angle, READ off OSM bearings by build_local_geometry,
+        # or 0.0 where nothing was measured (the game then ASSUMES a square
+        # corner). This file is the one whose segments become the streets a
+        # delivery drives, so dropping the key here meant no measured angle
+        # could ever reach the game.
+        "turn_deg": round(float(segment.get("turn_deg", 0.0)), 1),
     }
 
 
@@ -692,7 +698,25 @@ def clean_text(value: str) -> str:
 
 
 def coverage_summary(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    # Corner-angle provenance, the same ratio build_local_geometry reports. A
+    # corner whose angle was READ off OSM geometry is priced from its own
+    # shape; one without is priced as a square corner, which is an ASSUMPTION.
+    # These are the streets a delivery actually drives, so this is the layer
+    # where a bake that mostly assumed has to say so.
+    corners = 0
+    measured = 0
+    for item in records.values():
+        for segment in item.get("segments", []):
+            if not str(segment.get("cue", "")).lower().startswith("turn "):
+                continue
+            corners += 1
+            if float(segment.get("turn_deg", 0.0)) > 0.0:
+                measured += 1
     return {
+        "corners": corners,
+        "corners_angle_read": measured,
+        "corners_angle_assumed": corners - measured,
+        "corners_angle_read_ratio": round(measured / corners, 4) if corners else 0.0,
         "facilities": len(records),
         "source_backed_endpoints": sum(
             1 for item in records.values() if item["endpoint_source_backed"]
@@ -810,6 +834,16 @@ def main() -> int:
             return 1
         print("Coverage after (merged):", flush=True)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
+    corners = payload["coverage"].get("corners", 0)
+    if corners:
+        ratio = payload["coverage"]["corners_angle_read_ratio"]
+        print(
+            f"corner angles: {payload['coverage']['corners_angle_read']} of {corners} READ "
+            f"from OSM geometry ({ratio:.1%}); the rest are priced as square "
+            f"corners, which is an ASSUMPTION."
+        )
+        if ratio < 0.5:
+            print("WARNING: most corner angles in this bake are assumed, not read.")
     if args.write:
         args.output.write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"

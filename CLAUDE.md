@@ -32,7 +32,11 @@ Read this before opening files; the rest is discoverable from `lib.rs` docs.
   and the port is line for line. When a Rust module's intent is unclear, the
   `src/freight_fate/` file of the same name is the reference. `pyrandom` and
   `pyfmt` exist because the tests pin spoken strings byte for byte to what
-  Python produced; do not "fix" their rounding or RNG.
+  Python produced; do not "fix" their rounding or RNG. Three modules break
+  that rule and the Python is NOT their reference: `sim/turn_guide.rs` and
+  `data/corners.rs` have no Python counterpart at all, and `sim/lane.rs`
+  diverged from `sim/lane.py` when it grew a heading and a bicycle model --
+  reading the Python file for any of the three gives you retired behaviour.
 - **World data has two shapes.** The JSON tree under `src/freight_fate/data/`
   (`FREIGHT_FATE_DATA_ROOT` overrides it) and the baked, memory-mapped
   `world.ffdata` container (`data/baked/`) that the shipped game reads. A loose
