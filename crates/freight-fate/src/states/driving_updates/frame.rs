@@ -44,12 +44,9 @@ impl DrivingState {
         if ahead <= 0.0 || speed <= curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH {
             return;
         }
-        let pan = if curve.direction == 'L' {
-            -PACENOTE_CUE_PAN
-        } else {
-            PACENOTE_CUE_PAN
-        };
-        ctx.audio.play_with("vehicle/curve_bink", 0.9, pan);
+        // The pacenote speaks; the chime that preceded it does not (owner,
+        // 2026-09-18). The spoken call carries the side and the number, and
+        // the engine's lean carries the shape.
         let text = self.pacenote_text(ctx, &curve, ahead, speed);
         let mut opts = SayEvent::new().category(SpeechCategory::Navigation);
         // The refreshed call checks the bend before speaking; the rescue

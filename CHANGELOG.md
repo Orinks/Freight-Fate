@@ -10,6 +10,10 @@
 
 ### Changed
 
+- **The engine leans toward where you should steer, instead of the road noise.** Follow the lean. The road noise now tells you where you are in your lane.
+
+- **Bends no longer chime.** The spoken call and the engine's lean carry the bend, so there is nothing beeping over them.
+
 - **Route-transition assistance stops announcing itself over and over on a slow ramp.** It said it was slowing and releasing about twenty times down one ramp, burying the countdown to the stop bar.
 
 - **A turn now takes the speed its own shape allows.** A sweeping turn lets you carry more speed than a tight one into a yard.

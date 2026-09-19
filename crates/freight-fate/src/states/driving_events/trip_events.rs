@@ -477,14 +477,11 @@ impl DrivingState {
         // 2026-07-18). One-shot, not the continuous steering tone the
         // community ruled out. Placeholder sound until a dedicated cue
         // is auditioned (docs/sound-hunt-brief.md, need 1).
-        if let Some(curve) = curve.as_ref().filter(|_| announce) {
-            let pan = if curve.direction == 'L' {
-                -PACENOTE_CUE_PAN
-            } else {
-                PACENOTE_CUE_PAN
-            };
-            ctx.audio.play_with("vehicle/curve_bink", 0.9, pan);
-        }
+        // The panned curve chime that used to fire here is gone (owner,
+        // 2026-09-18): a one-shot beep says a bend is coming and then stops
+        // saying anything, and the driver still has the whole bend to steer.
+        // The engine's lean carries that continuously now, so the chime was
+        // noise stacked in front of the guide rather than help.
         let say_curve = |ctx: &mut GameContext, text: SpokenMessage, interrupt: bool| {
             if !announce {
                 return;

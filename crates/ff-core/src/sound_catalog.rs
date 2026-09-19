@@ -58,7 +58,22 @@ const LANE: SoundCategory = SoundCategory {
         // inversion ever reads as a mistake and someone "corrects" this text,
         // they will be teaching blind drivers to steer off the road.
         SoundEntry::new(
-            "The road lean",
+            "The engine lean",
+            &[
+                Cue::new("engine/mid").volume(0.6).pan(-0.8).hold_s(2.0),
+                Cue::new("engine/mid")
+                    .volume(0.6)
+                    .pan(0.8)
+                    .delay_s(2.4)
+                    .hold_s(2.0),
+            ],
+            "Not a sound of its own: it is the engine you are always hearing,              leaning to one side. Steer toward the lean. It leans the way the              wheel should go, so it points into a bend before you reach it,              and away from the edge you are drifting toward. This is the one              cue here you follow rather than avoid, and it eases back to the              middle once you are straight.",
+        )
+        .when(
+            "Lane keeping partial or off, and lane-departure warning on.              With that warning off the engine stays centered and the lean              never happens; on full lane keeping the truck holds the lane              for you.",
+        ),
+        SoundEntry::new(
+            "Where you sit in the lane",
             &[
                 Cue::new("vehicle/road").volume(0.6).pan(-0.8).hold_s(2.0),
                 Cue::new("vehicle/road")
@@ -67,17 +82,10 @@ const LANE: SoundCategory = SoundCategory {
                     .delay_s(2.4)
                     .hold_s(2.0),
             ],
-            "Not a sound of its own: it is the road noise you are always \
-             hearing, leaning to one side. Steer toward the lean. It leans \
-             the way the wheel should go, so it points into a bend before \
-             you reach it, and away from the edge you are drifting toward. \
-             This is the one cue here you follow rather than avoid, and it \
-             eases back to the middle once you are straight.",
+            "The road noise under the truck, sitting where you are in your              lane rather than where you should be going. Drift left and it              goes left with you. It is the quieter half of the pair: the              engine tells you what to do, this tells you what you have done.",
         )
         .when(
-            "Lane keeping partial or off, and lane-departure warning on. \
-             With that warning off the road stays centered and the lean never \
-             happens; on full lane keeping the truck holds the lane for you.",
+            "Lane keeping partial or off. On full lane keeping the truck              holds the lane for you and the road stays centered.",
         ),
         SoundEntry::new(
             "Rumble strip, clipped",
@@ -227,20 +235,6 @@ const LANE: SoundCategory = SoundCategory {
              people. Brake as soon as you hear them; they are placed far \
              enough back that braking still makes the corner.",
         ),
-        SoundEntry::new(
-            "Curve chime",
-            &[
-                Cue::new("vehicle/curve_bink").volume(0.9).pan(-0.85),
-                Cue::new("vehicle/curve_bink")
-                    .volume(0.9)
-                    .pan(0.85)
-                    .delay_s(1.2),
-            ],
-            "A demanding bend is coming, and the chime comes from the side it \
-             turns toward. Be under the advised speed before you reach it, \
-             not while you are in it.",
-        )
-        .when("Curve callouts on."),
         SoundEntry::new(
             "Mechanical blinker",
             &[
@@ -412,6 +406,17 @@ const RAMPS: SoundCategory = SoundCategory {
             "A continuous tone that means the stop bar is close enough that \
              you must already be stopping. It runs until you have stopped or \
              passed it. Treat it as the last warning, not the first.",
+        ),
+        SoundEntry::new(
+            "Stop bar countdown",
+            // Quickening as the bar nears; here at the spacing it has a few
+            // hundred feet out, before it fuses into the solid tone above.
+            &[
+                Cue::new("vehicle/curve_bink").volume(0.9),
+                Cue::new("vehicle/curve_bink").volume(0.9).delay_s(0.8),
+                Cue::new("vehicle/curve_bink").volume(0.9).delay_s(1.4),
+            ],
+            "Beeps that come faster the closer the stop bar gets. When they              run together into the steady tone above, you should already be              nearly stopped.",
         ),
         SoundEntry::new(
             "Green light",
@@ -805,7 +810,6 @@ pub const SELF_EXPLANATORY: &[(&str, &str)] = &[
         "engine/low",
         "As the idle loop: an engine at an engine speed.",
     ),
-    ("engine/mid", "As the idle loop."),
     ("engine/midhigh", "As the idle loop."),
     ("engine/high", "As the idle loop."),
     (

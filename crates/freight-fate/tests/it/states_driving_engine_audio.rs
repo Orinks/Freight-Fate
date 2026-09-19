@@ -51,6 +51,8 @@ struct Calls {
     reverse: Vec<&'static str>,
     engine_rpm: Vec<(f64, f64)>,
     engine_pan: Vec<f64>,
+    /// `set_loop_pan(channel, pan)`: the road bed carries lane position now.
+    loop_pans: Vec<(u32, f64)>,
     /// `set_engine_duck(duck)`: the shift-gap disengage, in order.
     ducks: Vec<f64>,
     engine_running: bool,
@@ -139,7 +141,9 @@ impl Audio for TrackingAudio {
             .loops
             .push(LoopCall::Volume(channel, volume));
     }
-    fn set_loop_pan(&mut self, _channel: u32, _pan: f64) {}
+    fn set_loop_pan(&mut self, channel: u32, pan: f64) {
+        self.log.borrow_mut().loop_pans.push((channel, pan));
+    }
     fn set_loop_rate(&mut self, channel: u32, rate: f64) {
         self.log
             .borrow_mut()
@@ -818,32 +822,78 @@ fn joint_plays(log: &Log) -> Vec<f64> {
 }
 
 #[test]
-fn test_engine_pan_tracks_lane_position_each_audio_frame_and_resets_for_full() {
-    let (mut harness, log) = a_drive("Engine lane pan");
-    for mode in ["partial", "off", "full"] {
-        harness.app.ctx.settings.lane_keeping = mode.into();
-        for (offset, expected) in [
-            (0.0, 0.0),
-            (0.65, 0.65),
-            (-0.4, -0.4),
-            (2.0, 1.0),
-            (-2.0, -1.0),
-        ] {
-            harness.with_drive(|drive, _| drive.lane.offset = offset);
-            update_audio(&mut harness, 1.0 / 60.0);
-            assert_eq!(
-                log.borrow().engine_pan.last().copied(),
-                Some(if mode == "full" { 0.0 } else { expected })
-            );
-        }
-    }
+fn test_the_engine_carries_the_guide_and_the_road_bed_carries_the_seat() {
+    // Owner ruling 2026-09-18: the steering guide moved off the road bed and
+    // onto the engine, and the lane-position readout took the bed in exchange.
+    // The two must not blur -- the engine says where to GO, the bed says where
+    // the truck IS, and the pans point opposite ways when the truck is
+    // drifting, which is exactly what makes them tellable apart.
+    let (mut harness, log) = a_drive("Engine guide pan");
+    harness.app.ctx.settings.lane_departure_warning = true;
     for mode in ["partial", "off"] {
         harness.app.ctx.settings.lane_keeping = mode.into();
-        harness.with_drive(|drive, _| drive.lane.offset = 0.75);
-        update_audio(&mut harness, 0.0);
-        assert_eq!(log.borrow().engine_pan.last(), Some(&0.75));
-        harness.app.ctx.settings.lane_keeping = "full".into();
-        update_audio(&mut harness, 0.0);
-        assert_eq!(log.borrow().engine_pan.last(), Some(&0.0));
+        harness.with_drive(|drive, _| {
+            // Rolling: the guide only wakes on a truck actually driving.
+            drive.trip.truck.engine_on = true;
+            drive.trip.truck.velocity_mps = 55.0 / 2.23694;
+            drive.lane.offset = 0.8; // well past DRIFT_WAKE, toward the right
+            drive.lane_guide_pan_applied = 0.0;
+            drive.road_pan_applied = 0.0;
+        });
+        log.borrow_mut().engine_pan.clear();
+        log.borrow_mut().loop_pans.clear();
+        // The guide slews rather than snapping, so give it road to lean over.
+        for _ in 0..120 {
+            harness.with_drive(|drive, ctx| drive.update_lane_guidance_audio(ctx, 1.0 / 60.0));
+        }
+
+        let guide = log
+            .borrow()
+            .engine_pan
+            .last()
+            .copied()
+            .unwrap_or_else(|| panic!("{mode}: the engine was never panned"));
+        assert!(
+            guide < -0.1,
+            "{mode}: drifting right, the engine must lean LEFT to be followed              back to centre; got {guide}"
+        );
+        let seat = log
+            .borrow()
+            .loop_pans
+            .last()
+            .copied()
+            .unwrap_or_else(|| panic!("{mode}: the road bed was never panned"));
+        assert!(
+            seat.1 > 0.1,
+            "{mode}: the bed reports where the truck IS, which is right of              centre; got {seat:?}"
+        );
     }
+
+    // Full lane keeping steers for the driver, so there is nothing to follow
+    // and nothing to report: both channels sit centred.
+    harness.app.ctx.settings.lane_keeping = "full".into();
+    log.borrow_mut().engine_pan.clear();
+    log.borrow_mut().loop_pans.clear();
+    for _ in 0..10 {
+        harness.with_drive(|drive, ctx| drive.update_lane_guidance_audio(ctx, 1.0 / 60.0));
+    }
+    assert_eq!(log.borrow().engine_pan.last().copied(), Some(0.0));
+    assert_eq!(log.borrow().loop_pans.last().map(|p| p.1), Some(0.0));
+}
+
+#[test]
+fn test_the_audio_frame_no_longer_pans_the_engine_for_lane_position() {
+    // The engine's pan belongs to the guide now. update_audio used to set it
+    // from lane.offset every frame, which would fight the guide for the same
+    // channel and leave whichever ran last in charge.
+    let (mut harness, log) = a_drive("Engine pan ownership");
+    harness.app.ctx.settings.lane_keeping = "off".into();
+    harness.with_drive(|drive, _| drive.lane.offset = 0.75);
+    log.borrow_mut().engine_pan.clear();
+    update_audio(&mut harness, 1.0 / 60.0);
+    assert!(
+        log.borrow().engine_pan.is_empty(),
+        "the audio frame set the engine pan again: {:?}",
+        log.borrow().engine_pan
+    );
 }

@@ -134,15 +134,9 @@ impl DrivingState {
                     touched,
                     hot,
                 });
-                if demanding && ctx.settings.curve_callouts {
-                    let pan = if curve.direction == 'L' {
-                        -PACENOTE_CUE_PAN
-                    } else {
-                        PACENOTE_CUE_PAN
-                    };
-                    let volume = 1.0f64.min(0.65 * self.cue_loudness(ctx));
-                    ctx.audio.play_with("vehicle/curve_bink", volume, pan);
-                }
+                // No chime at the bend's start: the engine is already leaning
+                // into it, and it leads the bend rather than marking a moment
+                // that has already passed (owner, 2026-09-18).
             }
             let rumbling = self.lane.rumble_level() > 0.0;
             let speed = self.trip.truck.speed_mph();
@@ -417,10 +411,23 @@ impl DrivingState {
         }
     }
 
-    /// Run the guidance director: the road bed leans toward where the
-    /// wheel should go (pursuit guide -- follow the sound), wakes for drift
-    /// or a bend, and slews home on the centered straight. Never a new
-    /// tone: the community ruling keeps the guide on the existing bed.
+    /// Run the guidance director: the ENGINE leans toward where the wheel
+    /// should go (pursuit guide -- follow the sound), wakes for drift or a
+    /// bend, and slews home on the centered straight, while the road bed
+    /// sits where the truck actually is in its lane.
+    ///
+    /// The guide rode the road bed until 2026-09-18 and the owner's ruling
+    /// moved it: the bed is a quiet, textureless surface and a lean across it
+    /// is hard to place, where the engine is the loudest continuous thing in
+    /// the cab and the one whose pitch a driver is already tracking. It
+    /// carries a pan far better, which is the whole job. The two swapped
+    /// rather than the position readout being dropped -- knowing where you
+    /// sit in the lane is still worth a channel, it is just worth the quieter
+    /// one.
+    ///
+    /// Still never a new tone: the community ruling holds, and panning an
+    /// engine that was already running is not a tone the soundscape did not
+    /// have.
     pub fn update_lane_guidance_audio(&mut self, ctx: &mut GameContext, dt: f64) {
         let frame = if !ctx.settings.lane_departure_warning {
             self.lane_guidance.update(&self.lane, dt, false, 0.0, None)
@@ -432,11 +439,29 @@ impl DrivingState {
             self.lane_guidance
                 .update(&self.lane, dt, assist_on, curve_steer, curve_ahead_mi)
         };
+        // The guide. Automated lane keeping is doing the steering itself, so
+        // there is nothing to follow and the engine sits centred.
+        let guide_pan = if ctx.settings.lane_is_automated() || ctx.settings.lane_guide_tone {
+            0.0
+        } else {
+            frame.pan
+        };
+        if guide_pan != self.lane_guide_pan_applied {
+            ctx.audio.set_engine_pan(guide_pan);
+            self.lane_guide_pan_applied = guide_pan;
+        }
         if ctx.settings.lane_guide_tone {
             self.lean_the_tone(ctx, frame);
-        } else if frame.pan != self.road_pan_applied {
-            ctx.audio.set_loop_pan(CH_ROAD, frame.pan);
-            self.road_pan_applied = frame.pan;
+        }
+        // And the position readout, on the bed the guide used to ride.
+        let seat_pan = if ctx.settings.lane_is_automated() {
+            0.0
+        } else {
+            self.lane.offset.clamp(-1.0, 1.0)
+        };
+        if seat_pan != self.road_pan_applied {
+            ctx.audio.set_loop_pan(CH_ROAD, seat_pan);
+            self.road_pan_applied = seat_pan;
         }
         if frame.centered {
             // The drift settled: the old centered earcon still says so.
