@@ -30,9 +30,61 @@ pub const CENTERED_MAX: f64 = 0.25;
 pub const OFF_ROAD_GRACE_S: f64 = 2.0;
 pub const OFF_ROAD_REPEAT_S: f64 = 3.0;
 pub const WANDER_RATE: f64 = 0.05;
-pub const CURVE_RATE: f64 = 0.12;
 pub const WIND_RATE: f64 = 0.10;
 pub const STEER_RATE: f64 = 0.55;
+
+// -- heading ------------------------------------------------------------------
+//
+// The truck carries a HEADING relative to the road, and steering turns the
+// truck rather than sliding it sideways. Until 2026-09-18 it had none: a bend
+// pushed the offset straight over and the driver held the opposite key against
+// it, which meant the wheel that tracks a left-hand bend was the RIGHT one.
+// Nobody noticed while the guide only reported drift, and it became untenable
+// the moment the engine started leaning the way the road turns -- following
+// that cue steered the truck off the road, which is how it was found (owner's
+// drive on AZ-260, 100 percent cargo damage in one bend).
+//
+// With a heading it comes out by itself. Leave the wheel alone in a bend and
+// the road turns away beneath a truck still pointing straight, so it runs
+// WIDE, to the outside, the way inertia really takes it. Hold the wheel into
+// the bend and the truck tracks it. "Steer toward the lean" is then simply
+// true.
+//
+// The model is the standard bicycle (Ackermann) one every vehicle-dynamics
+// text starts from: a steer angle at the front axle turns the vehicle at
+// `yaw_rate = v * tan(delta) / wheelbase`.
+
+/// Tractor wheelbase, feet. A bicycle model uses the steering unit's own
+/// wheelbase; the trailer follows it (low-speed off-tracking is modelled
+/// separately by `data::corners`, not here).
+pub const WHEELBASE_FT: f64 = 20.0;
+/// Full lock at the front axle, radians -- about 30 degrees.
+pub const MAX_STEER_RAD: f64 = 0.52;
+/// The most lateral acceleration a steering input may ask for, in g.
+///
+/// A keyboard has no proportional control: a held arrow is full lock, and at
+/// highway speed full lock is not a steering input, it is a rollover. Capping
+/// the yaw rate so the resulting `v * yaw_rate` stays here gives the driver
+/// the same authority a real one uses -- lots of it at yard speed, very little
+/// at seventy -- without pretending the keyboard is a wheel. Set well under
+/// the 0.35 g static rollover threshold a loaded combination is built to
+/// (NHTSA DOT HS 811 734), because this is the routine limit, not the edge.
+pub const MAX_STEER_LATERAL_G: f64 = 0.2;
+/// Half a twelve-foot lane, feet: what `offset` 1.0 is worth on the ground.
+pub const HALF_LANE_FT: f64 = 6.0;
+/// How hard PARTIAL lane keeping steers for the driver.
+///
+/// Nothing recentres the heading on its own: a truck pointing five degrees
+/// off the road does not rotate itself back, it keeps going off, and making
+/// it self-correct was the difference between a bend you must drive and one
+/// that drives itself (caught the first time this model ran -- the recentring
+/// cancelled the road's own rotation and a 600-foot bend read as straight).
+/// Assistance is a thing that STEERS, so it is modelled as steering: a lane
+/// error and a heading error, each worth this much wheel.
+pub const ASSIST_OFFSET_GAIN: f64 = 0.7;
+pub const ASSIST_YAW_GAIN: f64 = 3.0;
+pub const FPS_PER_MPH: f64 = 1.466_667;
+pub const G_FPS2: f64 = 32.174;
 
 /// Only the modes where the driver does the lane work have a drift model.
 /// "full" is absent on purpose: it pins the offset to lane centre.
@@ -43,6 +95,11 @@ pub fn assist_tuning(assist: &str) -> Option<(f64, f64)> {
         "off" => Some((1.0, 1.0)),
         _ => None,
     }
+}
+
+/// Whether this mode steers for the driver as well as damping the wander.
+pub fn assist_steers(assist: &str) -> bool {
+    assist == "partial"
 }
 
 pub const DEFAULT_LANE_COUNT: i64 = 2;
@@ -83,6 +140,9 @@ pub fn lane_phrase(index: i64, count: i64) -> String {
 pub struct LaneKeeping {
     rng: PyRandom,
     pub offset: f64,
+    /// Truck heading relative to the road's own direction, radians. Positive
+    /// points right of the road. Zero means tracking it.
+    pub yaw_rad: f64,
     pub steering: f64,
     pub lane: i64, // everyone starts in the right lane
     pub lane_count: i64,
@@ -113,6 +173,7 @@ impl LaneKeeping {
         Self {
             rng,
             offset: 0.0,
+            yaw_rad: 0.0,
             steering: 0.0,
             lane: 0,
             lane_count: DEFAULT_LANE_COUNT,
@@ -152,16 +213,28 @@ impl LaneKeeping {
 
     /// Advance the lane model.
     ///
+    /// `road_curvature` is the road's own bend at the truck, as 1 over its
+    /// radius in feet, signed: positive turns right. Zero is straight.
+    ///
     /// Returns true when the truck has been off the road edge long enough to
     /// fire a warning/damage event. A completed drift across an interior lane
     /// line is reported through `crossed` (+1 moved left, -1 moved right)
     /// for the frame it happens. `assist == "full"` is lane keeping doing the
     /// whole job: the truck stays centered and no drift accrues. The discrete
     /// `lane` is still honored there, driven by tap-to-change controls.
-    pub fn update(&mut self, dt: f64, speed_mps: f64, curve: f64, wind: f64, assist: &str) -> bool {
+    pub fn update(
+        &mut self,
+        dt: f64,
+        speed_mps: f64,
+        road_curvature: f64,
+        wind: f64,
+        grip: f64,
+        assist: &str,
+    ) -> bool {
         self.crossed = 0;
         let Some((drift_mult, steer_mult)) = assist_tuning(assist) else {
             self.offset = 0.0;
+            self.yaw_rad = 0.0;
             self.off_road_timer = 0.0;
             return false;
         };
@@ -171,7 +244,7 @@ impl LaneKeeping {
             self.off_road_timer = 0.0;
             return false;
         }
-        let speed_factor = (mph / 55.0).min(1.2);
+        let fps = mph * FPS_PER_MPH;
 
         self.wander_timer -= dt;
         if self.wander_timer <= 0.0 {
@@ -187,11 +260,47 @@ impl LaneKeeping {
         }
         self.gust += (self.gust_target - self.gust) * (dt / 1.5).min(1.0);
 
-        let drift = (self.wander + curve * CURVE_RATE + wind * self.gust * WIND_RATE)
-            * drift_mult
-            * speed_factor;
-        let authority = STEER_RATE * steer_mult * (mph / 25.0).min(1.0);
-        self.offset += (drift + self.steering * authority) * dt;
+        // What the driver asked the front axle for, plus whatever partial
+        // lane keeping is contributing, capped so a held key is a steering
+        // input rather than a rollover (see MAX_STEER_LATERAL_G).
+        let helper = if assist_steers(assist) {
+            -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
+        } else {
+            0.0
+        };
+        let commanded = (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD;
+        let mut yaw_rate = fps * commanded.tan() / WHEELBASE_FT;
+        let yaw_rate_cap = if fps > 1.0 {
+            MAX_STEER_LATERAL_G * G_FPS2 / fps
+        } else {
+            f64::MAX
+        };
+        yaw_rate = yaw_rate.clamp(-yaw_rate_cap, yaw_rate_cap);
+        // Understeer: tires that cannot hold the road do not turn the truck as
+        // far as the wheel asked, so a bend taken on ice runs wide even with
+        // the wheel into it. This is where load and grip live now.
+        yaw_rate *= grip.clamp(0.0, 1.0);
+
+        // The road turns underneath. Holding the wheel still in a bend leaves
+        // the truck pointing where it was, so the RELATIVE heading opens up
+        // and it runs wide -- which is the whole point of carrying a heading.
+        let road_yaw_rate = fps * road_curvature;
+        self.yaw_rad += (yaw_rate - road_yaw_rate) * dt;
+        self.yaw_rad = self.yaw_rad.clamp(-0.6, 0.6);
+
+        // Wander and crosswind are a small standing HEADING error, not a
+        // shove on the position and not a rate: integrating them as a yaw
+        // rate turned WANDER_RATE's 0.05 into 0.05 RADIANS PER SECOND, which
+        // is half a radian of heading in ten seconds and put the truck in the
+        // median on every approach the first time this ran. Sized so the
+        // lateral drift they produce is the one the old model produced --
+        // `offset` moves at `sin(yaw) * fps / HALF_LANE_FT`, so the yaw worth
+        // a given drift rate is that rate times HALF_LANE_FT over speed.
+        let drift_rate = (self.wander + wind * self.gust * WIND_RATE) * drift_mult;
+        let disturbance_yaw = drift_rate * HALF_LANE_FT / fps.max(1.0);
+
+        // Heading is what moves the truck across its lane.
+        self.offset += (self.yaw_rad + disturbance_yaw).sin() * fps * dt / HALF_LANE_FT;
 
         // Straddle an interior line far enough and the truck is in the next
         // lane over: re-center the offset relative to the new lane so the
@@ -259,15 +368,138 @@ mod tests {
     //! app-shell bucket).
     use super::*;
 
+    /// A left-hand bend of `radius_ft`, as the model now takes it.
+    fn left_bend(radius_ft: f64) -> f64 {
+        -1.0 / radius_ft
+    }
+
     fn run_lane(lane: &mut LaneKeeping, seconds: f64, curve: f64, wind: f64, assist: &str) -> i64 {
         let dt = 0.1;
         let mut events = 0;
         for _ in 0..((seconds / dt) as i64) {
-            if lane.update(dt, 29.0, curve, wind, assist) {
+            if lane.update(dt, 29.0, curve, wind, 1.0, assist) {
                 events += 1;
             }
         }
         events
+    }
+
+    // -- heading -------------------------------------------------------------
+
+    #[test]
+    fn a_bend_taken_without_steering_runs_the_truck_wide() {
+        // The whole reason heading exists. Hands off in a LEFT-hander, the
+        // road turns away from a truck still pointing straight, so it ends up
+        // to the RIGHT -- the outside. Inertia, not a shove.
+        let mut lane = LaneKeeping::new(Some(11));
+        run_lane(&mut lane, 6.0, left_bend(600.0), 0.0, "off");
+        assert!(
+            lane.offset > 0.2,
+            "hands off in a left bend must run wide right; got {}",
+            lane.offset
+        );
+        assert!(lane.yaw_rad > 0.0, "the truck should be pointing wide");
+    }
+
+    #[test]
+    fn steering_into_a_bend_tracks_it() {
+        // Holding the wheel INTO the bend keeps the lane, which is what makes
+        // "steer toward the lean" a true instruction. Before heading, holding
+        // left here slid the truck off the left EDGE (owner's AZ-260 drive,
+        // 2026-09-18, one destroyed load).
+        //
+        // Closed loop, because that is what driving is: the input answers the
+        // error rather than being held open at some guessed angle. A bend of
+        // this radius only wants a few percent of lock to track -- steering
+        // the whole wheel into it would cut the corner just as surely as not
+        // steering runs wide.
+        // At a speed the bend can actually be taken at. A 600-foot radius
+        // wants 0.47 g at 65 mph, past the rollover threshold, so
+        // MAX_STEER_LATERAL_G correctly refuses to turn that hard and the
+        // truck runs wide however the wheel is held -- the model saying, in
+        // its own terms, that the advisory exists for a reason.
+        let mut lane = LaneKeeping::new(Some(11));
+        let dt = 0.05;
+        let forty_mph = 40.0 / MPH_PER_MPS;
+        for _ in 0..300 {
+            lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
+            lane.update(dt, forty_mph, left_bend(600.0), 0.0, 1.0, "off");
+        }
+        assert!(
+            lane.offset.abs() < LANE_EDGE,
+            "a driver answering the bend should stay in the lane; offset {}",
+            lane.offset
+        );
+    }
+
+    #[test]
+    fn steering_the_wrong_way_in_a_bend_leaves_the_road_faster() {
+        let dt = 0.05;
+        let mut hands_off = LaneKeeping::new(Some(11));
+        for _ in 0..8 {
+            hands_off.update(dt, 29.0, left_bend(600.0), 0.0, 1.0, "off");
+        }
+        let mut wrong = LaneKeeping::new(Some(11));
+        for _ in 0..8 {
+            wrong.steering = 0.2; // right, out of a left-hander
+            wrong.update(dt, 29.0, left_bend(600.0), 0.0, 1.0, "off");
+        }
+        assert!(
+            wrong.offset > hands_off.offset,
+            "steering out of the bend must go wider than hands off: {} vs {}",
+            wrong.offset,
+            hands_off.offset
+        );
+    }
+
+    #[test]
+    fn a_tighter_bend_pulls_wide_faster_than_a_gentle_one() {
+        // Curvature is the road's own geometry, so this falls out rather than
+        // being a severity number somebody chose. Sampled early, because at
+        // highway speed BOTH bends have the truck off the road in a couple of
+        // seconds if nobody steers -- which is itself the point.
+        let dt = 0.05;
+        let mut gentle = LaneKeeping::new(Some(5));
+        let mut tight = LaneKeeping::new(Some(5));
+        for _ in 0..8 {
+            gentle.update(dt, 29.0, left_bend(2000.0), 0.0, 1.0, "off");
+            tight.update(dt, 29.0, left_bend(400.0), 0.0, 1.0, "off");
+        }
+        assert!(
+            tight.offset > gentle.offset,
+            "tight {} should be wider than gentle {}",
+            tight.offset,
+            gentle.offset
+        );
+    }
+
+    #[test]
+    fn ice_understeers_so_the_wheel_buys_less_turn() {
+        let mut dry = LaneKeeping::new(Some(3));
+        let mut icy = LaneKeeping::new(Some(3));
+        let dt = 0.1;
+        for _ in 0..40 {
+            dry.steering = -0.5;
+            icy.steering = -0.5;
+            dry.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
+            icy.update(dt, 29.0, 0.0, 0.0, 0.25, "off");
+        }
+        assert!(
+            dry.offset < icy.offset,
+            "dry should have turned further left than ice: {} vs {}",
+            dry.offset,
+            icy.offset
+        );
+    }
+
+    #[test]
+    fn full_lane_keeping_still_pins_the_truck_and_its_heading() {
+        let mut lane = LaneKeeping::new(Some(1));
+        lane.offset = 0.9;
+        lane.yaw_rad = 0.3;
+        run_lane(&mut lane, 5.0, left_bend(400.0), 1.0, "full");
+        assert_eq!(lane.offset, 0.0);
+        assert_eq!(lane.yaw_rad, 0.0);
     }
 
     #[test]
@@ -280,14 +512,34 @@ mod tests {
 
     #[test]
     fn test_drift_and_steering_correction() {
+        // Ported from the old drift model, which shoved the POSITION. A
+        // heading is what carries the truck off line now, so the drift starts
+        // as one: a few degrees off the road's direction, the way a gust or a
+        // moment's inattention leaves it.
+        let dt = 0.05;
         let mut lane = LaneKeeping::new(Some(7));
-        run_lane(&mut lane, 12.0, 1.0, 0.0, "off");
-        assert!(lane.offset.abs() > 0.4);
-        for _ in 0..100 {
-            lane.steering = (-lane.offset * 2.0).clamp(-1.0, 1.0);
-            lane.update(0.1, 29.0, 0.0, 0.0, "off");
+        lane.yaw_rad = 0.05;
+        for _ in 0..40 {
+            lane.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
         }
-        assert!(lane.offset.abs() < 0.25);
+        let wandered = lane.offset.abs();
+        assert!(
+            wandered > 0.4,
+            "the heading should have carried it off line"
+        );
+
+        // Answering it with the wheel brings it back. The yaw term has to
+        // dominate: at highway speed the heading is what moves the truck, so
+        // a controller watching position alone chases its own overshoot.
+        for _ in 0..600 {
+            lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
+            lane.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
+        }
+        assert!(
+            lane.offset.abs() < wandered * 0.5,
+            "steering back should recover most of it: {} from {wandered}",
+            lane.offset
+        );
     }
 
     #[test]
@@ -315,7 +567,7 @@ mod tests {
         lane.steering = -1.0; // hold left
         let mut crossed = 0;
         for _ in 0..200 {
-            lane.update(0.1, 29.0, 0.0, 0.0, "off");
+            lane.update(0.1, 29.0, 0.0, 0.0, 1.0, "off");
             if lane.crossed != 0 {
                 crossed = lane.crossed;
                 break;
@@ -334,7 +586,7 @@ mod tests {
         lane.steering = -1.0;
         let mut fired = false;
         for _ in 0..400 {
-            if lane.update(0.1, 29.0, 0.0, 0.0, "off") {
+            if lane.update(0.1, 29.0, 0.0, 0.0, 1.0, "off") {
                 fired = true;
                 break;
             }

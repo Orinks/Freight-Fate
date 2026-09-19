@@ -10,6 +10,8 @@
 
 ### Changed
 
+- **The truck has a heading now, so steering turns it instead of sliding it sideways.** Leave the wheel alone in a bend and you run wide, the way a real truck does.
+
 - **The engine pans the way you must turn, and comes back to centre as you turn.** Steer toward it until it goes quiet. It is centred again once you are through.
 
 - **Steering the wrong way in a turn leans the engine harder.** Going wrong is now something you hear straight away, not once you reach the lane line.

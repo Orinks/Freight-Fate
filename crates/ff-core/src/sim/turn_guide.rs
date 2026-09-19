@@ -37,6 +37,8 @@
 //! only number that is not read off the road is [`MIN_NEEDED_S`], which keeps
 //! a near-stationary truck from dividing by a speed of zero.
 
+use super::lane_guidance::{DRIFT_SLEEP, DRIFT_WAKE};
+
 /// Below this the lean is centred: a hair of residual demand is not worth
 /// moving the engine for, and it would chatter around the null.
 pub const DEADBAND: f64 = 0.02;
@@ -167,6 +169,14 @@ pub struct TurnGuide {
     /// Set while a turn is open, cleared when it ends, so a new turn starts
     /// from a full lean rather than inheriting the last one's progress.
     open: bool,
+    /// Whether the DRIFT half of the lean is currently speaking.
+    ///
+    /// Gated on the same wake and sleep thresholds `lane_guidance` uses, and
+    /// for the reason its header gives: silence is centred. Without this the
+    /// correction chased ordinary lane wander and the engine stepped about
+    /// once a second the whole length of a straight road -- heard on AZ-260,
+    /// 2026-09-18, which is what driving it was for.
+    drift_awake: bool,
 }
 
 impl TurnGuide {
@@ -203,6 +213,28 @@ impl TurnGuide {
         self.pan()
     }
 
+    /// The drift half of the lean, asleep until the wander is a real drift.
+    ///
+    /// Hysteresis, not a single threshold: woken at `DRIFT_WAKE` and only
+    /// quiet again back inside `DRIFT_SLEEP`, so a truck sitting on the wake
+    /// line does not switch the correction on and off.
+    fn drift_correction(&mut self, lane_offset: f64) -> f64 {
+        let offset = lane_offset.clamp(-1.0, 1.0);
+        let away = offset.abs();
+        if self.drift_awake {
+            if away < DRIFT_SLEEP {
+                self.drift_awake = false;
+            }
+        } else if away >= DRIFT_WAKE {
+            self.drift_awake = true;
+        }
+        if self.drift_awake {
+            -offset * LANE_TERM
+        } else {
+            0.0
+        }
+    }
+
     /// Where the lean wants to be, before slewing.
     fn target(&mut self, input: TurnInput, dt: f64) -> f64 {
         let Some(shape) = input.shape.filter(|_| !input.past) else {
@@ -210,8 +242,9 @@ impl TurnGuide {
             // on a straight road with a centred truck is silence.
             self.open = false;
             self.steered = 0.0;
-            let correction =
-                (-input.lane_offset.clamp(-1.0, 1.0) * LANE_TERM).clamp(-MAX_LEAN, MAX_LEAN);
+            let correction = self
+                .drift_correction(input.lane_offset)
+                .clamp(-MAX_LEAN, MAX_LEAN);
             return if input.inverted {
                 -correction
             } else {
@@ -249,8 +282,9 @@ impl TurnGuide {
         let by_road = (1.0 - input.progress.clamp(0.0, 1.0)).clamp(0.0, 1.0);
         let remaining = by_wheel.min(by_road);
         let owed = shape.side.sign() * TURN_LEAN * approach * remaining;
-        // The lane error rides on top, pointing the way that corrects it.
-        let correction = -input.lane_offset.clamp(-1.0, 1.0) * LANE_TERM;
+        // The lane error rides on top, pointing the way that corrects it --
+        // once the drift is worth reporting at all.
+        let correction = self.drift_correction(input.lane_offset);
         let target = (owed + correction).clamp(-MAX_LEAN, MAX_LEAN);
         if input.inverted {
             -target
@@ -456,6 +490,78 @@ mod tests {
             done, 0.0,
             "the corner was used up; the lean must be centred"
         );
+    }
+
+    #[test]
+    fn ordinary_lane_wander_leaves_the_engine_alone() {
+        // Silence is centred. Driven on AZ-260 the correction had no wake
+        // threshold at all, so it chased the wander model and the engine
+        // stepped about once a second down a dead straight road -- which for
+        // a driver listening to it for hours is the opposite of help.
+        let mut guide = TurnGuide::new();
+        for offset in [0.0, 0.1, -0.2, 0.3, -0.35, 0.2] {
+            let pan = run(
+                &mut guide,
+                TurnInput {
+                    shape: None,
+                    to_start_mi: f64::INFINITY,
+                    past: false,
+                    steering: 0.0,
+                    speed_mph: 55.0,
+                    lane_offset: offset,
+                    inverted: false,
+                    progress: 0.0,
+                },
+                0.5,
+            );
+            assert_eq!(pan, 0.0, "wander of {offset} woke the lean");
+        }
+    }
+
+    #[test]
+    fn a_real_drift_wakes_the_lean_and_holds_it_until_the_truck_is_back() {
+        let mut guide = TurnGuide::new();
+        let straight = TurnInput {
+            shape: None,
+            to_start_mi: f64::INFINITY,
+            past: false,
+            steering: 0.0,
+            speed_mph: 55.0,
+            lane_offset: 0.0,
+            inverted: false,
+            progress: 0.0,
+        };
+        // Past the wake line, it speaks.
+        let woken = run(
+            &mut guide,
+            TurnInput {
+                lane_offset: 0.5,
+                ..straight
+            },
+            1.0,
+        );
+        assert!(woken < -0.1, "a real drift must lean; got {woken}");
+        // Coming back but not yet centred, it KEEPS speaking -- hysteresis,
+        // or a truck sitting on the line would switch it on and off.
+        let recovering = run(
+            &mut guide,
+            TurnInput {
+                lane_offset: 0.35,
+                ..straight
+            },
+            1.0,
+        );
+        assert!(recovering < 0.0, "it let go too early: {recovering}");
+        // Back inside the centred band, it sleeps again.
+        let settled = run(
+            &mut guide,
+            TurnInput {
+                lane_offset: 0.1,
+                ..straight
+            },
+            1.0,
+        );
+        assert_eq!(settled, 0.0);
     }
 
     #[test]

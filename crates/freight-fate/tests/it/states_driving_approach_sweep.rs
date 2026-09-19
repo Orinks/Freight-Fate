@@ -317,6 +317,13 @@ fn arrive_with(
     harness.app.ctx.settings.destination_approach_assist = true;
     harness.app.ctx.settings.speed_keeper = true;
     harness.app.ctx.settings.automatic_transmission = true;
+    // Lane keeping holds the WHEEL; this sweep is about the assist that holds
+    // the PEDALS. They were the same question while steering was a nudge on
+    // the truck's position, and stopped being one when the lane model grew a
+    // heading (2026-09-18): a truck nobody steers now genuinely leaves the
+    // road, which is the point of that change and not this file's subject.
+    // Every run here would otherwise measure whether a ghost can steer.
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
     let mut route_setup = RouteSetup::seeded(4242)
         .named("Approach Sweep")
         .destination_location(&destination.location);
@@ -948,6 +955,10 @@ fn arrive_from_the_sign(
     harness.app.ctx.settings.route_transition_assist = true;
     harness.app.ctx.settings.speed_keeper = true;
     harness.app.ctx.settings.automatic_transmission = true;
+    // "Hands off" here means no PEDAL and no wheel input from the test; lane
+    // keeping is what holds the wheel, and since the lane model grew a heading
+    // it has to be on for a truck nobody steers to stay on the road.
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
     let mut route_setup = RouteSetup::seeded(4242)
         .named("Sign Release")
         .destination_location(&destination.location);

@@ -99,7 +99,7 @@ pub use ff_core::settings::{acc_gap_seconds, ACC_GAP_CHOICES, ACC_GAP_DEFAULT};
 pub use ff_core::sim::driving_modes::tuning_for_time_scale;
 pub use ff_core::sim::enforcement_observe::OBSERVE_LEEWAY_MPH;
 pub use ff_core::sim::hos::{clock_text, is_night, time_of_day};
-pub use ff_core::sim::lane::{lane_label, lane_phrase, LaneKeeping, CURVE_RATE};
+pub use ff_core::sim::lane::{lane_label, lane_phrase, LaneKeeping};
 pub use ff_core::sim::lane_guidance::LaneGuidance;
 pub use ff_core::sim::pedal_latch::PedalLatch;
 pub use ff_core::sim::timezones::city_zone;

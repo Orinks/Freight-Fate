@@ -2,6 +2,7 @@
 //! changes, crossings, a road that narrows under the truck, coned-off lanes,
 //! and keep-right pressure.
 
+use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft};
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::trip_models::Zone;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
@@ -61,17 +62,20 @@ impl DrivingState {
                 // inertia to pull wide); worn or icy grip means less resistance.
                 let load =
                     1.5f64.min(self.trip.truck.gross_mass_kg() / self.trip.truck.specs.mass_kg);
-                let grip_factor = 1.0f64.min(self.trip.truck.effective_grip());
-                // Raw severity only: the lane model applies CURVE_RATE itself.
-                // Scaling here too made every bend ~8x weaker than designed --
-                // a 30-advisory curve at 45 could be no-hands (owner-caught on
-                // Camp Verde-Payson: "didn't hear or have to turn").
-                let curve_push = tightness * (1.0 + excess * 0.05) * load / 0.2f64.max(grip_factor);
-                // Centrifugal force pushes the truck OUTSIDE the curve: a left
-                // curve pushes right (positive offset), a right curve pushes left
-                // (negative offset). The lane model's positive offset = rightward.
-                let direction = if bend.direction == 'L' { 1.0 } else { -1.0 };
-                curve = curve_push * direction;
+
+                // The lane model carries a HEADING now, so running wide is
+                // not a push applied to the position -- it is what happens by
+                // itself when the road turns and the truck does not. What it
+                // wants from here is the road's real geometry: one over the
+                // radius, signed positive when the road bends right.
+                //
+                // `tightness`, `load` and `excess` stay computed because the
+                // slip warning below reads them, and because a tighter bend at
+                // a higher speed rotates the road faster under the truck all
+                // on its own -- which the curvature already says.
+                let _ = (tightness, load);
+                let direction = if bend.direction == 'L' { -1.0 } else { 1.0 };
+                curve = direction / (bend.min_radius_ft as f64).max(1.0);
                 // Spoken slip warning: entering a curve well above advisory
                 // pushes the truck toward the shoulder and the driver should
                 // know why.
@@ -86,8 +90,20 @@ impl DrivingState {
             }
             None => curve = 0.0,
         }
-        if self.ramp_mi.is_some() {
-            curve += 0.35;
+        if self.ramp_mi.is_some() && !self.surface_chain {
+            // A ramp peels off the mainline and keeps bending. Its radius is
+            // DERIVED from the speed it is posted at, through the same AASHTO
+            // point-mass control the curve bake uses, rather than a flat push
+            // invented for the old model.
+            //
+            // NOT on the facility street chain, which keeps `ramp_mi` set long
+            // after the ramp is behind the truck: a ramp's curvature held over
+            // city streets bent a road that is straight, and with nobody
+            // steering it walked the truck into the median and wrote it off
+            // (every chain destination in the approach sweep, first run of the
+            // heading model).
+            let ramp_radius = min_radius_ft(self.armed_ramp_mph(None));
+            curve += 1.0 / ramp_radius.max(1.0);
         }
         if active.is_none() && self.curve_slip_active {
             self.curve_slip_active = false;
@@ -112,8 +128,14 @@ impl DrivingState {
                 }
                 None => {
                     if curve != 0.0 && !route_transition_owns_ramp {
-                        // Fallback: old terrain- or ramp-based heuristic
-                        let mut heuristic = 50.0 - curve.abs() * 20.0;
+                        // No baked bend here, so the geometry the lane model
+                        // is steering to is all there is: a ramp's own radius.
+                        // Priced with the same advisory the curve bake uses,
+                        // rather than the old "50 minus a push times twenty",
+                        // which stopped meaning anything once `curve` became a
+                        // curvature instead of a shove.
+                        let radius_ft = 1.0 / curve.abs();
+                        let mut heuristic = advisory_with_bank_mph(radius_ft, RAMP_MAX_MPH) as f64;
                         if self.curve_assist_active {
                             heuristic -= 3.0;
                         }
@@ -345,7 +367,8 @@ impl DrivingState {
         self.transition_assist_active = transition_assisting;
         let wind = self.trip.weather.effects().wind;
         let speed_mps = self.trip.truck.velocity_mps;
-        let off_road_event = self.lane.update(dt, speed_mps, curve, wind, &mode);
+        let grip = self.trip.truck.effective_grip();
+        let off_road_event = self.lane.update(dt, speed_mps, curve, wind, grip, &mode);
         if off_road_event {
             if !ctx.settings.lane_departure_warning {
                 return;
