@@ -344,6 +344,16 @@ its status or release decision.
       from the curve call, the curve servo and the cargo model by design,
       so the driver was told about a bend no assist acts on (I-30 to I-35
       at Fort Worth). D still answers with the connector's safe speed.
+- [x] The curve servo holds a bend on a downgrade on one application
+      (2026-09-18). Inside its hold band it let go, the hill carried the
+      truck back over, and the snub came back as a new application ten
+      times a second: 125 psi to the spring brakes in one bend of AZ-260,
+      Camp Verde to Payson. It now settles to the grade's own push and
+      stays there.
+- [ ] A bend called "just ahead" arms the servo with 0.03 mile to shed in,
+      and on the compressed clock the approach profile asks for a full
+      application to take off 3 mph (same AZ-260 trace). Price a late arm
+      on the real clock, or arm the servo before the call is spoken.
 
 ### September 12 live data and dispatch
 

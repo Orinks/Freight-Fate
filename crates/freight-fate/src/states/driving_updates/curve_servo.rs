@@ -125,28 +125,46 @@ impl DrivingState {
         // metres there arrives over the number. The keeper prices its ease
         // the same way (`keeper_ease_mi`).
         let scale = self.trip.effective_time_scale().max(1.0);
-        let needed = if position < servo.start_mi {
+        let needed: Option<f64> = if position < servo.start_mi {
             // The approach: the uniform shed that lands the truck ON the
             // number at the bend's start. Recomputed every frame against the
             // road left, so a truck coasting slower than the profile sees
             // its demand climb and the pedal follow.
             let remaining_m = ((servo.start_mi - position) * METERS_PER_MILE).max(0.5);
-            0.0f64.max(v * v - target * target) * scale / (2.0 * remaining_m)
+            (v > target).then(|| (v * v - target * target) * scale / (2.0 * remaining_m))
         } else if v > target + CURVE_SERVO_HOLD_BAND_MPH / MPH_PER_MPS {
             // Inside the chain and over the number: the keeper's own snub
             // rate, net of the grade like everything else here. A profile to
             // the chain's END would let the truck ride the whole corner over
             // its advisory and only arrive at the number where it no longer
             // matters.
-            KEEPER_SNUB_DECEL_MPS2 * scale
+            Some(KEEPER_SNUB_DECEL_MPS2 * scale)
+        } else if road < 0.0
+            && (v > target
+                || (servo.brake > 0.0 && v > target - CURVE_SERVO_HOLD_BAND_MPH / MPH_PER_MPS))
+        {
+            // Inside the band with GRAVITY pushing. "The road's own drag
+            // holds the rest" is only true where the road is taking speed
+            // off; on a downgrade it is adding it, so letting go here handed
+            // the truck straight back to the hill, which carried it over the
+            // band again within a few frames, and the snub above came back
+            // as a fresh application each time -- ten a second down the 6.1
+            // percent pitch into the AZ-260 hairpin, 125 psi to the spring
+            // brakes in one bend (owner's drive, 2026-09-18; bench trace:
+            // 0.364, released, 0.364, released, six frames apart).
+            //
+            // So on a downgrade the pedal settles to what the hill is asking
+            // for -- nothing to shed, so `needed - road` below comes to exactly
+            // the grade's push -- and STAYS there. Taken up once the truck is
+            // over the number, kept until it is a band under it, so the two
+            // edges are hysteresis and not one line decided twice.
+            Some(0.0)
         } else {
-            0.0
+            None
         };
-        let applied = if v > target && needed > 0.0 {
+        let applied = needed.map_or(0.0, |needed| {
             arrival_servo_brake(servo.brake, needed - road, &self.trip.truck)
-        } else {
-            0.0
-        };
+        });
         if let Some(servo) = self.curve_servo.as_mut() {
             servo.brake = applied;
         }

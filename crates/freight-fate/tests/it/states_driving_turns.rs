@@ -2053,6 +2053,48 @@ fn test_the_drivers_own_brake_takes_the_bend_back_from_the_servo() {
 }
 
 #[test]
+fn test_the_servo_holds_a_bend_on_a_downgrade_on_one_application() {
+    // Inside a 40 mph bend on a 6.1 percent downgrade, the truck a hair over
+    // the hold band. The servo used to snub for a frame, let go the moment
+    // the truck was back under the band, and get it handed straight back by
+    // the hill: a fresh application ten times a second, 125 psi to the spring
+    // brakes before the bend was over (owner's AZ-260 drive, 2026-09-18). The
+    // air system charges every RISE of the pedal, so the rises are what is
+    // counted here.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_hot_bend_ahead(&mut app, &mut d, 41.5, 40, 400, 0.5);
+    let here = d.trip.position_mi;
+    d.arm_curve_servo(40.0, here - 0.1, here + 5.0, false);
+
+    let mut applied_total = 0.0;
+    let mut last = 0.0;
+    for _ in 0..(45.0 / DT) as usize {
+        d.trip.truck.grade = -0.061; // the trip normally stamps this each frame
+        d.trip.truck.brake = 0.0; // no pedal: the servo is the only thing braking
+        d.update_curve_speed_servo(&app.ctx);
+        applied_total += (d.trip.truck.brake - last).max(0.0);
+        last = d.trip.truck.brake;
+        d.trip.truck.update(DT);
+    }
+
+    assert!(
+        applied_total < 3.0,
+        "the pedal was re-made over and over: {applied_total:.1} applications in one bend"
+    );
+    assert!(
+        !d.trip.truck.air_low_warning(),
+        "the bend drained the tanks to {:.0} psi",
+        d.trip.truck.air_pressure_psi()
+    );
+    assert!(
+        d.trip.truck.speed_mph() < 40.0 + 2.0,
+        "and the hill got away from it: {:.1} mph",
+        d.trip.truck.speed_mph()
+    );
+}
+
+#[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
     // driver holding the throttle into the same bend gets the old drift
