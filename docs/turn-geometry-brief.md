@@ -37,45 +37,54 @@ fallbacks with no coordinates at all, so they can never carry an angle. Only
 the 1,077 turn-level city-service routes can. Do not read a low ratio as a
 bake failure without checking that denominator first.
 
-### The one open defect this exposed -- READ THIS BEFORE THE NEXT SESSION
+### The defect this exposed -- FIXED 2026-09-18
 
-Two tests fail on this branch and they are the same bug:
+Two tests failed on this branch and they were the same bug:
 `states_driving_facility::test_the_approach_assist_stops_the_truck_on_a_facility_street_chain`
 and `states_driving_approach_sweep::test_the_approach_assist_stops_the_truck_at_every_kind_of_destination`.
+The destination approach assist ran the truck out of air on a facility street
+chain, set the spring brakes, and parked it short of the gate, at every
+destination.
 
-The destination approach assist now runs the truck out of air on a facility
-street chain, sets the spring brakes, and parks it short of the gate. It does
-this at EVERY destination, so it is not a fixture artifact.
+The first diagnosis blamed `keeper_snub_brakes` cycling across its 1.5/1.0
+mph band. **That was wrong**, and the instrumented re-run says so plainly:
+over the 1,200 frames of the drain, `keeper_snub` rose ONCE while the pedal
+rose 179 times. The snub does not cycle. It latches and stays latched.
 
-Measured, not guessed (instrumented run, Aberdeen Company Yard):
+The real mechanism is the latch outliving the frames that apply it.
+`update_keeper` returns early whenever the driver is on the accelerator or
+the automatic has an open driveline mid-shift, and `update_frame`'s input
+pass -- which ramps `truck.brake` down every frame nobody commands it --
+runs BEFORE it. So on an overridden frame the held application was not
+paused, it was dropped; the next frame the keeper reached its controller it
+re-made the same application from zero, and `consume_brake_air`, which
+charges `air_loss_primary_per_application_psi` on every RISING edge, billed
+4.5 psi again. Measured on the Aberdeen chain: nine re-applications a second,
+about eight psi a second against the four the compressor makes at idle, 308
+rising edges over the chain. FMCSA's CDL manual names the same thing on a
+real truck -- fanning the brakes spends reservoir air the compressor cannot
+replace, and the spring brakes come on.
 
-* The truck sheds cleanly for the corner and reaches about 9 mph with 120 psi.
-* It then sits at 7.3 mph and the air falls about 3 psi per second with the
-  service brake reading ZERO at every sample and a peak of 0.20 between them.
-* 125 psi to the 40 psi spring-brake trip in about 20 seconds. The keeper is
-  cancelled by the emergency application, the throttle pins at 1.00 against
-  set brakes, and the truck never moves again.
+The corner price is what put the truck where it shows, not what broke it. At
+the old 15 mph corner floor the truck rode above its eased target with no
+snub latched; at 9.35 it settles right on the release edge with one latched.
 
-The mechanism is `keeper_snub_brakes` cycling. Its band is fixed at
-`KEEPER_SNUB_OVER_MPH` 1.5 over and `KEEPER_SNUB_UNDER_MPH` 1.0 under: a
-couple of percent of a highway limit, but a quarter of a 9 mph corner. Each
-cycle is a fresh application and `air_loss_primary_per_application_psi` is
-4.5, so roughly one cycle a second empties the tanks. The function's own
-comment already says "Easing and re-pressing is what the air system charges
-for" -- the hysteresis was built for exactly this and is simply sized for
-highway numbers.
+Fixed in two halves, and neither works alone. The pedal write moved into
+`apply_keeper_snub` and is re-asserted from `update_frame` beside the other
+assists' floors -- the treatment `apply_hazard_brake` and the arrival's
+pedals already have -- so one held snub costs one application however many
+frames the keeper spends overridden. And a driver on the accelerator now
+releases the snub: `keeper_snub_brakes` re-evaluates the latch only on frames
+the keeper reaches its controller, so re-asserting a pedal it can no longer
+judge deadlocks the truck (measured: Aberdeen at rest at 0.01 mph with the
+snub held, ten thousand feet short). The release is also the rule the keeper
+already applied to its own throttle, now applied to the driver's.
 
-Widening that band by a fraction of the target was tried and does NOT fix it,
-because the reason the truck crosses the band at all is that the automatic
-cannot hold a steady 9 mph -- it hunts in gear at that speed. So the real
-question is what the truck should DO at a street-corner target: creep in a low
-gear, hold on the throttle alone and keep the drums out of it (the rule
-`update_lane` already applies to ramps -- "lift first and let drag shed the
-excess; holding a service floor here spent air all the way down the ramp"), or
-have the keeper decline targets below some speed and hand the pedals back.
+No threshold was changed: the snub band, the 4.5 psi, and the corner price
+are all exactly as they were.
 
-That is a feel decision and it wants the owner at the wheel, which is why it
-was left rather than guessed at. Nothing was tuned to make a test pass.
+What the truck should FEEL like holding roughly 8 mph through a chain of
+square corners is still the owner's call and is still untouched.
 
 ## What was wrong (the 2026-08-21 report)
 

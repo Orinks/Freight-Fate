@@ -10,6 +10,8 @@
 
 ### Changed
 
+- **Pressing the accelerator now lets the speed keeper's brake off.** The keeper used to hold its brake against you until you lifted.
+
 - **A turn now takes the speed its own shape allows.** A sweeping turn lets you carry more speed than a tight one into a yard.
 
 - **A turn is called out even when you are already crawling.** Turns used to go unannounced while the speed keeper held you at fifteen.
@@ -38,6 +40,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **The speed keeper no longer runs you out of air on the way to a gate.** It used to pump the brakes until the parking brake set itself and stranded you short of the yard.
 
 - **z103.com plays music again.** The station moved its stream and the old address played only a sign-off message.
 

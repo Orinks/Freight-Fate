@@ -160,6 +160,17 @@ pub struct Arrival {
     pub min_creep_gear: Option<i32>,
     /// A dead engine at the gate would make a successful position misleading.
     pub stalled: bool,
+    /// Lowest service-brake pressure seen anywhere on the approach, psi.
+    pub min_air_psi: f64,
+    /// This truck's own low-air warning pressure, so a case can ask whether
+    /// the approach ever got near the cliff without naming a number of its
+    /// own.
+    pub air_low_warning_psi: f64,
+    /// How many times the pedal ROSE on the way in -- the air system charges
+    /// a whole application for each one, so this is what the approach spent.
+    /// Diagnostic, not a bar: what a chain costs depends on how many corners
+    /// it turns.
+    pub brake_applications: usize,
     /// Every line the driver heard.
     pub heard: Vec<String>,
 }
@@ -176,7 +187,8 @@ impl Arrival {
         format!(
             "{} ({}, {}, {}, truck={} torque={:.0} Nm gross={:.0} kg brake={:.2} m/s2): ready={} \
              assist_spoke={} on_chain={} speed={:.2} mph, {:.0} ft short of the gate, creep hold \
-             {:.3}, creep speed {:?}, creep gear {:?}, stalled={}\nlast heard: {:#?}",
+             {:.3}, creep speed {:?}, creep gear {:?}, stalled={}, air floor {:.1} psi over {} \
+             brake applications\nlast heard: {:#?}",
             destination.location,
             destination.city,
             destination.state,
@@ -194,6 +206,8 @@ impl Arrival {
             self.min_creep_speed_mph,
             self.min_creep_gear,
             self.stalled,
+            self.min_air_psi,
+            self.brake_applications,
             tail,
         )
     }
@@ -208,14 +222,26 @@ impl Arrival {
 /// is the posted number, eased to the advised speed for a corner in play --
 /// a driver who hears "turn right, ten miles an hour" and holds twenty-nine
 /// through it is testing the missed-turn loop-back, not the assist.
+///
+/// "In play" is the game's own word for it, and `turn_cue_in_play` is the
+/// game's own answer: an unresolved corner within its commit tail, which is
+/// the corner the truck is still taking. This used to narrow that to corners
+/// whose milepost was still ahead, so the moment the front wheels crossed the
+/// corner -- with the "turn right now, advise nine" still being spoken, and
+/// the judgement of the corner still a grace period away -- the driver here
+/// went back to the posted number and floored it. Measured on the Abilene
+/// chain: 8.6 mph to 19.8 in the last seven hundred feet, the corner then
+/// failed on the speed the driver had just put on, and the loop-back set the
+/// truck down on the gate still doing 19.8. That is the loop-back being
+/// tested, which this driver exists not to do.
 pub fn driver_target_mph(d: &mut DrivingState) -> f64 {
     if d.ramp_mi.is_some() {
         return d.armed_ramp_mph(None);
     }
     let posted = d.trip.speed_limit_at(d.trip.position_mi).0;
     match d.turn_cue_in_play() {
-        Some(cue) if cue.at_mi >= d.trip.position_mi => posted.min(d.turn_speed_mph(&cue)),
-        _ => posted,
+        Some(cue) => posted.min(d.turn_speed_mph(&cue)),
+        None => posted,
     }
 }
 
@@ -380,6 +406,10 @@ fn arrive_with(
     let mut max_creep_hold_throttle = 0.0f64;
     let mut min_creep_speed_mph: Option<f64> = None;
     let mut min_creep_gear: Option<i32> = None;
+    let mut min_air_psi = f64::INFINITY;
+    let mut air_low_warning_psi = 0.0f64;
+    let mut brake_applications = 0usize;
+    let mut last_brake = 0.0f64;
     // Ten minutes for each mile of city streets at a crawl, and no more: a
     // truck that has not arrived by then is not going to. Per mile, because
     // the streets are as long as the facility is far: this was a flat ten
@@ -414,6 +444,23 @@ fn arrive_with(
             }
         }
         on_chain |= now_on_chain;
+        // What the approach cost the tanks, every frame of it. An arrival that
+        // is measured only on where the truck ENDED cannot tell "stopped at
+        // the gate" from "stopped wherever the spring brakes caught it", and
+        // that is exactly the shape the 2026-09-18 defect had.
+        let (air_psi, pedal, warning_psi) = harness.read_drive(|d| {
+            (
+                d.truck().air_pressure_psi(),
+                d.truck().brake.clamp(0.0, 1.0),
+                d.truck().specs.air_low_warning_psi,
+            )
+        });
+        min_air_psi = min_air_psi.min(air_psi);
+        air_low_warning_psi = warning_psi;
+        if pedal > last_brake + 1e-9 {
+            brake_applications += 1;
+        }
+        last_brake = pedal;
         let (remaining, speed, hold_throttle, gear) = harness.read_drive(|d| {
             (
                 d.ramp_mi.unwrap_or_else(|| d.trip.remaining_miles()),
@@ -522,6 +569,9 @@ fn arrive_with(
         min_creep_speed_mph,
         min_creep_gear,
         stalled,
+        min_air_psi,
+        air_low_warning_psi,
+        brake_applications,
         heard,
     }
 }

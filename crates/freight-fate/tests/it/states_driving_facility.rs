@@ -699,6 +699,49 @@ fn test_the_approach_assist_stops_the_truck_on_a_facility_street_chain() {
 }
 
 #[test]
+fn test_the_approach_assist_still_has_its_air_at_the_gate() {
+    // A facility chain is a string of corners, and the speed keeper works
+    // them with the service brakes. The air system charges a whole
+    // application every time the pedal RISES and only leakage while it is
+    // held, so the assist can only afford the chain if each snub is ONE
+    // application.
+    //
+    // It was not. `update_keeper` returns early on a frame the driver is on
+    // the accelerator or the automatic is mid-shift, and the input pass at
+    // the top of the frame had already bled the pedal the keeper left behind
+    // -- so the same snub was re-made, and re-charged, nine times a second.
+    // A hundred and twenty-five psi to the spring-brake trip in twenty
+    // seconds, and the truck set its own parking brakes half a mile short of
+    // Aberdeen Company Yard with the delivery unfinishable (2026-09-18).
+    //
+    // Arriving is not enough to catch that: the truck can arrive on the last
+    // of its air, or be stopped by the spring brakes ON the gate and read as
+    // parked there. This case measures the tanks the whole way in.
+    // The bar is the truck's OWN low-air warning, not a number chosen here:
+    // an approach the driver never even hears an air warning on is an
+    // approach that never spent the air, and the warning sits a long way
+    // above the spring-brake trip, so the case fails while the truck is
+    // still drivable rather than only once it has already stranded itself.
+    let (chain, _) = destinations(get_world(), FEW);
+    for destination in &chain {
+        let arrival = arrive(destination);
+        assert!(arrival.on_chain, "{}", arrival.report(destination));
+        // A run that sampled nothing leaves the floor at infinity and would
+        // pass the real bar below without measuring anything at all.
+        assert!(
+            arrival.min_air_psi.is_finite(),
+            "{}",
+            arrival.report(destination)
+        );
+        assert!(
+            arrival.min_air_psi > arrival.air_low_warning_psi,
+            "{}",
+            arrival.report(destination)
+        );
+    }
+}
+
+#[test]
 fn test_the_approach_assist_stops_within_a_truck_length_of_the_gate() {
     // The other half of the Spokane report: stopping means stopping AT the
     // gate, not a city block past it.
