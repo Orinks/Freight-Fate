@@ -1402,8 +1402,8 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     ),
     Achievement(
         "fifty_five_mph",
-        "The Double Nickel, Retired",
-        "You held it at exactly fifty-five for a solid mile, the way Jim Kitchen's Trucker still asks of its drivers. Congress let that limit go in 1995. Out here, use the whole speedometer.",
+        "Wrong Game, No Limit",
+        "It isn't the mid-90s anymore like Jim Kitchen had you believe in Trucker. It's okay, floor it and hit 88.",
         "hidden",
         "Sammy Hagar - I Can't Drive 55",
         hidden=True,
@@ -1411,9 +1411,9 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "ten_four_day",
         "Copy That, October",
-        "A load settled on the fourth of October, which every driver on the channel reads as ten-four. They spent the whole day acknowledging each other over nothing at all.",
+        "A load settled on the fourth of October, which every driver reads as ten-four. Some white knight on the channel started it, and by noon the whole band was saying the date back.",
         "hidden",
-        "C.W. McCall - Convoy",
+        "Cledus Maggard and the Citizen's Band - The White Knight",
         hidden=True,
     ),
 )

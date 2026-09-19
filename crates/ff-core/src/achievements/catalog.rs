@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "5fe0a2b9146fb237a4b2a512e476c2b1c9d4b82bc82311325fe784976ece03ea";
+pub const CATALOG_DIGEST: &str = "afd69d7a9418d2e80c02235fded66a0a0d5f2e7c72c434d3b629d7831f986b03";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -1505,8 +1505,8 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
     },
     Achievement {
         id: "fifty_five_mph",
-        name: "The Double Nickel, Retired",
-        description: "You held it at exactly fifty-five for a solid mile, the way Jim Kitchen's Trucker still asks of its drivers. Congress let that limit go in 1995. Out here, use the whole speedometer.",
+        name: "Wrong Game, No Limit",
+        description: "It isn't the mid-90s anymore like Jim Kitchen had you believe in Trucker. It's okay, floor it and hit 88.",
         category: "hidden",
         inspiration: "Sammy Hagar - I Can't Drive 55",
         hidden: true,
@@ -1514,9 +1514,9 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
     Achievement {
         id: "ten_four_day",
         name: "Copy That, October",
-        description: "A load settled on the fourth of October, which every driver on the channel reads as ten-four. They spent the whole day acknowledging each other over nothing at all.",
+        description: "A load settled on the fourth of October, which every driver reads as ten-four. Some white knight on the channel started it, and by noon the whole band was saying the date back.",
         category: "hidden",
-        inspiration: "C.W. McCall - Convoy",
+        inspiration: "Cledus Maggard and the Citizen's Band - The White Knight",
         hidden: true,
     },
 ];

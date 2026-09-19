@@ -291,12 +291,30 @@ fn test_the_funny_ones_are_actually_in_the_catalog() {
     // copy is the whole badge, and a reworded one stops being the joke.
     let double_nickel = achievement_by_id("fifty_five_mph").unwrap();
     assert!(double_nickel.hidden);
-    assert!(double_nickel.description.contains("fifty-five"));
-    assert!(double_nickel.description.contains("1995"));
+    // The whole badge is the wink: the game it is winking at, and the number
+    // it sends you to instead -- which is the badge sitting next to it.
+    assert!(double_nickel.description.contains("Jim Kitchen"));
+    assert!(double_nickel.description.contains("88"));
     let ten_four = achievement_by_id("ten_four_day").unwrap();
     assert!(ten_four.hidden);
     assert!(ten_four.description.contains("fourth of October"));
     assert!(ten_four.description.contains("ten-four"));
+    // And it alludes to its own song, which is how the catalog talks. Owner
+    // ruling while it was being written: a fresh one, by an artist the
+    // catalog has not leaned on already -- Convoy is cited twice elsewhere
+    // and Dave Dudley three times over, and a wink shared with three other
+    // badges is not a wink.
+    assert!(ten_four.description.contains("white knight"));
+    let (artist, _) = ten_four.inspiration.split_once(" - ").unwrap();
+    assert_eq!(
+        ACHIEVEMENTS
+            .iter()
+            .filter(|badge| badge.inspiration.starts_with(artist))
+            .count(),
+        1,
+        "{} shares its artist with another badge",
+        ten_four.id
+    );
 }
 
 #[test]
