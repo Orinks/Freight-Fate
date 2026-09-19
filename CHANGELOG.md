@@ -10,6 +10,10 @@
 
 ### Changed
 
+- **A new career starts with the Balanced assists, so the truck helps hold your lane.** You can still feel it steer and take the work back whenever you want.
+
+- **Curve assistance now steers through a bend as well as slowing for it.** It is one setting for one job; lane keeping holds you between the lines the rest of the time.
+
 - **The truck has a heading now, so steering turns it instead of sliding it sideways.** Leave the wheel alone in a bend and you run wide, the way a real truck does.
 
 - **The engine pans the way you must turn, and comes back to centre as you turn.** Steer toward it until it goes quiet. It is centred again once you are through.

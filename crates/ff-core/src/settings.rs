@@ -399,7 +399,16 @@ settings_fields! {
     /// reading rather than renaming the label to match a setting nobody
     /// chose. Existing players are untouched: their saved value migrates to
     /// whatever they already had.
-    lane_keeping: String = "off" => str_checked,
+    ///
+    /// Ships on PARTIAL (owner, 2026-09-18), which makes a fresh install the
+    /// Balanced preset rather than Realistic. The lane model grew a heading
+    /// that day, so steering turns the truck instead of sliding it, and a
+    /// truck nobody steers genuinely leaves the road -- "off" stopped being
+    /// the mild drift it used to be and became a continuous driving task.
+    /// Partial steers for the error while leaving the driver something to
+    /// feel and to fight, where full holds the lane outright and hands over a
+    /// job a new driver never gets to learn.
+    lane_keeping: String = "partial" => str_checked,
     /// How many more times the Lane keeping row explains that it used to be
     /// called Lane drift. Zero by default: a fresh install has nothing to
     /// explain, and only a load that actually found the old key on disk
@@ -432,13 +441,20 @@ settings_fields! {
     /// The shipped defaults now match the realistic preset field for field
     /// -- lane keeping was the only one that did not, and it is the default
     /// the row has been claiming since before it could see that field.
-    driving_assistance_preset: String = "realistic" => str_checked,
+    /// Moved from "realistic" to "balanced" on 2026-09-18 with `lane_keeping`,
+    /// so the row a fresh install shows is still the truth about the ruleset
+    /// it is running -- the whole point of the 2026-08-09 ruling.
+    driving_assistance_preset: String = "balanced" => str_checked,
     automatic_emergency_braking: bool = true => bool_strict,
     lane_departure_warning: bool = true => bool_strict,
     stop_and_go_assist: bool = true => bool_strict,
-    descent_speed_control: String = "realistic" => str_checked,
+    /// Balanced's value: a fresh install is the Balanced preset from
+    /// 2026-09-18, and every field it names has to agree or the row reads
+    /// "custom".
+    descent_speed_control: String = "balanced" => str_checked,
     exit_speed_assist: bool = true => bool_strict,
-    destination_approach_assist: bool = false => bool_strict,
+    /// Balanced's value; see `descent_speed_control` above.
+    destination_approach_assist: bool = true => bool_strict,
     /// An explicit-plan accessibility aid, separate from the realism
     /// presets: T plans a sleep stop, X signals for it, and only then may
     /// this bring the truck to a complete stop at the entrance. Presets

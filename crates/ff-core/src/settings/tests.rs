@@ -112,12 +112,12 @@ fn the_defaults_match_the_python_dataclass() {
         "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
         "real_parking": false, "real_fuel_prices": true,
         "live_weather_controls_calendar": true,
-        "hos_mode": "realistic", "lane_keeping": "off", "lane_keeping_rename_notice_left": 0,
+        "hos_mode": "realistic", "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
         "lane_cue_loudness": "standard", "lane_guide_tone": false,
-        "driving_assistance_preset": "realistic", "automatic_emergency_braking": true,
+        "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
         "lane_departure_warning": true, "stop_and_go_assist": true,
-        "descent_speed_control": "realistic",
-        "exit_speed_assist": true, "destination_approach_assist": false,
+        "descent_speed_control": "balanced",
+        "exit_speed_assist": true, "destination_approach_assist": true,
         "selected_stop_assist": false, "curve_speed_assist": true,
         "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
         "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
@@ -159,7 +159,7 @@ fn the_file_text_is_what_json_dump_wrote() {
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
     assert!(text.ends_with(
         "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \
-         \"steering_assist\": \"realistic\"\n}"
+         \"steering_assist\": \"light\"\n}"
     ));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));
@@ -346,20 +346,24 @@ fn test_driving_assistance_presets_apply_complete_mappings() {
 }
 
 #[test]
-fn test_a_fresh_install_is_the_realistic_preset() {
-    // The shipped defaults ARE the realistic preset, and the row says so.
+fn test_a_fresh_install_is_the_balanced_preset() {
+    // The shipped defaults ARE a named preset, and the row says so -- the
+    // point of the 2026-08-09 ruling, which the preset must keep honouring
+    // whichever preset that is. For months the row read "Realistic" while
+    // lane keeping was fully automated, because the preset could not see that
+    // field, so a player reading the row believed something false.
     //
-    // For months the row read "Realistic" while lane keeping was fully
-    // automated, because the preset could not see that field -- so a player
-    // reading the row believed they were driving the realistic ruleset. This
-    // makes the truck match the label those players have been reading,
-    // rather than renaming the label to match a setting nobody chose.
+    // It moved from Realistic to Balanced on 2026-09-18, when the lane model
+    // grew a heading: "off" stopped being a mild drift and became a
+    // continuous driving task, so shipping it would hand every new driver a
+    // job they cannot yet do. Partial steers for the error and still leaves
+    // them something to feel.
     let mut settings = Settings::default();
-    assert_eq!(settings.lane_keeping, "off");
+    assert_eq!(settings.lane_keeping, "partial");
     assert!(settings.lane_is_manual());
     assert!(!settings.lane_is_automated());
-    assert_eq!(settings.driving_assistance_preset, "realistic");
-    assert_eq!(settings.refresh_driving_assistance_preset(), "realistic");
+    assert_eq!(settings.driving_assistance_preset, "balanced");
+    assert_eq!(settings.refresh_driving_assistance_preset(), "balanced");
 }
 
 #[test]
@@ -474,7 +478,9 @@ fn test_a_fresh_install_hears_no_rename_notice() {
             std::fs::remove_file(&path).unwrap();
         }
         let loaded = Settings::load();
-        assert_eq!(loaded.lane_keeping, "off"); // the realistic default, not the fallback
+        // The shipped default, not the unreadable-value fallback (which is
+        // "full"): a fresh install must land on what the preset promises.
+        assert_eq!(loaded.lane_keeping, "partial");
         assert_eq!(loaded.lane_keeping_rename_notice_left, 0);
         assert!(!loaded.lane_keeping_unreadable);
     });
@@ -540,7 +546,7 @@ fn test_retired_lane_centering_assist_is_dropped_on_load_and_save() {
     // load must ignore it, and the next save must not write it back.
     with_data_dir(|_| {
         write_settings_file(
-            r#"{"lane_centering_assist": true, "lane_keeping": "off", "driving_assistance_preset": "realistic"}"#,
+            r#"{"lane_centering_assist": true, "lane_keeping": "partial", "driving_assistance_preset": "balanced"}"#,
         );
         let loaded = Settings::load();
         assert!(!Settings::FIELD_NAMES.contains(&"lane_centering_assist"));
@@ -966,10 +972,13 @@ fn a_file_that_is_not_an_object_reads_as_an_empty_one() {
         let loaded = Settings::load();
         assert_eq!(loaded.driving_assistance_preset, "custom");
         assert_eq!(loaded.lane_keeping, "full");
+        // Unparseable text is not a file at all, so this reads as a fresh
+        // install and lands on the shipped defaults -- Balanced since
+        // 2026-09-18 -- rather than on the corrupt-value fallback above.
         write_settings_file("{not json");
         let loaded = Settings::load();
-        assert_eq!(loaded.driving_assistance_preset, "realistic");
-        assert_eq!(loaded.lane_keeping, "off");
+        assert_eq!(loaded.driving_assistance_preset, "balanced");
+        assert_eq!(loaded.lane_keeping, "partial");
     });
 }
 

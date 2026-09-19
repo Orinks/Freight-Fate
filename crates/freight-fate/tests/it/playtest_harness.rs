@@ -637,6 +637,14 @@ fn test_realistic_speed_control_transitions_do_not_issue_speeding_fines() {
 fn test_realistic_cruise_eases_for_destination_exit_without_speeding_fine() {
     let mut harness = PlaytestHarness::new();
     harness.app.ctx.settings.hos_mode = "realistic".to_string();
+    // The case is about the REALISTIC ruleset, so it names it rather than
+    // inheriting whatever a fresh install ships -- which moved to Balanced on
+    // 2026-09-18 and took descent control's brake capture with it.
+    harness
+        .app
+        .ctx
+        .settings
+        .apply_driving_assistance_preset("realistic");
     harness.app.ctx.settings.speed_keeper = true;
     harness.app.ctx.settings.automatic_transmission = true;
     harness.app.ctx.settings.time_scale = 10.0;

@@ -102,6 +102,40 @@ pub fn assist_steers(assist: &str) -> bool {
     assist == "partial"
 }
 
+/// The steer angle that exactly tracks a road of this curvature.
+///
+/// The bicycle model solved the other way round: `yaw_rate = v tan(d) / L`
+/// has to equal the rate the road itself turns, `v * curvature`, and the
+/// speed cancels -- so the angle a bend wants is a property of the BEND, not
+/// of how fast you take it. That is what makes turn assistance separable from
+/// lane keeping: this is feed-forward off the road's shape, where lane keeping
+/// is feedback off the driver's error. Owner's ruling, 2026-09-18: they are
+/// not the same assist and should not be one setting.
+/// What the road under the truck is doing this frame.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct RoadConditions {
+    /// One over the bend's radius in feet, signed: positive turns right.
+    pub curvature: f64,
+    /// Crosswind strength, 0 to 1.
+    pub wind: f64,
+    /// Tire grip, 0 to 1. Below one the truck understeers.
+    pub grip: f64,
+}
+
+impl Default for RoadConditions {
+    fn default() -> Self {
+        RoadConditions {
+            curvature: 0.0,
+            wind: 0.0,
+            grip: 1.0,
+        }
+    }
+}
+
+pub fn tracking_steer_rad(road_curvature: f64) -> f64 {
+    (road_curvature * WHEELBASE_FT).atan()
+}
+
 pub const DEFAULT_LANE_COUNT: i64 = 2;
 
 /// Spoken name for a lane index: right, left, or middle.
@@ -226,11 +260,15 @@ impl LaneKeeping {
         &mut self,
         dt: f64,
         speed_mps: f64,
-        road_curvature: f64,
-        wind: f64,
-        grip: f64,
+        road: RoadConditions,
         assist: &str,
+        turn_assist: bool,
     ) -> bool {
+        let RoadConditions {
+            curvature: road_curvature,
+            wind,
+            grip,
+        } = road;
         self.crossed = 0;
         let Some((drift_mult, steer_mult)) = assist_tuning(assist) else {
             self.offset = 0.0;
@@ -268,7 +306,15 @@ impl LaneKeeping {
         } else {
             0.0
         };
-        let commanded = (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD;
+        // Turn assistance: the wheel the BEND wants, handed over whether or
+        // not anything is helping with the driver's own error.
+        let tracking = if turn_assist {
+            tracking_steer_rad(road_curvature)
+        } else {
+            0.0
+        };
+        let commanded =
+            (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD + tracking;
         let mut yaw_rate = fps * commanded.tan() / WHEELBASE_FT;
         let yaw_rate_cap = if fps > 1.0 {
             MAX_STEER_LATERAL_G * G_FPS2 / fps
@@ -377,7 +423,17 @@ mod tests {
         let dt = 0.1;
         let mut events = 0;
         for _ in 0..((seconds / dt) as i64) {
-            if lane.update(dt, 29.0, curve, wind, 1.0, assist) {
+            if lane.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: curve,
+                    wind,
+                    grip: 1.0,
+                },
+                assist,
+                false,
+            ) {
                 events += 1;
             }
         }
@@ -423,7 +479,17 @@ mod tests {
         let forty_mph = 40.0 / MPH_PER_MPS;
         for _ in 0..300 {
             lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
-            lane.update(dt, forty_mph, left_bend(600.0), 0.0, 1.0, "off");
+            lane.update(
+                dt,
+                forty_mph,
+                RoadConditions {
+                    curvature: left_bend(600.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         assert!(
             lane.offset.abs() < LANE_EDGE,
@@ -437,12 +503,32 @@ mod tests {
         let dt = 0.05;
         let mut hands_off = LaneKeeping::new(Some(11));
         for _ in 0..8 {
-            hands_off.update(dt, 29.0, left_bend(600.0), 0.0, 1.0, "off");
+            hands_off.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: left_bend(600.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         let mut wrong = LaneKeeping::new(Some(11));
         for _ in 0..8 {
             wrong.steering = 0.2; // right, out of a left-hander
-            wrong.update(dt, 29.0, left_bend(600.0), 0.0, 1.0, "off");
+            wrong.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: left_bend(600.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         assert!(
             wrong.offset > hands_off.offset,
@@ -462,8 +548,28 @@ mod tests {
         let mut gentle = LaneKeeping::new(Some(5));
         let mut tight = LaneKeeping::new(Some(5));
         for _ in 0..8 {
-            gentle.update(dt, 29.0, left_bend(2000.0), 0.0, 1.0, "off");
-            tight.update(dt, 29.0, left_bend(400.0), 0.0, 1.0, "off");
+            gentle.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: left_bend(2000.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
+            tight.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: left_bend(400.0),
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         assert!(
             tight.offset > gentle.offset,
@@ -481,8 +587,28 @@ mod tests {
         for _ in 0..40 {
             dry.steering = -0.5;
             icy.steering = -0.5;
-            dry.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
-            icy.update(dt, 29.0, 0.0, 0.0, 0.25, "off");
+            dry.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
+            icy.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 0.25,
+                },
+                "off",
+                false,
+            );
         }
         assert!(
             dry.offset < icy.offset,
@@ -520,7 +646,17 @@ mod tests {
         let mut lane = LaneKeeping::new(Some(7));
         lane.yaw_rad = 0.05;
         for _ in 0..40 {
-            lane.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
+            lane.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         let wandered = lane.offset.abs();
         assert!(
@@ -533,7 +669,17 @@ mod tests {
         // a controller watching position alone chases its own overshoot.
         for _ in 0..600 {
             lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
-            lane.update(dt, 29.0, 0.0, 0.0, 1.0, "off");
+            lane.update(
+                dt,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
         }
         assert!(
             lane.offset.abs() < wandered * 0.5,
@@ -567,7 +713,17 @@ mod tests {
         lane.steering = -1.0; // hold left
         let mut crossed = 0;
         for _ in 0..200 {
-            lane.update(0.1, 29.0, 0.0, 0.0, 1.0, "off");
+            lane.update(
+                0.1,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            );
             if lane.crossed != 0 {
                 crossed = lane.crossed;
                 break;
@@ -586,7 +742,17 @@ mod tests {
         lane.steering = -1.0;
         let mut fired = false;
         for _ in 0..400 {
-            if lane.update(0.1, 29.0, 0.0, 0.0, 1.0, "off") {
+            if lane.update(
+                0.1,
+                29.0,
+                RoadConditions {
+                    curvature: 0.0,
+                    wind: 0.0,
+                    grip: 1.0,
+                },
+                "off",
+                false,
+            ) {
                 fired = true;
                 break;
             }

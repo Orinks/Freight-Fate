@@ -4,6 +4,7 @@
 
 use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft};
 use ff_core::pyfmt::fmt_grouped;
+use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::SpokenMessage;
@@ -374,7 +375,20 @@ impl DrivingState {
         let wind = self.trip.weather.effects().wind;
         let speed_mps = self.trip.truck.velocity_mps;
         let grip = self.trip.truck.effective_grip();
-        let off_road_event = self.lane.update(dt, speed_mps, curve, wind, grip, &mode);
+        // Curve assistance is one assist, not two: it brakes for the bend AND
+        // supplies the wheel the bend wants (owner, 2026-09-18 -- "turn assist
+        // and curve assist should probably be merged"). Lane keeping is the
+        // other job, holding the truck between the lines against wander and
+        // wind, and the two are separate settings because they are separate
+        // jobs: feed-forward off the road's shape, feedback off the driver's
+        // error.
+        let takes_the_bend = ctx.settings.curve_speed_assist;
+        let road = RoadConditions {
+            curvature: curve,
+            wind,
+            grip,
+        };
+        let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
         if off_road_event {
             if !ctx.settings.lane_departure_warning {
                 return;

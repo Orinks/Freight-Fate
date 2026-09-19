@@ -260,6 +260,15 @@ impl TestApp {
             // would refuse it, noisily, from a worker thread). Tests that
             // want the week's price seed an offline provider and turn it on.
             real_fuel_prices: false,
+            // Off here, on for players since the fresh install moved to the
+            // Balanced preset (2026-09-18). A test that drives a gate or an
+            // arrival BY HAND must not have an assist reaching for the same
+            // pedals, and twenty-two of them stopped arriving the moment this
+            // default flipped. The cases that are about the assist turn it on
+            // themselves, which is the right way round: a fixture should not
+            // inherit a player-facing default that changes what the truck
+            // does for you.
+            destination_approach_assist: false,
             ..Default::default()
         };
         let _ = settings.save();
