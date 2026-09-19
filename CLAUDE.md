@@ -212,6 +212,17 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   keyboard is dropped so typing elsewhere never becomes truck input; add
   `--operator-keys` (this repo's `.mcp.json` does) when the owner wants to
   play alongside the agent and take the wheel with the real keyboard.
+  **`.mcp.json` launches `target\release\freightfate.exe` directly, NOT
+  `cargo run`** -- so BUILD IT FIRST (`cargo build --release -p freight-fate
+  --bin freightfate`) and rebuild after every change you mean to drive, or
+  you will playtest the last build and not know it. It used to go through
+  cargo, which made every spawn wait on the workspace build lock: any
+  background test or clippy run held it past the client's 30-second timeout,
+  the server never came up, and the tools stayed dead for the rest of the
+  session (2026-09-12 and again 2026-09-19). `quit_game` ends the server
+  process, so the next tool call spawns a fresh one -- do not quit until the
+  drive is finished, and never hold the single-instance slot with a second
+  copy of the game while the MCP is trying to spawn.
   Keep this check separate from unit tests and the
   adversarial battery. Recorded speech does not establish how speech sounds
   to the owner; that still needs the owner's listening pass.

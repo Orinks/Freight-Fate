@@ -37,10 +37,22 @@
 //!
 //! Holding the wheel fully into the turn for that whole time is exactly one
 //! turn's worth of steering, so the lean closes over `needed_s` of full lock
-//! and proportionally longer for anything gentler. Nothing here is tuned: the
-//! only number that is not read off the road is [`MIN_NEEDED_S`], which keeps
-//! a near-stationary truck from dividing by a speed of zero.
+//! and proportionally longer for anything gentler.
+//!
+//! How DEEP the lean goes is read from the road too, and separately: see
+//! [`TurnShape::lean_depth`]. The two answer different questions -- how much
+//! wheel this turn wants, and how long it wants it for -- and a guide that
+//! only knew the second gave a switchback and a barely-signed sweeper the
+//! identical instruction.
+//!
+//! The rest is perceptual rather than geometric, and says so where it stands:
+//! [`DEADBAND`], [`MAX_LEAN`], [`SLEW_PER_S`], [`MIN_TURN_LEAN`], and
+//! [`MIN_NEEDED_S`], which keeps a near-stationary truck from dividing by a
+//! speed of zero.
 
+use crate::data::curves::{min_radius_ft, HAIRPIN_TURN_MAX_MPH};
+
+use super::lane::{tracking_steer_rad, MAX_STEER_RAD};
 use super::lane_guidance::{DRIFT_SLEEP, DRIFT_WAKE};
 
 /// Below this the lean is centred: a hair of residual demand is not worth
@@ -75,6 +87,15 @@ pub const LANE_TERM: f64 = MAX_LEAN;
 /// guide exists to catch. Seven tenths keeps the turn plainly the louder voice
 /// while leaving a margin that is audible when it opens.
 pub const TURN_LEAN: f64 = MAX_LEAN * 0.7;
+/// The shallowest a warranted turn's lean may go.
+///
+/// A perceptual floor, like [`DEADBAND`] and [`MAX_LEAN`], rather than a
+/// number off the road: [`TurnShape::lean_depth`] scales with the wheel a turn
+/// asks for, and the gentlest bend a road still signs scales far enough down
+/// to land where the engine reads as centred. The road has already said that
+/// turn is worth a warning, so the driver has to be able to place which side
+/// it is on.
+pub const MIN_TURN_LEAN: f64 = 0.12;
 
 /// Which way a turn goes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -113,6 +134,35 @@ pub struct TurnShape {
 }
 
 impl TurnShape {
+    /// How deep this turn's lean opens: the wheel it asks for, as a share of
+    /// the wheel the sharpest turn a ROAD can hold asks for.
+    ///
+    /// The lean is an instruction, so its depth has to mean the size of the
+    /// instruction. It did not: every turn opened the whole of [`TURN_LEAN`]
+    /// and only the TIMING came off the road, so a ninety-degree switchback
+    /// and a bend a road barely bothers to sign said the identical thing.
+    /// Driven on AZ-260 (2026-09-19) that is a hard lean, either way, every
+    /// few hundred feet for fifty-eight miles.
+    ///
+    /// Read from the road, like everything else here. The bicycle model gives
+    /// the exact steer angle that tracks a bend of this radius
+    /// ([`tracking_steer_rad`]), and the reference it is measured against is
+    /// the tightest curve a road may legally bend to -- AASHTO's point-mass
+    /// control at the top of the hairpin band, about 214 feet. Anything
+    /// sharper than that is a street corner or a switchback, and gets the
+    /// whole lean; a sweeper gets its honest fraction of it, floored at
+    /// [`MIN_TURN_LEAN`] so a warranted turn is never mistaken for centre.
+    /// [`MAX_STEER_RAD`] is deliberately NOT the reference: full lock is a
+    /// yard maneuver, and measured against it every mapped highway bend lands
+    /// between two and nine percent, which is to say silent.
+    pub fn lean_depth(&self) -> f64 {
+        let wheel = tracking_steer_rad(1.0 / self.radius_ft.max(1.0));
+        let sharpest = tracking_steer_rad(1.0 / min_radius_ft(HAIRPIN_TURN_MAX_MPH as f64));
+        debug_assert!(sharpest < MAX_STEER_RAD, "a road cannot need full lock");
+        let share = (wheel / sharpest).clamp(0.0, 1.0);
+        MIN_TURN_LEAN.max(TURN_LEAN * share)
+    }
+
     /// Seconds of full-lock steering this turn is worth at `speed_mph`.
     pub fn needed_s(&self, speed_mph: f64) -> f64 {
         let arc_ft = self.radius_ft.max(1.0) * self.deflection_deg.max(0.0).to_radians();
@@ -299,7 +349,9 @@ impl TurnGuide {
         let by_wheel = (1.0 - self.steered).clamp(0.0, 1.0);
         let by_road = (1.0 - input.progress.clamp(0.0, 1.0)).clamp(0.0, 1.0);
         let remaining = by_wheel.min(by_road);
-        let owed = shape.side.sign() * TURN_LEAN * approach * remaining;
+        // How deep the lean goes is the turn's own; how far through it the
+        // driver is decides how much of that depth is still owed.
+        let owed = shape.side.sign() * shape.lean_depth() * approach * remaining;
         // The lane error rides on top, pointing the way that corrects it --
         // once the drift is worth reporting at all.
         let correction = self.drift_correction(input.lane_offset);
@@ -384,11 +436,12 @@ mod tests {
         run(&mut guide, approaching(shape, 0.0, 0.0), 1.0);
         let needed = shape.needed_s(9.0);
         let half = run(&mut guide, approaching(shape, -0.01, 1.0), needed / 2.0);
-        // Half the TURN's share of the lean -- stated against the constant so
-        // it keeps meaning "half" if the share is ever re-split.
+        // Half of THIS turn's own depth -- stated against the shape so it
+        // keeps meaning "half" however deep the turn leans.
+        let depth = shape.lean_depth();
         assert!(
-            ((TURN_LEAN * 0.4)..(TURN_LEAN * 0.6)).contains(&half),
-            "half a turn's steering should leave about half of {TURN_LEAN}; got {half}"
+            ((depth * 0.4)..(depth * 0.6)).contains(&half),
+            "half a turn's steering should leave about half of {depth}; got {half}"
         );
     }
 
@@ -713,9 +766,63 @@ mod tests {
 
         let pan = run(&mut guide, at_speed(second, 11, 0.0), 1.0);
         assert!(
-            pan > TURN_LEAN * 0.9,
+            pan > second.lean_depth() * 0.9,
             "the second half must open to its full lean; got {pan}"
         );
+    }
+
+    #[test]
+    fn a_hairpin_leans_much_deeper_than_a_bend_the_road_barely_signs() {
+        // The depth is the size of the instruction. A switchback wants most of
+        // the wheel and a thousand-foot sweeper wants a touch of it, and until
+        // 2026-09-19 they opened the engine to exactly the same place.
+        let switchback = TurnShape {
+            side: TurnSide::Left,
+            deflection_deg: 150.0,
+            radius_ft: 150.0,
+        };
+        let sweeper = TurnShape {
+            side: TurnSide::Left,
+            deflection_deg: 30.0,
+            radius_ft: 1200.0,
+        };
+        assert_eq!(
+            switchback.lean_depth(),
+            TURN_LEAN,
+            "a switchback is the cap"
+        );
+        assert!(
+            switchback.lean_depth() > sweeper.lean_depth() * 3.0,
+            "{} is not materially deeper than {}",
+            switchback.lean_depth(),
+            sweeper.lean_depth()
+        );
+        // And what the driver hears says the same, which is the whole point:
+        // the two used to open the engine to the identical place.
+        let lean = |shape| {
+            let mut guide = TurnGuide::new();
+            run(
+                &mut guide,
+                TurnInput {
+                    speed_mph: 45.0,
+                    ..approaching(shape, 0.0, 0.0)
+                },
+                1.5,
+            )
+            .abs()
+        };
+        assert!(
+            lean(switchback) > lean(sweeper) * 3.0,
+            "the engine said the same thing both times: {} against {}",
+            lean(switchback),
+            lean(sweeper)
+        );
+        // And the sweeper is still plainly a side, not centre.
+        assert!(sweeper.lean_depth() >= MIN_TURN_LEAN);
+        const { assert!(MIN_TURN_LEAN > DEADBAND * 4.0) };
+        // A street corner is sharper than any road bend, so it keeps the cap
+        // it always had.
+        assert_eq!(a_corner(TurnSide::Right).lean_depth(), TURN_LEAN);
     }
 
     #[test]

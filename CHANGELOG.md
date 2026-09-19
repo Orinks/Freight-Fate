@@ -61,6 +61,8 @@
 
 ### Fixed
 
+- **The engine leans only for bends that need steering, and leans as hard as the bend asks.** A winding highway no longer swings it side to side the whole way.
+
 - **Curve assistance no longer stamps on the brakes just before a bend.** The last few miles an hour come off gently now.
 
 - **Curve assistance no longer runs you out of air on a downhill bend.** It holds one steady brake through the bend instead of pumping.

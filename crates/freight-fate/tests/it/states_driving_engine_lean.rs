@@ -18,7 +18,7 @@ use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::sim::trip_models::NavigationCue;
-use ff_core::sim::turn_guide::{TurnSide, LEAD_MI};
+use ff_core::sim::turn_guide::{TurnShape, TurnSide, LEAD_MI, MIN_TURN_LEAN};
 use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::app::testing::TestApp;
@@ -99,6 +99,20 @@ fn a_bend(start_mi: f64, length_mi: f64, direction: char) -> RouteCurve {
         deflection_deg: 40.0,
         connector: false,
     }
+}
+
+/// How deep a bend's lean opens, so the thresholds below can say "most of what
+/// this bend is worth" rather than a flat number. An eight-hundred-foot bend
+/// is a mild one and leans like one since the depth started coming off the
+/// road (2026-09-19); the cases here are about WHICH WAY and WHO OWNS the
+/// engine, so they ask for the bend's own depth and not a fixed lean.
+fn bend_depth(curve: &RouteCurve) -> f64 {
+    TurnShape {
+        side: TurnSide::parse(&curve.direction.to_string()).expect("a bend has a side"),
+        deflection_deg: curve.deflection_deg,
+        radius_ft: curve.min_radius_ft as f64,
+    }
+    .lean_depth()
 }
 
 fn a_corner(at_mi: f64, direction: &str) -> NavigationCue {
@@ -235,12 +249,17 @@ fn test_the_inverted_guide_is_one_convention_across_approach_bend_and_ramp() {
     // carries.
     let toward = settled_leans(false);
     let away = settled_leans(true);
-    for (what, (t, a)) in ["approach", "bend", "ramp"]
+    // Half a lead out the approach has opened half the bend's depth; an eighth
+    // of the way in, most of it. The ramp's lean is the lane guide's and is
+    // not scaled by any turn's shape.
+    let depth = bend_depth(&a_bend(30.0, 0.4, 'R'));
+    let floors = [depth * 0.4, depth * 0.8, 0.1];
+    for (what, (floor, (t, a))) in ["approach", "bend", "ramp"]
         .into_iter()
-        .zip(toward.into_iter().zip(away))
+        .zip(floors.into_iter().zip(toward.into_iter().zip(away)))
     {
         assert!(
-            t > 0.1,
+            t > floor,
             "{what}: a right-hander leans right by default; got {t}"
         );
         assert!(
@@ -311,11 +330,12 @@ fn test_with_the_warning_off_the_engine_leans_for_bends_but_not_for_drift() {
 
     // The same truck, centred, inside a right-hander: it leans.
     drive.lane.offset = 0.0;
-    drive.trip.curves = vec![a_bend(30.0, 0.4, 'R')];
+    let bend = a_bend(30.0, 0.4, 'R');
+    drive.trip.curves = vec![bend];
     drive.trip.position_mi = 30.05;
     lean_for(&mut app, &mut drive, 2.0);
     assert!(
-        last_engine_pan(&log) > 0.3,
+        last_engine_pan(&log) > bend_depth(&bend) * 0.8,
         "the bend must still lean with the warning off; got {}",
         last_engine_pan(&log)
     );
@@ -406,4 +426,138 @@ fn test_a_bend_still_being_taken_keeps_the_engine_from_the_bend_after_it() {
     let handed = drive.turn_guide_input(true);
     assert_eq!(handed.shape.map(|s| s.side), Some(TurnSide::Right));
     assert_ne!(handed.turn_id, input.turn_id);
+}
+
+// -- a road that never stops bending ------------------------------------------------------
+
+/// The drive the owner reported, on the real map: AZ-260 from Camp Verde to
+/// Payson at thirty-seven miles an hour, nobody touching the wheel, and the
+/// assists a fresh install ships with.
+///
+/// The route's own bends are the whole subject here, so unlike [`a_drive`]
+/// nothing is cleared: what this pins is what fifty-eight miles of baked
+/// mountain highway do to the lean.
+fn on_az260(app: &mut TestApp, start_mi: f64) -> (DrivingState, Log) {
+    app.ctx.settings.lane_keeping = "partial".into();
+    app.ctx.settings.lane_departure_warning = true;
+    app.ctx.settings.curve_speed_assist = true;
+    app.ctx.settings.lane_guide_tone = false;
+    app.ctx.settings.steering_guide_inverted = false;
+
+    let world = get_world();
+    let mut profile = Profile::named_in("Lean", "Camp Verde");
+    profile.tutorial_done = true;
+    app.ctx.profile = Some(profile);
+    let route = world
+        .supported_route("Camp Verde", "Payson", None)
+        .expect("the world routes")
+        .expect("Camp Verde to Payson has a route");
+    let job = Job::new(
+        &CARGO_CATALOG["general"],
+        12.0,
+        "Camp Verde",
+        "company yard",
+        "Payson",
+        route.miles(),
+        1000.0,
+        12.0,
+    );
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        None,
+        DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
+    drive.trip.position_mi = start_mi;
+    drive.trip.truck.engine_on = true;
+    let log: Log = Rc::new(RefCell::new(Calls::default()));
+    app.ctx.audio = Box::new(TrackingAudio {
+        log: Rc::clone(&log),
+    });
+    (drive, log)
+}
+
+/// Roll `seconds` of real time down the road with the wheel untouched, and
+/// hand back the engine's pan on every frame.
+///
+/// Miles come off the clock the way `Trip::update` spends them -- velocity
+/// times `dt` times `effective_time_scale` -- because the compression is part
+/// of what the driver hears. The map arrives eight times faster than the lean
+/// slews, so a chain of bends a quarter of a mile apart reaches the ears as a
+/// wobble a couple of seconds wide.
+fn roll(app: &mut TestApp, drive: &mut DrivingState, log: &Log, seconds: f64) -> Vec<f64> {
+    let mut pans = Vec::new();
+    let mut applied = 0.0;
+    for _ in 0..((seconds / DT) as i64) {
+        drive.trip.truck.velocity_mps = 37.0 / 2.23694;
+        let scale = drive.trip.effective_time_scale();
+        drive.trip.position_mi += drive.trip.truck.velocity_mps * DT * scale / 1609.344;
+        drive.update_lane(&mut app.ctx, DT);
+        clear(log);
+        drive.update_lane_guidance_audio(&mut app.ctx, DT);
+        applied = engine_pans(log).last().copied().unwrap_or(applied);
+        pans.push(applied);
+    }
+    pans
+}
+
+#[test]
+fn test_a_corridor_of_sweepers_leaves_the_engine_at_rest() {
+    // Agent drive, AZ-260, 2026-09-19: with no steering input at all the lean
+    // swung hard left, hard right, hard left and never once settled, while the
+    // road bed -- which reports where the truck actually sits -- stayed put.
+    // The truck was fine; the instrument was not. Mile 25 to 27 is nine baked
+    // bends, every one of them posted at or above the speed of the road, and
+    // the guide opened its full lean for each in turn because the lean's depth
+    // did not depend on how much wheel the bend asked for.
+    let mut app = TestApp::new();
+    let (mut drive, log) = on_az260(&mut app, 25.0);
+    let pans = roll(&mut app, &mut drive, &log, 20.0);
+
+    let worst = pans.iter().fold(0.0f64, |held, pan| held.max(pan.abs()));
+    assert!(
+        worst < 0.1,
+        "twenty seconds of sweepers leaned the engine to {worst}"
+    );
+    // And the truck really was holding its lane, so nothing here was the
+    // drift half honestly reporting a wandering truck.
+    assert!(
+        drive.lane.offset.abs() < 0.1,
+        "the truck left its lane; this case proves nothing: {}",
+        drive.lane.offset
+    );
+}
+
+#[test]
+fn test_a_bend_the_road_warns_about_still_takes_the_engine_and_gives_it_back() {
+    // The other side of the gate, on the same road. Mile 31.7 is a
+    // ninety-two-degree, 475-foot right-hander posted well under the corridor:
+    // a bend any state would sign, and the one kind the lean exists for. It
+    // has to lead, open to its full depth, and then hand the engine back --
+    // because a lean that never returns to centre is the metronome again.
+    let mut app = TestApp::new();
+    let (mut drive, log) = on_az260(&mut app, 31.2);
+    let pans = roll(&mut app, &mut drive, &log, 12.0);
+
+    // A 475-foot bend is worth about twice the floor a barely-signed sweeper
+    // gets, which is the depth rule doing its job on real baked geometry.
+    let deepest = pans.iter().fold(0.0f64, |held, pan| held.max(*pan));
+    assert!(
+        deepest > MIN_TURN_LEAN * 2.0,
+        "the signed right-hander never opened the lean: {deepest}"
+    );
+    assert!(
+        pans.iter().all(|pan| *pan > -0.05),
+        "nothing on this stretch should have leaned left"
+    );
+    let tail = &pans[pans.len() - 60 * 3..];
+    assert!(
+        tail.iter().all(|pan| *pan == 0.0),
+        "the engine never came back to centre after the bend: {:?}",
+        tail.last()
+    );
 }

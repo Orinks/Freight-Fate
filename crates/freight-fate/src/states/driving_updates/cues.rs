@@ -397,19 +397,60 @@ impl DrivingState {
         self.edge_loop_key = Some(key.to_string());
     }
 
+    /// Whether a mapped bend asks the driver for enough wheel to lean the
+    /// engine for.
+    ///
+    /// The lean is a warning device -- it says "there is steering to do here"
+    /// -- and the road already states which of its bends need one. A bend
+    /// posted at or above the speed of the road it sits on is taken without
+    /// slowing and without a conscious steering input, which is why no state
+    /// DOT signs one: the MUTCD warrants the Horizontal Alignment sign and its
+    /// advisory plaque (sections 2C.06 and 2C.08) where the advisory speed is
+    /// BELOW the approach speed, and nowhere else. It is the same test
+    /// `update_curve_run` already uses to decide a bend is worth a spoken
+    /// verdict, so the engine and the co-driver now agree on what a bend is.
+    ///
+    /// The guide had no such test, and the lean's DEPTH is flat: every turn
+    /// opens `TURN_LEAN` whatever it asks for, because only the timing is read
+    /// off the road. Driven on AZ-260 Camp Verde to Payson (agent drive,
+    /// 2026-09-19) that meant fifty-eight miles of sixty-five to eighty mph
+    /// sweepers, none of them wanting any wheel at thirty-seven, each opening
+    /// the lean to its full depth in turn -- and with a bend every fifth of a
+    /// mile the engine swung hard left, hard right, hard left for the whole
+    /// drive while the truck sat dead centre in its lane. An instrument at
+    /// full deflection telling a driver to steer when the road wants nothing
+    /// is worse than a silent one: it is the same reading the bend that
+    /// destroyed a load gives.
+    pub fn bend_asks_for_the_wheel(&mut self, bend: &RouteCurve) -> bool {
+        let (limit, _) = self.trip.speed_limit_at(self.trip.position_mi);
+        (bend.advisory_mph as f64) < limit
+    }
+
     /// Signed steer the active bend asks for, -1 full left .. 1 full right.
     ///
     /// Direction leads into the curve (a left bend wants left); magnitude
     /// follows the same tightness/overspeed shape the curve push uses, so
     /// the guide leans harder exactly when the bend pulls harder.
-    pub fn curve_steer_demand(&self) -> f64 {
+    ///
+    /// A bend the road does not warn about is not one of them. The gate has to
+    /// be here as well as in [`Self::turn_guide_input`] or it buys nothing:
+    /// this demand is the FALLBACK the engine takes when no turn is in play,
+    /// and it leans for the whole length of a bend rather than closing as the
+    /// bend is used up, so leaving the sweepers to it would have made the
+    /// swing worse rather than quieter.
+    pub fn curve_steer_demand(&mut self) -> f64 {
         let active = self.trip.curve_at(self.trip.position_mi);
-        let Some(bend) = active.as_ref().filter(|curve| !curve.connector) else {
+        // A gated sweeper is not handed on to the maneuver demand as though it
+        // were a connector: it is simply not a bend, so the road under the
+        // truck reads as whatever it would with no curve record at all.
+        let mainline = active.as_ref().filter(|curve| !curve.connector).copied();
+        let asks = mainline.is_some_and(|curve| self.bend_asks_for_the_wheel(&curve));
+        let Some(bend) = mainline.filter(|_| asks) else {
             // Ramp connectors and street maneuvers carry no mainline curve
             // record, and returning 0.0 here left the panned road bed dead
             // centre through every exit and every turn. The maneuver demand
             // keeps the guide leaning (see driving_turns.py).
-            return self.maneuver_steer_demand(active.as_ref());
+            return self.maneuver_steer_demand(active.as_ref().filter(|c| c.connector));
         };
         let tightness = 0.2f64.max(1.0 - bend.min_radius_ft as f64 / 5000.0);
         let excess = 0.0f64.max(self.trip.truck.speed_mph() - bend.advisory_mph as f64);
@@ -489,7 +530,14 @@ impl DrivingState {
         // The bend under the wheels AND the next one inside the lead. They
         // were an either/or, so the second half of an S-bend was never looked
         // at until the first had ended and opened with no lead.
-        if let Some(curve) = self.trip.curve_at(position).filter(|c| !c.connector) {
+        //
+        // Both go through `bend_asks_for_the_wheel` first: a sweeper the road
+        // does not warn about is not a turn the engine has anything to say
+        // about, and a corridor of them left the lean with no rest at all
+        // (agent drive, AZ-260, 2026-09-19).
+        let mainline = self.trip.curve_at(position).filter(|c| !c.connector);
+        let under_the_wheels = mainline.filter(|c| self.bend_asks_for_the_wheel(c));
+        if let Some(curve) = under_the_wheels {
             if let Some(shape) = bend_shape(&curve) {
                 let lo = curve.start_mi.min(curve.end_mi);
                 let hi = curve.start_mi.max(curve.end_mi);
@@ -502,7 +550,9 @@ impl DrivingState {
                 );
             }
         }
-        if let Some((ahead, curve)) = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI) {
+        let next_bend = self.trip.next_curve_within(TURN_GUIDE_LEAD_MI);
+        let ahead_of_us = next_bend.filter(|(_, curve)| self.bend_asks_for_the_wheel(curve));
+        if let Some((ahead, curve)) = ahead_of_us {
             if let Some(shape) = bend_shape(&curve) {
                 consider(ahead, bend_id(&curve), shape, 0.0);
             }
