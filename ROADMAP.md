@@ -384,6 +384,12 @@ its status or release decision.
       mention of a signal in a whole run was "The turn signal was not set"
       after the miss. The loop-back line had always named the control, so
       the gate was only ever explained once it had closed.
+- [x] Two hidden badges, 181 in the catalog (2026-09-19). A mile held at the
+      old national 55, nodding to the trucker game that still asks it of
+      blind drivers and to Congress letting the limit go in 1995; and a load
+      settled on October 4, which reads as ten-four. Both carry the invariants
+      export, so the cloud validator's copy needs regenerating on staging
+      before a build ships with them.
 - [x] Losing the exit lane is spoken (2026-09-19). "Exit lane set." was a
       promise the drive could break in silence -- a lane change away or a
       quarter-lane wander left decays the alignment -- and the next word on

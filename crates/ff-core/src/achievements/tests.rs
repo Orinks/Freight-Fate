@@ -60,7 +60,7 @@ fn catalog_digest() -> String {
 #[test]
 fn the_generated_catalog_matches_the_python_source_digest() {
     assert_eq!(catalog_digest(), CATALOG_DIGEST);
-    assert_eq!(ACHIEVEMENTS.len(), 179);
+    assert_eq!(ACHIEVEMENTS.len(), 181);
     assert_eq!(CATEGORIES.len(), 7);
 }
 
@@ -275,6 +275,8 @@ fn test_the_funny_ones_are_actually_in_the_catalog() {
     for badge_id in [
         "sixty_nine_mph",
         "eighty_eight_mph",
+        "fifty_five_mph",
+        "ten_four_day",
         "sixteen_tons",
         "brake_smoke",
         "one_for_the_road",
@@ -284,6 +286,17 @@ fn test_the_funny_ones_are_actually_in_the_catalog() {
         assert!(badge.inspiration.matches(" - ").count() >= 1);
         assert!(!badge.description.trim().is_empty());
     }
+
+    // The two jokes that turn on a specific number keep their number: the
+    // copy is the whole badge, and a reworded one stops being the joke.
+    let double_nickel = achievement_by_id("fifty_five_mph").unwrap();
+    assert!(double_nickel.hidden);
+    assert!(double_nickel.description.contains("fifty-five"));
+    assert!(double_nickel.description.contains("1995"));
+    let ten_four = achievement_by_id("ten_four_day").unwrap();
+    assert!(ten_four.hidden);
+    assert!(ten_four.description.contains("fourth of October"));
+    assert!(ten_four.description.contains("ten-four"));
 }
 
 #[test]

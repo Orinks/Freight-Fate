@@ -689,6 +689,36 @@ fn test_the_number_that_means_nothing_takes_a_whole_mile() {
 }
 
 #[test]
+fn test_the_old_national_limit_takes_a_whole_mile_too() {
+    // The double nickel, held rather than passed through, same as its
+    // sibling above -- and it must not fall out of ordinary highway driving,
+    // which is the whole risk with a number this close to a posted limit.
+    let mut app = TestApp::new();
+    let mut d = a_drive_for_badges(&mut app);
+
+    for speed in [45.0, 55.0, 65.0, 55.0] {
+        d.trip.truck.velocity_mps = speed / 2.23694;
+        d.track_driving_badges(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(!earned(&app, "fifty_five_mph"));
+
+    // Most of a mile is not a mile.
+    for _ in 0..(40 * 60) {
+        d.trip.truck.velocity_mps = 55.0 / 2.23694;
+        d.track_driving_badges(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(!earned(&app, "fifty_five_mph"));
+
+    for _ in 0..(40 * 60) {
+        d.trip.truck.velocity_mps = 55.0 / 2.23694;
+        d.track_driving_badges(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(earned(&app, "fifty_five_mph"));
+    // And the other held number stayed where it was.
+    assert!(!earned(&app, "sixty_nine_mph"));
+}
+
+#[test]
 fn test_eighty_eight_miles_an_hour_is_noticed() {
     let mut app = TestApp::new();
     let mut d = a_drive_for_badges(&mut app);

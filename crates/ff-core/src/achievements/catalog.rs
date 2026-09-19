@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "2431169ff4ace2bd390ec89b10d3db300fb3c8023f808d14685b600f5552fc94";
+pub const CATALOG_DIGEST: &str = "5fe0a2b9146fb237a4b2a512e476c2b1c9d4b82bc82311325fe784976ece03ea";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -70,7 +70,7 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
 
 /// Every badge, in the Python catalog's order (the achievements menu and
 /// the cloud validator's allow-list both walk it in this order).
-pub const ACHIEVEMENTS: [Achievement; 179] = [
+pub const ACHIEVEMENTS: [Achievement; 181] = [
     Achievement {
         id: "first_dispatch",
         name: "Breaker, Breaker",
@@ -1502,5 +1502,21 @@ pub const ACHIEVEMENTS: [Achievement; 179] = [
         category: "road",
         inspiration: "Tom Waits - One for My Baby (and One More for the Road)",
         hidden: false,
+    },
+    Achievement {
+        id: "fifty_five_mph",
+        name: "The Double Nickel, Retired",
+        description: "You held it at exactly fifty-five for a solid mile, the way Jim Kitchen's Trucker still asks of its drivers. Congress let that limit go in 1995. Out here, use the whole speedometer.",
+        category: "hidden",
+        inspiration: "Sammy Hagar - I Can't Drive 55",
+        hidden: true,
+    },
+    Achievement {
+        id: "ten_four_day",
+        name: "Copy That, October",
+        description: "A load settled on the fourth of October, which every driver on the channel reads as ten-four. They spent the whole day acknowledging each other over nothing at all.",
+        category: "hidden",
+        inspiration: "C.W. McCall - Convoy",
+        hidden: true,
     },
 ];

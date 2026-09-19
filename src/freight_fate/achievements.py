@@ -1400,6 +1400,22 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "road",
         "Tom Waits - One for My Baby (and One More for the Road)",
     ),
+    Achievement(
+        "fifty_five_mph",
+        "The Double Nickel, Retired",
+        "You held it at exactly fifty-five for a solid mile, the way Jim Kitchen's Trucker still asks of its drivers. Congress let that limit go in 1995. Out here, use the whole speedometer.",
+        "hidden",
+        "Sammy Hagar - I Can't Drive 55",
+        hidden=True,
+    ),
+    Achievement(
+        "ten_four_day",
+        "Copy That, October",
+        "A load settled on the fourth of October, which every driver on the channel reads as ten-four. They spent the whole day acknowledging each other over nothing at all.",
+        "hidden",
+        "C.W. McCall - Convoy",
+        hidden=True,
+    ),
 )
 ACHIEVEMENT_BY_ID = {achievement.id: achievement for achievement in ACHIEVEMENTS}
 

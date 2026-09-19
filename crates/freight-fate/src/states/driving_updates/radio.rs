@@ -741,6 +741,17 @@ impl DrivingState {
         } else {
             self.nice_speed_mi = 0.0;
         }
+        // And a mile at the old national maximum, for anyone who learned to
+        // drive a truck in a cab that never let them off it. Same shape as
+        // the one above: a held number, for a mile, deliberately.
+        if (54.5..=55.5).contains(&speed) {
+            self.double_nickel_mi += speed * dt / 3600.0;
+            if self.double_nickel_mi >= 1.0 {
+                ctx.award_achievement("fifty_five_mph");
+            }
+        } else {
+            self.double_nickel_mi = 0.0;
+        }
         if speed >= 88.0 {
             ctx.award_achievement("eighty_eight_mph");
         }

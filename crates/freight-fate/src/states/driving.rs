@@ -532,8 +532,9 @@ pub struct DrivingState {
     // from the pickup plan once per half mile rather than every frame:
     // (defect or empty, mile it was read at).
     pub visible_trailer_defect: (String, f64),
-    pub nice_speed_mi: f64,   // distance held at a very particular speed
-    pub jake_descent_mi: f64, // downgrade held on the engine alone
+    pub nice_speed_mi: f64,    // distance held at a very particular speed
+    pub double_nickel_mi: f64, // and at the limit Congress retired in 1995
+    pub jake_descent_mi: f64,  // downgrade held on the engine alone
     pub radio_states_station: String, // station the state tally belongs to
     pub radio_states_held: HashSet<String>,
     pub cruise_descent_mph: Option<f64>, // interactive descent ceiling, while it lasts

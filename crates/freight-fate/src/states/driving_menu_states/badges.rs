@@ -468,6 +468,11 @@ pub(crate) fn award_arrival_achievements(
     if is_friday_the_thirteenth(calendar_hours) && trip_damage <= 1.0 {
         push(&mut ids, "friday_thirteenth");
     }
+    // Ten-four day: the date reads as the acknowledgment every driver on the
+    // channel has been saying all year.
+    if arrival_date == "October 4" {
+        push(&mut ids, "ten_four_day");
+    }
     if job.distance_mi >= 1_000.0 {
         push(&mut ids, "five_hundred_mile_run");
     }

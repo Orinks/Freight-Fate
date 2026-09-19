@@ -182,6 +182,10 @@
       "category": "career",
       "description": "Fifty career deliveries logged. The board knows your handle now, and the windshield's collected a small nation of bugs."
     },
+    "fifty_five_mph": {
+      "category": "hidden",
+      "description": "You held it at exactly fifty-five for a solid mile, the way Jim Kitchen's Trucker still asks of its drivers. Congress let that limit go in 1995. Out here, use the whole speedometer."
+    },
     "fifty_thousand_miles": {
       "category": "career",
       "description": "Fifty thousand miles of trailers and two-lane towns behind you. You answer to a long ribbon of road now, and it is not the sort of job a person walks away from."
@@ -642,6 +646,10 @@
       "category": "career",
       "description": "Ten career deliveries in the books. It has been a long, strange stretch of road to get here, and the receipts are piling up faster than the war stories."
     },
+    "ten_four_day": {
+      "category": "hidden",
+      "description": "A load settled on the fourth of October, which every driver on the channel reads as ten-four. They spent the whole day acknowledging each other over nothing at all."
+    },
     "ten_thousand_miles": {
       "category": "career",
       "description": "Ten thousand lifetime miles behind you. The white-line fever stopped being a symptom a long way back -- now it's just the job."
@@ -786,6 +794,7 @@
     "farm_load",
     "fifteen_states",
     "fifty_deliveries",
+    "fifty_five_mph",
     "fifty_thousand_miles",
     "first_day",
     "first_delivery",
@@ -901,6 +910,7 @@
     "storm_driving",
     "tank_load",
     "ten_deliveries",
+    "ten_four_day",
     "ten_thousand_miles",
     "texas_triangle",
     "thirty_states",
@@ -967,6 +977,7 @@
     "farm_load": "Feed, Seed, and Freight",
     "fifteen_states": "Fifteen State Lines Behind You",
     "fifty_deliveries": "Fifty Loads Down the Road",
+    "fifty_five_mph": "The Double Nickel, Retired",
     "fifty_thousand_miles": "Highway Lifer",
     "first_day": "First Day",
     "first_delivery": "Signed, Sealed, Hauled",
@@ -1082,6 +1093,7 @@
     "storm_driving": "Dark Line on the Radar",
     "tank_load": "The Load That Pushes Back",
     "ten_deliveries": "What a Long, Strange Haul",
+    "ten_four_day": "Copy That, October",
     "ten_thousand_miles": "Ten Thousand Down the Line",
     "texas_triangle": "All Your Loads Live in Texas",
     "thirty_states": "Thirty States and Counting",
