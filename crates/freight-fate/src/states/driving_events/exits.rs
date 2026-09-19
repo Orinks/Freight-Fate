@@ -454,6 +454,7 @@ impl DrivingState {
         self.exit_lane_alignment = 0.0;
         self.exit_lane_prompt_said = false;
         self.exit_lane_ready_said = false;
+        self.exit_lane_lost_s = 0.0;
         self.exit_commit_said = false;
         self.exit_cancel_armed = false;
         self.exit_right_hold_s = 0.0;
@@ -519,17 +520,29 @@ impl DrivingState {
         } else {
             format!("Exit for {}", stop.spoken_name())
         };
-        let lane_text = if self.exit_lane_ready() {
-            ""
-        } else if ctx.settings.lane_is_automated() {
-            " Tap Right to the right lane."
-        } else {
-            " Steer right for the exit lane."
-        };
+        // What this exit is still owed, in the order it has to be done. The
+        // signal only ever reaches here on a destination exit, because every
+        // other exit is armed BY signalling for it -- and it leads, because a
+        // truck squarely in the exit lane with no signal set is a miss, and
+        // the anchor that said only "Destination exit in half a mile." was the
+        // last word before the loop-back (agent drive into Payson,
+        // 2026-09-19). See `exit_signal_instruction`.
+        let mut owed = String::new();
+        if ctx.settings.lane_is_manual() && !self.exit_signal_on {
+            owed.push(' ');
+            owed.push_str(&self.exit_signal_instruction());
+        }
+        if !self.exit_lane_ready() {
+            owed.push_str(if ctx.settings.lane_is_automated() {
+                " Tap Right to the right lane."
+            } else {
+                " Steer right for the exit lane."
+            });
+        }
         ctx.audio.play_with("ui/notify", 0.6, 0.0);
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Some(SpeechCategory::Navigation);
-        ctx.say_event_with(format!("{name} in {distance}.{lane_text}"), opts);
+        ctx.say_event_with(format!("{name} in {distance}.{owed}"), opts);
     }
 
     /// `_update_exit_preparation(keys, dt)`.
@@ -637,6 +650,33 @@ impl DrivingState {
             self.exit_lane_ready_said = true;
             ctx.audio.play_with("ui/notify", 0.6, 0.0);
             self.say_plain(ctx, "Exit lane set.");
+        } else if ahead > 0.0 && self.exit_lane_ready_said && !self.exit_lane_ready() {
+            // "Exit lane set." is a promise, and it was being broken in
+            // silence: wander left out of the lane it was said about and the
+            // alignment decays, or cross into the left lane and it is gone
+            // outright, with nothing said either way until "You missed the
+            // exit. You were not in the exit lane." at the gore (agent drive
+            // into Payson, 2026-09-19 -- the second miss of the same exit).
+            //
+            // A standing condition that ends says so, the way going off the
+            // pavement and coming back does. Clearing the latch also lets the
+            // lane be re-earned and "Exit lane set." mean something again.
+            //
+            // Debounced, because the readiness it answers to is a hair-trigger:
+            // the hold that pins the alignment releases at a quarter of a lane
+            // left of centre, and one frame of decay past it reads as lost. A
+            // truck wandering across that line on partial lane keeping would
+            // otherwise announce the lane lost and set several times in a
+            // straight mile.
+            self.exit_lane_lost_s += dt;
+            if self.exit_lane_lost_s >= EXIT_LANE_LOST_S {
+                self.exit_lane_ready_said = false;
+                self.exit_lane_lost_s = 0.0;
+                ctx.audio.play("ui/warning");
+                self.say_plain(ctx, "Exit lane lost. Steer right again.");
+            }
+        } else {
+            self.exit_lane_lost_s = 0.0;
         }
         if (0.0..=EXIT_COMMIT_WINDOW_MI).contains(&ahead) && !self.exit_commit_said {
             self.exit_commit_said = true;
@@ -793,6 +833,29 @@ impl DrivingState {
     }
 
     /// `_exit_intent_ready(stop)`.
+    /// The one sentence a manual approach owes: set the signal.
+    ///
+    /// The signal is what COMMITS the truck to an exit -- [`Self::exit_intent_ready`]
+    /// grants a destination exit on the signal alone once the lane work is the
+    /// driver's -- and until 2026-09-19 nothing on the approach said so. The
+    /// announcement and both distance anchors named the lane and the ramp
+    /// speed, the driver moved right and slowed as told, and the first mention
+    /// of a signal in the whole run was "You missed the exit for the Payson
+    /// metro freight market. The turn signal was not set." (agent drive,
+    /// AZ-260 into Payson). Then the loop-back line names the control -- so the
+    /// game only ever explained the gate after it had closed.
+    ///
+    /// Named while the instruction is still being taught and bare once the
+    /// player has armed enough signals to retire it (research doc R7), but
+    /// never dropped the way the stop callout drops it: an optional stop costs
+    /// a driver who ignores it nothing, and this one costs the loop-back.
+    pub fn exit_signal_instruction(&self) -> String {
+        if self.trip.exit_hint.is_empty() {
+            return "Signal for it.".to_string();
+        }
+        format!("Press {} to signal.", self.trip.exit_hint)
+    }
+
     pub fn exit_intent_ready(&self, ctx: &GameContext, stop: &RoadStop) -> bool {
         if self.exit_signal_canceled {
             return false;

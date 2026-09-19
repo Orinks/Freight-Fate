@@ -414,6 +414,9 @@ pub struct DrivingState {
     pub exit_lane_alignment: f64,
     pub exit_lane_prompt_said: bool,
     pub exit_lane_ready_said: bool,
+    /// How long the exit lane has been lost since "Exit lane set." was said.
+    /// Debounces the line that takes it back; see `update_exit_preparation`.
+    pub exit_lane_lost_s: f64,
     pub exit_commit_said: bool,
     pub exit_cancel_armed: bool,
     pub exit_right_hold_s: f64,

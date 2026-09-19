@@ -120,6 +120,7 @@ pub const EXIT_LANE_READY: f64 = 0.85; // accumulated right-lane commitment
 pub const EXIT_LANE_OFFSET_READY: f64 = 0.45; // right-side lane position also counts
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
+pub const EXIT_LANE_LOST_S: f64 = 1.0; // held out of the exit lane this long before it is called lost
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
 pub const AEB_LEAD_S: f64 = 0.5; // plus this flat lead, covering brake heat added during the stop
                                  // The assist brakes on the SERVICE brakes, and the escalation to the emergency

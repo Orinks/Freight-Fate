@@ -811,6 +811,107 @@ fn test_exit_lane_stays_set_after_keyboard_release() {
 }
 
 #[test]
+fn test_losing_the_exit_lane_is_spoken_instead_of_waiting_for_the_miss() {
+    // "Exit lane set." was a promise the drive could break in silence. An
+    // agent heard it, wandered a lane left and came back, and the next word
+    // on the subject was "You missed the exit. You were not in the exit lane."
+    // at the gore (AZ-260 into Payson, 2026-09-19).
+    let mut harness = a_drive("Exits");
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
+    let stop = first_stop(&harness);
+    let at = stop.at_mi;
+    harness.with_drive(move |d, _| d.trip.position_mi = at - 1.5);
+    press_x(&mut harness);
+
+    hold(&mut harness, &[Key::Right]);
+    for _ in 0..80 {
+        harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+    }
+    assert!(harness.read_drive(|d| d.exit_lane_ready()));
+    assert!(
+        said_any(&harness, "Exit lane set"),
+        "{:?}",
+        spoken(&harness)
+    );
+    harness.clear_speech();
+
+    // Away to the left, long enough to be gone rather than wobbling.
+    hold(&mut harness, &[Key::Left]);
+    for _ in 0..(60 * 2) {
+        harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+    }
+
+    assert!(!harness.read_drive(|d| d.exit_lane_ready()));
+    assert!(
+        said_any(&harness, "Exit lane lost"),
+        "the lane went quiet instead of saying it was gone: {:?}",
+        spoken(&harness)
+    );
+    // Once only, however long the truck stays out of it.
+    assert_eq!(
+        said_count(&harness, "Exit lane lost"),
+        1,
+        "{:?}",
+        spoken(&harness)
+    );
+
+    // And the promise can be made again, because the latch let go with it.
+    harness.clear_speech();
+    release_keys(&mut harness);
+    hold(&mut harness, &[Key::Right]);
+    for _ in 0..(60 * 4) {
+        harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+    }
+    assert!(harness.read_drive(|d| d.exit_lane_ready()));
+    assert!(
+        said_any(&harness, "Exit lane set"),
+        "{:?}",
+        spoken(&harness)
+    );
+}
+
+#[test]
+fn test_a_wobble_out_of_the_exit_lane_never_announces_itself() {
+    // The readiness this answers to is a hair-trigger -- the hold that pins
+    // the alignment releases a quarter of a lane left of centre, and one frame
+    // past it reads as lost -- so an undebounced line would have a truck on
+    // partial lane keeping calling the lane lost and set over and over down a
+    // straight mile.
+    let mut harness = a_drive("Exits");
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
+    let stop = first_stop(&harness);
+    let at = stop.at_mi;
+    harness.with_drive(move |d, _| d.trip.position_mi = at - 1.5);
+    press_x(&mut harness);
+
+    hold(&mut harness, &[Key::Right]);
+    for _ in 0..80 {
+        harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+    }
+    assert!(harness.read_drive(|d| d.exit_lane_ready()));
+    harness.clear_speech();
+
+    // Out and straight back, well inside the debounce, several times over.
+    for _ in 0..6 {
+        hold(&mut harness, &[Key::Left]);
+        for _ in 0..12 {
+            harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+        }
+        release_keys(&mut harness);
+        hold(&mut harness, &[Key::Right]);
+        for _ in 0..30 {
+            harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
+        }
+    }
+
+    assert!(
+        !said_any(&harness, "Exit lane lost"),
+        "a wobble announced itself: {:?}",
+        spoken(&harness)
+    );
+}
+
+#[test]
 fn test_exit_missed_after_gore_window() {
     let mut harness = a_drive("Exits");
     let stop = first_stop(&harness);

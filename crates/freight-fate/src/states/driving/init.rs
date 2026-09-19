@@ -438,6 +438,7 @@ impl DrivingState {
             exit_lane_alignment: 0.0,
             exit_lane_prompt_said: false,
             exit_lane_ready_said: false,
+            exit_lane_lost_s: 0.0,
             exit_commit_said: false,
             exit_cancel_armed: false,
             exit_right_hold_s: 0.0,

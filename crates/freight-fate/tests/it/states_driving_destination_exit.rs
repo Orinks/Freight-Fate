@@ -145,6 +145,48 @@ fn test_armed_exit_counts_down() {
 }
 
 #[test]
+fn test_every_anchor_asks_for_the_signal_until_it_is_set() {
+    // Doing everything the approach asks except the signal is still a miss,
+    // and until 2026-09-19 no line on the approach asked. An agent drove
+    // AZ-260 into Payson steering right and slowing for the ramp exactly as
+    // told, heard three calls that named the lane and the ramp only, and the
+    // first mention of a signal in the whole run was the miss itself.
+    //
+    // So every anchor asks while the signal is off, and the moment it is set
+    // it stops asking -- a countdown still nagging for a signal already on is
+    // the same failure the other way round.
+    let mut harness = a_drive("Anchor Signal");
+    let at_mi = harness.read_drive(|d| d.trip.position_mi) + 3.0;
+    harness.with_drive(move |drive, _| {
+        drive.exit_stop = Some(a_destination_stop(at_mi));
+        drive.exit_countdown_said.clear();
+    });
+    harness.clear_speech();
+
+    walk_the_countdown(&mut harness, at_mi, &[0.9]);
+
+    let asked: Vec<String> = events(&harness)
+        .into_iter()
+        .filter(|line| line.starts_with("Destination exit in"))
+        .collect();
+    assert_eq!(asked.len(), 1, "{asked:#?}");
+    assert!(asked[0].to_lowercase().contains("signal"), "{}", asked[0]);
+
+    // Signal set: the anchor at half a mile has nothing left to say about it.
+    harness.with_drive(|drive, _| drive.exit_signal_on = true);
+    harness.clear_speech();
+
+    walk_the_countdown(&mut harness, at_mi, &[0.4]);
+
+    let after: Vec<String> = events(&harness)
+        .into_iter()
+        .filter(|line| line.starts_with("Destination exit in"))
+        .collect();
+    assert_eq!(after.len(), 1, "{after:#?}");
+    assert!(!after[0].to_lowercase().contains("signal"), "{}", after[0]);
+}
+
+#[test]
 fn test_armed_exit_counts_down_from_two_miles_when_the_truck_holds_the_lane() {
     let mut harness = PlaytestHarness::new();
     harness.app.ctx.settings.lane_keeping = "full".to_string();
@@ -435,7 +477,10 @@ fn test_destination_exit_announcement_names_lane_move_when_drift_is_on() {
         said.to_lowercase().contains("move right for the exit lane"),
         "{said}"
     );
-    assert!(!said.contains("Press X"), "{said}");
+    // The lane move is the second half of the instruction; the signal is the
+    // first, and it is the one that decides whether the exit is taken at all
+    // (agent drive into Payson, 2026-09-19).
+    assert!(said.to_lowercase().contains("signal"), "{said}");
     assert!(!said.contains("X takes"), "{said}");
 }
 
@@ -590,7 +635,10 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
         message.contains("Move right for the exit lane"),
         "{message}"
     );
-    assert!(!message.contains("Press X"), "{message}");
+    // And the gate the lane work is in aid of. Doing everything this line
+    // asks except the signal is still a miss, so the line has to ask for it
+    // (agent drive into Payson, 2026-09-19).
+    assert!(message.to_lowercase().contains("signal"), "{message}");
     assert!(!message.contains("X takes"), "{message}");
     assert!(
         message.contains(&format!(

@@ -126,7 +126,11 @@ impl DrivingState {
             if self.terse_speech(ctx) {
                 return core;
             }
-            return format!("{core} Move right for the exit lane.");
+            // The signal first, because it is the gate: the lane and the ramp
+            // speed are both wasted if it is never set. See
+            // `DrivingState::exit_signal_instruction`.
+            let signal = self.exit_signal_instruction();
+            return format!("{core} {signal} Move right for the exit lane.");
         }
         // Lane keeping takes this exit with no signal and no lane work, so
         // the one thing the driver must not have to infer is that it is

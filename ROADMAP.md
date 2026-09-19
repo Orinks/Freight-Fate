@@ -366,6 +366,31 @@ its status or release decision.
       advisory plus its margin while the servo aims at the advisory itself,
       so the last 3 mph were shed on the compressed clock and took a full
       application (same AZ-260 trace).
+- [x] A bend can be held at its own advisory (2026-09-19). The lane model's
+      cornering ceiling was a flat 0.35 g, and advisories are priced at
+      0.30 g plus up to 6 percent of built bank and then rounded to the
+      nearest five, so the tightest bends ask 0.36 to 0.43 g at the very
+      number the cab calls out: AZ-260's 146-foot hairpin, advisory 30, ran
+      the truck wide at 30 whatever the driver or the assists steered. The
+      ceiling now reads the bend's own advisory demand, screened at 0.49 g
+      -- what the advisory formula can produce at the 15 mph floor -- so a
+      row asking for more than the formula allows cannot raise it. Above the
+      advisory the truck still understeers wide (agent drive, Camp Verde to
+      Payson).
+- [x] The destination-exit approach asks for the signal (2026-09-19). With
+      the lane work the driver's, the signal alone commits the truck to the
+      exit, and no line on the approach named it: the announcement and both
+      distance anchors gave the lane and the ramp speed, and the first
+      mention of a signal in a whole run was "The turn signal was not set"
+      after the miss. The loop-back line had always named the control, so
+      the gate was only ever explained once it had closed.
+- [x] Losing the exit lane is spoken (2026-09-19). "Exit lane set." was a
+      promise the drive could break in silence -- a lane change away or a
+      quarter-lane wander left decays the alignment -- and the next word on
+      it was "You missed the exit. You were not in the exit lane." at the
+      gore. Debounced a second, because one frame past the pin that holds
+      the alignment reads as lost and a truck on partial lane keeping would
+      otherwise call the lane lost and set down a straight mile.
 
 ### September 12 live data and dispatch
 

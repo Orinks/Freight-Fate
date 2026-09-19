@@ -61,6 +61,12 @@
 
 ### Fixed
 
+- **A tight bend can now be held at the speed it is signed for.** The truck used to run wide at the number curve assistance had just braked to.
+
+- **The approach to your delivery exit now asks you to signal.** It used to name the lane and the ramp speed only.
+
+- **The truck now says when you lose the exit lane.** It used to say the lane was set, then go quiet until you missed the exit.
+
 - **The engine leans only for bends that need steering, and leans as hard as the bend asks.** A winding highway no longer swings it side to side the whole way.
 
 - **Curve assistance no longer stamps on the brakes just before a bend.** The last few miles an hour come off gently now.
