@@ -7,9 +7,11 @@
 //! `music/tables.rs` (the track pools) and `music/pools.rs` (host breaks,
 //! station maps, the duration index); this file is the selection logic.
 
+mod expansion;
 mod pools;
 mod tables;
 
+pub use expansion::NIGHT_LINE_VOCAL_TRACKS;
 use pools::TRACKS_BY_KEY;
 pub use pools::*;
 pub use tables::*;

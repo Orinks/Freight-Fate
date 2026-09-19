@@ -244,3 +244,121 @@ Print each resolution ("cast Night Line -> Serena (added from library)") so the 
 - [ ] **Step 3: ROADMAP** — 1.9 line: check off/describe the station-identity work; add an unchecked follow-up bullet for any pool that came in under target or any voice that needs recasting after tester feedback.
 - [ ] **Step 4: Full suite + lint via the test-runner agent.**
 - [ ] **Step 5: Commit** `feat(radio): station identity and soundtrack expansion` (changelog commit, no skip marker). Then `git lfs push origin feat/debt-dealer-radio` (full path to git-lfs) before any `git push`.
+
+---
+
+## Suno candidates and listening links - September 19, 2026
+
+Created September 19, 2026. Based on the content plan at Career 1.9 commit 72f85e86 and the inventory in C:/ff-tester/FreightFate/freight_fate/music.pak.
+
+### Status and listening notes
+
+All 33 missing song prompts and 19 additional station-jingle slots now have Suno candidates, counting the Roadhouse trial the owner liked. Each generation has two takes in the Suno workspace; the links below open one candidate per planned slot, not an endorsed selection. Generation entries were verified, but not every take's final completion or audio quality. Nothing was downloaded, published, or integrated into the game by this session. Playback was left paused.
+
+The eight country candidates and two rock candidates were generated in Simple mode before the owner requested manually written lyrics. Later vocal songs use original lyrics entered in Advanced mode. Instrumentals use arrangement instructions only. Vocal genders follow the narrator; River Rising is a male-female duet. Suno's actual performance still needs listening verification.
+
+Some short jingles display Credits Refunded. This is a UI status, not a listening verdict. Check clear station-name pronunciation, clean beginnings and endings, musical character, and sensible duration. Later, audition chosen assets with game speech and engine audio before integration.
+
+Final duration check: Neon Drive returned 0:27 and 0:08 despite the 0:12 target. The linked first take is the longer one; the [eight-second Neon Drive alternate](https://suno.com/song/443802c3-c5a2-45e3-a882-7805e83772d1) is also available. Custom duration is therefore a target, not a verified exact-length guarantee; selected jingles may need trimming.
+
+The first pair titled Vulture Pass accidentally retained Paper Crown lyrics because clearing the editor failed. Do not use those: 97d078f4-3d2c-4465-ac1e-9711c8f8f142 and d7f2a6ba-d6e5-45df-bea1-0907ca546cfc. The corrected Vulture Pass — Instrumental pair is linked below. All subsequent editor text was verified before submission.
+
+### Country: earlier automatic-lyric candidates
+
+- [Split Rail](https://suno.com/song/cd8835a5-4433-42bc-9d7e-e044aa730874).
+- [County Fair Lights, generated as At the Top of the Ferris](https://suno.com/song/028d9086-5c7a-46ac-9e5b-99fe8f8fbfbe).
+- [Porch Swing Promise — selected duet retake A](https://suno.com/song/81aa9882-1473-41d4-8a66-0d3242b7dfdc).
+- [Harvest Moon Over the Barn](https://suno.com/song/10e263c2-b485-4413-8681-787c6edc95f4).
+- [Cold Coffee Courage](https://suno.com/song/f01396d2-f089-4eaf-b054-79f20ad7d0ba).
+- [Last Bale of Summer](https://suno.com/song/ad45e351-273a-46ad-aaf6-23d7b8099a5e).
+- [Red Dirt Ring, generated as Barn Dance Duel](https://suno.com/song/a6471d5c-107e-4c0f-8cbf-8aa12d6e4ae7): instrumental.
+- [High Line Home, generated as The Northern High Line](https://suno.com/song/abf8f56c-0e6f-4cd8-9782-14042519024b).
+
+### Classic rock
+
+- [Paper Crown](https://suno.com/song/db920dc3-6454-4861-af0a-c71cc3c01b8f): original lyrics, female narrator addressing her former high-school boyfriend.
+- [Bar Band Saturday, generated as Loudest Little Band](https://suno.com/song/3c06d3f2-cbf9-4e32-8c35-eedbf31f438d): earlier automatic lyrics.
+- [Lights Over Superior, generated as Expressive Guitar Arc](https://suno.com/song/0f4f5e35-fc47-426b-8880-acf4f6a7cd82): earlier Simple-mode instrumental.
+- [Last Payphone in Town](https://suno.com/song/9dfb8f32-71b3-4191-970e-e5e1c7cdc5a8): original lyrics, male narrator.
+- [Vulture Pass — Instrumental, corrected version](https://suno.com/song/c1cec1aa-ff79-456f-a46b-f51b0565dbe6): instrumental arrangement instructions.
+- [Magnetic West](https://suno.com/song/26bc7622-1fdb-4a5b-838d-2278ddee5ba0): original lyrics, female narrator starting a new life.
+- [River Rising — selected duet retake B](https://suno.com/song/57c036ee-fd3c-407a-943d-ddba882e3809): original lyrics, male-female community duet.
+- [Furnace Wind](https://suno.com/song/904d2498-cb4f-4b01-b57d-ecf5042f7cf3): original lyrics, smoky female lead.
+
+### Blues
+
+- [Eleven Bridges](https://suno.com/song/dbd2a741-c418-4a35-8b3c-273bb5995e87): original lyrics, reflective male narrator.
+- [Fish Fry Friday](https://suno.com/song/bfe4c0a9-5e04-4620-a05e-9e53c9135eb7): original lyrics, exuberant female storyteller.
+- [Back Porch Darling](https://suno.com/song/5e3088f1-5839-4d12-95a8-287173a1eca3): original lyrics, female serenade to a longtime partner.
+- [Leaky Roof Blues](https://suno.com/song/76edbaf4-0163-4957-9d35-c0890d313adb): original lyrics, weathered male narrator.
+- [Catfish County](https://suno.com/song/7ee496ed-d232-484d-99ef-06c6f979a92c): harmonica-led instrumental.
+- [Low Water Crossing](https://suno.com/song/bd6abc07-276a-46ac-9dcf-b2079590141e): original lyrics, male narrator choosing the higher road after a previous mistake.
+- [Night Shift Queen](https://suno.com/song/335d42ef-1f29-4d19-a8af-6c8af3048b43): original lyrics, female supervisor narrating her shift.
+- [Red Lights and Regrets](https://suno.com/song/7932cd44-3c07-46b9-81ed-f8fa28fe252c): original lyrics, reflective male narrator.
+
+### Jazz
+
+- [Lower Broad Lullaby](https://suno.com/song/b924a7bd-3fee-4248-b6c0-2c59c284d2e8): muted-trumpet instrumental.
+- [Velvet Downbeat](https://suno.com/song/760d1b78-9277-40a8-ab00-0fc384cdf8f0): tenor-sax swing instrumental.
+- [Neon and Nylon](https://suno.com/song/0cca0565-be3d-4354-b733-e1e1d140b646): nylon guitar and electric piano instrumental.
+- [Printer's Alley Last Call](https://suno.com/song/74d8cb9b-9583-4662-aade-8c802a71b08d): plunger-mute trombone instrumental.
+- [Brushed Steel](https://suno.com/song/d781eb13-4cfb-4135-881e-1a4d4ce182e9): pedal-steel jazz instrumental.
+- [Midnight Mezzanine](https://suno.com/song/9940202b-aac1-42d8-a9da-cfe2b051e5f8): piano nocturne.
+- [Blue Neon Glow](https://suno.com/song/67a91cb3-31ae-4154-9822-d222505040ba): original lyrics, female torch-song narrator remembering a former male partner.
+- [Cumberland Moonrise](https://suno.com/song/dd2657ae-8fc4-47dc-8d4e-6bdbb21a2f8c): flugelhorn instrumental.
+
+### Night Line
+
+- [Dashboard Glow](https://suno.com/song/bafd04a3-3c9a-47df-b1dc-4651061209ec): original lyrics, intimate male narrator learning to speak honestly to his partner.
+
+### Additional station jingles
+
+The station ID 04 titles refer to the missing additional jingle slot in the plan. No existing IDs were replaced. The Roadhouse trial is an owner-liked alternative to the exact planned solo-voice/whistle arrangement; the remaining station jingles follow their planned identity. Twelve-second targets allow room for the ending; actual durations vary.
+
+- [Freight Fate Roadhouse — Coast to Coast ID](https://suno.com/song/9e6007bf-7d50-431e-ad9d-eeb1f301520c): owner liked this trial; warm male harmonies.
+- [Night Line — Station ID 04](https://suno.com/song/d773df22-d9b3-477e-9b8a-a5a46f293c46): hushed female lead.
+- [The Rawhide — Station ID 04](https://suno.com/song/ddf13ac6-b109-41bd-9218-62b9ad1afa82): cowboy baritone.
+- [Big Wheel Country — Station ID 04](https://suno.com/song/0c9e048b-0b6d-464e-95b6-7cefeb8fc42b): female duet.
+- [Prairie Line — Station ID 04](https://suno.com/song/356ef85e-8d45-4c2c-9351-0f1be2013723): warm male lead.
+- [Big Sky Country — Station ID 04](https://suno.com/song/b56bcab1-058c-4a2c-aeac-6f5ca6496a80): high male tenor.
+- [The Grind — Station ID 04](https://suno.com/song/da3f4704-b42f-4402-8783-a176e4782737): gravelly male lead.
+- [Desert Rock — Station ID 04](https://suno.com/song/590f71dd-3573-4689-a471-a5f473553e88): low raspy male lead.
+- [Chrome — Station ID 04](https://suno.com/song/4aeafb12-8db3-4c8e-99ae-84f6de25223a): powerhouse female lead with group response.
+- [The Ridge — Station ID 04](https://suno.com/song/ab402f95-1430-4677-8179-0bf90b0f0488): soaring male lead.
+- [The Sound — Station ID 04](https://suno.com/song/4da332c6-440f-4690-ab3f-f5b618f7cdf2): relaxed male lead.
+- [The Delta — Station ID 04](https://suno.com/song/7bb87f34-c8d3-47c6-981f-5078f149ba29): weathered male lead.
+- [Bayou Soul — Station ID 04](https://suno.com/song/307f8afb-5efa-41d4-a003-d32c8e4d9ab4): playful raspy male lead.
+- [Southern Soul — Station ID 04](https://suno.com/song/442dcb8c-087f-4088-98c2-1d5471111669): rich female lead with choir response.
+- [Nashville After Hours — Station ID 04](https://suno.com/song/82e808dc-1769-4940-b5d4-49bbcae08f94): hushed male crooner.
+- [Cruisin' Gold — Station ID 04](https://suno.com/song/446195a5-7652-4f57-8d5c-8244e6d41c5e): mixed harmony singers.
+- [Glory Road — Station ID 04](https://suno.com/song/69e200e8-bdd3-4f38-8636-8d24f28a7a5d): female lead and mixed choir.
+- [Puro Tejano — Station ID 04](https://suno.com/song/4653a11b-1ea4-417d-af6f-22304040628c): bright male lead with Spanish pronunciation.
+- [Neon Drive — Station ID 04](https://suno.com/song/44b20cea-05d9-4eea-880b-b975121e30d2): breathy female voice with vocoder.
+
+### Next production step
+
+Audition both versions in Suno and choose takes. Confirm lyrics, pronunciation, absence of unwanted vocals in instrumentals, clean endings, and level consistency. Then download selected originals, measure durations, preserve the established asset keys, and test the game mix before updating music.pak. The existing pack remains untouched.
+
+## Duet retakes using Fade Out at the Bar
+
+The owner approved the other linked song takes and requested duet retakes using the metatag structure from [the published Fade Out at the Bar reference](https://suno.com/song/663d250f-1995-480f-9f24-a4a99c5fbbc3). The existing duet versions remain alternates; none were deleted or overwritten.
+
+These new generations preserve every lyric word from the linked original versions. Section tags now explicitly identify Male, Female, and Male & Female, with instrumental intro/outro tags. Style prompts reinforce solo alternating verses and joined harmony choruses while retaining each song's genre. New entries were verified; consistent vocal-role performance still requires listening. Playback remains paused.
+
+- Porch Swing Promise: [duet retake A](https://suno.com/song/81aa9882-1473-41d4-8a66-0d3242b7dfdc), [duet retake B](https://suno.com/song/f505f7c8-20d0-4424-b547-e52352d8ab9f). [Existing alternate](https://suno.com/song/503e7a2f-5050-433e-ab8d-3c9668010d61).
+- River Rising: [duet retake A](https://suno.com/song/5afdfaf0-c4bf-4d13-90ab-fca5badc935a), [duet retake B](https://suno.com/song/57c036ee-fd3c-407a-943d-ddba882e3809). [Existing alternate](https://suno.com/song/71fd5c68-4a69-405f-af89-712d16628c37).
+
+### Owner-selected duet takes
+
+- **Porch Swing Promise: take A selected.** [Open selected Porch Swing Promise](https://suno.com/song/81aa9882-1473-41d4-8a66-0d3242b7dfdc).
+- **River Rising: take B selected.** [Open selected River Rising](https://suno.com/song/57c036ee-fd3c-407a-943d-ddba882e3809).
+
+The owner listened and selected these versions. Earlier versions and the other retakes remain alternates. Both selections were downloaded and integrated in the September 19 batch described below.
+
+## September 19 snapshot integration
+
+The owner approved the linked full-song takes, selecting Porch Swing Promise duet retake A and River Rising duet retake B. The available 25 downloads covered eight country, eight classic-rock, eight blues, and Dashboard Glow. These are encoded as stereo 48 kHz Opus at 80 kbps, with gain toward the existing -16 dBFS RMS target and a 0.95 sample-peak cap. Last Bale of Summer and Fish Fry Friday received an additional 2 dB of headroom after checking codec overshoot; their decoded true peaks are -1.6 and -1.9 dBTP respectively. Masters and alternate takes remain preserved.
+
+The Rust station playlists include the matching genre additions. Dashboard Glow joins only the Night Line vocal pool. The rebuilt music pack retains all 380 previous entries byte-for-byte and adds 25 entries, for 405 total. Catalog durations come from the encoded files. [Source links, master hashes, encoding gains, and durations](../../radio-september-2026.json) identify every selected asset.
+
+Eight jazz songs remain to download first, followed by 19 jingles, after the September 21 allowance refresh.

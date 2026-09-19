@@ -7,6 +7,7 @@ use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
 
+use super::expansion::NIGHT_LINE_VOCAL_TRACKS;
 use super::tables::*;
 use super::MusicTrack;
 

@@ -1,0 +1,283 @@
+{
+  "base_entries": 380,
+  "entries": 405,
+  "bytes": 367493532,
+  "sha256": "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
+  "tracks": [
+    {
+      "key": "radio_country_split_rail",
+      "title": "Split Rail",
+      "description": "Fence-line country tune about staying the course",
+      "pool": "country",
+      "duration_s": 183.526,
+      "source": "https://suno.com/song/cd8835a5-4433-42bc-9d7e-e044aa730874",
+      "master_sha256": "c60dfa03df6ac7c2fcd16a9aeed3fce8339e40dd170178120c1204cd9adbebd8",
+      "gain_db": 2.313,
+      "encoded_sha256": "bb183dcf355938ecc046b63d1c30b1f69a7de9f360970ec50efdfa8efff7fb1f"
+    },
+    {
+      "key": "radio_country_county_fair_lights",
+      "title": "County Fair Lights",
+      "description": "Up-tempo song of a first kiss at the county fair",
+      "pool": "country",
+      "duration_s": 175.726,
+      "source": "https://suno.com/song/028d9086-5c7a-46ac-9e5b-99fe8f8fbfbe",
+      "master_sha256": "7346b935a3dac71f9bfbb3e2c491a21ea01203334cc77c7c04219e96d915e5c2",
+      "gain_db": 2.62,
+      "encoded_sha256": "d227abbda1792b66da8e98278132cd5640ac1aa0e570caf1b649427161bbbbd5"
+    },
+    {
+      "key": "radio_country_porch_swing_promise",
+      "title": "Porch Swing Promise",
+      "description": "Front-porch love duet in three-four time",
+      "pool": "country",
+      "duration_s": 271.207,
+      "source": "https://suno.com/song/81aa9882-1473-41d4-8a66-0d3242b7dfdc",
+      "master_sha256": "2ff18fec9cbae32d86bf2fd0e0f44b112e926bcbf64c94595bb2861831155644",
+      "gain_db": 0.963,
+      "encoded_sha256": "7c7d2ff85baf8c37949cf4139d4cea5981da1f56428ca79ae3c7e2678f6d9033"
+    },
+    {
+      "key": "radio_country_harvest_moon_over_the_barn",
+      "title": "Harvest Moon Over the Barn",
+      "description": "Wistful waltz about the farm passing to the next generation",
+      "pool": "country",
+      "duration_s": 206.367,
+      "source": "https://suno.com/song/10e263c2-b485-4413-8681-787c6edc95f4",
+      "master_sha256": "443a10cd1f6c5c636c24e8bf3ec5361a2807b9b3813ddf495e7b67030379c9ce",
+      "gain_db": 1.721,
+      "encoded_sha256": "b3e59be54c7d6528cde610cd5547d9ef2784f8cbe64a472464e3e127e48143a8"
+    },
+    {
+      "key": "radio_country_cold_coffee_courage",
+      "title": "Cold Coffee Courage",
+      "description": "Wry country anthem for the last hundred miles",
+      "pool": "country",
+      "duration_s": 169.966,
+      "source": "https://suno.com/song/f01396d2-f089-4eaf-b054-79f20ad7d0ba",
+      "master_sha256": "185bfb89a18a47230ca0b11b0211e7f817f20371b7aa69187564b940b03ef7b6",
+      "gain_db": 1.898,
+      "encoded_sha256": "b25a981d621fd0c3502cf5ed57c891c017519c6e7f343c250581d69b319d9fa9"
+    },
+    {
+      "key": "radio_country_last_bale_of_summer",
+      "title": "Last Bale of Summer",
+      "description": "Harvest-end ballad of fields going quiet",
+      "pool": "country",
+      "duration_s": 212.047,
+      "source": "https://suno.com/song/ad45e351-273a-46ad-aaf6-23d7b8099a5e",
+      "master_sha256": "a3c014fc75ea6eb3035afaf8eea669b86aa7bfaf1c068737edd83a7a05dca422",
+      "gain_db": -2.445,
+      "encoded_sha256": "5d7aa479d8e5cd058b4a8b47df41b81c55b9e0b5f3489de82e928626a546e864"
+    },
+    {
+      "key": "radio_country_red_dirt_ring",
+      "title": "Red Dirt Ring",
+      "description": "Stomping red-dirt band instrumental",
+      "pool": "country",
+      "duration_s": 165.887,
+      "source": "https://suno.com/song/a6471d5c-107e-4c0f-8cbf-8aa12d6e4ae7",
+      "master_sha256": "b464762c92612a464ff80496a27179638e5819a8a65833ff0a0a395560252295",
+      "gain_db": 0.834,
+      "encoded_sha256": "ed26d4a8bdc891c484d6299aad4239ca1aaa02334d9bab9f98db1c62273afaf9"
+    },
+    {
+      "key": "radio_country_high_line_home",
+      "title": "High Line Home",
+      "description": "Northern-plains song of the long way back",
+      "pool": "country",
+      "duration_s": 194.406,
+      "source": "https://suno.com/song/abf8f56c-0e6f-4cd8-9782-14042519024b",
+      "master_sha256": "85564a698f1fdd2f0a8d7ddc97afe50c49ba29b9f4410e001c25ca6f81857874",
+      "gain_db": 2.139,
+      "encoded_sha256": "c7f44948c17df773e680f2264aa228be8edf0cfa2df1562c67e64fdefa6655eb"
+    },
+    {
+      "key": "radio_rock_paper_crown",
+      "title": "Paper Crown",
+      "description": "Anthem for the small-town king who never left",
+      "pool": "classic_rock",
+      "duration_s": 202.367,
+      "source": "https://suno.com/song/db920dc3-6454-4861-af0a-c71cc3c01b8f",
+      "master_sha256": "749037b552aa1a54a933be4397083ad235ec71c8367c82165dfab989f9f12f45",
+      "gain_db": 2.221,
+      "encoded_sha256": "ad61ee0869e1db2857a0e5327fa01145d10fbe8e96fd02fca7d411a946dac0b2"
+    },
+    {
+      "key": "radio_rock_bar_band_saturday",
+      "title": "Bar Band Saturday",
+      "description": "Grinning blues-rocker about the cover band that never quit",
+      "pool": "classic_rock",
+      "duration_s": 177.566,
+      "source": "https://suno.com/song/3c06d3f2-cbf9-4e32-8c35-eedbf31f438d",
+      "master_sha256": "d425c928bf640eab0eeba9fbac9e87911c37ef64bcab4dc5454c05dd64dd711e",
+      "gain_db": 2.484,
+      "encoded_sha256": "086837dcaa7aa6d94d2fbf5a720af60730992a5ecf00f23e11947f3de30bf1af"
+    },
+    {
+      "key": "radio_rock_lights_over_superior",
+      "title": "Lights Over Superior",
+      "description": "Instrumental for northern lights over the big lake",
+      "pool": "classic_rock",
+      "duration_s": 225.806,
+      "source": "https://suno.com/song/0f4f5e35-fc47-426b-8880-acf4f6a7cd82",
+      "master_sha256": "7f95157ee3bc349a341cab5fc03f96a8a86ce70d83d93f0adcd06e9e4236ea27",
+      "gain_db": 1.816,
+      "encoded_sha256": "fa0c45bfdf8bc977c2c9f7a880f7f7a9def495efae34ce4062b2fb57b174f6e2"
+    },
+    {
+      "key": "radio_rock_last_payphone_in_town",
+      "title": "Last Payphone in Town",
+      "description": "Horn-stabbed funk-rock about a call that never came",
+      "pool": "classic_rock",
+      "duration_s": 173.607,
+      "source": "https://suno.com/song/9dfb8f32-71b3-4191-970e-e5e1c7cdc5a8",
+      "master_sha256": "19a454157843282f9121fbbf34e0263ab3e1c11108e0bee12be2d77be0c6fcf8",
+      "gain_db": 1.945,
+      "encoded_sha256": "9c4329d91bf00b710699241725e043c9777e9798f4510f6a48407814b422909c"
+    },
+    {
+      "key": "radio_rock_vulture_pass",
+      "title": "Vulture Pass",
+      "description": "Menacing desert hard-rock instrumental",
+      "pool": "classic_rock",
+      "duration_s": 209.526,
+      "source": "https://suno.com/song/c1cec1aa-ff79-456f-a46b-f51b0565dbe6",
+      "master_sha256": "38a5a06ab3b28ac9018dfdec53a1384db575f302268d1e25ab34c6b8be7db4b3",
+      "gain_db": 0.97,
+      "encoded_sha256": "ad448a6a80aa4fcf09685495e4d756eb7aee85f36ea1e64f52d8205b3ac229bf"
+    },
+    {
+      "key": "radio_rock_magnetic_west",
+      "title": "Magnetic West",
+      "description": "Wanderlust rocker pulled toward the sunset",
+      "pool": "classic_rock",
+      "duration_s": 190.767,
+      "source": "https://suno.com/song/26bc7622-1fdb-4a5b-838d-2278ddee5ba0",
+      "master_sha256": "db1752cc98a25133347bc64ce99ec65d211e8727c250cd8bf1cbe9099facc437",
+      "gain_db": 2.537,
+      "encoded_sha256": "5cbd4f4a24ceb5b9c9de2607c18e19f520c7a95155319c1419c9b46354971036"
+    },
+    {
+      "key": "radio_rock_river_rising",
+      "title": "River Rising",
+      "description": "Boogie about a town sandbagging through a spring flood",
+      "pool": "classic_rock",
+      "duration_s": 292.366,
+      "source": "https://suno.com/song/57c036ee-fd3c-407a-943d-ddba882e3809",
+      "master_sha256": "7a337c8ab376c71a7db02fce8c97755da6f9782fb649a6a712bdd1ef9302ba26",
+      "gain_db": 0.489,
+      "encoded_sha256": "bef28584a68995dba703395f88201ee44c3d2b7e26b0a3c9923132c019a5c65e"
+    },
+    {
+      "key": "radio_rock_furnace_wind",
+      "title": "Furnace Wind",
+      "description": "Heat-wave rocker about a love that will not cool",
+      "pool": "classic_rock",
+      "duration_s": 213.167,
+      "source": "https://suno.com/song/904d2498-cb4f-4b01-b57d-ecf5042f7cf3",
+      "master_sha256": "0c289bb336b172394fa8df4ffbdba3c3210c1140536caee436a38200c2de2b7f",
+      "gain_db": 1.835,
+      "encoded_sha256": "81b0eb2f50db0642a14b2528e636d3936da63384ee489d224dddc92cbbb26048"
+    },
+    {
+      "key": "radio_blues_eleven_bridges",
+      "title": "Eleven Bridges",
+      "description": "Counting crossings on a heavy-hearted run",
+      "pool": "blues",
+      "duration_s": 218.126,
+      "source": "https://suno.com/song/dbd2a741-c418-4a35-8b3c-273bb5995e87",
+      "master_sha256": "b6ffe97d5743c4a46944d1ee5f921fdf415e07ddf84b296260349af5cae287b8",
+      "gain_db": 1.77,
+      "encoded_sha256": "bc00e6afb17bd48ae379ab2f2e69eb34a3535e32cc67f44caefacad3a94d2893"
+    },
+    {
+      "key": "radio_blues_fish_fry_friday",
+      "title": "Fish Fry Friday",
+      "description": "Greasy jump-blues floor shaker for the church fish fry",
+      "pool": "blues",
+      "duration_s": 161.566,
+      "source": "https://suno.com/song/bfe4c0a9-5e04-4620-a05e-9e53c9135eb7",
+      "master_sha256": "4e4a123bd95a314908baae9e90254078f5b7c4f1c796b20e210a1f4154a36126",
+      "gain_db": 1.004,
+      "encoded_sha256": "192904203b2bafd8444467f58f3efda6a33ce31d04eb290e3cc935c9d1cafa53"
+    },
+    {
+      "key": "radio_blues_back_porch_darling",
+      "title": "Back Porch Darling",
+      "description": "Soul-blues serenade on a summer back porch",
+      "pool": "blues",
+      "duration_s": 203.607,
+      "source": "https://suno.com/song/5e3088f1-5839-4d12-95a8-287173a1eca3",
+      "master_sha256": "94859e8ae7e885308fca979dc1a6674ba23106b9f46d2a6681cb085ff99a64a3",
+      "gain_db": 1.764,
+      "encoded_sha256": "0b2590a506311ebed8d2029b9e78ec150bff26babdd5b689e693a7a976c14dd8"
+    },
+    {
+      "key": "radio_blues_leaky_roof",
+      "title": "Leaky Roof Blues",
+      "description": "Rain-streaked slow blues about a landlord who never shows",
+      "pool": "blues",
+      "duration_s": 223.607,
+      "source": "https://suno.com/song/76edbaf4-0163-4957-9d35-c0890d313adb",
+      "master_sha256": "cea8e5c50cc8c10ed158f9128b0f858f07f3a9c6fec7fb273531c34ff099c8f7",
+      "gain_db": 0.735,
+      "encoded_sha256": "90e94a0f89dac29c31129be18f0d936e499240358e43e07fc2753c0ef2e1e856"
+    },
+    {
+      "key": "radio_blues_catfish_county",
+      "title": "Catfish County",
+      "description": "Swamp-groove instrumental with harmonica lead",
+      "pool": "blues",
+      "duration_s": 185.607,
+      "source": "https://suno.com/song/7ee496ed-d232-484d-99ef-06c6f979a92c",
+      "master_sha256": "c148294d01e698af1ca6855fc357dbdfc44ce11218f67a5ce50aaa013ded6b20",
+      "gain_db": -0.106,
+      "encoded_sha256": "9ca0f1ccac42f2af4ea7457bf45b0d5b7824b709766f7dbb8c2dd96592959cac"
+    },
+    {
+      "key": "radio_blues_low_water_crossing",
+      "title": "Low Water Crossing",
+      "description": "Texas blues shuffle about risky crossings",
+      "pool": "blues",
+      "duration_s": 177.526,
+      "source": "https://suno.com/song/bd6abc07-276a-46ac-9dcf-b2079590141e",
+      "master_sha256": "0d6fc9de1ada6aa51b2602ccaa9226b42349156c95462edbdfaebb622f5baaaf",
+      "gain_db": 1.543,
+      "encoded_sha256": "1f34c01bd43dd628207c8ad4a8e03812f5975cef56f98b0601292ea18379288b"
+    },
+    {
+      "key": "radio_blues_night_shift_queen",
+      "title": "Night Shift Queen",
+      "description": "Horn-driven soul tribute to a night-shift hero",
+      "pool": "blues",
+      "duration_s": 191.927,
+      "source": "https://suno.com/song/335d42ef-1f29-4d19-a8af-6c8af3048b43",
+      "master_sha256": "0a026ffbb95f863bd4db6718e6189d143d3e368ec6e0c46b9a5d7c71e0f18210",
+      "gain_db": 2.469,
+      "encoded_sha256": "7c77448592b6234deee832a69b848790141667ff8884bcb848c2d1a44adf4686"
+    },
+    {
+      "key": "radio_blues_red_lights_and_regrets",
+      "title": "Red Lights and Regrets",
+      "description": "Minor-key blues of long stops and old choices",
+      "pool": "blues",
+      "duration_s": 229.526,
+      "source": "https://suno.com/song/7932cd44-3c07-46b9-81ed-f8fa28fe252c",
+      "master_sha256": "13c525934c34bd35a515248817071d55cf0b1fdcd73a50a95fe3c86b50a1f978",
+      "gain_db": 1.375,
+      "encoded_sha256": "eb7921bc84a3ee17d3b73db81a1d57a59da76e5aee842edd9f81dc57605b51e0"
+    },
+    {
+      "key": "radio_night_dashboard_glow",
+      "title": "Dashboard Glow",
+      "description": "Hushed confession lit by instrument lights",
+      "pool": "night_line",
+      "duration_s": 203.966,
+      "source": "https://suno.com/song/bafd04a3-3c9a-47df-b1dc-4651061209ec",
+      "master_sha256": "5dd2f05bae39270aa127b4c0e75378dde32c35a2e32708687668cce6d49ba0d3",
+      "gain_db": 2.732,
+      "encoded_sha256": "1024976cf50a7b43bc8ca585064d9e59b69fad42c5feee06a33a189b68cefab4"
+    }
+  ]
+}

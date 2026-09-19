@@ -9,7 +9,7 @@ use super::MusicTrack;
 /// `(key, title, description, duration_s)` -- the literal tables below.
 type Row = (&'static str, &'static str, &'static str, f64);
 
-fn tracks(rows: &[Row]) -> Vec<MusicTrack> {
+pub(super) fn tracks(rows: &[Row]) -> Vec<MusicTrack> {
     rows.iter()
         .map(|(key, title, description, duration_s)| {
             MusicTrack::new(key, title, description, *duration_s)
@@ -528,6 +528,9 @@ pub static COUNTRY_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             368.7,
         ),
     ])
+    .into_iter()
+    .chain(super::expansion::tracks("country"))
+    .collect()
 });
 
 pub static CLASSIC_ROCK_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
@@ -635,6 +638,9 @@ pub static CLASSIC_ROCK_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             141.7,
         ),
     ])
+    .into_iter()
+    .chain(super::expansion::tracks("classic_rock"))
+    .collect()
 });
 
 pub static BLUES_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
@@ -712,6 +718,9 @@ pub static BLUES_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             166.6,
         ),
     ])
+    .into_iter()
+    .chain(super::expansion::tracks("blues"))
+    .collect()
 });
 
 // Nashville jazz-crossover instrumentals: the Nashville After Hours station
@@ -988,35 +997,4 @@ pub static NIGHT_JAZZ_TRACK: Lazy<MusicTrack> = Lazy::new(|| {
         "Late-night instrumental jazz",
         180.0,
     )
-});
-
-// Vocal ballads exclusive to the Night Line station playlist. They stay out of
-// NIGHT_DRIVE_TRACKS so the Roadhouse night rotation remains instrumental.
-pub static NIGHT_LINE_VOCAL_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
-    tracks(&[
-        (
-            "radio_night_last_diner",
-            "Last Diner Open",
-            "Quiet late-night diner ballad",
-            158.7,
-        ),
-        (
-            "radio_night_third_shift_waltz",
-            "Third Shift Waltz",
-            "Gentle waltz for night workers",
-            109.2,
-        ),
-        (
-            "radio_night_paper_cup_moon",
-            "Paper Cup Moon",
-            "Quiet ballad of vending-machine coffee at midnight",
-            196.1,
-        ),
-        (
-            "radio_night_idle_hearts",
-            "Idle Hearts",
-            "Slow duet for two trucks idling side by side",
-            218.1,
-        ),
-    ])
 });

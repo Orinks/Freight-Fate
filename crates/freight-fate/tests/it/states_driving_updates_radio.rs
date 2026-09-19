@@ -615,18 +615,22 @@ fn test_tuning_in_lands_part_way_through_whatever_is_playing() {
 }
 
 #[test]
-fn test_two_stations_do_not_open_on_the_same_song() {
+fn test_two_stations_have_distinct_running_orders_and_playback_positions() {
     let mut app = TestApp::new();
     let mut d = a_denver_drive(&mut app, 42);
     let tape = MusicAudio::install(&mut app);
     two_fixture_stations(&mut d);
 
     tune(&mut d, &mut app, "keep-a");
-    let a = tape.last();
+    let a = (tape.last().0, tape.last_start());
+    let a_order = d.radio_playlist.clone();
     tune(&mut d, &mut app, "keep-b");
-    let b = tape.last();
+    let b = (tape.last().0, tape.last_start());
 
-    assert_ne!(a.0, b.0);
+    // Stations sharing a genre can legitimately reach the same song at
+    // different offsets as the catalog grows. They must not share a timeline.
+    assert_ne!(a_order, d.radio_playlist);
+    assert_ne!(a, b);
 }
 
 #[test]

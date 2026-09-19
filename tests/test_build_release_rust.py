@@ -278,7 +278,7 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_SHA256", raising=False)
     assert build_release.music_download_config() == (
         "https://dev.orinks.net/downloads/music.pak",
-        "19e6d11cf9402484f712cbc037167055804cee3c71fd403fb0f7303fa66d57b2",
+        "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
     )
 
 

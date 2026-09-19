@@ -974,10 +974,11 @@ mod tests {
         // Dial-up Summer); 359 since 2026-08-30, when Four Sources and the
         // Truth joined the country pool; 378 since 2026-09-11 (the gospel,
         // tejano, synthwave and Night Line song batch); 380 since 2026-09-13
-        // (D-Major Medley and From Bossa to Blues). Only the size and header
-        // are checked here: hashing 315 MB is the Python suite's job, once.
+        // (D-Major Medley and From Bossa to Blues); 405 since 2026-09-19
+        // (25 selected radio songs). Only the size and header are checked
+        // here: hashing the whole pack is the Python suite's job, once.
         let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 314_846_192);
+        assert_eq!(len, 367_493_532);
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()

@@ -839,6 +839,12 @@ its status or release decision.
       ended before the stamp existed read as not seen on duty yet until
       their next one ends.
 
+- [x] September 19 radio expansion: eight country songs, eight classic rock,
+      eight blues, and Dashboard Glow for Night Line, with selected duet retakes.
+      The music pack preserves its prior 380 entries and adds 25.
+- [ ] Download and integrate the eight remaining jazz songs, then 19 station
+      jingles, after the September 21 Suno allowance refresh.
+
 - [x] Two owner-supplied instrumentals in the music pack: D-Major Medley
       in the menu rotation, From Bossa to Blues in the day drive pool (so
       the Roadhouse plays it). Pack re-pinned at 380 entries and
