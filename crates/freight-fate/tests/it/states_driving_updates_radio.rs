@@ -65,6 +65,8 @@ struct MusicAudio {
     stops: Rc<RefCell<Vec<u32>>>,
     /// Every live stream URL the cab was asked to open, in order.
     streams: Rc<RefCell<Vec<String>>>,
+    /// The song title the playing stream reports, as BASS would read it.
+    now_playing: Rc<RefCell<Option<String>>>,
     volume: Rc<Cell<f64>>,
     playing: Rc<Cell<bool>>,
     engine_on: Rc<Cell<bool>>,
@@ -76,12 +78,18 @@ struct MusicTape {
     starts: Rc<RefCell<Vec<f64>>>,
     stops: Rc<RefCell<Vec<u32>>>,
     streams: Rc<RefCell<Vec<String>>>,
+    now_playing: Rc<RefCell<Option<String>>>,
 }
 
 impl MusicTape {
     /// The live stream the cab was last asked to open.
     fn last_stream(&self) -> Option<String> {
         self.streams.borrow().last().cloned()
+    }
+
+    /// What the stream is broadcasting as its current song.
+    fn set_now_playing(&self, title: &str) {
+        *self.now_playing.borrow_mut() = Some(title.to_string());
     }
 
     fn tracks(&self) -> Vec<String> {
@@ -122,6 +130,7 @@ impl MusicAudio {
             starts: Rc::clone(&audio.starts),
             stops: Rc::clone(&audio.stops),
             streams: Rc::clone(&audio.streams),
+            now_playing: Rc::clone(&audio.now_playing),
         };
         app.ctx.audio = Box::new(audio);
         tape
@@ -235,7 +244,7 @@ impl Audio for MusicAudio {
         self.playing.get()
     }
     fn radio_now_playing(&self) -> Option<String> {
-        None
+        self.now_playing.borrow().clone()
     }
     fn stop_music_with(&mut self, fade_ms: u32) {
         self.stops.borrow_mut().push(fade_ms);
@@ -805,6 +814,75 @@ fn test_a_playlist_with_nothing_playable_says_so_once() {
     d.playlist_nothing_plays(&mut app.ctx, &station);
     assert_eq!(app.event_lines().len(), 1);
     assert!(!tape.stopped().is_empty());
+}
+
+/// A playlist station tuned in, engine running, with the entry on the air.
+fn tune_playlist(
+    app: &mut TestApp,
+    d: &mut DrivingState,
+    id: &str,
+    entries: &[&str],
+) -> RadioStation {
+    app.ctx.settings.radio_streamer_safe = false; // personal media rides that gate
+    d.trip.truck.start_engine();
+    let station = a_playlist_station(id, entries);
+    let mut catalog = d.radio.catalog.clone();
+    catalog.push(station.clone());
+    d.radio.set_catalog(catalog);
+    tune(d, app, id);
+    station
+}
+
+#[test]
+fn test_a_playlist_station_on_a_stream_entry_reads_out_the_song() {
+    // A playlist exported from an internet radio app is nothing but
+    // stations, and every one of them publishes its song titles the way the
+    // curated streams do. The readout answered for all of them that the
+    // station sends no song information at all.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 5);
+    let tape = MusicAudio::install(&mut app);
+    tape.set_now_playing("Waylon Jennings - Lonesome, On'ry and Mean");
+    tune_playlist(&mut app, &mut d, "pl-streams", &["https://radio.test/kxyz"]);
+
+    assert_eq!(
+        d.radio_now_playing_text(&mut app.ctx),
+        "Now playing on My Playlist: Waylon Jennings - Lonesome, On'ry and Mean."
+    );
+}
+
+#[test]
+fn test_a_playlist_stream_song_survives_into_the_reception_tick() {
+    // The tick's copy is what the tablet and the arrival readout use when
+    // the channel is busy, so it has to be filled for a playlist stream too.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 5);
+    let tape = MusicAudio::install(&mut app);
+    tape.set_now_playing("Jerry Reed - East Bound and Down");
+    tune_playlist(&mut app, &mut d, "pl-tick", &["https://radio.test/kxyz"]);
+
+    radio_frame(&mut d, &mut app);
+
+    assert_eq!(
+        d.radio_now_playing.as_deref(),
+        Some("Jerry Reed - East Bound and Down")
+    );
+}
+
+#[test]
+fn test_a_playlist_station_on_a_file_entry_still_sends_no_song_information() {
+    // A file off the player's own disk is not a broadcast: nothing is
+    // publishing a title, so the honest answer is the one it always gave.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 5);
+    let tape = MusicAudio::install(&mut app);
+    tape.set_now_playing("whatever the channel happens to hold");
+    tune_playlist(&mut app, &mut d, "pl-files", &["C:/music/good.ogg"]);
+
+    assert_eq!(
+        d.radio_now_playing_text(&mut app.ctx),
+        "My Playlist does not send song information."
+    );
 }
 
 // -- driving out of range -------------------------------------------------------------

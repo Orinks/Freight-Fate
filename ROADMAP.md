@@ -613,6 +613,10 @@ its status or release decision.
       that just ended; off resumes top to bottom. Asked for by Hailey on
       the drivers board: the Playlists folder was built for M3U stream
       lists and is being used for MP3 collections.
+- [x] A playlist station sitting on a stream entry now reports the song it
+      is playing, the same as a station on the dial. The song readout
+      answered for every playlist that it sends no song information,
+      which is only true of a file off the player's own disk.
 - [ ] 196 legs still have no sleep stop a loaded truck can use and no
       inventory record on the road. US-12 Willmar to Minneapolis is one:
       its only stop is a Kwik Trip typed bobtail-only. Needs another

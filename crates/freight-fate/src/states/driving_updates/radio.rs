@@ -172,8 +172,8 @@ impl DrivingState {
         }
         self.radio_reconnect_timer = 0.0;
         // What the stream says it is playing, read on the same tick that
-        // judges its signal. Only real streams carry ICY song metadata.
-        self.radio_now_playing = if reception.station.real_stream {
+        // judges its signal. Only a live connection carries song metadata.
+        self.radio_now_playing = if self.station_sends_song_info(&reception.station) {
             ctx.audio.radio_now_playing()
         } else {
             None
@@ -567,6 +567,19 @@ impl DrivingState {
         advance: bool,
     ) {
         let _ = self.start_playlist_station_checked(ctx, station, fade_ms, advance);
+    }
+
+    /// Whether the station on the air can report the song it is playing.
+    ///
+    /// A live stream carries ICY metadata; so does a personal playlist
+    /// sitting on a stream entry, because that entry IS an internet station
+    /// -- a playlist exported from an internet radio app is nothing but
+    /// stations. A playlist on a file off the player's own disk is not a
+    /// broadcast and nobody is publishing a title for it.
+    pub fn station_sends_song_info(&self, station: &RadioStation) -> bool {
+        station.real_stream
+            || (station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE
+                && is_stream_entry(&self.playlist_entry(station)))
     }
 
     /// The entry this playlist is sitting on right now.
@@ -1022,7 +1035,7 @@ impl DrivingState {
             return "The engine is off. The radio has no power.".to_string();
         }
         let station = self.radio.current_station();
-        if !station.real_stream {
+        if !self.station_sends_song_info(&station) {
             return format!("{} does not send song information.", station.display_name());
         }
         if !ctx.audio.music_playing() {

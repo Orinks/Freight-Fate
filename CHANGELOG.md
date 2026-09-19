@@ -63,6 +63,8 @@
 
 ### Fixed
 
+- **A station in one of your playlists now names the song it is playing.** The cab used to answer that your playlist sends no song information.
+
 - **A tight bend can now be held at the speed it is signed for.** The truck used to run wide at the number curve assistance had just braked to.
 
 - **The approach to your delivery exit now asks you to signal.** It used to name the lane and the ramp speed only.
