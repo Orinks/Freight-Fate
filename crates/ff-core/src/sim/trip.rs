@@ -904,6 +904,19 @@ impl Trip {
         0
     }
 
+    /// The design speed of the leg under the truck, in mph.
+    ///
+    /// What the curve bake priced this leg's advisories and its bank with, so
+    /// anything reading the bank at run time (the lane model's cornering
+    /// ceiling) asks the same question of the same road.
+    pub fn leg_design_speed_mph(&self) -> f64 {
+        self.route
+            .legs
+            .get(self.current_leg_index())
+            .map(|leg| crate::data::curves::leg_design_speed(leg))
+            .unwrap_or(55.0)
+    }
+
     /// The world city the current leg heads toward; panics (Python:
     /// `KeyError`) for a synthetic city the world does not carry.
     pub fn current_target_city(&self) -> &City {

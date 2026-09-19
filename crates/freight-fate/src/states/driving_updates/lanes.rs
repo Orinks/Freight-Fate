@@ -2,7 +2,7 @@
 //! changes, crossings, a road that narrows under the truck, coned-off lanes,
 //! and keep-right pressure.
 
-use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft};
+use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft, superelevation_at};
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -399,10 +399,26 @@ impl DrivingState {
         // jobs: feed-forward off the road's shape, feedback off the driver's
         // error.
         let takes_the_bend = ctx.settings.curve_speed_assist;
+        // The bank the bend is built with, which is load the tires do not
+        // carry -- the same `superelevation_at` the advisory was priced with,
+        // so the ceiling and the number the cab speaks agree about the road.
+        // A ramp keeps its own geometry and no bank: its cap comes off the
+        // posted ramp speed, not a design speed the bake never recorded.
+        let bank = active
+            .as_ref()
+            .filter(|c| !c.connector)
+            .map(|bend| {
+                superelevation_at(
+                    (bend.min_radius_ft as f64).max(1.0),
+                    self.trip.leg_design_speed_mph(),
+                )
+            })
+            .unwrap_or(0.0);
         let road = RoadConditions {
             curvature: curve,
             wind,
             grip,
+            bank,
         };
         let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
         if off_road_event {

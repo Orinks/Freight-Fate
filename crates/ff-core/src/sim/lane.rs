@@ -82,7 +82,25 @@ pub const MAX_STEER_LATERAL_G: f64 = 0.2;
 /// taking a bend far above its advisory is, so the total still stops at the
 /// static rollover threshold a loaded combination is built to, and past that
 /// the truck understeers wide exactly as it should.
+///
+/// This is what the TIRES must supply, so a banked bend is credited its bank
+/// (`RoadConditions::bank`) on top of it. The governing equation the whole
+/// curve bake is built on is `e + f = V^2 / 15R`: the bank carries part of the
+/// lateral load and only the rest reaches the tires. Comparing the total
+/// against the tire limit priced the bank as if it did nothing, and the
+/// shipped advisories are `0.30 g PLUS bank` -- so at the very number the cab
+/// calls out, the tightest bends sat at or over a ceiling meant for the
+/// rollover edge, and the truck ran wide with every assist steering (agent
+/// drive, AZ-260 into Payson, 2026-09-19). Credited, the advisory leaves
+/// 0.05 g of tire between the road's demand and the ceiling, which is the
+/// authority lane keeping corrects a drift with. See
+/// `tests/it/sim_bends_hold_their_advisory.rs`, which sweeps every signed bend
+/// in the bake at its own advisory.
 pub const MAX_ROAD_LATERAL_G: f64 = 0.35;
+/// The most bank that may be credited, as a slope. `SUPERELEVATION_BUILT` in
+/// `data::curves` -- the 6 percent both cited DOT manuals build to -- and the
+/// screen that keeps a malformed row from buying cornering it never earned.
+pub const MAX_CREDITED_BANK: f64 = 0.06;
 /// Half a twelve-foot lane, feet: what `offset` 1.0 is worth on the ground.
 pub const HALF_LANE_FT: f64 = 6.0;
 /// How hard PARTIAL lane keeping steers for the driver.
@@ -133,6 +151,10 @@ pub struct RoadConditions {
     pub wind: f64,
     /// Tire grip, 0 to 1. Below one the truck understeers.
     pub grip: f64,
+    /// The bend's superelevation, as a slope. Zero on unbanked road. Credited
+    /// to the cornering ceiling, because bank the road carries is load the
+    /// tires do not -- see [`MAX_ROAD_LATERAL_G`].
+    pub bank: f64,
 }
 
 impl Default for RoadConditions {
@@ -141,6 +163,7 @@ impl Default for RoadConditions {
             curvature: 0.0,
             wind: 0.0,
             grip: 1.0,
+            bank: 0.0,
         }
     }
 }
@@ -299,6 +322,7 @@ impl LaneKeeping {
             curvature: road_curvature,
             wind,
             grip,
+            bank,
         } = road;
         self.crossed = 0;
         let Some((drift_mult, steer_mult)) = assist_tuning(assist) else {
@@ -358,7 +382,8 @@ impl LaneKeeping {
         let driver_cap = rate_at(MAX_STEER_LATERAL_G);
         let mut yaw_rate = (fps * commanded.tan() / WHEELBASE_FT).clamp(-driver_cap, driver_cap)
             + fps * tracking.tan() / WHEELBASE_FT;
-        let road_cap = rate_at(MAX_ROAD_LATERAL_G);
+        // The tire limit plus whatever the road's bank carries for the truck.
+        let road_cap = rate_at(MAX_ROAD_LATERAL_G + bank.clamp(0.0, MAX_CREDITED_BANK));
         yaw_rate = yaw_rate.clamp(-road_cap, road_cap);
         // Understeer: tires that cannot hold the road do not turn the truck as
         // far as the wheel asked, so a bend taken on ice runs wide even with
@@ -468,6 +493,7 @@ mod tests {
                     curvature: curve,
                     wind,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 assist,
                 false,
@@ -524,6 +550,7 @@ mod tests {
                     curvature: left_bend(600.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -559,6 +586,7 @@ mod tests {
                     curvature: left_bend(600.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "partial",
                 true,
@@ -569,6 +597,51 @@ mod tests {
             lane.offset.abs() < LANE_EDGE,
             "the bend could not be held at its own advisory; offset {}",
             lane.offset
+        );
+    }
+
+    #[test]
+    fn a_banked_hairpin_can_be_held_at_its_own_advisory() {
+        // AZ-260, mile 37.9: 146 feet of radius, advisory 30. Priced at
+        // 0.30 g plus the road's 6 percent of bank, so at 30 the bend asks
+        // 0.36 g of the road and 0.30 of the TIRES -- and comparing the whole
+        // 0.36 against a tire limit of 0.35 ran the truck out of its lane at
+        // the speed the cab had just called out, with every assist steering
+        // (agent drive, 2026-09-19).
+        let hairpin = |bank: f64| {
+            let mut lane = LaneKeeping::new(Some(11));
+            let dt = 0.05;
+            let thirty_mph = 30.0 / MPH_PER_MPS;
+            // 120 degrees of a 146-foot arc at 44 feet per second: 7 seconds.
+            for _ in 0..140 {
+                lane.update(
+                    dt,
+                    thirty_mph,
+                    RoadConditions {
+                        curvature: left_bend(146.0),
+                        wind: 0.0,
+                        grip: 1.0,
+                        bank,
+                    },
+                    "partial",
+                    true,
+                );
+            }
+            lane.offset
+        };
+
+        let banked = hairpin(0.06);
+        assert!(
+            banked.abs() < LANE_EDGE,
+            "the hairpin could not be held at its own advisory; offset {banked}"
+        );
+        // Lay the same bend flat and it is genuinely unholdable at 30, which
+        // is the model saying the bank is doing the work rather than a fudge
+        // factor: an unbanked 146-foot curve is not a 30 mph curve.
+        let flat = hairpin(0.0);
+        assert!(
+            flat > LANE_EDGE,
+            "expected an unbanked hairpin to run wide at 30; offset {flat}"
         );
     }
 
@@ -591,6 +664,7 @@ mod tests {
                     curvature: left_bend(600.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "partial",
                 true,
@@ -621,6 +695,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -646,6 +721,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -670,6 +746,7 @@ mod tests {
                     curvature: left_bend(600.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -685,6 +762,7 @@ mod tests {
                     curvature: left_bend(600.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -715,6 +793,7 @@ mod tests {
                     curvature: left_bend(2000.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -726,6 +805,7 @@ mod tests {
                     curvature: left_bend(400.0),
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -754,6 +834,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -765,6 +846,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 0.25,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -813,6 +895,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -836,6 +919,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -880,6 +964,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
@@ -909,6 +994,7 @@ mod tests {
                     curvature: 0.0,
                     wind: 0.0,
                     grip: 1.0,
+                    bank: 0.0,
                 },
                 "off",
                 false,
