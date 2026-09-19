@@ -39,6 +39,29 @@ fn pan_text(pan: f64) -> &'static str {
     }
 }
 
+/// A continuous pan quantised into the steps an agent should report.
+///
+/// A one-shot says its side once and is done, but the road bed and the engine
+/// are panned EVERY FRAME, and together they are the whole steering instrument
+/// with lane keeping off: the bed leans toward where the wheel should go, and
+/// the engine sits where the truck is in its lane. Reporting either raw would
+/// bury the transcript; reporting neither -- which is what this did until
+/// 2026-09-18 -- left an agent deaf to the one channel it was asked to test.
+/// Quantised to quarters, a slewing guide reports about as often as a player
+/// notices it move.
+fn pan_step(pan: f64) -> i32 {
+    (pan.clamp(-1.0, 1.0) * 4.0).round() as i32
+}
+
+/// How a reported pan step reads.
+fn pan_step_text(step: i32) -> String {
+    match step {
+        0 => "centred".to_string(),
+        s if s < 0 => format!("left {}", -s),
+        s => format!("right {s}"),
+    }
+}
+
 // -- the speech tee -------------------------------------------------------------------
 
 /// Passes every call to the real sink (the words still reach the screen
@@ -149,6 +172,10 @@ struct TeeAudio {
     weather_key: Option<String>,
     ambient_key: Option<String>,
     loop_keys: HashMap<u32, String>,
+    /// Last reported pan step per loop channel, and for the engine, so a pan
+    /// held steady says nothing and a pan on the move says so once per step.
+    loop_pan_steps: HashMap<u32, i32>,
+    engine_pan_step: i32,
 }
 
 impl TeeAudio {
@@ -230,7 +257,25 @@ impl Audio for TeeAudio {
         self.inner.set_loop_volume(channel, volume);
     }
     fn set_loop_pan(&mut self, channel: u32, pan: f64) {
+        let step = pan_step(pan);
+        if self.loop_pan_steps.insert(channel, step) != Some(step) {
+            let key = self
+                .loop_keys
+                .get(&channel)
+                .cloned()
+                .unwrap_or_else(|| format!("channel {channel}"));
+            self.hear(format!("[bed] {key} pans {}", pan_step_text(step)));
+        }
         self.inner.set_loop_pan(channel, pan);
+    }
+
+    fn set_engine_pan(&mut self, pan: f64) {
+        let step = pan_step(pan);
+        if step != self.engine_pan_step {
+            self.engine_pan_step = step;
+            self.hear(format!("[engine] pans {}", pan_step_text(step)));
+        }
+        self.inner.set_engine_pan(pan);
     }
     fn set_loop_rate(&mut self, channel: u32, rate: f64) {
         self.inner.set_loop_rate(channel, rate);
@@ -419,6 +464,8 @@ pub fn install_ears(app: &mut App) -> SharedEars {
         weather_key: None,
         ambient_key: None,
         loop_keys: HashMap::new(),
+        loop_pan_steps: HashMap::new(),
+        engine_pan_step: 0,
     });
     ears
 }
@@ -482,7 +529,49 @@ mod tests {
             weather_key: None,
             ambient_key: None,
             loop_keys: HashMap::new(),
+            loop_pan_steps: HashMap::new(),
+            engine_pan_step: 0,
         }
+    }
+
+    #[test]
+    fn the_steering_guide_reaches_an_agents_ears() {
+        // With lane keeping off the road bed leans toward where the wheel
+        // should go and the engine sits where the truck is in its lane. Those
+        // two are the whole instrument, and an agent asked to test steering
+        // heard NEITHER until 2026-09-18: one-shots reported their side, but
+        // the continuous pans went straight through to the backend.
+        let ears = Ears::shared();
+        {
+            let mut audio = tee_audio(&ears);
+            audio.start_loop_with(3, "vehicle/road_bed", 1.0, 0);
+            ears.borrow_mut().lines.clear();
+
+            // The bed leans into a left-hander and comes back.
+            audio.set_loop_pan(3, -0.5);
+            audio.set_loop_pan(3, -0.52); // same step: says nothing
+            audio.set_loop_pan(3, 0.0);
+            // And the engine follows the truck's own lane position.
+            audio.set_engine_pan(0.75);
+            audio.set_engine_pan(0.74); // same step again
+        }
+        let heard = drain_ears(&ears);
+        assert!(
+            heard.contains("[bed] vehicle/road_bed pans left 2"),
+            "the guide's lean never reached the ears: {heard}"
+        );
+        assert!(
+            heard.contains("[bed] vehicle/road_bed pans centred"),
+            "{heard}"
+        );
+        assert!(heard.contains("[engine] pans right 3"), "{heard}");
+        // Held steady, a pan is silent -- otherwise it floods every frame.
+        assert_eq!(heard.matches("[engine] pans").count(), 1, "{heard}");
+        assert_eq!(
+            heard.matches("[bed] vehicle/road_bed pans").count(),
+            2,
+            "{heard}"
+        );
     }
 
     #[test]
