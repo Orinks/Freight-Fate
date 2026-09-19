@@ -255,7 +255,13 @@ impl DrivingState {
         // cycle (cruise pulling back up to the engage line) must not chant.
         self.curve_assist_cue_s = (self.curve_assist_cue_s - dt).max(0.0);
         if curve_assisting && needs_service {
-            self.trip.truck.brake = self.trip.truck.brake.max(0.35f64.min(curve.abs()));
+            // Sized from how far OVER the bend's advisory the truck is, not
+            // from `curve`: that used to be a severity around 1.0 and is a
+            // curvature around 0.002 since the lane model grew a heading, so
+            // reading it here quietly turned a third of the brakes into
+            // nothing at all.
+            let over = excess_now.unwrap_or(0.0);
+            self.trip.truck.brake = self.trip.truck.brake.max(0.35f64.min(0.1 + over * 0.02));
         }
         // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp adds 0.35 of curve
         // weight above, so any exit taken over about 43 mph engages this
