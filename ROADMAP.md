@@ -350,10 +350,11 @@ its status or release decision.
       times a second: 125 psi to the spring brakes in one bend of AZ-260,
       Camp Verde to Payson. It now settles to the grade's own push and
       stays there.
-- [ ] A bend called "just ahead" arms the servo with 0.03 mile to shed in,
-      and on the compressed clock the approach profile asks for a full
-      application to take off 3 mph (same AZ-260 trace). Price a late arm
-      on the real clock, or arm the servo before the call is spoken.
+- [x] The clock stays real until curve assistance has finished slowing
+      for a bend (2026-09-18). The pacenote decompression lets go at the
+      advisory plus its margin while the servo aims at the advisory itself,
+      so the last 3 mph were shed on the compressed clock and took a full
+      application (same AZ-260 trace).
 
 ### September 12 live data and dispatch
 

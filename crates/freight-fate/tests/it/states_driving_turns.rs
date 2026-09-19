@@ -2142,6 +2142,44 @@ fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
 }
 
 #[test]
+fn test_the_last_few_miles_an_hour_are_shed_on_the_real_clock() {
+    // A bend called late with the truck barely over the pacenote margin: the
+    // call decompresses the clock, the first touch of the brakes takes the
+    // truck under the margin, and the clock used to snap back to the
+    // compressed pacing with the servo still shedding -- so the road left
+    // ran out seventeen times faster than the truck slowed and the pedal
+    // went to the floor for 3 mph (AZ-260 bench trace, 2026-09-18).
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    d.trip.time_scale = 20.0;
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 44.0, 40, 400, 0.08);
+
+    let mut servo_max: f64 = 0.0;
+    let mut armed = false;
+    drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        if let Some(servo) = d.curve_servo.as_ref() {
+            armed = true;
+            servo_max = servo_max.max(servo.brake);
+            if d.trip.truck.speed_mph() > servo.target_mph {
+                assert_eq!(
+                    d.trip.effective_time_scale(),
+                    1.0,
+                    "compressed clock with {:.1} mph still to shed",
+                    d.trip.truck.speed_mph() - servo.target_mph
+                );
+            }
+        }
+    });
+
+    assert!(armed, "the bend never armed the servo");
+    assert!(
+        servo_max < 0.6,
+        "four miles an hour should not take a hard application: {servo_max:.2}"
+    );
+}
+
+#[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
     // driver holding the throttle into the same bend gets the old drift

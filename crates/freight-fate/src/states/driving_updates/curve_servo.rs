@@ -100,6 +100,7 @@ impl DrivingState {
     /// application it sets is the one the truck integrates.
     pub fn update_curve_speed_servo(&mut self, ctx: &GameContext) {
         let Some(servo) = self.curve_servo.as_ref() else {
+            self.trip.curve_shed_active = false;
             return;
         };
         let position = self.trip.position_mi;
@@ -108,6 +109,7 @@ impl DrivingState {
             // back silently -- a release line on every bend of a cluster
             // would chant.
             self.curve_servo = None;
+            self.trip.curve_shed_active = false;
             return;
         }
         let v = self.trip.truck.velocity_mps;
@@ -168,6 +170,10 @@ impl DrivingState {
         if let Some(servo) = self.curve_servo.as_mut() {
             servo.brake = applied;
         }
+        // The clock stays real while there is still speed to take off, so
+        // the shed is priced in the same seconds the truck slows in. See
+        // `Trip::effective_time_scale`.
+        self.trip.curve_shed_active = v > target;
         self.trip.truck.brake = self.trip.truck.brake.max(applied);
     }
 

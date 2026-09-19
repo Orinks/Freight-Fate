@@ -298,6 +298,8 @@ pub struct Trip {
     pub pull_over_active: bool,
     /// True from a street corner's approach call until the corner resolves.
     pub controlled_turn: bool,
+    /// True while curve assistance is still taking speed off for a bend.
+    pub curve_shed_active: bool,
     /// Road left to an exit the driver has signalled for.
     pub exit_approach_mi: Option<f64>,
     pub exit_approach_release_s: f64,
@@ -454,6 +456,7 @@ impl Trip {
             dock_run_in: false,
             pull_over_active: false,
             controlled_turn: false,
+            curve_shed_active: false,
             exit_approach_mi: None,
             exit_approach_release_s: 0.0,
             announced_chain_law: HashSet::new(),
@@ -568,6 +571,17 @@ impl Trip {
         }
         if self.severe_curve_decompression() {
             // Same law for a hard bend (owner, 2026-07-24).
+            return full.min(1.0);
+        }
+        if self.curve_shed_active {
+            // And while curve assistance is still shedding for one. The law
+            // above lets go at the advisory plus the pacenote margin; the
+            // assist aims at the advisory itself, so the last three miles an
+            // hour were shed on the compressed clock, where the road left
+            // passes seventeen times faster than the truck slows and the
+            // only profile that still lands on the number is a full
+            // application (AZ-260 bench trace, 2026-09-18: 0.35 of the
+            // pedal one frame, all of it the next, to take off 3 mph).
             return full.min(1.0);
         }
         if self.armed_exit_decompression() {

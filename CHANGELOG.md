@@ -61,6 +61,8 @@
 
 ### Fixed
 
+- **Curve assistance no longer stamps on the brakes just before a bend.** The last few miles an hour come off gently now.
+
 - **Curve assistance no longer runs you out of air on a downhill bend.** It holds one steady brake through the bend now, where it used to pump them until the spring brakes set.
 
 - **The speed keeper no longer runs you out of air on the way to a gate.** It used to pump the brakes until the parking brake set itself and stranded you short of the yard.
