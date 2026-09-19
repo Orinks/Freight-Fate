@@ -1071,6 +1071,32 @@ repository root; Markdown links are relative to this document.
       Mainline merge symmetry (NPCs yielding to the player from on-ramps)
       stays out of scope with the parked merge-yield AI feel item.
 
+- [x] **An assist's held brake application must be re-asserted every frame,
+      never only on the frames its controller runs (third occurrence, FIXED
+      2026-09-18).** `update_frame`'s input pass ramps `truck.brake` down on
+      every frame nobody commands it, and it runs before any assist. An
+      assist that writes the pedal only from inside its own controller is
+      therefore not HOLDING an application across a frame it sits out -- it
+      is dropping one and making a fresh one, and `consume_brake_air` charges
+      `air_loss_primary_per_application_psi` on every rising edge. The hazard
+      assist had it (`apply_hazard_brake`), the arrival's pedals had it, the
+      facility lane hold learned it on Shelby's downgrade; the speed keeper's
+      snub did not, and on a facility street chain it was re-made nine times
+      a second -- eight psi a second against the four the compressor makes at
+      idle, spring brakes in twenty seconds, truck stranded short of the gate
+      with the delivery unfinishable. Now `apply_keeper_snub`, called from
+      `update_frame` beside the others. The next assist that holds a pedal
+      belongs in that same list -- and with the same companion rule, because
+      re-asserting alone deadlocks: an assist whose LATCH is only re-judged
+      on the frames its controller runs must release that latch when it hands
+      the pedals over, or it holds a brake nothing can let go of. The keeper
+      now releases its snub when the driver is on the accelerator, which is
+      the rule it already applied to its own throttle. Pinned by
+      `test_the_approach_assist_still_has_its_air_at_the_gate`, which measures
+      the tanks the whole way in rather than only where the truck ended up --
+      arriving cannot tell "stopped at the gate" from "stopped by its own
+      spring brakes on the gate".
+
 - [x] **Destination approach assistance brings the truck to a stop at the
       arrival point.** Shipped 2026-08-20 after three failed attempts, all
       of which passed a test built on stand-in objects while the real game

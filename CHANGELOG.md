@@ -10,11 +10,15 @@
 
 ### Changed
 
+<<<<<<< HEAD
 - **The engine leans toward where you should steer, instead of the road noise.** Follow the lean. The road noise now tells you where you are in your lane.
 
 - **Bends no longer chime.** The spoken call and the engine's lean carry the bend, so there is nothing beeping over them.
 
 - **Route-transition assistance stops announcing itself over and over on a slow ramp.** It said it was slowing and releasing about twenty times down one ramp, burying the countdown to the stop bar.
+=======
+- **Pressing the accelerator now lets the speed keeper's brake off.** The keeper used to hold its brake against you until you lifted.
+>>>>>>> fix/approach-assist-air
 
 - **A turn now takes the speed its own shape allows.** A sweeping turn lets you carry more speed than a tight one into a yard.
 
@@ -44,6 +48,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **The speed keeper no longer runs you out of air on the way to a gate.** It used to pump the brakes until the parking brake set itself and stranded you short of the yard.
 
 - **z103.com plays music again.** The station moved its stream and the old address played only a sign-off message.
 

@@ -436,6 +436,12 @@ impl DrivingState {
         self.resume_speed_control_if_ready(ctx, braking);
         self.update_cruise(ctx, dt, braking, hand_accelerating, clutch_disengaged);
         self.update_keeper(ctx, dt, braking, hand_accelerating, clutch_disengaged);
+        // The keeper's held snub, for the same reason and by the same rule:
+        // `update_keeper` returns early on an overridden or shifting frame,
+        // and the input ramp above has already bled the pedal it left behind
+        // -- so without this the one application is re-made, and re-charged,
+        // every time round. See apply_keeper_snub.
+        self.apply_keeper_snub();
         // The hazard assist's held application belongs here with the other
         // assists' floors, ahead of the physics -- see apply_hazard_brake.
         // update_hazard, which decides it, runs at the end of the frame.
