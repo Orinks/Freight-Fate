@@ -2104,7 +2104,7 @@ fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
     let mut d = a_drive(&mut app);
     for grade in [-0.02, -0.03, -0.04, -0.05, -0.061, -0.07, -0.08] {
         for target in [15.0, 25.0, 30.0, 40.0, 55.0] {
-            for over in [0.5, 1.5, 8.0] {
+            for (over, push) in [(0.5, 0.0), (1.5, 0.0), (8.0, 0.0), (0.9, 0.04)] {
                 a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, 400, 0.5);
                 d.curve_servo = None;
                 let here = d.trip.position_mi;
@@ -2115,15 +2115,22 @@ fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
                 for _ in 0..(45.0 / DT) as usize {
                     d.trip.truck.grade = grade;
                     d.trip.truck.brake = 0.0;
+                    // The last row is adaptive cruise holding the same bend:
+                    // a light push on the truck the whole way through, so the
+                    // hold never quite balances and the band edge is revisited.
+                    d.trip.truck.throttle = push;
                     d.update_curve_speed_servo(&app.ctx);
                     applied_total += (d.trip.truck.brake - last).max(0.0);
                     last = d.trip.truck.brake;
                     d.trip.truck.update(DT);
                 }
 
-                let case = format!("{:.1} percent, advise {target}, {over} over", grade * 100.0);
+                let case = format!(
+                    "{:.1} percent, advise {target}, {over} over, push {push}",
+                    grade * 100.0
+                );
                 assert!(
-                    applied_total < 3.0,
+                    applied_total < 1.5,
                     "{case}: {applied_total:.1} applications in one bend"
                 );
                 assert!(

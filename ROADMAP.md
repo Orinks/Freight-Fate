@@ -348,8 +348,11 @@ its status or release decision.
       (2026-09-18). Inside its hold band it let go, the hill carried the
       truck back over, and the snub came back as a new application ten
       times a second: 125 psi to the spring brakes in one bend of AZ-260,
-      Camp Verde to Payson. It now settles to the grade's own push and
-      stays there.
+      Camp Verde to Payson. With adaptive cruise holding the same bend it did the same on the
+      band's edge. The pedal is feathered now: the snub scales with how
+      far over the number the truck is, the hill is held tapering to a
+      band under it, and the whole run makes 8 applications where it made
+      277. Judged across 140 grade, advisory and entry-speed cases.
 - [x] The clock stays real until curve assistance has finished slowing
       for a bend (2026-09-18). The pacenote decompression lets go at the
       advisory plus its margin while the servo aims at the advisory itself,
