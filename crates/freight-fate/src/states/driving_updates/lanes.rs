@@ -433,11 +433,7 @@ impl DrivingState {
             // Back on the pavement: the standing condition ended, so its one
             // transition line speaks and the band resets (research doc R12).
             self.road_position_band = None;
-            // review=True: STATUS goes SILENT at urgent_only, so this line
-            // would otherwise reach no voice, no earcon, and (with the old
-            // review=False here) no log either -- genuinely unreachable,
-            // which breaks the ladder's own invariant that nothing it cuts
-            // becomes invisible to the review keys.
+            // Quiet speaks the recovery; Urgent only omits routine status.
             ctx.say_event_with(
                 "Back on the pavement.",
                 SayEvent::queued()

@@ -39,11 +39,11 @@ fn test_every_rung_rules_on_every_category() {
 }
 
 #[test]
-fn test_safety_and_money_speak_at_every_rung() {
+fn test_safety_and_immediate_navigation_speak_at_every_rung() {
     // R1's never-dropped contract outranks the ladder. A rung may
     // shorten these; it may never silence them.
     for mode in DRIVING_SPEECH_MODES {
-        for category in [SpeechCategory::Safety, SpeechCategory::Money] {
+        for category in [SpeechCategory::Safety, SpeechCategory::Navigation] {
             assert!(matches!(
                 disposition_for(mode, Some(category)),
                 Disposition::Full | Disposition::Terse
@@ -85,15 +85,15 @@ fn test_the_table_reads_exactly_as_the_spec_says() {
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Terse),
             (SpeechCategory::Coaching, Disposition::Earcon),
-            (SpeechCategory::Confirmation, Disposition::Earcon),
-            (SpeechCategory::Status, Disposition::Earcon),
+            (SpeechCategory::Confirmation, Disposition::Terse),
+            (SpeechCategory::Status, Disposition::Terse),
         ]
     );
     assert_eq!(
         *disposition_row("urgent_only").unwrap(),
         [
             (SpeechCategory::Safety, Disposition::Terse),
-            (SpeechCategory::Money, Disposition::Terse),
+            (SpeechCategory::Money, Disposition::Silent),
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Earcon),
             (SpeechCategory::Coaching, Disposition::Silent),

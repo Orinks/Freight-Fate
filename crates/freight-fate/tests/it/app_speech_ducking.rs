@@ -95,7 +95,7 @@ fn test_an_earcon_gets_the_room_the_words_it_replaces_would_have_had() {
     let mut app = TestApp::new();
     let audio = app.record_audio();
     app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "quiet".to_string(); // confirmation -> earcon
+    app.ctx.settings.driving_speech = "urgent_only".to_string(); // confirmation -> earcon
 
     app.ctx.say_event_with(
         "Automatic braking.",
@@ -124,7 +124,7 @@ fn test_the_earcon_duck_lets_go_on_its_own() {
     let mut app = TestApp::new();
     let audio = app.record_audio();
     app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "quiet".to_string();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
 
     app.ctx.say_event_with(
         "Automatic braking.",
@@ -153,7 +153,7 @@ fn test_with_ducking_off_an_earcon_leaves_the_mix_alone() {
     let mut app = TestApp::new();
     let audio = app.record_audio();
     app.ctx.settings.duck_audio_for_speech = false;
-    app.ctx.settings.driving_speech = "quiet".to_string();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
 
     app.ctx.say_event_with(
         "Automatic braking.",
@@ -177,7 +177,7 @@ fn test_a_say_path_earcon_gets_the_same_room_as_an_event_one() {
     let mut app = TestApp::new();
     let audio = app.record_audio();
     app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "quiet".to_string();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
 
     app.ctx.say_with(
         "Cruise set.",
@@ -199,7 +199,7 @@ fn test_with_ducking_off_a_say_path_earcon_leaves_the_mix_alone() {
     let mut app = TestApp::new();
     let audio = app.record_audio();
     app.ctx.settings.duck_audio_for_speech = false;
-    app.ctx.settings.driving_speech = "quiet".to_string();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
 
     app.ctx.say_with(
         "Cruise set.",

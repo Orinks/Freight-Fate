@@ -172,10 +172,12 @@ impl SettingsCategoryState {
                 action: adjust(|s, ctx, d| s.cycle_driving_speech(ctx, d)),
                 help: "How much the road tells you. Standard speaks every \
                        confirmation and status update, and a driving tip once \
-                       per leg. Quiet turns confirmations and status into short \
-                       sounds. Urgent only also turns the heads-up about a bend \
-                       or a town into a short sound, keeping safety calls, costs, \
-                       and the turn itself. Billboards, place names, and \
+                       per leg. Quiet speaks short confirmations, lane openings, \
+                       and status updates. Urgent only keeps safety warnings \
+                       and directions requiring action, with sounds for road \
+                       heads-ups and confirmations. Suppressed speech stays out \
+                       of the event buffer. Readout keys always answer. \
+                       Billboards, place names, and \
                        landmarks have their own switches below.",
             },
             SpeechSpec {

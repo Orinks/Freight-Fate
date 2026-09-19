@@ -12,8 +12,7 @@
 //! The capture sits BELOW the ladder gate and below the event pacer, where
 //! Python's stub replaced `ctx.say_event` and sat above both. So "spoken" here
 //! means what a player would actually hear at that rung: a STATUS line at
-//! `urgent_only` is not in `event_lines()` at all, and the words are read off
-//! `ctx.message_log`, which the gate still writes.
+//! `urgent_only` is absent from both `event_lines()` and message review.
 //!
 //! And the pacer measures in REAL seconds. A case that calls the same standing
 //! condition twice in the same instant is answered by the plain
@@ -654,7 +653,7 @@ fn test_the_air_brake_lockout_recurs_once_it_clears_and_comes_back() {
 // -- money and safety on the real lines ----------------------------------------------
 
 #[test]
-fn test_cargo_condition_speaks_at_urgent_only_as_money() {
+fn test_routine_cargo_condition_is_silent_at_urgent_only() {
     // The coaching tail only rides the first report; every message this sends
     // -- including that first one -- carries the pay consequence (an
     // exception, a claim, a refused load). MONEY, not COACHING, governs the
@@ -666,19 +665,14 @@ fn test_cargo_condition_speaks_at_urgent_only_as_money() {
 
     drive.announce_cargo_condition(&mut app.ctx);
 
-    assert!(!app.event_lines().is_empty());
+    assert!(app.event_lines().is_empty());
     app.shutdown();
 }
 
 #[test]
-fn test_the_carrier_grounding_speaks_at_urgent_only_as_money() {
-    // The company driver's twin of the owner-operator's roadside-repair report
-    // (already MONEY) -- same moment, but this one was tagged CONFIRMATION, an
-    // EARCON category at quiet and urgent_only. A company driver at either
-    // rung would have heard one chime and learned neither that dispatch took
-    // the tractor, the reputation hit, nor the damage on the truck they are
-    // now in. A bare profile defaults to COMPANY_DRIVER, so no extra setup
-    // lands this in the carrier branch rather than its owner-operator sibling.
+fn test_the_carrier_grounding_speaks_at_urgent_only_as_safety() {
+    // A replacement tractor and its restart instruction are essential recovery
+    // information, even though the message also names financial consequences.
     let mut app = an_urgent_only_app();
     let mut drive = a_drive(&mut app);
     app.clear_speech();
@@ -742,10 +736,8 @@ fn test_an_engine_stall_speaks_at_urgent_only_as_safety() {
 }
 
 #[test]
-fn test_a_tire_chain_release_speaks_at_urgent_only_as_money() {
-    // "The set is scrap" is a purchase, and running unchained under an active
-    // chain law is citation exposure -- MONEY, matching its own text, not
-    // CONFIRMATION.
+fn test_a_tire_chain_release_speaks_at_urgent_only_as_safety() {
+    // Losing chains changes traction immediately, so this remains a safety call.
     let mut app = an_urgent_only_app();
     let mut drive = a_drive(&mut app);
     drive.trip.truck.chains_just_snapped = true;
@@ -1424,8 +1416,8 @@ fn read_call(masked: &[char], open: usize) -> (String, usize, usize) {
 /// STATUS or CONFIRMATION call site that survives the per-condition repeat
 /// suppression, so their rung-to-rung counts are flat and would make this a
 /// vacuous test. This one reliably says a fresh "engine is screaming at
-/// redline" STATUS readout on each further mile of engine wear -- earcon
-/// silenced at quiet and urgent_only, full words at standard.
+/// redline" STATUS readout on each further mile of engine wear -- short
+/// words at quiet, silence at urgent_only, full words at standard.
 const SCENARIO: &str = "reverse_down_the_route";
 
 /// One scenario's transcript at one rung.
@@ -1452,38 +1444,12 @@ fn transcript_at(rung: &str) -> Vec<String> {
 
 #[test]
 fn test_a_drive_gets_quieter_as_the_rung_tightens() {
-    // The owner's report is a COUNT complaint, not a length complaint, so the
-    // pin is a count.
     let standard = transcript_at("standard");
     let quiet = transcript_at("quiet");
     let urgent_only = transcript_at("urgent_only");
-
-    // Non-vacuous: the top rung must actually carry a line from a category
-    // quiet and urgent_only cut to EARCON, or a tie further down the ladder
-    // would pass for the wrong reason (nothing left to cut).
-    assert!(
-        standard.join("\n").contains("Engine at redline"),
-        "{standard:#?}"
-    );
-    // And that it is really cut, not merely present at the top.
-    assert!(
-        !quiet.join("\n").contains("Engine at redline"),
-        "{quiet:#?}"
-    );
-
-    assert!(
-        standard.len() > quiet.len(),
-        "standard {} vs quiet {}",
-        standard.len(),
-        quiet.len()
-    );
-
-    // On THIS scenario quiet and urgent_only tie: it has no navigation
-    // advisory (no bend, no lead-in, no stop ahead), which is the only
-    // category that separates them AT THE VOICE. The separation itself is
-    // covered by the lead-announcement case above. Pinned as full transcript
-    // equality, not just a count tie, so a future asymmetry between the two
-    // rungs is caught immediately rather than only once it changes a length.
-    assert!(quiet.len() >= urgent_only.len());
-    assert_eq!(quiet, urgent_only);
+    assert!(standard.join("\n").contains("Engine at redline"));
+    assert!(quiet.join("\n").contains("Redline. Engine wear"));
+    assert!(!urgent_only.join("\n").contains("Redline. Engine wear"));
+    assert!(quiet.len() > urgent_only.len());
+    assert!(quiet.join(" ").len() <= standard.join(" ").len());
 }

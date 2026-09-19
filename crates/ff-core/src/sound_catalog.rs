@@ -550,19 +550,17 @@ const HAZARDS: SoundCategory = SoundCategory {
             "Confirmation note",
             &[Cue::new("ladder/confirmation_note").volume(0.32)],
             "One short, clear high note standing in for a confirmation -- \
-             the assist acted, the setting took, the latch caught. The words \
-             still reach the message log. Not to be confused with Hazard \
+             the assist acted, the setting took, the latch caught. Not to be confused with Hazard \
              clear above, which means something quite different and used to \
              be played here.",
         )
-        .when("Driving speech set to Quiet or Urgent only."),
+        .when("Driving speech set to Urgent only. Quiet speaks short confirmations."),
         SoundEntry::new(
             "Road ahead note",
             &[Cue::new("ladder/road_ahead_note").volume(0.38)],
             "Two short notes falling, standing in for a heads-up about what \
              the road is about to do -- a bend coming, a merge, how far the \
-             next stretch runs. The words still reach the message log, and \
-             the route and road keys still answer for it.",
+             next stretch runs. The route and road keys still answer on demand.",
         )
         .when(
             "Driving speech set to Urgent only. At Quiet and below \
@@ -573,9 +571,8 @@ const HAZARDS: SoundCategory = SoundCategory {
         SoundEntry::new(
             "Coaching note",
             &[Cue::new("ladder/coaching_note").volume(0.4)],
-            "A soft two-note rising chime standing in for a driving tip. The \
-             tip itself still reaches the message log, so pull it up there \
-             if you want the words.",
+            "A soft two-note rising chime standing in for a driving tip. \
+             Standard driving speech speaks the tip.",
         )
         .when(
             "Driving speech set to Quiet. At Urgent only, tips are \
@@ -585,13 +582,11 @@ const HAZARDS: SoundCategory = SoundCategory {
             "Status note",
             &[Cue::new("ladder/status_note").volume(0.35)],
             "A single short, low tock standing in for a status update -- \
-             load condition, the weather turning, and the like. The words \
-             still reach the message log and the status keys still answer \
-             for it.",
+             load condition, the weather turning, and the like.",
         )
         .when(
-            "Driving speech set to Quiet. At Urgent only, status \
-             updates are dropped instead of getting a sound.",
+            "Available here for reference. Quiet now speaks short status updates; \
+             Urgent only suppresses them.",
         ),
     ],
 };

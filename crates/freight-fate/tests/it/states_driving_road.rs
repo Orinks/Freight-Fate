@@ -572,17 +572,14 @@ fn test_terse_speech_keeps_the_lane_and_drops_the_vehicle() {
     clear_the_box_truck(&mut drive);
     drive.update_lane_gap(&mut app.ctx, 0.1);
 
-    // The rendering is the same one Python asserted; the delivery is not.
-    // Python monkeypatched `say_event` and so bypassed the ladder, but at the
-    // quiet rung STATUS is an EARCON -- the line is cut from the voice and
-    // kept for the review keys, which is exactly where it has to be found.
+    // Quiet keeps the short lane opening in both speech and review.
     let logged: Vec<String> = app.ctx.message_log.messages[logged_before..]
         .iter()
         .map(|message| message.text.clone())
         .filter(|text| text.contains("lane open"))
         .collect();
     assert_eq!(logged, vec!["Right lane open.".to_string()]);
-    assert!(openings(&app).is_empty(), "quiet answers with the earcon");
+    assert_eq!(openings(&app), vec!["Right lane open.".to_string()]);
 }
 
 #[test]
@@ -1700,9 +1697,7 @@ fn test_terse_speech_keeps_a_short_form_of_every_band() {
         drive.update_damage_bands(&mut app.ctx, 1.0 / 60.0);
     }
 
-    // The first two bands are STATUS, which the quiet rung answers with an
-    // earcon; the wall is SAFETY and keeps its (terse) words. Both renderings
-    // reach the review log, which is where the Python assertions live now.
+    // Quiet speaks concise status and safety bands and keeps them in review.
     let logged: Vec<String> = app.ctx.message_log.messages[logged_before..]
         .iter()
         .map(|message| message.text.clone())
@@ -1980,3 +1975,6 @@ fn test_the_worst_band_reached_survives_a_shoulder_repair() {
     assert_eq!(drive.damage_band, DAMAGE_BAND_NONE);
     assert_eq!(drive.worst_damage_band, DAMAGE_BAND_LAST_CALL);
 }
+
+#[path = "states_driving_road/quiet_speech.rs"]
+mod quiet_speech;

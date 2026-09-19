@@ -491,7 +491,7 @@ impl DrivingState {
             self.trip.truck.chains_just_snapped = false;
             ctx.say_event_with(
                 "A tire chain let go. The set is scrap; you are running on rubber again.",
-                SayEvent::new().category(SpeechCategory::Money),
+                SayEvent::new().category(SpeechCategory::Safety),
             );
         }
         let chains_fast =

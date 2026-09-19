@@ -690,7 +690,7 @@ impl DrivingState {
                 ctx.control_hint("engine")
             )
         };
-        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Money));
+        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
     }
 
     /// Company driver: the carrier takes the truck, and the driver waits.
@@ -810,7 +810,7 @@ impl DrivingState {
                 ctx.control_hint("engine")
             )
         };
-        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Money));
+        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
     }
 
     /// Leave the event on the career for the trust and termination layer.

@@ -14,6 +14,8 @@
 
 ### Changed
 
+- **Quiet speaks short updates, including lane openings.** Urgent only keeps essential warnings and directions; suppressed speech stays out of the event buffer.
+
 - **A new install now starts on the Balanced assists.** The truck helps hold your lane and stops for you at the destination gate.
 
 - **Curve assistance now steers through a bend as well as slowing for it.** Lane keeping holds your line the rest of the time.

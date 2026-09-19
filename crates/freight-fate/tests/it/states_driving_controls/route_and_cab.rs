@@ -690,9 +690,9 @@ fn test_the_radio_dial_keys_tune_jump_and_change_volume() {
 /// cab confirmations go to an earcon at quiet, and the air-brake lockout that
 /// speaks the same words is a ROUTE event and keeps its voice.
 #[test]
-fn test_the_cab_is_categorised_so_quiet_is_actually_quiet() {
+fn test_the_cab_confirmations_are_suppressed_at_urgent_only() {
     let mut app = TestApp::new();
-    app.ctx.settings.driving_speech = "quiet".to_string();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
     let mut d = a_drive(&mut app);
     // The ladder only applies past the walkthrough.
     app.ctx.profile.as_mut().unwrap().tutorial_done = true;
@@ -719,7 +719,7 @@ fn test_the_cab_is_categorised_so_quiet_is_actually_quiet() {
     assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
 }
 
-/// Standard hears the confirmations in full: quiet is what silences them, not
+/// Standard hears the confirmations in full: Urgent only silences them, not
 /// the category itself.
 #[test]
 fn test_the_cab_confirmations_still_speak_at_standard() {

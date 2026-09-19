@@ -38,6 +38,8 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Quiet speech keeps concise lane openings, confirmations, and status transitions; Urgent only omits routine costs and status, and suppressed categories skip review.
+
 - [x] Keep traffic light approaches and changes brief: Light red, Light yellow,
       Light green; retain the distance countdown without "to the bar."
 

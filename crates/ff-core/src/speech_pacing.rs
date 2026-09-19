@@ -105,11 +105,11 @@ pub enum EventPriority {
 /// CONFIRMATION. CONFIRMATION is an outcome report -- the assist cleared it,
 /// the latch caught, here is what happened. A stalled engine, a grounded
 /// tractor, a scrapped chain set are unrequested failures that stop the
-/// truck and demand a next action; at quiet and urgent_only CONFIRMATION is
+/// truck and demand a next action; at urgent_only CONFIRMATION is
 /// an EARCON, so miscategorising one of these turns the instruction that
 /// gets the truck moving again into a chime. Route it by what actually
-/// changed instead: SAFETY when the truck will not move and the line says
-/// what to press, MONEY when it cost money or equipment.
+/// changed instead: SAFETY for a failure or recovery instruction, MONEY
+/// for a cost report that does not require immediate action.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum SpeechCategory {
     Safety,
@@ -165,9 +165,8 @@ impl SpeechCategory {
 /// What a rung does with a category.
 ///
 /// `Earcon` and `Silent` both stop the words; they differ in whether the
-/// sound layer still marks the moment. Neither loses the line -- both still
-/// reach the message log, and the status-query keys still answer, so nothing
-/// the ladder cuts becomes unreachable.
+/// sound layer still marks the moment. Neither adds suppressed words to
+/// message review. Status-query keys still answer on demand.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Disposition {
     /// speaks, normal rendering
@@ -180,7 +179,7 @@ pub enum Disposition {
     Transitions,
     /// the sound layer carries it; no words
     Earcon,
-    /// no words, no sound; log and status keys only
+    /// no words, no sound; status keys still answer
     Silent,
 }
 
@@ -224,8 +223,8 @@ pub const DRIVING_SPEECH_MODES: [&str; 3] = ["standard", "quiet", "urgent_only"]
 pub type DispositionRow = [(SpeechCategory, Disposition); 7];
 
 /// The rung table. Read a row as "at this rung, a line of this category is
-/// delivered this way". Safety and money are FULL or TERSE in every row and
-/// a test pins that: R1's never-dropped contract outranks any rung.
+/// delivered this way". Safety and immediate navigation always speak. Quiet
+/// keeps short confirmations and status; Urgent only omits routine costs.
 pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
     (
         "standard",
@@ -247,15 +246,15 @@ pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Terse),
             (SpeechCategory::Coaching, Disposition::Earcon),
-            (SpeechCategory::Confirmation, Disposition::Earcon),
-            (SpeechCategory::Status, Disposition::Earcon),
+            (SpeechCategory::Confirmation, Disposition::Terse),
+            (SpeechCategory::Status, Disposition::Terse),
         ],
     ),
     (
         "urgent_only",
         [
             (SpeechCategory::Safety, Disposition::Terse),
-            (SpeechCategory::Money, Disposition::Terse),
+            (SpeechCategory::Money, Disposition::Silent),
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Earcon),
             (SpeechCategory::Coaching, Disposition::Silent),

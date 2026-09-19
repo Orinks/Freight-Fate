@@ -46,7 +46,7 @@ impl DrivingState {
         // never-dropped contract instead of purging the channel.
         let engine = ctx.control_hint("engine");
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
-        opts.category = Some(SpeechCategory::Money);
+        opts.category = Some(SpeechCategory::Safety);
         ctx.say_event_with(
             format!(
                 "Out of fuel. Roadside rescue brought thirty gallons {billing}. Press {engine} \

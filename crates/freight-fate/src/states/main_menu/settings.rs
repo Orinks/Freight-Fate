@@ -138,10 +138,11 @@ pub const SETTINGS_LAYOUT_NOTICES: [(i64, &str); 3] = [
         "Speech verbosity is now Driving speech, in the Speech category, with \
          two more steps. Normal is now standard and terse is now quiet; your \
          choice came with you. Both still speak every safety call, route \
-         instruction, and money consequence; quiet trades confirmations and \
-         status for short sounds. Urgent only, below them, speaks safety \
-         calls, costs, and the directions you cannot take back, while a \
-         heads-up about a bend or a town becomes a short sound.",
+         instruction, and money consequence. Quiet keeps short confirmations \
+         and status updates, including lane openings. Urgent only speaks \
+         safety warnings and directions requiring action; road heads-ups and \
+         confirmations become sounds, while routine costs and status are silent. \
+         Events silenced by your setting stay out of message review.",
     ),
 ];
 

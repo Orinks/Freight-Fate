@@ -236,11 +236,8 @@ impl GameContext {
 
     /// Sound the cue standing in for a category the rung just cut.
     ///
-    /// Spec invariant 3: what drops out of speech lands on the earcon layer
-    /// or the message log, so cutting is legitimate rather than
-    /// exclusionary. Only called where `speech_disposition` is already
-    /// EARCON -- SILENT never reaches here, which is the entire difference
-    /// at the voice between the `quiet` and `urgent_only` rungs.
+    /// Only EARCON dispositions reach here; SILENT has no replacement sound.
+    /// Suppressed words stay out of message review; readout keys still answer.
     /// `LADDER_EARCONS` names the cue by the catalog entry's canonical noun;
     /// the entry itself is the one place its key, volume, and pan are
     /// written down, so this resolves through it rather than keeping a
@@ -279,13 +276,7 @@ impl GameContext {
             category,
         } = say;
         if !self.settings.speaks(category) && self.ladder_applies() && !self.speech_requested {
-            // The player's rung silences this category. The line still
-            // reaches the review log, so the information is cut from the
-            // drive, not from the game -- the review key that exists to
-            // answer for it still can. Where the rung's disposition is
-            // EARCON rather than SILENT, the sound layer marks the moment
-            // instead of the words -- the two rungs that share this branch
-            // are otherwise identical at the voice.
+            // Suppressed categories stay out of message review.
             //
             // A line the player ASKED for is exempt (`speech_requested`, set
             // by `player_asked()` around key and button handling) -- the
@@ -326,9 +317,6 @@ impl GameContext {
                 self.settings.driving_speech,
                 text
             );
-            if review {
-                self.message_log.add(&text, MessageCategory::General);
-            }
             return;
         }
         // A normal/terse pair resolves here, in the delivery layer, so
@@ -595,9 +583,8 @@ impl GameContext {
         } = opts;
         let key = key.as_deref();
         if !self.settings.speaks(category) && !force && self.ladder_applies() {
-            // The player's rung silences this category. The line still
-            // reaches the review log and the status keys, so the
-            // information is cut from the drive, not from the game. `force`
+            // Suppressed categories stay out of message review. Status keys
+            // still answer on demand. `force`
             // is a line the player asked for and must hear. Where the rung's
             // disposition is EARCON rather than SILENT, the sound layer marks
             // the moment instead of the words.
@@ -639,25 +626,18 @@ impl GameContext {
                 self.settings.driving_speech,
                 text
             );
-            if review {
-                self.message_log.add(&text, MessageCategory::Event);
-            }
             return;
         }
         let Some(text) = self.render_spoken(&spoken) else {
             return;
         };
         if !force && self.ladder_applies() && self.ladder_repeats(&text, category, key) {
-            // Said once already, and this rung only promised once. Logged,
-            // so the review keys still answer for it.
+            // Said once already; keep the original review entry without duplicates.
             transcript!(
                 "[ladder] {} already said: {}",
                 self.settings.driving_speech,
                 text
             );
-            if review {
-                self.message_log.add(&text, MessageCategory::Event);
-            }
             return;
         }
         if self.event_pacer.is_repeat(&text, key, force, None) {
@@ -680,10 +660,9 @@ impl GameContext {
             // described is dropped, not promoted to an interrupt: losing it
             // costs the player nothing (the enum's own words), and the old
             // stale-flush made the least important class the only one
-            // guaranteed to preempt. The review log still keeps the line --
-            // recovery is exactly what the log is for. Not marked heard: the
-            // player never heard it, so an identical later moment speaks
-            // fresh.
+            // guaranteed to preempt. Keep these eligible but delayed events in
+            // review for recovery; preference-suppressed categories are omitted.
+            // Not marked heard: an identical later moment speaks fresh.
             transcript!("[pacer] stale ambient dropped: {}", text);
             if review {
                 self.message_log.add(&text, MessageCategory::Event);

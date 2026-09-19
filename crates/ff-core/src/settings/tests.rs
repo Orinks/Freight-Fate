@@ -781,7 +781,7 @@ fn test_flavor_is_independent_of_the_rung() {
 }
 
 #[test]
-fn test_the_cab_is_categorised_so_quiet_is_actually_quiet() {
+fn test_quiet_keeps_short_cab_confirmations() {
     // Owner playtest, 2026-08-17: "quiet still feels busy". (The source
     // scan of the driving states for the three cab lines goes with the
     // states port.)
@@ -789,7 +789,7 @@ fn test_the_cab_is_categorised_so_quiet_is_actually_quiet() {
     quiet.driving_speech = "quiet".to_string();
     assert_eq!(
         quiet.speech_disposition(Some(SpeechCategory::Confirmation)),
-        Disposition::Earcon
+        Disposition::Terse
     );
 }
 

@@ -62,9 +62,8 @@ fn test_a_silenced_category_never_reaches_the_voice() {
 }
 
 #[test]
-fn test_a_silenced_category_still_reaches_the_message_log() {
-    // Nothing the ladder cuts becomes unreachable -- the log and the
-    // status-query keys still answer for it.
+fn test_a_silenced_category_stays_out_of_the_message_log() {
+    // The buffer follows speech; status-query keys still answer on demand.
     let mut app = app();
     set_rung(&mut app, "urgent_only");
 
@@ -73,7 +72,7 @@ fn test_a_silenced_category_still_reaches_the_message_log() {
         SayEvent::queued().category(SpeechCategory::Status),
     );
 
-    assert_eq!(logged_last(&app), "Load damage 43 percent.");
+    assert!(app.ctx.message_log.messages.is_empty());
     app.shutdown();
 }
 
@@ -92,7 +91,7 @@ fn test_a_silenced_category_never_reaches_the_voice_via_say() {
 }
 
 #[test]
-fn test_a_silenced_category_still_reaches_the_log_through_say() {
+fn test_a_silenced_category_stays_out_of_the_log_through_say() {
     let mut app = app();
     set_rung(&mut app, "urgent_only");
 
@@ -101,7 +100,7 @@ fn test_a_silenced_category_still_reaches_the_log_through_say() {
         Say::new().category(SpeechCategory::Status),
     );
 
-    assert_eq!(logged_last(&app), "Load damage 43 percent.");
+    assert!(app.ctx.message_log.messages.is_empty());
     app.shutdown();
 }
 
@@ -213,21 +212,21 @@ fn test_the_ladder_applies_with_no_profile_at_all() {
 
 #[test]
 fn test_an_earcon_category_actually_asks_the_audio_layer_to_play() {
-    // Spec invariant 3: a "quiet" driver gets a cue where the words were.
+    // Spec invariant 3: a "urgent_only" driver gets a cue where the words were.
     // Asserts the actual call into `ctx.audio.play`, not that a table
     // contains a key.
     let mut app = app();
     let audio = app.record_audio();
-    set_rung(&mut app, "quiet");
+    set_rung(&mut app, "urgent_only");
 
     app.ctx.say_event_with(
         "Load damage 43 percent.",
-        SayEvent::queued().category(SpeechCategory::Status),
+        SayEvent::queued().category(SpeechCategory::NavigationAdvisory),
     );
 
     assert_eq!(
         audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::Status)]
+        vec![earcon_cue(SpeechCategory::NavigationAdvisory)]
     );
     app.shutdown();
 }
@@ -269,27 +268,27 @@ fn test_an_earcon_category_plays_through_say_too() {
 }
 
 #[test]
-fn test_a_silenced_keyed_status_line_plays_the_earcon_once() {
+fn test_a_silenced_keyed_advisory_plays_the_earcon_once() {
     // A keyed standing condition re-firing every few seconds while the
     // accelerator is held against a locked-out brake must not play its
     // earcon on every re-announce at quiet, where the same condition speaks
     // one sentence and falls silent at standard.
     let mut app = app();
     let audio = app.record_audio();
-    set_rung(&mut app, "quiet");
+    set_rung(&mut app, "urgent_only");
 
     for _ in 0..5 {
         app.ctx.say_event_with(
             "Parking brake set. Press P to release it.",
             SayEvent::queued()
                 .key("air_brake_lockout")
-                .category(SpeechCategory::Status),
+                .category(SpeechCategory::NavigationAdvisory),
         );
     }
 
     assert_eq!(
         audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::Status)]
+        vec![earcon_cue(SpeechCategory::NavigationAdvisory)]
     );
     app.shutdown();
 }
@@ -328,7 +327,7 @@ fn test_raising_the_rung_still_speaks_an_active_silenced_condition() {
     // "coaching", an unknown rung that falls back to standard, where STATUS
     // is TRANSITIONS: a first occurrence under the key speaks).
     let mut app = app();
-    set_rung(&mut app, "quiet");
+    set_rung(&mut app, "urgent_only");
 
     app.ctx.say_event_with(
         "Parking brake set. Press P to release it.",
@@ -336,7 +335,7 @@ fn test_raising_the_rung_still_speaks_an_active_silenced_condition() {
             .key("air_brake_lockout")
             .category(SpeechCategory::Status),
     );
-    assert!(app.event_lines().is_empty()); // silenced (earcon only) at quiet
+    assert!(app.event_lines().is_empty()); // silenced at urgent_only
 
     set_rung(&mut app, "coaching");
     app.ctx.say_event_with(
@@ -416,12 +415,12 @@ fn test_a_key_the_player_pressed_is_never_silenced_by_the_rung() {
     // (owner, 2026-08-17). The RENDERING still follows the rung, so the
     // answer gets shorter, never absent.
     let mut app = app();
-    set_rung(&mut app, "quiet");
+    set_rung(&mut app, "urgent_only");
     // The first-run gate outranks the rung; this is not a first drive.
     past_the_walkthrough(&mut app);
     app.clear_speech();
 
-    // Volunteered: quiet turns a confirmation into a sound.
+    // Volunteered: Urgent only turns a confirmation into a sound.
     app.ctx.say_with(
         "Transmission changed to manual.",
         Say::new().category(SpeechCategory::Confirmation),
@@ -607,10 +606,8 @@ fn test_only_standard_can_reach_the_already_said_gate() {
 
 /// The transcript lines the ladder writes, byte for byte.
 #[test]
-fn the_ladder_logs_silenced_and_already_said_to_the_transcript() {
-    // Pinned through the message log rather than the log crate (no global
-    // logger in tests): a silenced line still reaches the review log, an
-    // already-said line too.
+fn review_excludes_silenced_events_and_keeps_spoken_tips_once() {
+    // Suppressed events stay out of review; repeated tips retain one entry.
     let mut app = app();
     past_the_walkthrough(&mut app);
     set_rung(&mut app, "urgent_only");
@@ -618,7 +615,7 @@ fn the_ladder_logs_silenced_and_already_said_to_the_transcript() {
         "Load damage 43 percent.",
         SayEvent::queued().category(SpeechCategory::Status),
     );
-    assert_eq!(logged_last(&app), "Load damage 43 percent.");
+    assert!(app.ctx.message_log.messages.is_empty());
     set_rung(&mut app, "standard");
     app.ctx.event_pacer = EventSpeechPacer::with_clock(stepping_clock(60.0));
     for _ in 0..2 {
@@ -631,5 +628,41 @@ fn the_ladder_logs_silenced_and_already_said_to_the_transcript() {
     }
     assert_eq!(app.event_lines(), vec!["Keep it under 30.".to_string()]);
     assert_eq!(logged_last(&app), "Keep it under 30.");
+    assert_eq!(app.ctx.message_log.messages.len(), 1);
+    app.shutdown();
+}
+
+#[test]
+fn quiet_keeps_short_status_and_confirmation_words_in_review() {
+    for category in [SpeechCategory::Status, SpeechCategory::Confirmation] {
+        let mut app = app();
+        set_rung(&mut app, "quiet");
+        let audio = app.record_audio();
+        app.ctx.say_event_with(
+            SpokenMessage::with_terse("Automatic braking is now released.", "Braking released."),
+            SayEvent::new().category(category),
+        );
+        assert_eq!(app.event_lines(), vec!["Braking released."]);
+        assert_eq!(logged_last(&app), "Braking released.");
+        assert!(audio.borrow().played.is_empty());
+        app.shutdown();
+    }
+}
+
+#[test]
+fn urgent_only_omits_routine_costs_but_answers_an_explicit_request() {
+    let mut app = app();
+    set_rung(&mut app, "urgent_only");
+    let line = SpokenMessage::with_terse("Toll paid, twenty dollars.", "Toll 20 dollars.");
+    app.ctx
+        .say_event_with(&line, SayEvent::new().category(SpeechCategory::Money));
+    assert!(app.event_lines().is_empty());
+    assert!(app.ctx.message_log.messages.is_empty());
+    app.ctx.say_event_with(
+        &line,
+        SayEvent::new().category(SpeechCategory::Money).force(true),
+    );
+    assert_eq!(app.event_lines(), vec!["Toll 20 dollars."]);
+    assert_eq!(logged_last(&app), "Toll 20 dollars.");
     app.shutdown();
 }
