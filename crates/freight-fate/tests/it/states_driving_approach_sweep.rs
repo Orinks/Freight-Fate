@@ -183,7 +183,7 @@ impl Arrival {
     /// What went wrong, for a failure message that names the place and the
     /// numbers rather than just "assertion failed".
     pub fn report(&self, destination: &Destination) -> String {
-        let tail: Vec<&String> = self.heard.iter().rev().take(6).rev().collect();
+        let tail: Vec<&String> = self.heard.iter().rev().take(60).rev().collect();
         format!(
             "{} ({}, {}, {}, truck={} torque={:.0} Nm gross={:.0} kg brake={:.2} m/s2): ready={} \
              assist_spoke={} on_chain={} speed={:.2} mph, {:.0} ft short of the gate, creep hold \

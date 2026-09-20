@@ -322,6 +322,7 @@ impl DrivingState {
         let grade = self.trip.grade_at(0.0);
         let lane_mi = acceleration_lane_mi(highway_mph, grade * 100.0);
         self.departure_ramp_mi = Some(lane_mi);
+        self.departure_merge_road_mph = highway_mph;
         let capability_mph = acceleration_lane_capability_mph(&self.trip.truck, lane_mi, grade);
         let merge_target_mph = merge_traffic_target_mph(highway_mph).max(CRUISE_MIN_MPH);
         self.departure_cruise_handoff_mph =
@@ -379,7 +380,12 @@ impl DrivingState {
     pub fn update_departure_ramp(&mut self, ctx: &mut GameContext, moved_mi: f64) {
         let Some(left) = self.departure_ramp_mi else {
             if self.departure_merge_recovery {
-                let (limit, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                // Recovered against the same road the warning named.
+                let limit = if self.departure_merge_road_mph > 0.0 {
+                    self.departure_merge_road_mph
+                } else {
+                    self.trip.speed_limit_at(self.trip.position_mi).0
+                };
                 if self.trip.truck.speed_mph() + 0.5 >= merge_traffic_target_mph(limit) {
                     self.departure_merge_recovery = false;
                 }
@@ -394,7 +400,18 @@ impl DrivingState {
         self.departure_ramp_mi = None;
         self.departure_cruise_handoff_mph = None;
         let position = self.trip.position_mi;
-        let (limit, _) = self.trip.speed_limit_at(position);
+        // The road being JOINED, not the zone under the wheels. Read at the
+        // taper, a ramp posted below its own highway made the game measure
+        // the truck against the ramp and call a slow join "up to speed": out
+        // of Ardmore Company Yard the truck reached the taper 14 miles an
+        // hour under the road and heard the plain "Lane ending. Merge left."
+        // (departure sweep, 2026-09-20). The number a merging driver needs is
+        // the speed of the traffic they are merging with.
+        let limit = if self.departure_merge_road_mph > 0.0 {
+            self.departure_merge_road_mph
+        } else {
+            self.trip.speed_limit_at(position).0
+        };
         let speed = self.trip.truck.speed_mph();
         // Under the limit by enough to matter is the NORMAL outcome for a
         // loaded truck, so it is said as a fact about the gap you need, never
