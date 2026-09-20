@@ -237,12 +237,21 @@ mod tests {
                 music_track_duration_s(key),
                 song["duration_s"].as_f64().unwrap()
             );
-            assert!(!DAY_DRIVE_TRACKS
-                .iter()
-                .chain(NIGHT_DRIVE_TRACKS.iter())
-                .chain(MENU_DAY_ROTATION_TRACKS.iter())
-                .chain(MENU_NIGHT_ROTATION_TRACKS.iter())
-                .any(|t| t.key == key));
+            // The September batch was generated for the radio, so none of it
+            // should have leaked into the drive or menu beds -- except the one
+            // track the owner asked for in the menus, which keeps its station
+            // slot as well and is named here so the promotion is deliberate.
+            let borrowed_by_the_menu = key == "radio_rock_lights_over_superior";
+            assert_eq!(
+                DAY_DRIVE_TRACKS
+                    .iter()
+                    .chain(NIGHT_DRIVE_TRACKS.iter())
+                    .chain(MENU_DAY_ROTATION_TRACKS.iter())
+                    .chain(MENU_NIGHT_ROTATION_TRACKS.iter())
+                    .any(|t| t.key == key),
+                borrowed_by_the_menu,
+                "{key} is in a drive or menu pool it was not meant for"
+            );
         }
     }
 }

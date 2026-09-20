@@ -222,6 +222,7 @@ not distributed in this repository.
 | Static and Stars | `music/radio_rock_static_and_stars.ogg` | Suno-composed wide-open night-sky heartland rock for the in-game radio (2026-07 Zero batch) |
 | Greywater Quay | `music/radio_rock_greywater_quay.ogg` | Suno-composed folk-rock tribute to Saltwake's Greywater Quay for the in-game radio (2026-07 Zero batch) |
 | Inland Sea | `music/radio_rock_inland_sea.ogg` | Suno-composed heartland rock song about the Great Salt Lake for the in-game radio (2026-07 Zero batch) |
+| Lights Over Superior | `music/radio_rock_lights_over_superior.ogg` | Suno-composed northern-lights rock instrumental for the in-game radio and the day menu rotation (2026-09 batch) |
 | Raincheck | `music/radio_blues_raincheck.ogg` | Suno-composed slow rained-out electric blues for the in-game radio (2026-07 Zero batch) |
 | Magnolia Porch | `music/radio_blues_magnolia_porch.ogg` | Suno-composed warm porch-evening southern soul for the in-game radio (2026-07 Zero batch) |
 | Neon and Bourbon | `music/radio_blues_neon_bourbon.ogg` | Suno-composed smoky Chicago bar-band blues for the in-game radio (2026-07 Zero batch) |

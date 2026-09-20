@@ -844,6 +844,8 @@ its status or release decision.
 - [x] September 19 radio expansion: eight country songs, eight classic rock,
       eight blues, and Dashboard Glow for Night Line, with selected duet retakes.
       The music pack preserves its prior 380 entries and adds 25.
+- [x] Lights Over Superior borrowed into the day menu rotation, by owner
+      request, and still in the classic rock station playlist.
 - [ ] Download and integrate the eight remaining jazz songs, then 19 station
       jingles, after the September 21 Suno allowance refresh.
 

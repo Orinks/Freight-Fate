@@ -12,10 +12,12 @@ use super::tables::*;
 use super::MusicTrack;
 
 // Radio instrumentals that double as menu beds. Curated, not the whole
-// instrumental catalog: these sit well under menu speech (Glass Highway is the
-// one rocker, by request), and the night picks stay behind the night theme so
-// the day menu keeps its Americana feel. Vocal songs and host breaks stay on
-// the radio -- menus already carry screen-reader speech.
+// instrumental catalog: these sit well under menu speech (Glass Highway and
+// Lights Over Superior are the rockers, both by request), and the night picks
+// stay behind the night theme so the day menu keeps its Americana feel. Vocal
+// songs and host breaks stay on the radio -- menus already carry screen-reader
+// speech. Borrowing a track does not take it off its station: every key here
+// stays in the station playlist it came from.
 fn radio_track_by_key(key: &str) -> MusicTrack {
     COUNTRY_TRACKS
         .iter()
@@ -32,6 +34,7 @@ pub static MENU_DAY_ROTATION_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
         "radio_country_steel_string_sunday",
         "radio_country_dobro_dusk",
         "radio_rock_glass_highway",
+        "radio_rock_lights_over_superior",
     ]
     .iter()
     .map(|key| radio_track_by_key(key))
