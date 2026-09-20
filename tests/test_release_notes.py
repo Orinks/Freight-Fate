@@ -868,6 +868,30 @@ def test_career_19_retry_is_bounded_to_one_delayed_attempt():
     assert '"$TAG already exists; the nightly recovered while waiting."' in workflow
 
 
+def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():
+    # The gate was written when src/ WAS the game. The Rust port moved every
+    # line of gameplay into crates/ and the gate was not widened with it, so
+    # a change to the shipping runtime could land with no entry at all.
+    module = load_release_notes_module()
+    for path in (
+        "crates/freight-fate/src/states/driving_turns.rs",
+        "crates/ff-core/src/sim/trip.rs",
+        "src/freight_fate/data/facility_endpoints.json",
+        "docs/ontology.md",
+        "CHANGELOG.md",
+    ):
+        assert module.is_user_facing_path(path), path
+    # A test or bench is not a player-facing change: under the Python layout
+    # tests/ sat beside src/ and was never gated.
+    for path in (
+        "crates/ff-core/tests/it/sim_trip_cues.rs",
+        "crates/freight-fate/benches/frame_time.rs",
+        "tools/build_facility_endpoints.py",
+        ".github/workflows/rust.yml",
+    ):
+        assert not module.is_user_facing_path(path), path
+
+
 def test_auto_base_follows_the_release_line_the_branch_was_cut_from(tmp_path, monkeypatch):
     """A hotfix is cut from main and never contains dev.
 

@@ -20,6 +20,10 @@
 //!
 //! * `--list-break-scenarios` -- name and one-line summary of every
 //!   adversarial scenario (`tools/playtest_break.py --list`).
+//! * `--list-speech-backends` -- every screen reader and voice Prism knows
+//!   on THIS machine, which of them can speak right now, and which one the
+//!   game would choose. There is no allowlist in the game, so a reader the
+//!   maintainers cannot install is answered by its own user running this.
 //! * `--break-scenario NAME` / `--break-battery` `[--transcript]` -- run one
 //!   scenario, or all of them, and print the verdict table.
 //! * `--playtest-sandbox` -- prepare (and with `--launch`, run the real game
@@ -161,6 +165,9 @@ fn run(args: &[String]) -> i32 {
     if args.iter().any(|a| a == "--list-break-scenarios") {
         return list_break_scenarios();
     }
+    if args.iter().any(|a| a == "--list-speech-backends") {
+        return list_speech_backends();
+    }
     if let Some(name) = flag_value(args, "--break-scenario") {
         return run_break(&[name], has(args, "--transcript"));
     }
@@ -225,6 +232,7 @@ const KNOWN_SWITCHES: &[&str] = &[
     "--lead",
     "--level",
     "--list-break-scenarios",
+    "--list-speech-backends",
     "--log",
     "--max-advisory",
     "--max-miles",
@@ -286,6 +294,7 @@ Drive tools:
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print
   --list-break-scenarios            name every adversarial scenario
+  --list-speech-backends            name every screen reader and voice found
   --break-scenario NAME             run one, --transcript to hear it
   --break-battery                   run them all and print the verdicts
   --agent-server                    the real game with an MCP server on stdio,
@@ -343,6 +352,85 @@ fn list_break_scenarios() -> i32 {
     let width = scenarios.iter().map(|s| s.name.len()).max().unwrap_or(0);
     for scenario in scenarios {
         println!("{:<width$}  {}", scenario.name, scenario.description);
+    }
+    0
+}
+
+/// Every backend Prism registers here, and what the game makes of each.
+///
+/// The game has no list of approved screen readers: `pick_backend` walks the
+/// registry in priority order and keeps the first whose own runtime check
+/// says it can speak. So ZDSR, PC-Talker, BoYing, SenseReader, System Access
+/// and ZoomText are already chosen automatically wherever they run -- and
+/// that is precisely what nobody here can confirm, because none of those
+/// readers can be installed on this machine. This switch moves the question
+/// to somebody who has one: run it, read the table, send it back.
+fn list_speech_backends() -> i32 {
+    use freight_fate::speech::{narrator_running, usable, PrismRegistry, VoiceRegistry};
+
+    let registry = match PrismRegistry::new() {
+        Ok(registry) => registry,
+        Err(err) => {
+            eprintln!("Prism did not start, so nothing here can speak: {err}");
+            return 1;
+        }
+    };
+    let chosen = freight_fate::speech::pick_backend(&registry, None).map(|backend| backend.name());
+    println!(
+        "{:<20} {:>8}  {:<10} NOTE",
+        "BACKEND", "PRIORITY", "CAN SPEAK"
+    );
+    for index in 0..registry.backend_count() {
+        let Some(id) = registry.id_at(index) else {
+            continue;
+        };
+        let name = registry.name_of(id).unwrap_or_else(|| id.to_string());
+        // UIA exists on every modern Windows but only Narrator reads it, so
+        // it is answered before the acquire that would fail confusingly.
+        if name == "UIA" && !narrator_running() {
+            println!(
+                "{:<20} {:>8}  {:<10} Narrator is not running",
+                name,
+                registry.priority_of(id),
+                "no"
+            );
+            continue;
+        }
+        let (speaks, note) = match registry.acquire(id) {
+            Ok(backend) => {
+                let features = backend.features();
+                let note = if Some(name.clone()) == chosen {
+                    "chosen"
+                } else if !features.is_supported_at_runtime {
+                    "not running here"
+                } else {
+                    ""
+                };
+                (usable(backend.as_ref()), note.to_string())
+            }
+            // The ordinary case for every reader this machine does not have.
+            Err(err) if err.is_backend_unavailable() => {
+                (false, "not installed or not running here".to_string())
+            }
+            Err(err) => (false, err.to_string()),
+        };
+        println!(
+            "{:<20} {:>8}  {:<10} {}",
+            name,
+            registry.priority_of(id),
+            if speaks { "yes" } else { "no" },
+            note
+        );
+    }
+    match chosen {
+        Some(name) => println!(
+            "
+The game would speak through {name}."
+        ),
+        None => println!(
+            "
+Nothing on this machine can speak; the game would run mute."
+        ),
     }
     0
 }

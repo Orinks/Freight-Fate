@@ -49,9 +49,21 @@ bookmarks usable.
 - [x] Keep the exit blinker repeating on the right until ramp entry, cancellation,
       or a missed exit; stop canceled-exit guidance until the driver signals again.
 
-- [ ] Validate the Windows portable snapshot on a clean Windows installation
-      without a separately installed Visual C++ redistributable; the build
-      runner's smoke test alone cannot establish this.
+- [x] Validate the Windows portable snapshot on a clean Windows installation
+      without a separately installed Visual C++ redistributable. CLOSED
+      2026-09-20 by proof rather than by a boot: the packaging audit now reads
+      EVERY normal import of the executable and of every DLL beside it and
+      requires each one to be either a library the payload ships or a DLL
+      Windows itself has (`WINDOWS_SYSTEM_DLLS`, plus the API sets the loader
+      answers from its own schema). A build runner cannot establish this by
+      running the game, because the runner HAS the C++ redistributable and
+      the Windows SDK; the static rule holds on a machine that has neither.
+      Read back from the real payload: the only redistributable import in the
+      whole tree is `vcruntime140.dll` from the executable, and the build has
+      staged the official CRT family beside it since the audit was written.
+      Prism's bridges to the PC-Talker, ZDSR and BoYing screen readers are
+      DELAY imports and stay exempt: without that reader installed the bridge
+      does not resolve, which costs the bridge and never the launch.
 
 ### Release gate -- what stands between here and a public 1.9.0
 
@@ -334,6 +346,17 @@ its status or release decision.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
+
+- [x] `--list-speech-backends` names every screen reader and voice Prism finds
+      on the machine it runs on, says which can speak right now, and which one
+      the game would choose (2026-09-20). There has never been a list of
+      approved readers in the game: `pick_backend` walks the registry in
+      priority order and keeps the first whose own runtime check passes, so
+      ZDSR, PC-Talker, BoYing, SenseReader, System Access and ZoomText are
+      already chosen wherever they run. None of them can be installed here,
+      which is why the switch exists: it moves the question to somebody who
+      has one. Read here, the three Prism reaches through a delay-loaded SDK
+      (ZDSR, PC-Talker, BoYing) register at priority 101, above JAWS.
 - [x] Stabilized the curve-assistance test's empty-road fixture. It clears
       current vehicles and disables random traffic replenishment before the
       bend cases run. One full run reported cargo damage; focused and full

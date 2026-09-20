@@ -4,6 +4,8 @@
 
 ### Added
 
+- **The game lists every screen reader it finds on your computer.** Start it with `--list-speech-backends` and it names the one it would speak through.
+
 - **Country, classic rock, blues, and Night Line stations play new songs.**
 
 - **Two new achievements, both hidden.** One is earned at the wheel and one only on a particular day of the year.

@@ -57,6 +57,16 @@ impl Error {
             _ => None,
         }
     }
+
+    /// The ordinary answer for a screen reader this machine does not have.
+    ///
+    /// Acquiring every registered backend is how the game finds what can
+    /// speak, so most of these errors are not faults: a Windows install
+    /// without JAWS, ZDSR or PC-Talker refuses each of them exactly this way.
+    pub fn is_backend_unavailable(&self) -> bool {
+        self.code() == Some(prism_sys::PRISM_ERROR_BACKEND_NOT_AVAILABLE)
+            || matches!(self, Error::NoBackend)
+    }
 }
 
 /// Whether the native Prism library was found and loaded.
@@ -786,6 +796,24 @@ mod tests {
         );
         assert_eq!(Error::NoBackend.code(), None);
         assert_eq!(Error::EmptyText.code(), None);
+    }
+
+    #[test]
+    fn a_missing_screen_reader_is_not_a_fault() {
+        // Every registry walk acquires backends this machine does not have,
+        // so the caller has to be able to tell that apart from a real error.
+        let absent = Error::Native {
+            code: prism_sys::PRISM_ERROR_BACKEND_NOT_AVAILABLE,
+            message: "Backend not available".to_string(),
+        };
+        assert!(absent.is_backend_unavailable());
+        assert!(Error::NoBackend.is_backend_unavailable());
+        assert!(!Error::Unavailable.is_backend_unavailable());
+        assert!(!Error::Native {
+            code: prism_sys::PRISM_ERROR_SPEAK_FAILURE,
+            message: "Speak failure".to_string(),
+        }
+        .is_backend_unavailable());
     }
 }
 

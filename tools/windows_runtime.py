@@ -16,6 +16,53 @@ import subprocess
 from pathlib import Path
 
 REQUIRED_CRT = ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll")
+# What a clean Windows already has. An API set (``api-ms-win-``,
+# ``ext-ms-win-``) is resolved by the loader from the OS schema, never from a
+# file on disk, and the classic DLLs below all ship in System32 on every
+# supported Windows -- including the Universal CRT (``api-ms-win-crt-*``),
+# which has been a Windows component since Windows 10.
+# https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-apisets
+# https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment
+API_SET = re.compile(r"(?:api|ext)-ms-win-[a-z0-9-]+-l\d+-\d+-\d+\.dll$", re.I)
+WINDOWS_SYSTEM_DLLS = frozenset(
+    {
+        "advapi32.dll",
+        "bcrypt.dll",
+        "bcryptprimitives.dll",
+        "comctl32.dll",
+        "comdlg32.dll",
+        "crypt32.dll",
+        "dbghelp.dll",
+        "dwmapi.dll",
+        "gdi32.dll",
+        "imm32.dll",
+        "iphlpapi.dll",
+        "kernel32.dll",
+        "msacm32.dll",
+        "msvcrt.dll",  # the OS's own CRT, not a redistributable one
+        "ntdll.dll",
+        "ole32.dll",
+        "oleaut32.dll",
+        "powrprof.dll",
+        "propsys.dll",
+        "rpcrt4.dll",
+        "secur32.dll",
+        "setupapi.dll",
+        "shcore.dll",
+        "shell32.dll",
+        "shlwapi.dll",
+        "uiautomationcore.dll",
+        "user32.dll",
+        "userenv.dll",
+        "uxtheme.dll",
+        "version.dll",
+        "windowscodecs.dll",
+        "winmm.dll",
+        "ws2_32.dll",
+        "wtsapi32.dll",
+        "xmllite.dll",
+    }
+)
 VC_DLL = re.compile(r"(?:vcruntime|msvcp|msvcr|concrt|vcomp)\d[^/\\]*\.dll$", re.I)
 
 
@@ -78,10 +125,16 @@ def find_crt_directory() -> Path:
     )
 
 
-def pe_imports(path: Path) -> set[str]:
-    """Read normal and delay imports from an x64 PE; reject malformed inputs.
+def pe_imports(path: Path, *, delayed: bool = True) -> set[str]:
+    """Read imports from an x64 PE; reject malformed inputs.
 
-    This is a static VC-runtime audit, not a general Windows loader emulator.
+    ``delayed`` off returns only the NORMAL import table -- what the loader
+    must resolve before the process starts. A delay import is resolved on
+    first call, so a missing one is a feature that does not run rather than a
+    game that does not launch: Prism's bridges to the PC-Talker, ZDSR and
+    BoYing screen readers are delay imports for exactly that reason.
+
+    This is a static runtime audit, not a general Windows loader emulator.
     All reads must map to bytes in the file, never a section's zero-filled tail.
     """
     data = path.read_bytes()
@@ -136,7 +189,8 @@ def pe_imports(path: Path) -> set[str]:
             raise ValueError("unterminated DLL name")
 
         imports = set()
-        for index, size, name_field in ((1, 20, 12), (13, 32, 4)):
+        tables = ((1, 20, 12), (13, 32, 4)) if delayed else ((1, 20, 12),)
+        for index, size, name_field in tables:
             if directory_count <= index:
                 continue
             rva, length = unpack("<II", optional + 112 + index * 8)
@@ -166,7 +220,20 @@ def pe_imports(path: Path) -> set[str]:
 
 
 def verify_windows_runtime(root: Path) -> None:
-    """Prove every VC import has an application-local DLL, including plugins."""
+    """Prove the payload starts on a clean Windows.
+
+    Two things, both read from the binaries themselves:
+
+    * every VC++ runtime import, at any depth and in either import table, has
+      an application-local DLL -- the redistributable is not assumed to be
+      installed;
+    * every other NORMAL import is a DLL Windows itself ships, or one the
+      payload carries. This is the part a build runner's smoke test cannot
+      establish, because the runner has the C++ redistributable, the Windows
+      SDK and whatever else Visual Studio put in System32. A player's machine
+      has none of it, and a normal import the loader cannot resolve is not a
+      missing feature: it is a window that never opens.
+    """
     available = {p.name.lower() for p in root.iterdir() if p.is_file()}
     missing = set(REQUIRED_CRT) - available
     if missing:
@@ -179,6 +246,15 @@ def verify_windows_runtime(root: Path) -> None:
                 raise RuntimeError(
                     f"{path.relative_to(root)} requires unbundled VC++ runtime {name}"
                 )
+        for name in pe_imports(path, delayed=False):
+            if name in available or name in WINDOWS_SYSTEM_DLLS or API_SET.fullmatch(name):
+                continue
+            raise RuntimeError(
+                f"{path.relative_to(root)} needs {name} before it can start, and neither "
+                "Windows nor this payload provides it. Ship the library beside the "
+                "executable, or add it to WINDOWS_SYSTEM_DLLS with the Microsoft page "
+                "that says Windows includes it."
+            )
 
 
 def stage_windows_runtime(root: Path) -> None:

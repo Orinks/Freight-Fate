@@ -53,7 +53,15 @@ INTERNAL_SECTIONS = (
 )
 NIGHTLY_BUILD_MARKERS = ("nightly: build", "[nightly build]")
 SKIP_CHANGELOG_MARKERS = ("changelog: none", "[skip changelog]")
-USER_FACING_PATH_PREFIXES = ("src/", "docs/")
+# `crates/` was added 2026-09-20. The gate was written when `src/` WAS the
+# game; the Rust port moved every line of gameplay to `crates/` and the gate
+# was never widened, so for the whole port a change to the shipping runtime
+# could land with no entry and CI would not say a word.
+USER_FACING_PATH_PREFIXES = ("src/", "docs/", "crates/")
+# ... but not a crate's test or bench binaries. Under the Python layout
+# `tests/` sat beside `src/` and was never gated; a Rust test is the same
+# kind of change, and the point is to restore the old rule, not tighten it.
+NOT_USER_FACING = re.compile(r"^crates/[^/]+/(?:tests|benches)/")
 USER_FACING_PATHS = {
     "CHANGELOG.md",
     "README.md",
@@ -542,6 +550,8 @@ def commits_opt_out_of_changelog(base: str, head: str) -> bool:
 
 def is_user_facing_path(path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if NOT_USER_FACING.match(normalized):
+        return False
     return normalized in USER_FACING_PATHS or normalized.startswith(USER_FACING_PATH_PREFIXES)
 
 

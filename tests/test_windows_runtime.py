@@ -139,6 +139,32 @@ class WindowsRuntimeTests(unittest.TestCase):
         pe_file(payload / "msvcp140_2.dll")
         windows_runtime.verify_windows_runtime(payload)
 
+    def test_unshipped_library_the_loader_needs_stops_release(self):
+        # The clean-Windows question: a build runner has the C++
+        # redistributable and the Windows SDK, so an import it resolves from
+        # System32 can be one a player's machine has never heard of.
+        payload = self.make_payload()
+        pe_file(payload / "prism.dll", ["KERNEL32.dll", "libspeechbridge-1.dll"])
+        with self.assertRaisesRegex(RuntimeError, "prism.dll needs libspeechbridge-1.dll"):
+            windows_runtime.verify_windows_runtime(payload)
+        pe_file(payload / "libspeechbridge-1.dll")
+        windows_runtime.verify_windows_runtime(payload)
+
+    def test_optional_screen_reader_bridges_do_not_have_to_ship(self):
+        # Prism reaches PC-Talker, ZDSR and BoYing through DELAY imports: a
+        # player without that reader loses the bridge, never the game.
+        payload = self.make_payload()
+        pe_file(payload / "prism.dll", ["KERNEL32.dll"], delayed=["pctkusr.dll"])
+        windows_runtime.verify_windows_runtime(payload)
+
+    def test_windows_api_sets_are_not_files_to_ship(self):
+        payload = self.make_payload()
+        pe_file(
+            payload / "engine.dll",
+            ["api-ms-win-crt-runtime-l1-1-0.dll", "ext-ms-win-ntuser-window-l1-1-0.dll"],
+        )
+        windows_runtime.verify_windows_runtime(payload)
+
     def test_missing_required_runtime_stops_release(self):
         payload = self.make_payload()
         (payload / "vcruntime140_1.dll").unlink()
