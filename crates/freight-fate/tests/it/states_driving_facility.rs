@@ -652,6 +652,35 @@ fn test_the_hold_prompt_does_not_come_back_once_the_menu_is_open() {
 }
 
 #[test]
+fn test_the_assist_stops_the_truck_at_a_pickup_gate() {
+    // The setting promises to stop at the selected facility arrival point,
+    // and it did that at a dock and not at a pickup: the pickup gate had no
+    // assist branch at all, so it only ever OPENED the check-in once the
+    // truck was already slow. The owner drove into Oshkosh Dry Warehouse
+    // with every assist on and stopped the truck himself (2026-09-20).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.destination_approach_assist = true;
+    app.clear_speech();
+    at_gate(&mut d, 8.0, false);
+    d.handle_pickup_gate(&mut app.ctx);
+    assert_eq!(d.trip.truck.brake, 1.0, "the assist has to take the brake");
+    assert_eq!(d.trip.truck.throttle, 0.0);
+    assert!(
+        !d.arrival_menu_open,
+        "still rolling, nothing to check into yet"
+    );
+
+    // Stopped, it holds at the entrance and hands the driver the key --
+    // the same line and the same control as the dock.
+    d.trip.truck.velocity_mps = 0.0;
+    d.handle_pickup_gate(&mut app.ctx);
+    let prompt = last_with(&app, "holding at the entrance");
+    assert!(prompt.contains("Press Enter"), "{prompt}");
+    assert!(d.trip.truck.parking_brake);
+}
+
+#[test]
 fn test_manual_delivery_stop_names_parking_and_facility_controls() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);

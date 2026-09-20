@@ -18,9 +18,12 @@ use crate::states::driving_updates::live;
 impl DrivingState {
     /// `_handle_pickup_gate()`.
     pub fn handle_pickup_gate(&mut self, ctx: &mut GameContext) {
-        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH
-            && (ctx.settings.destination_approach_assist || self.trip.truck.parking_brake)
-        {
+        // The assist stops the truck here, exactly as it does at a dock, and
+        // holds for the driver's key; see `hold_at_facility_entrance`.
+        if self.hold_at_facility_entrance(ctx) {
+            return;
+        }
+        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH && self.trip.truck.parking_brake {
             self.open_pickup_arrival(ctx);
             return;
         }

@@ -148,49 +148,71 @@ impl DrivingState {
         );
     }
 
+    /// The assisted stop at a facility entrance: the assist takes the pedals,
+    /// brings the truck to rest, sets the parking brake and holds there for
+    /// the driver's key. `true` means the assist owns this frame and the
+    /// gate's manual flow must not run.
+    ///
+    /// Shared by the dock gate and the pickup gate. It lived only in
+    /// `handle_arrival_gate` until 2026-09-20, so the setting that promises
+    /// to stop at "the selected facility arrival point" stopped the truck at
+    /// a delivery and not at a pickup: `handle_pickup_gate` only OPENED the
+    /// check-in once the truck was already under docking speed, and nothing
+    /// ever put the brake on. The owner drove into Oshkosh Dry Warehouse and
+    /// stopped the truck himself (2026-09-20), which is the same report the
+    /// delivery side answered in August. `open_ready_facility_arrival` has
+    /// always dispatched the confirm key by phase, so the pickup needed the
+    /// hold and nothing else.
+    pub(crate) fn hold_at_facility_entrance(&mut self, ctx: &mut GameContext) -> bool {
+        if !ctx.settings.destination_approach_assist {
+            return false;
+        }
+        // A ramp-end arrival may already have started the automatic
+        // pull-in before this frame reaches the finished-trip handler.
+        // Do not queue the manual "Press Enter" hold prompt behind the
+        // truthful dock-opening line: even though its validity gate keeps
+        // it out of speech, it leaves a contradictory transcript and can
+        // be handed to other announcement consumers as actionable text.
+        if self.arrival_menu_open {
+            return true;
+        }
+        self.cancel_cruise(ctx, false);
+        self.trip.truck.throttle = 0.0;
+        self.trip.truck.brake = 1.0;
+        if self.trip.truck.speed_mph() <= 0.5 && !self.arrival_full_stop_said {
+            self.arrival_full_stop_said = true;
+            self.trip.truck.set_parking_brake();
+            // Only while the key still does something. A cut line is
+            // handed back so it finishes, and this one asks for a
+            // keypress -- handed back after the driver has pressed it
+            // and the dock menu is open, it asks for a press that has
+            // already happened (Shane, 2026-08-21, three of these at
+            // one dock). Third line in this family after the scale and
+            // the destination exit; the rule is the same every time.
+            //
+            // Rust: the live `_arrival_menu_open` read cannot ride a
+            // 'static closure, so it goes through `live` like the scale
+            // reminder's mile does. The flag is stamped where it moves as
+            // well as per frame, because the drive stops ticking the
+            // moment the dock menu takes over -- which is exactly the
+            // moment this gate has to notice.
+            self.refresh_live_facts();
+            let mut opts = SayEvent::new().valid(|| !live::arrival_menu_open());
+            opts.category = Some(SpeechCategory::Navigation);
+            ctx.say_event_with(
+                format!(
+                    "Facility stopping assistance is holding at the entrance. Press {} to continue into the facility.",
+                    ctx.control_hint("confirm")
+                ),
+                opts,
+            );
+        }
+        true
+    }
+
     /// `_handle_arrival_gate()`.
     pub fn handle_arrival_gate(&mut self, ctx: &mut GameContext) {
-        if ctx.settings.destination_approach_assist {
-            // A ramp-end arrival may already have started the automatic
-            // pull-in before this frame reaches the finished-trip handler.
-            // Do not queue the manual "Press Enter" hold prompt behind the
-            // truthful dock-opening line: even though its validity gate keeps
-            // it out of speech, it leaves a contradictory transcript and can
-            // be handed to other announcement consumers as actionable text.
-            if self.arrival_menu_open {
-                return;
-            }
-            self.cancel_cruise(ctx, false);
-            self.trip.truck.throttle = 0.0;
-            self.trip.truck.brake = 1.0;
-            if self.trip.truck.speed_mph() <= 0.5 && !self.arrival_full_stop_said {
-                self.arrival_full_stop_said = true;
-                self.trip.truck.set_parking_brake();
-                // Only while the key still does something. A cut line is
-                // handed back so it finishes, and this one asks for a
-                // keypress -- handed back after the driver has pressed it
-                // and the dock menu is open, it asks for a press that has
-                // already happened (Shane, 2026-08-21, three of these at
-                // one dock). Third line in this family after the scale and
-                // the destination exit; the rule is the same every time.
-                //
-                // Rust: the live `_arrival_menu_open` read cannot ride a
-                // 'static closure, so it goes through `live` like the scale
-                // reminder's mile does. The flag is stamped where it moves as
-                // well as per frame, because the drive stops ticking the
-                // moment the dock menu takes over -- which is exactly the
-                // moment this gate has to notice.
-                self.refresh_live_facts();
-                let mut opts = SayEvent::new().valid(|| !live::arrival_menu_open());
-                opts.category = Some(SpeechCategory::Navigation);
-                ctx.say_event_with(
-                    format!(
-                        "Facility stopping assistance is holding at the entrance. Press {} to continue into the facility.",
-                        ctx.control_hint("confirm")
-                    ),
-                    opts,
-                );
-            }
+        if self.hold_at_facility_entrance(ctx) {
             return;
         }
         if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH && self.trip.truck.parking_brake {
