@@ -652,6 +652,40 @@ fn test_the_hold_prompt_does_not_come_back_once_the_menu_is_open() {
 }
 
 #[test]
+fn test_a_half_full_tank_is_eased_and_stopped_earlier_than_a_dry_van() {
+    // Every CDL manual says the same thing about a liquid load: brake earlier
+    // and more smoothly, because the surge gives back some of the rate at the
+    // worst moment. The truck has known how much since
+    // `surge_decel_penalty_mps2` was written, but only the ramp bar asked --
+    // the facility arrival, the curve servo and the speed keeper all priced
+    // their shed at the dry-van rate (owner, 2026-09-20).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.truck.cargo_kg = CARGO_KG;
+    d.trip.truck.velocity_mps = 20.0;
+
+    let dry_ease = d.keeper_ease_mi(15.0, 1.0);
+    assert_eq!(
+        d.trip.truck.surge_decel_penalty_mps2(),
+        0.0,
+        "a dry van has no surge to give back"
+    );
+
+    // A half-full smooth bore: the worst thing on the roster to stop.
+    d.trip.truck.liquid = Some(LiquidLoad::new(0.5, false));
+    let wet_penalty = d.trip.truck.surge_decel_penalty_mps2();
+    assert!(
+        wet_penalty > 0.0,
+        "a part-filled tank takes deceleration away: {wet_penalty}"
+    );
+    let wet_ease = d.keeper_ease_mi(15.0, 1.0);
+    assert!(
+        wet_ease > dry_ease,
+        "the keeper eases further out with liquid aboard: {wet_ease} vs {dry_ease}"
+    );
+}
+
+#[test]
 fn test_the_assist_stops_the_truck_at_a_pickup_gate() {
     // The setting promises to stop at the selected facility arrival point,
     // and it did that at a dock and not at a pickup: the pickup gate had no

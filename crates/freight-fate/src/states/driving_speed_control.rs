@@ -12,6 +12,7 @@
 //! module's own surface reads like the Python file's.
 
 use ff_core::sim::trip_route_helpers::zone_key;
+use ff_core::sim::vehicle::MIN_STOPPING_DECEL_MPS2;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, Say, SayEvent};
@@ -576,7 +577,12 @@ impl DrivingState {
         let speed = self.trip.truck.speed_mph().max(1.0);
         let target = 1.0f64.max(target_mph.min(speed));
         let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed * scale / 3600.0;
-        let shed_s = (speed - target) / MPH_PER_MPS / KEEPER_EASE_DECEL_MPS2;
+        // Net of the surge, for the reason the facility arrival is: a tank
+        // the liquid can move in gives some of the rate back at the worst
+        // moment, so the ease has to start further out to make the number.
+        let decel = (KEEPER_EASE_DECEL_MPS2 - self.trip.truck.surge_decel_penalty_mps2())
+            .max(MIN_STOPPING_DECEL_MPS2);
+        let shed_s = (speed - target) / MPH_PER_MPS / decel;
         // The mean of the two ends through the shed, then the settling tail
         // down at the new number, because that is where the truck spends it.
         let mut shed_mi = shed_s * (speed + target) / 2.0 * scale / 3600.0;

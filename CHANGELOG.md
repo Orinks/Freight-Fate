@@ -73,11 +73,13 @@
 
 - **The way in to a facility sticks to real streets.** Approaches used to cut through parking lanes, a fire lane, and one coffee shop's drive-through.
 
-- **The turn chime sounds as you take the corner.** It used to play on the approach, even at Urgent only where nothing was said about the turn.
+- **A turn chimes once, as you take it.** The same corner used to sound up to three times on the way in, and at Urgent only it sounded where nothing was said about the turn at all.
 
 - **An assist holding the brake no longer empties your air tanks.** The held pedal was billed as a fresh application sixty times a second, and the spring brakes could set short of the gate.
 
 - **Towns with no real freight site now hold one yard instead of four invented warehouses.** Every other town keeps the businesses the map can back.
+
+- **The assists brake earlier with a tank load.** Cruise, the curve assist and the stop at the gate now allow for the liquid running forward.
 
 - **Short, false walls of hill on flat road are gone.** Over a thousand of them, most only a few hundred yards long, were never there.
 

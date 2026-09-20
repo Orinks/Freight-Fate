@@ -145,7 +145,12 @@ impl DrivingState {
             // road left, so a truck coasting slower than the profile sees
             // its demand climb and the pedal follow.
             let remaining_m = ((servo.start_mi - position) * METERS_PER_MILE).max(0.5);
-            (v > target).then(|| (v * v - target * target) * scale / (2.0 * remaining_m))
+            // Plus what the surge will take back. A tank the liquid can
+            // move in cannot hold the dry-van rate, so the demand has to ask
+            // for the shortfall as well or the bend arrives over its number
+            // (owner, 2026-09-20).
+            let surge = self.trip.truck.surge_decel_penalty_mps2();
+            (v > target).then(|| (v * v - target * target) * scale / (2.0 * remaining_m) + surge)
         } else if v > target {
             // Inside the chain and over the number: the keeper's own snub
             // rate, net of the grade like everything else here. A profile to

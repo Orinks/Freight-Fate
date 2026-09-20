@@ -378,6 +378,25 @@ its status or release decision.
       row asking for more than the formula allows cannot raise it. Above the
       advisory the truck still understeers wide (agent drive, Camp Verde to
       Payson).
+- [x] The assists allow for a liquid load (2026-09-20). `surge_decel_penalty_mps2`
+      has answered "how much rate does this tank give back at the worst
+      moment" since it was written, and only the ramp bar asked: the facility
+      arrival, the curve servo and the speed keeper all priced their shed at
+      the dry-van rate, so a part-filled tank arrived over every number. All
+      three read it now, which is the CDL manuals' own rule -- with a liquid
+      load you brake earlier -- taken from the truck's own model rather than
+      a factor somebody picked. The surge physics itself was already right:
+      `ZETA_LATERAL` equals the smooth-bore value whatever the baffles,
+      matching FMCSA's Cargo Tank Incidents Study -- "in all cases, tank
+      structure does not control side-to-side sloshing".
+- [ ] A part-filled tank is priced as a FULL one by the roll models, not as
+      worse than one. `roll_load_fraction` stops a half-empty tank reading as
+      a light load, which was the bug; the truth is that the half-empty tank
+      is the worst case of all, because the liquid climbs as it goes to the
+      outside of the turn. Needs a fill-level curve for the rollover
+      threshold: FMCSA's 2007 Cargo Tank Roll Stability Study is the place to
+      look, and its PDF refuses a plain fetch (403), so it wants a proper
+      read rather than a guessed de-rating.
 - [x] The map stops inventing freight where it cannot see any (2026-09-20).
       Of 623 markets, 137 had no facility whose endpoint the freight-site
       screen accepts -- Nevada 11 of 15, Montana 9 of 15, Arizona 12 of 22 --
