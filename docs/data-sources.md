@@ -25,9 +25,9 @@ against 49 jurisdictions, which is what sinks several rows below.
 | FHWA toll facilities | n/a | US Gov, public domain | biennial XLSX / PDF | 2023 edition | national | **Defer** -- superseded by `tools/toll_rates.py` |
 | USGS 3DEP elevation | yes | US Gov, public domain | JSON samples | 3DEP rolling | US, 1-10 m | **Adopt as a screen** -- see the throughput note |
 | NWS `api.weather.gov` | yes | US Gov, public domain | JSON | hourly METAR cycle | US and territories | **Keep** -- pattern still fits |
-| WZDx feed registry + member feeds | registry yes; 29 of 43 feeds yes | US Gov registry; feed terms vary | JSON / GeoJSON | 1 min to 72 h | 2 of our 21 dark states | **Adopt for Oklahoma and New Mexico** |
+| WZDx feed registry + member feeds | registry yes; 29 of 43 feeds yes | US Gov registry; feed terms vary | JSON / GeoJSON | 1 min to 72 h | already swept 2026-09-12 | **Nothing new** -- the two keyless rows we lack were benched on purpose |
 | Caltrans Lane Closure System | yes | Caltrans public feed | JSON per district | live | California, 12 districts | **Adopt with a district scope** |
-| OSM `amenity=weighbridge` | yes | ODbL -- attribution and share-alike | PBF / Overpass | continuous | 3,818 US features | **Adopt** via the existing extracts |
+| OSM `amenity=weighbridge` | yes | ODbL -- attribution and share-alike | PBF / Overpass | continuous | 2,127 CAT Scales; only 72 enforcement scales | **Adopt for CAT Scales**; useless for scale houses |
 | FMCSA hours, endorsements, brake limits | n/a | US Gov, public domain | published rule text | rulemaking | national | **Keep** as cited constants |
 | FRED `GASDESW` diesel | yes | Public domain series | CSV | weekly | national average | **Keep** -- already the diesel source |
 | EIA fuel prices | **no** | -- | -- | -- | -- | **Needs a key, deferred** |
@@ -128,17 +128,19 @@ https://datahub.transportation.gov/resource/69qe-yiui.json?$limit=300
 ```
 
 43 registered feeds, 29 active and keyless. Against the 21 states the game
-currently marks `no_api` in `crates/ff-core/src/sim/real_traffic/state_apis.rs`,
-that closes exactly two:
+marks `no_api` in `crates/ff-core/src/sim/real_traffic/state_apis.rs`, that
+leaves exactly two -- **and the registry was already swept on 2026-09-12, which
+benched both on stated grounds**:
 
-| State | Feed | Version | Refresh |
+| State | Feed | Today | Why it is benched |
 | --- | --- | --- | --- |
-| Oklahoma | `oktraffic.org/api/Geojsons/workzones` (token published in the registry) | 4 | 1 min |
-| New Mexico | `ai.blyncsy.io/wzdx/nmdot/feed` | 4.1 | 72 h |
+| Oklahoma | `oktraffic.org/api/Geojsons/workzones` | 200, 60 zones, WZDx 4.0 | The registry publishes an access token inside the URL. A key in a URL is still a key -- owner's call, not a bug |
+| New Mexico | `ai.blyncsy.io/wzdx/nmdot/feed` | 503, same as on 2026-09-12 | Dead, and dead for at least a week -- not a transient outage |
 
-Texas appears in the registry with an Austin-only feed, not a statewide
-one. The `wzdx` parser already exists, so both are registry entries rather than
-new code.
+Texas appears in the registry with an Austin-only feed, not a statewide one.
+So this source is worked out: re-sweeping the registry finds nothing the
+September sweep missed. Re-check New Mexico when a build is due; Oklahoma needs
+the owner to revisit the token rule, not new code.
 
 **California** is the largest dark state and has no keyless WZDx feed, but
 Caltrans publishes its Lane Closure System per district with no key at
@@ -162,17 +164,36 @@ planning and screening -- a WIM site is not somewhere a driver pulls in, so
 using it as the pull-in inventory would ship a derived guess in the shape of a
 survey.
 
-What does exist is OpenStreetMap. `amenity=weighbridge` inside the US returns
-3,818 features (3,147 nodes, 670 ways, 1 relation) as of 2026-09-20 --
-enough for a per-corridor layer, and reachable through the Geofabrik
-extracts already cached in `~/.cache/freight-fate-osm`. The `highway=services`
-name-match fallback returns 12, so the tag is the only route worth taking.
+OpenStreetMap's `amenity=weighbridge` returns 3,818 US features, which looked
+like the answer until the tags were read. Classified by name, operator and
+brand:
 
-Licence is ODbL: attribution required, share-alike on a derived database.
-The project already carries that obligation for the rest of the map, so this
-adds no new constraint -- but it is the one row in this document that is not
-public domain, and it is the reason NTAD WIM stays useful as a corroborating
-screen rather than being dropped.
+| What it is | Count |
+| --- | --- |
+| CAT Scale, at a truck stop, driver pays to weigh | 2,127 |
+| No name and no operator -- could be a farm or quarry scale | 1,529 |
+| Other private or unclassified | 88 |
+| State enforcement scale house | 72 |
+| Other truck-stop chain scale | 2 |
+
+So the tag does **not** answer the scale-house question. 72 enforcement scales
+nationally is fewer than the 87 the map already carries, which came from
+`highway=motorway_junction` exit signs -- every one of them, and only on 78 of
+1,283 legs. Both sources are thin for the same reason: nobody maintains a
+national list of state scale houses, and the states publish theirs in 50
+different shapes. Treat that as unsolved rather than papered over.
+
+What the tag does answer is a different and unclaimed question: 2,127 branded
+CAT Scales, where a driver pays to learn their axle weights before a scale
+house does it for them. The sim already models mass and axle load
+(`crates/ff-core/src/sim/vehicle/mass.rs`), and `docs/roadmap-details.md`
+already lists CAT scales among travel-center amenities. That is the layer worth
+taking.
+
+Licence is ODbL: attribution required, share-alike on a derived database. The
+project already carries that obligation for the rest of the map, so this adds
+no new constraint -- but it is the one row in this document that is not public
+domain.
 
 ## 6. FMCSA static rules
 
@@ -184,12 +205,17 @@ already do. The only upkeep is re-reading the source when a rule moves.
 
 ## What to adopt in career 1.9, and what to leave
 
-**Adopt now.** The truck parking snapshot, because it was already load-bearing
-and was one BTS outage away from failing a bake. The two WZDx registry
-entries, because the parser exists and it is two rows of configuration for two
-states that currently hear nothing. The OSM weighbridge layer, because it needs
-no new licence, no new fetch path, and answers a question the map cannot
-answer today.
+**Already done.** The truck parking snapshot. It was load-bearing and one BTS
+outage away from failing a bake; it is now cached, offline-safe and reading the
+full 1,915 records instead of 1,000. No driver hears anything new -- this
+survey's one shipped change is maintenance on a layer players already had.
+
+**Worth building, in this order.** CAT Scales as a truck-stop service: 2,127
+real branded locations, a driver-elected activity the game does not have, on
+top of a mass model that already exists. Then the 3DEP grade screen below,
+because a wrong grade is something a driver hears as a wrong advisory. Neither
+is a data drop; both are features, and the first one needs a design call about
+what a weigh costs and what the readout says.
 
 **Adopt as a screen, not as a bake.** 3DEP through the ImageServer. It is the
 right instrument for the provenance rule -- checking derived grades against an
@@ -197,10 +223,16 @@ authoritative measurement -- and the wrong instrument for a wholesale re-bake
 until somebody costs the overnight run against a named benefit.
 
 **Leave.** NHS, because the graph already exists. FHWA toll facilities, because
-the researched rate table is better data for the question the game asks.
+the researched rate table is better data for the question the game asks. The
+WZDx registry, because September's sweep already took everything in it.
 Caltrans LCS until a route-to-district lookup exists, because a 17 MB fetch
 inside an 8-second budget is a stall, not a feature. Every keyed feed, and EIA,
 because a key is a secret this build cannot keep.
+
+**Unsolved, and worth saying so.** Where the state scale houses are. 78 of
+1,283 legs have one, all found by accident off exit-sign text, and no keyless
+national source improves on that. Fixing it means 50 state DOT lists in 50
+shapes, which is a project, not a fetch.
 
 ## Re-checking this document
 

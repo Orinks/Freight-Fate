@@ -890,14 +890,21 @@ against.
       file. Paging off the ArcGIS `exceededTransferLimit` flag read 1,000 of
       1,915 records and reported success -- the GeoJSON responses never carry
       that flag -- so the fetch pages on length instead.
-- [ ] Oklahoma and New Mexico get live work zones: both publish keyless WZDx
-      feeds in the federal registry, the parser already exists, and they are
-      two of the 21 states that currently hear nothing.
-- [ ] Weigh and inspection stations come from OpenStreetMap
-      `amenity=weighbridge` -- 3,818 US features through the extracts already
-      cached. No federal inventory of enforcement scales exists; the NTAD
-      Weigh-in-Motion layer is 763 sensor sites, which is a screen and not a
-      place a driver pulls in.
+- [x] The federal work-zone registry was re-swept and holds nothing the
+      September 12 sweep missed. Oklahoma answers (60 zones) but publishes its
+      access token inside the URL, which is still a key; New Mexico still
+      answers 503, a week on, so it is dead rather than briefly down.
+- [ ] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
+      each axle group weighs before a scale house tells them. 2,127 of them
+      are mapped and branded, and the truck already knows its mass and axle
+      load. Needs the owner's call on what a weigh costs and what the readout
+      says.
+- [ ] Where the state scale houses are is still unsolved. 78 of 1,283 legs
+      carry one, every one of them found off an exit sign rather than looked
+      for, and no keyless national source beats that -- OpenStreetMap's
+      weighbridge tag holds 72 enforcement scales against 2,127 commercial
+      ones, and the federal Weigh-in-Motion layer is 763 sensor sites nobody
+      pulls into. Fifty state lists in fifty shapes is the only route.
 - [ ] Baked elevations get screened against USGS 3DEP through the ImageServer
       multipoint endpoint (100 points in 20 s, keyless, public domain, 1 to
       10 m against Copernicus GLO-90's 30 m). A screen, not a re-bake, until
