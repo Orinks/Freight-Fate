@@ -25,25 +25,25 @@ def test_facility_approach_data_covers_full_facility_set(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 5037
+    assert coverage["facilities"] == 4271
     # Synced with facility_endpoints after far-pin regeocode (419 estimated)
     # and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
     # had every chain to one of them rebuilt toward the new endpoint.
     # The 2026-09-17 yard-road rule then gave 89 facilities the public roads
     # do not reach a chain over the facility's own private road (52 new chains,
     # 37 stale ones rebuilt).
-    assert coverage["source_backed_endpoints"] == 2934
-    assert coverage["road_snapped"] == 2449
-    assert coverage["turn_level"] == 2416
-    assert coverage["nearest_road_fallback"] == 485
+    assert coverage["source_backed_endpoints"] == 2745
+    assert coverage["road_snapped"] == 2346
+    assert coverage["turn_level"] == 2314
+    assert coverage["nearest_road_fallback"] == 399
     # Sourced endpoints with no chain whose own OSM object is not a freight site
     # (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert coverage["endpoint_screen_refused"] == 419
+    assert coverage["endpoint_screen_refused"] == 332
     # Chains that still lead to a replaced endpoint because no public-road
     # path reaches the new one, not even over its own private road; kept until
     # a chain replaces them, and labelled.
-    assert coverage["stale_chain_kept"] == 45
-    assert coverage["representative_fallback"] == 2103
+    assert coverage["stale_chain_kept"] == 42
+    assert coverage["representative_fallback"] == 1526
     assert coverage["gate_yard_dock_hints"] == 0
 
     # The 2026-07-14 regen keys records by current slug facility ids and
@@ -523,6 +523,44 @@ def test_long_chain_keeps_the_streets_at_the_facility_and_folds_junction_links()
     )
     assert local_geometry.road_label({"highway": "motorway", "ref": "I 5"}) == ""
 
+    # A drive-through, a parking aisle, an emergency access and a busway are
+    # `highway=service` and none of them is a road a combination can use. The
+    # tester report this comes from: the Oshkosh approach turned off West
+    # Murdock Avenue and said "Continue onto Starbucks Drive-Through" (OSM way
+    # 849313280, `service=drive-through`, one lane wide).
+    for service in ("drive-through", "drive_through", "parking_aisle", "bus"):
+        assert (
+            local_geometry.road_label(
+                {"highway": "service", "service": service, "name": "Starbucks Drive-Through"}
+            )
+            == ""
+        ), service
+    # The service ways that ARE how a yard, a dock and a loading bay are
+    # reached stay routable.
+    assert local_geometry.road_label({"highway": "service"}) == local_geometry.UNNAMED_SERVICE
+    for service in ("driveway", "alley", "yard"):
+        assert (
+            local_geometry.road_label({"highway": "service", "service": service})
+            == local_geometry.UNNAMED_SERVICE
+        ), service
+
+    # And who upstream says may use it. A permit is a refusal: the Burlington
+    # grocery chain ran two miles of a way named "Route 127 Bike Path" tagged
+    # `access=permit`.
+    for access in ("permit", "residents", "employees", "emergency", "private"):
+        assert (
+            local_geometry.road_label(
+                {"highway": "service", "access": access, "name": "Route 127 Bike Path"}
+            )
+            == ""
+        ), access
+    # A truck bound for the site is the traffic these name.
+    for access in ("customers", "delivery", "destination", "permissive"):
+        assert (
+            local_geometry.road_label({"highway": "service", "access": access, "name": "Dock Road"})
+            == "Dock Road"
+        ), access
+
 
 def _approach_stub(facility_id, *, turn_level, reason="", source_backed=True, estimated=False):
     return {
@@ -849,9 +887,12 @@ def test_long_synthetic_approach_steps_down_45_25_15(world):
 
     # Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
     # regeocode; Kenosha Dry Warehouse gained an 0.81-mile turn-level chain in
-    # the 2026-09-16 departure-route sweep. Payson Quarry has no source-backed
+    # the 2026-09-16 departure-route sweep. Payson went with the 2026-09-20
+    # stand-in cut, so this is Port Saint Lucie now: no source-backed
     # endpoint, so no sweep can route it (the Rust test made the same choice).
-    route = world.facility_approach_route("payson_az_us", "Payson Quarry")
+    route = world.facility_approach_route(
+        "port_saint_lucie_fl_us", "Port Saint Lucie Grocery Distribution Center"
+    )
     assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
     truck = TruckState()
     truck.transmission.automatic = True

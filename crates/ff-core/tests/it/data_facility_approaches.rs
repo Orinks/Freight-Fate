@@ -28,25 +28,31 @@ fn test_facility_approach_data_covers_full_facility_set() {
     let data = read_json("facility_approaches.json");
     let coverage = &data["coverage"];
 
-    assert_eq!(coverage["facilities"], 5037);
+    // The 2026-09-20 sweep moved every count here: a stand-in market now
+    // holds one yard instead of four (766 generated facilities retired), and
+    // drive-throughs, parking aisles, fire lanes and permit-only ways left
+    // the road graph, so the chains were rebuilt on real streets. Corner
+    // angles came with that rebuild: 8,454 of 10,900 are READ from OSM
+    // geometry now, against 5 before.
+    assert_eq!(coverage["facilities"], 4271);
     // Synced with facility_endpoints after far-pin regeocode (419 estimated)
     // and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
     // had every chain to one of them rebuilt toward the new endpoint.
     // The 2026-09-17 yard-road rule then gave 89 facilities the public roads
     // do not reach a chain over the facility's own private road (52 new chains,
     // 37 stale ones rebuilt).
-    assert_eq!(coverage["source_backed_endpoints"], 2934);
-    assert_eq!(coverage["road_snapped"], 2449);
-    assert_eq!(coverage["turn_level"], 2416);
-    assert_eq!(coverage["nearest_road_fallback"], 485);
+    assert_eq!(coverage["source_backed_endpoints"], 2745);
+    assert_eq!(coverage["road_snapped"], 2346);
+    assert_eq!(coverage["turn_level"], 2314);
+    assert_eq!(coverage["nearest_road_fallback"], 399);
     // Sourced endpoints with no chain whose own OSM object is not a freight site
     // (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert_eq!(coverage["endpoint_screen_refused"], 419);
+    assert_eq!(coverage["endpoint_screen_refused"], 332);
     // Chains that still lead to a replaced endpoint because no public-road
     // path reaches the new one, not even over its own private road; kept until
     // a chain replaces them, and labelled.
-    assert_eq!(coverage["stale_chain_kept"], 45);
-    assert_eq!(coverage["representative_fallback"], 2103);
+    assert_eq!(coverage["stale_chain_kept"], 42);
+    assert_eq!(coverage["representative_fallback"], 1526);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
     // The 2026-07-14 regen keys records by current slug facility ids and
@@ -249,11 +255,20 @@ fn test_facility_chains_never_say_unnamed_public_road() {
         .facility_approach_route("amarillo_tx_us", "Route 66 Truck Terminal")
         .expect("approach route");
     let last = arrival.legs.last().expect("a turn-level chain");
-    assert_eq!(last.highway, "a service road");
-    assert_eq!(last.local_cue, "Turn left onto a service road.");
+    // The terminal used to be reached down an unnamed service way. The
+    // 2026-09-20 screens took parking aisles, drive-throughs and permit-only
+    // ways out of the graph, and the route that survives comes in off a
+    // named street -- which is the better answer, and the pairing below is
+    // what this test is actually for.
+    assert_eq!(last.highway, "North Williams Street");
+    assert_eq!(last.local_cue, "Turn right onto North Williams Street.");
     let departure = w
         .facility_departure_route("amarillo_tx_us", "Route 66 Truck Terminal")
         .expect("departure route")
         .expect("a multi-leg chain");
-    assert_eq!(departure.legs[0].local_cue, "Start on a service road.");
+    assert_eq!(departure.legs[0].highway, last.highway);
+    assert_eq!(
+        departure.legs[0].local_cue,
+        "Start on North Williams Street."
+    );
 }

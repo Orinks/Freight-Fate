@@ -278,13 +278,12 @@ endpoints behind miles of private road.
       quality follow-up are deferred; neither blocks far pins.
 - [x] The Duff-shared sound cues flagged unlicensed by the provenance
       audit. N/A 2026-09-16 (owner): dropped from the release gate.
-- [ ] Every street corner is still priced as a square one. The corner-speed
-      model reads a measured turn angle per junction, but no shipped route
-      carries one: neither the local-geometry layer nor the facility-approach
-      layer writes the angle, so every corner advises the same number and a
-      sweeping turn is no faster than a tight one. Needs both builders to
-      carry the angle through and both layers rebuilt, with the read/assumed
-      ratio reported the way the other bakes report theirs.
+- [x] Street corners carry their measured angle (2026-09-20). The
+      facility-approach rebuild writes the turn angle per junction: 8,454 of
+      10,900 corners are READ from OSM geometry, against 5 before, so a
+      sweeping junction is now genuinely faster than a square one and a
+      switchback slower. The local-geometry layer still reports 0 read; it
+      serves the retired city-service rows and nothing the game drives.
 - [ ] Colorado's live traffic and construction are dead (CARS GraphQL
       retired; COtrip's WZDx feed wants a registered key, as do Ohio,
       Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
@@ -379,6 +378,22 @@ its status or release decision.
       row asking for more than the formula allows cannot raise it. Above the
       advisory the truck still understeers wide (agent drive, Camp Verde to
       Payson).
+- [x] The map stops inventing freight where it cannot see any (2026-09-20).
+      Of 623 markets, 137 had no facility whose endpoint the freight-site
+      screen accepts -- Nevada 11 of 15, Montana 9 of 15, Arizona 12 of 22 --
+      and each was stamped with four or more invented warehouses anyway.
+      They hold one company yard now; 766 generated facilities retired, and
+      the screen's `passed` count did not move, which is the proof the cut
+      took only fiction. A facility the world generates is also approached by
+      a generated road: no snapped real street stands in for a site that is
+      not there. Drive-throughs, parking aisles, fire lanes and permit-only
+      ways left the routing graph in the same pass.
+- [ ] Wholesale and trade sites are refused as retail. `shop=wholesale` is
+      how OSM tags a distributor -- Shamrock Foodservice Warehouse in
+      Billings is a bare node carrying it and nothing else -- and the screen
+      refuses any `shop` object outright. Accepting the tag alone would also
+      admit a Costco, so this needs a rule that separates the two, probably
+      trade words in the name on top of the tag.
 - [x] A street corner is priced for the load that is actually in the trailer
       (2026-09-20). The corner model derived its lateral from the 0.35 g
       rollover threshold of a LOADED combination and applied it whatever was

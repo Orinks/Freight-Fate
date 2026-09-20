@@ -24,7 +24,7 @@ fn test_local_geometry_data_covers_supported_map() {
     let decision = data["generated"]["routing_decision"].as_str().unwrap();
     assert!(decision.contains("OpenRouteService driving-hgv"));
     assert!(decision.contains("not ORS-certified HGV routes"));
-    assert_eq!(coverage["targets"], 6910);
+    assert_eq!(coverage["targets"], 6144);
     // 1077, not the 1076 this pinned before the 2026-08-25 re-bake. The
     // shipped file predated a builder fix and had never been regenerated, so
     // one city service -- the Jonesboro garage -- was still carrying the
@@ -35,15 +35,15 @@ fn test_local_geometry_data_covers_supported_map() {
     // (`tests/test_local_geometry.py`) moved with the re-bake; this port was
     // written from the pre-re-bake numbers and did not.
     assert_eq!(coverage["turn_level"], 1077);
-    assert_eq!(coverage["fallback"], 5833);
-    assert_eq!(coverage["estimated"], 5833);
+    assert_eq!(coverage["fallback"], 5067);
+    assert_eq!(coverage["estimated"], 5067);
     assert_eq!(
         coverage["by_type"]["city_service"],
         serde_json::json!({"estimated": 792, "fallback": 792, "total": 1869, "turn_level": 1077})
     );
     assert_eq!(
         coverage["by_type"]["facility"],
-        serde_json::json!({"estimated": 5041, "fallback": 5041, "total": 5041, "turn_level": 0})
+        serde_json::json!({"estimated": 4275, "fallback": 4275, "total": 4275, "turn_level": 0})
     );
 
     // The coverage block records the sweep's own inventory; the map has grown

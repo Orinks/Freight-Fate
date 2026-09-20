@@ -1,3 +1,5 @@
+from .stand_in_markets import STAND_IN_MARKET_CITY_KEYS  # noqa: F401
+
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
@@ -450,6 +452,11 @@ FACILITY_LEVEL_UNLOCKS = {
     "mine_quarry": 3,
     "steel_industrial": 3,
 }
+
+# The one facility type a stand-in market is stamped with. A company yard
+# ships general, retail and parcel freight and takes bulk fuel, so the town
+# is still a place freight moves through.
+STAND_IN_MARKET_FACILITY_TYPE = "company_yard"
 
 BASE_MARKET_FACILITY_TYPES = (
     "company_yard",

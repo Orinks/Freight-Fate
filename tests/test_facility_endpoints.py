@@ -25,7 +25,7 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 5037
+    assert coverage["facilities"] == 4271
     # After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
     # unresolvable pins became estimated-near-city fallbacks (2779/2258).
     # The 2026-09-17 re-sweep with the matcher that reads an object's own
@@ -34,13 +34,13 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     # every sourced row is in the row: 1,939 are freight sites, 995 still are
     # not (nothing better within 6.4 miles), and 175 of the sites state no
     # trade, so the match to this facility's trade is assumed and says so.
-    assert coverage["source_backed"] == 2934
-    assert coverage["fallback"] == 2103
+    assert coverage["source_backed"] == 2745
+    assert coverage["fallback"] == 1526
     assert coverage["screen"] == {
         "passed": 1939,
-        "refused": 995,
+        "refused": 806,
         "not_screened": 0,
-        "trade_assumed": 175,
+        "trade_assumed": 173,
     }
     assert coverage["nearest_road_context"] == 0
     assert coverage["turn_level_geometry"] == 0

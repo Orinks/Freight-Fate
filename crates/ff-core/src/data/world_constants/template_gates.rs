@@ -6,6 +6,8 @@ use std::collections::HashSet;
 
 use once_cell::sync::Lazy;
 
+use super::stand_in_markets::STAND_IN_MARKET_CITY_KEYS;
+
 // Geography gates for template facilities. Market tags apply per region or
 // state, which over-stamps water- and rail-dependent facility types onto
 // cities that plainly lack them (a port terminal in landlocked Lampasas).
@@ -371,6 +373,22 @@ pub struct TemplateCityGate {
 
 /// type -> (allowlist or None, denylist or None); applied when stamping
 /// template facilities in `expand_market_locations`.
+/// The one facility type a stand-in market is stamped with.
+///
+/// A company yard ships general, retail and parcel freight and takes bulk
+/// fuel, so a town with nothing surveyed is still somewhere a load can come
+/// from or go to -- it just stops claiming to hold a warehouse, a cross-dock
+/// and a grocery distribution centre as well.
+pub const STAND_IN_MARKET_FACILITY_TYPE: &str = "company_yard";
+
+/// Whether this city's freight market is a stand-in: nothing behind any of
+/// its facilities was surveyed. See [`STAND_IN_MARKET_CITY_KEYS`].
+pub fn is_stand_in_market(city_key: &str) -> bool {
+    static KEYS: Lazy<HashSet<&'static str>> =
+        Lazy::new(|| STAND_IN_MARKET_CITY_KEYS.iter().copied().collect());
+    KEYS.contains(city_key)
+}
+
 pub fn template_facility_city_gate(facility_type: &str) -> Option<TemplateCityGate> {
     match facility_type {
         "port_terminal" => Some(TemplateCityGate {

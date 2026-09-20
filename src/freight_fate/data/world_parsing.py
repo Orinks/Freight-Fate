@@ -116,9 +116,18 @@ def _expand_market_locations(
     locations = list(explicit_locations)
     existing_types = {location.type for location in locations}
     existing_names = {location.name.lower() for location in locations}
-    desired_types = list(BASE_MARKET_FACILITY_TYPES)
-    for tag in market_tags:
-        desired_types.extend(MARKET_TAG_FACILITY_TYPES.get(tag, ()))
+    # A STAND-IN market gets one yard, not a skyline: not one of its
+    # facilities has an endpoint the freight-site screen accepts, so all of
+    # them are invented (owner ruling, 2026-09-20). A city that curates its
+    # own freight is never a stand-in. Kept in step with the Rust runtime,
+    # which is what players run; this copy is what the build tools read.
+    stand_in = city_key in STAND_IN_MARKET_CITY_KEYS and not explicit_locations
+    if stand_in:
+        desired_types = [STAND_IN_MARKET_FACILITY_TYPE]
+    else:
+        desired_types = list(BASE_MARKET_FACILITY_TYPES)
+        for tag in market_tags:
+            desired_types.extend(MARKET_TAG_FACILITY_TYPES.get(tag, ()))
     for facility_type in _dedupe(desired_types):
         if facility_type in existing_types:
             continue

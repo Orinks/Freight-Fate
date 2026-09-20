@@ -69,6 +69,16 @@
 
 - **An empty trailer takes a street corner faster than a loaded one.** Every corner used to be advised as though you were carrying a full load.
 
+- **Facility stopping assistance now stops you at a pickup.** It braked and held at the entrance on a delivery, but only talked you in at a pickup.
+
+- **The way in to a facility sticks to real streets.** Approaches used to cut through parking lanes, a fire lane, and one coffee shop's drive-through.
+
+- **The turn chime sounds as you take the corner.** It used to play on the approach, even at Urgent only where nothing was said about the turn.
+
+- **An assist holding the brake no longer empties your air tanks.** The held pedal was billed as a fresh application sixty times a second, and the spring brakes could set short of the gate.
+
+- **Towns with no real freight site now hold one yard instead of four invented warehouses.** Every other town keeps the businesses the map can back.
+
 - **Short, false walls of hill on flat road are gone.** Over a thousand of them, most only a few hundred yards long, were never there.
 
 - **Mountain climbs pull like mountain climbs again.** Wolf Creek Pass, the redwood coast and the Santiam were all being flattened to a gentler grade than the road has.

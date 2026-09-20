@@ -545,15 +545,28 @@ def approach_record(
         reason = "Public-road path is shorter than the playable facility approach floor."
     if too_long_yard:
         reason = YARD_STRETCH_TOO_LONG_REASON
+    # A REFUSED endpoint contributes nothing, its road context included.
+    #
+    # The screen rejects the sourced endpoint as not a freight site, and the
+    # row says so -- but the fallback still named the road nearest to it, and
+    # that road was chosen by the very object the screen threw out. All 419
+    # refused rows named one: a heliport's street in Atlantic City, a museum's
+    # in Bartlesville, an airport terminal's in Beckley, and in Glenwood
+    # Springs 2.5 miles of "Red Mountain / Jeanne Golay Trail" -- an unpaved
+    # track up a mountainside, nearest road to the Roaring Fork Substation
+    # (owner, 2026-09-20). A name derived from a rejected reading is worse
+    # than no name: it reads as a survey and sends the driver somewhere real.
+    screen_refused = reason.startswith(SCREEN_REFUSAL_PREFIX)
+    approach_road = "" if screen_refused else target.local_approach_road
     segments = (
         list(geometry.segments)
         if turn_level
         else [
             {
-                "road": target.local_approach_road or "local facility access road",
+                "road": approach_road or "local facility access road",
                 "miles": round(max(target.local_approach_miles, 0.4), 2),
                 "cue": (
-                    f"Use {target.local_approach_road or 'the local facility access road'} "
+                    f"Use {approach_road or 'the local facility access road'} "
                     "for the facility approach."
                 ),
                 "speed_mph": 25.0,

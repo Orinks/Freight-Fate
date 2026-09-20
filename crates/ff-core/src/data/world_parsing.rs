@@ -12,13 +12,14 @@ use serde_json::{Map, Value};
 
 use super::legacy_aliases::legacy_city_slug;
 use super::world_constants::{
-    facility_cargo_roles, lookup, set_contains, template_facility_city_gate,
+    facility_cargo_roles, is_stand_in_market, lookup, set_contains, template_facility_city_gate,
     BASE_MARKET_FACILITY_TYPES, CITY_MARKET_TAGS, DEFAULT_POI_ACTIONS, DEFAULT_VEHICLE_ACCESS,
     FACILITY_LEVEL_UNLOCKS, FACILITY_NAME_TEMPLATES, FACILITY_SOURCE_NOTES, FREIGHT_LOCATION_TYPES,
     MARKET_TAG_FACILITY_TYPES, PARKING_CERTAINTY_LABELS, POI_ACTIONS, POI_DENSITY_MEDIUM_LEG_MILES,
     POI_DENSITY_SHORT_LEG_MILES, RAW_FACILITY_TEXT_MARKERS, RAW_POI_TEXT_MARKERS,
-    REGION_MARKET_TAGS, SOURCE_BACKED_POI_ACTIONS, STATE_MARKET_TAGS, STOP_CURATION_LEVELS,
-    STOP_DIRECTIONS, STOP_TYPE_LABELS, VEHICLE_ACCESS_LEVELS,
+    REGION_MARKET_TAGS, SOURCE_BACKED_POI_ACTIONS, STAND_IN_MARKET_FACILITY_TYPE,
+    STATE_MARKET_TAGS, STOP_CURATION_LEVELS, STOP_DIRECTIONS, STOP_TYPE_LABELS,
+    VEHICLE_ACCESS_LEVELS,
 };
 use super::world_loader::{RawCity, RawLeg, WorldData};
 use super::world_models::{DataError, Location, Stop};
@@ -199,13 +200,34 @@ pub fn expand_market_locations(
     let mut existing_types: Vec<String> =
         locations.iter().map(|l| l.facility_type.clone()).collect();
     let mut existing_names: Vec<String> = locations.iter().map(|l| l.name.to_lowercase()).collect();
-    let mut desired_types: Vec<String> = BASE_MARKET_FACILITY_TYPES
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
-    for tag in market_tags {
-        if let Some(types) = lookup(MARKET_TAG_FACILITY_TYPES, tag) {
-            desired_types.extend(types.iter().map(|s| s.to_string()));
+    // A STAND-IN MARKET gets one yard, not a skyline.
+    //
+    // Every other city is stamped with the four base types plus whatever its
+    // market tags add, and the endpoint sweep then binds each to a real OSM
+    // freight site nearby. In these cities it binds nothing: not one facility
+    // has an endpoint the freight-site screen accepts, so all of them are
+    // invented, and four invented warehouses in one town is four stories the
+    // map cannot back (owner ruling, 2026-09-20). One company yard keeps the
+    // town a place freight moves through -- it ships general, retail and
+    // parcel and takes bulk fuel -- without the rest of the pretence.
+    //
+    // A city that curates its own freight is never a stand-in, whatever the
+    // endpoint sweep found: those locations were authored by hand, and the
+    // market types that go with them are owed too.
+    let stand_in = is_stand_in_market(city_key) && explicit_locations.is_empty();
+    let mut desired_types: Vec<String> = if stand_in {
+        vec![STAND_IN_MARKET_FACILITY_TYPE.to_string()]
+    } else {
+        BASE_MARKET_FACILITY_TYPES
+            .iter()
+            .map(|s| s.to_string())
+            .collect()
+    };
+    if !stand_in {
+        for tag in market_tags {
+            if let Some(types) = lookup(MARKET_TAG_FACILITY_TYPES, tag) {
+                desired_types.extend(types.iter().map(|s| s.to_string()));
+            }
         }
     }
     for facility_type in dedupe(desired_types) {

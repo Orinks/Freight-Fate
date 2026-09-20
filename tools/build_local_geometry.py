@@ -77,6 +77,73 @@ UNNAMED_SERVICE = "a service road"
 UNNAMED_STREET = "a side street"
 # The classes whose namelessness is honest rather than a data gap.
 SERVICE_CLASSES = frozenset({"service", "living_street"})
+# READ from OSM `service=*`: the service ways that are not roads a combination
+# can be routed through, whatever else they are tagged.
+#
+# `highway=service` covers both the delivery road behind a warehouse and the
+# queue lane at a coffee window, and until 2026-09-20 the router took either.
+# A tester's approach to the Oshkosh dry warehouse turned off West Murdock
+# Avenue, ran a chain of parking lanes, and was told "Continue onto Starbucks
+# Drive-Through" -- OSM way 849313280, `highway=service`, `service=drive-
+# through`, `oneway=yes`, and one car wide. Near Oshkosh alone the extract
+# holds 120 drive-through ways, 1,010 parking aisles and 14 emergency accesses,
+# all of which were routable.
+#
+# What each value asserts, from the OSM wiki's `Key:service`, and why a
+# 53-foot combination cannot use it:
+#   drive-through   a queue lane to a service window, kerbed and one lane wide
+#   parking_aisle   the lane between two rows of parked cars
+#   emergency_access a fire lane, usually gated or bollarded
+#   bus             a busway, closed to other traffic
+#   slipway         a boat ramp into the water
+# `driveway`, `alley`, `yard` and an untagged service way stay routable: those
+# are how a yard, a dock and a loading bay are actually reached.
+# <https://wiki.openstreetmap.org/wiki/Key:service>
+#
+# `is_yard_road` has refused `emergency_access` since it was written; this is
+# the same judgment applied to the public side of the graph.
+UNROUTABLE_SERVICE = frozenset(
+    {
+        "drive-through",
+        "drive_through",
+        "drive-thru",
+        "drive_thru",
+        "parking_aisle",
+        "emergency_access",
+        "bus",
+        "slipway",
+    }
+)
+
+# READ from OSM `access=*`: who upstream says may use the way at all.
+#
+# `private`, `no` and `military` were refused from the start. The rest of
+# this list came from the 2026-09-20 sweep: a chain into the Burlington
+# grocery distribution centre ran 2.1 miles of "Route 127 Bike Path" (OSM way
+# 1092499015, `highway=service`, `access=permit`) because a permit is not a
+# refusal in the old set. Every value here is one upstream uses to say the
+# way is closed to a truck that has not been let in:
+#   permit       entry needs a permit issued in advance
+#   residents    the people who live on it
+#   employees    the staff of the site it belongs to
+#   emergency    emergency vehicles
+#   agricultural farm traffic; forestry, forest traffic
+# `customers`, `delivery`, `destination`, `permissive`, `designated` and
+# `official` stay routable: a truck bound for the site IS the traffic those
+# name. <https://wiki.openstreetmap.org/wiki/Key:access>
+CLOSED_ACCESS = frozenset(
+    {
+        "private",
+        "no",
+        "military",
+        "permit",
+        "residents",
+        "employees",
+        "emergency",
+        "agricultural",
+        "forestry",
+    }
+)
 # Every label that stands in for a name rather than being one. Anything that
 # has to ask "is this road actually named" tests membership here: the speed
 # default used to compare against one literal string, so adding a second
@@ -1075,9 +1142,11 @@ def road_label(tags: dict[str, str]) -> str:
     highway = tags.get("highway", "")
     if highway not in ROUTABLE_HIGHWAYS:
         return ""
+    if tags.get("service", "").strip().lower() in UNROUTABLE_SERVICE:
+        return ""
     # `private` ways come back in only as a facility's own yard road
     # (`yard_roads.py`); a base's roads (`military`) never do.
-    if tags.get("access") in {"private", "no", "military"}:
+    if tags.get("access", "").strip().lower() in CLOSED_ACCESS:
         return ""
     if tags.get("motorroad") == "yes":
         return ""

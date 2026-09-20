@@ -6,8 +6,8 @@ use crate::data_support::{data_dir, shortest, supported, world};
 use ff_core::data::regions::REGIONS;
 use ff_core::data::world::{max_alternate_miles, World};
 use ff_core::data::world_constants::{
-    lookup, set_contains, DEFAULT_POI_ACTIONS, FREIGHT_LOCATION_TYPES, PARKING_CERTAINTY_LABELS,
-    POI_ACTIONS, STOP_DIRECTIONS, STOP_TYPE_LABELS,
+    is_stand_in_market, lookup, set_contains, DEFAULT_POI_ACTIONS, FREIGHT_LOCATION_TYPES,
+    PARKING_CERTAINTY_LABELS, POI_ACTIONS, STOP_DIRECTIONS, STOP_TYPE_LABELS,
 };
 use ff_core::data::world_models::Route;
 use serde_json::json;
@@ -260,7 +260,28 @@ fn test_each_metro_expands_to_representative_facilities() {
         // port terminal and the intermodal ramp from a remote town (rural
         // Nevada keeps five). Inventing a different filler facility to hold
         // the count at six would repeat the realism bug the gate fixes.
-        assert!(city.locations.len() >= 5);
+        // A STAND-IN market is the exception, and it is the point: not one of
+        // its facilities has an endpoint the freight-site screen accepts, so it
+        // is stamped with one company yard instead of four invented warehouses
+        // (owner ruling, 2026-09-20).
+        let templates: Vec<&str> = city
+            .locations
+            .iter()
+            .filter(|loc| loc.template)
+            .map(|loc| loc.facility_type.as_str())
+            .collect();
+        let curated = city.locations.iter().any(|loc| !loc.template);
+        if is_stand_in_market(&city.key) && !curated {
+            assert!(
+                templates.len() <= 1,
+                "{}: a stand-in market gets one yard, not {:?}",
+                city.name,
+                templates
+            );
+            assert!(templates.iter().all(|kind| *kind == "company_yard"));
+        } else {
+            assert!(city.locations.len() >= 5);
+        }
         assert!(!city.market_tags.is_empty());
         assert!(city.locations.iter().any(|loc| loc.template));
         assert!(city
@@ -860,8 +881,13 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.name,
             city.lon
         );
+        let floor = if is_stand_in_market(&city.key) && city.locations.iter().all(|l| l.template) {
+            1
+        } else {
+            2
+        };
         assert!(
-            city.locations.len() >= 2,
+            city.locations.len() >= floor,
             "{}: too few freight locations",
             city.name
         );

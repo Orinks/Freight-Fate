@@ -984,6 +984,9 @@ pub const MARKET_TAG_FACILITY_TYPES: &[(&str, &[&str])] = &[
     ("steel", &["steel_industrial"]),
 ];
 
+mod stand_in_markets;
+pub use stand_in_markets::STAND_IN_MARKET_CITY_KEYS;
+
 mod template_gates;
 pub use template_gates::*;
 
