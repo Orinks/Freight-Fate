@@ -143,6 +143,17 @@ impl Trip {
             return self.events.clone();
         }
 
+        // What this run has burned, read as the DROP in the tank since the
+        // last frame. The burn model is the truck's and runs outside this
+        // call, so reading the level is the one place that sees every path;
+        // and only a drop counts, so a fuel island adds gallons without ever
+        // crediting the run with ones it did not spend.
+        let fuel_now = self.truck.fuel_gal;
+        if let Some(previous) = self.fuel_seen_gal {
+            self.fuel_used_gal += (previous - fuel_now).max(0.0);
+        }
+        self.fuel_seen_gal = Some(fuel_now);
+
         // Any release path disarms waiting.
         if self.waiting && !self.truck.parking_brake {
             self.waiting = false;

@@ -964,3 +964,125 @@ fn test_category_with_nothing_earned_still_reads_naturally() {
         );
     }
 }
+
+/// Every badge in the catalog is either awarded somewhere in the shipping
+/// code or listed below as deliberately retired.
+///
+/// Found by audit on 2026-09-20: `thrifty_run` and `coffee_regular` had never
+/// been awardable in either runtime -- no award site, no test, no retirement
+/// note, from the day they were written. Nothing caught it, because nothing
+/// was looking. This looks.
+///
+/// It reads the source rather than playing the game, so it proves reachability
+/// and not correctness: a badge can be wired here and still fire at the wrong
+/// moment. What it does catch is the failure that has actually happened --
+/// copy written for a badge nobody wired up.
+#[test]
+fn test_every_badge_is_awarded_somewhere_or_named_as_retired() {
+    use std::collections::BTreeSet;
+    use std::fs;
+    use std::path::Path;
+
+    // Merged into "first_day" at the pickup, by design; their catalog rows
+    // stay so the cloud validator's allow-list never sees a removed id.
+    const RETIRED: [&str; 3] = ["first_dispatch", "first_pickup", "air_ready"];
+
+    fn sources(dir: &Path, out: &mut String) {
+        let Ok(entries) = fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if path.is_dir() {
+                if name != "tests" && name != "playtest" {
+                    sources(&path, out);
+                }
+            } else if name.ends_with(".rs") && name != "catalog.rs" && name != "tests.rs" {
+                out.push_str(&fs::read_to_string(&path).unwrap_or_default());
+            }
+        }
+    }
+
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("crates/");
+    let mut code = String::new();
+    sources(&root.join("ff-core/src"), &mut code);
+    sources(&root.join("freight-fate/src"), &mut code);
+    // Comments name retired ids in prose; strip them so a note is not a wire.
+    let code: String = code
+        .lines()
+        .filter(|line| !line.trim_start().starts_with("//"))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let retired: BTreeSet<&str> = RETIRED.into_iter().collect();
+    let unwired: Vec<&str> = ff_core::achievements::ACHIEVEMENTS
+        .iter()
+        .map(|a| a.id)
+        .filter(|id| !retired.contains(id) && !code.contains(&format!("\"{id}\"")))
+        .collect();
+    assert!(
+        unwired.is_empty(),
+        "these badges have copy but no way to earn them: {unwired:?}"
+    );
+
+    // And a retired badge must stay retired. Here the question is narrower --
+    // is it AWARDED -- because a bare mention is not a wire: the training
+    // stage enum spells "first_dispatch" as its own stage id, which is a name
+    // collision and not a badge.
+    let revived: Vec<&str> = RETIRED
+        .into_iter()
+        .filter(|id| {
+            code.contains(&format!("award_achievement(\"{id}\")"))
+                || code.contains(&format!("push(&mut ids, \"{id}\")"))
+        })
+        .collect();
+    assert!(
+        revived.is_empty(),
+        "retired badges are wired again: {revived:?}"
+    );
+}
+
+/// Eight miles to the gallon over the whole run earns the badge, and a
+/// thirstier run does not. Unearnable until 2026-09-20: the copy had been in
+/// the catalog from the start with no award site anywhere.
+#[test]
+fn test_a_light_footed_run_earns_its_mileage_badge() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named("Sipper"));
+    let job = an_unlocked_job(&app, 0);
+    let mut driving = a_finished_delivery(&mut app, job);
+
+    // 400 miles on 40 gallons is ten to the gallon.
+    driving.trip.position_mi = 400.0;
+    driving.trip.fuel_used_gal = 40.0;
+    ArrivalState::new(&mut app.ctx, &mut driving);
+    assert!(earned(&app, "thrifty_run"));
+    drop(app);
+
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named("Heavy Foot"));
+    let job = an_unlocked_job(&app, 0);
+    let mut driving = a_finished_delivery(&mut app, job);
+    // The same 400 miles on 80 gallons is five, which the model calls normal.
+    driving.trip.position_mi = 400.0;
+    driving.trip.fuel_used_gal = 80.0;
+    ArrivalState::new(&mut app.ctx, &mut driving);
+    assert!(!earned(&app, "thrifty_run"));
+}
+
+/// A run that burned nothing cannot claim the mileage badge: a resumed trip
+/// starts its fuel tally at zero, and zero gallons is not infinite mileage.
+#[test]
+fn test_a_run_with_no_fuel_burned_claims_no_mileage() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named("No Burn"));
+    let job = an_unlocked_job(&app, 0);
+    let mut driving = a_finished_delivery(&mut app, job);
+    driving.trip.position_mi = 400.0;
+    driving.trip.fuel_used_gal = 0.0;
+    ArrivalState::new(&mut app.ctx, &mut driving);
+    assert!(!earned(&app, "thrifty_run"));
+}

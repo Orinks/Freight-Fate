@@ -56,9 +56,7 @@ fn job_with(miles: f64, pay: f64, deadline: f64) -> Job {
 /// `_new_hire`: a company driver past the first-dispatch badge.
 fn new_hire(app: &mut TestApp, name: &str) {
     career(app, name, "Chicago");
-    profile_mut(app)
-        .achievements
-        .push("first_dispatch".to_string());
+    profile_mut(app).achievements.push("first_day".to_string());
 }
 
 fn push_board(app: &mut TestApp, jobs: Vec<Job>) {
@@ -1243,7 +1241,7 @@ fn test_terminal_career_plan_is_keyboard_reachable_and_spoken() {
     career(&mut app, "Keyboard Plan", "Chicago");
     profile_mut(&mut app)
         .achievements
-        .push("first_dispatch".to_string());
+        .push("first_day".to_string());
 
     let city = CityMenuState::new(&app.ctx, false);
     app.push_state(city);
@@ -1272,7 +1270,7 @@ fn test_terminal_career_plan_speaks_senior_company_level_guidance() {
     career(&mut app, "Senior Driver", "Chicago");
     {
         let p = profile_mut(&mut app);
-        p.achievements.push("first_dispatch".to_string());
+        p.achievements.push("first_day".to_string());
         p.career.xp = LEVEL_XP[9];
         p.career.deliveries = 20;
         p.career.reputation = 86.0;
@@ -1303,7 +1301,7 @@ fn test_dispatch_board_speaks_objective_and_marks_recommended_job() {
     career(&mut app, "Board Plan", "Chicago");
     {
         let p = profile_mut(&mut app);
-        p.achievements.push("first_dispatch".to_string());
+        p.achievements.push("first_day".to_string());
         p.career.xp = LEVEL_XP[9];
         p.career.deliveries = 12;
         p.career.reputation = 86.0;

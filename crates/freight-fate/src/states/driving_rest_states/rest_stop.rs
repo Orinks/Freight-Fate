@@ -1,6 +1,7 @@
 //! The spoken route POI menu: actions come from the corridor metadata
 //! (`RestStopState`).
 
+use ff_core::achievements::increment_stat;
 use ff_core::data::amenities::{classify_brand, spoken_amenities};
 use ff_core::data::buffs::{buffs_for_stop, Buff};
 use ff_core::models::solvency;
@@ -462,6 +463,12 @@ impl RestStopState {
         ctx.audio.play("ui/notify");
         ctx.say(&text);
         ctx.award_achievement("break_taken");
+        // Twenty-five proper breaks. The 30-minute one is the break that
+        // counts -- the 15-minute food and coffee stop eases fatigue but
+        // resets nothing, so it is not one of these.
+        if increment_stat(profile_mut_of(ctx), "breaks_taken") >= 25 {
+            ctx.award_achievement("coffee_regular");
+        }
     }
 
     fn food_break(&mut self, ctx: &mut GameContext) {

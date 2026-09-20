@@ -239,6 +239,12 @@ pub struct Trip {
     pub outbound: bool,
     pub position_mi: f64,
     pub game_minutes: f64,
+    /// Diesel burned on this run, in gallons. Observed as a per-frame DROP in
+    /// the tank rather than plumbed out of the burn model, so a refuel stop
+    /// mid-run adds fuel without ever subtracting from what was spent.
+    pub fuel_used_gal: f64,
+    /// Last tank level seen, for the line above.
+    fuel_seen_gal: Option<f64>,
     /// Real seconds spent in trip.update: the sitting budget chatter reads.
     pub sitting_s: f64,
     /// When the last billboard / flavor landmark was generated, on sitting_s.
@@ -419,6 +425,8 @@ impl Trip {
             outbound: opts.outbound,
             position_mi: 0.0,
             game_minutes: 0.0,
+            fuel_used_gal: 0.0,
+            fuel_seen_gal: None,
             sitting_s: 0.0,
             last_chatter_s: None,
             finished: false,

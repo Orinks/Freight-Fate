@@ -857,7 +857,7 @@ fn test_owner_operator_transcript_keeps_load_and_route_choice() {
     let result = harness.start_delivery(StartDelivery::named("Harness Owner Choice").configure(
         |profile| {
             profile.business_status = LEASED_OWNER_OPERATOR.to_string();
-            profile.achievements.push("first_dispatch".to_string());
+            profile.achievements.push("first_day".to_string());
             // All trailer programs, so a specialty-heavy random board can
             // never leave the harness with zero unlocked jobs.
             profile.trailer_programs = ["dry_van", "reefer", "flatbed", "bulk"]
@@ -879,7 +879,7 @@ fn test_mid_career_transcript_speaks_level_band_guidance() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness Senior Career").configure(
         |profile| {
-            profile.achievements.push("first_dispatch".to_string());
+            profile.achievements.push("first_day".to_string());
             profile.career.xp = LEVEL_XP[9];
             profile.career.deliveries = 20;
             profile.career.reputation = 86.0;

@@ -346,6 +346,27 @@ its status or release decision.
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still
       dropped at the door.
+- [x] Achievement triggers audited (2026-09-20). 181 badges: 177 wired, 3
+      deliberately retired into "first_day" and tested as such, and 2 --
+      `thrifty_run` and `coffee_regular` -- that had never been awardable in
+      either runtime: catalog copy from the day they were written, no award
+      site, no test, no note. Both wired. The mileage one needed per-run fuel
+      accounting that did not exist; `Trip.fuel_used_gal` reads it as the
+      DROP in the tank each frame, so a refuel stop adds gallons without
+      crediting the run with ones it did not spend.
+      The same audit found a live bug: `first_dispatch_done` still read the
+      retired `first_dispatch` badge, so it was false for every driver
+      forever, and the dispatch board's recommended-load line fell through
+      that dead check for anyone not on a company training profile. It reads
+      `first_day` now, and the six tests that hand-seeded the retired badge
+      to make their setup work seed the real one.
+      A test now asserts every catalog badge is either awarded in shipping
+      code or named as retired, and that a retired one is never awarded
+      again. It reads source, so it proves REACHABILITY, not correctness.
+- [ ] 130 of the 177 wired badges have no test naming them individually, so
+      nothing proves they fire at the right MOMENT rather than merely being
+      reachable. The trigger sites are concentrated (one arrival pass, one
+      rest-stop pass), so this is a readable job, not an endless one.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.

@@ -69,6 +69,10 @@
 
 ### Fixed
 
+- **Two badges can finally be earned.** One is for a whole run at better than eight miles to the gallon, the other for twenty-five proper breaks; neither had any way to be awarded.
+
+- **The dispatch board recommends a load again.** It had stopped naming one for every driver except a company trainee.
+
 - **Learn game sounds no longer explains itself with a speech setting that was removed.** Four entries pointed at terse; they name Urgent only now.
 
 - **The manual lists the key that repeats the last CB call, and the one that names what the radio is playing.** Both keys worked already.

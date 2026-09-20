@@ -147,8 +147,15 @@ pub const BOBTAIL_RANGE_MI: f64 = 400.0;
 // round trip, short enough that a dead network never holds the answer hostage.
 pub const BACKUP_RESULT_WAIT_S: f64 = 10.0;
 
+/// Has this driver taken their first load out?
+///
+/// Reads "first_day", the badge that is actually awarded. It used to read
+/// "first_dispatch", which was folded INTO "first_day" at the pickup and has
+/// not been awarded since -- so this answered false for everyone, forever,
+/// and the board's recommended dispatch never appeared for any driver who was
+/// not on a company training profile (found by audit, 2026-09-20).
 pub fn first_dispatch_done(profile: &Profile) -> bool {
-    profile.achievements.iter().any(|a| a == "first_dispatch")
+    profile.achievements.iter().any(|a| a == "first_day")
 }
 
 // Gated off the 1.9 release line (owner + Josh, 2026-07-27): the school is
