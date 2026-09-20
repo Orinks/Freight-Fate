@@ -25,8 +25,8 @@
 use ff_core::sim::vehicle::TruckState;
 
 use crate::states::driving_core::{
-    RAMP_ASSIST_DECEL_START_MPS2, RAMP_ASSIST_FULL_DECEL_MPS2, RAMP_ASSIST_RELEASE_BAND,
-    RAMP_BAR_REACTION_S, RAMP_BAR_SOLID_MI, RAMP_BAR_TICK_RANGE_MI,
+    RAMP_ASSIST_APPLY_BAND, RAMP_ASSIST_DECEL_START_MPS2, RAMP_ASSIST_FULL_DECEL_MPS2,
+    RAMP_ASSIST_RELEASE_BAND, RAMP_BAR_REACTION_S, RAMP_BAR_SOLID_MI, RAMP_BAR_TICK_RANGE_MI,
 };
 
 /// `bar_tick_range_mi(truck)`: how far out the stop-bar tick starts, for this
@@ -91,7 +91,15 @@ pub fn assist_full_decel_mps2(truck: &TruckState) -> f64 {
 pub fn arrival_servo_brake(applied: f64, needed_mps2: f64, truck: &TruckState) -> f64 {
     let full = assist_full_decel_mps2(truck);
     let wanted = 1.0f64.min(0.0f64.max(needed_mps2) / full);
-    if wanted > applied {
+    // A rise is charged a whole application, so it has to be worth one. The
+    // demand on a uniform stop is monotone, which the comment above took to
+    // mean there was nothing to fan -- true of the pedal's DIRECTION, and
+    // wrong about its cost: the demand creeps up a ten-thousandth of a pedal
+    // per frame while the truck runs a hair behind its profile, and every one
+    // of those was an application. A truck at the gate is never held short by
+    // this band -- it only ever delays the press by one band of deceleration,
+    // and a demand that really is climbing crosses it in a few frames.
+    if wanted > applied + RAMP_ASSIST_APPLY_BAND || (wanted > applied && applied <= 0.0) {
         return wanted;
     }
     if wanted < applied - RAMP_ASSIST_RELEASE_BAND {
@@ -121,7 +129,10 @@ pub fn arrival_servo_brake(applied: f64, needed_mps2: f64, truck: &TruckState) -
 pub fn assist_servo_brake(applied: f64, needed_mps2: f64, truck: &TruckState) -> f64 {
     let full = assist_full_decel_mps2(truck);
     let wanted = 1.0f64.min((RAMP_ASSIST_DECEL_START_MPS2 / full).max(needed_mps2 / full));
-    if wanted > applied {
+    // The same rule on the way up as `arrival_servo_brake`: the floor stops
+    // the collapse-and-return cycle, but a demand creeping above it still
+    // bought an application a frame.
+    if wanted > applied + RAMP_ASSIST_APPLY_BAND || (wanted > applied && applied <= 0.0) {
         return wanted;
     }
     if wanted < applied - RAMP_ASSIST_RELEASE_BAND {

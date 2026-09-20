@@ -643,6 +643,10 @@ pub struct DrivingState {
     // and how long it has been out of authority with the truck still over
     // the number -- past which it owns up rather than riding it out.
     pub keeper_snub: f64,
+    /// The number the held snub is bringing the truck down to -- the
+    /// keeper's WORKING target, which on an approach is the corner or zone
+    /// ahead and not the set speed. The release rule reads this.
+    pub keeper_snub_target_mph: f64,
     // And the mirror of that on the other side of the number: how long the
     // keeper has been flat out and still losing the grade, plus the
     // say-once latch and the per-hill cooldown for owning up to it.
@@ -732,6 +736,11 @@ pub struct DrivingState {
     // facility. None once the lane is behind the truck (or when the run
     // never started at a facility at all).
     pub departure_ramp_mi: Option<f64>,
+    /// The posted speed of the road the departure ramp feeds, read when the
+    /// acceleration lane is armed. The closing line at the taper is about
+    /// the traffic the truck has to merge WITH, which is this road -- not
+    /// whatever zone happens to sit under the wheels at the taper.
+    pub departure_merge_road_mph: f64,
     // Cruise takes the acceleration lane at this traffic-relative speed only
     // when this exact truck's predicted drivetrain/load/grade capability can
     // reach it. Otherwise the keeper stays flat out through the taper.

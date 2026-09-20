@@ -269,12 +269,29 @@ impl DrivingState {
         // held floor on top of that.
         let braking_ramp =
             (key_down && !backing) || (accelerating && self.trip.truck.velocity_mps < -0.1);
+        // The floor an assist is holding right now. The ramp decays the
+        // pedal toward zero every frame the driver is not braking, and the
+        // assists re-press their application further down the frame, so the
+        // PHYSICS felt a steady pedal -- but the air model charges by the
+        // RISE, and it saw 0.09 climb back to 0.20 sixty times a second. One
+        // held snub was billed as six applications a second, which is the
+        // Aberdeen stranding (2026-09-18) surviving its own fix one layer
+        // down and stranding Albany Company Yard the same way (approach
+        // sweep, 2026-09-20). A pedal an assist is holding is not a pedal
+        // the driver let go of, so the decay stops there. Their own brake
+        // key still cancels the assist, which is what drops the floor.
+        let assist_floor = self
+            .keeper_snub
+            .max(self.aeb_brake)
+            .max(self.destination_assist_brake)
+            .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
+            .clamp(0.0, 1.0);
         {
             let t = &mut self.trip.truck;
             if braking_ramp {
                 t.brake = 1.0f64.min(t.brake + ramp * 1.5);
             } else {
-                t.brake = 0.0f64.max(t.brake - ramp * 3.0);
+                t.brake = assist_floor.max(t.brake - ramp * 3.0);
             }
             if pad_brake > 0.05 && !backing {
                 t.brake = t.brake.max(pad_brake);

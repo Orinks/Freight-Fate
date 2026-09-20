@@ -223,6 +223,17 @@ pub const RAMP_ASSIST_HOLD_MI: f64 = 60.0 / 5280.0;
 // brake application by the air system, so a servo that chases every dip in the
 // demand empties the tanks on one approach.
 pub const RAMP_ASSIST_RELEASE_BAND: f64 = 0.05;
+// And how far it has to climb ABOVE that pedal before the servo presses
+// harder. The air system charges a whole application for every RISE, so a
+// demand that creeps up a ten-thousandth of a pedal per frame -- which is
+// what a stop profile does while the truck is not quite holding its rate --
+// is charged sixty applications a second. The 2026-09-20 approach sweep
+// measured 31,556 of its 35,112 applications coming from that creep, and
+// Albany Company Yard was the first chain whose shed ran long enough to put
+// the tanks on the floor and set the spring brakes 2,992 feet short of the
+// gate. Same size as the release band: the pedal moves when the move is
+// worth an application, in either direction.
+pub const RAMP_ASSIST_APPLY_BAND: f64 = RAMP_ASSIST_RELEASE_BAND;
 // The destination approach assist's last lengths to the gate. The dock opens
 // only AT the point, so the arrival profile aims to reach it at a walk, not at
 // rest: an assist that targets zero speed at the point converges on a stop

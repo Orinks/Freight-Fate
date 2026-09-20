@@ -396,10 +396,20 @@ impl DrivingState {
             // release it but letting the clutch out (review finding,
             // 2026-09-19). The rule is the keeper's own, just applied on a
             // frame it cannot run.
-            if let Some(keeper_mph) = self.keeper_mph {
-                if self.trip.truck.speed_mph() <= keeper_mph - KEEPER_SNUB_UNDER_MPH {
-                    self.keeper_snub = 0.0;
-                }
+            // Against the number the snub is HOLDING, not the number the
+            // keeper is set to. Read against the set speed, this released on
+            // every shift frame of any approach -- the truck eased to a 10 mph
+            // corner is a mile an hour under its 45 mph setting by a mile an
+            // hour of margin and thirty-four more besides -- and an automatic
+            // hunting gears at 10 mph shifts constantly. Press, shift,
+            // release, press: 392 applications and the tanks on the floor at
+            // Albany Company Yard's service road (approach sweep,
+            // 2026-09-20).
+            if self.keeper_snub > 0.0
+                && self.trip.truck.speed_mph()
+                    <= self.keeper_snub_target_mph - KEEPER_SNUB_UNDER_MPH
+            {
+                self.keeper_snub = 0.0;
             }
             return;
         }
@@ -735,6 +745,9 @@ impl DrivingState {
             }
         } else if over > KEEPER_SNUB_OVER_MPH {
             self.keeper_snub = wanted;
+        }
+        if self.keeper_snub > 0.0 {
+            self.keeper_snub_target_mph = target_mph;
         }
         self.apply_keeper_snub();
         // Pressing everything it has and still riding well over the number:
