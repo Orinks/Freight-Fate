@@ -23,7 +23,7 @@ against 49 jurisdictions, which is what sinks several rows below.
 | NTAD National Highway System | yes | US Gov, public domain | GeoJSON lines | refreshed 2026-09 | 492,005 segments, all US | **Defer** -- the route graph already exists |
 | NTAD Weigh-in-Motion Stations | yes | US Gov, public domain | GeoJSON points | last edited 2025-04-30 | 763 sensor sites | **Adopt as a screen**, not as an inventory |
 | FHWA toll facilities | n/a | US Gov, public domain | biennial XLSX / PDF | 2023 edition | national | **Defer** -- superseded by `tools/toll_rates.py` |
-| USGS 3DEP elevation | yes | US Gov, public domain | JSON samples | 3DEP rolling | US, 1-10 m | **Adopt as a screen** -- see the throughput note |
+| USGS 3DEP elevation | yes | US Gov, public domain | JSON samples | 3DEP rolling | US, 1-10 m | **Adopted** -- 9,484 points read; see ROADMAP |
 | NWS `api.weather.gov` | yes | US Gov, public domain | JSON | hourly METAR cycle | US and territories | **Keep** -- pattern still fits |
 | WZDx feed registry + member feeds | registry yes; 29 of 43 feeds yes | US Gov registry; feed terms vary | JSON / GeoJSON | 1 min to 72 h | already swept 2026-09-12 | **Nothing new** -- the two keyless rows we lack were benched on purpose |
 | Caltrans Lane Closure System | yes | Caltrans public feed | JSON per district | live | California, 12 districts | **Adopt with a district scope** |
@@ -217,10 +217,13 @@ because a wrong grade is something a driver hears as a wrong advisory. Neither
 is a data drop; both are features, and the first one needs a design call about
 what a weigh costs and what the readout says.
 
-**Adopt as a screen, not as a bake.** 3DEP through the ImageServer. It is the
-right instrument for the provenance rule -- checking derived grades against an
-authoritative measurement -- and the wrong instrument for a wholesale re-bake
-until somebody costs the overnight run against a named benefit.
+**Adopted as a screen.** 3DEP through the ImageServer, and it has now been
+run: `tools/screen_grades_3dep.py` read 9,484 elevations over every grade span
+the load screen clamps. It confirmed the clamp on 77 percent of them and found
+one thing worth more than the verdicts -- two elevation models agreeing does
+not make a slope real, because both read ground and neither reads a bridge
+deck. Full findings are in `ROADMAP.md`. Still the wrong instrument for a
+wholesale re-bake until that overnight run is costed against a named benefit.
 
 **Leave.** NHS, because the graph already exists. FHWA toll facilities, because
 the researched rate table is better data for the question the game asks. The

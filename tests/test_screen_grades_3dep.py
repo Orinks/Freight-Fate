@@ -34,10 +34,15 @@ screen = _load_tool()
 FT_PER_M = 1.0 / 3.280839895
 
 
-def _row(profile_pct: float, ceiling_pct: float, span_mi: float = 1.0) -> dict:
+def _row(
+    profile_pct: float,
+    ceiling_pct: float,
+    span_mi: float = 1.0,
+    highway: str = "US-160",
+) -> dict:
     return {
         "leg": "a -> b",
-        "highway": "I-5",
+        "highway": highway,
         "start_mi": 0.0,
         "end_mi": span_mi,
         "profile_pct": profile_pct,
@@ -54,17 +59,34 @@ def _cache_for(grade_pct: float, span_mi: float = 1.0) -> dict[str, float]:
 
 def test_a_spike_3dep_flatly_contradicts_is_an_artifact() -> None:
     """The profile's 14 percent on ground 3DEP reads at 2: the clamp was right."""
-    row = screen.judged(_row(14.4, 7.0), _cache_for(2.0))
+    row = screen.judged(_row(14.4, 7.0, highway="I-5"), _cache_for(2.0))
 
     assert row["dep_pct"] == 2.0
     assert row["verdict"] == "artifact, clamp right"
 
 
 def test_a_steep_grade_3dep_confirms_is_being_clamped_away() -> None:
-    """This is the finding that matters: a real climb the load screen caps."""
-    row = screen.judged(_row(9.0, 7.0), _cache_for(9.0))
+    """A real climb the terrain ceiling caps: US-160 at 9, held at 6.
+
+    A US route's class ceiling is 10, so 9 is a slope the road can hold and
+    both readings agreeing means something.
+    """
+    row = screen.judged(_row(9.0, 6.0), _cache_for(9.0))
 
     assert row["verdict"] == "REAL, CLAMPED"
+
+
+def test_both_models_agreeing_on_an_impossible_grade_is_not_a_confirmation() -> None:
+    """13 percent on an interstate, confirmed by 3DEP, is a bridge.
+
+    Both models read the ground; over three tenths of a mile the ground under
+    a viaduct is not the road on it. 47 spans in the first full run looked
+    exactly like this, and calling them real grades would have argued for
+    loosening a clamp that is the only thing catching them.
+    """
+    row = screen.judged(_row(-13.02, 6.0, highway="I-79"), _cache_for(-13.43))
+
+    assert row["verdict"] == "both models, class forbids"
 
 
 def test_a_grade_under_the_ceiling_that_agrees_is_just_confirmed() -> None:
@@ -75,13 +97,13 @@ def test_a_grade_under_the_ceiling_that_agrees_is_just_confirmed() -> None:
 
 def test_a_reading_neither_agrees_with_nor_acquits_says_so() -> None:
     """Profile 12, ceiling 7, 3DEP 9: clamped, and 3DEP is over the ceiling too."""
-    row = screen.judged(_row(12.0, 7.0), _cache_for(9.0))
+    row = screen.judged(_row(12.0, 7.0, highway="I-5"), _cache_for(9.0))
 
     assert row["verdict"] == "disagrees"
 
 
 def test_a_segment_with_nothing_cached_is_dropped_not_guessed() -> None:
-    assert screen.judged(_row(14.4, 7.0), {}) is None
+    assert screen.judged(_row(14.4, 7.0, highway="I-5"), {}) is None
 
 
 def test_span_points_reads_the_vertices_inside_the_span() -> None:

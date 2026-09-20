@@ -13,8 +13,16 @@ span the profile measured answers the question the load screen cannot:
   * the profile says 14 percent, 3DEP says 2 -- an artifact, and the clamp
     was right to cap it, though it is still capping to a ceiling rather than
     to the truth;
-  * the profile says 14 percent and 3DEP agrees -- the clamp is destroying a
-    real grade, and a driver is hearing a climb the road does not have.
+  * the profile says 6.4 percent and 3DEP agrees, on a US route the clamp is
+    holding at 6 -- a real grade the driver is not getting.
+
+What the first full run taught, and why the verdicts are not just those two:
+two elevation models agreeing does NOT make a slope real. Both read ground,
+and over three tenths of a mile in the Appalachians the ground under a bridge
+is not the road on it. 47 spans came back with 3DEP confirming 10 to 13
+percent on an INTERSTATE, which is not a grade any interstate holds. That is a
+shared blind spot, not a measurement, and no second elevation model can close
+it -- which is why `grades.py` leads with road class rather than terrain.
 
 Nothing here writes to the world. The provenance rule in `CLAUDE.md` is that
 a screen reports and the bake stays readable; a screen that edits what it
@@ -48,7 +56,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import leg_geometry as lg  # noqa: E402
 from world_source import load_world  # noqa: E402
 
-from freight_fate.data.grades import grade_ceiling_pct, road_class  # noqa: E402
+from freight_fate.data.grades import (  # noqa: E402
+    CLASS_CEILING_PCT,
+    grade_ceiling_pct,
+    road_class,
+)
 
 SAMPLES_URL = (
     "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples"
@@ -192,10 +204,21 @@ def judged(row: dict[str, Any], cache: dict[str, float]) -> dict[str, Any] | Non
 
     clamped = abs(row["profile_pct"]) > row["ceiling_pct"]
     agrees = abs(row["gap_pct"]) <= AGREE_WITHIN_PCT
-    if agrees:
-        # 3DEP reads the same slope. If the load screen is capping it, the cap
-        # is taking a real grade away from the driver.
-        row["verdict"] = "REAL, CLAMPED" if clamped else "confirmed"
+    # Two elevation models agreeing is NOT proof a slope is real: both read the
+    # ground, and over a tenth of a mile in the Appalachians the ground under a
+    # bridge is not the road on it. The first run found 47 spans where 3DEP
+    # confirmed the profile at 10 to 13 percent on an interstate, which is not
+    # a grade any interstate holds. A confirmation the road class forbids is a
+    # shared blind spot, so it gets its own verdict rather than counting as a
+    # real grade the clamp is taking away.
+    class_ceiling = CLASS_CEILING_PCT[road_class(row["highway"])]
+    impossible = abs(row["dep_pct"]) > class_ceiling
+    if agrees and not clamped:
+        row["verdict"] = "confirmed"
+    elif agrees and impossible:
+        row["verdict"] = "both models, class forbids"
+    elif agrees:
+        row["verdict"] = "REAL, CLAMPED"
     elif clamped and abs(row["dep_pct"]) <= row["ceiling_pct"]:
         row["verdict"] = "artifact, clamp right"
     else:

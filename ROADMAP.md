@@ -905,13 +905,35 @@ against.
       weighbridge tag holds 72 enforcement scales against 2,127 commercial
       ones, and the federal Weigh-in-Motion layer is 763 sensor sites nobody
       pulls into. Fifty state lists in fifty shapes is the only route.
-- [ ] Baked elevations get screened against USGS 3DEP through the ImageServer
-      multipoint endpoint (100 points in 20 s, keyless, public domain, 1 to
-      10 m against Copernicus GLO-90's 30 m). A screen, not a re-bake, until
-      an overnight run is costed against a named benefit. The single-point
-      EPQS service answers an out-of-coverage point with HTTP 200 and the text
-      `Call failed.`, so a reader that trusts the status stores that as an
-      elevation.
+- [x] Every grade the load screen clamps was read a second time against USGS
+      3DEP and the clamp held up. `tools/screen_grades_3dep.py` sampled 9,484
+      real elevations over the 1,271 clamped spans (keyless, public domain, 1
+      to 10 m against the baked profile's SRTM 30 m; cached, so a re-run is
+      offline and instant). 976 of them -- 77 percent -- are slopes 3DEP flatly
+      contradicts, several with the sign reversed: the profile reads +9.5 where
+      3DEP reads -6.5. The clamp is catching real noise.
+- [x] Two elevation models agreeing does not make a slope real, which is the
+      thing this screen was built to find out and the reason road class still
+      leads terrain. 47 spans came back with 3DEP confirming the profile at 10
+      to 13 percent on an interstate -- a grade no interstate holds. Both
+      models read ground, and over three tenths of a mile the ground under a
+      bridge is not the road on it. No second elevation source can close that;
+      the class ceiling is the only thing that does.
+- [x] Loosening the ceiling was scored against the 3DEP readings and rejected.
+      Taking the looser of the two terrain labels, or dropping terrain where
+      the labels disagree, or dropping terrain entirely, each recover about 70
+      genuine grades and admit 386 to 543 artifacts. The rule stays as it is.
+- [ ] 96 real grades are still being flattened, and that is the residue worth
+      fixing one day. HPMS reports a single terrain verdict for a whole leg,
+      so US-160 over Wolf Creek Pass, US-101 through the redwoods, US-20 over
+      Santiam and I-5 through Canyon Creek all come back "level" across 500 to
+      800 sections and every segment on them is held to 6 percent. Median loss
+      is 0.55 grade points, 19 spans lose more than 1. The fix is a measured
+      per-segment elevation baked as its own reading, not a looser ceiling --
+      a bake change and the owner's call.
+- [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
+      out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
+      reader that trusts the status stores that string as an elevation.
 - [ ] California stays dark until a route-to-district lookup exists. Caltrans
       publishes lane closures per district with no key, but district 7 alone
       is 17.6 MB against an 8-second feed budget.
