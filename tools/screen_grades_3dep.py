@@ -24,9 +24,14 @@ percent on an INTERSTATE, which is not a grade any interstate holds. That is a
 shared blind spot, not a measurement, and no second elevation model can close
 it -- which is why `grades.py` leads with road class rather than terrain.
 
-Nothing here writes to the world. The provenance rule in `CLAUDE.md` is that
-a screen reports and the bake stays readable; a screen that edits what it
-rejects cannot be re-judged when the rule turns out too broad.
+By default nothing is written: the provenance rule in `CLAUDE.md` is that a
+screen reports and the bake stays readable, because a screen that deletes what
+it rejects cannot be re-judged when the rule turns out too broad. `--write`
+does the one thing that is not a screen -- it RE-SOURCES a slope, replacing a
+profile reading with a 3DEP reading and recording the profile's own number in
+`source`, so the swap is reversible by reading rather than by guessing. It
+only ever writes a value the road class could hold, so the shared bridge
+blind spot above is never baked in.
 
 Samples are cached by coordinate, so a second run costs nothing and works
 offline over whatever the first run already read.
@@ -35,6 +40,7 @@ Usage::
 
     uv run python tools/screen_grades_3dep.py --limit 40
     uv run python tools/screen_grades_3dep.py --over-ceiling --report grades.md
+    uv run python tools/screen_grades_3dep.py --over-ceiling --offline --write
 """
 
 from __future__ import annotations
@@ -48,13 +54,14 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import leg_geometry as lg  # noqa: E402
-from world_source import load_world  # noqa: E402
+from world_source import load_world, save_world  # noqa: E402
 
 from freight_fate.data.grades import (  # noqa: E402
     CLASS_CEILING_PCT,
@@ -93,6 +100,16 @@ MIN_SPAN_MI = 0.05
 #: resolution of the question a driver can hear.
 AGREE_WITHIN_PCT = 1.5
 
+#: Written into a re-sourced segment's `source`, and the thing a second run
+#: looks for so it never re-reads its own reading as if it were the profile's.
+MEASURED_MARKER = "Slope re-read at USGS 3DEP"
+MEASURED_NOTE = (
+    " {marker}: {measured:+.2f} percent measured over this span, replacing the "
+    "{profile:+.2f} the OpenRouteService/SRTM profile gave -- READ, not derived "
+    "(USGS 3DEP, public domain, 1 to 10 m; sampled {accessed} by "
+    "tools/screen_grades_3dep.py)."
+).replace("{marker}", MEASURED_MARKER)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -113,9 +130,15 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Use only cached samples; skip anything not already read.",
     )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Re-source segments whose 3DEP reading the road class can hold.",
+    )
     args = parser.parse_args(argv)
 
-    candidates = steepest_segments(load_world(), over_ceiling=args.over_ceiling)
+    world = load_world()
+    candidates = steepest_segments(world, over_ceiling=args.over_ceiling)
     if not args.over_ceiling:
         candidates = candidates[: args.limit]
     if not candidates:
@@ -139,7 +162,45 @@ def main(argv: list[str] | None = None) -> int:
     print(text)
     if args.report:
         args.report.write_text(text, encoding="utf-8")
+
+    if args.write:
+        written = write_measurements(rows)
+        save_world(world)
+        print(f"\nre-sourced {written} segments from 3DEP; world_source written", file=sys.stderr)
     return 0
+
+
+def write_measurements(rows: list[dict[str, Any]]) -> int:
+    """Replace a profile slope with the 3DEP reading where the class allows it.
+
+    A measurement beats a clamp: the load screen's ceiling is a guess at what
+    the road can hold, and where 3DEP has read the same span there is a number
+    instead. But only where the road class could hold it -- the 165 spans
+    where 3DEP itself reads 10 to 13 percent on an interstate are the shared
+    bridge blind spot, and writing those would bake the artifact in for good.
+    Those are left exactly as they are, for the load screen to clamp as now.
+
+    The profile's own value goes into `source`, so this is reversible by
+    reading rather than by guessing.
+    """
+    written = 0
+    for row in rows:
+        segment = row.get("segment")
+        if segment is None or MEASURED_MARKER in str(segment.get("source") or ""):
+            continue
+        if abs(row["dep_pct"]) > CLASS_CEILING_PCT[road_class(row["highway"])]:
+            continue
+        segment["source"] = (
+            str(segment.get("source") or "").strip()
+            + MEASURED_NOTE.format(
+                measured=row["dep_pct"],
+                profile=row["profile_pct"],
+                accessed=date.today().isoformat(),
+            )
+        ).strip()
+        segment["avg_grade_pct"] = row["dep_pct"]
+        written += 1
+    return written
 
 
 def steepest_segments(world: dict[str, Any], *, over_ceiling: bool) -> list[dict[str, Any]]:
@@ -186,6 +247,9 @@ def steepest_segments(world: dict[str, Any], *, over_ceiling: bool) -> list[dict
                     "profile_pct": profile_pct,
                     "ceiling_pct": ceiling,
                     "points": points,
+                    # The segment dict itself, so --write can re-source it in
+                    # place without matching the row back to the world.
+                    "segment": segment,
                 }
             )
     rows.sort(key=lambda r: abs(r["profile_pct"]), reverse=True)
@@ -237,7 +301,8 @@ def render(rows: list[dict[str, Any]]) -> str:
         + ", ".join(f"{v} {k}" for k, v in sorted(counts.items(), key=lambda kv: -kv[1])),
         "",
         "3DEP is public domain, 1 to 10 m, sampled over the same span the "
-        "OpenRouteService/SRTM profile measured. Nothing here was written back.",
+        "OpenRouteService/SRTM profile measured. A row is only ever re-sourced "
+        "(--write) when the road class could hold the reading.",
         "",
         "| Leg | Highway | Span (mi) | Profile % | 3DEP % | Ceiling | Verdict |",
         "| --- | --- | --- | --- | --- | --- | --- |",

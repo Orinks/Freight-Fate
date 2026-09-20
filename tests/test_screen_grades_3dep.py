@@ -189,3 +189,45 @@ def test_a_non_json_body_is_an_error_not_an_elevation(monkeypatch) -> None:
         assert "non-JSON" in str(exc)
     else:  # pragma: no cover - the point of the test
         raise AssertionError("a plain-text body must not parse as a reading")
+
+
+def _writable_row(profile_pct: float, dep_pct: float, highway: str, source: str = "ORS.") -> dict:
+    row = _row(profile_pct, 6.0, highway=highway)
+    row["dep_pct"] = dep_pct
+    row["segment"] = {"avg_grade_pct": profile_pct, "source": source}
+    return row
+
+
+def test_write_replaces_the_profile_slope_and_keeps_it_in_the_source() -> None:
+    row = _writable_row(6.42, 6.01, "US-160")
+
+    assert screen.write_measurements([row]) == 1
+    assert row["segment"]["avg_grade_pct"] == 6.01
+    # The profile's own number stays readable, so the swap can be undone by
+    # reading rather than by guessing.
+    assert "+6.42" in row["segment"]["source"]
+    assert row["segment"]["source"].startswith("ORS.")
+
+
+def test_write_refuses_a_reading_the_road_class_cannot_hold() -> None:
+    """The bridge blind spot must never be baked in.
+
+    3DEP reading -13.43 on an interstate is the ground under a viaduct. Left
+    alone, the load screen clamps it; written, it would be permanent.
+    """
+    row = _writable_row(-13.02, -13.43, "I-79")
+
+    assert screen.write_measurements([row]) == 0
+    assert row["segment"]["avg_grade_pct"] == -13.02
+    assert screen.MEASURED_MARKER not in row["segment"]["source"]
+
+
+def test_write_is_idempotent() -> None:
+    """A second run must not re-read its own reading as if it were the profile."""
+    row = _writable_row(6.42, 6.01, "US-160")
+    screen.write_measurements([row])
+    source_after_first = row["segment"]["source"]
+
+    assert screen.write_measurements([row]) == 0
+    assert row["segment"]["source"] == source_after_first
+    assert source_after_first.count(screen.MEASURED_MARKER) == 1

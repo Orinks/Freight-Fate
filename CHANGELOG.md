@@ -67,6 +67,10 @@
 
 ### Fixed
 
+- **Short, false walls of hill on flat road are gone.** Over a thousand of them, most only a few hundred yards long, were never there.
+
+- **Mountain climbs pull like mountain climbs again.** Wolf Creek Pass, the redwood coast and the Santiam were all being flattened to a gentler grade than the road has.
+
 - **A station in one of your playlists now names the song it is playing.** The cab used to answer that your playlist sends no song information.
 
 - **A tight bend can now be held at the speed it is signed for.** The truck used to run wide at the number curve assistance had just braked to.

@@ -1,20 +1,36 @@
 //! Load-time screen for elevation artifacts in the baked grade data (port of
 //! `freight_fate/data/grades.py`).
 //!
-//! All 146,496 grade segments in the world come from one place -- an
+//! Almost all of the world's 144,431 grade segments come from one place -- an
 //! OpenRouteService route elevation profile over SRTM, segmented by terrain --
-//! and a few hundred of them describe a slope no road of their class and
-//! terrain can hold. 455 exceed 8 percent; the steepest is +14.4 percent on
-//! I-5. The tell is the same one the curve sweep left behind: the extremes sit
-//! on 0.2 and 0.3 mile spans, which is the length of a bridge or an overpass,
-//! and a profile crossing a structure reads the deck rather than the road
-//! under it.
+//! and some of them describe a slope no road of their class and terrain can
+//! hold. The tell is the same one the curve sweep left behind: the extremes
+//! sit on 0.2 and 0.3 mile spans, which is the length of a bridge or an
+//! overpass, and a profile crossing a structure reads the deck rather than the
+//! road under it.
+//!
+//! 1,106 segments no longer come from that profile. On 2026-09-19 every span
+//! this screen clamped was read a second time against USGS 3DEP, and where
+//! 3DEP returned a slope the road class could hold, the segment was re-sourced
+//! to the measurement and says so in its own `source`
+//! (`tools/screen_grades_3dep.py`). That took the world from 455 segments over
+//! 8 percent to 141, and the count this screen still clamps from 1,271 to 242.
+//!
+//! What the re-read did NOT do is make this screen unnecessary, and the reason
+//! is worth keeping: 165 of those spans came back with 3DEP CONFIRMING the
+//! profile at 10 to 13 percent on roads that cannot hold it -- I-79 in West
+//! Virginia at -13.4, for one. Two elevation models agree there because both
+//! read ground, and the road is on a bridge above it. A second elevation
+//! source cannot see that. The class ceiling is the only thing that does,
+//! which is why those 165 were left for this screen rather than written into
+//! the bake.
 //!
 //! WHY THIS SCREEN CANNOT COPY `curves` AND EXEMPT THE MOUNTAINS. There,
 //! mountain terrain is never flagged, because a real switchback lives there.
-//! Here the single worst record -- the I-5 14.4 -- is itself labelled
-//! `mountain`, and the label is coarse enough (3,098 segments carry it) that
-//! exempting it would shelter most of the interstate artifacts. Road class
+//! Here the worst record left after the 3DEP re-read -- I-68 at 14.0 between
+//! Morgantown and Cumberland -- sits on a leg labelled `mountain`, and the
+//! label is coarse enough (3,098 segments carry it) that exempting it would
+//! shelter most of the interstate artifacts. Road class
 //! replaces terrain as the discriminator because it carries a harder fact: the
 //! interstate system is designed to a 6 percent maximum, and the famously
 //! brutal exceptions -- I-70 west of Denver, I-17 out of Phoenix, I-80 over
@@ -80,12 +96,19 @@ pub const TERRAIN_CEILING_PCT: &[(&str, f64)] =
 
 /// WHICH terrain, though. The bake's own label is derived from net elevation
 /// change end to end and is wrong often enough to matter: checked against
-/// FHWA HPMS Terrain_Type over 1,273 legs it agreed on only 67 percent. The
-/// single worst grade record in the world -- the I-5 14.4 -- sits on a leg the
-/// label calls `mountain` (ceiling 12) while HPMS calls that ground LEVEL.
+/// FHWA HPMS Terrain_Type over 1,273 legs it agreed on only 67 percent, and
+/// the worst records in the world sit on legs the label calls `mountain`
+/// (ceiling 12) while HPMS calls that ground LEVEL.
 ///
 /// So the HPMS class leads where it exists, and the segment's own label is the
 /// fallback. HPMS speaks in Green Book terms; these are its names in ours.
+///
+/// The cost of that, measured: HPMS returns ONE verdict for a whole leg, so
+/// US-160 over Wolf Creek Pass, US-101 through the redwoods and US-20 over
+/// Santiam all come back `level` across 500 to 800 sections. Before the 3DEP
+/// re-read that held 96 real grades down to 6 percent. The re-read fixed those
+/// by measuring them; the rule is unchanged because loosening it was scored
+/// against those same readings and let 386 to 543 artifacts through.
 pub const HPMS_TERRAIN_TO_LABEL: &[(i64, &str)] = &[(1, "flat"), (2, "hills"), (3, "mountain")];
 
 /// The ceiling for a road class (`interstate`, `us`, `state`).
@@ -486,7 +509,13 @@ mod tests {
     }
 
     #[test]
-    fn test_the_baked_gary_leg_into_chicago_loads_level_at_the_city_node() {
+    fn test_the_chicago_skyline_artifact_was_measured_away_not_rescued_at_load() {
+        // This screen used to earn its keep on this exact segment: +8.61
+        // percent over the last 0.4 mile of I-90 into the Loop, which it
+        // rejected as level because the profile and HPMS both called the
+        // ground flat. On 2026-09-19 USGS 3DEP read the same span and
+        // measured -0.04. The rescue was right, and the bake no longer needs
+        // it -- a measurement stands where a judgement call used to.
         let text = read_data_text("world_data/us/legs/IN.json").expect("IN shard");
         let data: serde_json::Value = serde_json::from_str(&text).unwrap();
         let leg = data["legs"]
@@ -495,22 +524,54 @@ mod tests {
             .iter()
             .find(|lg| lg["from"] == "gary_in_us" && lg["to"] == "chicago_il_us")
             .expect("the I-90 Gary to Chicago leg");
-        let raw = leg["corridor"]["grade_segments"].as_array().unwrap();
-        let last_raw = raw.last().unwrap()["avg_grade_pct"].as_f64().unwrap();
-        assert!(last_raw > 8.0, "fixture no longer has the skyline artifact");
+        let last = leg["corridor"]["grade_segments"]
+            .as_array()
+            .unwrap()
+            .last()
+            .unwrap();
+
+        assert!(
+            last["avg_grade_pct"].as_f64().unwrap().abs() < 1.0,
+            "the skyline segment is measured flat; a spike here means the \
+             3DEP reading was lost in a re-bake"
+        );
+        assert!(
+            last["source"].as_str().unwrap().contains("USGS 3DEP"),
+            "the measured slope has to keep saying where it came from"
+        );
+    }
+
+    #[test]
+    fn test_a_baked_leg_still_exercises_the_reject_as_level_path() {
+        // 33 spans still sit above the ceiling on ground both sources call
+        // level -- 3DEP either could not improve on them or read something
+        // the road class forbids, so the load screen is still what handles
+        // them. This keeps that path covered against real baked data rather
+        // than against a hand-built segment.
+        let text = read_data_text("world_data/us/legs/NH.json").expect("NH shard");
+        let data: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let leg = data["legs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|lg| lg["from"] == "keene_nh_us" && lg["to"] == "springfield_ma_us")
+            .expect("the I-91 Keene to Springfield leg");
         assert_eq!(leg["corridor"]["hpms_terrain"]["type"], 1);
 
         let built = build_leg_corridor(
             &leg["corridor"],
             leg["miles"].as_f64().unwrap(),
-            "gary_in_us",
-            "chicago_il_us",
-            "IN",
+            "keene_nh_us",
+            "springfield_ma_us",
+            "NH",
             leg["highway"].as_str().unwrap(),
         )
         .unwrap();
-        let last = built.grade_segments.last().unwrap();
-        assert_eq!(last.avg_grade_pct, 0.0);
-        assert!(last.source.contains("assumed level"));
+        let rejected = built
+            .grade_segments
+            .iter()
+            .find(|seg| seg.source.contains("assumed level"))
+            .expect("a segment this leg's profile put above the ceiling on level ground");
+        assert_eq!(rejected.avg_grade_pct, 0.0);
     }
 }

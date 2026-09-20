@@ -143,9 +143,9 @@
           {
             "start_mi": 8.5,
             "end_mi": 8.7,
-            "avg_grade_pct": -11.14,
+            "avg_grade_pct": -2.7,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -2.70 percent measured over this span, replacing the -11.14 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 8.7,
@@ -4823,9 +4823,9 @@
           {
             "start_mi": 36.7,
             "end_mi": 37.0,
-            "avg_grade_pct": 6.95,
+            "avg_grade_pct": 0.56,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.56 percent measured over this span, replacing the +6.95 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 37.0,
@@ -5026,9 +5026,9 @@
           {
             "start_mi": 56.01,
             "end_mi": 56.32,
-            "avg_grade_pct": 7.48,
+            "avg_grade_pct": -1.12,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -1.12 percent measured over this span, replacing the +7.48 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 56.32,
@@ -5089,9 +5089,9 @@
           {
             "start_mi": 61.91,
             "end_mi": 62.21,
-            "avg_grade_pct": 8.14,
+            "avg_grade_pct": -1.16,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -1.16 percent measured over this span, replacing the +8.14 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 62.21,
@@ -5103,9 +5103,9 @@
           {
             "start_mi": 62.52,
             "end_mi": 62.72,
-            "avg_grade_pct": -6.76,
+            "avg_grade_pct": 0.14,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.14 percent measured over this span, replacing the -6.76 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 62.72,
@@ -19059,9 +19059,9 @@
           {
             "start_mi": 19.9,
             "end_mi": 20.2,
-            "avg_grade_pct": -7.32,
+            "avg_grade_pct": -4.84,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -4.84 percent measured over this span, replacing the -7.32 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 20.2,
@@ -19185,9 +19185,9 @@
           {
             "start_mi": 30.1,
             "end_mi": 30.4,
-            "avg_grade_pct": -8.95,
+            "avg_grade_pct": -0.16,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.16 percent measured over this span, replacing the -8.95 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 30.4,
@@ -19437,9 +19437,9 @@
           {
             "start_mi": 55.0,
             "end_mi": 55.3,
-            "avg_grade_pct": -7.84,
+            "avg_grade_pct": -4.66,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -4.66 percent measured over this span, replacing the -7.84 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 55.3,
@@ -20421,9 +20421,9 @@
           {
             "start_mi": 34.9,
             "end_mi": 35.2,
-            "avg_grade_pct": 10.09,
+            "avg_grade_pct": 1.39,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +1.39 percent measured over this span, replacing the +10.09 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 35.2,
@@ -20603,9 +20603,9 @@
           {
             "start_mi": 48.1,
             "end_mi": 48.4,
-            "avg_grade_pct": -11.04,
+            "avg_grade_pct": 0.66,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.66 percent measured over this span, replacing the -11.04 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 48.4,
@@ -20729,9 +20729,9 @@
           {
             "start_mi": 58.5,
             "end_mi": 58.8,
-            "avg_grade_pct": 13.31,
+            "avg_grade_pct": -0.14,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.14 percent measured over this span, replacing the +13.31 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 58.8,
@@ -20981,9 +20981,9 @@
           {
             "start_mi": 77.9,
             "end_mi": 78.2,
-            "avg_grade_pct": 9.91,
+            "avg_grade_pct": 0.27,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.27 percent measured over this span, replacing the +9.91 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 78.2,
@@ -21767,9 +21767,9 @@
           {
             "start_mi": 11.8,
             "end_mi": 12.1,
-            "avg_grade_pct": -9.74,
+            "avg_grade_pct": -2.43,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -2.43 percent measured over this span, replacing the -9.74 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 12.1,
@@ -21865,9 +21865,9 @@
           {
             "start_mi": 27.1,
             "end_mi": 27.5,
-            "avg_grade_pct": 8.1,
+            "avg_grade_pct": 3.72,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +3.72 percent measured over this span, replacing the +8.10 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 27.5,
@@ -21900,9 +21900,9 @@
           {
             "start_mi": 29.9,
             "end_mi": 30.1,
-            "avg_grade_pct": 7.63,
+            "avg_grade_pct": 0.54,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.54 percent measured over this span, replacing the +7.63 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 30.1,
@@ -26927,9 +26927,9 @@
           {
             "start_mi": 34.5,
             "end_mi": 34.7,
-            "avg_grade_pct": 8.01,
+            "avg_grade_pct": 0.31,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: +0.31 percent measured over this span, replacing the +8.01 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 34.7,
@@ -27172,9 +27172,9 @@
           {
             "start_mi": 56.3,
             "end_mi": 56.6,
-            "avg_grade_pct": -6.86,
+            "avg_grade_pct": 3.33,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: +3.33 percent measured over this span, replacing the -6.86 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 56.6,
@@ -27291,9 +27291,9 @@
           {
             "start_mi": 66.1,
             "end_mi": 66.4,
-            "avg_grade_pct": 6.95,
+            "avg_grade_pct": -2.69,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: -2.69 percent measured over this span, replacing the +6.95 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 66.4,
@@ -27312,9 +27312,9 @@
           {
             "start_mi": 67.3,
             "end_mi": 67.6,
-            "avg_grade_pct": 8.56,
+            "avg_grade_pct": -2.69,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: -2.69 percent measured over this span, replacing the +8.56 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 67.6,
@@ -27326,9 +27326,9 @@
           {
             "start_mi": 67.9,
             "end_mi": 68.2,
-            "avg_grade_pct": -7.13,
+            "avg_grade_pct": -2.69,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: -2.69 percent measured over this span, replacing the -7.13 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 68.2,
@@ -27606,9 +27606,9 @@
           {
             "start_mi": 101.2,
             "end_mi": 101.6,
-            "avg_grade_pct": -7.72,
+            "avg_grade_pct": -0.08,
             "terrain": "mountain",
-            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry. Slope re-read at USGS 3DEP: -0.08 percent measured over this span, replacing the -7.72 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 101.6,
@@ -28311,9 +28311,9 @@
           {
             "start_mi": 13.2,
             "end_mi": 13.6,
-            "avg_grade_pct": 9.68,
+            "avg_grade_pct": -1.62,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -1.62 percent measured over this span, replacing the +9.68 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 13.6,
@@ -28325,9 +28325,9 @@
           {
             "start_mi": 14.5,
             "end_mi": 14.8,
-            "avg_grade_pct": -8.68,
+            "avg_grade_pct": 5.23,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +5.23 percent measured over this span, replacing the -8.68 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 14.8,
@@ -28423,9 +28423,9 @@
           {
             "start_mi": 19.4,
             "end_mi": 19.7,
-            "avg_grade_pct": -12.12,
+            "avg_grade_pct": 0.12,
             "terrain": "mountain",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.12 percent measured over this span, replacing the -12.12 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 19.7,
@@ -29381,9 +29381,9 @@
           {
             "start_mi": 13.98,
             "end_mi": 14.3,
-            "avg_grade_pct": 9.66,
+            "avg_grade_pct": 1.21,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +1.21 percent measured over this span, replacing the +9.66 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 14.3,
@@ -29395,9 +29395,9 @@
           {
             "start_mi": 15.24,
             "end_mi": 15.56,
-            "avg_grade_pct": -8.65,
+            "avg_grade_pct": 1.01,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +1.01 percent measured over this span, replacing the -8.65 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 15.56,
@@ -29444,9 +29444,9 @@
           {
             "start_mi": 18.29,
             "end_mi": 18.61,
-            "avg_grade_pct": -8.64,
+            "avg_grade_pct": 1.56,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +1.56 percent measured over this span, replacing the -8.64 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 18.61,

@@ -1444,9 +1444,9 @@
           {
             "start_mi": 45.2,
             "end_mi": 45.8,
-            "avg_grade_pct": 7.05,
+            "avg_grade_pct": 2.29,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +2.29 percent measured over this span, replacing the +7.05 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 45.8,
@@ -15874,9 +15874,9 @@
           {
             "start_mi": 61.3,
             "end_mi": 62.0,
-            "avg_grade_pct": 6.95,
+            "avg_grade_pct": -0.02,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.02 percent measured over this span, replacing the +6.95 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           }
         ],
         "checkpoints": [
@@ -20957,9 +20957,9 @@
           {
             "start_mi": 147.3,
             "end_mi": 148.0,
-            "avg_grade_pct": 6.88,
+            "avg_grade_pct": -0.02,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.02 percent measured over this span, replacing the +6.88 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           }
         ],
         "checkpoints": [

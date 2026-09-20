@@ -923,14 +923,18 @@ against.
       Taking the looser of the two terrain labels, or dropping terrain where
       the labels disagree, or dropping terrain entirely, each recover about 70
       genuine grades and admit 386 to 543 artifacts. The rule stays as it is.
-- [ ] 96 real grades are still being flattened, and that is the residue worth
-      fixing one day. HPMS reports a single terrain verdict for a whole leg,
-      so US-160 over Wolf Creek Pass, US-101 through the redwoods, US-20 over
-      Santiam and I-5 through Canyon Creek all come back "level" across 500 to
-      800 sections and every segment on them is held to 6 percent. Median loss
-      is 0.55 grade points, 19 spans lose more than 1. The fix is a measured
-      per-segment elevation baked as its own reading, not a looser ceiling --
-      a bake change and the owner's call.
+- [x] 1,106 grade spans now carry a measured slope instead of a profile
+      reading or a clamp. Wolf Creek Pass, the redwood coast, Santiam and
+      Canyon Creek were each held to 6 percent because HPMS returns one
+      terrain verdict for a whole leg and called 500 to 800 sections "level";
+      they now read what 3DEP measured over the same span. The world went from
+      455 segments over 8 percent to 141, and from 1,271 clamped at load to
+      242. Each re-sourced segment names 3DEP and keeps the profile's own
+      number in its `source`, so the swap reverses by reading.
+- [x] The 165 spans where 3DEP itself reads 10 to 13 percent on a road that
+      cannot hold it were deliberately NOT written. They stay as the profile
+      left them for the load screen to clamp, because baking a bridge deck in
+      as a grade would put it beyond the one rule that catches it.
 - [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
       out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
       reader that trusts the status stores that string as an elevation.

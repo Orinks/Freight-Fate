@@ -22956,9 +22956,9 @@
           {
             "start_mi": 19.8,
             "end_mi": 20.1,
-            "avg_grade_pct": -6.99,
+            "avg_grade_pct": -0.79,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.79 percent measured over this span, replacing the -6.99 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 20.1,
@@ -22970,9 +22970,9 @@
           {
             "start_mi": 21.9,
             "end_mi": 22.7,
-            "avg_grade_pct": 6.18,
+            "avg_grade_pct": -0.7,
             "terrain": "mountain",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -0.70 percent measured over this span, replacing the +6.18 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 22.7,
@@ -23047,9 +23047,9 @@
           {
             "start_mi": 27.3,
             "end_mi": 28.0,
-            "avg_grade_pct": -6.95,
+            "avg_grade_pct": -1.14,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: -1.14 percent measured over this span, replacing the -6.95 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 28.0,

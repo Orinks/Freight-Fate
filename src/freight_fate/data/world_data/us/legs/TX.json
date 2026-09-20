@@ -63178,9 +63178,9 @@
           {
             "start_mi": 432.28,
             "end_mi": 432.49,
-            "avg_grade_pct": -7.37,
+            "avg_grade_pct": 0.55,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +0.55 percent measured over this span, replacing the -7.37 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 432.49,
@@ -64683,9 +64683,9 @@
           {
             "start_mi": 587.61,
             "end_mi": 587.92,
-            "avg_grade_pct": -7.3,
+            "avg_grade_pct": 1.82,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "OpenRouteService route elevation profile segmented by terrain (development-time). Slope re-read at USGS 3DEP: +1.82 percent measured over this span, replacing the -7.30 the OpenRouteService/SRTM profile gave -- READ, not derived (USGS 3DEP, public domain, 1 to 10 m; sampled 2026-09-19 by tools/screen_grades_3dep.py)."
           },
           {
             "start_mi": 587.92,
