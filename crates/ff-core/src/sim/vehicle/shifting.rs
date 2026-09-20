@@ -1,7 +1,7 @@
 //! `TruckState.auto_shift`: the vehicle's half of the automatic gearbox --
 //! everything the box is told about the road, the load and the retarder.
 
-use super::{TruckState, G, JAKE_RPM_FLOOR, JAKE_STAGES, REFERENCE_CARGO_KG};
+use super::{TruckState, G, JAKE_RPM_FLOOR, JAKE_STAGES};
 use crate::sim::transmission::{
     AutoUpdateArgs, AUTO_DOWNSHIFT_RPM, DOWNSHIFT_TIME, PROGRESSIVE_UPSHIFT_RPM,
 };
@@ -27,7 +27,7 @@ impl TruckState {
         // taller gear that guts the retarder mid-descent.
         jaking = jaking || (self.engine_brake() && self.engine_on && self.grade < -0.01);
         let bobtail = !self.trailer_attached;
-        let load_fraction = (self.cargo_kg / REFERENCE_CARGO_KG).clamp(0.0, 1.0);
+        let load_fraction = self.load_fraction();
         let base_interval = if bobtail { 1.1 } else { 1.25 };
         let minimum_shift_interval_s = if braking {
             1.75

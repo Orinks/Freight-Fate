@@ -31,6 +31,27 @@ impl TruckState {
         self.fuel_mass_for_gallons_kg(self.fuel_gal)
     }
 
+    /// How full the trailer is, 0 to 1, for the models that care about the
+    /// load rather than the gross weight: launch traction, shifting, and the
+    /// corner speed a street turn is taken at.
+    pub fn load_fraction(&self) -> f64 {
+        (self.cargo_kg / REFERENCE_CARGO_KG).clamp(0.0, 1.0)
+    }
+
+    /// The load fraction the roll models use.
+    ///
+    /// A tank with anything at all in it is priced as full. A part-filled
+    /// tank is the WORSE rollover case, not the better one: the liquid runs
+    /// to the outside of the turn and takes its weight with it, which is why
+    /// the tank endorsement is taught around it.
+    pub fn roll_load_fraction(&self) -> f64 {
+        if self.liquid.is_some() && self.cargo_kg > 0.0 {
+            1.0
+        } else {
+            self.load_fraction()
+        }
+    }
+
     /// Remaining legal gross-weight capacity; negative means overweight.
     pub fn gross_weight_margin_kg(&self) -> f64 {
         LEGAL_GVW_KG - self.gross_mass_kg()

@@ -81,7 +81,7 @@ pub fn keeper_bench(name: &str, zone_mph: f64, grade: f64, from_mph: f64) -> Pla
         d.trip.zones = vec![Zone::new(0.0, BENCH_MILES, zone_mph, "construction")];
         d.trip.position_mi = START_MI;
         d.truck_mut().transmission.automatic = true;
-        d.truck_mut().cargo_kg = 18_000.0;
+        d.truck_mut().cargo_kg = CORNER_RUN_CARGO_KG;
         d.truck_mut().start_engine();
         d.truck_mut().set_air_ready(false);
         d.truck_mut().velocity_mps = from_mph * MPS_PER_MPH;
@@ -389,7 +389,7 @@ fn take_the_corner(street_mph: f64) -> CornerRun {
         street_chain_at(d, street_mph);
         d.departure_checked = true;
         d.truck_mut().transmission.automatic = true;
-        d.truck_mut().cargo_kg = 18_000.0;
+        d.truck_mut().cargo_kg = CORNER_RUN_CARGO_KG;
         d.truck_mut().start_engine();
         d.truck_mut().set_air_ready(false);
         d.truck_mut().velocity_mps = street_mph * MPS_PER_MPH;
@@ -447,6 +447,14 @@ fn take_the_corner(street_mph: f64) -> CornerRun {
     }
 }
 
+/// What `corner_run` loads the trailer with, kg.
+const CORNER_RUN_CARGO_KG: f64 = 18_000.0;
+
+/// The load `corner_run` puts on the truck, as the corner model sees it.
+fn corner_run_load_fraction() -> f64 {
+    (CORNER_RUN_CARGO_KG / ff_core::sim::vehicle::REFERENCE_CARGO_KG).clamp(0.0, 1.0)
+}
+
 /// The keeper eases for a corner only where the corner asks for less than the
 /// street does.
 ///
@@ -473,7 +481,9 @@ fn the_keeper_eases_for_a_corner_only_when_the_corner_asks_for_less() {
     // they price as square corners. What the street still decides is whether
     // there is anything to EASE: a street already at or under the corner's
     // speed has nothing to shed.
-    let square = corner_speed_mph(None);
+    // The fixture's own load: the corner price rides it, so the expectation
+    // has to read the same number the drive does.
+    let square = corner_speed_mph(None, corner_run_load_fraction());
     let cases = [
         (35.0f64, square, true),
         (25.0, square, true),

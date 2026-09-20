@@ -454,7 +454,8 @@ fn test_speed_keeper_is_under_the_turn_speed_before_the_corner() {
     let (mut harness, cue) = keeper_on_a_street_chain("Corner Keeper", 0.25);
     let advise = harness.read_drive(|d| d.turn_speed_mph(&cue));
     // An unmeasured corner on this fixture, so the square-corner price.
-    assert_eq!(advise, corner_speed_mph(None));
+    let load = harness.read_drive(|d| d.trip.truck.roll_load_fraction());
+    assert_eq!(advise, corner_speed_mph(None, load));
 
     let trace = roll_to(&mut harness, cue.at_mi, 60 * 300);
     // Under the number BEFORE the corner, not arriving at it on the spot: the
@@ -524,7 +525,10 @@ fn test_speed_keeper_makes_the_second_corner_of_a_short_block() {
         0.5
     ));
     // Unmeasured corners on this fixture, so both price as square ones.
-    let square = corner_speed_mph(None);
+    let square = corner_speed_mph(
+        None,
+        harness.read_drive(|d| d.trip.truck.roll_load_fraction()),
+    );
     assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&first)), square);
     assert_eq!(harness.read_drive(|d| d.turn_speed_mph(&second)), square);
     assert!(second.at_mi - first.at_mi < 0.15); // inside the first corner's tail

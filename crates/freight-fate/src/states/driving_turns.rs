@@ -204,7 +204,9 @@ impl DrivingState {
 
     /// `_turn_speed_mph(cue)`: the speed the corner has to be taken under --
     /// the lower of the street's own posted limit and what the corner's own
-    /// geometry allows a loaded combination.
+    /// geometry allows THIS combination, loaded as it is right now. An empty
+    /// trailer's weight sits far lower than a full one's, so it takes the same
+    /// corner faster; `corners` owns that span.
     ///
     /// There is deliberately NO floor. The old one clamped every corner to at
     /// least the 15 mph gate crawl, which made a truck already held at 14-15 by
@@ -225,7 +227,10 @@ impl DrivingState {
         // and `corners` prices that as a square one rather than inventing a
         // shape for it.
         let measured = leg.map(|leg| leg.local_turn_deg).filter(|deg| *deg > 0.0);
-        street.min(corner_speed_mph(measured))
+        street.min(corner_speed_mph(
+            measured,
+            self.trip.truck.roll_load_fraction(),
+        ))
     }
 
     /// `_turn_window_mi()`: how far out the corner is called, and how far back

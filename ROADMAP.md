@@ -379,6 +379,17 @@ its status or release decision.
       row asking for more than the formula allows cannot raise it. Above the
       advisory the truck still understeers wide (agent drive, Camp Verde to
       Payson).
+- [x] A street corner is priced for the load that is actually in the trailer
+      (2026-09-20). The corner model derived its lateral from the 0.35 g
+      rollover threshold of a LOADED combination and applied it whatever was
+      on the fifth wheel, so a driver deadheading to a pickup was advised 9
+      mph at a square corner -- the owner's report. UMTRI-83-10 Figure 38
+      measures the threshold at -0.01 g per inch of payload centre-of-gravity
+      height, and Figure 33 puts the empty van body's own centre at 60
+      inches, which walks the loaded 0.35 g up to 0.70 g empty: the same
+      square corner is 13.2 mph with nothing aboard, 9.4 mph full, and a
+      ladder in between. A part-filled tank is still priced full, because
+      slosh makes it the worse case, not the better one.
 - [x] The destination-exit approach asks for the signal (2026-09-19). With
       the lane work the driver's, the signal alone commits the truck to the
       exit, and no line on the approach named it: the announcement and both

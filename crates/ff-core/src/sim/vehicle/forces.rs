@@ -5,7 +5,7 @@ use super::{
     BrakeApplication, TruckState, AIR_DENSITY, DRIVE_AXLE_LOAD_FRACTION, EMERGENCY_BRAKE_MULT, G,
     JAKE_LOCK_MARGIN, JAKE_RPM_FLOOR, JAKE_STAGES, LAUNCH_TRACTION_FULL_GRADE,
     LAUNCH_TRACTION_LOW_SPEED_MPH, LAUNCH_TRACTION_ROLLING_G, LAUNCH_TRACTION_START_G,
-    MIN_STOPPING_DECEL_MPS2, REFERENCE_CARGO_KG, SURGE_EXCUSE_BRAKE, SURGE_EXCUSE_FORCE_N,
+    MIN_STOPPING_DECEL_MPS2, SURGE_EXCUSE_BRAKE, SURGE_EXCUSE_FORCE_N,
 };
 use crate::sim::surge::lateral_accel_mps2;
 
@@ -53,7 +53,7 @@ impl TruckState {
     /// never promises a gear more force than the tires will deliver.
     pub fn drive_traction_limit(&self) -> f64 {
         let launch = (self.speed_mph() / LAUNCH_TRACTION_LOW_SPEED_MPH).min(1.0);
-        let load_fraction = (self.cargo_kg / REFERENCE_CARGO_KG).clamp(0.0, 1.0);
+        let load_fraction = self.load_fraction();
         let start_g = LAUNCH_TRACTION_ROLLING_G
             - (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * load_fraction;
         let mut traction_g = start_g + (LAUNCH_TRACTION_ROLLING_G - start_g) * launch;

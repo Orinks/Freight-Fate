@@ -67,6 +67,8 @@
 
 ### Fixed
 
+- **An empty trailer takes a street corner faster than a loaded one.** Every corner used to be advised as though you were carrying a full load.
+
 - **Short, false walls of hill on flat road are gone.** Over a thousand of them, most only a few hundred yards long, were never there.
 
 - **Mountain climbs pull like mountain climbs again.** Wolf Creek Pass, the redwood coast and the Santiam were all being flattened to a gentler grade than the road has.

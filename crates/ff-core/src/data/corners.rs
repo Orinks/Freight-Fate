@@ -57,9 +57,34 @@
 //!   the trailer does not amplify it. NHTSA DOT HS 811 734; FHWA
 //!   <https://www.fhwa.dot.gov/reports/tswstudy/vehiclsaf.htm>
 //!
-//! The same fraction of 0.35 g is [`CORNER_LATERAL_G`], about 0.090 g, and the
-//! whole model reduces to the truck taking a corner at `sqrt(0.35/1.41)` --
-//! almost exactly half -- of the speed a car takes it at.
+//! The same fraction of 0.35 g is [`corner_lateral_g`] at full load, about
+//! 0.090 g, and the whole model reduces to the truck taking a corner at
+//! `sqrt(0.35/1.41)` -- almost exactly half -- of the speed a car takes it at.
+//!
+//! **The rollover threshold is the LOADED one, so it moves with the load.**
+//! 0.35 g describes a van with freight stacked in it; an empty trailer's mass
+//! is its own body, sitting much lower, and it does not roll at a ninth of a g.
+//! Until 2026-09-20 every corner was priced as though the trailer were full,
+//! so a driver deadheading to a pickup was held to 9 mph at a square corner --
+//! the owner's report, driving empty to collect a load. The span is DERIVED
+//! from UMTRI-83-10 (Ervin et al., "Influence of Size and Weight Variables on
+//! the Stability and Control Properties of Heavy Trucks", for FHWA), whose
+//! Figure 38 measures the five-axle tractor-semitrailer's rollover threshold
+//! against payload centre-of-gravity height: "The strength of the influence is
+//! nominally -0.01 g's per inch of payload c.g. height." The same report's
+//! Figure 33 states the empty van body's own c.g. height, 60 inches, and puts
+//! the load floor at "52 to 55 inches above the ground". Taking the 0.35 g
+//! figure as the loaded van it describes -- payload c.g. near 95 inches, the
+//! height at which Figure 38's line passes 0.35 g -- and walking that slope
+//! down to the empty body's 60 inches gives [`EMPTY_ROLLOVER_G`], 0.70 g.
+//! <https://rosap.ntl.bts.gov/view/dot/68509>
+//!
+//! Between the two ends the threshold is interpolated on the load, which is a
+//! straight-line stand-in for the mass-weighted composite c.g. the report
+//! actually plots. `tests::the_load_span_tracks_the_composite_centre` runs
+//! that composite model and holds the difference under a mile an hour, in the
+//! conservative direction: a half-loaded trailer is priced a little slower
+//! than its centre of gravity says it has to be, never faster.
 //!
 //! **Nothing here is ASSUMED except a missing angle.** A corner whose angle the
 //! map could not measure is priced at [`ASSUMED_TURN_DEG`], the modal city
@@ -102,6 +127,21 @@ pub const CAR_ROLLOVER_G: f64 = 1.41;
 /// Satisfactory static rollover threshold for a loaded tractor-semitrailer.
 pub const TRUCK_ROLLOVER_G: f64 = 0.35;
 
+/// UMTRI-83-10 Figure 38: how far the rollover threshold moves per inch of
+/// payload centre-of-gravity height, in g.
+pub const ROLLOVER_G_PER_PAYLOAD_IN: f64 = 0.01;
+/// The payload centre-of-gravity height [`TRUCK_ROLLOVER_G`] describes: where
+/// Figure 38's line passes 0.35 g, and within an inch or two of a van loaded
+/// off a 52-55 inch floor to the 70/30 bottom/top split FHWA reports.
+pub const LOADED_PAYLOAD_CG_IN: f64 = 95.0;
+/// The empty van body's own centre-of-gravity height, from the Figure 33 case
+/// ("Trailer Body - 9000 lbs, Body C.G. Height - 60 inches").
+pub const EMPTY_BODY_CG_IN: f64 = 60.0;
+
+/// Static rollover threshold with nothing in the trailer, in g.
+pub const EMPTY_ROLLOVER_G: f64 =
+    TRUCK_ROLLOVER_G + ROLLOVER_G_PER_PAYLOAD_IN * (LOADED_PAYLOAD_CG_IN - EMPTY_BODY_CG_IN);
+
 /// The point-mass control every design manual republishes, `V = sqrt(15 R
 /// (e + f))`, with `e = 0`: an at-grade intersection is not superelevated.
 pub const INTERSECTION_SUPERELEVATION: f64 = 0.0;
@@ -117,12 +157,21 @@ fn car_lateral_g() -> f64 {
     (v85 * v85) / (15.0 * CALIBRATION_RADIUS_FT)
 }
 
-/// The lateral a loaded combination takes a street corner at, in g.
+/// The static rollover threshold of a combination carrying `load_fraction` of
+/// a full payload, in g. Empty is [`EMPTY_ROLLOVER_G`], full is
+/// [`TRUCK_ROLLOVER_G`], and a bobtail tractor is priced as empty.
+pub fn rollover_threshold_g(load_fraction: f64) -> f64 {
+    let load = load_fraction.clamp(0.0, 1.0);
+    EMPTY_ROLLOVER_G + (TRUCK_ROLLOVER_G - EMPTY_ROLLOVER_G) * load
+}
+
+/// The lateral a combination carrying `load_fraction` takes a street corner
+/// at, in g.
 ///
 /// Computed from the published constants above rather than typed in, so a
 /// correction to any of them moves the model instead of being argued with it.
-pub fn corner_lateral_g() -> f64 {
-    (car_lateral_g() / CAR_ROLLOVER_G) * TRUCK_ROLLOVER_G
+pub fn corner_lateral_g(load_fraction: f64) -> f64 {
+    (car_lateral_g() / CAR_ROLLOVER_G) * rollover_threshold_g(load_fraction)
 }
 
 /// The design radius for a turn of `turn_deg`, in feet.
@@ -154,13 +203,15 @@ pub fn corner_radius_ft(turn_deg: f64) -> f64 {
     last.1
 }
 
-/// The speed a loaded combination takes a corner of `turn_deg` at, in mph.
+/// The speed a combination carrying `load_fraction` takes a corner of
+/// `turn_deg` at, in mph.
 ///
 /// `None` is a corner whose angle the map could not measure, priced at
 /// [`ASSUMED_TURN_DEG`].
-pub fn corner_speed_mph(turn_deg: Option<f64>) -> f64 {
+pub fn corner_speed_mph(turn_deg: Option<f64>, load_fraction: f64) -> f64 {
     let radius = corner_radius_ft(turn_deg.unwrap_or(ASSUMED_TURN_DEG));
-    (15.0 * radius * (INTERSECTION_SUPERELEVATION + corner_lateral_g())).sqrt()
+    let lateral = INTERSECTION_SUPERELEVATION + corner_lateral_g(load_fraction);
+    (15.0 * radius * lateral).sqrt()
 }
 
 /// The measured 85th-percentile CAR speed through the same corner, in mph.
@@ -186,19 +237,102 @@ mod tests {
         // docs/turn-geometry-brief.md, written before the model existed:
         // a typical 90-degree city corner lands in 5-12 mph, and never above
         // the measured 85th-percentile car speed for the same radius.
-        let square = corner_speed_mph(Some(90.0));
+        let square = corner_speed_mph(Some(90.0), 1.0);
         assert!(
             (5.0..=12.0).contains(&square),
             "a 90-degree corner came out at {square} mph, outside the 5-12 band \
              CDL practice and the TTI distribution point at"
         );
+        // The car ceiling holds at every load, not just the loaded one: an
+        // empty trailer is more stable than a full one, never more stable
+        // than the cars that were clocked through the same corner.
         for deg in [60.0, 75.0, 90.0, 105.0, 120.0, 150.0, 180.0] {
-            let truck = corner_speed_mph(Some(deg));
             let car = car_speed_mph(Some(deg));
+            for load in [0.0, 0.25, 0.5, 0.75, 1.0] {
+                let truck = corner_speed_mph(Some(deg), load);
+                assert!(
+                    truck < car,
+                    "a {deg}-degree corner at {load} load priced the truck at {truck} mph, \
+                     at or above the {car} mph cars were measured taking it"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn an_empty_trailer_corners_faster_than_a_loaded_one() {
+        // The owner's report, 2026-09-20: deadheading to a pickup and held to
+        // 9 mph at a square corner, which is the speed a FULL trailer's centre
+        // of gravity asks for.
+        let empty = corner_speed_mph(Some(90.0), 0.0);
+        let full = corner_speed_mph(Some(90.0), 1.0);
+        assert!(
+            empty > full + 3.0,
+            "empty came out at {empty} mph against {full} loaded -- the load is \
+             not reaching the corner model"
+        );
+        assert!(close(EMPTY_ROLLOVER_G, 0.70, 1e-9));
+        assert!(
+            close(empty, 13.2, 0.05),
+            "empty square corner is {empty} mph"
+        );
+
+        // And it is a ladder, not a switch: every step of loading is slower
+        // than the one before it.
+        let mut previous = f64::INFINITY;
+        for step in 0..=10 {
+            let speed = corner_speed_mph(Some(90.0), f64::from(step) / 10.0);
             assert!(
-                truck < car,
-                "a {deg}-degree corner priced the truck at {truck} mph, at or above \
-                 the {car} mph cars were measured taking it"
+                speed <= previous + 1e-9,
+                "load {step} of 10 came out faster"
+            );
+            previous = speed;
+        }
+    }
+
+    #[test]
+    fn the_load_span_tracks_the_composite_centre() {
+        // The straight line between empty and loaded stands in for the
+        // mass-weighted composite centre of gravity UMTRI-83-10 Figure 33
+        // plots. Its case: a 9000 lb van body at 60 inches, 50000 lb of
+        // payload, a 52-55 inch load floor, and homogeneous freight stacked
+        // to the load fraction inside a 110-inch box, sitting at the 70/30
+        // bottom/top split (so 0.40 of the stack height above the floor).
+        const BODY_LB: f64 = 9_000.0;
+        const PAYLOAD_LB: f64 = 50_000.0;
+        const FLOOR_IN: f64 = 53.5;
+        const BOX_IN: f64 = 110.0;
+        const STACK_SHARE: f64 = 0.40;
+
+        let composite_cg = |load: f64| {
+            let payload = PAYLOAD_LB * load;
+            let payload_cg = FLOOR_IN + STACK_SHARE * BOX_IN * load;
+            (BODY_LB * EMPTY_BODY_CG_IN + payload * payload_cg) / (BODY_LB + payload)
+        };
+        // Figure 38's slope is per inch of PAYLOAD c.g.; Figure 33's line
+        // converts it to per inch of composite c.g.
+        let per_composite_in = ROLLOVER_G_PER_PAYLOAD_IN / (PAYLOAD_LB / (BODY_LB + PAYLOAD_LB));
+        let loaded_cg = composite_cg(1.0);
+        let composite_speed = |load: f64| {
+            let threshold = TRUCK_ROLLOVER_G + per_composite_in * (loaded_cg - composite_cg(load));
+            let lateral = (car_lateral_g() / CAR_ROLLOVER_G) * threshold;
+            (15.0 * CALIBRATION_RADIUS_FT * lateral).sqrt()
+        };
+
+        for step in 0..=10 {
+            let load = f64::from(step) / 10.0;
+            let shipped = corner_speed_mph(Some(90.0), load);
+            let modelled = composite_speed(load);
+            assert!(
+                shipped <= modelled + 1e-9,
+                "at {load} load the shipped {shipped:.2} mph is FASTER than the \
+                 {modelled:.2} mph the composite centre allows"
+            );
+            assert!(
+                modelled - shipped < 1.0,
+                "at {load} load the shipped {shipped:.2} mph is {:.2} mph under the \
+                 composite model's {modelled:.2}",
+                modelled - shipped
             );
         }
     }
@@ -210,7 +344,7 @@ mod tests {
         // quarter of 0.35 g.
         assert!(close(car_lateral_g(), 0.361, 0.001));
         assert!(close(car_lateral_g() / CAR_ROLLOVER_G, 0.256, 0.001));
-        assert!(close(corner_lateral_g(), 0.0897, 0.0001));
+        assert!(close(corner_lateral_g(1.0), 0.0897, 0.0001));
     }
 
     #[test]
@@ -220,7 +354,7 @@ mod tests {
         // rollover margin, asserted rather than described.
         let ratio = (TRUCK_ROLLOVER_G / CAR_ROLLOVER_G).sqrt();
         assert_eq!(corner_radius_ft(90.0), CALIBRATION_RADIUS_FT);
-        let got = corner_speed_mph(Some(90.0)) / car_speed_mph(Some(90.0));
+        let got = corner_speed_mph(Some(90.0), 1.0) / car_speed_mph(Some(90.0));
         assert!(close(got, ratio, 1e-9), "got {got:.6}, want {ratio:.6}");
 
         // Away from it the two diverge, because the truck side is a constant
@@ -233,7 +367,7 @@ mod tests {
         // size of the divergence is a recorded number and not a threshold
         // somebody widened until it passed.
         for (deg, share) in [(60.0, 0.556), (120.0, 0.443)] {
-            let got = corner_speed_mph(Some(deg)) / car_speed_mph(Some(deg));
+            let got = corner_speed_mph(Some(deg), 1.0) / car_speed_mph(Some(deg));
             assert!(
                 close(got, share, 0.001),
                 "a {deg}-degree corner is {got:.3} of the car speed, was {share:.3}"
@@ -246,7 +380,7 @@ mod tests {
         let mut previous = f64::INFINITY;
         let mut deg = 30.0;
         while deg <= 180.0 {
-            let speed = corner_speed_mph(Some(deg));
+            let speed = corner_speed_mph(Some(deg), 1.0);
             assert!(
                 speed <= previous + 1e-9,
                 "a {deg}-degree corner came out faster than the corner before it"
@@ -280,7 +414,10 @@ mod tests {
 
     #[test]
     fn an_unmeasured_corner_is_priced_as_a_square_one() {
-        assert_eq!(corner_speed_mph(None), corner_speed_mph(Some(90.0)));
+        assert_eq!(
+            corner_speed_mph(None, 1.0),
+            corner_speed_mph(Some(90.0), 1.0)
+        );
     }
 
     #[test]
@@ -290,7 +427,7 @@ mod tests {
         // numbers are recorded here so a change to them is deliberate.
         let speeds: Vec<f64> = [60.0, 75.0, 90.0, 105.0, 120.0]
             .iter()
-            .map(|d| (corner_speed_mph(Some(*d)) * 10.0).round() / 10.0)
+            .map(|d| (corner_speed_mph(Some(*d), 1.0) * 10.0).round() / 10.0)
             .collect();
         assert_eq!(speeds, vec![11.6, 10.0, 9.4, 8.2, 7.8]);
     }
