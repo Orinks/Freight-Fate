@@ -121,6 +121,7 @@ impl DrivingState {
         self.turn_advised.clear();
         self.turn_missed.clear();
         self.turn_resolved.clear();
+        self.turn_announced.clear();
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
     }
@@ -331,7 +332,7 @@ impl DrivingState {
                 // whole story here, by the comment above -- still has to
                 // arrive far enough ahead to be acted on.
                 if ahead <= 0.0 {
-                    self.resolve_turn(&cue);
+                    self.resolve_turn(ctx, &cue);
                 } else if ahead <= self.turn_window_mi() {
                     self.trip.controlled_turn = true;
                 }
@@ -347,13 +348,15 @@ impl DrivingState {
             self.trip.controlled_turn = true;
             let message = self.turn_approach_text(ctx, &cue, 0.0f64.max(ahead));
             self.turn_grace_s = self.turn_grace_seconds(ctx, &message);
-            if let Some(sound) = local_turn_sound(Some(&cue.direction)) {
-                let pan = if cue.direction == "left" {
-                    -TURN_CUE_PAN
-                } else {
-                    TURN_CUE_PAN
-                };
-                ctx.audio.play_with(sound, 1.0, pan);
+            // The earcon waits for the corner itself. It used to sound
+            // here, on the approach, whether or not the words that go with
+            // it were ever spoken -- so a rung that silenced the lead left a
+            // turn chime with nothing attached to it, and the owner heard
+            // corners announced by sound alone (2026-09-20). It marks the
+            // moment the truck turns now, his own preference, and only for a
+            // corner he was actually told about.
+            if ctx.settings.speaks(Some(SpeechCategory::Navigation)) || !ctx.ladder_applies() {
+                self.turn_announced.insert(cue.key.clone());
             }
             // A LEAD is deliberately left on the droppable ambient default,
             // unlike the act-now navigation calls raised to ROUTE alongside
@@ -393,22 +396,34 @@ impl DrivingState {
             return; // the corner's own cue is still speaking
         }
         if self.turn_miss_suspended() {
-            self.resolve_turn(&cue);
+            self.resolve_turn(ctx, &cue);
             return;
         }
         if self.trip.truck.speed_mph() > self.turn_speed_mph(&cue) + TURN_SPEED_MARGIN_MPH {
             self.handle_missed_turn(ctx, &cue);
         } else {
-            self.resolve_turn(&cue);
+            self.resolve_turn(ctx, &cue);
         }
     }
 
     /// `_resolve_turn(cue)`: this corner is settled; the clock goes back to
     /// trip pacing.
-    pub fn resolve_turn(&mut self, cue: &NavigationCue) {
+    pub fn resolve_turn(&mut self, ctx: &mut GameContext, cue: &NavigationCue) {
         self.turn_resolved.insert(cue.key.clone());
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
+        // Taken, by the driver or by the assists: the corner is behind the
+        // truck and this is the sound of it, panned to the side it went.
+        if self.turn_announced.remove(&cue.key) {
+            if let Some(sound) = local_turn_sound(Some(&cue.direction)) {
+                let pan = if cue.direction == "left" {
+                    -TURN_CUE_PAN
+                } else {
+                    TURN_CUE_PAN
+                };
+                ctx.audio.play_with(sound, 1.0, pan);
+            }
+        }
     }
 
     /// `_reposition_for_turn(cue)`: drop back a full spoken window onto the
@@ -459,7 +474,7 @@ impl DrivingState {
             format!("You missed the turn onto {street}.")
         };
         let (tail, status): (String, &str) = if completed {
-            self.resolve_turn(cue);
+            self.resolve_turn(ctx, cue);
             self.trip.position_mi = self.trip.position_mi.max(cue.at_mi + TURN_COMMIT_TAIL_MI);
             let tail = if terse {
                 "Turn made for you.".to_string()

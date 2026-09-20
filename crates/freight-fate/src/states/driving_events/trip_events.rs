@@ -684,7 +684,22 @@ impl DrivingState {
             return;
         }
         if let Some(sound) = sound {
-            if kind != TripEventKind::ZoneEnter {
+            // A turn earcon belongs to the words that name the turn. The
+            // maneuver lead is NAVIGATION_ADVISORY, which the quiet rungs
+            // cut, and this played the chime anyway -- so at urgent only a
+            // driver heard a turn announced by sound with nothing said about
+            // it, on top of the rung's own stand-in note (owner,
+            // 2026-09-20). Only the turn cue is held back: the road's other
+            // sounds, a passing truck above all, are the road itself and
+            // were never a substitute for a sentence (owner, 2026-08-17:
+            // "sound is enough").
+            let is_turn_cue = event
+                .data
+                .cue
+                .as_ref()
+                .is_some_and(|cue| cue.kind == "local_turn");
+            let spoken = ctx.settings.speaks(category) || !ctx.ladder_applies();
+            if kind != TripEventKind::ZoneEnter && (spoken || !is_turn_cue) {
                 ctx.audio
                     .play_with(sound, 1.0, route_event_sound_pan(event));
             }

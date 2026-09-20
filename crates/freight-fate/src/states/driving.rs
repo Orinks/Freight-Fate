@@ -703,6 +703,11 @@ pub struct DrivingState {
     pub turn_advised: HashSet<String>,
     pub turn_missed: HashSet<String>,
     pub turn_resolved: HashSet<String>,
+    /// Corners whose call actually reached the voice. The turn earcon is
+    /// played off this at the moment the corner is taken, so a driver who
+    /// was told nothing about a corner is not chimed at for it either
+    /// (owner, 2026-09-20).
+    pub turn_announced: HashSet<String>,
     pub turn_grace_s: f64,
 
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------

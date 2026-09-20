@@ -288,6 +288,33 @@ fn test_the_planner_sees_past_the_corner_it_is_already_easing_for() {
 }
 
 #[test]
+fn test_the_turn_earcon_waits_for_the_corner_itself() {
+    // The chime used to sound the moment the approach call was armed, whether
+    // or not the words that go with it ever reached the voice: at urgent only
+    // the owner heard corners announced by sound alone (2026-09-20). It is
+    // owed to a corner the driver was told about, and spent when the truck
+    // actually turns.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    assert!(!d.turn_announced.contains(&cue.key));
+    d.trip.position_mi = 0.4;
+    mph(&mut d, 30.0);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        d.turn_announced.contains(&cue.key),
+        "the corner was called, so its earcon is owed at the corner"
+    );
+
+    // Taking it spends the earcon, once and once only.
+    d.resolve_turn(&mut app.ctx, &cue);
+    assert!(!d.turn_announced.contains(&cue.key));
+    d.resolve_turn(&mut app.ctx, &cue);
+    assert!(!d.turn_announced.contains(&cue.key));
+}
+
+#[test]
 fn test_a_cold_arrival_at_the_turn_still_gets_its_window() {
     // A resumed save can reach the turn without ever hearing the approach.
     let mut app = TestApp::new();

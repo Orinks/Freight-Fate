@@ -169,14 +169,10 @@ impl DrivingState {
                 first_corner = format!(" Then {}", lower_first(&call));
                 self.turn_advised.insert(corner.key.clone());
                 self.trip.controlled_turn = true;
-                if let Some(sound) = local_turn_sound(Some(&corner.direction)) {
-                    let pan = if corner.direction == "left" {
-                        -TURN_CUE_PAN
-                    } else {
-                        TURN_CUE_PAN
-                    };
-                    ctx.audio.play_with(sound, 1.0, pan);
-                }
+                // Spoken inside this line, so the corner counts as told;
+                // its earcon sounds when the truck actually turns, not here
+                // (see `resolve_turn`).
+                self.turn_announced.insert(corner.key.clone());
             }
         }
         if announce {
