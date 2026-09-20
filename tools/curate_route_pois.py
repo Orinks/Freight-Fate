@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import ntad
 from world_source import WORLD_SOURCE_PATH, load_world, save_world
 
 from freight_fate.data.world import minimum_curated_pois
@@ -540,10 +541,10 @@ def fetch_jasons_law_candidates(source_file: Path | None = None) -> list[Candida
     if source_file is not None:
         payload = json.loads(source_file.read_text(encoding="utf-8"))
     else:
-        params = urllib.parse.urlencode(
-            {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"}
-        )
-        payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
+        # ntad.load reads the cached snapshot first and only asks BTS when there
+        # is none, so a re-run is offline and a survey that outgrows one ArcGIS
+        # page is still read whole.
+        payload = ntad.load("truck_parking")
     out: list[Candidate] = []
     for feature in payload.get("features", []):
         props = feature.get("properties", {})

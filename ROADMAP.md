@@ -878,6 +878,46 @@ its status or release decision.
       game enumerates exactly as 1.8 does; the library under it changed.
       Holding each instance for the session sidesteps it on every version.
 
+### September 19 keyless public data sources surveyed
+
+Verdicts, licences and the requests behind them: `docs/data-sources.md`. The
+map's 624 cities across 48 states and DC are what each source was judged
+against.
+
+- [x] The FHWA Jason's Law truck parking survey reads through
+      `tools/ntad.py`, which keeps a snapshot on disk, re-runs offline, and
+      carries the public-domain licence and the FHWA acknowledgment in the
+      file. Paging off the ArcGIS `exceededTransferLimit` flag read 1,000 of
+      1,915 records and reported success -- the GeoJSON responses never carry
+      that flag -- so the fetch pages on length instead.
+- [ ] Oklahoma and New Mexico get live work zones: both publish keyless WZDx
+      feeds in the federal registry, the parser already exists, and they are
+      two of the 21 states that currently hear nothing.
+- [ ] Weigh and inspection stations come from OpenStreetMap
+      `amenity=weighbridge` -- 3,818 US features through the extracts already
+      cached. No federal inventory of enforcement scales exists; the NTAD
+      Weigh-in-Motion layer is 763 sensor sites, which is a screen and not a
+      place a driver pulls in.
+- [ ] Baked elevations get screened against USGS 3DEP through the ImageServer
+      multipoint endpoint (100 points in 20 s, keyless, public domain, 1 to
+      10 m against Copernicus GLO-90's 30 m). A screen, not a re-bake, until
+      an overnight run is costed against a named benefit. The single-point
+      EPQS service answers an out-of-coverage point with HTTP 200 and the text
+      `Call failed.`, so a reader that trusts the status stores that as an
+      elevation.
+- [ ] California stays dark until a route-to-district lookup exists. Caltrans
+      publishes lane closures per district with no key, but district 7 alone
+      is 17.6 MB against an 8-second feed budget.
+- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
+      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
+      feed, and EIA fuel prices. Not in the registry at all: Alabama,
+      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
+      Tennessee, West Virginia, Wyoming, DC.
+- [x] The National Highway System and FHWA toll facility datasets were
+      checked and left: the route graph already carries truck-restricted
+      geometry, and `tools/toll_rates.py` already carries what a five-axle rig
+      pays, which the toll inventory does not.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
