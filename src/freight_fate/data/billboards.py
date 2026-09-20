@@ -76,7 +76,7 @@ GENERIC_BILLBOARDS = (
     "World's 3rd-best pie: we used to be #2. Then Jerry complained.",
     "Uncle Josh's Steakhouse: steaks so tender they're legally considered missing.",
     "Next exit: biggest pancake in the state! Probably. We haven't checked.",
-    "Free coffee! With purchase of coffee. Extra refils fifty cents each.",
+    "Free coffee! With purchase of coffee. Extra refills fifty cents each.",
 )
 
 # The truck-wreck attorney genre -- a real interstate staple, and gently meta in

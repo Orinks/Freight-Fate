@@ -69,6 +69,10 @@
 
 ### Fixed
 
+- **Learn game sounds no longer explains itself with a speech setting that was removed.** Four entries pointed at terse; they name Urgent only now.
+
+- **The manual lists the key that repeats the last CB call, and the one that names what the radio is playing.** Both keys worked already.
+
 - **An empty trailer takes a street corner faster than a loaded one.** Every corner used to be advised as though you were carrying a full load.
 
 - **Facility stopping assistance now stops you at a pickup.** It braked and held at the entrance on a delivery, but only talked you in at a pickup.

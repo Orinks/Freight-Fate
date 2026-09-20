@@ -94,7 +94,7 @@ pub const GENERIC_BILLBOARDS: &[&str] = &[
     "World's 3rd-best pie: we used to be #2. Then Jerry complained.",
     "Uncle Josh's Steakhouse: steaks so tender they're legally considered missing.",
     "Next exit: biggest pancake in the state! Probably. We haven't checked.",
-    "Free coffee! With purchase of coffee. Extra refils fifty cents each.",
+    "Free coffee! With purchase of coffee. Extra refills fifty cents each.",
     "Next exit: homemade jerky and a gift shop that sells the same jerky.",
     "If you can read this, you are not in the sleeper. Eyes up.",
     "We have ice. We have bait. We have opinions about your bumper sticker.",

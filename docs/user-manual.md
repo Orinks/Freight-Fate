@@ -684,6 +684,7 @@ wherever the pad has one.
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
+| Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
@@ -835,8 +836,8 @@ The road warns you about the hills that matter. Any climb or descent of three
 percent or more that runs at least three quarters of a mile is called out
 before it starts, with the steepness, the length, and -- going down -- what to
 do about it before it begins. Short dips stay quiet so the real hills stand
-out. Terse speech skips these; G answers on demand either way, and G also
-names the next grade ahead.
+out. Quiet and Urgent only skip these; G answers on demand either way, and G
+also names the next grade ahead.
 
 Cruise reads the same road when predictive cruise is on. It banks a little
 speed before a climb so the truck carries it up the hill, gives up the last
@@ -1494,6 +1495,7 @@ Use these keys when you need status without leaving the road:
 | Alt+D | What ends this shift, both clocks, plus the next legal stop. |
 | R | Route progress and GPS context. |
 | V | Weather and forecast. |
+| Alt+C | The last CB chatter again, with the distance as it is now. |
 | M | Toggle the in-cab radio. |
 | Page Down / Page Up | Tune the radio to the next or previous station. |
 | ; / ' | The same, on keyboards where the Page keys are awkward: semicolon tunes to the previous station and apostrophe to the next. |
@@ -1501,6 +1503,7 @@ Use these keys when you need status without leaving the road:
 | Shift with any tune key | Change the in-cab radio volume in 10 percent steps: up on Page Up or Shift+semicolon, down on Page Down or Shift+apostrophe. Works whether the radio is on or off, and speaks the new level. |
 | O | Save or unsave the current station as a favorite. Favorites become their own early dial category. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
+| Shift+Y | Speak what the radio is playing right now. |
 | Tab | Grouped driving status screens. |
 
 Tab opens the Driving status menu. It has four review screens and a Driver apps menu:
@@ -1794,10 +1797,17 @@ flows, driving alerts, route information, and settlement summaries are available
 through the game's audio and text output. The window mirrors the same
 core menu and status information as plain text.
 
-Freight Fate can use NVDA, JAWS, SAPI, VoiceOver, Speech Dispatcher, and other
-available voices. It chooses a voice that is usable on the current machine. If
-the preferred screen reader is not running, the game can fall back to another
-available voice.
+Freight Fate speaks through whichever screen reader you already run: NVDA,
+JAWS, ZDSR, PC-Talker, BoYing, SenseReader, System Access, ZoomText, Narrator,
+VoiceOver, Orca, or Speech Dispatcher. Where none is running it uses a software
+voice instead -- SAPI or the Windows voices on Windows, the system voice
+elsewhere. There is no list of approved readers: the game asks each one in turn
+whether it can speak right now and takes the first that says yes, so a reader
+you start in the middle of a drive is picked up on its own.
+
+To see what your own computer offers, start the game with
+`--list-speech-backends`. It names every reader and voice it found, says which
+of them can speak, and says which one it would use.
 
 Driving events can use a separate software voice when available, so road alerts
 do not fight with a screen reader's own speech.

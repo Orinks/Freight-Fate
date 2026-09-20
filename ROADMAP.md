@@ -102,8 +102,11 @@ These steps remain open even where a related implementation bullet is checked:
       the rewrite could not from the code: fuel counting toward the
       truck's weight against the 80,000-pound dispatch cap; curve speed
       assistance "engine brake first" (Added) against "the engine brake
-      is for hills, not corners" (Fixed); the Learn game sounds collision
-      entry, which still explains itself by the retired terse mode.
+      is for hills, not corners" (Fixed). The third, the Learn game sounds
+      collision entry explaining itself by the retired terse mode, is
+      SETTLED (2026-09-20): four entries named terse, and the rung table
+      says a confirmation and a bend advisory only become a sound at
+      Urgent only, so all four say Urgent only now.
 
 #### Player-impacting release blockers
 

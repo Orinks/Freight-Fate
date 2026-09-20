@@ -167,12 +167,12 @@ const LANE: SoundCategory = SoundCategory {
             &[Cue::new("vehicle/lane_centered").volume(0.5)],
             "The soft chime that says you are centered again. It is the \
              all-clear after a drift, and it also marks a bend taken cleanly \
-             when speech is set to terse.",
+             when driving speech is set to Urgent only.",
         )
         .when(
             "The all-clear after a drift needs lane keeping partial or \
              off and lane-departure warning on. The short answer to a bend \
-             needs curve callouts on and speech set to terse.",
+             needs curve callouts on and driving speech set to Urgent only.",
         ),
         SoundEntry::new(
             "Lane line crossed",
@@ -470,7 +470,7 @@ const HAZARDS: SoundCategory = SoundCategory {
             "Hazard clear",
             &[Cue::new("events/hazard_clear").volume(0.75)],
             "You got past the hazard. This is the success half of the \
-             dodge outcome pair: in terse speech it is the whole confirmation \
+             dodge outcome pair: at Urgent only it is the whole confirmation \
              that you cleared it, and you can go back to normal speed. Its \
              opposite is the collision below -- the two sound nothing alike, \
              so 'did I make it?' is never in doubt.",
@@ -480,7 +480,7 @@ const HAZARDS: SoundCategory = SoundCategory {
             &[Cue::new("vehicle/collision").volume(0.9)],
             "You hit it. This is the failure half of the dodge outcome pair: \
              where the hazard-clear chime says you got past, this says you did \
-             not, and a spoken damage figure follows. In terse speech the \
+             not, and a spoken damage figure follows. At Urgent only the \
              sound is the outcome, so it is worth knowing before you need it.",
         ),
         SoundEntry::new(
