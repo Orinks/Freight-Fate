@@ -24,8 +24,8 @@ use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
 use freight_fate::states::driving_location::NEAREST_TOWN_MI;
 use freight_fate::states::driving_turns::{
-    RAMP_GUIDE_DEMAND, TURN_COMMIT_TAIL_MI, TURN_CORNER_MAX_MPH, TURN_MISS_LOOP_MIN,
-    TURN_WINDOW_MAX_MI, TURN_WINDOW_MIN_MI,
+    is_judged_turn, RAMP_GUIDE_DEMAND, TURN_COMMIT_TAIL_MI, TURN_CORNER_MAX_MPH,
+    TURN_MISS_LOOP_MIN, TURN_WINDOW_MAX_MI, TURN_WINDOW_MIN_MI,
 };
 
 // -- rigging -------------------------------------------------------------------------
@@ -306,6 +306,23 @@ fn test_the_turn_earcon_waits_for_the_corner_itself() {
         d.turn_announced.contains(&cue.key),
         "the corner was called, so its earcon is owed at the corner"
     );
+
+    // And the corner is a JUDGED one, which is what stops its route cues
+    // sounding the same chime at the quarter-mile lead and again at the
+    // corner: `handle_trip_event` suppresses the earcon for exactly these,
+    // so the turn flow owns it outright. Three chimes on one turn out of
+    // Houston is what that cost before (owner drive, 2026-09-20).
+    assert!(is_judged_turn(&cue));
+    let straight_on = d
+        .trip
+        .navigation_cues
+        .iter()
+        .find(|other| other.kind == "local_turn" && !is_judged_turn(other));
+    if let Some(straight_on) = straight_on {
+        // A cue with no side to it never reaches the turn flow, so it keeps
+        // its own sound.
+        assert!(!d.turn_announced.contains(&straight_on.key));
+    }
 
     // Taking it spends the earcon, once and once only.
     d.resolve_turn(&mut app.ctx, &cue);

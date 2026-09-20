@@ -16,7 +16,7 @@ use ff_core::speech_text::{
 use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
-use crate::states::driving_turns::TURN_COMMIT_TAIL_MI;
+use crate::states::driving_turns::{is_judged_turn, TURN_COMMIT_TAIL_MI};
 use crate::states::driving_updates::live;
 
 use super::ambient::Ambient;
@@ -693,13 +693,24 @@ impl DrivingState {
             // sounds, a passing truck above all, are the road itself and
             // were never a substitute for a sentence (owner, 2026-08-17:
             // "sound is enough").
+            // A JUDGED corner -- one with a real side to it -- belongs to the
+            // turn flow, which sounds it once as the truck actually turns
+            // (`resolve_turn`). Its route cues fire twice more, at the
+            // quarter-mile lead and at the corner itself, and the owner heard
+            // all three on one turn out of Houston (2026-09-20). One corner,
+            // one chime, at the corner.
+            //
+            // A cue with no side to it -- "continue onto", "straight on" --
+            // never reaches the turn flow, so it keeps its own sound and only
+            // has to be told when the words it belongs to were silenced.
+            let judged_turn = event.data.cue.as_ref().is_some_and(is_judged_turn);
             let is_turn_cue = event
                 .data
                 .cue
                 .as_ref()
                 .is_some_and(|cue| cue.kind == "local_turn");
             let spoken = ctx.settings.speaks(category) || !ctx.ladder_applies();
-            if kind != TripEventKind::ZoneEnter && (spoken || !is_turn_cue) {
+            if kind != TripEventKind::ZoneEnter && !judged_turn && (spoken || !is_turn_cue) {
                 ctx.audio
                     .play_with(sound, 1.0, route_event_sound_pan(event));
             }
