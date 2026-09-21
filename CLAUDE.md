@@ -278,6 +278,14 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 ## Accessibility expectations
 
 - Every gameplay path must stay usable by keyboard and screen reader.
+- **Silence over redundant speech** (owner rule, 2026-09-21). Speak only what
+  the player needs and does not already know. A control that a mode
+  deliberately disables does nothing and says nothing: no refusal line, no
+  error tick, no explanation of the intentional no-op. Do not add lines that
+  restate a setting the player chose, confirm the obvious, or describe what
+  the screen already does. The information lives where the player goes to
+  look for it (the settings help, the Tab screens, the manual), not in a
+  reply to every key press.
 - Spoken text is player-facing: no maintainer or CI jargon, and never replace
   spoken information with visual-only cues.
 - If you touch menu items, prompts, warnings, settings, or status text, test
