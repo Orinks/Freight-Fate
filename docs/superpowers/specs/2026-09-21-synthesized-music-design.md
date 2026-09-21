@@ -45,17 +45,15 @@ The milestone ladder follows the career path:
 | 2 | Regional | | |
 | 3 | | Senior company driver | Fleet owner |
 | 4 | | Top hand | Coast to coast |
-| 5 | | Million-mile driver | Legendary haul |
+| 5 | | Trainer | Legendary haul |
+| 6 | | Million-mile driver | Road legend |
 
-Rung thresholds are the existing ones in `menu_milestone_index`
-(`crates/ff-core/src/music.rs`), with two changes for the synth ladder
-only:
-
-- Rung 1 unlocks on level 2 or 3 deliveries, not on a truck other than
-  `rig`. A company driver's carrier tractor is not a milestone.
-- The existing rung 6 threshold (level 21, 75 deliveries, 40,000 miles)
-  becomes the branch's rung 5; the existing rungs 5 and 6 collapse, so each
-  branch has three rungs after the split.
+Rung thresholds are exactly the existing ones in `menu_milestone_index`
+(`crates/ff-core/src/music.rs`), rung for rung, with one change for the
+synth ladder only: rung 1 unlocks on level 2 or 3 deliveries, not on a
+truck other than `rig`. A company driver's carrier tractor is not a
+milestone. (Rung 3's "two trucks owned" clause stays; a company driver
+reaches rung 3 on level 5 as today.)
 
 The branch is read from `business_status` every time music is chosen:
 going back to company driving moves the career to the company branch, and
@@ -93,8 +91,8 @@ and likewise "Open Road" and "Night Haul".
 No audio device, no threads; testable with `cargo test -p ff-core`.
 
 - `Style`: key, tempo range, progression pool, voices, drum pattern pool,
-  mood. One per place: the three shared rungs, three company rungs, three
-  owner rungs, night menu, day drive, night drive (12 styles).
+  mood. One per place: the three shared rungs, four company rungs, four
+  owner rungs, night menu, day drive, night drive (14 styles).
 - `compose(style, seed) -> Score`: sections (intro, A, B, A, outro), a
   chord per bar from the style's progressions, a bass line, a melody drawn
   from the scale over the chords, and drums where the style has them. Its
