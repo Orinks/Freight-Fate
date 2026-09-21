@@ -62,8 +62,7 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from facility_endpoint_match import RoleMatch, match_roles  # noqa: E402

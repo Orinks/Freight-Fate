@@ -5,7 +5,7 @@ The build-time route tools (``enrich_routes.py``, ``build_interchanges.py``)
 read and write ``src/freight_fate/data/world_source/`` through
 ``tools/world_source.py``. The game loads
 ``src/freight_fate/data/world_data/`` via
-``freight_fate.data.world_loader`` -- an index plus per-country
+``ffworld.world_loader`` -- an index plus per-country
 ``cities.json``, per-state leg shards, and ``metadata.json``. This script
 regenerates that tree from the source so the two never drift.
 

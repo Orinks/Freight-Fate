@@ -1,6 +1,6 @@
-# Career 1.9 gameplay is Rust. Ruff remains for Python maintenance outside
-# the retired reference gameplay suite. The Rust world loader still reads the
-# indexed world_data tree derived from world_source, so keep that check here.
+# The game is Rust. Ruff covers the Python build and data tooling under
+# tools/ and its tests. The Rust world loader still reads the indexed
+# world_data tree derived from world_source, so keep that check here.
 repos:
   - repo: local
     hooks:
@@ -16,14 +16,12 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [python, pyi]
-        exclude: ^src/freight_fate/
         stages: [pre-commit]
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
-        exclude: ^src/freight_fate/
         stages: [pre-commit]
       - id: world-data-index
         name: world_data is in sync with world_source

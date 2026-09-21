@@ -1,4 +1,4 @@
-"""Pack the sound assets into masked files for frozen builds.
+"""Pack the sound assets into masked files for release builds.
 
 The release build (``tools/build_release.py``) runs this so the shipped
 game carries ``freight_fate/sounds.pak`` and ``freight_fate/music.pak``
@@ -27,9 +27,9 @@ DEFAULT_MUSIC_OUTPUT = ROOT / "build" / "music.pak"
 
 
 def _load_assets_pack():
-    """Import the game's pack module by path (works without an installed package)."""
+    """Import the pack-format module beside this tool, by path."""
     spec = importlib.util.spec_from_file_location(
-        "assets_pack", SRC_DIR / "freight_fate" / "assets_pack.py"
+        "assets_pack", Path(__file__).resolve().parent / "assets_pack.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

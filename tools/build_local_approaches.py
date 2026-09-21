@@ -19,8 +19,7 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"

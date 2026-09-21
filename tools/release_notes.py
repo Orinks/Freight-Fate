@@ -230,6 +230,26 @@ def normalize_entry(entry: str) -> str:
     return entry.casefold().strip()
 
 
+def flatten_markdown(body: str) -> list[str]:
+    """Release-notes markdown as plain, speakable lines.
+
+    Mirrors ``flatten_markdown`` in crates/freight-fate/src/updater.rs, which
+    is how the game's updater reads these notes aloud.
+    """
+    lines: list[str] = []
+    for raw in (body or "").splitlines():
+        line = raw.strip()
+        if not line or set(line) <= {"-", "=", "*", "_"}:
+            continue
+        line = re.sub(r"^#{1,6}\s+", "", line)  # headings
+        line = re.sub(r"^[-*+]\s+", "", line)  # bullets
+        line = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", line)  # links
+        line = re.sub(r"(\*\*|__|\*|_|`)", "", line)  # emphasis/code
+        if line:
+            lines.append(line)
+    return lines
+
+
 def format_entry(entry: str) -> str:
     lines = [line.strip() for line in entry.splitlines() if line.strip()]
     if not lines:

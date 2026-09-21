@@ -44,7 +44,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa: E402

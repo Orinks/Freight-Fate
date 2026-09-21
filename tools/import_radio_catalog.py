@@ -61,8 +61,6 @@ import re
 import sys
 from pathlib import Path
 
-from freight_fate.radio import canonical_stream_url, normalize_stream_url
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = ROOT / "data" / "radio-cache" / "pr150_stations.json"
 CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
@@ -141,10 +139,80 @@ def curated_call_signs(curated: dict) -> set[str]:
     return {call_sign_base(row.get("call_sign", "")) for row in curated["stations"]} - {""}
 
 
-# normalize_stream_url lives in freight_fate.radio: this build-time collision
-# check and the runtime dial (which collapses a multi-site station like KZYX
-# or WNPN to a single listing) must agree on what counts as "the same
-# stream", so there is exactly one implementation of that rule.
+# normalize_stream_url and canonical_stream_url mirror ff_core::radio: this
+# build-time collision check and the game's dial (which collapses a multi-site
+# station like KZYX or WNPN to a single listing) must agree on what counts as
+# "the same stream". Change one, change both.
+
+_URL_SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.\-]*://", re.IGNORECASE)
+
+# Live365 hands the same station out under its own name and under whichever
+# CDN edge answered that day (ais-sa5.cdnstream1.com, das-edge14-live365-
+# dal02.cdnstream.com, the legacy edge4.peta.live365.net), and at several
+# bitrates off one station id. The mount name carries the id, so the id is
+# the station: b09584_128mp3 and b09584_64aac are one station at two
+# bitrates, not two stations.
+_LIVE365_HOST_RE = re.compile(
+    r"^(?:streaming\.live365\.com"
+    r"|(?:ais|das)-[\w.-]*\.cdnstream1?\.com"
+    r"|[\w-]+\.peta\.live365\.net)$",
+    re.IGNORECASE,
+)
+_LIVE365_MOUNT_RE = re.compile(r"^([ab]\d{4,7})(?:_[0-9a-z]+)?$", re.IGNORECASE)
+_LIVE365_CANONICAL_HOST = "streaming.live365.com"
+
+
+def normalize_stream_url(url: str) -> str:
+    """A stream URL with scheme and a trailing slash stripped, for dedup only.
+
+    The same live stream is sometimes registered under both ``http://`` and
+    ``https://`` (and sometimes with a bare trailing slash); an exact-string
+    comparison treats those as different streams and let one station land on
+    the dial twice under two names (WHYY 90.9, 2026-08-12 field report).
+    Scheme and host are case-insensitive by spec, so only that part is
+    folded -- a genuinely case-sensitive path is never merged with a
+    different one. Live365 mounts fold further, onto the station id in the
+    mount name: the directory carries the same station under several CDN
+    edge hosts and bitrates, which put Radiostorm's At Work, Oldies and
+    Comedy channels on the web band twice each. Never stored or spoken --
+    comparison only. Mirrors ``ff_core::radio::normalize_stream_url`` so this build-time
+    collision check and the game agree on what counts as "the same
+    stream".
+    """
+    url = url.strip()
+    match = _URL_SCHEME_RE.match(url)
+    if match:
+        url = url[match.end() :]
+    url = url.rstrip("/")
+    host, _, rest = url.partition("/")
+    host = host.lower()
+    if _LIVE365_HOST_RE.match(host):
+        mount = _LIVE365_MOUNT_RE.match(rest.partition("?")[0])
+        if mount:
+            return f"{_LIVE365_CANONICAL_HOST}/{mount.group(1).lower()}"
+    return f"{host}/{rest}" if rest else host
+
+
+def canonical_stream_url(url: str) -> str:
+    """A Live365 stream pointed at Live365's own address, not one CDN edge.
+
+    The directory records whichever edge host answered the day it checked
+    (``ais-edge104-live365-dal02.cdnstream.com``), sometimes carrying the
+    checker's own player and ad-block tokens in the query. Those hostnames
+    come and go; ``streaming.live365.com`` is the address the station
+    publishes, and it redirects to a live edge at play time. Anything that
+    is not a Live365 mount is returned exactly as it came in.
+    """
+    match = _URL_SCHEME_RE.match(url.strip())
+    rest = url.strip()[match.end() :] if match else url.strip()
+    host, _, path = rest.partition("/")
+    if not _LIVE365_HOST_RE.match(host.lower()):
+        return url
+    mount = path.partition("?")[0].rstrip("/")
+    if not _LIVE365_MOUNT_RE.match(mount):
+        return url
+    return f"https://{_LIVE365_CANONICAL_HOST}/{mount}"
+
 
 # Leftovers the source file's name cleaning can strand at the front of a
 # local station's name once a sibling frequency or call sign is stripped:

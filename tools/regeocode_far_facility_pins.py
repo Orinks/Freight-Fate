@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
 ENDPOINTS_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_endpoints.json"

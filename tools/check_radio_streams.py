@@ -42,14 +42,12 @@ import argparse
 import http.client
 import json
 import ssl
-import sys
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
 
 CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
 IMPORTED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"

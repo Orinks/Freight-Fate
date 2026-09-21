@@ -7,8 +7,6 @@ from pathlib import Path
 
 import yaml
 
-from freight_fate.updater import flatten_markdown
-
 
 def load_release_notes_module():
     path = Path(__file__).resolve().parents[1] / "tools" / "release_notes.py"
@@ -550,7 +548,7 @@ def test_generated_notes_flatten_to_speakable_lines(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(release_notes, "ROOT", repo)
 
-    spoken = flatten_markdown(release_notes.nightly_notes())
+    spoken = release_notes.flatten_markdown(release_notes.nightly_notes())
 
     assert "Added" in spoken
     assert "Cruise control. See manual before setting speed." in spoken

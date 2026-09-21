@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .data_resources import read_data_text
+from .data_resources import DATA_ROOT, read_data_text
 from .world_constants import (
     CITY_SERVICE_ORDER,
     CITY_SERVICE_SOURCE_TYPES,
@@ -19,15 +19,15 @@ from .world_models import (
     LocalGeometrySegment,
 )
 
-CITY_SERVICES_PATH = Path(__file__).parent / "city_services.json"
-LOCAL_APPROACHES_PATH = Path(__file__).parent / "local_approaches.json"
-LOCAL_GEOMETRY_PATH = Path(__file__).parent / "local_geometry.json"
-FACILITY_ENDPOINTS_PATH = Path(__file__).parent / "facility_endpoints.json"
-FACILITY_APPROACHES_PATH = Path(__file__).parent / "facility_approaches.json"
+CITY_SERVICES_PATH = DATA_ROOT / "city_services.json"
+LOCAL_APPROACHES_PATH = DATA_ROOT / "local_approaches.json"
+LOCAL_GEOMETRY_PATH = DATA_ROOT / "local_geometry.json"
+FACILITY_ENDPOINTS_PATH = DATA_ROOT / "facility_endpoints.json"
+FACILITY_APPROACHES_PATH = DATA_ROOT / "facility_approaches.json"
 
 
 def _read_runtime_json(path: Path, default_path: Path, name: str) -> dict | None:
-    """Parse a runtime data file: baked in frozen builds when the caller
+    """Parse a data file: read through ``read_data_text`` when the caller
     kept the default path, read from disk when a test injected its own."""
     if path == default_path:
         text = read_data_text(name)

@@ -13,6 +13,7 @@ import json
 import threading
 from pathlib import Path
 
+from .data_resources import DATA_ROOT
 from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
 from .world_corridor import raw_metadata_complete
@@ -43,29 +44,12 @@ from .world_parsing import (
 )
 from .world_services import WorldServiceMixin
 
-WORLD_DATA_PATH = Path(__file__).parent / "world_data"
+WORLD_DATA_PATH = DATA_ROOT / "world_data"
 WORLD_INDEX_PATH = WORLD_DATA_PATH / "index.json"
 # Alternate routes should feel like dispatch choices, not graph leftovers.
 ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
-
-
-def _load_base_world_data(root: Path) -> dict:
-    """Read the base world, preferring the baked-in module in frozen builds.
-
-    Release builds compile the world into the executable via
-    ``tools/bake_world.py`` and ship no ``world_data/`` files. Source
-    checkouts have no baked module and read the editable tree. Explicit
-    non-default roots (tests, tooling) always read files.
-    """
-    if root == WORLD_DATA_PATH:
-        try:
-            from . import _baked_world
-        except ImportError:
-            return load_world_data(root)
-        return _baked_world.load()
-    return load_world_data(root)
 
 
 # Routing cost multiplier for a leg carrying a truck_advisory (see
@@ -274,7 +258,7 @@ class World(WorldServiceMixin):
         loader capability the online tier will build on.
         """
 
-        data = _load_base_world_data(root)
+        data = load_world_data(root)
         if overlay is not None and overlay.exists():
             data = _merge_overlay(data, json.loads(overlay.read_text(encoding="utf-8")))
         return cls(data)

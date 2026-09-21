@@ -21,8 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
