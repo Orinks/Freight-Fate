@@ -12,7 +12,7 @@
 # dummy video and audio drivers, and the session log then has to say that
 # BASS loaded from beside the executable. Speech is NOT disabled here:
 # Prism is linked into the executable and opens the system's
-# speech-dispatcher and glibmm, which is where a distribution's loader would
+# speech-dispatcher, which is where a distribution's loader would
 # object if it were going to.
 #
 # Every log is also required to hold no error-level line at all: a boot
@@ -28,8 +28,8 @@
 #
 # What each container is given is what every desktop install already has:
 # libdbus-1 (the executable links it for the Secret Service keyring),
-# libstdc++, and speech-dispatcher's client library with glibmm (Prism
-# links both; a desktop with Orca already has them). Nothing else is installed -- a distribution that needs
+# libstdc++, and speech-dispatcher's client library (Prism links it; a
+# desktop with Orca already has it). Nothing else is installed -- a distribution that needs
 # more is a finding, not something to paper over here.
 #
 # The container's own architecture decides which pair of downloads is
@@ -53,19 +53,19 @@ echo "== $PRETTY_NAME ($(uname -m))"
 case "${ID:-}" in
   ubuntu|debian)
     apt-get update -qq >/dev/null
-    apt-get install -y -qq --no-install-recommends libdbus-1-3 libstdc++6 libspeechd2 libglibmm-2.68-1 >/dev/null
+    apt-get install -y -qq --no-install-recommends libdbus-1-3 libstdc++6 libspeechd2 >/dev/null
     ;;
   fedora)
-    dnf install -y -q dbus-libs libstdc++ speech-dispatcher-libs glibmm2.68 xorg-x11-server-Xvfb \
+    dnf install -y -q dbus-libs libstdc++ speech-dispatcher-libs xorg-x11-server-Xvfb \
       libX11 libXext libXrandr libXcursor libXi libXfixes libXScrnSaver libxkbcommon \
       mesa-libGL mesa-libEGL speech-dispatcher >/dev/null
     speech-dispatcher -d
     ;;
   arch)
-    pacman -Sy --noconfirm --quiet dbus gcc-libs speech-dispatcher glibmm-2.68 >/dev/null
+    pacman -Sy --noconfirm --quiet dbus gcc-libs speech-dispatcher >/dev/null
     ;;
   opensuse-tumbleweed|opensuse-leap)
-    zypper --quiet --non-interactive install libdbus-1-3 libstdc++6 libspeechd2 libglibmm-2_68-1 >/dev/null
+    zypper --quiet --non-interactive install libdbus-1-3 libstdc++6 libspeechd2 >/dev/null
     ;;
   *)
     echo "No package step for ${ID:-unknown}; booting with what the image has."

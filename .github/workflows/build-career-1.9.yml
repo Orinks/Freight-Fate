@@ -328,12 +328,14 @@ jobs:
 
       # Prism is compiled from source and linked into the executable. It
       # needs C++23 (<expected>, so gcc 12; 22.04 defaults to 11) and builds
-      # its speech-dispatcher and Orca backends only when their development
-      # packages are here -- without them Linux players would get no speech.
+      # its speech-dispatcher backend only when the development package is
+      # here -- without it Linux players would get no speech. Its Orca
+      # backend needs glibmm 2.68, which 22.04 does not carry, so it is left
+      # out; Orca users hear the game through Speech Dispatcher instead.
       - name: Install Prism build dependencies
         run: |
           sudo apt-get install -y --no-install-recommends \
-            gcc-12 g++-12 libspeechd-dev libglibmm-2.68-dev
+            gcc-12 g++-12 libspeechd-dev
           echo "CC=gcc-12" >> "$GITHUB_ENV"
           echo "CXX=g++-12" >> "$GITHUB_ENV"
 
