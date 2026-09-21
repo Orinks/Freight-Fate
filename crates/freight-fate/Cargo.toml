@@ -24,11 +24,10 @@ workspace = true
 ff-core = { path = "../ff-core" }
 # Prism is compiled from source and linked in; see build.rs for the
 # delay-loaded screen reader DLLs that keeps optional.
-# Pinned to our fork: prismer 0.1.2 binds version 3 of PrismConfig while
-# its Prism writes version 4, overrunning the caller's stack on every
-# Prism::new (trypsynth/prismer#2 fixes it). Back to a crates.io version
-# once one ships with that fix.
-prismer = { git = "https://github.com/Orinks/prismer", rev = "f16094d", features = ["static"] }
+# 0.1.3 at least: earlier releases either drop every backend from a static
+# link (0.1.1) or overrun the caller's stack in Prism::new (0.1.2 and
+# before; trypsynth/prismer#2).
+prismer = { version = "0.1.3", features = ["static"] }
 bass-sys = { path = "../bass-sys" }
 anyhow.workspace = true
 thiserror.workspace = true
