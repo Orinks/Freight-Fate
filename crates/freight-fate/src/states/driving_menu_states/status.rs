@@ -415,6 +415,13 @@ impl DrivingStatusScreenState {
                          hidden."
                             .to_string()
                     });
+                    if ctx.settings.synth_music && !ctx.settings.radio_streamer_safe {
+                        lines.push(
+                            "Music source Synthesized: Freight Fate's own stations are off \
+                             the dial."
+                                .to_string(),
+                        );
+                    }
                     lines.push(
                         "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
                          Control they jump categories. With Shift they change radio volume by \

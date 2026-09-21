@@ -68,13 +68,12 @@ bookmarks usable.
 - [x] Synthesized music source (no AI): a seeded composer with 14 styles on
       a career-path ladder, the restored 1.5 tracks, a Synthesized Roadhouse
       with no voiced breaks, the Synthesized dial rules and the
-      streamer-safe lock, and tracker modules playable in radio playlists.
+      streamer-safe lock, and tracker modules playable in radio playlists
+      (a module that jumps back to its start ends after one pass, so the
+      playlist moves on). The Tab radio screen says Freight Fate's own
+      stations are off the dial in Synthesized mode.
       - [ ] Typed-in music seeds.
       - [ ] More synth voices per style.
-      - [ ] A looping tracker module may need `BASS_MUSIC_STOPBACK` set so
-            its loop point stays gapless.
-      - [ ] The Tab radio screen does not yet say why Freight Fate's own
-            stations are gone when streamer-safe is off.
 
 ### Release gate -- what stands between here and a public 1.9.0
 

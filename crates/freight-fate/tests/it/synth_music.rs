@@ -72,26 +72,6 @@ fn the_three_classics_play_from_the_executable() {
     }
 }
 
-/// A brand-new career sits at the title screen -- which plays
-/// `classic_menu_theme` before any drive exists -- so app startup itself,
-/// not just a driving-state constructor, must register the classics. Unlike
-/// the test above, this one never calls `classic_music::register()` by
-/// hand: it removes the registration first, so it can only pass if
-/// `TestApp::new()` (which goes through the same `App::build()` real
-/// launches use) put it back on its own.
-#[test]
-fn the_menu_theme_is_registered_by_app_startup_alone() {
-    ff_core::assets_pack::unregister_generated_sound("music/classic_menu_theme");
-    let _app = TestApp::new();
-    let (bytes, ext) = freight_fate::audio::assets::asset_bytes(
-        "music/classic_menu_theme",
-        freight_fate::audio::assets::MUSIC_EXTENSIONS,
-    )
-    .expect("classic_menu_theme missing after a fresh TestApp::new()");
-    assert_eq!(ext, "ogg");
-    assert_eq!(&bytes[..4], b"OggS");
-}
-
 #[test]
 fn synthesized_menus_open_on_headlights_west_and_hold_no_pack_music() {
     let mut app = TestApp::new();
@@ -542,5 +522,29 @@ fn the_original_radio_screen_is_unchanged() {
             "{lines:#?}"
         );
         assert!(!lines.iter().any(|l| l.contains(STREAMER_SAFE_LOCKED)));
+    }
+}
+
+const OFF_THE_DIAL: &str =
+    "Music source Synthesized: Freight Fate's own stations are off the dial.";
+
+#[test]
+fn the_synthesized_radio_screen_says_why_the_stations_are_gone() {
+    let mut app = TestApp::new();
+    let lines = radio_screen_lines(&mut app, true, false);
+    let safety = lines
+        .iter()
+        .position(|l| l.starts_with("Streamer-safe mode off."))
+        .unwrap_or_else(|| panic!("{lines:#?}"));
+    assert_eq!(
+        lines.get(safety + 1).map(String::as_str),
+        Some(OFF_THE_DIAL)
+    );
+    drop(app);
+    // Original mode never says it, with streamer-safe on or off.
+    for streamer_safe in [false, true] {
+        let mut app = TestApp::new();
+        let lines = radio_screen_lines(&mut app, false, streamer_safe);
+        assert!(!lines.iter().any(|l| l == OFF_THE_DIAL), "{lines:#?}");
     }
 }

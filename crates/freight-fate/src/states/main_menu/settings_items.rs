@@ -817,7 +817,7 @@ impl SettingsCategoryState {
                  personal playlists. On keeps the radio to built-in safe \
                  stations, for streaming or recording. With Music source set to \
                  Synthesized, On keeps the radio on the Roadhouse and station \
-                 keys do nothing.",
+                 keys say so instead of changing station.",
             ),
             row(
                 dyn_label(|s| {
