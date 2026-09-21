@@ -297,8 +297,11 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   REAL game (real runtime, real audio, real menus), the sanctioned path is
   `freightfate --agent-server`: an MCP server inside the game that gives an
   agent a player's capabilities only -- keys in through the normal input
-  seam, ears out (both speech channels plus every earcon and cue) -- always
-  in the audited playtest sandbox, never against the owner's account.
+  seam, ears out (both speech channels plus every earcon and cue) -- in the
+  audited playtest sandbox, never against the owner's careers. The one
+  exception is `--online`, only when the owner asks for a site check: its
+  own `saves-agent-online` directory, no careers copied in, the real driver
+  identity, cloud backup on, presence and Mastodon off.
 
 ## World and route data
 
