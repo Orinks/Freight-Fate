@@ -79,15 +79,21 @@ Now playing names a synth piece by a generated title: "Synthesized: First
 Rig, number 3." A classic reads "Headlights West, from Freight Fate 1.5",
 and likewise "Open Road" and "Night Haul".
 
-### Streamer-safe mode
+### The radio dial
 
-Owner ruling, 2026-09-21: with streamer-safe mode on, the synthesized
-Roadhouse is the only station, whatever Music source is set to: synthesized
-music, no voiced breaks. Station commands (tuning, seek, categories,
-favorites, the station browser, playlists) do not change the station and
-say "Streamer-safe mode keeps the radio on the Roadhouse." The radio key
-still turns the radio on and off; volume and now playing still work. Menus
-follow Music source as before.
+Owner rulings, 2026-09-21:
+
+- **Music source Original:** the radio is exactly as today, with
+  streamer-safe on or off.
+- **Synthesized, streamer-safe off:** Freight Fate's own fictional stations
+  leave the dial. The dial and the category key cycle the synthesized
+  Roadhouse, terrestrial stations, web streams and personal playlists.
+- **Synthesized, streamer-safe on:** the synthesized Roadhouse is the only
+  station. Station commands (tuning, seek, categories, favorites, the
+  station browser, playlists) do not change the station and say
+  "Streamer-safe mode keeps the radio on the Roadhouse." The radio key
+  still turns the radio on and off; volume and now playing still work.
+- Menus play synthesized music whenever Music source is Synthesized.
 
 ### Hand-made pieces (tracker modules)
 

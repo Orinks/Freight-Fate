@@ -2377,38 +2377,48 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 12: Streamer-safe mode is the synthesized Roadhouse only
+### Task 12: The radio dial in Synthesized mode
 
-Owner ruling, 2026-09-21: with streamer-safe mode on, the synthesized Roadhouse is the only station. Station commands do not change the station; the radio is just an on/off switch.
+Owner rulings, 2026-09-21:
+- **Music source Original:** the radio behaves exactly as today, with streamer-safe on or off. Nothing in this task changes Original mode.
+- **Synthesized, streamer-safe on:** the synthesized Roadhouse is the only station. Station commands do not change the station and say so; the radio key is just on/off.
+- **Synthesized, streamer-safe off:** the fictional Freight Fate stations are gone from the dial (every station in dial group 1 -- `source_type == "built_in"` or playlist-backed non-stream stations -- except the Roadhouse, which is group 0). The dial and the category key cycle the synthesized Roadhouse, terrestrial stations, web streams and personal playlists, as today.
+- Menus play synthesized music whenever Music source is Synthesized (Task 8 already does this).
 
 **Files:**
-- Modify: `crates/ff-core/src/radio/state.rs` (`station_allowed` at ~`:956`, `tune` at ~`:642`, `tune_category` at ~`:736`, `select_station` at ~`:772`, `toggle_favorite` at ~`:1045`, and any other public station-changing entry point: read the whole `impl RadioState`)
-- Modify: `crates/freight-fate/src/states/driving_updates/radio.rs` (`station_allowed` at ~`:823`; `synth_roadhouse` from Task 9)
-- Modify: every driving-control handler that changes station or opens the station browser, radio app, favorites or playlists (find them from the controls bindings table: `grep -rn "radio" crates/freight-fate/src/states/driving_controls/` and the keyboard shortcuts table)
-- Modify: `crates/freight-fate/src/states/main_menu/settings_items.rs` (the streamer-safe row's help, ~`:812`)
+- Modify: `crates/ff-core/src/radio/state.rs` (`station_allowed` ~`:956`, `tune` ~`:642`, `tune_category` ~`:736`, `select_station` ~`:772`, `toggle_favorite` ~`:1045`, and every other public station-changing entry point: read the whole `impl RadioState`), and the settings view trait at ~`:35` (`radio_streamer_safe`) to also carry the Music source
+- Modify: `crates/ff-core/src/radio.rs` (`dial_group` ~`:584` is read, not changed; the constant goes here)
+- Modify: `crates/freight-fate/src/states/driving_core.rs` (~`:885`, `:905`: the `RadioSettingsView` impls gain the new method)
+- Modify: `crates/freight-fate/src/states/driving_updates/radio.rs` (`station_allowed` ~`:823`) and `radio_synth.rs` (Task 9's `synth_roadhouse`)
+- Modify: every game-side handler that changes station or opens the station browser, radio app, favorites or playlists (find them from the controls bindings table: `grep -rn "radio" crates/freight-fate/src/states/driving_controls/`)
+- Modify: `crates/freight-fate/src/states/main_menu/settings_items.rs` (the streamer-safe row's help, ~`:812`; the Music source row's help from Task 6)
 - Test: `crates/ff-core/src/radio/tests.rs`, `crates/freight-fate/tests/it/synth_music.rs`
 
 **Interfaces:**
-- Consumes: `DrivingState::synth_roadhouse` (Task 9), `SAFE_ROUTE_PLAYLIST` (the Roadhouse's station id)
-- Produces: `pub const STREAMER_SAFE_LOCKED: &str = "Streamer-safe mode keeps the radio on the Roadhouse.";` in `ff_core::radio`, spoken whenever a station command is refused
+- Consumes: `DrivingState::synth_roadhouse` (Task 9), `SAFE_ROUTE_PLAYLIST`, `dial_group`
+- Produces: `pub const STREAMER_SAFE_LOCKED: &str = "Streamer-safe mode keeps the radio on the Roadhouse.";` in `ff_core::radio`; `RadioSettingsView::synth_music(&self) -> bool`; `RadioState::synth_music: bool` (set from the view in both places `streamer_safe` is set, ~`:153` and ~`:199`)
 
 **Required behaviour:**
-- With `radio_streamer_safe` on, the only allowed station is `SAFE_ROUTE_PLAYLIST`, in both `station_allowed` gates (ff-core `RadioState` and the driving state's copy). Turning streamer-safe on mid-drive retunes to the Roadhouse; the existing `apply_radio_settings_to_drive` path moves off a disallowed station to `SAFE_ROUTE_PLAYLIST` -- confirm it does, with a test.
-- `DrivingState::synth_roadhouse` returns true when `station.playlist == "route"` and (`ctx.settings.synth_music` OR `ctx.settings.radio_streamer_safe`). In streamer-safe mode the Roadhouse always plays synthesized music with no host breaks, station IDs, jingles or ads, whatever Music source is set to. `station_rotation_pool`, the break suppression and the now-playing title from Task 9 must all use this predicate, not `synth_music` alone. The restart-on-settings-change in `apply_radio_settings_to_drive` must also fire when streamer-safe flips.
-- Every station-changing command (tune up/down, seek/scan, category tune, select by name or number, favorites, the station browser or radio app, personal playlists) leaves the station unchanged in streamer-safe mode and speaks `STREAMER_SAFE_LOCKED` on the channel that command already uses. It never fails silently.
-- The radio power key still turns the radio on and off. Volume and now playing still work.
-- Menus are unchanged by streamer-safe mode (they follow Music source).
-- The streamer-safe settings row's help becomes exactly: `On keeps the radio on the Roadhouse, playing synthesized music with no AI-made songs or voices, for streaming or recording. The radio key turns it on and off; station keys do nothing.`
+- `station_allowed` (both the ff-core `RadioState` gate and the driving state's copy), when Music source is Synthesized:
+  - streamer-safe on: only `SAFE_ROUTE_PLAYLIST` is allowed;
+  - streamer-safe off: a station in dial group 1 (Freight Fate's own stations) is not allowed; the Roadhouse, terrestrial stations, web streams and personal playlists follow today's rules.
+  - Original: today's rules, unchanged.
+- `synth_roadhouse` is unchanged in meaning (Roadhouse and Music source Synthesized); this task does not widen it.
+- Changing Music source or streamer-safe mid-drive moves the radio off a station that is no longer allowed onto the Roadhouse (the existing `apply_radio_settings_to_drive` path already moves off a disallowed station to `SAFE_ROUTE_PLAYLIST`; confirm it does for both new rules, with a test), and the settings restart from Task 9 still fires.
+- In Synthesized + streamer-safe, every station-changing command (tune up/down, seek/scan, category tune, select by name or number, favorites, the station browser or radio app, personal playlists) leaves the station unchanged and speaks `STREAMER_SAFE_LOCKED` on the channel that command already uses. Never silent. The radio power key still turns the radio on and off; volume and now playing still work.
+- In Synthesized with streamer-safe off, the plain dial and the category key simply skip Freight Fate's own stations because they are not allowed; the category key cycles only categories that still have an allowed station (it already builds its group list from receivable stations -- confirm the filtered stations drop out of `receivable_stations`).
+- Settings help strings, exactly:
+  - streamer-safe row: `Off plays the full dial, including real public streams and personal playlists. On keeps the radio to built-in safe stations, for streaming or recording. With Music source set to Synthesized, On keeps the radio on the Roadhouse and station keys do nothing.`
+  - Music source row: `Synthesized plays menu music and the Roadhouse station made by the game itself, with no AI-made songs or voices, and takes Freight Fate's other stations off the dial. Original plays the full soundtrack.`
 
 - [ ] **Step 1: Write the failing tests**
 
-In `crates/ff-core/src/radio/tests.rs`, build a `RadioState` the way the neighbouring streamer-safe tests do (read them first), then:
+In `crates/ff-core/src/radio/tests.rs`, build `RadioState`s the way the neighbouring streamer-safe tests do (read them first; give the settings view the new `synth_music` answer), then write one test per rule:
 
 ```rust
 #[test]
-fn streamer_safe_allows_only_the_roadhouse() {
-    let mut radio = safe_radio(); // local helper: as the neighbouring tests build one
-    radio.streamer_safe = true;
+fn synthesized_streamer_safe_allows_only_the_roadhouse() {
+    let mut radio = radio_with(/* synth_music */ true, /* streamer_safe */ true);
     let allowed: Vec<String> = radio
         .receivable_stations()
         .into_iter()
@@ -2419,9 +2429,27 @@ fn streamer_safe_allows_only_the_roadhouse() {
 }
 
 #[test]
-fn streamer_safe_refuses_every_station_command_out_loud() {
-    let mut radio = safe_radio();
-    radio.streamer_safe = true;
+fn synthesized_dial_drops_freight_fate_stations_but_keeps_the_rest() {
+    let mut radio = radio_with(true, false);
+    let groups: Vec<i32> = radio.receivable_stations().iter().map(|r| dial_group(&r.station)).collect();
+    assert!(!groups.contains(&1), "a Freight Fate station is still on the dial");
+    assert!(groups.contains(&0), "the Roadhouse is gone");
+    // And at least one terrestrial or web station remains, whichever the
+    // fixture catalog provides (assert on the fixture's known ids).
+}
+
+#[test]
+fn original_mode_dial_is_unchanged() {
+    // With synth_music false, receivable_stations is identical, id for id,
+    // to what it was before this task for both streamer-safe settings.
+    // Build both and compare against a radio with the view answering false
+    // for synth_music -- or against the fixture's pinned list if the file
+    // pins one.
+}
+
+#[test]
+fn synthesized_streamer_safe_refuses_every_station_command_out_loud() {
+    let mut radio = radio_with(true, true);
     let before = radio.current_station().id;
     // One call per station-changing method: tune (both directions),
     // tune_category, select_station, toggle_favorite, and any other found.
@@ -2431,7 +2459,7 @@ fn streamer_safe_refuses_every_station_command_out_loud() {
 }
 ```
 
-Use the real method names and return types in `state.rs`; fill in one assertion pair per method. In `synth_music.rs`, using the `a_drive` helper from Task 9: with `synth_music = false` and `radio_streamer_safe = true`, the Roadhouse pool is all `synth_drive_*` keys and classics; no host break is planned over two break intervals; pressing each station-changing driving control (through the same key path the existing radio control tests use) leaves the station on the Roadhouse and puts `Streamer-safe mode keeps the radio on the Roadhouse.` in the transcript; the radio power key turns the radio off and back on.
+Write `radio_with` as a small local helper; fill in the assertions the comments describe with the real method names and fixture ids from `state.rs` and `tests.rs`. In `synth_music.rs`, using the `a_drive` helper from Task 9: with Synthesized + streamer-safe, pressing each station-changing driving control (through the same key path the existing radio control tests use) leaves the station on the Roadhouse and puts `Streamer-safe mode keeps the radio on the Roadhouse.` in the transcript, and the radio power key turns the radio off and back on; with Synthesized and streamer-safe off, stepping the dial through every station never lands on a Freight Fate station; with Original, stepping the dial reaches a Freight Fate station exactly as before; tuned to a Freight Fate station in Original, switching Music source to Synthesized moves the radio to the Roadhouse.
 
 - [ ] **Step 2: Run to see them fail**
 
@@ -2440,26 +2468,31 @@ Expected: the new tests FAIL.
 
 - [ ] **Step 3: Implement**
 
-Add the constant to `ff_core::radio` (re-exported where the other radio constants are). Tighten both `station_allowed` gates, before the existing real-stream check:
+Add the constant to `ff_core::radio` (re-exported with the other radio constants). Add `fn synth_music(&self) -> bool;` to the radio settings view trait and implement it in both driving-core views (`self.0.synth_music`) and every test fake of that trait (grep the implementors). Store it on `RadioState` alongside `streamer_safe` in both places `streamer_safe` is set. In both `station_allowed` gates, before the existing real-stream check:
 
 ```rust
-        if self.streamer_safe && station.id != SAFE_ROUTE_PLAYLIST {
-            return false;
+        if self.synth_music {
+            if self.streamer_safe && station.id != SAFE_ROUTE_PLAYLIST {
+                return false;
+            }
+            if station.id != SAFE_ROUTE_PLAYLIST && dial_group(station) == 1 {
+                return false;
+            }
         }
 ```
 
-(driving copy: `self.radio.streamer_safe`). At the top of each station-changing `RadioState` method, when `self.streamer_safe`, return that method's normal "nothing changed" result carrying `STREAMER_SAFE_LOCKED` as its spoken message. Game-side handlers that bypass `RadioState` (station browser, playlists) check `ctx.settings.radio_streamer_safe` and speak the constant instead of opening. Widen `synth_roadhouse` as specified. Update the settings help string. Keep the existing streamer-safe tests passing; where one asserted that other built-in stations stay reachable in streamer-safe mode, that behaviour is intentionally gone -- update it to the new rule and name it in the report.
+(driving copy: `self.radio.synth_music` / `self.radio.streamer_safe`). At the top of each station-changing `RadioState` method, when `self.synth_music && self.streamer_safe`, return that method's normal "nothing changed" result carrying `STREAMER_SAFE_LOCKED` as its spoken text. Game-side handlers that bypass `RadioState` (station browser, playlists) check `ctx.settings.synth_music && ctx.settings.radio_streamer_safe` and speak the constant instead of opening. Update the two help strings. Keep every existing radio test passing unchanged: they run in Original mode.
 
 - [ ] **Step 4: Run the tests**
 
-Run: `cargo test -p ff-core radio`, `cargo test -p freight-fate --test it synth_music`, `cargo test -p freight-fate --test it radio`
+Run: `cargo test -p ff-core radio`, `cargo test -p freight-fate --test it synth_music`, `cargo test -p freight-fate --test it radio`, `cargo test -p freight-fate --test it settings`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add <each file you changed, explicitly>
-git commit -m "feat(radio): streamer-safe mode is the synthesized Roadhouse only
+git commit -m "feat(radio): Synthesized mode takes Freight Fate's stations off the dial; streamer-safe keeps it on the Roadhouse
 
 [skip changelog]
 
@@ -2484,7 +2517,9 @@ Under `### Added`:
 
 - **The original 1.5 soundtrack is back in Synthesized mode.** Headlights West, Open Road and Night Haul return.
 
-- **Streamer-safe mode keeps the radio on the synthesized Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
+- **Synthesized mode takes Freight Fate's own stations off the radio.** The dial keeps the synthesized Roadhouse, local and web stations, and your playlists.
+
+- **In Synthesized mode, streamer-safe keeps the radio on the Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
 
 - **Your own tracker modules can play in Synthesized mode.** Put OpenMPT modules or audio files in the music folder in your Freight Fate data folder.
 ```
