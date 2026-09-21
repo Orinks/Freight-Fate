@@ -718,7 +718,7 @@ its status or release decision.
       notice, the greeting says the career is over, the buy-in waits for a
       clear CDL, the public profile carries a Career ended row with the last
       verified career behind it, and Close out this career (terminal menu,
-      last row, confirmed) is the only thing that removes the save and its
+      last row, confirmed) is how the game removes an ended career's save and its
       cloud backups. Real-life basis: 49 CFR 383.51 Table 1 lifetime
       disqualification, 49 CFR 384.225 55-year record retention.
 - [ ] Two record gaps from the same research: the scale-house safety

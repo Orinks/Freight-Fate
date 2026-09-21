@@ -85,6 +85,9 @@ pub struct CloudSlotState {
     /// for a result before the player is told it is still trying.
     backup_watch: Option<(String, i64, f64)>,
     pub status: String,
+    /// Whether the restore in flight replaces a save on this computer, which
+    /// is then kept beside it as a fallback file.
+    replaces_local: bool,
     pub threaded: bool,
 }
 
@@ -110,6 +113,7 @@ impl CloudSlotState {
             restored: Mailbox::new(),
             backup_watch: None,
             status: "Ready.".to_string(),
+            replaces_local: false,
             threaded: true,
         }
     }
@@ -206,6 +210,7 @@ impl CloudSlotState {
             return;
         };
         self.busy = true;
+        self.replaces_local = self.has_local_save();
         self.refresh(ctx, true);
         ctx.say("Downloading the backup.");
         let revision = match entry.get("revision") {
@@ -535,6 +540,14 @@ impl CloudSlotState {
 
     fn speak_outcome(&mut self, ctx: &mut GameContext, outcome: &str) {
         match outcome {
+            "restored" if !self.replaces_local => {
+                self.status = "Backup restored and verified.".to_string();
+                ctx.audio.play("ui/menu_select");
+                ctx.say(&format!(
+                    "Backup restored. {} is back on this computer.",
+                    self.save_name
+                ));
+            }
             "restored" => {
                 self.status =
                     "Backup restored and verified. The replaced save was kept.".to_string();

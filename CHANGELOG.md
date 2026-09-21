@@ -89,6 +89,14 @@
 
 ### Fixed
 
+- **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
+
+- **Manage careers lists careers from earlier versions, so you can delete them.** Before, one stayed on the Choose career list for good.
+
+- **Deleting a backed-up career asks about its cloud backups.** Remove them too, or keep them; a new career with the same name no longer writes over kept ones.
+
+- **Restoring a career you had deleted no longer mentions a fallback file.** There was no save to replace, so none was kept.
+
 - **The truck drives off again after a stop.** Leaving a fuel or rest stop no longer leaves the brakes held, with the truck stuck at 0 miles per hour. (Shane, Jerry and Jessie)
 
 - **A deleted career no longer asks which copy to keep.** The Online menu named a career you no longer have, and nothing could clear it.

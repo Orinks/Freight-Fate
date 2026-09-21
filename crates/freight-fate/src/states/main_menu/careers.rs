@@ -4,18 +4,20 @@
 
 use std::path::PathBuf;
 
-use ff_core::models::profile::{LegacyCareerError, Profile};
+use ff_core::models::profile::{find_save_path, LegacyCareerError, Profile};
 use ff_core::models::start_options::{apply_start_option, option_for_profile};
 use ff_core::playtest_levers::apply_continue_levers;
 use ff_core::pyfmt::fmt_grouped;
 
 use crate::app::{GameContext, Say};
+use crate::cloud_saves::{self, AUTH_HELP};
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::main_menu::{
     career_location, career_summary, legacy_saves, loadable_saves, pending_notice_state,
     world_entry_state, MainMenuState,
 };
+use crate::states::online_states::{load_identity, run_worker, Mailbox};
 use crate::states::save_notice::LegacyCareerNoticeState;
 
 pub struct LoadDriverState {
@@ -141,6 +143,23 @@ impl Menu for ManageCareersState {
                 .help(help),
             );
         }
+        // A career from an earlier version cannot load, so it cannot be
+        // reset either, but the player can still clear it off the list.
+        for legacy in legacy_saves() {
+            let Some(path) = legacy.path.clone().or_else(|| find_save_path(&legacy.name)) else {
+                continue;
+            };
+            let name = legacy.name.clone();
+            items.push(
+                MenuItem::new(
+                    format!("{name}: career from an earlier version of Freight Fate"),
+                    move |_s: &mut Self, ctx| {
+                        ctx.push_state(ConfirmCareerActionState::delete_legacy(path.clone(), &name))
+                    },
+                )
+                .help("Enter offers to delete this save. It still works in Freight Fate 1.8."),
+            );
+        }
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
         items
     }
@@ -231,45 +250,142 @@ impl_state_for_menu!(CareerActionsState);
 pub struct ConfirmCareerActionState {
     menu: MenuCore<Self>,
     pub path: PathBuf,
-    pub profile: Profile,
+    pub name: String,
+    /// The loaded career; `None` for a save from an earlier version, which
+    /// can only be deleted.
+    pub profile: Option<Profile>,
     pub action: CareerAction,
+    outcome: Mailbox<String>,
+    busy: bool,
+    /// Tests run the cloud call inline; the game runs it on a worker.
+    pub threaded: bool,
 }
 
 impl ConfirmCareerActionState {
     pub fn new(path: PathBuf, profile: Profile, action: CareerAction) -> Self {
+        let name = profile.name.clone();
+        Self::build(path, name, Some(profile), action)
+    }
+
+    /// Deleting a career from an earlier version, which cannot load.
+    pub fn delete_legacy(path: PathBuf, name: &str) -> Self {
+        Self::build(path, name.to_string(), None, CareerAction::Delete)
+    }
+
+    fn build(path: PathBuf, name: String, profile: Option<Profile>, action: CareerAction) -> Self {
         Self {
             menu: MenuCore::new("Confirm career action")
                 .with_open_sound(Some("ui/error"))
                 .with_intro_help("Enter confirms, Escape cancels."),
             path,
+            name,
             profile,
             action,
+            outcome: Mailbox::new(),
+            busy: false,
+            threaded: true,
         }
     }
 
-    fn confirm(&mut self, ctx: &mut GameContext) {
-        let name = self.profile.name.clone();
-        let message = match self.action {
-            CareerAction::Reset => {
-                let mut fresh = Profile::named_in(&name, &self.profile.current_city);
-                apply_start_option(&mut fresh, option_for_profile(&self.profile));
-                if let Err(e) = fresh.save() {
-                    log::error!("Could not save the profile: {e}");
+    /// Whether this computer has backed the career up to orinks.net, so a
+    /// delete has cloud backups to keep or remove.
+    fn has_cloud_backups(&self, ctx: &GameContext) -> bool {
+        load_identity().is_some()
+            && !ctx
+                .cloud_saves_service()
+                .sync_state()
+                .slot(&self.name)
+                .is_empty()
+    }
+
+    fn reset(&mut self, ctx: &mut GameContext) {
+        let Some(old) = &self.profile else {
+            return;
+        };
+        let name = self.name.clone();
+        let mut fresh = Profile::named_in(&name, &old.current_city);
+        apply_start_option(&mut fresh, option_for_profile(old));
+        match fresh.save() {
+            // A career loaded from a file named apart from it: the reset went
+            // to the file its name points at, so the old career goes.
+            Ok(written) if written != self.path => {
+                if let Err(e) = std::fs::remove_file(&self.path) {
+                    log::warn!("Could not remove {}: {e}", self.path.display());
                 }
-                format!(
-                    "{name} reset. The career starts over at {} with {} and {} dollars.",
-                    ctx.world.spoken_city(&fresh.current_city, None),
-                    fresh.carrier_name,
-                    fmt_grouped(fresh.money(), 0)
-                )
             }
-            CareerAction::Delete => {
-                let _ = std::fs::remove_file(&self.path);
-                if ctx.profile.as_ref().is_some_and(|p| p.path() == self.path) {
-                    ctx.profile = None;
-                }
-                format!("{name} deleted.")
+            Ok(_) => {}
+            Err(e) => log::error!("Could not save the profile: {e}"),
+        }
+        // The title menu may still hold the old career from the last drive.
+        if ctx.profile.as_ref().is_some_and(|p| p.name == name) {
+            ctx.profile = None;
+        }
+        let message = format!(
+            "{name} reset. The career starts over at {} with {} and {} dollars.",
+            ctx.world.spoken_city(&fresh.current_city, None),
+            fresh.carrier_name,
+            fmt_grouped(fresh.money(), 0)
+        );
+        ctx.reset_to(MainMenuState::new());
+        ctx.say(&message);
+    }
+
+    /// Delete the save here; with `with_cloud`, ask orinks.net to remove its
+    /// backups first, so the player hears one outcome that covers both.
+    fn delete(&mut self, ctx: &mut GameContext, with_cloud: bool) {
+        if self.busy {
+            ctx.say("Still deleting. One moment.");
+            return;
+        }
+        let identity = if with_cloud { load_identity() } else { None };
+        let Some(identity) = identity else {
+            let line = if self.has_cloud_backups(ctx) {
+                "Its cloud backups were kept, and Cloud backup on the Online menu can restore it."
+            } else {
+                ""
+            };
+            return self.finish_delete(ctx, line);
+        };
+        self.busy = true;
+        ctx.say("Removing the cloud backups.");
+        let save_name = self.name.clone();
+        let outcome = self.outcome.clone();
+        let transport = ctx.cloud_saves_service().transport().clone();
+        run_worker(self.threaded, "career-delete-cloud", move || {
+            let tag = match cloud_saves::delete_save(&identity, &save_name, transport.as_ref()) {
+                Err(cloud_saves::CloudAuthError) => "delete_auth_failed",
+                Ok(true) => "deleted",
+                Ok(false) => "delete_failed",
+            };
+            outcome.post(tag.to_string());
+        });
+    }
+
+    fn finish_delete(&mut self, ctx: &mut GameContext, cloud_line: &str) {
+        let name = self.name.clone();
+        if let Err(e) = std::fs::remove_file(&self.path) {
+            if self.path.exists() {
+                log::error!("Could not delete {}: {e}", self.path.display());
+                ctx.reset_to(MainMenuState::new());
+                ctx.say(&format!(
+                    "{name} could not be deleted. The save is still on this computer."
+                ));
+                return;
             }
+        }
+        // Whatever the cloud still holds under this name belongs to a career
+        // that is gone from here. Forgetting this computer's record of it
+        // means a new career with the same name meets those backups as a
+        // choice, instead of quietly uploading over them as their next
+        // revision.
+        ctx.cloud_saves_service().sync_state().forget(&name);
+        if ctx.profile.as_ref().is_some_and(|p| p.name == name) {
+            ctx.profile = None;
+        }
+        let message = if cloud_line.is_empty() {
+            format!("{name} deleted.")
+        } else {
+            format!("{name} deleted from this computer. {cloud_line}")
         };
         ctx.reset_to(MainMenuState::new());
         ctx.say(&message);
@@ -286,34 +402,105 @@ impl Menu for ConfirmCareerActionState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let detail = match self.action {
-            CareerAction::Reset => format!(
+        let detail = match (&self.profile, self.action) {
+            (Some(profile), CareerAction::Reset) => format!(
                 "Reset starts over at {} with a fresh truck, starting money, \
                  no active trip, and no delivery history.",
-                ctx.world.spoken_city(&self.profile.current_city, None)
+                ctx.world.spoken_city(&profile.current_city, None)
             ),
-            CareerAction::Delete => "Delete removes this saved career for good.".to_string(),
+            _ if self.has_cloud_backups(ctx) => {
+                "Delete removes this saved career from this computer for good. It also has \
+                 cloud backups on your orinks.net account; choose whether they go too."
+                    .to_string()
+            }
+            _ => "Delete removes this saved career for good.".to_string(),
         };
         let text = format!(
             "Confirm {} for {}. {detail} {}",
             self.action.label(),
-            self.profile.name,
+            self.name,
             self.current_text(ctx)
         );
         ctx.say_with(text, Say::new().review(false));
     }
 
-    fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        let label = self.action.label();
-        vec![
-            MenuItem::new(
-                format!("Yes, {label} {}", self.profile.name),
-                |s: &mut Self, ctx| s.confirm(ctx),
-            )
-            .help(format!("Confirm and {label} this saved career.")),
+    fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        let name = self.name.clone();
+        let mut items = Vec::new();
+        match self.action {
+            CareerAction::Reset => items.push(
+                MenuItem::new(format!("Yes, reset {name}"), |s: &mut Self, ctx| {
+                    s.reset(ctx)
+                })
+                .help("Confirm and reset this saved career."),
+            ),
+            CareerAction::Delete if self.has_cloud_backups(ctx) => {
+                items.push(
+                    MenuItem::new(
+                        format!("Yes, delete {name} and its cloud backups"),
+                        |s: &mut Self, ctx| s.delete(ctx, true),
+                    )
+                    .help(
+                        "Removes the save from this computer and every cloud backup of it \
+                         from your orinks.net account.",
+                    ),
+                );
+                items.push(
+                    MenuItem::new(
+                        format!("Yes, delete {name} from this computer only"),
+                        |s: &mut Self, ctx| s.delete(ctx, false),
+                    )
+                    .help(
+                        "The cloud backups stay, and Cloud backup on the Online menu can \
+                         restore the career.",
+                    ),
+                );
+            }
+            CareerAction::Delete => items.push(
+                MenuItem::new(format!("Yes, delete {name}"), |s: &mut Self, ctx| {
+                    s.delete(ctx, false)
+                })
+                .help("Confirm and delete this saved career."),
+            ),
+        }
+        items.push(
             MenuItem::new("No, keep this career", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Back to career actions, nothing changed."),
-        ]
+                .help("Back, nothing changed."),
+        );
+        items
+    }
+
+    fn update(&mut self, ctx: &mut GameContext, dt: f64) {
+        ctx.update_music_rotation(dt);
+        if !self.busy {
+            return;
+        }
+        let Some(tag) = self.outcome.take() else {
+            return;
+        };
+        self.busy = false;
+        let cloud_line = match tag.as_str() {
+            "deleted" => {
+                "Every cloud backup of it was removed from your orinks.net account.".to_string()
+            }
+            "delete_auth_failed" => format!(
+                "{AUTH_HELP} The cloud backups were not removed; Cloud backup on the Online \
+                 menu can remove them once this computer is signed in again."
+            ),
+            _ => "The site could not be reached, so the cloud backups are still there; Cloud \
+                  backup on the Online menu can remove them later."
+                .to_string(),
+        };
+        self.finish_delete(ctx, &cloud_line);
+    }
+
+    fn go_back(&mut self, ctx: &mut GameContext) {
+        if self.busy {
+            ctx.say("Still deleting. One moment.");
+            return;
+        }
+        ctx.audio.play("ui/menu_back");
+        ctx.pop_state();
     }
 }
 

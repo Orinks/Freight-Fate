@@ -142,8 +142,12 @@ pub fn loadable_saves() -> Vec<(PathBuf, Profile)> {
         match Profile::load(&path) {
             Ok(profile) => {
                 // Loading may have converted a legacy file in place; report
-                // the path the career actually lives at now.
-                saves.push((profile.path(), profile));
+                // the path the career actually lives at now. That is the file
+                // just read unless the conversion moved it: a save whose file
+                // name differs from the career name (copied or renamed) lives
+                // where it was found, not where its name points.
+                let path = if path.exists() { path } else { profile.path() };
+                saves.push((path, profile));
             }
             Err(LoadError::LegacyCareer(err)) => legacy.push(err),
             Err(LoadError::Integrity(_)) => invalid.push(path),
@@ -762,7 +766,7 @@ impl Menu for MainMenuState {
                 .help("Any saved career, not only the newest."),
             );
         }
-        if !saves.is_empty() {
+        if !saves.is_empty() || !legacy_saves().is_empty() {
             items.push(
                 MenuItem::new("Manage careers", |_s: &mut Self, ctx| {
                     ctx.push_state(ManageCareersState::new())
