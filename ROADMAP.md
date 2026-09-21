@@ -81,10 +81,10 @@ bookmarks usable.
       `integrity_modified` at the next audit and folds into the signed
       save, so a memory-edited total arrives as evidence instead of clean.
 
-- [x] Held-for-review cloud backups (game side): a marked career's backup
-      waits for review instead of retrying, the driver hears once that it is
-      waiting or was declined, and a career accepted after review has its
-      mark cleared so later backups go up unmarked.
+- [x] Reviewed cloud backups (game side): a marked career keeps backing up
+      while it waits for review; declined, it stops backing up and the driver
+      hears so once instead of retrying; accepted, its mark is cleared so
+      later backups go up unmarked.
 
 ### Release gate -- what stands between here and a public 1.9.0
 

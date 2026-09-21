@@ -88,8 +88,8 @@ pub fn upload_save(
         "content": base64::engine::general_purpose::STANDARD.encode(&content),
         "summary": summary,
         "meaningfulPlay": meaningful_play,
-        // Tells the server this build understands a career held for review,
-        // so it answers `held_for_review` instead of a legacy reason.
+        // Tells the server this build understands a career declined after
+        // review, so it answers `review_declined` instead of a legacy reason.
         "reviewAware": true,
     });
     let reply = match transport.call(&saves_url(), Some(&payload), &identity.auth_headers(), None) {

@@ -32,7 +32,7 @@
 
 ### Changed
 
-- **A career changed outside the game now waits for review before it backs up.** You hear once that its backup is waiting.
+- **A career declined after review stops backing up.** You hear once, by name, that its backup was declined.
 
 - **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.
 
