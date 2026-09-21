@@ -20,6 +20,7 @@ class WeatherKind(Enum):
     HEAVY_RAIN = "heavy rain"
     THUNDERSTORM = "thunderstorm"
     SNOW = "snow"
+    ICE = "freezing rain"
     FOG = "fog"
     WIND = "high winds"
 
@@ -32,16 +33,27 @@ class WeatherEffects:
     sound: str | None  # ambience loop key, e.g. "weather/rain_light"
     wind: float  # 0..1 wind loop intensity
     safe_speed_mph: float
+    water_mm: float = 0.0  # standing water depth; drives hydroplane onset
+    surface: str = "dry"  # what the tires touch: dry, wet, snow, or ice
 
 
+# Freezing rain never rolls in the random weather draw: it forms when rain
+# falls into the narrow band just below freezing (see season.py) or when the
+# live NWS feed reports it. Its grip is glare-ice territory -- a third of
+# snow -- which is what makes it the one condition worth parking for.
 EFFECTS: dict[WeatherKind, WeatherEffects] = {
     WeatherKind.CLEAR: WeatherEffects(1.00, 1.00, 10.0, None, 0.0, 70),
     WeatherKind.CLOUDY: WeatherEffects(1.00, 1.00, 8.0, None, 0.1, 70),
-    WeatherKind.RAIN: WeatherEffects(0.80, 1.05, 4.0, "weather/rain_light", 0.2, 55),
-    WeatherKind.HEAVY_RAIN: WeatherEffects(0.62, 1.12, 1.5, "weather/rain_heavy", 0.4, 45),
-    WeatherKind.THUNDERSTORM: WeatherEffects(0.58, 1.18, 1.0, "weather/rain_heavy", 0.6, 40),
-    WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35),
-    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, "weather/fog_horn", 0.1, 40),
+    WeatherKind.RAIN: WeatherEffects(0.80, 1.05, 4.0, "weather/rain_light", 0.2, 55, 1.5, "wet"),
+    WeatherKind.HEAVY_RAIN: WeatherEffects(
+        0.62, 1.12, 1.5, "weather/rain_heavy", 0.4, 45, 3.0, "wet"
+    ),
+    WeatherKind.THUNDERSTORM: WeatherEffects(
+        0.58, 1.18, 1.0, "weather/rain_heavy", 0.6, 40, 4.0, "wet"
+    ),
+    WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35, 0.0, "snow"),
+    WeatherKind.ICE: WeatherEffects(0.15, 1.02, 3.0, "weather/rain_light", 0.2, 20, 0.0, "ice"),
+    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, None, 0.1, 40, 0.0, "wet"),
     WeatherKind.WIND: WeatherEffects(0.90, 1.25, 7.0, None, 0.9, 55),
 }
 
@@ -257,6 +269,14 @@ class WeatherSystem:
         self.city: str | None = None
         self.city_coords: tuple[float, float] = (0.0, 0.0)
         self.live = False  # True while real-world data is driving conditions
+        # True once any live observation has driven conditions this session.
+        # From then on a failing provider holds last-known conditions --
+        # simulated weather never takes over a sky the player has heard live
+        # (owner ruling, 2026-08-08).
+        self._session_had_live = False
+        # The last raw live observation and the city it was for, plus the
+        # season-reconciled condition it produced. Held so live weather is
+        # reconciled once per observation instead of re-evaluated every tick.
         self._live_raw: WeatherKind | None = None
         self._live_city: str | None = None
         self._live_kind: WeatherKind | None = None
@@ -368,6 +388,7 @@ class WeatherSystem:
                 WeatherKind.HEAVY_RAIN: [WeatherKind.RAIN, WeatherKind.THUNDERSTORM],
                 WeatherKind.THUNDERSTORM: [WeatherKind.HEAVY_RAIN, WeatherKind.RAIN],
                 WeatherKind.SNOW: [WeatherKind.CLOUDY, WeatherKind.SNOW],
+                WeatherKind.ICE: [WeatherKind.RAIN, WeatherKind.SNOW, WeatherKind.CLOUDY],
                 WeatherKind.FOG: [WeatherKind.CLOUDY, WeatherKind.CLEAR],
                 WeatherKind.WIND: [WeatherKind.CLEAR, WeatherKind.CLOUDY],
             }
@@ -403,6 +424,12 @@ class WeatherSystem:
             # condition (clear at the start of a drive) instead of running a
             # simulated warm-up. Only fall through to simulation when the
             # provider is genuinely offline.
+            return None
+
+        if self.provider is not None and self._session_had_live:
+            # The sky has been live this session: a failing provider holds
+            # the last known conditions while the retry cadence keeps trying.
+            # Simulated transitions never take over from real weather.
             return None
 
         if self.provider is not None and not self._fallback_active:
@@ -460,7 +487,10 @@ class WeatherSystem:
                 except Exception:  # pragma: no cover - defensive
                     pass
             return "live"
-        if self._carried_last_known and not self._provider_offline():
+        if self._carried_last_known or self._session_had_live:
+            # Live conditions have driven this sky before; whatever is wrong
+            # with the network right now, the player keeps them as last-known
+            # (with their honest age) rather than a simulated substitute.
             return "last_known"
         if self._provider_offline():
             return "fallback"
@@ -624,10 +654,16 @@ class WeatherSystem:
             self._live_kind = None
             return None
         self.live = True
+        self._session_had_live = True
         self._carried_last_known = False
         if kind != self._live_raw or self.city != self._live_city:
             self._last_observed_kind = kind
             self._last_observed_temperature = self._observed_temperature()
+        # Reconcile the raw observation to the career season once, when the
+        # observation (or the city it is for) changes -- not every tick. The
+        # season temperature swings across freezing on a diurnal cycle, so
+        # re-reconciling each tick would flip live precipitation between rain
+        # and freezing rain on its own, which live weather must never do.
         if kind == self._live_raw and self.city == self._live_city:
             if self._live_kind is not None and self.current != self._live_kind:
                 self.current = self._live_kind
@@ -715,7 +751,9 @@ class WeatherSystem:
             else:
                 visibility = f"{eff.visibility_mi * 1.609344:g} kilometers"
             parts.append(f"visibility {visibility}")
-        if eff.grip < 0.7:
+        if self.current is WeatherKind.ICE:
+            parts.append("ice on the road")
+        elif eff.grip < 0.7:
             parts.append("slick roads")
         if eff.wind > 0.6:
             parts.append("strong crosswinds")

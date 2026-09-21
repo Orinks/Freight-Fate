@@ -79,15 +79,22 @@ def test_cross_country_leg_is_rejected():
         iw.build_country_files(data, index)
 
 
-def test_checked_in_world_data_matches_world_json():
+def test_checked_in_world_data_matches_world_source():
     """CI guard: the committed world_data/ must equal what the indexer would
-    produce from world.json, so the two never drift (run
+    produce from world_source/, so the two never drift (run
     `uv run python tools/index_world.py` if this fails)."""
-    data = json.loads(iw.WORLD_PATH.read_text(encoding="utf-8"))
+    data = iw.load_world()
     index = json.loads((iw.WORLD_DATA_PATH / "index.json").read_text(encoding="utf-8"))
-    for path, text in iw.build_country_files(data, index).items():
+    files = iw.build_country_files(data, index)
+    for path, text in files.items():
         assert path.exists(), f"{path} missing; run tools/index_world.py"
         assert path.read_text(encoding="utf-8") == text, (
-            f"{path.relative_to(ROOT)} out of sync with world.json; "
+            f"{path.relative_to(ROOT)} out of sync with world_source/; "
             "run `uv run python tools/index_world.py`"
         )
+    # A shard left behind after its last leg moved states would keep feeding
+    # the game a leg the source no longer has -- the loader globs the directory.
+    stale = iw._stale_shards(index, files)
+    assert not stale, (
+        f"stale leg shard(s) {[p.name for p in stale]}; run `uv run python tools/index_world.py`"
+    )

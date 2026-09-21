@@ -34,6 +34,20 @@ def distance_unit(imperial: bool, *, plural: bool = True) -> str:
     return unit + "s" if plural else unit
 
 
+def spoken_feet_or_meters(miles: float, imperial: bool) -> str:
+    """A very short distance in round feet or meters, never decimals.
+
+    The last few hundred of them before a stop bar, a gate, or a turn, where
+    every miles-based wording in the game has already bottomed out: 50-foot
+    steps down to 50 feet, 20-meter steps down to 20 meters.
+    """
+    if imperial:
+        feet = max(50, int(round(miles * 5280.0 / 50.0)) * 50)
+        return f"{feet} feet"
+    meters = max(20, int(round(miles * MILES_TO_KM * 1000.0 / 20.0)) * 20)
+    return f"{meters} meters"
+
+
 def spoken_gap(miles: float, imperial: bool) -> str:
     """A one-decimal distance, for cues close enough that rounding to whole
     units would hide the gap being announced."""

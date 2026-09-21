@@ -18,7 +18,10 @@ map-wide. This repair now drops every sub-45 sample from interstate legs'
 ``corridor.speed_limits``; the step function heals itself (the runtime
 holds the previous surviving sample across the gap, and the first sample
 back to mile 0). Non-interstate highways keep their honest small-town 30s.
-Offline and deterministic -- no Overpass required.
+Samples with ``mph: null`` are coverage-gap markers (OSM tagging ends
+there), not postings: they are always kept and never counted as pollution
+or plausibility evidence. Offline and deterministic -- no Overpass
+required.
 
 Usage:
     uv run python tools/repair_interstate_anchor_limits.py          # dry run
@@ -29,9 +32,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 
-WORLD_PATH = Path(__file__).resolve().parent.parent / "src" / "freight_fate" / "data" / "world.json"
+from world_source import load_world, save_world
 
 INTERSTATE_MIN_PLAUSIBLE_MPH = 45.0
 
@@ -59,18 +61,34 @@ def repair(data: dict) -> list[dict]:
         samples = corridor.get("speed_limits")
         if not samples:
             continue
+        # Coverage-gap markers (mph null) are not postings: never pollution,
+        # never plausibility evidence. Judge only the numeric samples.
+        numeric = [s for s in samples if s["mph"] is not None]
         dropped: list[dict] = []
         if is_interstate(leg.get("highway", "")):
-            kept_samples = [s for s in samples if s["mph"] >= INTERSTATE_MIN_PLAUSIBLE_MPH]
+            kept_samples = [
+                s for s in samples if s["mph"] is None or s["mph"] >= INTERSTATE_MIN_PLAUSIBLE_MPH
+            ]
             if len(kept_samples) != len(samples):
-                dropped.extend(s for s in samples if s["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH)
+                dropped.extend(
+                    s
+                    for s in samples
+                    if s["mph"] is not None and s["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH
+                )
                 samples[:] = kept_samples
         elif (
-            len(samples) >= 2
-            and samples[0]["at_mi"] == 0.0
-            and samples[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
-            and samples[1]["mph"] >= SURFACE_NEXT_MIN_MPH
-            and samples[1]["at_mi"] >= SURFACE_MIN_SPAN_MI
+            len(numeric) >= 2
+            and samples[0] is numeric[0]
+            and numeric[0]["at_mi"] == 0.0
+            and numeric[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
+            and numeric[1]["mph"] >= SURFACE_NEXT_MIN_MPH
+            and numeric[1]["at_mi"] >= SURFACE_MIN_SPAN_MI
+            # A gap marker between the anchor and the next posting means the
+            # anchor never owned that span in the first place -- the runtime
+            # already reverts to the heuristic there, so the sample is honest.
+            and not any(
+                s["mph"] is None and s["at_mi"] < numeric[1]["at_mi"] for s in samples
+            )
         ) or (
             # A lone sub-45 anchor sample owning a long leg: the sweep found
             # maxspeed only at the city anchor (Globe's 35 ruled all 88 miles
@@ -78,10 +96,12 @@ def repair(data: dict) -> list[dict]:
             # it hands the leg back to the highway/region heuristic, which is
             # honest where a town street value is not. Short town-to-town hops
             # keep their limits -- 35 the whole way is real on those.
-            len(samples) == 1
+            len(numeric) == 1
+            and samples[0] is numeric[0]
+            and len(samples) == 1
             and leg.get("miles", 0.0) >= SURFACE_SOLE_SAMPLE_MIN_LEG_MI
-            and samples[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
-            and samples[0]["at_mi"] in (0.0, leg.get("miles"))
+            and numeric[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
+            and numeric[0]["at_mi"] in (0.0, leg.get("miles"))
         ):
             dropped.append(samples.pop(0))
         if not dropped:
@@ -105,11 +125,13 @@ def repair(data: dict) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--write", action="store_true", help="write world.json (default: dry run)")
+    parser.add_argument(
+        "--write", action="store_true", help="write the world source (default: dry run)"
+    )
     parser.add_argument("--json", action="store_true", help="print the full report as JSON")
     args = parser.parse_args()
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     repaired = repair(data)
 
     if args.json:
@@ -117,11 +139,13 @@ def main() -> None:
     else:
         for entry in repaired:
             drops = ", ".join(f"{d['mph']:.0f} mph at mile {d['at_mi']}" for d in entry["dropped"])
-            print(f"{entry['leg']} ({entry['highway']}): dropped {drops}; {entry['kept']} samples kept")
+            print(
+                f"{entry['leg']} ({entry['highway']}): dropped {drops}; {entry['kept']} samples kept"
+            )
     print(f"\n{len(repaired)} interstate legs repaired ({'written' if args.write else 'dry run'})")
 
     if args.write and repaired:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        save_world(data)
 
 
 if __name__ == "__main__":

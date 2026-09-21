@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate route-enrichment smoke (https://github.com/Orinks/Freight-Fate)"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
@@ -58,9 +57,12 @@ OSRM_TIMEOUT_S = 12
 # Dispatch gates on routing completeness only. Curated POIs are an additive
 # quality layer (auto-sourced; reported via the non-blocking POI advisory), not a
 # dispatch requirement -- the runtime HOS fallbacks keep a stop-less leg playable.
+# Checkpoints are deliberately NOT required (speech-quality layer, same
+# class as POIs): the old requirement forced 246 fake "corridor between"
+# placeholder checkpoints into existence, which then spoke as places.
+# Mirrors Leg.metadata_complete (world_models.py).
 REQUIRED_METADATA_FIELDS = (
     "route_points",
-    "checkpoints",
     "state_miles",
     "elevation_samples",
     "grade_segments",
@@ -86,6 +88,8 @@ ORS_CORRIDOR_SOURCE = (
 ORS_GRADE_SOURCE = (
     "OpenRouteService route elevation profile segmented by terrain (development-time)."
 )
+
+
 def spoken_state(data, value):
     """Full state name for a city ``state`` value.
 

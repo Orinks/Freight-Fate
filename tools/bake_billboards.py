@@ -24,15 +24,14 @@ an existing curated category, until a dedicated monument category is added.
 
 Idempotent + additive; without --write it is a dry run.
 """
+
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
+from world_source import load_world, save_world
 
 # Treatment -> baked landmark category. Both are CURATED categories that
 # bake_landmarks.py must preserve when it overwrites a leg's OSM landmarks.
@@ -88,7 +87,11 @@ def sign_record(sign: dict) -> tuple[str, str, dict] | None:
 def merge_into_leg(leg: dict, rec: dict) -> None:
     """Add rec to leg.corridor.landmarks, replacing a prior same-name curated one."""
     lms = leg.setdefault("corridor", {}).setdefault("landmarks", [])
-    lms[:] = [lm for lm in lms if not (lm.get("name") == rec["name"] and lm.get("category") == rec["category"])]
+    lms[:] = [
+        lm
+        for lm in lms
+        if not (lm.get("name") == rec["name"] and lm.get("category") == rec["category"])
+    ]
     lms.append(rec)
     lms.sort(key=lambda r: r["at_mi"])
 
@@ -99,7 +102,7 @@ def main() -> int:
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args()
 
-    d = json.loads(WORLD.read_text(encoding="utf-8"))
+    d = load_world()
     legs_by_pair = {(lg["from"], lg["to"]): lg for lg in d["legs"]}
 
     signs = parse_sheet(Path(a.sheet).read_text(encoding="utf-8"))
@@ -119,8 +122,8 @@ def main() -> int:
 
     print(f"\nbaked {baked} signs, skipped {skipped}")
     if a.write:
-        WORLD.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
-        print("WRITTEN to world.json -- now run: uv run python tools/index_world.py")
+        save_world(d)
+        print("WRITTEN to the world source -- now run: uv run python tools/index_world.py")
     else:
         print("(dry run -- pass --write to apply)")
     return 0

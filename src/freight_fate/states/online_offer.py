@@ -4,10 +4,13 @@ Shown once, straight after a first career is created, because nothing else
 tells a new player the feature exists. Online is optional and stays optional:
 declining takes one keypress, sets the gate, and is never asked again.
 
-What the copy deliberately does NOT say: that connecting turns on cloud
-backup or the drivers board. It does not -- both stay off until the player
-enables each separately -- and a player who connects believing their career is
-backed up, and is not, is worse off than one who was never offered.
+The copy says exactly what connecting does: it turns cloud backup and Profile
+sharing on. It does, since 1.9 -- a connected account that publishes nothing
+and backs nothing up is a connection that did nothing for the player, and the
+career statistics on the public profile are read from the backup. The rule
+behind the wording is unchanged though: a player must never walk away from
+this prompt with a wrong idea of what is backed up or public, in either
+direction.
 """
 
 from __future__ import annotations
@@ -39,10 +42,11 @@ class OnlineOfferState(MenuState):
         # where they are and what they own before being asked anything.
         self.ctx.say(
             "Before you set off. You can connect this computer to an "
-            "orinks.net account. That is what lets you turn on cloud backup "
-            "for your career and appear on the drivers board later, from "
-            "Online on the main menu. It takes a code and your browser, and "
-            "you can do it any time instead. "
+            "orinks.net account. That backs your career up so you can bring "
+            "it to another computer, and puts your driver profile and on-duty "
+            "activity on the public site. You can turn either of those off "
+            "afterwards from Online on the main menu. It takes a code and "
+            "your browser, and you can do it any time instead. "
             f"{self.current_text()}",
             interrupt=False,
         )
@@ -55,7 +59,10 @@ class OnlineOfferState(MenuState):
                 "Not now", self._decline, help="Start driving. You can connect later from Online."
             ),
             MenuItem(
-                "Set up now", self._accept, help="Connect this computer to an orinks.net account."
+                "Set up now",
+                self._accept,
+                help="Connect this computer to an orinks.net account, which turns on "
+                "cloud backup and your public driver profile.",
             ),
         ]
 

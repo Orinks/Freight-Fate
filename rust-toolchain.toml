@@ -1,0 +1,9 @@
+[toolchain]
+# Keep CI, snapshots and local builds on the same compiler. A moving stable
+# channel invalidates compiler caches when the runner image updates.
+# Bump deliberately after validating the new compiler on Career 1.9.
+channel = "1.98.0"
+# Do not inherit a user's complete profile: it requests components unavailable
+# on stable Windows (including Miri and Cranelift) before Cargo can build.
+profile = "minimal"
+components = ["rustfmt", "clippy"]

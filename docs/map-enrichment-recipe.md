@@ -34,13 +34,27 @@ determinism contract). Read those first if you have not.
   not to reset. Never delete a leg, stop, or checkpoint without reading it.
 - **Curated mileage is pay.** `leg["miles"]` drives pay and deadlines. The
   enrichment steps below never change it (`--refresh-geometry` preserves it;
-  `--adopt-ors-miles` is only for brand-new legs, always with `--only`).
+  `--adopt-ors-miles` is only for brand-new legs, always with `--only`). The
+  one job that does change it is replacing a leg's route outright -- see
+  *Putting a leg back on the road it is named for* -- and it says so in the
+  changelog when it does, because players feel it in the pay.
 - **Source notes on everything real.** Each checkpoint/stop records where it
   came from and how it was positioned. The placement tool writes these
   automatically; keep the convention if you edit by hand.
 - **Data stays deterministic and offline.** All queries here are build-time.
-  After any world.json edit: regenerate (`uv run python tools/index_world.py`),
+  After any world-source edit: regenerate (`uv run python tools/index_world.py`),
   verify (`--check`), and run the world tests.
+- **A new jurisdiction owes a truck-limit check.** Before the first leg in a
+  state, province, or country goes live, settle whether heavy vehicles are
+  held below the general limit there and record it (see *Jurisdiction truck
+  limits* below). OSM tagging is too uneven to discover this per-leg, and the
+  failure is silent: the map serves the car number and the game confidently
+  speaks a limit no legal rig may drive.
+- **Go through `tools/world_source.py`.** The source is per-state shards under
+  `src/freight_fate/data/world_source/`, not one file. `load_world()` hands you
+  the whole world as one dict and `save_world(data)` writes it back, so the
+  tools in this recipe work exactly as they always have — but never open a
+  shard directly, and never hand-edit one you have not read in full.
 
 ## Prerequisites
 
@@ -52,6 +66,15 @@ determinism contract). Read those first if you have not.
   `ORS_API_KEY=selfhosted`.
 - Overpass queries use the public endpoints (rate-limited, cached in
   `.route-cache/`; transient failures are skipped and retried on re-runs).
+- **The self-hosted Overpass DB holds only the tags its extract was filtered
+  to.** It carries roads, landmark polygons, and truck POIs -- and NO `place`
+  nodes at all, so `node["place"="village"]` returns zero rows nationwide.
+  That is a fact about the import filter, not about the world, and reading a
+  zero out of it as "there is nothing there" is the same trap as reading a
+  missing `maxspeed:hgv` as "no truck limit here". When a bake needs a tag the
+  extract lacks, source it from the full Geofabrik US extract instead
+  (`D:/ors/files/us-latest.osm.pbf`, scanned offline with pyosmium -- see
+  `tools/extract_osm_places.py`) rather than widening the DB.
 
 ## Finding the backlog
 
@@ -233,6 +256,76 @@ real source notes in the message; data-only batches that change nothing
 player-visible take `[skip changelog]`, but a batch that adds audible places
 to legs players can drive deserves a changelog entry under `Added`.
 
+## Jurisdiction truck limits (once per state/province/country)
+
+Many jurisdictions post one limit for cars and a lower one for heavy vehicles.
+A rig's limit therefore reaches the player by two independent routes, and
+**both must be handled or the map lies in one direction or the other**:
+
+1. **Tagged.** OSM carries `maxspeed:hgv` on the way. The baked sample records
+   it with `hgv: true` and it is already truck-correct.
+2. **Statutory.** OSM carries only the general `maxspeed`. Nothing in the data
+   says trucks are held lower, so `STATE_TRUCK_MAX_MPH`
+   (`src/freight_fate/sim/trip_models.py`) pulls it down at runtime.
+
+Route 2 exists because **OSM tagging coverage is not a fact about the law.**
+California I-80 alternates mile by mile between tagged and untagged; the
+statutory cap is what makes the whole corridor read 55 instead of flickering.
+Never conclude "this road has no truck limit" from missing tags.
+
+**Both routes must speak identically.** `truck_limit_at()` reports a
+truck-specific limit whichever way it arose, so S says "Truck limit 55.
+California holds trucks to this." on tagged and untagged miles alike. Keying
+off the cap alone silences the tagged roads — that regression shipped and was
+caught by a player on US-395 (2026-07-19); `tests/test_maxspeed.py` locks it.
+
+**Source the number, don't infer it.** Cite the statute or the DOT table, with
+the access date, in the comment above the entry. These laws move — several US
+states repealed their splits in the last decade — so a stale table is worse
+than none now that the game names the jurisdiction out loud.
+
+**Verify in-engine, never from the baked file.** The file holds the car
+number on untagged stretches by design; reading it and concluding the limit is
+wrong is a mistake that has been made twice. Build a `Trip` and call
+`speed_limit_at()`:
+
+```sh
+uv run python - <<'PY'
+from freight_fate.data.world import get_world
+from freight_fate.sim.trip import Trip
+from freight_fate.sim.vehicle import TruckState
+from freight_fate.sim.weather import WeatherSystem
+route = get_world().route_options("Sacramento", "Reno")[0]
+trip = Trip(route, TruckState(), WeatherSystem("california", seed=1), seed=2)
+for m in (5, 20, 50, 90, 110, 125):
+    print(m, trip.speed_limit_at(m)[0], trip.truck_limit_at(m))
+PY
+```
+
+### Taking this off the US grid
+
+`STATE_TRUCK_MAX_MPH` is keyed by US state name in mph, matched against
+`Leg.state_miles`/`state_crossings`. Canada, Mexico, and Europe all need the
+same mechanic and none of them fit that shape, so expanding the map means
+generalizing it rather than adding rows:
+
+- **Key by jurisdiction, not state.** Provinces, Länder, and national defaults
+  all set truck limits; the lookup wants a jurisdiction code that a leg can
+  carry regardless of country.
+- **Store canonical units.** Most of the world posts km/h and caps heavy
+  vehicles nationally (commonly 80–90 km/h). Storing mph and converting at the
+  edges will round wrongly and speak numbers no sign shows.
+- **National default, jurisdiction override.** Outside the US the cap is
+  usually a country-level rule a region may tighten — the opposite of the flat
+  state table here.
+- **The speech must stay honest.** "California holds trucks to this" becomes
+  whatever names the real authority; do not attribute a national rule to a
+  province.
+
+Until that lands, a non-US corridor with a statutory truck limit **cannot be
+served correctly** and should be flagged rather than quietly shipped on car
+numbers.
+
 ## Capturing alternate routes during a scrub
 
 The enrichment pass is when real alternate routes surface: a leg's ORS route
@@ -269,6 +362,57 @@ enrichment commit.
   re-running a batch is cheap and safe (all steps are idempotent).
 - The endpoint-city POI queries are cache-keyed per CITY, so working
   corridor-by-corridor gets cheaper as coverage grows.
+
+## Putting a leg back on the road it is named for
+
+The one job on this page that DOES change `leg["miles"]`, and therefore pay
+and deadlines. It is not enrichment; it is replacing the leg's route, and
+then enriching the new one.
+
+A leg can be labelled for an interstate its baked route never joins. Two
+different faults look identical from inside the data and a truck router tells
+them apart, so start by measuring rather than reading the label:
+
+```
+uv run python tools/curve_valhalla_facts.py --all      # map-matched coverage
+uv run python tools/probe_leg_labels.py --out .route-cache/label-split.json
+```
+
+That prints two lists. A leg whose ROUTER route barely touches the shield has
+the wrong LABEL, and `tools/repair_leg_labels.py --split` renames it. A leg
+whose router route rides the shield has the wrong ROUTE, and it wants this:
+
+```
+uv run python tools/reroute_leg.py --leg <from_slug>:<to_slug> --write
+uv run --group tooling python tools/reroute_enrich.py \
+    --all-pending --pbf ~/osm/us-latest.osm.pbf --write
+```
+
+`reroute_leg` settles the route, writes the polyline and the mileage, and
+drops every corridor layer that was a reading along the OLD road. Curated
+checkpoints are the exception: they are real towns with real coordinates, so
+they are re-positioned onto the new road and only dropped if it now runs more
+than three miles from them. Curated TOLL EVENTS are dropped and printed --
+nothing downstream puts them back, so a leg that still tolls wants
+re-curating by hand.
+
+`reroute_enrich` rebuilds everything else and refuses to call a leg finished
+if any layer came back empty or at less than half its old size. Between the
+two, the leg is INCOMPLETE, and `--check` on either tool lists any leg left
+that way. Run `tools/index_world.py` afterwards like any world edit, then the
+curve chain (`curve_valhalla_facts.py --all`, `bake_curve_connectors.py
+--write`, `clamp_curve_advisories.py --write`, `screen_curve_artifacts.py`),
+because the bends moved with the road.
+
+Two things bite:
+
+- **`--only` takes SLUGS on every tool in the chain**, semicolon-separated:
+  `corpus_christi_tx_us->san_antonio_tx_us`, never `Corpus Christi->San
+  Antonio`. The interchange family builds one index over a 12 GB extract per
+  run, so pass all the legs at once or pay for that read per leg.
+- **The interchange sub-mode flags do not compose.** `--maxspeed
+  --restrictions --ramp-controls` together dispatches to one and silently
+  skips the rest. `reroute_enrich` runs them in sequence.
 
 ## Building new corridors (composition)
 

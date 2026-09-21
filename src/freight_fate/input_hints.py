@@ -39,7 +39,6 @@ _HINTS: dict[str, tuple[str, str]] = {
     "fuel": ("F", "right bumper plus B"),
     "clock": ("C", "D-pad right"),
     "route": ("R", "D-pad up"),
-    "next_exit": ("Shift R", "right bumper plus D-pad up"),
     "weather": ("V", "D-pad left"),
     "lane": ("L", "the left stick"),
     "horn": ("H", "the left stick click"),

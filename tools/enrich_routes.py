@@ -23,8 +23,9 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from world_source import load_world, save_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate route-enrichment smoke (https://github.com/Orinks/Freight-Fate)"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
@@ -66,9 +67,12 @@ OSRM_TIMEOUT_S = 12
 # Dispatch gates on routing completeness only. Curated POIs are an additive
 # quality layer (auto-sourced; reported via the non-blocking POI advisory), not a
 # dispatch requirement -- the runtime HOS fallbacks keep a stop-less leg playable.
+# Checkpoints are deliberately NOT required (speech-quality layer, same
+# class as POIs): the old requirement forced 246 fake "corridor between"
+# placeholder checkpoints into existence, which then spoke as places.
+# Mirrors Leg.metadata_complete (world_models.py).
 REQUIRED_METADATA_FIELDS = (
     "route_points",
-    "checkpoints",
     "state_miles",
     "elevation_samples",
     "grade_segments",
@@ -288,7 +292,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     if args.enrich_all:
         api_key = None
         if args.engine == "ors":
@@ -310,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
             api_key=api_key,
         )
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         print(
             json.dumps(result, indent=2, sort_keys=True)
             if args.json
@@ -332,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
             only=_parse_only(args.only),
         )
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
@@ -353,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
             rural_fallback=args.rural_fuel_fallback,
         )
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
@@ -374,7 +378,7 @@ def main(argv: list[str] | None = None) -> int:
             only=_parse_only(args.only),
         )
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
@@ -388,7 +392,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.prune_non_truck_pois:
         result = prune_non_truck_pois(data)
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
@@ -419,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
             only=_parse_only(args.only),
         )
         if args.write:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data)
         if args.json:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:

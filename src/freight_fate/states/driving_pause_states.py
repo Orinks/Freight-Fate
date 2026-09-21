@@ -41,7 +41,15 @@ class PauseMenuState(MenuState):
     def enter(self) -> None:
         self.ctx.audio.play("ui/pause")
         self.ctx.audio.stop_world()
+        # Everything the road had handed the voice belongs to the mile the
+        # player just stopped on. Left alone it sits in the event channel's
+        # own queue and is performed over the pause menu, or replayed in full
+        # on resume (tester transcript, 2026-08-11).
+        self.ctx.pause_event_speech()
+        self.driving._pending_ambient_events.clear()
         self.driving._reverse_cue_active = False
+        self.driving._air_cue_active = False
+        self.driving._jake_cue_key = None
         super().enter()
 
     def announce_entry(self) -> None:
@@ -83,6 +91,12 @@ class PauseMenuState(MenuState):
                 "line by line, Escape returns here.",
             ),
             MenuItem(
+                "Learn game sounds",
+                self._learn_sounds,
+                help="Play any sound the road uses and hear what it means. "
+                "The drive is paused while you listen.",
+            ),
+            MenuItem(
                 self._mechanic_label,
                 self._mechanic,
                 help="A mobile mechanic patches the truck up enough to "
@@ -96,6 +110,31 @@ class PauseMenuState(MenuState):
                 help="Change units, transmission, volumes, weather, "
                 "voices, update channel, and trip pacing.",
             ),
+        ]
+        if self.driving.truck.chains_on:
+            items.append(
+                MenuItem(
+                    f"Remove snow chains: about {CHAIN_REMOVE_MIN:.0f} minutes",
+                    self._remove_chains,
+                    help="Pull the chains off the drives and stow them. Do it "
+                    "as soon as the road is bare again; chains grind apart "
+                    "fast on pavement.",
+                )
+            )
+        elif self.ctx.profile.chains_owned and self.ctx.profile.chain_wear_pct < 100:
+            items.append(
+                MenuItem(
+                    self._install_chains_label,
+                    self._install_chains,
+                    help="Stop, kneel on the shoulder, and hang the chain set "
+                    "on the drives. Chains bite snow and glare ice like "
+                    "nothing else. Keep it near chain speed, about thirty "
+                    "miles per hour, and pull them the moment the road is "
+                    "bare. Installing in the dark takes longer and takes "
+                    "more out of you.",
+                )
+            )
+        items += [
             MenuItem(
                 "Drivers board",
                 self._drivers_board,
@@ -118,7 +157,7 @@ class PauseMenuState(MenuState):
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
             items.insert(
-                4,
+                5,
                 MenuItem(
                     "Emergency shoulder sleep",
                     self._emergency_shoulder_sleep,
@@ -137,8 +176,7 @@ class PauseMenuState(MenuState):
         damage = self.driving.truck.damage_pct
         if damage <= FIELD_REPAIR_DAMAGE_PCT:
             return "Call a roadside mechanic: not needed yet"
-        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
         return f"Call a roadside mechanic: {cost:,.0f} dollars"
 
     def _mechanic(self) -> None:
@@ -155,20 +193,91 @@ class PauseMenuState(MenuState):
             self.ctx.say("Come to a complete stop first.")
             return
         p = self.ctx.profile
-        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost  # the rescue is never refused; money can go negative
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
+        carrier_paid = not player_pays_operating_costs(p.business_status)
+        if not carrier_paid:
+            p.money -= cost  # the rescue is never refused; money can go negative
         d.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT
         _advance_rest_clock(d, MECHANIC_WAIT_MIN)
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self.ctx.audio.play("ui/notify")
         self.refresh()
+        billing = (
+            "on the carrier breakdown account"
+            if carrier_paid
+            else f"for {cost:,.0f} dollars. You have {p.money:,.0f} dollars"
+        )
         self.ctx.say(
             f"A mobile mechanic patched the truck up to "
-            f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage for "
-            f"{cost:,.0f} dollars. You have {p.money:,.0f} dollars. "
+            f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage {billing}. "
             f"The repair took an hour and a half: it is "
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _chain_night(self) -> bool:
+        return is_night(self.driving.trip.local_hour)
+
+    def _install_chains_label(self) -> str:
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if self._chain_night() else 1.0)
+        when = " in the dark" if self._chain_night() else ""
+        return f"Install snow chains{when}: about {minutes:.0f} minutes"
+
+    def _install_chains(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        night = self._chain_night()
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if night else 1.0)
+        fatigue = CHAIN_INSTALL_NIGHT_FATIGUE if night else CHAIN_INSTALL_FATIGUE
+        _advance_rest_clock(d, minutes, "on_duty_not_driving", "chain up")
+        d.hos.on_duty(minutes)
+        p.fatigue = min(100.0, p.fatigue + fatigue)
+        d.truck.chains_on = True
+        d._chains_fast_active = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        effort = (
+            "Kneeling on a dark shoulder by headlamp, it takes everything your gloves have got. "
+            if night
+            else ""
+        )
+        bare = (
+            " The road here is bare; they will grind apart fast until you reach the snow."
+            if d.truck.surface not in ("snow", "ice")
+            else ""
+        )
+        self.ctx.say(
+            f"Chains hung on the drives in {minutes:.0f} minutes. {effort}"
+            f"Keep it near {self.ctx.settings.speed_text(CHAIN_SAFE_MPH)}, and pull them "
+            f"when the road turns bare.{bare} It is "
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _remove_chains(self) -> None:
+        d = self.driving
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        _advance_rest_clock(d, CHAIN_REMOVE_MIN, "on_duty_not_driving", "remove chains")
+        d.hos.on_duty(CHAIN_REMOVE_MIN)
+        p = self.ctx.profile
+        p.fatigue = min(100.0, p.fatigue + CHAIN_REMOVE_FATIGUE)
+        d.truck.chains_on = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        wear = d.truck.chain_wear_pct
+        state_word = (
+            "They are about done; pick up a fresh set at a garage."
+            if wear >= 75
+            else f"The set is {wear:.0f} percent worn."
+            if wear >= 1
+            else "The set is still fresh."
+        )
+        self.ctx.say(
+            f"Chains off and stowed in {CHAIN_REMOVE_MIN:.0f} minutes. "
+            f"{state_word} It is {clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
 
     def _emergency_shoulder_sleep(self) -> None:
@@ -177,6 +286,13 @@ class PauseMenuState(MenuState):
             self.ctx.say(
                 "Emergency shoulder sleep is not available right now. "
                 "Use a route stop for normal breaks and sleep."
+            )
+            self.refresh()
+            return
+        if not _secure_truck_for_stopped_menu(self.driving):
+            self.ctx.say(
+                "Come to a complete stop first. Resume driving, finish stopping, "
+                "then reopen the pause menu."
             )
             self.refresh()
             return
@@ -198,6 +314,13 @@ class PauseMenuState(MenuState):
 
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
+        # Anything that reached the voice while the menu was up describes a
+        # road the player was not on. They come back to the road as it is now.
+        self.ctx.resume_event_speech()
+        # The player may have lost the thread across the pause: bring each
+        # facility's full name back once (research doc R6).
+        self.driving.trip.reset_facility_mentions()
+        self.driving._pending_ambient_events.clear()
         self.ctx.pop_state()
         self.ctx.say("Resumed.", interrupt=False, review=False)
 
@@ -225,6 +348,11 @@ class PauseMenuState(MenuState):
         from .main_menu import HelpState, controls_help_page
 
         self.ctx.push_state(HelpState(self.ctx, start_page=controls_help_page()))
+
+    def _learn_sounds(self) -> None:
+        from .learn_sounds import LearnSoundsState
+
+        self.ctx.push_state(LearnSoundsState(self.ctx))
 
     def _settings(self) -> None:
         from .main_menu import SettingsState
@@ -270,12 +398,64 @@ class AbandonJobConfirmationState(MenuState):
         super().__init__(ctx)
         self.driving = driving
 
+    # Abandoning a real load costs 500 dollars and 5 reputation (breach of a
+    # paying contract). An assigned reposition carries no freight and no pay,
+    # so there is no contract to breach and no money at stake -- but walking
+    # off a dispatch ASSIGNMENT still costs the carrier's trust, the same
+    # shape as declining one outright (dispatch_policy.DECLINE_REPUTATION_
+    # PENALTY), just heavier, because this one was already accepted and
+    # driven before it was abandoned.
+    ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY = 3.0
+
+    def _is_bobtail(self) -> bool:
+        # An empty reposition has no load and no contract -- there is
+        # nothing to breach. The hours still pass either way.
+        return bool(getattr(getattr(self.driving, "job", None), "bobtail", False))
+
+    def _is_assigned_reposition(self) -> bool:
+        # Dispatch sent the driver empty (job.assigned), as opposed to a
+        # self-serve bobtail the driver chose from the menu. There is still
+        # no freight and no pay to lose, but walking away from an
+        # ASSIGNMENT is walking away from dispatch, not just from a drive.
+        job = getattr(self.driving, "job", None)
+        return self._is_bobtail() and bool(getattr(job, "assigned", False))
+
     def announce_entry(self) -> None:
+        if self._is_assigned_reposition():
+            self.ctx.say(
+                f"{self.title} Walking away from a dispatch assignment costs "
+                "standing, not money: no freight, no fine, but reputation "
+                "takes a hit. You will return to "
+                f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+                f"{self.current_text()}"
+            )
+            return
+        if self._is_bobtail():
+            self.ctx.say(
+                f"{self.title} You are running empty, so turning back costs "
+                "nothing but the time already spent. You will return to "
+                f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+                f"{self.current_text()}"
+            )
+            return
         self.ctx.say(
             f"{self.title} Abandoning gives up this load. You will pay a five "
             "hundred dollar penalty, take a reputation hit, and return to "
             f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
             f"{self.current_text()}"
+        )
+
+    def _abandon_help_text(self) -> str:
+        if self._is_assigned_reposition():
+            return (
+                "Walk away from this dispatch assignment. Costs reputation, "
+                "no money, and returns you to the origin city."
+            )
+        if self._is_bobtail():
+            return "Give up this empty run. No freight, no penalty, returns you to the origin city."
+        return (
+            "Give up this job. Costs five hundred dollars and "
+            "reputation, and returns you to the origin city."
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -288,8 +468,7 @@ class AbandonJobConfirmationState(MenuState):
             MenuItem(
                 "Yes, abandon the job",
                 self._confirm,
-                help="Give up this job. Costs five hundred dollars and "
-                "reputation, and returns you to the origin city.",
+                help=self._abandon_help_text(),
             ),
         ]
 
@@ -297,10 +476,17 @@ class AbandonJobConfirmationState(MenuState):
         from .city import CityMenuState
 
         p = self.ctx.profile
-        p.money -= 500.0
-        p.career.reputation = max(0.0, p.career.reputation - 5.0)
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
+        bobtail = self._is_bobtail()
+        assigned_reposition = self._is_assigned_reposition()
+        if assigned_reposition:
+            p.career.reputation = max(
+                0.0,
+                p.career.reputation - self.ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
+            )
+        elif not bobtail:
+            p.money -= 500.0
+            p.career.reputation = max(0.0, p.career.reputation - 5.0)
+        p.store_truck_condition(self.driving.truck)
         # the hours spent on the failed run still happened: keep the world
         # clock consistent with the HOS and fatigue already accrued
         p.game_hours += self.driving.trip.game_minutes / 60.0
@@ -312,8 +498,22 @@ class AbandonJobConfirmationState(MenuState):
         self.ctx.pop_state()  # close the pause menu
         self.ctx.replace_state(CityMenuState(self.ctx))
         # interrupt=True so this overrides any menu re-announcement during unwind
-        self.ctx.say(
-            f"Job abandoned. You paid a five hundred dollar penalty and "
-            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
-            interrupt=True,
-        )
+        if assigned_reposition:
+            self.ctx.say(
+                "Dispatch assignment abandoned. Walking away from a dispatch "
+                "assignment costs standing, not money: reputation down, no "
+                f"fine. Back in {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )
+        elif bobtail:
+            self.ctx.say(
+                "Reposition called off. No freight, no penalty; the hours "
+                f"still count. Back in {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )
+        else:
+            self.ctx.say(
+                f"Job abandoned. You paid a five hundred dollar penalty and "
+                f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )

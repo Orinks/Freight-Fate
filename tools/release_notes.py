@@ -22,6 +22,21 @@ NIGHTLY_HEADER = (
     "stable release. Expect rough edges; your save files stay compatible "
     "whenever possible, but back them up first."
 )
+GITHUB_RELEASE_NOTES_SAFE_CHARACTERS = 120_000
+FIRST_SNAPSHOT_COMPLETE_LIST = (
+    "## Complete change list\n\n"
+    "This first snapshot contains more player-facing changes than fit on the "
+    "GitHub release page. Read `CHANGELOG.md` in the download for the complete "
+    "curated list."
+)
+# A later snapshot can overflow too: a busy stretch, or a rewrite of the
+# curated entries, which makes every bullet read as new to the previous tag.
+SNAPSHOT_COMPLETE_LIST = (
+    "## Complete change list\n\n"
+    "This snapshot carries more player-facing changes than fit on the GitHub "
+    "release page. Read `CHANGELOG.md` in the download for the complete "
+    "curated list."
+)
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
 INTERNAL_SECTIONS = (
@@ -38,7 +53,15 @@ INTERNAL_SECTIONS = (
 )
 NIGHTLY_BUILD_MARKERS = ("nightly: build", "[nightly build]")
 SKIP_CHANGELOG_MARKERS = ("changelog: none", "[skip changelog]")
-USER_FACING_PATH_PREFIXES = ("src/", "docs/")
+# `crates/` was added 2026-09-20. The gate was written when `src/` WAS the
+# game; the Rust port moved every line of gameplay to `crates/` and the gate
+# was never widened, so for the whole port a change to the shipping runtime
+# could land with no entry and CI would not say a word.
+USER_FACING_PATH_PREFIXES = ("src/", "docs/", "crates/")
+# ... but not a crate's test or bench binaries. Under the Python layout
+# `tests/` sat beside `src/` and was never gated; a Rust test is the same
+# kind of change, and the point is to restore the old rule, not tighten it.
+NOT_USER_FACING = re.compile(r"^crates/[^/]+/(?:tests|benches)/")
 USER_FACING_PATHS = {
     "CHANGELOG.md",
     "README.md",
@@ -217,7 +240,7 @@ def format_entry(entry: str) -> str:
     return marker + " ".join([first_text, *lines[1:]])
 
 
-def format_sections(sections: list[ChangelogSection]) -> str:
+def format_sections(sections: list[ChangelogSection], *, heading_level: int = 2) -> str:
     if not sections:
         return "- No user-facing changes"
 
@@ -232,7 +255,7 @@ def format_sections(sections: list[ChangelogSection]) -> str:
         entries = "\n".join(
             entry for entry in dict.fromkeys(format_entry(e) for e in by_title[title]) if entry
         )
-        chunks.append(f"## {title}\n{entries}")
+        chunks.append(f"{'#' * heading_level} {title}\n{entries}")
     return "\n\n".join(chunks).strip()
 
 
@@ -251,6 +274,47 @@ def excluded_entries_from_notes(path: str) -> set[str]:
     )
 
 
+REPUBLISHED_FILE = Path("tools/release_notes_republished.txt")
+
+
+def republished_entries(released: set[str] | None = None) -> set[str]:
+    """Entries a rewrite republished rather than added.
+
+    A snapshot lists the bullets whose text is not in the changelog at the
+    previous tag, so a commit that rewords every entry makes the next snapshot
+    announce the whole block as new. ``tools/release_notes_republished.txt``
+    names that commit (``ref = <sha>``): everything in the changelog there
+    counts as already published, except the bullets whose bold lead the file
+    lists on ``new = ...`` lines, which were genuinely new when the rewrite
+    landed and still have to go out. Delete the file once a snapshot tag
+    carries the rewritten text; it is harmless but stale after that.
+    """
+    path = ROOT / REPUBLISHED_FILE
+    if not path.exists():
+        return set()
+    ref = ""
+    still_new: list[str] = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if key == "ref":
+            ref = value
+        elif key == "new":
+            still_new.append(normalize_entry(value))
+    if not ref:
+        return set()
+    text = changelog_at(ref)
+    if not text:
+        raise SystemExit(f"{REPUBLISHED_FILE}: commit {ref} is not in this clone")
+    if released is None:
+        released = released_versions()
+    entries = entries_from_sections(nightly_candidate_sections(text, released))
+    return {entry for entry in entries if not any(entry.startswith(lead) for lead in still_new)}
+
+
 def sections_added_since(
     base_ref: str,
     head_text: str,
@@ -262,6 +326,7 @@ def sections_added_since(
     base_entries = entries_from_sections(
         nightly_candidate_sections(changelog_at(base_ref), released)
     )
+    base_entries.update(republished_entries(released))
     if extra_excluded_entries:
         base_entries.update(extra_excluded_entries)
 
@@ -281,10 +346,94 @@ def stable_notes(version: str) -> str:
     return format_sections(parse_sections(block))
 
 
+def format_nightly_notes(
+    sections: list[ChangelogSection],
+    changes_heading: str,
+    footer: str = "",
+    *,
+    section_heading_level: int = 2,
+) -> str:
+    body = format_sections(sections, heading_level=section_heading_level)
+    notes = f"{NIGHTLY_HEADER}\n\n## {changes_heading}\n\n{body}"
+    return f"{notes}\n\n{footer}" if footer else notes
+
+
+def first_snapshot_fits(notes: str) -> bool:
+    """Whether notes plus the file's final line feed fit the safe limit."""
+    return len(notes) + 1 <= GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+
+
+def bounded_first_snapshot_sections(
+    sections: list[ChangelogSection],
+) -> tuple[list[ChangelogSection], bool]:
+    """Keep complete recent entries from every section within GitHub's limit."""
+    return bounded_sections(
+        sections,
+        "Changes in this snapshot",
+        FIRST_SNAPSHOT_COMPLETE_LIST,
+        section_heading_level=3,
+    )
+
+
+def bounded_sections(
+    sections: list[ChangelogSection],
+    changes_heading: str,
+    footer: str,
+    *,
+    section_heading_level: int,
+) -> tuple[list[ChangelogSection], bool]:
+    """Keep complete recent entries from every section within GitHub's limit.
+
+    Returns the sections to publish and whether anything was left out; when
+    something was, the caller appends ``footer`` so the page says where the
+    rest is. Entries are taken in file order, round-robin across sections, so
+    the newest of every kind survives rather than all of one section.
+    """
+    if first_snapshot_fits(
+        format_nightly_notes(sections, changes_heading, section_heading_level=section_heading_level)
+    ):
+        return sections, False
+
+    selected: list[list[str]] = [[] for _ in sections]
+    offsets = [0 for _ in sections]
+
+    def selected_sections() -> list[ChangelogSection]:
+        return [
+            ChangelogSection(section.title, tuple(selected[index]))
+            for index, section in enumerate(sections)
+            if selected[index]
+        ]
+
+    while True:
+        added_this_round = False
+        for index, section in enumerate(sections):
+            if offsets[index] >= len(section.entries):
+                continue
+            entry = section.entries[offsets[index]]
+            selected[index].append(entry)
+            candidate = format_nightly_notes(
+                selected_sections(),
+                changes_heading,
+                footer,
+                section_heading_level=section_heading_level,
+            )
+            if first_snapshot_fits(candidate):
+                offsets[index] += 1
+                added_this_round = True
+            else:
+                selected[index].pop()
+        if not added_this_round:
+            break
+
+    return selected_sections(), True
+
+
 def nightly_notes(
     previous_tag: str = "",
     exclude_notes: str = "",
     exclude_stable_notes: str = "",
+    *,
+    first_snapshot: bool = False,
 ) -> str:
     changelog_text = changelog_file().read_text(encoding="utf-8")
     excluded_entries = excluded_entries_from_notes(exclude_notes)
@@ -294,8 +443,21 @@ def nightly_notes(
         sections = sections_added_since(previous_tag, changelog_text, excluded_entries, released)
     else:
         sections = nightly_candidate_sections(changelog_text, released)
-    body = format_sections(sections)
-    return f"{NIGHTLY_HEADER}\n\n## Changes since the previous snapshot\n\n{body}"
+    changes_heading = (
+        "Changes in this snapshot" if first_snapshot else "Changes since the previous snapshot"
+    )
+    section_heading_level = 3 if first_snapshot else 2
+    complete_list = FIRST_SNAPSHOT_COMPLETE_LIST if first_snapshot else SNAPSHOT_COMPLETE_LIST
+    sections, was_bounded = bounded_sections(
+        sections, changes_heading, complete_list, section_heading_level=section_heading_level
+    )
+    footer = complete_list if was_bounded else ""
+    return format_nightly_notes(
+        sections,
+        changes_heading,
+        footer,
+        section_heading_level=section_heading_level,
+    )
 
 
 def current_branch() -> str:
@@ -388,6 +550,8 @@ def commits_opt_out_of_changelog(base: str, head: str) -> bool:
 
 def is_user_facing_path(path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if NOT_USER_FACING.match(normalized):
+        return False
     return normalized in USER_FACING_PATHS or normalized.startswith(USER_FACING_PATH_PREFIXES)
 
 
@@ -499,9 +663,23 @@ def write_notes_command(args: argparse.Namespace) -> int:
             args.previous_tag,
             args.exclude_notes,
             getattr(args, "exclude_stable_notes", ""),
+            first_snapshot=getattr(args, "first_snapshot", False),
         )
-    Path(args.output).write_text(notes + "\n", encoding="utf-8")
+    Path(args.output).write_text(notes + "\n", encoding="utf-8", newline="\n")
     print(f"Wrote release notes to {args.output}.")
+    return 0
+
+
+def check_size_command(args: argparse.Namespace) -> int:
+    characters = len(Path(args.input).read_bytes().decode("utf-8"))
+    if characters > args.max_characters:
+        print(
+            f"Release notes contain {characters} characters, exceeding the "
+            f"{args.max_characters}-character publication limit.",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"Release notes fit the publication limit ({characters} characters).")
     return 0
 
 
@@ -516,6 +694,8 @@ def build_parser() -> argparse.ArgumentParser:
         notes.add_argument("--previous-tag", default="")
         notes.add_argument("--exclude-notes", default="")
         notes.add_argument("--exclude-stable-notes", default="")
+        if kind == "nightly":
+            notes.add_argument("--first-snapshot", action="store_true")
         notes.add_argument("--output", required=True)
 
     should_build = subparsers.add_parser(
@@ -534,11 +714,18 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--head", default="HEAD")
     check.set_defaults(func=check_command)
 
+    check_size = subparsers.add_parser(
+        "check-size", help="Require release notes to fit the publication limit."
+    )
+    check_size.add_argument("--input", required=True)
+    check_size.add_argument("--max-characters", required=True, type=int)
+    check_size.set_defaults(func=check_size_command)
+
     return parser
 
 
-def main() -> int:
-    args = build_parser().parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     return args.func(args)
 
 

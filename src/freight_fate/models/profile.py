@@ -47,23 +47,59 @@ import sys
 import zlib
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
+from functools import cache
 from pathlib import Path
 
-from ..sim.hos import HosClock
+from ..sim.hos import DutyLog, HosClock
 from ..updater import is_frozen
+from .business import COMPANY_DRIVER, INDEPENDENT_AUTHORITY, is_owner_operator
 from .career import Career
+from .career_ladder import STARTER_CARRIER_NAME
+from .enforcement import DrivingRecord, seed_record_from_save
+from .loyalty import LoyaltyAccount
 from .market import Market
-from .trucks import TruckCondition
+from .safety_record import SAFETY_RECORD_BASELINE
+from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
 log = logging.getLogger(__name__)
 
-SAVE_VERSION = 5
+# The 1.9 line's per-truck condition records are plain dicts, so the
+# TruckCondition dataclass the mainline introduced is not imported here.
+SAVE_VERSION = 11
+
+# The release line careers are created on, stamped into every save (the
+# ``created_line`` field below). 1.9 rebalanced the whole career arc, so
+# careers from earlier lines do not carry over (owner ruling, 2026-08-08):
+# the load gate turns them away without touching the file, which stays
+# playable by the 1.8 builds that wrote it.
+CREATED_LINE = "1.9"
+
+# The first save version only 1.9 builds ever wrote. The 1.8 line (dev and
+# every stable release) stops at SAVE_VERSION 5; versions 6 and up were
+# introduced by the 1.9 career arc (grounded start choices, 2026-06-27) and
+# exist nowhere else. Saves from 1.9 dev builds that predate the
+# ``created_line`` marker are recognized by this threshold instead, so
+# testers' existing 1.9 careers are not locked out.
+FIRST_1_9_SAVE_VERSION = 6
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "chicago_il_us"
+DEFAULT_FUEL_GAL = 150.0
 SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
-SIGNATURE_VERSION = 1
+SIGNATURE_VERSION = 3
 SECRET_FILE = "profile.key"
+
+# Condition fields that were stored flat on the profile before per-truck
+# conditions (SAVE_VERSION 11 / SIGNATURE_VERSION 2). Kept for two reasons:
+# validating v1 signatures against the field set they were signed over, and
+# migrating legacy saves into per-truck records.
+_LEGACY_CONDITION_FIELDS = (
+    "truck_damage_pct",
+    "tire_wear_pct",
+    "brake_wear_pct",
+    "engine_wear_pct",
+    "truck_fuel_gal",
+)
 
 # Packed save container: this magic header, then zlib-deflated profile JSON.
 # The container stops accidental and casual hand-editing; the HMAC signature
@@ -104,12 +140,20 @@ def _legacy_data_dir() -> Path:
     return base / "FreightFate"
 
 
+@cache
 def _is_writable_dir(path: Path) -> bool:
     """Whether ``path`` exists (or can be created) and accepts a write.
 
     Detects installs in protected locations, such as Windows ``Program
     Files``, where the portable ``saves`` folder beside the game would raise
     on the first save and crash the game mid-session.
+
+    Cached per path: ``_save_root()`` re-derives this on every save-directory
+    lookup (several times per menu enter), and the answer cannot change
+    within one run -- ``game_root()`` is fixed once the process starts, and
+    nothing else in the portable-save code path relocates it mid-session.
+    Without the cache this was a real mkdir+write+unlink against disk every
+    single call.
     """
     try:
         path.mkdir(parents=True, exist_ok=True)
@@ -305,8 +349,59 @@ def profiles_dir() -> Path:
     return d
 
 
+def _known_fields(cls, payload) -> dict:
+    """The subset of a nested save payload this build's dataclass accepts."""
+    if not isinstance(payload, dict):
+        return {}
+    return {k: v for k, v in payload.items() if k in cls.__dataclass_fields__}
+
+
 class ProfileIntegrityError(ValueError):
     """A save file failed its integrity signature check."""
+
+
+class LegacyCareerError(Exception):
+    """A career from the 1.8 line (or earlier) that 1.9 does not continue.
+
+    Raised by the load gate *before* any migration or resave machinery runs:
+    the file on disk stays byte-for-byte intact, still loadable by the build
+    that wrote it. Carries the driver name so menus can label the career
+    instead of letting it vanish from the list.
+    """
+
+    def __init__(self, name: str, path: Path | None = None) -> None:
+        super().__init__(f"{name}: career created before the 1.9 line")
+        self.name = name
+        self.path = path
+
+
+def is_pre_1_9_save(data: dict) -> bool:
+    """Whether a raw save dict was created on the 1.8 line or earlier.
+
+    The explicit ``created_line`` marker decides when present. Saves written
+    before the marker existed are judged by their save version: the 1.8 line
+    never wrote a version past 5, while every 1.9 build has written 6 or
+    higher since the career arc landed -- so existing 1.9 tester careers pass
+    and are stamped with the marker on their next save.
+    """
+    if data.get("created_line"):
+        return False
+    version = data.get("version")
+    return not (isinstance(version, int) and version >= FIRST_1_9_SAVE_VERSION)
+
+
+def is_pre_1_9_save_file(path: Path) -> bool:
+    """Whether an on-disk save was created before the 1.9 line.
+
+    Unreadable files are not legacy saves -- they fail the load gate on their
+    own terms. Used by the new-career flow so starting over with the same
+    driver name can never overwrite a career an earlier build still owns.
+    """
+    try:
+        data, _ = _decode_save_bytes(path.read_bytes())
+    except (OSError, ProfileIntegrityError):
+        return False
+    return is_pre_1_9_save(data)
 
 
 def _secret_path() -> Path:
@@ -331,21 +426,44 @@ def _profile_secret() -> bytes:
         return secret
 
 
-# Field names signed by pre-v5 saves, kept in the payload allow-list so a
-# valid v4 signature still verifies on load. v5 saves never contain these keys.
-_LEGACY_SIGNED_FIELDS = frozenset(
-    {"truck_damage_pct", "tire_wear_pct", "road_grime_pct", "truck_fuel_gal"}
-)
-
-
-def _signed_payload(data: dict) -> dict:
-    allowed = set(Profile.__dataclass_fields__) | {"version"} | _LEGACY_SIGNED_FIELDS
+def _signed_payload(data: dict, signature_version: int) -> dict:
+    # The mainline kept a flat _LEGACY_SIGNED_FIELDS allow-list for the same
+    # job; this line versions the signature instead, so the older field set is
+    # consulted only for the saves that were actually signed over it.
+    #
+    # v3 signs every key the file actually carries, so a code-side field
+    # rename or removal can never invalidate a stored signature again. The
+    # older versions signed the dataclass field set of their day and must be
+    # validated against that day's set, not today's: dropping road_grime_pct
+    # from the class (2026-07-20) silently changed the v2 payload and falsely
+    # flagged every save signed before it. Removing a field while any v2
+    # saves remain in the wild means adding it to the v2 set below.
+    if signature_version >= 3:
+        return {
+            key: data[key]
+            for key in sorted(data)
+            if key not in (SIGNATURE_FIELD, SIGNATURE_VERSION_FIELD)
+        }
+    allowed = set(Profile.__dataclass_fields__) | {"version"}
+    if signature_version == 2:
+        # Fields signed by v2-era code that have since left the dataclass.
+        allowed |= {"road_grime_pct"}
+    if signature_version < 2:
+        # v1 saves signed the flat condition fields, before per-truck
+        # conditions replaced them. Validate against that older field set so a
+        # legitimately signed v1 save is not quarantined on first load.
+        allowed = (allowed - {"truck_conditions"}) | set(_LEGACY_CONDITION_FIELDS)
     return {key: data[key] for key in sorted(allowed) if key in data}
 
 
-def _signature_for(data: dict) -> str:
+def _signature_for(data: dict, signature_version: int | None = None) -> str:
+    if signature_version is None:
+        signature_version = int(data.get(SIGNATURE_VERSION_FIELD, 1))
     payload = json.dumps(
-        _signed_payload(data), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        _signed_payload(data, signature_version),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
     )
     return hmac.new(_profile_secret(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
@@ -426,14 +544,138 @@ def _quarantine(path: Path) -> Path:
     return target
 
 
+def _fresh_condition(fuel_gal: float = DEFAULT_FUEL_GAL) -> dict:
+    """A brand-new truck's condition record: no wear, no damage, given fuel.
+
+    Traction equipment rides in the same record -- tire compound, whether a
+    chain set is aboard, and how worn that set is -- because it bolts to the
+    truck, not the driver. Older records missing these keys read as the
+    defaults through the property ``get`` calls below.
+    """
+    return {
+        "tire_wear_pct": 0.0,
+        "brake_wear_pct": 0.0,
+        "engine_wear_pct": 0.0,
+        "damage_pct": 0.0,
+        "grime_pct": 0.0,
+        "fuel_gal": fuel_gal,
+        "tire_type": "all_season",
+        "chains_owned": False,
+        "chain_wear_pct": 0.0,
+    }
+
+
+def _truck_tank_gal(key: str, upgrades: dict | None = None) -> float:
+    """A truck's full-tank capacity, or the default if its specs won't build.
+
+    Upgrades matter here: a long-range tank is a truck's capacity, so a career
+    that bought one must not be migrated back down to the base tank.
+    """
+    try:
+        from .trucks import build_truck_specs
+
+        return float(build_truck_specs(key, upgrades or {}).fuel_tank_gal)
+    except Exception:
+        return DEFAULT_FUEL_GAL
+
+
+def _migrate_flat_conditions(data: dict) -> dict:
+    """Build per-truck condition records from a pre-migration flat profile.
+
+    Every owned truck (and the active/assigned key) inherits the profile's one
+    saved wear and damage set -- no free pristine spares from a swap. The
+    active truck also inherits the saved fuel; other parked trucks start with
+    full tanks (they were sitting still, and a fuel windfall is worth cents,
+    not an exploit).
+    """
+
+    def _pct(key: str) -> float:
+        # Clamped, not trusted. A save carrying an impossible wear figure is
+        # repaired on the way in; loading it verbatim would leave an old career
+        # failing its own invariant check the moment it opened, which reads to
+        # the player as a tampered save rather than an old one.
+        return max(0.0, min(100.0, float(data.get(key, 0.0))))
+
+    tire = _pct("tire_wear_pct")
+    brake = _pct("brake_wear_pct")
+    engine = _pct("engine_wear_pct")
+    damage = _pct("truck_damage_pct")
+
+    owns = is_owner_operator(data.get("business_status", COMPANY_DRIVER))
+    active = str(data.get("truck", "rig")) if owns else "rig"
+    keys = {str(k) for k in (data.get("owned_trucks") or [])}
+    keys.add(active)
+
+    # Tanks are sized with the career's upgrades applied, so a driver who paid
+    # for a long-range tank keeps it through the migration on every truck.
+    upgrades = data.get("upgrades")
+    if not isinstance(upgrades, dict):
+        upgrades = {}
+    active_tank = _truck_tank_gal(active, upgrades)
+    fuel = max(0.0, min(active_tank, float(data.get("truck_fuel_gal", DEFAULT_FUEL_GAL))))
+
+    grime = _pct("road_grime_pct")
+
+    conditions: dict[str, dict] = {}
+    for key in keys:
+        conditions[key] = {
+            "tire_wear_pct": tire,
+            "brake_wear_pct": brake,
+            "engine_wear_pct": engine,
+            "damage_pct": damage,
+            "grime_pct": grime,
+            "fuel_gal": fuel if key == active else _truck_tank_gal(key, upgrades),
+        }
+    return conditions
+
+
+def _migrate_profile_wide_grime(data: dict) -> bool:
+    """Move a profile-wide ``road_grime_pct`` into each truck's record.
+
+    Grime followed the driver on this line while every other kind of wear had
+    already moved onto the truck -- an alpha-only gap left when the mainline's
+    per-truck accessors were dropped as duplicates during a merge. A save
+    written before this fix carries the flat field and condition records with
+    no ``grime_pct``, so match on that shape rather than on a save version:
+    the records were already fanned out, so there is no version to key off.
+
+    Every truck inherits the one saved figure, the same rule the original
+    fan-out uses -- a parked truck was as dirty as the career said it was, and
+    handing out clean spares would wash a fleet for free.
+    """
+    flat = data.pop("road_grime_pct", None)
+    conditions = data.get("truck_conditions")
+    if not isinstance(conditions, dict):
+        return flat is not None
+    try:
+        grime = max(0.0, min(100.0, float(flat if flat is not None else 0.0)))
+    except (TypeError, ValueError):
+        grime = 0.0
+    moved = False
+    for record in conditions.values():
+        if isinstance(record, dict) and "grime_pct" not in record:
+            record["grime_pct"] = grime
+            moved = True
+    return moved or flat is not None
+
+
 @dataclass
 class Profile:
     name: str = "Driver"
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
-    # Per-truck condition, keyed into trucks.TRUCK_CATALOG. Records for trucks
-    # this build has never heard of are kept as-is (a newer build may own them).
-    truck_conditions: dict[str, TruckCondition] = field(default_factory=dict)
+    # The release line this career was created on. New careers stamp the
+    # current line; a save without the field is judged by its save version
+    # instead (see is_pre_1_9_save), and pre-1.9 saves never get this far --
+    # the load gate turns them away before from_dict, so the default here can
+    # only ever backfill a 1.9 career from before the marker existed.
+    created_line: str = CREATED_LINE
+    # road_grime_pct is a property over the active truck's record (below), not
+    # a field: grime belongs to the tractor that got dirty, same as every other
+    # kind of wear.
+    # truck_conditions is declared above -- this line's records are plain dicts
+    # holding traction gear as well as wear, so the mainline's typed record is
+    # not repeated here.
     # An old save was converted to the per-truck format; the player has not yet
     # heard the one-time notice. Cleared when they dismiss it.
     migration_notice_pending: bool = False
@@ -444,25 +686,80 @@ class Profile:
     integrity_modified: bool = False
     # The player has not yet heard the one-time spoken notice about the flag.
     integrity_notice_pending: bool = False
+    # Clock presses left that still append "hours of service moved to Alt A,
+    # Alt S, and Alt D". The detail moved off C onto its own keys, and muscle
+    # memory says C, so the pointer rides C -- three times, then never again.
+    hos_key_notice_left: int = 3
     game_hours: float = 6.0  # in-game clock, hours since career start
     # Whole-day offset used only by the spoken calendar and seasonal weather.
     # Existing careers can anchor their independent calendar to today's date
     # without changing deadlines, HOS, markets, or elapsed career time.
     calendar_offset_days: int = 0
     tutorial_done: bool = False
-    truck: str = "rig"  # key into trucks.TRUCK_CATALOG
-    owned_trucks: list[str] = field(default_factory=lambda: ["rig"])
-    upgrades: dict[str, int] = field(default_factory=dict)  # upgrade key -> tier
+    truck: str = "rig"  # owner-operator active tractor, or assignment key
+    owned_trucks: list[str] = field(default_factory=list)  # owned tractors after buy-in
+    # Condition follows the truck, not the profile: wear, damage, and fuel per
+    # owned truck key. The flat ``tire_wear_pct``/``truck_fuel_gal``/... names
+    # remain as properties (below) proxying to the active truck's record.
+    truck_conditions: dict[str, dict] = field(default_factory=dict)
+    upgrades: dict[str, int] = field(default_factory=dict)  # owned-tractor upgrade key -> tier
     active_trip: dict | None = None  # mid-delivery snapshot, see DrivingState
     dispatch_board_cache: dict | None = None
     fatigue: float = 0.0  # 0 fresh .. 100 exhausted
+    active_buffs: list = field(default_factory=list)  # timed consumables, see data/buffs.py
     pay_advance: float = 0.0  # outstanding dispatcher advance owed, repaid at delivery
+    # Fines a settlement could not fully collect. Carried forward and taken
+    # out of the next one, because the alternative -- saying a fine was paid
+    # and then writing it off -- tells the player something untrue.
+    fines_owed: float = 0.0
     pay_advance_used_for_load: bool = False
+    business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
+    carrier_name: str = STARTER_CARRIER_NAME
+    carrier_key: str = DEFAULT_START_KEY
+    start_mode: str = START_MODE_COMPANY
+    authority_readiness: bool = False
+    # Owner-operator-purchased weigh-in-motion bypass subscription (see
+    # models/business.has_weigh_station_transponder). Company drivers never
+    # set this -- their fleet issues one free at
+    # business.WEIGH_STATION_TRANSPONDER_LEVEL instead.
+    weigh_station_transponder: bool = False
+    trailer_programs: list[str] = field(default_factory=list)
+    owned_trailers: list[str] = field(default_factory=list)
+    # The driver chose to stay a company driver with the buy-in open (Career
+    # 1.9, Business status "Stay a company driver"). Carried here so the two
+    # lines agree on the save's field list; the dev line never sets it.
+    owner_operator_declined: bool = False
     career: Career = field(default_factory=Career)
+    # Citations, serious violations, and CDL standing. Enforcement outlives a
+    # trip: the old build kept the felony count on the trip snapshot and then
+    # threw the snapshot away, so nothing a driver did downstream ever
+    # remembered it.
+    driving_record: DrivingRecord = field(default_factory=DrivingRecord)
+    # How interesting this driver looks to a screening lane, 0 to 100, higher
+    # being worse. Derived from reputation, citations, out-of-service history,
+    # damage carried and clean inspections (see models/safety_record.py) and
+    # refreshed whenever any of those move; stored so the scale can read it
+    # without rebuilding the whole history mid-approach. Spoken as "safety
+    # record", never as a number and never as a trade acronym.
+    selection_score: float = SAFETY_RECORD_BASELINE
+    # Times this driver has been placed out of service, roadside or at a
+    # scale. Feeds the safety record; kept on the profile rather than the
+    # licence file because it is a carrier fact, not a licensing one.
+    out_of_service_events: int = 0
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
+    duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
+    loyalty: LoyaltyAccount = field(default_factory=LoyaltyAccount)  # truck stop loyalty program
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
+    # Station ids the driver saved with the favorite key; they surface as the
+    # radio dial's early Favorites category. Additive with a default, so older
+    # saves load unchanged and from_dict simply fills it in.
+    radio_favorites: list[str] = field(default_factory=list)
+    # Last few delivered from:to lanes, newest first -- assigned dispatch
+    # prefers a lane not in this list so short-haul careers stop bouncing
+    # between the same two cities forever.
+    recent_lanes: list[str] = field(default_factory=list)
 
     # Set on the instance by from_dict when the raw dict needed a format
     # migration, so load() can rewrite the converted save to disk. Never
@@ -483,73 +780,298 @@ class Profile:
         from .save_migration import migrate_save_data
 
         d, migrated = migrate_save_data(dict(d))
+        # A 1.9 career from before the created-on marker existed: the load
+        # gate already vouched for it by save version, so stamp the explicit
+        # marker on the resave and the version threshold is needed only once.
+        if "created_line" not in d:
+            migrated = True
         d.pop("version", None)
         d.pop(SIGNATURE_FIELD, None)
         d.pop(SIGNATURE_VERSION_FIELD, None)
-        career = Career(**d.pop("career", {}))
-        market = Market(**d.pop("market", {}))
+        # Nested payloads keep only the fields this build knows: saves written
+        # by a newer snapshot (or an older one with since-removed fields) load
+        # instead of crashing on an unexpected keyword.
+        # Pre-11 saves stored one flat condition set; fan it out per truck so
+        # each owned tractor keeps its own wear, damage, and fuel from here on.
+        if not isinstance(d.get("truck_conditions"), dict):
+            d["truck_conditions"] = _migrate_flat_conditions(d)
+        # Grime moved onto the truck after those records already existed, so an
+        # alpha save can be fanned out yet still carry the flat field. Matched
+        # on shape rather than save version for exactly that reason, and run
+        # after the fan-out so both paths land on the same records.
+        if _migrate_profile_wide_grime(d):
+            migrated = True
+        career = Career(**_known_fields(Career, d.pop("career", {})))
+        # A career from before the enforcement record existed is seeded from
+        # whatever offenses the save still holds -- no amnesty -- and hears a
+        # one-time explanation of where it stands.
+        if "driving_record" in d:
+            record = DrivingRecord(**_known_fields(DrivingRecord, d.pop("driving_record") or {}))
+        else:
+            record = seed_record_from_save(d)
+        market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
-        raw_conditions = d.pop("truck_conditions", None)
-        conditions = {}
-        if isinstance(raw_conditions, dict):
-            conditions = {str(k): TruckCondition.from_dict(v) for k, v in raw_conditions.items()}
-        skip = ("career", "market", "hos", "truck_conditions")
-        known = {f for f in cls.__dataclass_fields__ if f not in skip}
+        duty_log = DutyLog.from_dict(d.pop("duty_log", None))
+        loyalty = LoyaltyAccount(**_known_fields(LoyaltyAccount, d.pop("loyalty", {})))
+        known = {
+            f
+            for f in cls.__dataclass_fields__
+            if f not in ("career", "driving_record", "market", "hos", "duty_log", "loyalty")
+        }
+        # truck_conditions rides through kwargs: on this line the records are
+        # plain dicts, already fanned out per truck above, so they need no
+        # per-record construction on the way in.
         kwargs = {k: v for k, v in d.items() if k in known}
-        profile = cls(career=career, market=market, hos=hos, truck_conditions=conditions, **kwargs)
+        profile = cls(
+            career=career,
+            driving_record=record,
+            market=market,
+            hos=hos,
+            duty_log=duty_log,
+            loyalty=loyalty,
+            **kwargs,
+        )
+        # A save that had to be migrated on load is rewritten on the next save,
+        # so the conversion is not redone on every launch.
         profile.needs_migration_resave = migrated
         return profile
 
     # -- truck ------------------------------------------------------------------
 
+    def owns_equipment(self) -> bool:
+        """True when the profile is responsible for owned tractor equipment."""
+        return is_owner_operator(self.business_status)
+
+    def active_truck_key(self) -> str:
+        """Truck model currently used for simulation.
+
+        Company drivers operate whatever tractor the carrier fleet has
+        assigned for their level band. The profile still carries ``truck``
+        for save compatibility and for the owner-operator path, but
+        company-driver play should not treat it as player-owned equipment.
+        """
+        if self.owns_equipment():
+            return self.truck
+        from .carrier_fleet import assigned_truck_key, slip_seat_pool, slip_seats
+
+        # A slip-seating driver keeps the tractor dispatch handed them for this
+        # run (``take_slip_seat`` wrote it into ``truck``, which has always
+        # doubled as the assignment key). It has to still be one of this
+        # driver's spares to count: a promotion moves the pool on, and a save
+        # written before slip-seating carries a value from the old scheme.
+        if slip_seats(self) and self.truck in slip_seat_pool(self):
+            return self.truck
+        return assigned_truck_key(self)
+
+    def take_slip_seat(self, job) -> str:
+        """Draw the tractor dispatch has picked for this load; returns its key.
+
+        Company drivers only, and only while they are still slip-seating --
+        an owner-operator's truck is their own, and a senior company driver
+        has a seat of their own to come back to.
+        """
+        from .carrier_fleet import assigned_truck_key, slip_seats
+
+        if self.owns_equipment() or not slip_seats(self):
+            return self.active_truck_key()
+        key = assigned_truck_key(self, job)
+        self.truck = key
+        return key
+
+    def visible_owned_trucks(self) -> tuple[str, ...]:
+        """Player-owned tractors to show in menus."""
+        return tuple(self.owned_trucks) if self.owns_equipment() else ()
+
+    def active_trailer_programs(self) -> tuple[str, ...]:
+        """Trailer programs the player controls for owner-operator dispatch."""
+        if not self.owns_equipment():
+            return ()
+        from .trailers import DEFAULT_TRAILER_PROGRAMS, normalized_trailer_programs
+
+        programs = normalized_trailer_programs(self.trailer_programs)
+        if self.business_status == INDEPENDENT_AUTHORITY:
+            owned = normalized_trailer_programs(self.owned_trailers)
+            combined = list(programs)
+            for key in owned:
+                if key not in combined:
+                    combined.append(key)
+            if combined:
+                return tuple(combined)
+        if programs:
+            return programs
+        return DEFAULT_TRAILER_PROGRAMS
+
+    def visible_owned_trailers(self) -> tuple[str, ...]:
+        """Player-owned trailers to show in menus."""
+        if self.business_status != INDEPENDENT_AUTHORITY:
+            return ()
+        from .trailers import normalized_trailer_programs
+
+        return normalized_trailer_programs(self.owned_trailers)
+
     def truck_specs(self):
         """The active truck's specs with this profile's upgrades applied."""
         from .trucks import build_truck_specs
 
-        return build_truck_specs(self.truck, self.upgrades)
+        upgrades = self.upgrades if self.owns_equipment() else {}
+        return build_truck_specs(self.active_truck_key(), upgrades)
 
-    def condition_for(self, truck_key: str) -> TruckCondition:
-        """This truck's condition record, created purchase-fresh if absent."""
-        cond = self.truck_conditions.get(truck_key)
-        if cond is None:
-            cond = TruckCondition.fresh(truck_key, self.upgrades)
-            self.truck_conditions[truck_key] = cond
-        return cond
+    # -- per-truck condition ---------------------------------------------------
+    #
+    # Condition lives in ``truck_conditions`` keyed by truck. The flat names
+    # below stay as properties routed through the *active* truck's record, so
+    # the garage, the rig readout, and the save layer keep using ``p.tire_wear_pct``
+    # unchanged while each truck carries its own wear, damage, and fuel.
 
-    # The active truck's condition under the pre-v5 flat names, so gameplay
-    # code can keep saying "the truck" without caring which truck that is.
+    def _condition(self) -> dict:
+        """The active truck's condition record, created on first touch."""
+        key = self.active_truck_key()
+        rec = self.truck_conditions.get(key)
+        if rec is None:
+            rec = _fresh_condition()
+            self.truck_conditions[key] = rec
+        return rec
 
-    @property
-    def truck_fuel_gal(self) -> float:
-        return self.condition_for(self.truck).fuel_gal
-
-    @truck_fuel_gal.setter
-    def truck_fuel_gal(self, value: float) -> None:
-        self.condition_for(self.truck).fuel_gal = value
-
-    @property
-    def truck_damage_pct(self) -> float:
-        return self.condition_for(self.truck).damage_pct
-
-    @truck_damage_pct.setter
-    def truck_damage_pct(self, value: float) -> None:
-        self.condition_for(self.truck).damage_pct = value
+    def provision_truck_condition(self, key: str, fuel_gal: float | None = None) -> None:
+        """Give a newly acquired truck its own fresh, full-tank record."""
+        tank = _truck_tank_gal(key) if fuel_gal is None else float(fuel_gal)
+        self.truck_conditions[key] = _fresh_condition(tank)
 
     @property
     def tire_wear_pct(self) -> float:
-        return self.condition_for(self.truck).tire_wear_pct
+        return float(self._condition().get("tire_wear_pct", 0.0))
 
     @tire_wear_pct.setter
     def tire_wear_pct(self, value: float) -> None:
-        self.condition_for(self.truck).tire_wear_pct = value
+        self._condition()["tire_wear_pct"] = float(value)
+
+    @property
+    def brake_wear_pct(self) -> float:
+        return float(self._condition().get("brake_wear_pct", 0.0))
+
+    @brake_wear_pct.setter
+    def brake_wear_pct(self, value: float) -> None:
+        self._condition()["brake_wear_pct"] = float(value)
+
+    @property
+    def engine_wear_pct(self) -> float:
+        return float(self._condition().get("engine_wear_pct", 0.0))
+
+    @engine_wear_pct.setter
+    def engine_wear_pct(self, value: float) -> None:
+        self._condition()["engine_wear_pct"] = float(value)
+
+    @property
+    def truck_damage_pct(self) -> float:
+        return float(self._condition().get("damage_pct", 0.0))
+
+    @truck_damage_pct.setter
+    def truck_damage_pct(self, value: float) -> None:
+        self._condition()["damage_pct"] = float(value)
+
+    @property
+    def truck_fuel_gal(self) -> float:
+        return float(self._condition().get("fuel_gal", DEFAULT_FUEL_GAL))
+
+    @truck_fuel_gal.setter
+    def truck_fuel_gal(self, value: float) -> None:
+        self._condition()["fuel_gal"] = float(value)
 
     @property
     def road_grime_pct(self) -> float:
-        return self.condition_for(self.truck).grime_pct
+        return float(self._condition().get("grime_pct", 0.0))
 
     @road_grime_pct.setter
     def road_grime_pct(self, value: float) -> None:
-        self.condition_for(self.truck).grime_pct = value
+        self._condition()["grime_pct"] = float(value)
+
+    @property
+    def tire_type(self) -> str:
+        return str(self._condition().get("tire_type", "all_season"))
+
+    @tire_type.setter
+    def tire_type(self, value: str) -> None:
+        self._condition()["tire_type"] = str(value)
+
+    @property
+    def chains_owned(self) -> bool:
+        return bool(self._condition().get("chains_owned", False))
+
+    @chains_owned.setter
+    def chains_owned(self, value: bool) -> None:
+        self._condition()["chains_owned"] = bool(value)
+
+    @property
+    def chain_wear_pct(self) -> float:
+        return float(self._condition().get("chain_wear_pct", 0.0))
+
+    @chain_wear_pct.setter
+    def chain_wear_pct(self, value: float) -> None:
+        self._condition()["chain_wear_pct"] = float(value)
+
+    def load_truck_condition(self, truck) -> None:
+        """Put the saved rig condition onto a fresh ``TruckState`` at trip start.
+
+        Fuel, incident damage, and the wear meters travel together so no
+        sync site can pick up one and drop another.
+        """
+        truck.fuel_gal = min(self.truck_fuel_gal, truck.specs.fuel_tank_gal)
+        truck.damage_pct = self.truck_damage_pct
+        truck.tire_wear_pct = self.tire_wear_pct
+        truck.brake_wear_pct = self.brake_wear_pct
+        truck.engine_wear_pct = self.engine_wear_pct
+        truck.tire_type = self.tire_type
+        truck.chain_wear_pct = self.chain_wear_pct
+
+    RECENT_LANES_KEPT = 6
+
+    def remember_lane(self, lane: str) -> None:
+        """Record a delivered from:to lane for dispatch-variety preference."""
+        if not lane:
+            return
+        lanes = [lane] + [entry for entry in self.recent_lanes if entry != lane]
+        self.recent_lanes = lanes[: self.RECENT_LANES_KEPT]
+
+    def store_truck_condition(self, truck) -> None:
+        """Write the rig's current condition back to the profile for saving."""
+        self.truck_fuel_gal = truck.fuel_gal
+        self.truck_damage_pct = truck.damage_pct
+        self.tire_wear_pct = truck.tire_wear_pct
+        self.brake_wear_pct = truck.brake_wear_pct
+        self.engine_wear_pct = truck.engine_wear_pct
+        # Tire type is chosen at the garage, never behind the wheel, so it only
+        # flows profile-to-truck. Chain wear accrues while driving chained.
+        self.chain_wear_pct = truck.chain_wear_pct
+
+    def fatigue_buff_rate(self, now_h: float) -> float:
+        """Fatigue accrual multiplier from the active food or drink buff.
+
+        1.0 when nothing is active. ``now_h`` is the absolute game hour
+        (game_hours plus trip minutes), the same clock the entries store.
+        """
+        for entry in self.active_buffs:
+            if entry.get("group") == "fatigue" and now_h < float(entry.get("expires_h", 0.0)):
+                return float(entry.get("rate", 1.0))
+        return 1.0
+
+    def add_timed_buff(self, entry: dict) -> None:
+        """One active buff per group: the newest replaces its predecessor."""
+        group = entry.get("group")
+        self.active_buffs = [b for b in self.active_buffs if b.get("group") != group]
+        self.active_buffs.append(entry)
+
+    def expire_buffs(self, now_h: float) -> list[dict]:
+        """Drop timed buffs past their hour; returns them for announcing."""
+        expired = [b for b in self.active_buffs if now_h >= float(b.get("expires_h", 0.0))]
+        if expired:
+            self.active_buffs = [b for b in self.active_buffs if b not in expired]
+        return expired
+
+    # The mainline's condition accessors lived here -- condition_for plus a
+    # second set of flat-name properties over a typed TruckCondition record.
+    # This line already has both, above, over its own dict-shaped records:
+    # keeping the pair would silently shadow them, and road_grime_pct is a
+    # plain field here rather than a per-truck value.
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)
@@ -615,6 +1137,13 @@ class Profile:
             # warning stays truthful and the file is not re-tried every visit.
             _quarantine(path)
             raise
+        if is_pre_1_9_save(data):
+            # A career from the 1.8 line or earlier. 1.9 starts everyone
+            # fresh (the rebalanced arc cannot absorb old-scale careers), so
+            # refuse before any signature check, migration, or resave can
+            # touch the file: it stays intact on disk, still playable by the
+            # build that wrote it.
+            raise LegacyCareerError(str(data.get("name") or "Driver"), path)
         signed = SIGNATURE_FIELD in data
         resign = False
         tampered = False

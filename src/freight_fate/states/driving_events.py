@@ -5319,7 +5319,9 @@ class DrivingEventMixin:
         # Sedona to Camp Verde on AZ-260, 2026-07-18), and speaking a dispatch
         # reroute the trip never performs left those runs stuck past the yard.
         exit_at = (
-            exit_details[0] if exit_details is not None else self._synthetic_destination_exit_mi()
+            exit_details[0]
+            if exit_details is not None
+            else self._synthetic_destination_exit_mi()
         )
         # Drop back a full exit window, not a fixed mile: under time
         # compression one mile passes in a few real seconds, making the
@@ -5333,7 +5335,9 @@ class DrivingEventMixin:
                 return
             self._missed_destination_exit_said = True
             self.ctx.audio.play("ui/warning")
-            self._set_status("Destination exit missed. No safe turnaround on this approach.")
+            self._set_status(
+                "Destination exit missed. No safe turnaround on this approach."
+            )
             self.ctx.say_event(
                 f"You missed the destination exit for {self._destination_facility_text()}. "
                 "Dispatch cannot find a safe turnaround on this approach.",

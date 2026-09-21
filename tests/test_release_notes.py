@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 from freight_fate.updater import flatten_markdown
 
 
@@ -62,9 +64,177 @@ def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
     notes = release_notes.nightly_notes()
 
     assert "Preview snapshot for players" in notes
+    assert "## Changes since the previous snapshot" in notes
     assert "## Added" in notes
     assert "- **Dispatch.** New spoken board details." in notes
     assert "chore: seed changelog" not in notes
+
+
+def test_first_career_snapshot_uses_accurate_release_notes_heading(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog("### Added\n- **Career.** A new driver can begin a career.\n"),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(first_snapshot=True)
+
+    assert "## Changes in this snapshot" in notes
+    assert "Changes since the previous snapshot" not in notes
+
+
+def test_first_career_snapshot_notes_fit_github_without_cutting_entries(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    added_entries = "\n".join(
+        f"- **Career improvement {index}.** " + ("Player-facing detail. " * 90)
+        for index in range(100)
+    )
+    fixed_entries = "\n".join(
+        f"- **Career fix {index}.** " + ("Clear fix detail. " * 90) for index in range(100)
+    )
+    repo = make_repo(
+        tmp_path,
+        changelog(f"### Added\n{added_entries}\n\n### Fixed\n{fixed_entries}\n"),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(first_snapshot=True)
+
+    assert len(notes) <= release_notes.GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+    assert "### Added" in notes
+    assert "### Fixed" in notes
+    assert "\n## Added\n" not in notes
+    assert "\n## Fixed\n" not in notes
+    assert "**Career improvement 0.**" in notes
+    assert "**Career fix 0.**" in notes
+    assert "## Complete change list" in notes
+    assert "CHANGELOG.md" in notes
+    emitted = {
+        release_notes.format_entry(entry)
+        for section in release_notes.parse_sections(notes, min_heading_level=3)
+        for entry in section.entries
+    }
+    source = {
+        release_notes.format_entry(entry)
+        for entry in [*added_entries.splitlines(), *fixed_entries.splitlines()]
+    }
+    assert emitted
+    assert emitted <= source
+
+
+def test_later_snapshot_notes_are_bounded_too(tmp_path, monkeypatch):
+    # A rewrite of the curated entries makes every bullet read as new to the
+    # previous tag; the page must still fit, and say where the rest is.
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("### Added\n- **Old wording.** Long ago.\n"))
+    git(repo, "tag", "nightly-20260615")
+    added_entries = "\n".join(
+        f"- **Career improvement {index}.** " + ("Player-facing detail. " * 90)
+        for index in range(100)
+    )
+    fixed_entries = "\n".join(
+        f"- **Career fix {index}.** " + ("Clear fix detail. " * 90) for index in range(100)
+    )
+    (repo / "CHANGELOG.md").write_text(
+        changelog(f"### Added\n{added_entries}\n\n### Fixed\n{fixed_entries}\n"),
+        encoding="utf-8",
+    )
+    commit(repo, "docs: rewrite every entry")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    assert len(notes) <= release_notes.GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+    assert "## Changes since the previous snapshot" in notes
+    assert "\n## Added\n" in notes
+    assert "\n## Fixed\n" in notes
+    assert "**Career improvement 0.**" in notes
+    assert "**Career fix 0.**" in notes
+    assert "## Complete change list" in notes
+    assert "This snapshot carries" in notes
+    assert "**Old wording.**" not in notes
+
+
+def test_republished_entries_are_not_new_but_listed_leads_still_are(tmp_path, monkeypatch):
+    # A rewrite reworded every bullet after the previous snapshot; the
+    # republished file names that commit, and the one bullet that was added
+    # between the tag and the rewrite, so the snapshot lists only that one
+    # plus anything added after the rewrite.
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog("### Added\n- **Old wording.** A long story about the feature.\n"),
+    )
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **Old wording.** A long story about the feature.\n"
+            "- **Pausing no longer takes you off duty.** Long story.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "fix: pause stays on duty")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **New wording.** Short.\n"
+            "- **Pausing no longer takes you off duty.** Short.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "docs(changelog): rewrite")
+    rewrite = git(repo, "rev-parse", "HEAD")
+    (repo / "tools").mkdir()
+    (repo / "tools" / "release_notes_republished.txt").write_text(
+        f"# rewrite\nref = {rewrite}\nnew = Pausing no longer takes you off duty.\n",
+        encoding="utf-8",
+    )
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **Tonight's change.** Short.\n- **New wording.** Short.\n"
+            "- **Pausing no longer takes you off duty.** Short.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "feat: tonight")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    assert "**Tonight's change.**" in notes
+    assert "**Pausing no longer takes you off duty.**" in notes
+    assert "**New wording.**" not in notes
+
+
+def test_release_notes_size_check_rejects_oversized_input(tmp_path, capsys):
+    release_notes = load_release_notes_module()
+    notes = tmp_path / "notes.md"
+    notes.write_text("x" * 101, encoding="utf-8")
+
+    result = release_notes.main(["check-size", "--input", str(notes), "--max-characters", "100"])
+
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "101 characters" in captured.err
+    assert "100-character publication limit" in captured.err
+
+
+def test_release_notes_size_check_counts_crlf_characters(tmp_path, capsys):
+    release_notes = load_release_notes_module()
+    notes = tmp_path / "notes.md"
+    notes.write_bytes(b"x\r\n" * 40)
+
+    result = release_notes.main(["check-size", "--input", str(notes), "--max-characters", "100"])
+
+    assert result == 1
+    assert "120 characters" in capsys.readouterr().err
+
+
+def test_first_snapshot_budget_reserves_the_written_newline():
+    release_notes = load_release_notes_module()
+
+    assert release_notes.first_snapshot_fits("x" * 119_999)
+    assert not release_notes.first_snapshot_fits("x" * 120_000)
 
 
 def test_stable_notes_extract_matching_version_block(tmp_path, monkeypatch):
@@ -435,6 +605,291 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert "--exclude-stable-notes latest-stable-notes.md" in workflow
     assert "tools/release_notes.py nightly" in workflow
     assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow
+    assert "macos-arm64.zip" not in workflow
+
+
+def test_career_19_snapshot_workflow_contract():
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    ).read_text(encoding="utf-8")
+
+    assert 'CAREER_BRANCH: "feat/career-1.9"' in workflow
+    assert "group: career-19-snapshot\n" in workflow
+    assert "career-19-snapshot-${{ github.ref }}" not in workflow
+    assert 'cron: "37 2 * * *"' in workflow
+    assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
+    assert "commit_sha: ${{ steps.check.outputs.commit_sha }}" in workflow
+    assert 'echo "commit_sha=$(git rev-parse HEAD)"' in workflow
+    # Windows, macOS, Linux build, the Linux distro smoke, and the release.
+    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 5
+    assert 'git tag --list "1.9-tester-*"' in workflow
+    assert "tools/release_notes.py should-build-nightly" in workflow
+    assert "tools/release_notes.py nightly" in workflow
+    assert "tools/release_notes.py nightly --first-snapshot" in workflow
+    assert "tools/release_notes.py check-size --input notes.md --max-characters 120000" in workflow
+    assert "./build-release.ps1" in workflow
+    assert "windows-portable.zip" in workflow
+    assert "macos-arm64.zip" in workflow
+    assert "--prerelease" in workflow
+    assert "COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}" in workflow
+    assert '--target "$COMMIT_SHA"' in workflow
+    assert '--target "$CAREER_BRANCH"' not in workflow
+    assert "needs.build_windows.result == 'success'" in workflow
+    assert "needs.build_macos.result == 'success'" in workflow
+    assert "needs.build_linux.result == 'success'" in workflow
+    assert "needs.smoke_linux.result == 'success'" in workflow
+
+
+def test_career_19_snapshot_builds_and_boots_a_linux_release():
+    """The Linux tarball and AppImage ship only after both boot untouched on
+    the popular distributions, from a build whose glibc floor is 22.04's."""
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    ).read_text(encoding="utf-8")
+    assert "tools/build_release.py --rust --smoke" in workflow
+    assert "tools/build_appimage.py --rust" in workflow
+    assert "bash /work/tools/linux_smoke.sh" in workflow
+    # One build job, two native legs: the PC one on 22.04 and the ARM64 one
+    # (the Blazie BT Speak and BT Braille, Raspberry Pi) on GitHub's
+    # hosted ARM runner of the same release, so both carry the same glibc
+    # floor. Each leg uploads its own pair of downloads.
+    assert "            runner: ubuntu-22.04\n" in workflow
+    assert "            runner: ubuntu-22.04-arm\n" in workflow
+    assert "            tarball: linux-x64\n" in workflow
+    assert "            tarball: linux-arm64\n" in workflow
+    assert "name: Linux-${{ matrix.arch }}" in workflow
+    assert "dist/FreightFate-*-${{ matrix.tarball }}.tar.gz" in workflow
+    assert "dist/FreightFate-*-linux-${{ matrix.arch }}.AppImage" in workflow
+    # The smoke matrix runs on both architectures, minus Arch on ARM64
+    # (Docker Hub's archlinux image is amd64 only).
+    assert "arch: [x86_64, aarch64]" in workflow
+    assert (
+        "runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}"
+        in workflow
+    )
+    assert (
+        "        exclude:\n          - arch: aarch64\n            image: archlinux:latest\n"
+        in workflow
+    )
+    for image in (
+        "ubuntu:22.04",
+        "ubuntu:24.04",
+        "debian:12",
+        "debian:13",
+        "fedora:latest",
+        "archlinux:latest",
+        "opensuse/tumbleweed:latest",
+    ):
+        assert f"- {image}\n" in workflow, image
+    assert (
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage "
+        "FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt"
+        in workflow
+    )
+
+    smoke = (Path(__file__).resolve().parents[1] / "tools" / "linux_smoke.sh").read_text(
+        encoding="utf-8"
+    )
+    # Speech is not disabled in the container boot: libprism.so and its
+    # bundled glib are really opened, which is where a loader would object.
+    assert "FREIGHT_FATE_NO_SPEECH" not in smoke
+    assert "prism: loaded from" in smoke
+    assert "Speech backend: Speech Dispatcher" in smoke
+    assert 'grep -q " ERROR "' in smoke
+    assert "--appimage-extract-and-run --smoke" in smoke
+    assert "xvfb-run" in smoke
+    # The script boots whichever pair matches the container it runs in.
+    assert 'case "$(uname -m)"' in smoke
+    assert "x86_64) tarball_arch=x64; appimage_arch=x86_64 ;;" in smoke
+    assert "aarch64) tarball_arch=arm64; appimage_arch=aarch64 ;;" in smoke
+    assert '/work/dist/FreightFate-*-linux-"$tarball_arch".tar.gz' in smoke
+    assert '/work/dist/FreightFate-*-linux-"$appimage_arch".AppImage' in smoke
+
+
+def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    jobs = workflow["jobs"]
+    mac = jobs["build_macos"]
+
+    assert mac["runs-on"] == "macos-26"
+    steps = mac["steps"]
+    named_steps = {
+        step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
+    }
+    assert any(step.get("uses") == "astral-sh/setup-uv@v8.2.0" for step in steps)
+    assert named_steps["Install the pinned Rust toolchain"][1]["run"] == "rustup show"
+    # No brewed SDL anywhere in the job: Homebrew's sdl2 is sdl2-compat,
+    # which loads SDL3 at runtime and dies on player Macs. SDL2 is compiled
+    # into the executable instead.
+    assert all(
+        "brew install" not in step.get("run", "") or "sdl" not in step.get("run", "")
+        for step in steps
+    )
+    assert "uv run python tools/fetch_bass.py\n" in named_steps["Fetch BASS"][1]["run"]
+    assert "uv run python tools/fetch_bass.py --check" in named_steps["Fetch BASS"][1]["run"]
+    assert named_steps["Check Rust formatting"][1]["run"] == "cargo fmt --all --check"
+    assert (
+        named_steps["Lint Rust targets"][1]["run"]
+        == "cargo clippy --all-targets --locked -- -D warnings"
+    )
+    assert named_steps["Test Rust workspace"][1]["run"] == "cargo test -p ff-core -p freight-fate"
+    # The launch smoke is BACK on macOS: the hang that forced non-launch
+    # verification was the boot probes, moved off the boot path 2026-08-30.
+    # A packaged app that cannot boot must fail the build, not ship.
+    assert (
+        "uv run python tools/build_release.py --rust --smoke --tag"
+        in named_steps["Build the macOS release"][1]["run"]
+    )
+    assert "--macos-non-launch-verify" not in named_steps["Build the macOS release"][1]["run"]
+    assert "--skip-smoke" not in named_steps["Build the macOS release"][1]["run"]
+    assert "Contents/MacOS/FreightFate" not in named_steps["Build the macOS release"][1]["run"]
+    assert all("build-release.ps1" not in step.get("run", "") for step in steps)
+    upload = next(step for step in steps if step.get("uses") == "actions/upload-artifact@v7")
+    assert upload["with"]["path"] == "dist/FreightFate-*-macos-arm64.zip"
+
+
+def test_career_19_release_requires_and_verifies_every_platform_archive():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    release = workflow["jobs"]["release"]
+
+    assert release["needs"] == [
+        "prepare",
+        "build_windows",
+        "build_macos",
+        "build_linux",
+        "smoke_linux",
+    ]
+    assert "needs.build_windows.result == 'success'" in release["if"]
+    assert "needs.build_macos.result == 'success'" in release["if"]
+    assert "needs.build_linux.result == 'success'" in release["if"]
+    assert "needs.smoke_linux.result == 'success'" in release["if"]
+    downloads = [
+        step for step in release["steps"] if step.get("uses") == "actions/download-artifact@v7"
+    ]
+    assert {step["with"]["name"] for step in downloads} == {
+        "Windows",
+        "macOS-arm64",
+        "Linux-x86_64",
+        "Linux-aarch64",
+    }
+    assert all(step["with"]["path"] == "assets" for step in downloads)
+    verify = next(
+        step for step in release["steps"] if step.get("name") == "Verify release archives"
+    )
+    assert "assets/FreightFate-*-windows-portable.zip" in verify["run"]
+    assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
+    assert "assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
+    assert "assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
+    assert "assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
+    assert "assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
+    assert verify["run"].count('"${#') == 6
+    checksum = next(
+        step
+        for step in release["steps"]
+        if step.get("name") == "Prepare and verify release notes and checksums"
+    )
+    assert (
+        "sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip "
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage "
+        "FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage" in checksum["run"]
+    )
+
+
+def test_player_manual_distinguishes_stable_and_career_19_mac_archives():
+    manual = (Path(__file__).resolve().parents[1] / "docs" / "user-manual.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "| macOS stable | `FreightFate-<version>-macos.zip` |" in manual
+    assert (
+        "| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |"
+    ) in manual
+    assert "On an Intel Mac, the in-game updater will not offer" in manual
+
+
+def test_player_manual_names_both_linux_architectures():
+    manual = (Path(__file__).resolve().parents[1] / "docs" / "user-manual.md").read_text(
+        encoding="utf-8"
+    )
+    assert "| Linux | `FreightFate-<version>-linux-x64.tar.gz` |" in manual
+    assert "| Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |" in manual
+    assert "| Linux ARM64 | `FreightFate-<version>-linux-arm64.tar.gz` |" in manual
+    assert "| Linux ARM64 (AppImage) | `FreightFate-<version>-linux-aarch64.AppImage` |" in manual
+    assert "BT Speak" in manual
+
+
+def test_career_19_snapshot_prepares_bass_before_rust_validation():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    for job_name, build_step_name in (
+        ("build_windows", "Build the portable release"),
+        ("build_macos", "Build the macOS release"),
+    ):
+        steps = workflow["jobs"][job_name]["steps"]
+        named_steps = {
+            step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
+        }
+
+        bass_index, bass_step = named_steps["Fetch BASS"]
+        assert "uv run python tools/fetch_bass.py\n" in bass_step["run"]
+        assert "uv run python tools/fetch_bass.py --check" in bass_step["run"]
+        assert bass_index < named_steps["Lint Rust targets"][0]
+        assert bass_index < named_steps["Test Rust workspace"][0]
+        assert named_steps["Test Rust workspace"][0] < named_steps[build_step_name][0]
+
+
+def test_career_19_retry_is_bounded_to_one_delayed_attempt():
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "retry-failed-nightly.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "workflows: [Build, Career 1.9 snapshot]" in workflow
+    assert "github.event.workflow_run.run_attempt == 1" in workflow
+    assert 'if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then' in workflow
+    assert 'TAG="1.9-tester-$(date -u +%Y%m%d)"' in workflow
+    assert 'TARGET_BRANCH="feat/career-1.9"' in workflow
+    assert 'TAG="nightly-$(date -u +%Y%m%d)"' in workflow
+    assert 'TARGET_BRANCH="dev"' in workflow
+    assert (
+        'gh workflow run "Career 1.9 snapshot" --repo "$GITHUB_REPOSITORY" '
+        '--ref "feat/career-1.9" -f dry_run=false'
+    ) in workflow
+    assert (
+        'gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false'
+    ) in workflow
+    assert '"$TAG already exists; the nightly recovered while waiting."' in workflow
+
+
+def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():
+    # The gate was written when src/ WAS the game. The Rust port moved every
+    # line of gameplay into crates/ and the gate was not widened with it, so
+    # a change to the shipping runtime could land with no entry at all.
+    module = load_release_notes_module()
+    for path in (
+        "crates/freight-fate/src/states/driving_turns.rs",
+        "crates/ff-core/src/sim/trip.rs",
+        "src/freight_fate/data/facility_endpoints.json",
+        "docs/ontology.md",
+        "CHANGELOG.md",
+    ):
+        assert module.is_user_facing_path(path), path
+    # A test or bench is not a player-facing change: under the Python layout
+    # tests/ sat beside src/ and was never gated.
+    for path in (
+        "crates/ff-core/tests/it/sim_trip_cues.rs",
+        "crates/freight-fate/benches/frame_time.rs",
+        "tools/build_facility_endpoints.py",
+        ".github/workflows/rust.yml",
+    ):
+        assert not module.is_user_facing_path(path), path
 
 
 def test_auto_base_follows_the_release_line_the_branch_was_cut_from(tmp_path, monkeypatch):

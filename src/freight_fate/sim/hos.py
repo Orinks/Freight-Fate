@@ -24,6 +24,13 @@ from dataclasses import dataclass, field
 HOS_MODES = ("realistic", "relaxed", "debug_off")
 HOS_NON_ENFORCED_MODES = {"off", "debug_off"}
 DUTY_STATUSES = ("driving", "on_duty_not_driving", "off_duty", "sleeper_berth")
+DUTY_STATUS_LABELS = {
+    "driving": "driving",
+    "on_duty_not_driving": "on duty, not driving",
+    "off_duty": "off duty",
+    "sleeper_berth": "sleeper berth",
+}
+RODS_WINDOW_HOURS = 8 * 24.0
 SPLIT_SHORT_MIN = 120.0
 SPLIT_SHORT_ALT_MIN = 180.0
 SPLIT_LONG_MIN = 420.0
@@ -377,6 +384,31 @@ class HosClock:
     def in_violation(self, mode: str) -> bool:
         return any(rem <= 0 for _, rem, _ in self._statuses(mode))
 
+    def violation_causes(self, mode: str) -> list[str]:
+        """Plain spoken phrases for every limit currently blown.
+
+        The roadside out-of-service stop uses these BEFORE the reset wipes
+        the ledger, so the officer can say exactly why the order stands.
+        """
+        phrases = {
+            "drive": "you had driven past the 11-hour driving limit",
+            "duty": "your 14-hour duty window had expired",
+            "break": "you were past the 30-minute break requirement",
+        }
+        return [
+            phrases[kind] for kind, rem, _ in self._statuses(mode) if rem <= 0 and kind in phrases
+        ]
+
+    def re_arm_warnings(self) -> None:
+        """Speak the countdown again after a rest that did NOT reset the shift.
+
+        Warnings fire once per threshold per shift -- correct while driving,
+        but a long non-qualifying sleep (a pending sleeper split) left the
+        marks in place, so the driver woke to silence and drove straight
+        into a window violation with no countdown (owner, 2026-07-24).
+        """
+        self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]
+
     def check_warnings(self, mode: str) -> list[str]:
         """Newly crossed warning messages; each threshold fires once.
 
@@ -443,14 +475,114 @@ class HosClock:
             return (
                 f"ELD status {status}. Hours of service: "
                 f"{drive_left:.1f} hours of driving left, "
-                f"{duty_left:.1f} hours of duty window left{suffix}"
+                f"{duty_left:.1f} hours of duty window left.{suffix}"
             )
         return (
             f"ELD status {status}. Hours of service: "
             f"{drive_left:.1f} hours of driving left, "
             f"break due in {break_left:.1f} hours, "
-            f"duty window closes in {duty_left:.1f} hours{suffix}"
+            f"duty window closes in {duty_left:.1f} hours.{suffix}"
         )
+
+    # -- the one-answer readouts ------------------------------------------------
+    #
+    # ``summary`` speaks the whole picture; these three answer one question each,
+    # for the Alt A, Alt S, and Alt D keys (see DrivingControlsMixin). None may
+    # go silent -- a blind driver cannot tell a quiet key from a dead one -- and
+    # none names a limit in hours: relaxed runs 1.25 times realistic, so a
+    # hard-coded "11-hour limit" would be a lie in it.
+
+    _ENFORCEMENT_OFF = "Hours of service enforcement is off; the ELD clock still records time."
+    _RESET_ADVICE = "Sleep 10 hours at a rest stop to reset."
+    # kind -> (clause after "you are", sentence that can lead a readout)
+    _SHIFT_OVER = {
+        "drive": ("out of driving time for this shift", "Out of driving time for this shift."),
+        "duty": ("past your duty window", "Your duty window has closed."),
+    }
+
+    def _hours_left(self, mode: str) -> tuple[float, float, float]:
+        """(driving, duty window, break) hours left, floored at zero."""
+        spent = (self.driving_min, self.duty_min, self.since_break_min)
+        return tuple(max(0.0, x - y) / 60.0 for x, y in zip(LIMITS[mode], spent, strict=True))
+
+    def _shift_over_kind(self, mode: str) -> str | None:
+        """Which blown limit ended the shift, or None; the driving clock leads."""
+        blown = {kind for kind, rem, _ in self._statuses(mode) if rem <= 0}
+        return "drive" if "drive" in blown else ("duty" if "duty" in blown else None)
+
+    def wheel_time_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt A: how much of this shift is spent -- not the hours on this run."""
+        fresh = self.driving_min <= 0.0
+        driven = duration_text(self.driving_min / 60.0)
+        if terse:
+            lead = "At the wheel: no driving yet" if fresh else f"At the wheel {driven}"
+        else:
+            spent = "no driving yet" if fresh else f"{driven} driving"
+            lead = f"At the wheel so far: {spent}, {duration_text(self.duty_min / 60.0)} on duty this shift"
+        if mode not in LIMITS:
+            note = self._ENFORCEMENT_OFF
+        elif self._shift_over_kind(mode) is not None:
+            note = "You are out of hours."
+        elif self._hours_left(mode)[2] <= 0.0:
+            note = "Your 30-minute break is overdue."
+        else:
+            note = ""
+        return f"{lead}. {note}".rstrip()
+
+    def break_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt S: when the 30-minute break comes due."""
+        if mode not in LIMITS:
+            return f"Break: none required. {self._ENFORCEMENT_OFF}"
+        _drive_left, duty_left, break_left = self._hours_left(mode)
+        over = self._shift_over_kind(mode)
+        if break_left <= 0.0:
+            answer = "Break overdue"
+            detail = "" if terse else " Take a 30 minute break at a rest stop."
+        else:
+            answer = f"Break due in {duration_text(break_left)}" + ("" if terse else " of driving")
+            detail = ""
+            if over is None and duty_left <= break_left:
+                # summary drops the break when the window closes first; a key
+                # pressed for the break answers it, then the overriding fact.
+                answer += (
+                    f", duty window {duration_text(duty_left)}"
+                    if terse
+                    else f", but your duty window closes first, in {duration_text(duty_left)}"
+                )
+        if over is not None:
+            return f"{answer}, but you are {self._SHIFT_OVER[over][0]}. {self._RESET_ADVICE}"
+        return f"{answer}.{detail}"
+
+    def drive_time_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt D: what ends this shift. Both clocks are named; the binding one leads."""
+        if mode not in LIMITS:
+            no_limit = "Driving time left: no limit" + ("" if terse else ", and no duty window")
+            return f"{no_limit}. {self._ENFORCEMENT_OFF}"
+        drive_left, duty_left, break_left = self._hours_left(mode)
+        over = self._shift_over_kind(mode)
+        if over is not None:
+            return f"{self._SHIFT_OVER[over][1]} {self._RESET_ADVICE}"
+        drive_text = f"Driving time left: {duration_text(drive_left)}"
+        duty_text = f"Duty window closes in {duration_text(duty_left)}"
+        duty_binds = duty_left <= drive_left  # the window, not the wheel, ends this shift
+        if terse:
+            text = (
+                f"Duty window {duration_text(duty_left)}, {drive_text.lower()}"
+                if duty_binds
+                else f"{drive_text}, duty window {duration_text(duty_left)}"
+            )
+        else:
+            text = (
+                f"{duty_text}, before your driving time runs out. {drive_text}"
+                if duty_binds
+                else f"{drive_text}. {duty_text}"
+            )
+        if break_left <= 0.0:
+            text += (
+                ", break overdue" if terse else ". Your 30-minute break is overdue and comes first"
+            )
+        pending = self.split_pending_summary()
+        return f"{text}. {pending}" if pending else f"{text}."
 
     def arrival_note(self, mode: str, eta_min: float) -> str:
         """One clause relating an ETA to the nearest HOS limit, or ''.
@@ -570,6 +702,147 @@ class HosClock:
             return cls()
 
 
+@dataclass
+class DutySegment:
+    """One Record of Duty Status row, in absolute career-clock hours."""
+
+    status: str
+    start_hour: float
+    end_hour: float
+    location: str
+    note: str = ""
+
+    @property
+    def duration_hours(self) -> float:
+        return max(0.0, self.end_hour - self.start_hour)
+
+    def to_dict(self) -> dict:
+        return {
+            "status": self.status,
+            "start_hour": self.start_hour,
+            "end_hour": self.end_hour,
+            "location": self.location,
+            "note": self.note,
+        }
+
+    @classmethod
+    def from_dict(cls, data) -> DutySegment | None:
+        if not isinstance(data, dict):
+            return None
+        try:
+            status = str(data.get("status", ""))
+            if status not in DUTY_STATUSES:
+                return None
+            start = float(data.get("start_hour", 0.0))
+            end = float(data.get("end_hour", start))
+            if not math.isfinite(start) or not math.isfinite(end):
+                return None
+            if end < start:
+                end = start
+            return cls(
+                status=status,
+                start_hour=max(0.0, start),
+                end_hour=max(0.0, end),
+                location=str(data.get("location", "") or "unknown location"),
+                note=str(data.get("note", "") or ""),
+            )
+        except (TypeError, ValueError):
+            return None
+
+
+@dataclass
+class DutyLog:
+    """Rolling in-cab Record of Duty Status.
+
+    Kept separate from ``HosClock``: the clock remains the aggregate rules
+    engine, while the logbook records the chronological status rows a driver
+    and trooper can review.
+    """
+
+    segments: list[DutySegment] = field(default_factory=list)
+
+    def record(
+        self, status: str, start_hour: float, end_hour: float, location: str, note: str = ""
+    ) -> None:
+        if status not in DUTY_STATUSES:
+            return
+        try:
+            start = max(0.0, float(start_hour))
+            end = max(start, float(end_hour))
+        except (TypeError, ValueError):
+            return
+        if not math.isfinite(start) or not math.isfinite(end):
+            return
+        location = str(location or "unknown location")
+        note = str(note or "")
+        if end == start:
+            return
+        if self.segments:
+            last = self.segments[-1]
+            if last.status == status and last.location == location and last.note == note:
+                last.end_hour = max(last.end_hour, end)
+                self.prune(end)
+                return
+            if last.end_hour < start:
+                last.end_hour = start
+        self.segments.append(DutySegment(status, start, end, location, note))
+        self.prune(end)
+
+    def prune(self, now_hour: float, keep_hours: float = RODS_WINDOW_HOURS) -> None:
+        cutoff = max(0.0, now_hour - keep_hours)
+        kept: list[DutySegment] = []
+        for segment in self.segments:
+            if segment.end_hour <= cutoff:
+                continue
+            if segment.start_hour < cutoff:
+                segment.start_hour = cutoff
+            kept.append(segment)
+        self.segments = kept
+
+    def totals_since(self, start_hour: float, end_hour: float) -> dict[str, float]:
+        totals = {status: 0.0 for status in DUTY_STATUSES}
+        for segment in self.segments:
+            start = max(start_hour, segment.start_hour)
+            end = min(end_hour, segment.end_hour)
+            if end > start:
+                totals[segment.status] += end - start
+        return totals
+
+    def recent(self, count: int = 8) -> list[DutySegment]:
+        return self.segments[-count:]
+
+    def current_status(self) -> str:
+        if not self.segments:
+            return "off_duty"
+        return self.segments[-1].status
+
+    def to_dict(self) -> dict:
+        return {"segments": [segment.to_dict() for segment in self.segments]}
+
+    @classmethod
+    def from_dict(cls, data) -> DutyLog:
+        if not isinstance(data, dict):
+            return cls()
+        segments = [
+            segment
+            for raw in data.get("segments", [])
+            if (segment := DutySegment.from_dict(raw)) is not None
+        ]
+        segments.sort(key=lambda item: item.start_hour)
+        return cls(segments=segments)
+
+
+def duty_status_label(status: str) -> str:
+    return DUTY_STATUS_LABELS.get(status, str(status).replace("_", " "))
+
+
+def duration_text(hours: float) -> str:
+    minutes = max(0.0, hours * 60.0)
+    if minutes < 60.0:
+        return f"{minutes:.0f} minutes"
+    return f"{minutes / 60.0:.1f} hours"
+
+
 # ---------------------------------------------------------------------------
 # Fatigue
 # ---------------------------------------------------------------------------
@@ -580,6 +853,7 @@ FATIGUE_SEVERE = 80.0  # rumble strip drift, urgent warning
 # Escalating fines for failed roadside inspections while over hours.
 HOS_FINES = (200.0, 500.0, 1000.0, 2000.0)
 HOS_REPUTATION_HIT = 3.0
+FATIGUE_COFFEE_RELIEF = 8.0
 FATIGUE_BREAK_RELIEF = 35.0
 FATIGUE_SHOULDER_FLOOR = 30.0
 # How long before a sleep/duty limit the shoulder-sleep option opens up, paired
@@ -588,7 +862,8 @@ FATIGUE_SHOULDER_FLOOR = 30.0
 # last half hour -- 30 min left you stranded with no action available.
 SHOULDER_SLEEP_LIMIT_BUFFER_MIN = 120.0
 SHOULDER_FINE_CHANCE = 0.15
-SHOULDER_FINE = 150.0
+# Base only: models/enforcement.citation_fine scales it for priors and zone.
+SHOULDER_FINE = 400.0
 SHOULDER_DAMAGE_CHANCE = 0.10
 SHOULDER_DAMAGE_PCT = 3.0
 
@@ -613,6 +888,11 @@ def reaction_window_mult(fatigue: float) -> float:
 def rest_break(fatigue: float) -> float:
     """Fatigue after a 30-minute break."""
     return max(0.0, fatigue - FATIGUE_BREAK_RELIEF)
+
+
+def rest_coffee_break(fatigue: float) -> float:
+    """Fatigue after a short food and coffee stop."""
+    return max(0.0, fatigue - FATIGUE_COFFEE_RELIEF)
 
 
 def rest_sleep(fatigue: float) -> float:
@@ -677,18 +957,31 @@ def clock_text(game_hours: float) -> str:
 PARKING_CRUNCH_START, PARKING_CRUNCH_END = 20.0, 4.0  # 8 PM .. 4 AM
 
 
-def parking_full_probability(game_hours: float) -> float:
-    """Chance the lot is full, rising through the evening; 0 outside 8 PM-4 AM."""
+def parking_full_probability(game_hours: float, spaces: int = 0) -> float:
+    """Chance the lot is full, rising through the evening; 0 outside 8 PM-4 AM.
+
+    ``spaces`` is the surveyed truck-parking capacity (FHWA Jason's Law via BTS
+    NTAD) when known: a handful of spots fills earlier than a big travel-center
+    lot. 0 (unsurveyed) keeps the flat baseline."""
     h = clock_hour(game_hours)
     if not (h >= PARKING_CRUNCH_START or h < PARKING_CRUNCH_END):
         return 0.0
     hours_past_8pm = (h - PARKING_CRUNCH_START) % 24.0
-    return min(0.8, 0.2 + 0.1 * hours_past_8pm)
+    p = min(0.8, 0.2 + 0.1 * hours_past_8pm)
+    if spaces <= 0:
+        return p
+    if spaces <= 15:
+        return min(0.9, p + 0.15)
+    if spaces >= 100:
+        return p * 0.6
+    if spaces >= 40:
+        return p * 0.85
+    return p
 
 
-def parking_is_full(trip_seed: int, stop_mi: float, game_hours: float) -> bool:
+def parking_is_full(trip_seed: int, stop_mi: float, game_hours: float, spaces: int = 0) -> bool:
     """Deterministic per trip seed and stop, so saves and tests reproduce it."""
-    p = parking_full_probability(game_hours)
+    p = parking_full_probability(game_hours, spaces)
     if p <= 0.0:
         return False
     rng = random.Random(f"parking:{trip_seed}:{round(stop_mi * 10)}")

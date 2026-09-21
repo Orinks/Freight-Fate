@@ -17,7 +17,7 @@ import pygame
 
 if TYPE_CHECKING:
     from ..app import GameContext
-    from ..message_log import Message
+    from ..message_log import Message, MessageLog
 
 
 def end_sentence(text: str) -> str:
@@ -31,8 +31,33 @@ def end_sentence(text: str) -> str:
     return text if text.endswith((".", "!", "?", ":")) else text + "."
 
 
+def spoken_char(ch: str) -> str:
+    """A single typed character the way an accessible text field announces it.
+
+    Shared by every text-entry field in the game (currently just driver name
+    entry) so a character reviewed one at a time always sounds the same way.
+    A space reads as "space" rather than silence. A capital letter gets a
+    leading "cap" -- speech synthesis pronounces "J" and "j" identically, so
+    without the marker a player arrowing through a typed name has no way to
+    hear that the first letter capitalized the way they meant it to."""
+    if ch == " ":
+        return "space"
+    if ch.isalpha() and ch.isupper():
+        return f"cap {ch.lower()}"
+    return ch
+
+
 class State:
     """Base class for all game screens."""
+
+    # While this state is on top of the stack, main-channel speech
+    # (``ctx.say``) queues instead of interrupting. False for menus and
+    # readers -- cancelling on navigation is how screen readers behave --
+    # and True for the driving state, where an achievement or assist
+    # notice landing with interrupt=True would stamp on whatever the
+    # player was being told (speech priority research, R2). A menu pushed
+    # over a drive is the top state, so it keeps immediate speech.
+    paces_main_speech = False
 
     def __init__(self, ctx: GameContext) -> None:
         self.ctx = ctx
@@ -127,13 +152,13 @@ class State:
         if key == pygame.K_LEFTBRACKET:
             category = log.previous_category()
             if category:
-                self.ctx.say(f"{category} messages.", review=False)
+                self.ctx.say(f"{category} messages.{self._hidden_notice(log)}", review=False)
             return True
 
         if key == pygame.K_RIGHTBRACKET:
             category = log.next_category()
             if category:
-                self.ctx.say(f"{category} messages.", review=False)
+                self.ctx.say(f"{category} messages.{self._hidden_notice(log)}", review=False)
             return True
 
         if key == pygame.K_COMMA and ctrl:
@@ -149,7 +174,17 @@ class State:
             return True
 
         if key == pygame.K_PERIOD:
-            self._speak_review_message(log.next_message())
+            message = log.next_message()
+            if message is None:
+                # Already on the newest one this filter shows. Saying nothing
+                # is what let a whole delivery settlement sit invisible behind
+                # a filter left on Event, so the end of the list is exactly
+                # where the count has to be spoken.
+                notice = self._hidden_notice(log)
+                if notice:
+                    self.ctx.say(notice.strip(), review=False)
+                return True
+            self._speak_review_message(message)
             return True
 
         if key == pygame.K_c and ctrl:
@@ -163,20 +198,108 @@ class State:
             return True
         return False
 
+    def _hidden_notice(self, log: MessageLog) -> str:
+        """How many newer messages the chosen category is holding back.
+
+        Empty when nothing is filtered out, so the common case stays silent.
+        The filter is the driver's stated preference and now survives a lapse
+        in review (Tim S, 2026-08-21) -- which is safe only while the review
+        keeps saying what the preference costs.
+        """
+        hidden = log.hidden_newer_count()
+        if not hidden:
+            return ""
+        plural = "message" if hidden == 1 else "messages"
+        return f" {hidden} newer {plural} outside this filter."
+
     def _speak_review_message(self, message: Message | None) -> None:
         if message is None:
             return
         # Reviewing is a deliberate act: silence the event voice first, or a
         # hazard call still playing talks over the line being reviewed.
         self.ctx.stop_event_speech()
-        self.ctx.say(message.text, review=False)
+        log = self.ctx.message_log
+        visible = log.filtered_messages()
+        # Only on the newest one the filter shows: appending the count to
+        # every step back through the history would read it a dozen times.
+        at_newest = bool(visible) and log.index >= len(visible) - 1
+        notice = self._hidden_notice(log) if at_newest else ""
+        self.ctx.say(f"{message.text}{notice}", review=False)
+
+
+class TimedMessageState(State):
+    """A brief, spoken transition that ignores stray held navigation keys."""
+
+    def __init__(
+        self,
+        ctx: GameContext,
+        *,
+        title: str,
+        message: str,
+        status: str,
+        seconds: float,
+        on_complete: Callable[[], None],
+        complete_text: str = "",
+        sound_key: str = "ui/notify",
+    ) -> None:
+        super().__init__(ctx)
+        self.title = title
+        self.message = message
+        self.status = status
+        self.seconds = max(0.0, seconds)
+        self.remaining = self.seconds
+        self.on_complete = on_complete
+        self.complete_text = complete_text
+        self.sound_key = sound_key
+        self._complete = False
+
+    def enter(self) -> None:
+        if self.sound_key:
+            self.ctx.audio.play(self.sound_key)
+        self.ctx.say(self.message, interrupt=True)
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type != pygame.KEYDOWN:
+            return
+        if event.key in (
+            pygame.K_F1,
+            pygame.K_ESCAPE,
+            pygame.K_RETURN,
+            pygame.K_SPACE,
+            pygame.K_KP_ENTER,
+        ):
+            self.ctx.say(self.status)
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self._complete:
+            return
+        self.remaining = max(0.0, self.remaining - dt)
+        if self.remaining > 0.0:
+            return
+        self._complete = True
+        if self.complete_text:
+            self.ctx.say(self.complete_text, interrupt=False)
+        self.on_complete()
+
+    def lines(self) -> list[str]:
+        return [
+            self.title,
+            "",
+            self.status,
+            f"Ready in {self.remaining:.1f} seconds.",
+        ]
 
 
 @dataclass
 class MenuItem:
     label: str | Callable[[], str]
     action: Callable[[], None]
-    help: str = ""
+    # Callable for the same reason ``label`` is: a row whose help depends on
+    # state that changes while the menu is open (a waiting cloud conflict,
+    # say) must not read out an answer that was true when the screen was
+    # built. Read it through ``help_text``, never off the field.
+    help: str | Callable[[], str] = ""
     # The click played when this item is activated. Set to None for items whose
     # action plays its own confirmation sound, so the two do not stack.
     select_sound: str | None = "ui/menu_select"
@@ -184,6 +307,10 @@ class MenuItem:
     @property
     def text(self) -> str:
         return self.label() if callable(self.label) else self.label
+
+    @property
+    def help_text(self) -> str:
+        return self.help() if callable(self.help) else self.help
 
 
 class MenuState(State):
@@ -234,7 +361,7 @@ class MenuState(State):
         if not self.items:
             return self.intro_help
         item = self.items[self.index]
-        return item.help or f"{item.text}."
+        return item.help_text or f"{item.text}."
 
     def move(self, delta: int) -> None:
         if not self.items:

@@ -1,10 +1,10 @@
 """Propose candidate new city nodes for the freight map (read-only).
 
 Build-time helper for Workstream C (see docs/osm-routing-plan.md). Ranks US
-populated places from GeoNames by population, drops cities already in
-``world.json`` and near-duplicate suburbs, and prints a candidate list with each
+populated places from GeoNames by population, drops cities already in the world
+source and near-duplicate suburbs, and prints a candidate list with each
 city's derived freight region so the regional balance is visible before anyone
-adds legs. This never modifies ``world.json``; choosing nodes, wiring
+adds legs. This never modifies the world source; choosing nodes, wiring
 adjacencies, and ORS leg generation are separate, deliberate steps.
 
 GeoNames is free under CC BY; keep attribution in any committed result. Data:
@@ -23,8 +23,9 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+from world_source import load_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate node-picker (https://github.com/Orinks/Freight-Fate)"
 GEONAMES_CITIES_URL = "https://download.geonames.org/export/dump/cities15000.zip"
@@ -152,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     existing_names = set(data["cities"])
     existing_coords = [(float(c["lat"]), float(c["lon"])) for c in data["cities"].values()]
 

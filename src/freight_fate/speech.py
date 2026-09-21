@@ -35,6 +35,11 @@ import logging
 import os
 import sys
 
+# The event-voice pacer moved to its own module when it grew repeat
+# suppression and priority; re-exported here because it is part of what a
+# caller means by "the speech channel", and every existing import says so.
+from .speech_pacing import EventPriority, EventSpeechPacer  # noqa: F401
+
 log = logging.getLogger(__name__)
 
 # Seconds between runtime health checks of the speech backend. Short enough
@@ -262,6 +267,14 @@ class Speech:
             return self._backend.name
         except Exception:
             return "unknown"
+
+    @property
+    def has_separate_event_voice(self) -> bool:
+        """Whether events currently have their own backend.
+
+        Without one, :meth:`say_event` falls back to the main channel, so
+        events and menu speech share a single voice and can cut each other."""
+        return self._event_backend is not None
 
     @property
     def event_backend_name(self) -> str:

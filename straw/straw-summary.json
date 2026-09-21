@@ -1,0 +1,51 @@
+{
+  "data_version": "sha256:eb80f491f1ec",
+  "legs": [
+    {
+      "compression_x": 3.2,
+      "curves": 138,
+      "curves_non_connector": 133,
+      "curves_raw_detected": 152,
+      "encoded_geom_bytes": 12084,
+      "highway": "US-60",
+      "kept_vertices": 1034,
+      "kind": "canyon",
+      "leg": "globe_az_us:show_low_az_us",
+      "maxspeed_ways_seen": 78,
+      "miles": 88.0,
+      "raw_coord_bytes": 38610,
+      "raw_vertices": 1498,
+      "roundtrip": {
+        "advisories_equal": true,
+        "passed": true,
+        "rebaked_curves": 138,
+        "shipped_curves": 138,
+        "worst_radius_pct": 0.0
+      },
+      "speed_steps": 7
+    },
+    {
+      "compression_x": 7.5,
+      "curves": 11,
+      "curves_non_connector": 5,
+      "curves_raw_detected": 15,
+      "encoded_geom_bytes": 1643,
+      "highway": "I-70",
+      "kept_vertices": 119,
+      "kind": "straight",
+      "leg": "hays_ks_us:colby_ks_us",
+      "maxspeed_ways_seen": 262,
+      "miles": 109.0,
+      "raw_coord_bytes": 12312,
+      "raw_vertices": 486,
+      "roundtrip": {
+        "advisories_equal": true,
+        "passed": true,
+        "rebaked_curves": 11,
+        "shipped_curves": 11,
+        "worst_radius_pct": 0.0
+      },
+      "speed_steps": 1
+    }
+  ]
+}

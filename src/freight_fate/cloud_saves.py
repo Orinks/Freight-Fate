@@ -137,17 +137,239 @@ class CloudAuthError(Exception):
 # player always hears the same recovery path. orinks.net issues one token
 # per computer, so a refusal means this computer's token was signed out
 # from the account's computer list (or replaced by a sign-out-everywhere).
+#
+# Every control named here has to be one this player can actually find. The
+# recovery used to be "choose Add computer to get a fresh token, then paste
+# it": both halves of that died with the clipboard setup, and the setup page
+# has no Add computer button at all now -- a computer is added by activating
+# it from the game. The menu item is named as it reads while the identity
+# file is still on disk (which it is, in this failure): the Online hub says
+# "orinks.net account: connected", not "Set up orinks.net account".
 AUTH_HELP = (
-    "orinks.net no longer accepts this computer's sign-in. This usually "
-    "means this computer was signed out from the computer list on your "
-    "orinks.net driver setup page. On that page, choose Add computer to get "
-    "a fresh token, then paste it under Set up orinks.net account on the "
-    "Online menu."
+    "orinks.net no longer accepts this computer's sign-in. Usually this "
+    "computer was signed out from the computer list on your orinks.net "
+    "driver setup page. To connect it again, open the Online menu, choose "
+    "orinks.net account, then Set up this computer with orinks.net: the "
+    "game gives you an activation code to enter in your browser. If your "
+    "driver is not on that page at all, the account itself is gone rather "
+    "than this computer's sign-in, which can happen after the site is "
+    "rebuilt; make a new account and connect it the same way."
 )
 
 
 def _auth_refused(e: urllib.error.HTTPError, body: dict) -> bool:
+    """Whether orinks.net refused this machine's credentials.
+
+    Two different situations arrive here and the site does not distinguish
+    them: a retired token (this computer signed out from the account's
+    computer list) and a driver record that no longer exists at all. Both
+    answer ``404 {"error": "driver_not_found"}`` -- observed on the staging
+    site on 2026-08-11, after the deployment behind it was rebuilt and every
+    driver issued before the move stopped resolving. AUTH_HELP therefore
+    covers both, since the recovery differs: activating this computer again
+    for the first, a whole new account for the second.
+    """
     return e.code == 401 or body.get("error") in ("unauthorized", "driver_not_found")
+
+
+# -- upload failure classification ---------------------------------------------
+#
+# ``upload_save`` hands back a ``reason`` string that is a network problem, an
+# auth problem, or one of the validator's refusal codes -- three situations a
+# player needs three different honest sentences for (Jessie's report,
+# 2026-08-14: an ``invalid_achievement`` refusal was told to the player as
+# "check your connection", which sent them chasing their network for a
+# problem that was never there). Every caller that turns an upload result
+# into player-facing wording -- the background queue in ``_upload_slot`` and
+# the foreground "keep this computer's save" retry in
+# ``CloudSavesService.resolve_keep_mine`` -- must classify through the one
+# table below, so a new validator code only has to be added in one place.
+
+# The credentials were retired (usually by connecting another computer, or a
+# driver record that no longer exists); every retry fails identically until
+# the player reconnects from the Online menu.
+AUTH_FAILURE_REASONS = frozenset({"unauthorized", "driver_not_found", "http_401"})
+
+# The server read this save and refused it outright. Retrying with the same
+# save can never succeed -- it is not a connection problem, it is something
+# for the developers to fix.
+REJECTED_UPLOAD_REASONS = frozenset(
+    {
+        "too_large",
+        "invalid_schema",
+        "invalid_name",
+        "invalid_city",
+        "invalid_range",
+        "invalid_possession",
+        "invalid_career",
+        "impossible_xp",
+        "impossible_money",
+        "invalid_market",
+        "invalid_hos",
+        "invalid_achievement",
+        "unsupported_version",
+        # Neither of these can succeed on a retry, and both were missing here
+        # until Shane's three careers refused at once (2026-08-15): they fell
+        # through to "network", so the queue backed off and tried again
+        # forever while the player was told nothing at all.
+        "too_many_slots",
+        "signing_unavailable",
+    }
+)
+
+
+def classify_upload_failure(reason: str | None) -> str:
+    """Sort an ``upload_save`` failure ``reason`` into the family its
+    player-facing wording actually differs by.
+
+    Returns ``"auth"``, ``"rejected"``, or ``"network"`` -- the last one is
+    the honest default for anything not recognized (a raw network error, a
+    5xx, or a code the validator has not been taught to this table yet):
+    treating an unknown reason as transient and worth a retry is the safe
+    failure mode, never the other way around.
+    """
+    if reason in AUTH_FAILURE_REASONS:
+        return "auth"
+    if reason in REJECTED_UPLOAD_REASONS:
+        return "rejected"
+    return "network"
+
+
+# Within "rejected", the two arithmetic cross-checks -- recomputed XP ceiling,
+# recomputed money ceiling -- earn a different story than every other refusal:
+# only a real cross-check failure means the numbers themselves do not add up,
+# so only this pair says "flagged for review" and offers the appeal. A false
+# flag hit a real career on this exact wording (2026-08-14), so the appeal
+# sentence stays attached to it on purpose.
+ARITHMETIC_REJECTION_REASONS = frozenset({"impossible_xp", "impossible_money"})
+
+# Schema and version refusals mean this build and the server disagree about
+# what a save even looks like -- almost always a build gap, not something the
+# player did to the save.
+SCHEMA_REJECTION_REASONS = frozenset({"invalid_schema", "unsupported_version"})
+
+# The server checks the town a career is parked in against its own city list,
+# so a city the game knows and the server has not caught up with refuses every
+# backup from that career until the server is updated. That is a real failure
+# mode, not a hypothetical -- a tester's backups stopped for a day on a stale
+# deployed catalog (2026-08-14) -- and under the generic wording it looked like
+# an unexplained refusal. Nothing the player can do about it, so say so.
+CATALOG_REJECTION_REASONS = frozenset({"invalid_city"})
+
+# The one refusal a player can clear without anyone's help: the server keeps a
+# fixed number of backed-up careers, and the answer is to remove one from the
+# Cloud backup menu. Under the generic line it read as an unexplained failure
+# with nothing to do about it, which is the opposite of the truth.
+SLOTS_FULL_REJECTION_REASONS = frozenset({"too_many_slots"})
+
+# The server accepted the save and then could not sign it -- its own
+# configuration, nothing about this career. Says so plainly rather than
+# implying the save was judged and found wanting.
+SERVER_FAULT_REJECTION_REASONS = frozenset({"signing_unavailable"})
+
+
+def rejection_status(name: str, reason: str | None) -> str:
+    """The player-facing status line for a server-refused upload.
+
+    Always names the career (Shane's report, 2026-08-14: with more than one
+    career backed up he could not tell which one had been refused, or why),
+    then splits the "rejected" family by what the reason code actually means
+    to a player instead of one line for every cause. Shared by the background
+    auto-backup queue (:meth:`CloudSaves._upload_slot`) and the foreground
+    "keep this computer's save" retry (:meth:`CloudSaves.resolve_keep_mine`,
+    via :mod:`freight_fate.states.cloud_save_states`) so both speak the same
+    story for the same reason code.
+    """
+    if reason in ARITHMETIC_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The numbers in this save do not "
+            "look like possible play, so the server declined it and flagged "
+            "it for review. Your local career is safe and nothing public "
+            "changed. If you think this is wrong, say so in the tester "
+            "document."
+        )
+    if reason in SCHEMA_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. Your game and the server "
+            "disagree about this save's shape -- usually a build mismatch, "
+            "not something you did. Your local career is safe."
+        )
+    if reason in CATALOG_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The server does not recognise the "
+            "town this career is parked in, which usually means it has not "
+            "caught up with this build yet. Your local career is safe, and "
+            "backups start working again on their own once it has."
+        )
+    if reason in SLOTS_FULL_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. You have as many careers backed up "
+            "as the server keeps, so there is no room for this one. Remove a "
+            "career from the Cloud backup menu and this will back up again. "
+            "Your local career is safe."
+        )
+    if reason in SERVER_FAULT_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The server could not finish signing "
+            "this backup, which is a problem at our end and not anything about "
+            "your career. Your local career is safe, and backups start working "
+            "again on their own once it is fixed."
+        )
+    return (
+        f"{name}: backup not accepted. Your local career is safe. Public details were not updated."
+    )
+
+
+# The status line for the auth family, shared by the background queue and the
+# manual "Save game" announcement so a paused sign-in is always told the same
+# way. AUTH_HELP (above) carries the full recovery path when a menu can offer
+# it; this is the short standing line.
+AUTH_PAUSED_STATUS = (
+    "Backups are paused: orinks.net no longer accepts this "
+    "computer's sign-in. Reconnect from the Online menu."
+)
+
+
+def conflict_status(name: str) -> str:
+    """The player-facing line for a slot the server refused to overwrite
+    because another computer advanced it. Shared by the manual "Save game"
+    result (states/city.py) and the background queue's spoken announcement
+    so a conflict is always told the same way."""
+    return (
+        f"{name} needs attention: the cloud copy changed on another "
+        "computer. Open Restore a cloud backup on the Online menu "
+        "to choose which copy to keep."
+    )
+
+
+def backup_status(name: str) -> str:
+    """The spoken all-clear for an ordinary accepted background backup.
+
+    Career-named like every other backup story, and deliberately the shortest
+    of them: it fires at every rest stop, motel, sleep and delivery, so it has
+    to be something a driver can hear many times a run without it becoming
+    noise. "backed up" is the wording the rest of the feature already uses --
+    the Save game line, the recovery line, the Cloud backup menu -- so this
+    adds a moment to say it, not a new noun to learn.
+    """
+    return f"{name} is backed up."
+
+
+def recovery_status(name: str) -> str:
+    """The spoken all-clear for a career whose backup refusal was announced:
+    one line, career-named like every other backup story, when a later
+    upload of that slot is accepted again. Says "again" because it answers
+    the refusal the driver already heard; an ordinary success uses
+    :func:`backup_status`."""
+    return f"{name} is backed up again."
+
+
+# The dedupe key for the auth announcement: a paused sign-in is a property
+# of this computer, not of any one career, so it is announced once per
+# outage rather than once per slot -- loading a second career during the
+# same outage must not repeat the byte-identical line. save_slot_name()
+# replaces "*", so no real slot can ever collide with this key.
+_AUTH_ANNOUNCED_KEY = "*auth*"
 
 
 # -- sync state ----------------------------------------------------------------
@@ -460,10 +682,18 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     from .models.profile import (
         LEGACY_SAVE_SUFFIX,
         SAVE_SUFFIX,
+        LegacyCareerError,
         encode_save_bytes,
+        is_pre_1_9_save,
         save_path_for,
     )
 
+    # Careers created before the 1.9 line do not restore here, for the same
+    # reason the load gate refuses their local files: 1.9 starts everyone
+    # fresh. Checked before anything touches disk; the cloud copy stays in
+    # the account, still restorable by the 1.8 builds that made it.
+    if is_pre_1_9_save(payload["profile"]):
+        raise LegacyCareerError(str(payload["profile"].get("name") or "Driver"))
     profile = verify_cloud_revision(payload["profile"], payload)
     # Absolution. The server grants this only on a revision it signed and
     # fully validated, so a career that was marked purely for moving between
@@ -563,9 +793,25 @@ class CloudSaves:
         self.sync_state = sync_state if sync_state is not None else SyncState()
 
         self._lock = threading.Lock()
-        # slot name -> (profile dict snapshot, queued-at time)
-        self._pending: dict[str, tuple[dict, float]] = {}
+        # slot name -> (profile dict snapshot, queued-at time, attempt token).
+        # The token rides with the snapshot so an upload's terminal result is
+        # always recorded against the attempt that queued it, never against a
+        # manual attempt that started while it was in flight.
+        self._pending: dict[str, tuple[dict, float, int]] = {}
         self._retry_at: float | None = None
+        # Manual "Save game" attempts (backup_now): the latest attempt token
+        # handed out per slot, and the outcome recorded when an upload for
+        # that slot reaches a terminal result. Both guarded by self._lock.
+        self._attempts: dict[str, int] = {}
+        self._outcomes: dict[str, tuple[int, str]] = {}
+        # Spoken lines the background queue owes the player (drained by the
+        # app's main loop through take_announcements), and per slot the
+        # refusal cause already announced this session -- retries refused
+        # for the same cause stay silent until the cause changes or the
+        # slot uploads successfully. Both guarded by self._lock: the worker
+        # thread writes, the main loop drains.
+        self._announcements: list[str] = []
+        self._announced_causes: dict[str, str] = {}
 
         self._wake = threading.Event()
         self._stop = threading.Event()
@@ -607,10 +853,38 @@ class CloudSaves:
         if not self._enabled or self._started:
             return
         self._started = True
+        self._log_sync_state()
         self._stop.clear()
         if self._threaded:
             self._thread = threading.Thread(target=self._run, name="cloud-saves", daemon=True)
             self._thread.start()
+
+    def _log_sync_state(self) -> None:
+        """One line per known slot at startup: the kept session logs only go
+        back two sessions, so a stall whose conflict was recorded earlier
+        would otherwise leave no trace in the log a tester shares."""
+        slots = self.sync_state.slots()
+        if not slots:
+            log.info("Cloud sync state: no careers have synced from this computer yet")
+            return
+        for name, entry in sorted(slots.items()):
+            revision = entry.get("revision")
+            synced = (
+                f"last synced revision {revision}"
+                if revision is not None
+                else "no revision synced yet"
+            )
+            conflict = entry.get("conflict")
+            if conflict is None:
+                log.info("Cloud sync state for %s: %s", name, synced)
+            else:
+                log.info(
+                    "Cloud sync state for %s: %s; a conflict against cloud "
+                    "revision %s is waiting in the Cloud backup menu",
+                    name,
+                    synced,
+                    conflict.get("latestRevision"),
+                )
 
     def queue_backup(self, profile: Profile) -> None:
         """Snapshot a just-saved profile for upload; returns immediately."""
@@ -623,11 +897,158 @@ class CloudSaves:
             return
         name = save_slot_name(profile.name)
         with self._lock:
-            self._pending[name] = (snapshot, self._clock())
+            # Token 0: a background save, which no manual watch ever matches.
+            self._pending[name] = (snapshot, self._clock(), 0)
         if self._threaded:
             self._wake.set()
         else:
             self.pump()
+
+    def backup_now(self, profile: Profile) -> int | None:
+        """Snapshot a just-saved profile and attempt its upload promptly.
+
+        The manual "Save game" path (Shane's report, 2026-08-14: a silent
+        background upload is indistinguishable from no backup for a screen
+        reader user). Like :meth:`queue_backup`, but the snapshot is queued
+        as already past the debounce, the transient-retry backoff is lifted
+        for this attempt, and the worker is woken immediately. Every other
+        semantic -- the content-hash skip, conflict, rejection, and auth
+        handling -- is exactly the background queue's.
+
+        Returns an attempt token the caller can poll through
+        :meth:`outcome_for` without ever blocking, or None when the service
+        is off or the snapshot failed.
+        """
+        if not self._enabled:
+            return None
+        try:
+            snapshot = profile.to_dict()
+        except Exception:  # never let backup break the save that triggered it
+            log.debug("Cloud backup snapshot failed", exc_info=True)
+            return None
+        name = save_slot_name(profile.name)
+        with self._lock:
+            token = self._attempts.get(name, 0) + 1
+            self._attempts[name] = token
+            # Queued as already debounce-old, so the next pump owes it an
+            # attempt instead of a wait.
+            self._pending[name] = (snapshot, self._clock() - self._debounce, token)
+            # A manual save is the player asking now: this attempt does not
+            # sit out a backoff armed by an earlier transient failure.
+            self._retry_at = None
+        if self._threaded:
+            self._wake.set()
+        else:
+            self.pump()
+        return token
+
+    def outcome_for(self, name: str, token: int) -> str | None:
+        """The recorded outcome of a :meth:`backup_now` attempt, or None
+        while it is still in flight. Never blocks.
+
+        Outcomes: ``"accepted"``, ``"unchanged"`` (the cloud already holds
+        this exact content), ``"conflict"`` (recorded for the Cloud backup
+        menu), ``"auth"``, ``"network"`` (still retrying in the background),
+        or ``"rejected:<reason>"``.
+        """
+        with self._lock:
+            entry = self._outcomes.get(name)
+            if entry is None or entry[0] < token:
+                return None
+            return entry[1]
+
+    def _note_outcome(self, name: str, token: int, outcome: str) -> None:
+        """Record a terminal upload result under the attempt token its
+        snapshot was queued with (0 for background saves, which no poller
+        ever matches). Uploads run outside the lock, so an upload already in
+        flight when a newer manual attempt starts finishes carrying its own
+        older token: it must neither answer for the newer attempt nor
+        overwrite the newer attempt's recorded result."""
+        with self._lock:
+            current = self._outcomes.get(name)
+            if current is None or token >= current[0]:
+                self._outcomes[name] = (token, outcome)
+
+    def take_announcements(self) -> list[str]:
+        """Drain the spoken lines the background queue owes the player.
+
+        Automatic saves (rest stops, motels, deliveries, sleep, business
+        actions) upload with no menu watching, so a refusal used to reach
+        only the passive status line -- a blind player never heard that the
+        career had stopped backing up. The worker thread never speaks;
+        it queues lines here, and the app's main loop drains them every
+        frame (the same polled pattern as ControllerManager.take_disconnect)
+        onto the normal announcement channel. Thread-safe; empty almost
+        always.
+        """
+        with self._lock:
+            if not self._announcements:
+                return []
+            lines = self._announcements
+            self._announcements = []
+            return lines
+
+    def _announce_refusal(self, name: str, token: int, cause: str, message: str) -> None:
+        """Record a terminal upload refusal, and queue its spoken line when
+        the background queue owes one.
+
+        The token gates the speaking, never the bookkeeping: every terminal
+        refusal records its cause, manual or background, so whichever
+        channel told the player first -- this one, or the Save game watch
+        (states/city.py) that owns token > 0 attempts -- the player hears
+        each standing cause exactly once. Only a background attempt
+        (token 0) appends the line; a manual refusal is the menu's to
+        speak. A recorded cause stays silent until it changes or the slot
+        uploads successfully (see _announce_recovery). The auth cause
+        dedupes machine-wide under _AUTH_ANNOUNCED_KEY: a paused sign-in
+        belongs to this computer, not to whichever career saved first.
+        Transient network failures never arrive here -- they retry
+        silently.
+        """
+        key = _AUTH_ANNOUNCED_KEY if cause == "auth" else name
+        with self._lock:
+            if self._announced_causes.get(key) == cause:
+                return
+            self._announced_causes[key] = cause
+            if token == 0:
+                self._announcements.append(message)
+
+    def _announce_success(self, name: str, token: int, *, uploaded: bool) -> None:
+        """An upload was accepted: say so, and clear any recorded refusal so
+        later trouble speaks afresh.
+
+        Success used to be silent unless it followed an announced refusal,
+        which left the ordinary case with nothing to hear at all. A save at a
+        rest stop backs up in the background, and a driver who cannot see the
+        status line got the same nothing whether the career reached the server
+        or never left the machine -- silence reading as failure is the whole
+        complaint behind the refusal lines above, and it applied just as much
+        to the path that worked (owner, 2026-08-15).
+
+        Same principle as _announce_refusal: the token gates the speaking,
+        never the bookkeeping. Only a background save (token 0) speaks here --
+        a manual save's outcome is already spoken by the Save game watch
+        (states/city.py `_backup_outcome_text`), and a second line for the
+        same event would say it twice.
+
+        ``uploaded`` marks a real accepted upload, which also proves this
+        computer's sign-in works, so it re-arms the machine-wide auth
+        announcement -- silently, since the auth line named no career and
+        reconnecting speaks its own confirmation. The "unchanged" path never
+        contacts the server: it leaves the auth record alone, and it stays
+        silent unless it is clearing a refusal, because nothing was sent and
+        claiming a fresh backup would be untrue.
+        """
+        with self._lock:
+            if uploaded:
+                self._announced_causes.pop(_AUTH_ANNOUNCED_KEY, None)
+            recovered = self._announced_causes.pop(name, None) is not None
+            if token != 0:
+                return
+            if recovered:
+                self._announcements.append(recovery_status(name))
+            elif uploaded:
+                self._announcements.append(backup_status(name))
 
     def shutdown(self) -> None:
         """Flush the pending upload briefly and stop the worker. Never raises."""
@@ -659,6 +1080,10 @@ class CloudSaves:
     @property
     def status(self) -> str:
         """Short persistent player-facing result for the Cloud backup menu."""
+        # Never claim readiness while the service is off: 1.9 testers heard
+        # "ready" with the setting off and believed they were backed up.
+        if not self._enabled:
+            return "Cloud backup is off. Saves on this computer are not backed up."
         with self._lock:
             return self._status
 
@@ -692,7 +1117,7 @@ class CloudSaves:
         with self._lock:
             if not self._pending:
                 return _WORKER_TICK_S
-            oldest = min(t for _, t in self._pending.values())
+            oldest = min(t for _, t, _ in self._pending.values())
         if self._retry_at is not None:
             return max(0.05, self._retry_at - now)
         return max(0.05, self._debounce - (now - oldest))
@@ -707,14 +1132,14 @@ class CloudSaves:
             return
         with self._lock:
             due = [
-                (name, snapshot)
-                for name, (snapshot, queued_at) in self._pending.items()
+                (name, snapshot, token)
+                for name, (snapshot, queued_at, token) in self._pending.items()
                 if force or now - queued_at >= self._debounce
             ]
-        for name, snapshot in due:
+        for name, snapshot, token in due:
             if self._stop.is_set() and not force:
                 return
-            self._upload_slot(name, snapshot)
+            self._upload_slot(name, snapshot, token)
 
     def _done_with(self, name: str, snapshot: dict) -> None:
         """Drop a handled snapshot -- unless a newer save replaced it while
@@ -724,7 +1149,7 @@ class CloudSaves:
             if current is not None and current[0] is snapshot:
                 del self._pending[name]
 
-    def _upload_slot(self, name: str, snapshot: dict) -> None:
+    def _upload_slot(self, name: str, snapshot: dict, token: int = 0) -> None:
         slot = self.sync_state.slot(name)
         conflict = slot.get("conflict")
         if conflict is not None and conflict.get("latestRevision") is None:
@@ -744,6 +1169,8 @@ class CloudSaves:
                 # menu. Drop the snapshot -- the local file is still the
                 # source of truth for "keep mine".
                 self._done_with(name, snapshot)
+                self._note_outcome(name, token, "conflict")
+                self._announce_refusal(name, token, "conflict", conflict_status(name))
                 return
             log.info(
                 "Cloud backup of %s was blocked by a conflict whose cloud "
@@ -755,6 +1182,11 @@ class CloudSaves:
         _, content_hash = cloud_content(snapshot)
         if slot.get("hash") == content_hash:
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "unchanged")
+            # The cloud already holds this save -- a resolved conflict or a
+            # menu restore got the slot current, so an announced refusal is
+            # over even though no upload ran here.
+            self._announce_success(name, token, uploaded=False)
             return
         result = upload_save(
             self._identity,
@@ -769,6 +1201,8 @@ class CloudSaves:
             self._done_with(name, snapshot)
             self._retry_at = None
             self._set_status("Latest backup accepted and server-verified.")
+            self._note_outcome(name, token, "accepted")
+            self._announce_success(name, token, uploaded=True)
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
@@ -779,6 +1213,7 @@ class CloudSaves:
                 # retry pass re-create the slot from this machine's save.
                 self.sync_state.forget(name)
                 self._retry_at = self._clock() + self._retry
+                self._note_outcome(name, token, "network")
                 log.info(
                     "Cloud backup of %s named a revision the cloud no longer "
                     "has; restarting the slot fresh",
@@ -787,45 +1222,40 @@ class CloudSaves:
                 return
             self.sync_state.record_conflict(name, result)
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "conflict")
+            self._announce_refusal(name, token, "conflict", conflict_status(name))
             log.warning(
                 "Cloud backup of %s skipped: the cloud copy is newer (revision %s)",
                 name,
                 result.get("latestRevision"),
             )
             return
-        if result.get("reason") in ("unauthorized", "driver_not_found", "http_401"):
+        family = classify_upload_failure(result.get("reason"))
+        if family == "auth":
             # The credentials were retired (usually by connecting another
             # computer); every retry would fail identically, and the player
             # can only fix it by reconnecting.
-            self._set_status(
-                "Backups are paused: orinks.net no longer accepts this "
-                "computer's sign-in. Reconnect from the Online menu."
-            )
+            self._set_status(AUTH_PAUSED_STATUS)
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "auth")
+            self._announce_refusal(name, token, "auth", AUTH_PAUSED_STATUS)
             return
-        if result.get("reason") in (
-            "too_large",
-            "invalid_schema",
-            "invalid_name",
-            "invalid_city",
-            "invalid_range",
-            "invalid_possession",
-            "invalid_career",
-            "impossible_xp",
-            "impossible_money",
-            "invalid_market",
-            "invalid_hos",
-            "invalid_achievement",
-            "unsupported_version",
-        ):
+        if family == "rejected":
             # Not transient: retrying with the same inputs cannot succeed.
-            self._set_status(
-                "Backup not accepted. Your local career is safe. Public details were not updated."
-            )
+            # The raw reason code is logged for review but never spoken --
+            # only the honest, career-named story below is.
+            reason = result.get("reason")
+            log.warning("Cloud backup of %s was rejected: %s", name, reason)
+            self._set_status(rejection_status(name, reason))
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, f"rejected:{reason}")
+            self._announce_refusal(
+                name, token, f"rejected:{reason}", rejection_status(name, reason)
+            )
             return
         # Transient (network, 5xx): keep the snapshot, back off.
         self._retry_at = self._clock() + self._retry
+        self._note_outcome(name, token, "network")
 
     def _cloud_slot_exists(self, name: str) -> bool:
         """Whether the cloud still holds any revision of this slot. Errs on
@@ -842,14 +1272,25 @@ class CloudSaves:
         entries = reply["saves"] if isinstance(reply, dict) else reply
         return any(entry.get("saveName") == name for entry in entries)
 
-    def resolve_keep_mine(self, name: str, profile_dict: dict) -> bool:
+    def resolve_keep_mine(self, name: str, profile_dict: dict) -> str:
         """Conflict choice: overwrite the cloud with this machine's save.
 
         Called from a menu worker thread. Uploads with the server's latest
-        revision as parent, which the conflict entry recorded.
+        revision as parent, which the conflict entry recorded. Returns
+        ``"ok"`` on success, or the classified failure family the caller
+        needs to speak the real cause instead of always blaming the
+        connection (Jessie's report, 2026-08-14; see
+        ``classify_upload_failure``): ``"auth"``, ``"conflict"`` (the cloud
+        moved again since this conflict was recorded), ``"network"``, or --
+        for a server rejection -- ``"rejected:<reason>"``, carrying the raw
+        reason code so the caller can build the same career-named,
+        family-split story as the background queue via
+        :func:`rejection_status` (this menu is the exact button a
+        conflicted tester presses, so a bare "rejected" tag with no career
+        name or cause was not enough; see :mod:`freight_fate.states.cloud_save_states`).
         """
         if self._identity is None:
-            return False
+            return "network"
         slot = self.sync_state.slot(name)
         conflict = slot.get("conflict") or {}
         parent = conflict.get("latestRevision")
@@ -864,9 +1305,19 @@ class CloudSaves:
         if result.get("ok"):
             self.sync_state.record_synced(name, result["revision"], result["contentHash"])
             self.sync_state.clear_conflict(name)
-            return True
+            return "ok"
         if result.get("reason") == "conflict":
             # The cloud moved again since the conflict was recorded; refresh
             # the details so the menu speaks current numbers.
             self.sync_state.record_conflict(name, result)
-        return False
+            return "conflict"
+        reason = result.get("reason")
+        log.warning("Cloud keep-mine upload of %s failed: %s", name, reason)
+        family = classify_upload_failure(reason)
+        if family == "rejected":
+            # Carry the raw reason through the return value the caller
+            # already treats as an opaque tag, so it can speak the same
+            # career-named, family-split story cases 1-4 speak -- never the
+            # raw code itself, which stays log-only (logged just above).
+            return f"rejected:{reason}"
+        return family
