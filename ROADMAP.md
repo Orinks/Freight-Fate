@@ -91,8 +91,13 @@ These steps remain open even where a related implementation bullet is checked:
 - [ ] Convex deploys before any build with the no-transfer marker
       ships; the radio stream sweep (`--recheck-dead`) runs before the
       release; the place-callouts ladder rides the release merge to dev.
-- [ ] The physical-Mac VoiceOver listening pass on the Mac release
-      staging, and the owner voice pass over seven achievement titles.
+- [ ] The owner voice pass over seven achievement titles. The
+      physical-Mac VoiceOver listening pass was DROPPED as a release
+      gate (2026-09-20, owner): there is no physical Mac to test on.
+      Prism reaches VoiceOver the same way it reaches every other
+      reader, and the native runner boots the packaged app before it
+      ships, so the gate could never have been cleared here anyway.
+      Revive it only if a Mac tester appears.
 - [ ] Cut the stable notes from the rewritten Unreleased block
       (2026-09-14: 718 bullets at a median of 85 words became 774 at 27,
       one heading per section). Before cutting: drop the tester-line
@@ -118,7 +123,14 @@ These items are part of the release-gate sweep:
       seeded traffic decides whether a blown red or stop sign meets nothing,
       a horn, a clip or a heavy broadside, and a flat seeded roll draws the
       red-light or stop-sign citation on the chain-law checkpoint rails.
-- [ ] The 2026-08-13 Dropbox tester findings are still untriaged.
+- [x] The 2026-08-13 Dropbox tester findings are triaged (2026-09-01),
+      and the line calling them untriaged was stale. Two of the three
+      are settled: the doubled "middle lane" went with
+      `MAX_DRIVABLE_LANES`, and the one-lane passing cop is fixed. One
+      leftover is NOT a release blocker and lives in the detailed
+      backlog: enforcement and passing-cop sounds cut the in-cab radio,
+      a game-SFX-over-radio mix issue. The far-right lane of a
+      five-lane road stays unreachable by design.
 - [x] Cruise switches its traffic focus on the actual held-wheel lane
       crossing, keeping the origin lane until then and protecting traffic in
       the lane entered.

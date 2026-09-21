@@ -312,7 +312,10 @@ repository root; Markdown links are relative to this document.
       drivers) -- the hang that forced non-launch verification was the boot
       probes, gone since they moved to worker threads -- so a Mac zip that
       cannot start fails the build instead of shipping. VoiceOver through
-      Prism still needs a listening pass on a physical Mac.
+      Prism has never had a listening pass on a physical Mac, and that
+      pass was dropped as a release gate on 2026-09-20 -- there is no Mac
+      to run it on. Prism reaches VoiceOver through the same backend seam
+      as every other reader; the risk is accepted, not verified.
 - [x] **Rust port: Linux builds, boots on seven distributions, and ships in
       the nightly (2026-09-02).** `tools/fetch_bass.py` now pins un4seen's
       `-linux` x86_64 builds (no AAC add-on exists upstream, as on macOS);
@@ -687,9 +690,10 @@ repository root; Markdown links are relative to this document.
       because the zip was already deflating that JSON to 10.3 MB. `--smoke`
       is wired and the staged build boots and exits 0 on it -- and it is a
       real check: with the container moved aside the same run panics on
-      "the shipped world data loads" rather than passing. Left to do: the
-      macOS `.app` bundle is now complete; a physical-Mac VoiceOver listening
-      pass remains.
+      "the shipped world data loads" rather than passing. The macOS `.app`
+      bundle is complete; the physical-Mac VoiceOver listening pass that
+      used to be listed here was dropped as a gate on 2026-09-20 (no
+      physical Mac to test on).
 
 - [x] **Rust port: a launch takes the same time every time, and the session
       log says where it goes (2026-08-24).** Three runs of the packaged
