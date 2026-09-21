@@ -80,6 +80,9 @@ pub trait MenuMusicProfile {
     fn active_truck_key(&self) -> String;
     fn name(&self) -> String;
     fn current_city(&self) -> String;
+    /// `profile.business_status`: company driver, leased owner-operator or
+    /// independent authority. The synthesized ladder splits on it.
+    fn business_status(&self) -> String;
 }
 
 /// True when the loaded career's clock currently reads night.
@@ -275,6 +278,7 @@ mod tests {
         total_miles: f64,
         owned_trucks: Vec<String>,
         truck: String,
+        business_status: String,
     }
 
     impl FakeProfile {
@@ -287,6 +291,7 @@ mod tests {
                 level: 1,
                 owned_trucks: vec!["rig".to_string()],
                 truck: "rig".to_string(),
+                business_status: crate::models::business_constants::COMPANY_DRIVER.to_string(),
                 ..Default::default()
             }
         }
@@ -316,6 +321,9 @@ mod tests {
         }
         fn current_city(&self) -> String {
             self.current_city.clone()
+        }
+        fn business_status(&self) -> String {
+            self.business_status.clone()
         }
     }
 

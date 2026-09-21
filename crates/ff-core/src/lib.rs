@@ -22,6 +22,7 @@ pub mod ladder_earcons;
 pub mod lane_guide_tone;
 pub mod message_log;
 pub mod music;
+pub mod music_synth;
 pub mod playtest_levers;
 pub mod profile_integrity_invariants;
 pub mod profile_invariants;
