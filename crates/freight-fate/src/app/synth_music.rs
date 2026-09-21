@@ -31,10 +31,12 @@ impl GameContext {
         let Some(parsed) = SynthKey::parse(key) else {
             return key.to_string();
         };
+        // Requesting even a ready piece marks it in use, so the worker cannot
+        // evict it between this check and the play call.
+        self.request_synth(key);
         if SynthWorker::is_ready(key) {
             return key.to_string();
         }
-        self.request_synth(key);
         classic_for(parsed.style).to_string()
     }
 

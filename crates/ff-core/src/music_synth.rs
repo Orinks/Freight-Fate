@@ -190,8 +190,7 @@ mod tests {
             compose(StyleId::DayDrive, rng::piece_seed(StyleId::DayDrive, 1, 0)).duration_s();
         assert_eq!(crate::music::music_track_duration_s(&key), expected);
         assert!((crate::music::music_track_duration_s(CLASSIC_DAY) - 61.41).abs() < 0.01);
-        crate::music::register_track_duration("player_x", 42.0);
-        assert_eq!(crate::music::music_track_duration_s("player_x"), 42.0);
+        assert_eq!(crate::music::known_track_duration_s("player_x"), None);
     }
 
     #[test]

@@ -5,6 +5,7 @@
 use super::compose::{Note, Score, Voice};
 use super::rng::Rng;
 use std::f64::consts::TAU;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub const SAMPLE_RATE: u32 = 22_050;
 const PEAK: f64 = 0.85 * i16::MAX as f64;
@@ -121,20 +122,22 @@ fn voice_samples(note: &Note, dur_s: f64, rng: &mut Rng) -> Vec<f64> {
     }
 }
 
-/// Small Schroeder reverb on a mono send.
-fn reverb(send: &[f64]) -> Vec<f64> {
+/// Small Schroeder reverb on a mono send. Takes the send by value so it is
+/// freed as soon as the combs have read it.
+fn reverb(send: Vec<f32>) -> Vec<f32> {
     let combs = [1116usize, 1188, 1277, 1356].map(|d| d * SAMPLE_RATE as usize / 44_100);
-    let mut out = vec![0.0; send.len()];
+    let mut out = vec![0.0f32; send.len()];
     for d in combs {
-        let mut buf = vec![0.0; d];
+        let mut buf = vec![0.0f32; d];
         for (i, x) in send.iter().enumerate() {
             let y = buf[i % d];
             buf[i % d] = x + y * 0.78;
             out[i] += y * 0.25;
         }
     }
+    drop(send);
     for d in [556usize, 441].map(|d| d * SAMPLE_RATE as usize / 44_100) {
-        let mut buf = vec![0.0; d];
+        let mut buf = vec![0.0f32; d];
         for (i, sample) in out.iter_mut().enumerate() {
             let input = *sample;
             let y = buf[i % d];
@@ -145,15 +148,34 @@ fn reverb(send: &[f64]) -> Vec<f64> {
     out
 }
 
-pub fn render(score: &Score) -> Vec<i16> {
+/// Notes mixed between cancel checks: a long piece has a few thousand.
+const NOTES_PER_CANCEL_CHECK: usize = 64;
+
+/// Stereo f32 with the reverb folded in, and the gain that brings its peak
+/// to PEAK.
+struct Mix {
+    left: Vec<f32>,
+    right: Vec<f32>,
+    gain: f64,
+}
+
+/// Mix `score`. None when `cancel` is raised part way.
+///
+/// Peak memory for a 5-minute piece at 22.05 kHz (6.6 M frames) is four
+/// f32 buffers while the reverb combs run, about 106 MB; the output buffer
+/// is only allocated after the send and the wet signal are gone.
+fn mix(score: &Score, cancel: &AtomicBool) -> Option<Mix> {
     let sr = SAMPLE_RATE as f64;
     let frames = (score.duration_s() * sr).ceil() as usize;
-    let mut left = vec![0.0f64; frames];
-    let mut right = vec![0.0f64; frames];
-    let mut send = vec![0.0f64; frames];
+    let mut left = vec![0.0f32; frames];
+    let mut right = vec![0.0f32; frames];
+    let mut send = vec![0.0f32; frames];
     let beat_s = 60.0 / score.bpm;
     let mut rng = Rng::new(score.notes.len() as u64 ^ score.bpm.to_bits());
-    for note in &score.notes {
+    for (n, note) in score.notes.iter().enumerate() {
+        if n % NOTES_PER_CANCEL_CHECK == 0 && cancel.load(Ordering::Relaxed) {
+            return None;
+        }
         let start = (note.start_beat * beat_s * sr) as usize;
         let samples = voice_samples(note, note.beats * beat_s, &mut rng);
         let (gl, gr) = pan(note.voice);
@@ -163,26 +185,38 @@ pub fn render(score: &Score) -> Vec<i16> {
             if at >= frames {
                 break;
             }
-            left[at] += s * gl;
-            right[at] += s * gr;
+            left[at] += (s * gl) as f32;
+            right[at] += (s * gr) as f32;
             if wet {
-                send[at] += s * 0.3;
+                send[at] += (s * 0.3) as f32;
             }
         }
     }
-    let wet = reverb(&send);
-    let peak = left
-        .iter()
-        .zip(&right)
-        .zip(&wet)
-        .map(|((l, r), w)| (l + w).abs().max((r + w).abs()))
-        .fold(0.0f64, f64::max)
-        .max(1e-9);
-    let gain = PEAK / peak;
+    if cancel.load(Ordering::Relaxed) {
+        return None;
+    }
+    let wet = reverb(send);
+    let mut peak = 1e-9f64;
+    for ((l, r), w) in left.iter_mut().zip(right.iter_mut()).zip(&wet) {
+        *l += w;
+        *r += w;
+        peak = peak.max(l.abs().max(r.abs()) as f64);
+    }
+    Some(Mix {
+        left,
+        right,
+        gain: PEAK / peak,
+    })
+}
+
+/// Every interleaved sample of `mix`, faded in and out, to `emit`.
+fn emit_samples(mix: &Mix, mut emit: impl FnMut(i16)) {
+    let sr = SAMPLE_RATE as f64;
+    let frames = mix.left.len();
+    let gain = mix.gain;
     let fade_in = (FADE_IN_S * sr) as usize;
     let fade_out = (FADE_OUT_S * sr) as usize;
-    let mut pcm = Vec::with_capacity(frames * 2);
-    for i in 0..frames {
+    for (i, (l, r)) in mix.left.iter().zip(&mix.right).enumerate() {
         let mut env = 1.0;
         if i < fade_in {
             env *= i as f64 / fade_in as f64;
@@ -190,11 +224,29 @@ pub fn render(score: &Score) -> Vec<i16> {
         if i + fade_out > frames {
             env *= (frames - i) as f64 / fade_out as f64;
         }
-        for x in [left[i] + wet[i], right[i] + wet[i]] {
-            pcm.push((x * gain * env).clamp(i16::MIN as f64, i16::MAX as f64) as i16);
+        for x in [*l as f64, *r as f64] {
+            emit((x * gain * env).clamp(i16::MIN as f64, i16::MAX as f64) as i16);
         }
     }
+}
+
+/// Interleaved 16-bit stereo PCM for `score`.
+pub fn render(score: &Score) -> Vec<i16> {
+    let Some(mix) = mix(score, &AtomicBool::new(false)) else {
+        return Vec::new();
+    };
+    let mut pcm = Vec::with_capacity(mix.left.len() * 2);
+    emit_samples(&mix, |s| pcm.push(s));
     pcm
+}
+
+/// `score` as a 16-bit stereo WAV, header and samples written in one pass
+/// into one buffer. None when `cancel` is raised part way.
+pub fn render_wav(score: &Score, cancel: &AtomicBool) -> Option<Vec<u8>> {
+    let mix = mix(score, cancel)?;
+    let mut wav = crate::wav::pcm16_header(mix.left.len() * 2, 2, SAMPLE_RATE);
+    emit_samples(&mix, |s| wav.extend_from_slice(&s.to_le_bytes()));
+    Some(wav)
 }
 
 #[cfg(test)]
@@ -229,6 +281,20 @@ mod tests {
     }
 
     #[test]
+    fn the_wav_carries_exactly_the_rendered_samples() {
+        let score = short(StyleId::NightDrive, 5);
+        let pcm = render(&score);
+        let wav = render_wav(&score, &AtomicBool::new(false)).expect("not cancelled");
+        assert_eq!(wav, crate::wav::pcm16_wav(&pcm, 2, SAMPLE_RATE));
+    }
+
+    #[test]
+    fn a_cancelled_render_returns_nothing() {
+        let score = short(StyleId::DayDrive, 2);
+        assert!(render_wav(&score, &AtomicBool::new(true)).is_none());
+    }
+
+    #[test]
     fn starts_and_ends_quiet() {
         let pcm = render(&short(StyleId::FleetOwner, 9));
         assert!(pcm[..20].iter().all(|s| s.unsigned_abs() < 600));
@@ -243,7 +309,7 @@ mod tests {
             .max_by(|a, b| a.duration_s().total_cmp(&b.duration_s()))
             .expect("scores");
         let t = std::time::Instant::now();
-        let _ = render(&score);
+        let _ = render_wav(&score, &AtomicBool::new(false));
         let s = t.elapsed().as_secs_f64();
         println!("rendered {:.0}s of music in {s:.2}s", score.duration_s());
         assert!(s < 4.0);

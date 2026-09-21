@@ -158,31 +158,33 @@ pub fn asset_bytes(key: &str, extensions: &[&str]) -> Option<AssetBytes> {
     asset_bytes_from(pack.as_deref(), &asset_roots(), key, extensions)
 }
 
-/// A cache whose entries were computed from the generated-sound set at one
-/// version: a later registration drops them, because anything measured or
-/// rendered from the old bytes was measuring nothing (the Python
-/// `register_generated_sound` popped the key from `_LENGTHS` and
-/// `_CAB_SEALED`).
+/// A cache whose entries each remember their key's generated-sound version:
+/// registering or dropping that key invalidates its entry alone, because
+/// anything measured or rendered from the old bytes was measuring nothing
+/// (the Python `register_generated_sound` popped the key from `_LENGTHS`
+/// and `_CAB_SEALED`). A synthesized piece coming and going never costs an
+/// engine band its sealed cut.
 struct VersionedCache<T> {
-    version: u64,
-    map: HashMap<String, T>,
+    map: HashMap<String, (u64, T)>,
 }
 
 impl<T> VersionedCache<T> {
     fn new() -> Self {
         Self {
-            version: 0,
             map: HashMap::new(),
         }
     }
 
-    fn current(&mut self) -> &mut HashMap<String, T> {
-        let version = generated_sound_version();
-        if version != self.version {
-            self.map.clear();
-            self.version = version;
-        }
-        &mut self.map
+    fn get(&self, key: &str) -> Option<&T> {
+        self.map
+            .get(key)
+            .filter(|(version, _)| *version == generated_sound_version(key))
+            .map(|(_, value)| value)
+    }
+
+    fn insert(&mut self, key: &str, value: T) {
+        self.map
+            .insert(key.to_string(), (generated_sound_version(key), value));
     }
 }
 
@@ -211,7 +213,6 @@ pub fn playback_bytes(key: &str, extensions: &[&str]) -> Option<AssetBytes> {
     if let Some(cached) = CAB_SEALED
         .lock()
         .unwrap_or_else(|e| e.into_inner())
-        .current()
         .get(key)
     {
         return Some(cached.clone());
@@ -225,8 +226,7 @@ pub fn playback_bytes(key: &str, extensions: &[&str]) -> Option<AssetBytes> {
     CAB_SEALED
         .lock()
         .unwrap_or_else(|e| e.into_inner())
-        .current()
-        .insert(key.to_string(), found.clone());
+        .insert(key, found.clone());
     Some(found)
 }
 
@@ -353,12 +353,7 @@ fn rfind(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 /// demo, which must not lay a second copy over the first -- has this and
 /// nothing else to go on.
 pub fn asset_length_s(key: &str) -> f64 {
-    if let Some(cached) = LENGTHS
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .current()
-        .get(key)
-    {
+    if let Some(cached) = LENGTHS.lock().unwrap_or_else(|e| e.into_inner()).get(key) {
         return *cached;
     }
     let seconds = match asset_bytes(key, SFX_EXTENSIONS) {
@@ -381,8 +376,7 @@ pub fn asset_length_s(key: &str) -> f64 {
     LENGTHS
         .lock()
         .unwrap_or_else(|e| e.into_inner())
-        .current()
-        .insert(key.to_string(), seconds);
+        .insert(key, seconds);
     seconds
 }
 
@@ -456,6 +450,24 @@ mod tests {
         assert!((ogg_seconds(&ogg) - 2.0).abs() < 1e-12);
         assert_eq!(ogg_seconds(b"OggS"), 0.0);
         assert_eq!(ogg_seconds(b"nothing"), 0.0);
+    }
+
+    #[test]
+    fn a_music_registration_leaves_an_engine_band_cache_entry_alone() {
+        let engine = "engine/test_cache_band_1200";
+        let mut cache = VersionedCache::new();
+        cache.insert(engine, 7u32);
+        ff_core::assets_pack::register_generated_sound(
+            "music/test_cache_piece",
+            wav(22050, 2, 10),
+            "wav",
+        );
+        ff_core::assets_pack::unregister_generated_sound("music/test_cache_piece");
+        assert_eq!(cache.get(engine), Some(&7), "an unrelated key cleared it");
+        // Registering the entry's own key does invalidate it.
+        ff_core::assets_pack::register_generated_sound(engine, wav(22050, 2, 10), "wav");
+        assert_eq!(cache.get(engine), None);
+        ff_core::assets_pack::unregister_generated_sound(engine);
     }
 
     #[test]

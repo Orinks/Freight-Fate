@@ -71,11 +71,6 @@ impl DrivingState {
         // `_enforcement_init` opened with this; the synthesized signature has
         // to exist before the first enforcement cue can play.
         register_enforcement_sounds();
-        // The restored 1.5 classics: compiled in, so the Synthesized music
-        // source's fallback tracks (open road, night haul) exist before a
-        // drive can reach for them, the same as the enforcement signature
-        // above.
-        crate::audio::classic_music::register();
 
         let mut truck = TruckState::new(profile_of(ctx).truck_specs());
         // Loaded delivery runs carry the job's payload; pickup deadheads and

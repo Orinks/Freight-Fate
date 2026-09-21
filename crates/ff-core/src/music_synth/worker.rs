@@ -3,24 +3,35 @@
 //! One thread, a bounded queue of two requests. A full queue drops the new
 //! request -- the caller plays the classic and asks again next track -- so
 //! the loop never waits here. A rendered piece is published as a generated
-//! sound under `music/<key>`; at most KEEP_RENDERED stay registered.
+//! sound under `music/<key>`; KEEP_RENDERED stay registered, and a piece
+//! among the last RECENT_REQUESTS requests is never evicted, so what a
+//! rotation just resolved as playing or next is still there to play.
 
-use super::{compose, render, SynthKey, SAMPLE_RATE};
+use super::render::render_wav;
+use super::{compose, SynthKey};
 use crate::assets_pack::{generated_sound, register_generated_sound, unregister_generated_sound};
 use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TrySendError};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 const QUEUE: usize = 2;
-const KEEP_RENDERED: usize = 3;
+const KEEP_RENDERED: usize = 4;
+/// A rotation requests its current piece and the next one, and the menu and
+/// the Roadhouse can both be rotating: four requests cover both.
+const RECENT_REQUESTS: usize = 4;
+
+type Recent = Arc<Mutex<VecDeque<String>>>;
 
 pub struct SynthWorker {
     tx: Option<SyncSender<SynthKey>>,
     cancel: Arc<AtomicBool>,
     handle: Option<JoinHandle<()>>,
+    /// Generated-sound names (`music/<key>`) of the latest requests.
+    recent: Recent,
+    stopped_logged: AtomicBool,
 }
 
 impl SynthWorker {
@@ -28,31 +39,42 @@ impl SynthWorker {
         let (tx, rx) = sync_channel::<SynthKey>(QUEUE);
         let cancel = Arc::new(AtomicBool::new(false));
         let flag = Arc::clone(&cancel);
+        let recent: Recent = Arc::default();
+        let in_use = Arc::clone(&recent);
         let handle = std::thread::Builder::new()
             .name("synth-music".into())
-            .spawn(move || run(rx, flag))
+            .spawn(move || run(rx, flag, in_use))
             .map_err(|err| log::warn!("Synthesized music worker did not start ({err})"))
             .ok();
         SynthWorker {
             tx: handle.as_ref().map(|_| tx),
             cancel,
             handle,
+            recent,
+            stopped_logged: AtomicBool::new(false),
         }
     }
 
-    /// Queue a render. False when `key` is not a synth key, is already
-    /// published, the worker is shut down, or the queue is full.
+    /// Queue a render, and mark `key` in use so it is not evicted. True when
+    /// it is queued or already published. False when `key` is not a synth
+    /// key, the worker is shut down or has stopped, or the queue is full.
     pub fn request(&self, key: &str) -> bool {
         let (Some(tx), Some(parsed)) = (&self.tx, SynthKey::parse(key)) else {
             return false;
         };
+        note_request(&self.recent, format!("music/{key}"));
         if Self::is_ready(key) {
             return true;
         }
         match tx.try_send(parsed) {
             Ok(()) => true,
             Err(TrySendError::Full(_)) => false,
-            Err(TrySendError::Disconnected(_)) => false,
+            Err(TrySendError::Disconnected(_)) => {
+                if !self.stopped_logged.swap(true, Ordering::Relaxed) {
+                    log::warn!("Synthesized music worker has stopped; the classics play instead");
+                }
+                false
+            }
         }
     }
 
@@ -73,7 +95,9 @@ impl SynthWorker {
             std::thread::sleep(Duration::from_millis(10));
         }
         if handle.is_finished() {
-            let _ = handle.join();
+            if handle.join().is_err() {
+                log::warn!("shutdown: synthesized music worker had panicked");
+            }
             log::info!(
                 "shutdown: synthesized music worker joined in {} ms",
                 started.elapsed().as_millis()
@@ -95,7 +119,21 @@ impl Drop for SynthWorker {
     }
 }
 
-fn run(rx: Receiver<SynthKey>, cancel: Arc<AtomicBool>) {
+fn note_request(recent: &Recent, name: String) {
+    let mut recent = recent.lock().unwrap_or_else(|e| e.into_inner());
+    recent.retain(|k| *k != name);
+    recent.push_back(name);
+    while recent.len() > RECENT_REQUESTS {
+        recent.pop_front();
+    }
+}
+
+/// The oldest published piece that no recent request is using.
+fn evictable(published: &VecDeque<String>, recent: &VecDeque<String>) -> Option<usize> {
+    published.iter().position(|k| !recent.contains(k))
+}
+
+fn run(rx: Receiver<SynthKey>, cancel: Arc<AtomicBool>, recent: Recent) {
     let mut published: VecDeque<String> = VecDeque::new();
     while let Ok(key) = rx.recv() {
         if cancel.load(Ordering::SeqCst) {
@@ -106,14 +144,20 @@ fn run(rx: Receiver<SynthKey>, cancel: Arc<AtomicBool>) {
             continue;
         }
         let score = compose(key.style, key.seed());
-        let pcm = render(&score);
+        let Some(wav) = render_wav(&score, &cancel) else {
+            break; // cancelled mid-render: publish nothing
+        };
         if cancel.load(Ordering::SeqCst) {
             break;
         }
-        register_generated_sound(&name, crate::wav::pcm16_wav(&pcm, 2, SAMPLE_RATE), "wav");
+        register_generated_sound(&name, wav, "wav");
         published.push_back(name);
         while published.len() > KEEP_RENDERED {
-            if let Some(old) = published.pop_front() {
+            let in_use = recent.lock().unwrap_or_else(|e| e.into_inner()).clone();
+            let Some(i) = evictable(&published, &in_use) else {
+                break; // every piece is in use: keep them all for now
+            };
+            if let Some(old) = published.remove(i) {
                 unregister_generated_sound(&old);
             }
         }
@@ -153,6 +197,44 @@ mod tests {
         assert_eq!(ext, "wav");
         assert_eq!(&bytes[..4], b"RIFF");
         worker.shutdown(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_piece_resolved_as_playing_or_next_is_never_evicted() {
+        let names = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<VecDeque<_>>();
+        let recent: Recent = Arc::default();
+        // The menu resolves a and asks for b; the Roadhouse resolves c, asks d.
+        for k in ["music/a", "music/b", "music/c", "music/d"] {
+            note_request(&recent, k.to_string());
+        }
+        let in_use = recent.lock().unwrap().clone();
+        // e was just published over the cap: the oldest piece not in use goes.
+        let published = names(&["music/old", "music/a", "music/b", "music/c", "music/d"]);
+        assert_eq!(evictable(&published, &in_use), Some(0));
+        // With every published piece in use, nothing is evicted.
+        let published = names(&["music/a", "music/b", "music/c", "music/d"]);
+        assert_eq!(evictable(&published, &in_use), None);
+        // A repeat request refreshes a key instead of pushing a live one out.
+        note_request(&recent, "music/a".into());
+        note_request(&recent, "music/e".into());
+        let in_use = recent.lock().unwrap().clone();
+        assert_eq!(in_use, names(&["music/c", "music/d", "music/a", "music/e"]));
+    }
+
+    #[test]
+    fn a_ready_piece_is_marked_in_use_when_requested() {
+        let worker = SynthWorker::start();
+        let key = SynthKey {
+            style: StyleId::DayDrive,
+            music_seed: 4242,
+            index: 1,
+        }
+        .key();
+        let name = format!("music/{key}");
+        register_generated_sound(&name, b"RIFF".to_vec(), "wav");
+        assert!(worker.request(&key), "already published is true");
+        assert!(worker.recent.lock().unwrap().contains(&name));
+        unregister_generated_sound(&name);
     }
 
     #[test]

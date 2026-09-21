@@ -2,7 +2,17 @@
 //! runtime-generated sounds (siren, earcons, synthesized music) publish.
 
 pub fn pcm16_wav(samples: &[i16], channels: u16, rate: u32) -> Vec<u8> {
-    let data_len = (samples.len() * 2) as u32;
+    let mut out = pcm16_header(samples.len(), channels, rate);
+    for s in samples {
+        out.extend_from_slice(&s.to_le_bytes());
+    }
+    out
+}
+
+/// The 44-byte header for `sample_count` interleaved samples, in a buffer
+/// with room for them, so a caller can append samples as it makes them.
+pub fn pcm16_header(sample_count: usize, channels: u16, rate: u32) -> Vec<u8> {
+    let data_len = (sample_count * 2) as u32;
     let mut out = Vec::with_capacity(44 + data_len as usize);
     out.extend_from_slice(b"RIFF");
     out.extend_from_slice(&(36 + data_len).to_le_bytes());
@@ -16,9 +26,6 @@ pub fn pcm16_wav(samples: &[i16], channels: u16, rate: u32) -> Vec<u8> {
     out.extend_from_slice(&16u16.to_le_bytes());
     out.extend_from_slice(b"data");
     out.extend_from_slice(&data_len.to_le_bytes());
-    for s in samples {
-        out.extend_from_slice(&s.to_le_bytes());
-    }
     out
 }
 

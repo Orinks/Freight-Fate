@@ -14,7 +14,6 @@ mod tables;
 pub use expansion::NIGHT_LINE_VOCAL_TRACKS;
 use pools::TRACKS_BY_KEY;
 pub use pools::*;
-use std::collections::HashMap;
 pub use tables::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -235,27 +234,14 @@ pub fn select_drive_music(
         .expect("the drive pools are never empty")
 }
 
-/// Lengths learned at run time: hand-made modules and player files, whose
-/// length only BASS can read. Keyed like the catalog.
-static RUNTIME_DURATIONS: once_cell::sync::Lazy<parking_lot::Mutex<HashMap<String, f64>>> =
-    once_cell::sync::Lazy::new(|| parking_lot::Mutex::new(HashMap::new()));
-
-pub fn register_track_duration(key: &str, seconds: f64) {
-    if seconds.is_finite() && seconds > 0.0 {
-        RUNTIME_DURATIONS.lock().insert(key.to_string(), seconds);
-    }
-}
-
-/// The length of `key` if anything knows it: the shipped catalog, a
-/// synthesized piece (composed, not rendered), or a registered run-time track.
+/// The length of `key` if it can be known without audio: the shipped
+/// catalog or a synthesized piece (composed, not rendered). Anything else,
+/// such as a player file, is measured by the playing stream instead.
 pub fn known_track_duration_s(key: &str) -> Option<f64> {
     if let Some(info) = TRACKS_BY_KEY.get(key) {
         return Some(info.duration_s);
     }
-    if let Some(d) = crate::music_synth::duration_s(key) {
-        return Some(d);
-    }
-    RUNTIME_DURATIONS.lock().get(key).copied()
+    crate::music_synth::duration_s(key)
 }
 
 /// Best-known duration for slow playlist rotation.
