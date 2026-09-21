@@ -1,9 +1,12 @@
 name: Career 1.9 snapshot
 
+# The nightly for the 1.9 line, which since the 2026-09-20 cutover is
+# `dev` (see CAREER_BRANCH below).
+#
 # A scheduled run executes the copy of this file on the DEFAULT branch
 # (main), whatever the checked-out code is, so after changing it here push
 # the same file to main or the nightly quietly keeps the old job list. The
-# Prepare job fails a scheduled run whose file differs from this branch's.
+# Prepare job fails a scheduled run whose file differs from CAREER_BRANCH's.
 
 on:
   schedule:
@@ -24,7 +27,16 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  CAREER_BRANCH: "feat/career-1.9"
+  # `dev` since the 1.9 cutover (2026-09-20). This built feat/career-1.9
+  # while 1.9 was a side line; dev IS the 1.9 line now, and this is the
+  # only workflow that knows how to build the Rust game, so it is the
+  # nightly. build.yml's schedule was retired in the same change: it ran
+  # the Python path, which dev no longer has anything to feed.
+  #
+  # The `1.9-tester-*` tag scheme deliberately does NOT change. The
+  # in-game updater's developer-snapshot channel finds builds by that
+  # name, so renaming it would strand everyone already on one.
+  CAREER_BRANCH: "dev"
 
 jobs:
   prepare:
