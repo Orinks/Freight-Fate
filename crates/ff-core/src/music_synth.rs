@@ -115,16 +115,14 @@ fn shuffled(mut keys: Vec<String>, seed_key: &str) -> Vec<String> {
 }
 
 /// The menu rotation: Headlights West first for a brand-new career, else the
-/// place's first piece; then the rest of the pieces, the classic and any
-/// hand-made extras in a stable order.
+/// place's first piece; then the rest of the pieces and the classic in a
+/// stable order.
 pub fn select_synth_menu_sequence(
     profile: Option<&dyn MenuMusicProfile>,
     music_seed: i64,
-    extras: &[String],
 ) -> Vec<String> {
     let place = menu_style(profile);
     let mut all: Vec<String> = pieces(place, music_seed).collect();
-    all.extend(extras.iter().cloned());
     let classic = classic_for(place).to_string();
     let lead = if place == StyleId::NewHire {
         classic.clone()
@@ -139,12 +137,7 @@ pub fn select_synth_menu_sequence(
 }
 
 /// The Roadhouse's day or night playlist in Synthesized mode.
-pub fn select_synth_drive_sequence(
-    night: bool,
-    music_seed: i64,
-    trip_seed: i64,
-    extras: &[String],
-) -> Vec<String> {
+pub fn select_synth_drive_sequence(night: bool, music_seed: i64, trip_seed: i64) -> Vec<String> {
     let place = if night {
         StyleId::NightDrive
     } else {
@@ -152,7 +145,6 @@ pub fn select_synth_drive_sequence(
     };
     let mut all: Vec<String> = pieces(place, music_seed).collect();
     all.push(classic_for(place).to_string());
-    all.extend(extras.iter().cloned());
     shuffled(all, &format!("{music_seed}|{trip_seed}|{}", place.id()))
 }
 
@@ -204,7 +196,7 @@ mod tests {
 
     #[test]
     fn a_new_career_opens_on_headlights_west_and_holds_only_synth_music() {
-        let seq = select_synth_menu_sequence(None, 48213, &[]);
+        let seq = select_synth_menu_sequence(None, 48213);
         assert_eq!(seq[0], CLASSIC_MENU);
         assert_eq!(seq.len(), 1 + PIECES_PER_ROTATION);
         assert!(seq[1..]
@@ -213,17 +205,14 @@ mod tests {
     }
 
     #[test]
-    fn extras_join_the_rotation_and_the_seed_changes_every_piece() {
-        let extras = vec!["hand_made/new_hire/diesel_dawn".to_string()];
-        let seq = select_synth_menu_sequence(None, 1, &extras);
-        assert!(seq.contains(&extras[0]));
-        let a = select_synth_drive_sequence(false, 1, 7, &[]);
-        let b = select_synth_drive_sequence(false, 2, 7, &[]);
+    fn the_seed_changes_every_piece() {
+        let a = select_synth_drive_sequence(false, 1, 7);
+        let b = select_synth_drive_sequence(false, 2, 7);
         assert!(a.contains(&CLASSIC_DAY.to_string()));
         assert!(a
             .iter()
             .filter(|k| k.starts_with("synth_"))
             .all(|k| !b.contains(k)));
-        assert!(select_synth_drive_sequence(true, 1, 7, &[]).contains(&CLASSIC_NIGHT.to_string()));
+        assert!(select_synth_drive_sequence(true, 1, 7).contains(&CLASSIC_NIGHT.to_string()));
     }
 }

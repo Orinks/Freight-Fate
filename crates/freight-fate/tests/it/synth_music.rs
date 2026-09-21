@@ -6,8 +6,9 @@ use crate::states_main_menu_support::*;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
+use ff_core::radio::{dial_group, SAFE_ROUTE_PLAYLIST, STREAMER_SAFE_LOCKED};
 use freight_fate::app::testing::TestApp;
-use freight_fate::states::base::Key;
+use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
 use freight_fate::states::main_menu::{SettingsCategoryState, SettingsState};
@@ -158,9 +159,9 @@ fn the_synthesized_roadhouse_plays_synth_music_and_no_host_breaks() {
     let station = d.radio.current_station();
     assert_eq!(station.playlist, "route");
     let pool = d.station_rotation_pool(&app.ctx, &station, false);
-    assert!(pool.iter().all(|k| k.starts_with("synth_drive_day_")
-        || k == "classic_open_road"
-        || k.starts_with("hand_made/")));
+    assert!(pool
+        .iter()
+        .all(|k| k.starts_with("synth_drive_day_") || k == "classic_open_road"));
     // Play through more tracks than a break interval: nothing from a host break.
     d.start_station_rotation(&mut app.ctx, &station, 0);
     for _ in 0..(ff_core::music::RADIO_TRACKS_PER_HOST_BREAK * 2) {
@@ -305,4 +306,166 @@ fn the_length_is_the_new_tracks_while_the_old_one_fades() {
         (b - 7.68).abs() < 0.05,
         "reported {b}, not the module's 7.68 s"
     );
+}
+
+// -- the dial in Synthesized mode ---------------------------------------------------------
+
+/// `a_drive` with the engine running, the radio on, and the given settings.
+fn a_radio_drive(app: &mut TestApp, synth_music: bool, streamer_safe: bool) -> DrivingState {
+    app.ctx.settings.synth_music = synth_music;
+    app.ctx.settings.radio_streamer_safe = streamer_safe;
+    let mut d = a_drive(app);
+    d.trip.truck.start_engine();
+    d.radio.enabled = true;
+    d
+}
+
+fn tuned_group(d: &mut DrivingState) -> i32 {
+    dial_group(&d.radio.current_station())
+}
+
+#[test]
+fn synthesized_streamer_safe_keeps_every_station_key_on_the_roadhouse() {
+    let mut app = TestApp::new();
+    let mut d = a_radio_drive(&mut app, true, true);
+    assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+    for event in [
+        InputEvent::key(Key::PageDown),
+        InputEvent::key(Key::PageUp),
+        InputEvent::key(Key::Semicolon),
+        InputEvent::key(Key::Quote),
+        InputEvent::key_mods(Key::PageDown, Mods::CTRL),
+        InputEvent::key_mods(Key::PageUp, Mods::CTRL),
+        InputEvent::key(Key::O),
+    ] {
+        app.clear_speech();
+        d.handle_key_event(&mut app.ctx, &event);
+        assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+        let said = app.main_lines();
+        assert!(said.iter().any(|l| l == STREAMER_SAFE_LOCKED), "{said:?}");
+    }
+    assert!(d.radio.favorite_ids.is_empty());
+    assert_eq!(
+        d.tune_radio_to(&mut app.ctx, "afn-tokyo"),
+        STREAMER_SAFE_LOCKED
+    );
+    assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+    // The power key is still just on and off, and volume still moves.
+    d.handle_key_event(&mut app.ctx, &InputEvent::key(Key::M));
+    assert!(!d.radio.enabled);
+    d.handle_key_event(&mut app.ctx, &InputEvent::key(Key::M));
+    assert!(d.radio.enabled);
+    assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+    let volume = app.ctx.settings.radio_volume;
+    d.handle_key_event(
+        &mut app.ctx,
+        &InputEvent::key_mods(Key::PageUp, Mods::SHIFT),
+    );
+    assert_ne!(app.ctx.settings.radio_volume, volume);
+}
+
+#[test]
+fn synthesized_streamer_safe_radio_app_has_no_station_list_to_open() {
+    use crate::states_driving_menus_support as dm;
+    use freight_fate::states::driving_menu_states::DriveRef;
+    use freight_fate::states::driving_radio_app::{
+        RadioAppState, RadioSearchEntryState, RadioStationListState,
+    };
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    app.ctx.settings.radio_streamer_safe = true;
+    let drive = dm::a_drive_between(&mut app, "Denver", "Salt Lake City", "Radio App");
+    dm::with_drive(&drive, |d| d.trip.truck.start_engine());
+    let mut state = RadioAppState::new(DriveRef::of(&drive));
+    for row in ["Search stations", "Stations in range", "Favorites"] {
+        app.clear_speech();
+        dm::activate(&mut state, &mut app.ctx, row);
+        assert!(!dm::top_is::<RadioSearchEntryState>(&app), "{row}");
+        assert!(!dm::top_is::<RadioStationListState>(&app), "{row}");
+        let said = app.main_lines();
+        assert!(
+            said.iter().any(|l| l == STREAMER_SAFE_LOCKED),
+            "{row}: {said:?}"
+        );
+    }
+}
+
+#[test]
+fn the_synthesized_dial_never_lands_on_a_freight_fate_station() {
+    let mut app = TestApp::new();
+    let mut d = a_radio_drive(&mut app, true, false);
+    assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+    // Every category the Ctrl key can reach, twice round.
+    let categories = {
+        let mut groups: Vec<i32> = Vec::new();
+        for r in d.radio.receivable_stations() {
+            let g = d.radio.group(&r.station);
+            if !groups.contains(&g) {
+                groups.push(g);
+            }
+        }
+        groups.len()
+    };
+    assert!(categories > 1);
+    for _ in 0..categories * 2 {
+        d.handle_key_event(
+            &mut app.ctx,
+            &InputEvent::key_mods(Key::PageDown, Mods::CTRL),
+        );
+        assert_ne!(tuned_group(&mut d), 1);
+    }
+    // And the plain dial, stepping out of the Roadhouse in both directions.
+    let _ = d.tune_radio_to(&mut app.ctx, SAFE_ROUTE_PLAYLIST);
+    for _ in 0..30 {
+        d.handle_key_event(&mut app.ctx, &InputEvent::key(Key::PageDown));
+        assert_ne!(tuned_group(&mut d), 1);
+    }
+}
+
+#[test]
+fn the_original_dial_still_steps_onto_freight_fate_stations() {
+    for streamer_safe in [false, true] {
+        let mut app = TestApp::new();
+        let mut d = a_radio_drive(&mut app, false, streamer_safe);
+        assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+        d.handle_key_event(&mut app.ctx, &InputEvent::key(Key::PageDown));
+        assert_eq!(tuned_group(&mut d), 1);
+    }
+}
+
+#[test]
+fn switching_to_synthesized_moves_a_freight_fate_station_to_the_roadhouse() {
+    for (streamer_safe, reason) in [
+        (false, "Music source is Synthesized"),
+        (true, "streamer-safe mode is on"),
+    ] {
+        let mut app = TestApp::new();
+        let mut d = a_radio_drive(&mut app, false, false);
+        d.tune_radio_to(&mut app.ctx, "ff-night-line");
+        assert_eq!(d.radio.current_station().id, "ff-night-line");
+        let night = d.music_night;
+        d.update_radio_playback(&mut app.ctx, night, 0.0);
+        app.clear_speech();
+        app.ctx.settings.synth_music = true;
+        app.ctx.settings.radio_streamer_safe = streamer_safe;
+        d.apply_radio_settings_to_drive(&mut app.ctx);
+        assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+        assert_eq!(app.ctx.settings.radio_station_id, SAFE_ROUTE_PLAYLIST);
+        let events = app.event_lines();
+        assert!(
+            events
+                .iter()
+                .any(|l| l.contains("left the dial") && l.contains(reason)),
+            "{events:?}"
+        );
+        // The Roadhouse it lands on plays the synthesized rotation.
+        d.update_radio_playback(&mut app.ctx, night, 0.0);
+        assert!(
+            d.radio_playlist
+                .iter()
+                .all(|k| k.starts_with("synth_drive_") || k.starts_with("classic_")),
+            "{:?}",
+            d.radio_playlist
+        );
+    }
 }

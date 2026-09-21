@@ -4,7 +4,7 @@
 //! [`DrivingState::synth_roadhouse`], so widening that one predicate widens
 //! all of them.
 
-use ff_core::music_synth::{select_synth_drive_sequence, track_title, StyleId};
+use ff_core::music_synth::{select_synth_drive_sequence, track_title};
 use ff_core::radio::{RadioStation, SAFE_ROUTE_PLAYLIST};
 use ff_core::radio_content::content_duration_s;
 
@@ -30,16 +30,10 @@ impl DrivingState {
         if !self.synth_roadhouse(ctx, station) {
             return None;
         }
-        let place = if night {
-            StyleId::NightDrive
-        } else {
-            StyleId::DayDrive
-        };
         Some(select_synth_drive_sequence(
             night,
             ctx.settings.music_seed,
             self.trip_seed,
-            &crate::audio::hand_made::extras_for(place),
         ))
     }
 
@@ -101,8 +95,7 @@ impl DrivingState {
                 .unwrap_or_default();
             self.station_cue(ctx, station, &pool).current_key(&pool)
         };
-        let title =
-            track_title(&current).or_else(|| crate::audio::hand_made::title_for(&current))?;
+        let title = track_title(&current)?;
         Some(format!(
             "Now playing on {}: {title}.",
             station.display_name()

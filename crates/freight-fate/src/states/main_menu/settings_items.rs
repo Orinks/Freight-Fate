@@ -794,8 +794,9 @@ impl SettingsCategoryState {
                 }),
                 adjust(|s, ctx, d| s.toggle_music_source(ctx, d)),
                 "Synthesized plays menu music and the Roadhouse station made by the \
-                 game itself, with no AI-made songs or voices. Original plays the \
-                 full soundtrack.",
+                 game itself, with no AI-made songs or voices, and takes Freight \
+                 Fate's other stations off the dial. Original plays the full \
+                 soundtrack.",
             ),
             row(
                 dyn_label(|s| format!("Music seed: {}", s.music_seed)),
@@ -814,7 +815,9 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
                 "Off plays the full dial, including real public streams and \
                  personal playlists. On keeps the radio to built-in safe \
-                 stations, for streaming or recording.",
+                 stations, for streaming or recording. With Music source set to \
+                 Synthesized, On keeps the radio on the Roadhouse and station \
+                 keys do nothing.",
             ),
             row(
                 dyn_label(|s| {

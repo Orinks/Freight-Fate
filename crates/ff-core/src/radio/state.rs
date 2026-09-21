@@ -33,6 +33,8 @@ pub trait RadioSettingsAccess {
     fn radio_station_id(&self) -> String;
     fn radio_volume(&self) -> f64;
     fn radio_streamer_safe(&self) -> bool;
+    /// Music source Synthesized.
+    fn synth_music(&self) -> bool;
     fn set_radio_enabled(&mut self, enabled: bool);
     fn set_radio_station_id(&mut self, station_id: &str);
 }
@@ -54,6 +56,8 @@ pub struct RadioState {
     pub station_id: String,
     pub volume: f64,
     pub streamer_safe: bool,
+    /// Music source Synthesized: see `synth_dial.rs`.
+    pub synth_music: bool,
     pub position: Option<(f64, f64)>,
     pub elevation_ft: Option<f64>,
     pub favorite_ids: HashSet<String>,
@@ -97,6 +101,7 @@ impl RadioState {
             station_id: SAFE_ROUTE_PLAYLIST.to_string(),
             volume: 0.25,
             streamer_safe: false,
+            synth_music: false,
             position: None,
             elevation_ft: None,
             favorite_ids: HashSet::new(),
@@ -151,6 +156,7 @@ impl RadioState {
             .with_station_id(&settings.radio_station_id())
             .with_volume(settings.radio_volume())
             .with_streamer_safe(settings.radio_streamer_safe())
+            .with_synth_music(settings.synth_music())
             .with_favorites(favorites)
     }
 
@@ -197,6 +203,7 @@ impl RadioState {
     pub fn apply_settings(&mut self, settings: &dyn RadioSettingsAccess) {
         self.volume = Self::clamp_volume(settings.radio_volume());
         self.streamer_safe = settings.radio_streamer_safe();
+        self.synth_music = settings.synth_music();
     }
 
     pub fn write_settings(&self, settings: &mut dyn RadioSettingsAccess) {
@@ -538,6 +545,9 @@ impl RadioState {
         // that failed to open sits in `unplayable_ids` -- so both of those
         // still land on the silent satellite below, whose guarantee is
         // exactly that it always "plays".
+        if let Some(station) = self.synth_fallback() {
+            return station;
+        }
         if let Some(station) = self
             .catalog
             .iter()
@@ -652,6 +662,9 @@ impl RadioState {
         // The dial says why rather than going silent: nothing happening with
         // no explanation is the one outcome a screen reader user cannot tell
         // from a broken key.
+        if let Some(refused) = self.locked_action() {
+            return refused;
+        }
         if !self.enabled {
             return self.dial_is_off();
         }
@@ -738,6 +751,9 @@ impl RadioState {
         direction: i64,
         backend: Option<&mut dyn RadioPlaybackBackend>,
     ) -> RadioAction {
+        if let Some(refused) = self.locked_action() {
+            return refused;
+        }
         if !self.enabled {
             return self.dial_is_off();
         }
@@ -774,6 +790,12 @@ impl RadioState {
         station_id: &str,
         backend: Option<&mut dyn RadioPlaybackBackend>,
     ) -> RadioAction {
+        // The Roadhouse passes: it is where the game itself moves a locked dial.
+        if station_id != SAFE_ROUTE_PLAYLIST {
+            if let Some(refused) = self.locked_action() {
+                return refused;
+            }
+        }
         let station = match self.station_by_id(station_id).cloned() {
             Some(station) if self.station_allowed(&station) => station,
             _ => return self.play(backend, "Radio fallback."),
@@ -954,11 +976,11 @@ impl RadioState {
         })
     }
 
-    fn station_allowed(&self, station: &RadioStation) -> bool {
+    pub(super) fn station_allowed(&self, station: &RadioStation) -> bool {
         if !station.supported {
             return false;
         }
-        if self.unplayable_ids.contains(&station.id) {
+        if self.unplayable_ids.contains(&station.id) || !self.synth_allows(station) {
             return false;
         }
         if !station.real_stream && station.source_type != PERSONAL_PLAYLIST_SOURCE_TYPE {
@@ -1043,6 +1065,9 @@ impl RadioState {
 
     /// Save or unsave the current station; the spoken confirmation.
     pub fn toggle_favorite(&mut self) -> String {
+        if self.station_locked() {
+            return super::STREAMER_SAFE_LOCKED.to_string();
+        }
         let station = self.current_station();
         if station.fallback {
             return "The safety fallback is always on the dial.".to_string();

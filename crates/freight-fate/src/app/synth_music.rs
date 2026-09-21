@@ -4,9 +4,7 @@
 //! is already past the 1000-line limit.
 
 use ff_core::music::MenuMusicProfile;
-use ff_core::music_synth::{
-    classic_for, menu_style, select_synth_menu_sequence, SynthKey, SynthWorker,
-};
+use ff_core::music_synth::{classic_for, select_synth_menu_sequence, SynthKey, SynthWorker};
 
 use super::GameContext;
 
@@ -16,8 +14,7 @@ impl GameContext {
     pub(crate) fn effective_sequence(&self, pool_name: &str, sequence: &[&str]) -> Vec<String> {
         if pool_name == "menu" && self.settings.synth_music {
             let profile = self.profile.as_ref().map(|p| p as &dyn MenuMusicProfile);
-            let extras = crate::audio::hand_made::extras_for(menu_style(profile));
-            return select_synth_menu_sequence(profile, self.settings.music_seed, &extras);
+            return select_synth_menu_sequence(profile, self.settings.music_seed);
         }
         sequence.iter().map(|s| s.to_string()).collect()
     }

@@ -6,7 +6,7 @@ use ff_core::pyrandom::PyRandom;
 use ff_core::radio::{
     effective_range_miles, is_stream_entry, signal_volume_factor, station_identity,
     truck_elevation_ft, truck_position, RadioAction, RadioPlaybackError, RadioReception,
-    RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE,
+    RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE, STREAMER_SAFE_LOCKED,
 };
 use ff_core::radio_content::{content_duration_s, plan_break};
 use ff_core::radio_rotation::{cue_after, RotationCue, StationRotation};
@@ -849,7 +849,7 @@ impl DrivingState {
         if !station.supported {
             return false;
         }
-        if self.radio.unplayable_ids.contains(&station.id) {
+        if self.radio.unplayable_ids.contains(&station.id) || !self.radio.synth_allows(station) {
             return false;
         }
         if !station.real_stream && station.source_type != PERSONAL_PLAYLIST_SOURCE_TYPE {
@@ -889,9 +889,14 @@ impl DrivingState {
         });
         self.write_radio_settings(ctx);
         if powered {
+            let reason = if self.radio.streamer_safe {
+                "streamer-safe mode is on"
+            } else {
+                "Music source is Synthesized"
+            };
             ctx.say_event_with(
                 format!(
-                    "{} left the dial, streamer-safe mode is on. Tuned to {}.",
+                    "{} left the dial, {reason}. Tuned to {}.",
                     before.display_name(),
                     action.station.display_name()
                 ),
@@ -1025,6 +1030,9 @@ impl DrivingState {
             return "The engine is off. The radio has no power.".to_string();
         }
         self.sync_radio_settings(ctx);
+        if self.radio.station_locked() && station_id != SAFE_ROUTE_PLAYLIST {
+            return STREAMER_SAFE_LOCKED.to_string();
+        }
         let was_off = !self.radio.enabled;
         self.radio.enabled = true;
         let id = station_id.to_string();

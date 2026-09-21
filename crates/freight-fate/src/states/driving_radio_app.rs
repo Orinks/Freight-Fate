@@ -14,7 +14,9 @@
 //! radio tablet app ... and favorite stations in the app too."
 
 use ff_core::models::profile;
-use ff_core::radio::{RadioReception, RadioStation, PLAYLISTS_DIR_NAME, RADIO_SEARCH_LIMIT};
+use ff_core::radio::{
+    RadioReception, RadioStation, PLAYLISTS_DIR_NAME, RADIO_SEARCH_LIMIT, STREAMER_SAFE_LOCKED,
+};
 
 use crate::app::{GameContext, Say};
 use crate::states::base::{Menu, MenuCore, MenuItem};
@@ -95,7 +97,21 @@ impl RadioAppState {
         self.refresh(ctx, true);
     }
 
+    /// Synthesized with streamer-safe mode on: the Roadhouse is the only
+    /// station, so there is no list to open or search. Says so.
+    fn dial_locked(ctx: &mut GameContext) -> bool {
+        if !(ctx.settings.synth_music && ctx.settings.radio_streamer_safe) {
+            return false;
+        }
+        ctx.audio.play("ui/error");
+        ctx.say(STREAMER_SAFE_LOCKED);
+        true
+    }
+
     fn open_list(&mut self, ctx: &mut GameContext, kind: &str) {
+        if Self::dial_locked(ctx) {
+            return;
+        }
         let state = RadioStationListState::new(self.driving.clone(), kind);
         ctx.push_state(state);
     }
@@ -171,6 +187,9 @@ impl Menu for RadioAppState {
             )
             .help("Your saved stations. Enter on one tunes it."),
             MenuItem::new("Search stations", |s: &mut Self, ctx| {
+                if Self::dial_locked(ctx) {
+                    return;
+                }
                 let state = RadioSearchEntryState::new(s.driving.clone());
                 ctx.push_state(state);
             })

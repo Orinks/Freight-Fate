@@ -16,6 +16,7 @@
 
 pub mod playlists;
 pub mod state;
+mod synth_dial;
 #[cfg(test)]
 mod tests;
 
@@ -34,6 +35,9 @@ pub use state::{RadioSettingsAccess, RadioState, FAVORITES_GROUP, TERRESTRIAL_GR
 
 pub const SAFE_ROUTE_PLAYLIST: &str = "route_playlist";
 pub const SAFE_FALLBACK_STATION_ID: &str = "ff-safety-satellite";
+/// Every station command's answer with Music source Synthesized and
+/// streamer-safe mode on: the Roadhouse is the only station.
+pub const STREAMER_SAFE_LOCKED: &str = "Streamer-safe mode keeps the radio on the Roadhouse.";
 /// Where the dial lands when a station is lost and a real stream is still
 /// allowed: AFN Humphreys The Eagle, the catalog's one Eagle station --
 /// always available, no range, so it is receivable anywhere on the map.
