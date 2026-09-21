@@ -42,12 +42,12 @@ fn test_owner_operator_needs_the_purchased_subscription_not_just_level() {
     // starting money already covers the signup fee
     assert!(ok && reasons.is_empty());
 
-    p.money = 0.0;
+    p.set_money(0.0);
     let (ok, reasons) = weigh_station_transponder_eligibility(&p);
     assert!(!ok);
     assert!(reasons[0].contains("dollars"), "{:?}", reasons[0]);
 
-    p.money = 100_000.0;
+    p.set_money(100_000.0);
     p.weigh_station_transponder = true;
     assert!(has_weigh_station_transponder(&p));
     let (ok, reasons) = weigh_station_transponder_eligibility(&p);

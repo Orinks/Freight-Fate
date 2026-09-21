@@ -156,7 +156,11 @@ fn test_generic_stop_and_big_bucks_offer_no_wear_service() {
 fn test_road_tire_service_charges_and_clears_wear() {
     let mut app = TestApp::new();
     let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
-    app.ctx.profile.as_mut().expect("a career").money = 5_000.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(5_000.0);
     let (at, minutes_before) = with_drive(&drive, |d| {
         d.trip.truck.tire_wear_pct = 20.0;
         (d.trip.position_mi, d.trip.game_minutes)
@@ -170,9 +174,9 @@ fn test_road_tire_service_charges_and_clears_wear() {
     // synced through store_truck_condition
     assert_eq!(profile.tire_wear_pct(), 0.0);
     assert!(
-        (profile.money - (5_000.0 - 20.0 * ROAD_TIRE_SPECIALIST_COST_PER_PCT)).abs() < 0.01,
+        (profile.money() - (5_000.0 - 20.0 * ROAD_TIRE_SPECIALIST_COST_PER_PCT)).abs() < 0.01,
         "{}",
-        profile.money
+        profile.money()
     );
     assert!(with_drive(&drive, |d| d.trip.game_minutes) > minutes_before);
     assert!(last(&app).contains("Tires replaced"), "{}", last(&app));
@@ -182,7 +186,7 @@ fn test_road_tire_service_charges_and_clears_wear() {
 fn test_road_brake_job_is_all_or_nothing_when_broke() {
     let mut app = TestApp::new();
     let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
-    app.ctx.profile.as_mut().expect("a career").money = 100.0;
+    app.ctx.profile.as_mut().expect("a career").set_money(100.0);
     let at = with_drive(&drive, |d| {
         d.trip.truck.brake_wear_pct = 30.0;
         d.trip.position_mi
@@ -192,7 +196,7 @@ fn test_road_brake_job_is_all_or_nothing_when_broke() {
     activate(&mut state, &mut app.ctx, "Brake job");
 
     assert_eq!(with_drive(&drive, |d| d.trip.truck.brake_wear_pct), 30.0);
-    assert_eq!(app.ctx.profile.as_ref().expect("a career").money, 100.0);
+    assert_eq!(app.ctx.profile.as_ref().expect("a career").money(), 100.0);
     assert!(last(&app).contains("cannot afford"), "{}", last(&app));
 }
 
@@ -200,7 +204,7 @@ fn test_road_brake_job_is_all_or_nothing_when_broke() {
 fn test_company_driver_road_wear_service_is_carrier_billed() {
     let mut app = TestApp::new();
     let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let at = with_drive(&drive, |d| {
         d.trip.truck.brake_wear_pct = 30.0;
         d.trip.position_mi
@@ -211,7 +215,7 @@ fn test_company_driver_road_wear_service_is_carrier_billed() {
 
     assert_eq!(with_drive(&drive, |d| d.trip.truck.brake_wear_pct), 0.0);
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     );
     assert!(last(&app).contains("carrier account"), "{}", last(&app));
@@ -285,7 +289,11 @@ fn test_a_motel_bed_is_not_five_by_two() {
     // no sleeper facility: motel and lot offered
     stop.actions = vec!["break".to_string()];
     let mut state = rest_stop_at(&mut app, &drive, stop);
-    app.ctx.profile.as_mut().expect("a career").money = 10_000.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(10_000.0);
 
     // A tired driver beds down in the truck's own bunk in the lot: that
     // night counts (the guard refuses a fresh driver an emergency sleep).
@@ -458,12 +466,20 @@ fn test_rest_stop_pay_advance_option_only_appears_when_available() {
     stop.services = vec!["parking".to_string()];
     let mut state = rest_stop_at(&mut app, &drive, stop);
 
-    app.ctx.profile.as_mut().expect("a career").money = PAY_ADVANCE_ELIGIBLE_BELOW;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(PAY_ADVANCE_ELIGIBLE_BELOW);
     assert!(!build_labels(&mut state, &mut app.ctx)
         .iter()
         .any(|t| t.starts_with("Request pay advance")));
 
-    app.ctx.profile.as_mut().expect("a career").money = PAY_ADVANCE_ELIGIBLE_BELOW - 1.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(PAY_ADVANCE_ELIGIBLE_BELOW - 1.0);
     assert!(build_labels(&mut state, &mut app.ctx)
         .iter()
         .any(|t| t.starts_with("Request pay advance")));
@@ -654,14 +670,14 @@ fn test_abandoning_a_load_costs_five_hundred_and_reputation() {
     let drive = a_drive(&mut app);
     let (money_before, rep_before) = {
         let profile = app.ctx.profile.as_mut().expect("a career");
-        profile.money = 4_000.0;
-        (profile.money, profile.career.reputation)
+        profile.set_money(4_000.0);
+        (profile.money(), profile.career.reputation)
     };
     let mut state = AbandonJobConfirmationState::new(DriveRef::of(&drive));
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Yes, abandon the job");
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert_eq!(profile.money, money_before - 500.0);
+    assert_eq!(profile.money(), money_before - 500.0);
     assert_eq!(profile.career.reputation, (rep_before - 5.0).max(0.0));
     assert!(profile.active_trip.is_none());
     assert!(last(&app).starts_with("Job abandoned."), "{}", last(&app));
@@ -677,14 +693,14 @@ fn test_abandoning_an_assigned_reposition_costs_standing_not_money() {
     });
     let (money_before, rep_before) = {
         let profile = app.ctx.profile.as_mut().expect("a career");
-        profile.money = 4_000.0;
-        (profile.money, profile.career.reputation)
+        profile.set_money(4_000.0);
+        (profile.money(), profile.career.reputation)
     };
     let mut state = AbandonJobConfirmationState::new(DriveRef::of(&drive));
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Yes, abandon the job");
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert_eq!(profile.money, money_before, "no fine on an empty run");
+    assert_eq!(profile.money(), money_before, "no fine on an empty run");
     assert_eq!(
         profile.career.reputation,
         (rep_before - ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY).max(0.0)
@@ -942,7 +958,7 @@ fn test_bald_tires_in_the_lane_are_out_of_service_until_replaced() {
         d.trip.truck.brake_wear_pct = 0.0;
         d.trip.truck.damage_pct = 0.0;
     });
-    let money_before = app.ctx.profile.as_ref().unwrap().money;
+    let money_before = app.ctx.profile.as_ref().unwrap().money();
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
     let mut state = rest_stop_at(&mut app, &drive, stop);
@@ -957,7 +973,7 @@ fn test_bald_tires_in_the_lane_are_out_of_service_until_replaced() {
     assert_eq!(with_drive(&drive, |d| d.trip.truck.tire_wear_pct), 0.0);
     // A company driver pays the fine; the carrier's breakdown account pays
     // the tires.
-    let money_after = app.ctx.profile.as_ref().unwrap().money;
+    let money_after = app.ctx.profile.as_ref().unwrap().money();
     assert!(
         (money_before - money_after - OUT_OF_SERVICE_FINE).abs() < 1e-6,
         "{money_before} -> {money_after}"

@@ -264,7 +264,7 @@ pub fn apply(ctx: &mut GameContext, scenario: &Scenario) -> Result<Vec<String>, 
             notes.push(format!("{} deliveries behind them.", deliveries.max(0)));
         }
         if let Some(money) = scenario.money {
-            p.money = money;
+            p.set_money(money);
             notes.push(format!("{} dollars in hand.", fmt_grouped(money, 0)));
         }
         if let Some(reputation) = scenario.reputation {

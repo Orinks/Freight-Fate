@@ -137,7 +137,7 @@ impl ParkingFullState {
     }
 
     fn motel(&mut self, ctx: &mut GameContext) {
-        let money = profile_of(ctx).money;
+        let money = profile_of(ctx).money();
         if money < MOTEL_COST {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
@@ -147,7 +147,7 @@ impl ParkingFullState {
             ));
             return;
         }
-        profile_mut_of(ctx).money -= MOTEL_COST;
+        profile_mut_of(ctx).spend(MOTEL_COST);
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             // Same as every other sleep option: no truck idles all night just
             // because the driver bedded down in a motel instead of the
@@ -162,7 +162,7 @@ impl ParkingFullState {
                 p.store_truck_condition(&d.trip.truck);
                 p.active_trip = Some(snapshot);
             }
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             format!(
                 "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
                  is {}. Hours of service reset and you wake fresh. You have {} dollars. {} \

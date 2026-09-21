@@ -292,7 +292,11 @@ fn test_toll_route_delivery_settlement_records_expense() {
     driving.trip.update(0.0);
     assert_eq!(driving.trip.toll_expense(), 30.0);
 
-    app.ctx.profile.as_mut().expect("a career").money = 1000.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(1000.0);
     let hours = settlement_hours(&driving);
     let gross = job.payout_default(hours, 0.0);
     let status = app
@@ -330,7 +334,7 @@ fn test_toll_route_delivery_settlement_records_expense() {
     );
 
     let arrival = ArrivalState::new(&mut app.ctx, &mut driving);
-    let money = app.ctx.profile.as_ref().expect("a career").money;
+    let money = app.ctx.profile.as_ref().expect("a career").money();
     assert!(
         (money - (1000.0 + expected.net_before_advance)).abs() < 0.5,
         "{money}"

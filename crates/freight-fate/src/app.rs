@@ -287,7 +287,7 @@ impl PlayerInputFrame<'_> {
             profile.name,
             profile.career.level(),
             profile.career.deliveries,
-            ff_core::pyfmt::fmt_grouped(profile.money, 0),
+            ff_core::pyfmt::fmt_grouped(profile.money(), 0),
             profile.business_status,
         );
         if !notes.is_empty() {

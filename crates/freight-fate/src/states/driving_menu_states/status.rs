@@ -213,7 +213,7 @@ impl DrivingStatusScreenState {
                 };
                 let mut lines = vec![
                     format!("Driver: {}", profile.name),
-                    format!("Money: {} dollars", fmt_grouped(profile.money, 0)),
+                    format!("Money: {} dollars", fmt_grouped(profile.money(), 0)),
                 ];
                 if !owed.is_empty() {
                     lines.push(owed);

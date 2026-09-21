@@ -27,7 +27,7 @@ impl DrivingState {
         let billing = {
             let profile = profile_mut_of(ctx);
             if player_pays_operating_costs(&profile.business_status) {
-                profile.money -= fee; // can go negative: the rescue is not optional
+                profile.spend(fee); // can go negative: the rescue is not optional
                 format!("for {} dollars", fmt_grouped(fee, 0))
             } else {
                 // the carrier pays for company fuel, but a preventable service

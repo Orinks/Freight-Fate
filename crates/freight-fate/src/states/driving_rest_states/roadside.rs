@@ -223,7 +223,7 @@ impl TrafficStopState {
         let hit = hos::HOS_REPUTATION_HIT * if self.signaled { 0.7 } else { 1.0 };
         {
             let p = profile_mut_of(ctx);
-            p.money -= fine;
+            p.spend(fine);
             p.career.reputation = (rep - hit).max(0.0);
         }
         ctx.audio.play("ui/error");
@@ -391,7 +391,7 @@ impl EnforcementStopState {
         let hit = self.reputation_hit * if self.signaled { 0.8 } else { 1.0 };
         {
             let p = profile_mut_of(ctx);
-            p.money -= self.fine;
+            p.spend(self.fine);
             p.career.reputation = (p.career.reputation - hit).max(0.0);
         }
         ctx.audio.play("ui/error");
@@ -592,7 +592,7 @@ impl FelonyStopState {
         d.ticket_fines_paid += fine;
         {
             let p = profile_mut_of(ctx);
-            p.money -= fine;
+            p.spend(fine);
             p.career.reputation = (p.career.reputation - hos::HOS_REPUTATION_HIT * 3.0).max(0.0);
         }
         // The part that used to go nowhere: fleeing a stop in a commercial

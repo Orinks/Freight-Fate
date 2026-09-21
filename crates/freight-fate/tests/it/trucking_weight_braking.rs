@@ -189,7 +189,7 @@ fn realism_fuel_rows_report_margin_before_purchase_in_both_roadside_menus() {
         let drive = a_drive(&mut app);
         let profile = app.ctx.profile.as_mut().expect("career profile");
         profile.business_status = business.to_string();
-        profile.money = 50_000.0;
+        profile.set_money(50_000.0);
         with_drive(&drive, |d| {
             d.trip.truck.fuel_gal = 10.0;
             let full_tank_gross_without_cargo = d

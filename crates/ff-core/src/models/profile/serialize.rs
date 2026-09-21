@@ -13,6 +13,7 @@ use crate::models::enforcement::{seed_record_from_save, DrivingRecord};
 use crate::models::jobs::{py_str, py_truthy};
 use crate::models::loyalty::LoyaltyAccount;
 use crate::models::market::Market;
+use crate::models::money_guard::MoneyGuard;
 use crate::models::save_migration::{json_f64, json_i64, migrate_save_data};
 use crate::sim::hos::{DutyLog, HosClock};
 
@@ -67,13 +68,19 @@ impl Profile {
             "migration_notice_pending".into(),
             Value::from(self.migration_notice_pending),
         );
+        // A balance rewritten in memory between transactions is caught here
+        // too: the money guard's shadow disagrees with the field, and the
+        // save goes to disk already carrying the modified mark.
+        let memory_diverged = !self.money_guard.matches(self.money);
         d.insert(
             "integrity_modified".into(),
-            Value::from(self.integrity_modified),
+            Value::from(self.integrity_modified || memory_diverged),
         );
         d.insert(
             "integrity_notice_pending".into(),
-            Value::from(self.integrity_notice_pending),
+            Value::from(
+                self.integrity_notice_pending || (memory_diverged && !self.integrity_modified),
+            ),
         );
         d.insert(
             "hos_key_notice_left".into(),
@@ -279,9 +286,14 @@ impl Profile {
             _ => Map::new(),
         };
 
+        // Read once so the money guard is seeded with the balance the load
+        // gate already vouched for.
+        let money = f("money", defaults.money);
+
         Profile {
             name: s("name", &defaults.name),
-            money: f("money", defaults.money),
+            money,
+            money_guard: MoneyGuard::seeded(money),
             current_city: s("current_city", &defaults.current_city),
             created_line: s("created_line", &defaults.created_line),
             migration_notice_pending: b("migration_notice_pending", false),

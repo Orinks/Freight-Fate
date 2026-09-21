@@ -173,7 +173,7 @@ impl GarageState {
                 p.set_truck_fuel_gal(tank);
                 p.game_hours += TERMINAL_FUEL_MIN / 60.0;
                 p.hos.on_duty(TERMINAL_FUEL_MIN);
-                p.money
+                p.money()
             };
             ctx.save_profile();
             ctx.audio.play("vehicle/fuel_pump");
@@ -188,17 +188,17 @@ impl GarageState {
             return;
         }
         let cost = ctx.economy.fuel_cost(&Self::region(ctx), need);
-        if profile(ctx).money < cost {
+        if profile(ctx).money() < cost {
             self.partial_refuel(ctx, tank);
             return;
         }
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_fuel_gal(tank);
             let start = p.game_hours;
             p.game_hours += TERMINAL_FUEL_MIN / 60.0;
-            (start, p.game_hours, p.money)
+            (start, p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "terminal fuel");
         profile_mut(ctx).hos.on_duty(TERMINAL_FUEL_MIN);
@@ -217,7 +217,7 @@ impl GarageState {
         let region = Self::region(ctx);
         let price = ctx.economy.fuel_price(&region);
         let gallons = if price > 0.0 {
-            profile(ctx).money / price
+            profile(ctx).money() / price
         } else {
             0.0
         };
@@ -229,12 +229,12 @@ impl GarageState {
         let cost = ctx.economy.fuel_cost(&region, gallons);
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             let fuel = tank.min(p.truck_fuel_gal() + gallons);
             p.set_truck_fuel_gal(fuel);
             let start = p.game_hours;
             p.game_hours += TERMINAL_FUEL_MIN / 60.0;
-            (start, p.game_hours, p.money)
+            (start, p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "terminal fuel");
         profile_mut(ctx).hos.on_duty(TERMINAL_FUEL_MIN);
@@ -282,17 +282,17 @@ impl GarageState {
             return;
         }
         let cost = Economy::repair_cost(damage);
-        if profile(ctx).money < cost {
+        if profile(ctx).money() < cost {
             self.partial_repair(ctx);
             return;
         }
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_damage_pct(0.0);
             let start = p.game_hours;
             p.game_hours += TERMINAL_REPAIR_MIN / 60.0;
-            (start, p.game_hours, p.money)
+            (start, p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "terminal repair");
         profile_mut(ctx).hos.on_duty(TERMINAL_REPAIR_MIN);
@@ -317,7 +317,7 @@ impl GarageState {
         // curve actually sells and overdrew the account by pennies.
         let (money, damage) = {
             let p = profile(ctx);
-            (p.money, p.truck_damage_pct())
+            (p.money(), p.truck_damage_pct())
         };
         let mut repairable = money / (REPAIR_COST_PER_PCT * damage_severity_mult(damage));
         repairable = repairable.min(damage);
@@ -332,11 +332,11 @@ impl GarageState {
         ));
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_damage_pct((damage - repairable).max(0.0));
             let start = p.game_hours;
             p.game_hours += TERMINAL_REPAIR_MIN / 60.0;
-            (start, p.game_hours, p.money)
+            (start, p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "terminal repair");
         profile_mut(ctx).hos.on_duty(TERMINAL_REPAIR_MIN);
@@ -480,8 +480,8 @@ impl GarageState {
         }
         let per_pct = Self::tire_cost_per_pct(ctx);
         let mut cost = round_py_n(wear * per_pct, 2);
-        if profile(ctx).money < cost && wear < COMPONENT_SERVICE_LIMIT_PCT {
-            let serviceable = profile(ctx).money / per_pct;
+        if profile(ctx).money() < cost && wear < COMPONENT_SERVICE_LIMIT_PCT {
+            let serviceable = profile(ctx).money() / per_pct;
             if serviceable < 1.0 {
                 ctx.audio.play("ui/error");
                 ctx.say("Not enough money for one percent of tire service.");
@@ -490,10 +490,10 @@ impl GarageState {
             cost = round_py_n(serviceable * per_pct, 2);
             let (end, money) = {
                 let p = profile_mut(ctx);
-                p.money -= cost;
+                p.spend(cost);
                 p.set_tire_wear_pct((p.tire_wear_pct() - serviceable).max(0.0));
                 p.game_hours += TERMINAL_TIRE_MIN / 60.0;
-                (p.game_hours, p.money)
+                (p.game_hours, p.money())
             };
             record_terminal_duty(ctx, start, end, "tire service");
             profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
@@ -512,10 +512,10 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_tire_wear_pct(0.0);
             p.game_hours += TERMINAL_TIRE_MIN / 60.0;
-            (p.game_hours, p.money)
+            (p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "tire service");
         profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
@@ -557,7 +557,7 @@ impl GarageState {
         let premium = if to_winter { WINTER_TIRE_PREMIUM } else { 1.0 };
         let cost = round_py_n(100.0 * TIRE_SERVICE_COST_PER_PCT * premium, 2);
         let compound = if to_winter { "winter" } else { "all-season" };
-        if profile(ctx).money < cost {
+        if profile(ctx).money() < cost {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "A fresh set of {compound} tires \
@@ -569,11 +569,11 @@ impl GarageState {
         let (start, end, money) = {
             let p = profile_mut(ctx);
             let start = p.game_hours;
-            p.money -= cost;
+            p.spend(cost);
             p.set_tire_type(if to_winter { "winter" } else { "all_season" });
             p.set_tire_wear_pct(0.0);
             p.game_hours += TERMINAL_TIRE_MIN / 60.0;
-            (start, p.game_hours, p.money)
+            (start, p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "tire swap");
         profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
@@ -650,7 +650,7 @@ impl GarageState {
             self.refresh(ctx, true);
             return;
         }
-        if profile(ctx).money < CHAIN_SET_COST {
+        if profile(ctx).money() < CHAIN_SET_COST {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "A set of snow chains costs {} dollars.",
@@ -660,11 +660,11 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= CHAIN_SET_COST;
+            p.spend(CHAIN_SET_COST);
             p.set_chains_owned(true);
             p.set_chain_wear_pct(0.0);
             p.game_hours += TERMINAL_CHAINS_MIN / 60.0;
-            (p.game_hours, p.money)
+            (p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "chain set");
         profile_mut(ctx).hos.on_duty(TERMINAL_CHAINS_MIN);
@@ -744,8 +744,8 @@ impl GarageState {
             return;
         }
         let mut cost = round_py_n(wear * service.cost_per_pct, 2);
-        if profile(ctx).money < cost && wear < COMPONENT_SERVICE_LIMIT_PCT {
-            let serviceable = profile(ctx).money / service.cost_per_pct;
+        if profile(ctx).money() < cost && wear < COMPONENT_SERVICE_LIMIT_PCT {
+            let serviceable = profile(ctx).money() / service.cost_per_pct;
             if serviceable < 1.0 {
                 ctx.audio.play("ui/error");
                 ctx.say(&format!(
@@ -757,10 +757,10 @@ impl GarageState {
             cost = round_py_n(serviceable * service.cost_per_pct, 2);
             let (end, money) = {
                 let p = profile_mut(ctx);
-                p.money -= cost;
+                p.spend(cost);
                 service.meter.write(p, (wear - serviceable).max(0.0));
                 p.game_hours += service.minutes / 60.0;
-                (p.game_hours, p.money)
+                (p.game_hours, p.money())
             };
             record_terminal_duty(ctx, start, end, service.duty_note);
             profile_mut(ctx).hos.on_duty(service.minutes);
@@ -780,10 +780,10 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             service.meter.write(p, 0.0);
             p.game_hours += service.minutes / 60.0;
-            (p.game_hours, p.money)
+            (p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, service.duty_note);
         profile_mut(ctx).hos.on_duty(service.minutes);
@@ -823,7 +823,7 @@ impl GarageState {
             self.refresh(ctx, true);
             return;
         }
-        if profile(ctx).money < TRUCK_WASH_COST {
+        if profile(ctx).money() < TRUCK_WASH_COST {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "A truck wash costs {} dollars.",
@@ -833,10 +833,10 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= TRUCK_WASH_COST;
+            p.spend(TRUCK_WASH_COST);
             p.set_road_grime_pct(0.0);
             p.game_hours += TERMINAL_WASH_MIN / 60.0;
-            (p.game_hours, p.money)
+            (p.game_hours, p.money())
         };
         record_terminal_duty(ctx, start, end, "truck wash");
         profile_mut(ctx).hos.on_duty(TERMINAL_WASH_MIN);

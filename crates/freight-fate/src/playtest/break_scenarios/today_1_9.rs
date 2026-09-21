@@ -51,7 +51,11 @@ pub fn abandon_an_empty_run_costs_nothing() -> Outcome {
         rig.drive.trip.position_mi = rig.drive.trip.total_miles() * 0.5;
         let (money_before, rep_before, hours_before) = {
             let profile = rig.app.ctx.profile.as_ref().expect("a profile");
-            (profile.money, profile.career.reputation, profile.game_hours)
+            (
+                profile.money(),
+                profile.career.reputation,
+                profile.game_hours,
+            )
         };
 
         if !abandon(&mut rig) {
@@ -64,7 +68,11 @@ pub fn abandon_an_empty_run_costs_nothing() -> Outcome {
 
         let (money, reputation, hours) = {
             let profile = rig.app.ctx.profile.as_ref().expect("a profile");
-            (profile.money, profile.career.reputation, profile.game_hours)
+            (
+                profile.money(),
+                profile.career.reputation,
+                profile.game_hours,
+            )
         };
         let lost = money_before - money;
         let rep_lost = rep_before - reputation;

@@ -75,7 +75,7 @@ fn test_owner_operator_start_begins_the_arc_rather_than_skipping_it() {
     // What the start IS: your truck, your capital, your costs.
     assert_eq!(p.business_status, LEASED_OWNER_OPERATOR);
     assert!(p.owned_trucks.iter().any(|t| t == "rig"));
-    assert!(p.money > 0.0);
+    assert!(p.money() > 0.0);
     // And the menu no longer promises a shortcut.
     let blurb = format!("{} {}", option.menu_summary, option.help_text).to_lowercase();
     assert!(!blurb.contains("skip"));
@@ -98,7 +98,7 @@ fn test_owner_operator_unlock_requires_career_and_working_capital() {
     p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
     p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
     p.career.reputation = OWNER_OPERATOR_REPUTATION;
-    p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+    p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
 
     let (ok, reasons) = owner_operator_eligibility(&p);
     assert!(ok);
@@ -116,7 +116,7 @@ fn test_level_five_is_preparation_not_owner_operator_unlock() {
     p.career.xp = LEVEL_XP[4];
     p.career.deliveries = 20;
     p.career.reputation = 90.0;
-    p.money = 200_000.0;
+    p.set_money(200_000.0);
 
     let (ok, reasons) = owner_operator_eligibility(&p);
 
@@ -235,7 +235,7 @@ fn test_authority_readiness_requires_endgame_owner_operator() {
     p.career.xp = LEVEL_XP[(AUTHORITY_READY_LEVEL - 1) as usize];
     p.career.deliveries = AUTHORITY_READY_DELIVERIES;
     p.career.reputation = AUTHORITY_READY_REPUTATION;
-    p.money = AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL;
+    p.set_money(AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL);
 
     let (ok, reasons) = authority_readiness_eligibility(&p);
 
@@ -254,7 +254,7 @@ fn test_authority_activation_requires_prep_and_specialty_program() {
     p.career.xp = LEVEL_XP[(AUTHORITY_READY_LEVEL - 1) as usize];
     p.career.deliveries = AUTHORITY_ACTIVATION_DELIVERIES;
     p.career.reputation = AUTHORITY_ACTIVATION_REPUTATION;
-    p.money = AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL;
+    p.set_money(AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL);
 
     let (ok, reasons) = authority_activation_eligibility(&p);
     assert!(!ok);
@@ -335,7 +335,7 @@ fn transponder_eligibility_follows_the_status_and_the_fee() {
 
     p.business_status = LEASED_OWNER_OPERATOR.to_string();
     assert!(!has_weigh_station_transponder(&p));
-    p.money = WEIGH_STATION_TRANSPONDER_SIGNUP_FEE;
+    p.set_money(WEIGH_STATION_TRANSPONDER_SIGNUP_FEE);
     assert_eq!(weigh_station_transponder_eligibility(&p), (true, vec![]));
     p.weigh_station_transponder = true;
     assert!(has_weigh_station_transponder(&p));
@@ -425,7 +425,7 @@ fn test_a_company_driver_who_chose_to_stay_is_not_nudged_toward_the_buy_in() {
     p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
     p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
     p.career.reputation = OWNER_OPERATOR_REPUTATION;
-    p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+    p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
     assert!(owner_operator_eligibility(&p).0);
     assert!(next_business_unlock(&p).contains("buy into"));
     assert!(business_status_summary(&p).contains("You qualify to buy"));

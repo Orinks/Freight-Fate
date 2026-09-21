@@ -1148,7 +1148,7 @@ impl DrivingState {
         }
         {
             let profile = profile_mut_of(ctx);
-            profile.money -= fine; // can go negative; never a game over
+            profile.spend(fine); // can go negative; never a game over
             profile.career.reputation =
                 0.0f64.max(profile.career.reputation - hos::HOS_REPUTATION_HIT);
         }

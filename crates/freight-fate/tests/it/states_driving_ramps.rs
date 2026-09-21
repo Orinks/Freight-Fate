@@ -402,7 +402,7 @@ fn test_stop_sign_full_stop_clears() {
 /// before the run.
 fn blow_the_terminal(app: &mut TestApp, control: &str, seed: i64, mph: f64) -> (bool, f64, f64) {
     let mut d = a_drive(app);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     d.trip_seed = seed;
     d.cross_bubble = None; // the restored-save case: no bubble built yet
     on_ramp(&mut d, control, control == "signal", mph);
@@ -498,7 +498,7 @@ fn test_running_the_red_light_risks_a_citation_on_a_seeded_roll() {
     let expected = citation_fine(RED_LIGHT_FINE, 0, false, None);
     assert!((fine - expected).abs() < 0.01, "{fine}");
     let p = app.ctx.profile.as_ref().expect("a career");
-    assert!((p.money - (money_before - expected)).abs() < 0.01);
+    assert!((p.money() - (money_before - expected)).abs() < 0.01);
     assert_eq!(p.driving_record.citations, 1);
     let cited: Vec<String> = logged(&app)
         .into_iter()
@@ -517,7 +517,7 @@ fn test_running_the_red_light_risks_a_citation_on_a_seeded_roll() {
     let (_, fine, money_before) = blow_the_terminal(&mut app, "signal", missed, 30.0);
     assert_eq!(fine, 0.0);
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     );
     assert!(!logged(&app).iter().any(|s| s.contains("is a citation")));

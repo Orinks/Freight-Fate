@@ -468,11 +468,11 @@ impl DrivingState {
         let hours = crate::states::driving_rest_states::record_hours(ctx, self);
         {
             let profile = profile_mut_of(ctx);
-            profile.money -= fine; // can go negative; never a game over
-                                   // A municipal noise ordinance is not an FMCSA serious violation,
-                                   // so it never moves the suspension ladder -- but it is still a
-                                   // citation on the record, and the next citation of any kind costs
-                                   // more for it.
+            profile.spend(fine); // can go negative; never a game over
+                                 // A municipal noise ordinance is not an FMCSA serious violation,
+                                 // so it never moves the suspension ladder -- but it is still a
+                                 // citation on the record, and the next citation of any kind costs
+                                 // more for it.
             profile.driving_record.record_citation_at(fine, hours);
             profile.driving_record.note(
                 ff_core::models::enforcement::RECORD_CITATION,

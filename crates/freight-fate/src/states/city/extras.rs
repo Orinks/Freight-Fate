@@ -151,7 +151,7 @@ impl PayDebtState {
         ctx.audio.play("ui/notify");
         let (owed, money) = {
             let p = profile(ctx);
-            (solvency::debt_owed(p), p.money)
+            (solvency::debt_owed(p), p.money())
         };
         if owed < 1.0 {
             // Pop first, then speak: the parent's own announce_entry also
@@ -189,7 +189,7 @@ impl Menu for PayDebtState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let (owed, money) = {
             let p = profile(ctx);
-            (solvency::debt_owed(p), p.money)
+            (solvency::debt_owed(p), p.money())
         };
         let current = self.current_text(ctx);
         ctx.say(&format!(

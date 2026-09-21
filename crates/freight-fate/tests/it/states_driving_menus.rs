@@ -424,7 +424,7 @@ fn settlement_job() -> Job {
 fn settle(app: &mut TestApp, damage: f64, fuel_fraction: f64) -> ArrivalState {
     let world = ff_core::data::world::get_world();
     let mut profile = Profile::named_in("Readout Audit", "New York");
-    profile.money = 1000.0;
+    profile.set_money(1000.0);
     profile.business_status = COMPANY_DRIVER.to_string();
     app.ctx.profile = Some(profile);
     let route = world

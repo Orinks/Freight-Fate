@@ -679,7 +679,7 @@ fn test_a_held_back_truck_names_the_earned_tier_the_cause_and_the_way_out() {
 
     let mut p = real_profile();
     p.career.xp = 387_000.0;
-    p.money = -5_000.0;
+    p.set_money(-5_000.0);
     let verbose = equipment_hold_text(&p, false);
     let terse = equipment_hold_text(&p, true);
     for text in [&verbose, &terse] {

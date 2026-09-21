@@ -45,7 +45,7 @@ fn test_a_scenario_creates_a_bench_career_and_sets_every_part_asked_for() {
     assert_eq!(p.current_city, world.resolve_city_key("Tonopah"));
     assert_eq!(p.career.level(), 5);
     assert_eq!(p.career.deliveries, 12);
-    assert_eq!(p.money, 42_000.0);
+    assert_eq!(p.money(), 42_000.0);
     assert_eq!(p.career.reputation, 70.0);
     assert_eq!(p.business_status, LEASED_OWNER_OPERATOR);
     assert!(p.career.endorsements().contains("hazmat"));

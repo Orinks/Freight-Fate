@@ -195,7 +195,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
             ),
             format!(
                 "You own a new truck with a full tank and {} dollars of working capital.",
-                fmt_grouped(p.money, 0)
+                fmt_grouped(p.money(), 0)
             ),
             "Fuel, repairs, truck wear, trailer programs, and business reserves come out \
              of your cash."

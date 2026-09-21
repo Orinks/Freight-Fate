@@ -934,7 +934,7 @@ fn test_abandoning_assigned_reposition_costs_reputation_only() {
         freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY,
         None,
     );
-    let money_before = profile(&app).money;
+    let money_before = profile(&app).money();
     let reputation_before = profile(&app).career.reputation;
 
     app.push_state(driving);
@@ -955,7 +955,7 @@ fn test_abandoning_assigned_reposition_costs_reputation_only() {
     key(&mut app, Key::Return);
 
     assert!(is::<CityMenuState>(&app));
-    assert_eq!(profile(&app).money, money_before); // no dollar penalty
+    assert_eq!(profile(&app).money(), money_before); // no dollar penalty
     assert_eq!(
         profile(&app).career.reputation,
         reputation_before - ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY
@@ -998,12 +998,12 @@ fn test_terminal_pay_advance_option_only_appears_when_available() {
     career(&mut app, "Advance Test", "New York");
     let mut state = CityMenuState::new(&app.ctx, false);
 
-    profile_mut(&mut app).money = PAY_ADVANCE_ELIGIBLE_BELOW;
+    profile_mut(&mut app).set_money(PAY_ADVANCE_ELIGIBLE_BELOW);
     assert!(!built_labels(&mut app, &mut state)
         .iter()
         .any(|t| t.starts_with("Request pay advance")));
 
-    profile_mut(&mut app).money = PAY_ADVANCE_ELIGIBLE_BELOW - 1.0;
+    profile_mut(&mut app).set_money(PAY_ADVANCE_ELIGIBLE_BELOW - 1.0);
     assert!(built_labels(&mut app, &mut state)
         .iter()
         .any(|t| t.starts_with("Request pay advance")));
@@ -1029,7 +1029,7 @@ fn test_terminal_pay_advance_option_only_appears_when_available() {
 fn payer(app: &mut TestApp, money: f64, owed: f64) {
     career(app, "Dale", "Buffalo");
     let p = profile_mut(app);
-    p.money = money;
+    p.set_money(money);
     p.fines_owed = owed;
 }
 
@@ -1037,7 +1037,7 @@ fn payer(app: &mut TestApp, money: f64, owed: f64) {
 fn test_the_terminal_stops_offering_an_advance_under_collection() {
     let mut app = TestApp::new();
     career(&mut app, "Dale", "Buffalo");
-    profile_mut(&mut app).money = 2.0;
+    profile_mut(&mut app).set_money(2.0);
     let mut state = CityMenuState::new(&app.ctx, false);
     assert!(CityMenuState::pay_advance_available(&app.ctx));
     profile_mut(&mut app).fines_owed = 3_000.0;
@@ -1055,7 +1055,7 @@ fn test_a_setback_only_ever_fires_at_the_terminal() {
     {
         let p = profile_mut(&mut app);
         p.career.xp = 152_000.0;
-        p.money = -solvency::company_debt_ceiling(p) - 1.0;
+        p.set_money(-solvency::company_debt_ceiling(p) - 1.0);
     }
     // Walking into the terminal is what fires it, and the notice takes the
     // screen ahead of everything else the terminal had to say.
@@ -1095,7 +1095,7 @@ fn test_paying_it_all_off_clears_the_balance_and_says_so() {
 
     assert_eq!(profile(&app).fines_owed, 0.0);
     assert_eq!(solvency::debt_owed(profile(&app)), 0.0);
-    assert_eq!(profile(&app).money, 4_000.0);
+    assert_eq!(profile(&app).money(), 4_000.0);
     assert!(app
         .main_lines()
         .iter()
@@ -1131,7 +1131,7 @@ fn test_paying_half_leaves_the_rest_owed_and_says_the_remainder() {
 
     assert_eq!(profile(&app).fines_owed, 500.0);
     assert_eq!(solvency::debt_owed(profile(&app)), 500.0);
-    assert_eq!(profile(&app).money, 4_500.0);
+    assert_eq!(profile(&app).money(), 4_500.0);
     assert!(app
         .main_lines()
         .iter()
@@ -1230,7 +1230,7 @@ fn test_a_floor_reputation_company_driver_loses_the_carrier() {
         .iter()
         .any(|line| line.contains(&former) && line.contains("ended your employment")));
     // Nothing is taken away but the seat.
-    assert!(profile(&app).money > 0.0 || profile(&app).career.level() >= 1);
+    assert!(profile(&app).money() > 0.0 || profile(&app).career.level() >= 1);
 }
 
 // -- tests/test_career_objectives.py (terminal and board) -----------------------------
@@ -1334,7 +1334,7 @@ fn test_dispatch_board_speaks_authority_level_recommendation() {
         p.achievements.push("first_dispatch".to_string());
         p.business_status = INDEPENDENT_AUTHORITY.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 90_000.0;
+        p.set_money(90_000.0);
         p.career.xp = LEVEL_XP[24];
         p.career.deliveries = 80;
         p.career.reputation = 94.0;
@@ -1425,7 +1425,7 @@ fn test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 12_000.0;
+        p.set_money(12_000.0);
     }
 
     let city = CityMenuState::new(&app.ctx, false);
@@ -1445,7 +1445,7 @@ fn test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 12_000.0;
+        p.set_money(12_000.0);
     }
 
     push_board(

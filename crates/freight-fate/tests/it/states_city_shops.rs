@@ -44,7 +44,7 @@ fn test_business_status_menu_unlocks_owner_operator_when_qualified() {
         p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
         p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         p.career.reputation = OWNER_OPERATOR_REPUTATION;
-        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0;
+        p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0);
     }
 
     app.push_state(BusinessStatusState::new());
@@ -57,7 +57,10 @@ fn test_business_status_menu_unlocks_owner_operator_when_qualified() {
     select::<BusinessStatusState>(&mut app, "Buy into leased-on owner-operator");
 
     assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
-    approx(profile(&app).money, OWNER_OPERATOR_WORKING_CAPITAL + 500.0);
+    approx(
+        profile(&app).money(),
+        OWNER_OPERATOR_WORKING_CAPITAL + 500.0,
+    );
     assert!(profile(&app).dispatch_board_cache.is_none());
 }
 
@@ -70,7 +73,7 @@ fn test_owner_operator_buy_in_records_first_owned_tractor() {
         p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
         p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         p.career.reputation = OWNER_OPERATOR_REPUTATION;
-        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+        p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
     }
 
     app.push_state(BusinessStatusState::new());
@@ -103,7 +106,7 @@ fn test_business_status_menu_sets_authority_readiness_reserve() {
         p.career.xp = LEVEL_XP[(AUTHORITY_READY_LEVEL - 1) as usize];
         p.career.deliveries = AUTHORITY_READY_DELIVERIES;
         p.career.reputation = AUTHORITY_READY_REPUTATION;
-        p.money = AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL + 500.0;
+        p.set_money(AUTHORITY_READY_RESERVE + AUTHORITY_READY_WORKING_CAPITAL + 500.0);
         p.dispatch_board_cache = Some(serde_json::json!({"old": true}));
     }
 
@@ -111,7 +114,10 @@ fn test_business_status_menu_sets_authority_readiness_reserve() {
     select::<BusinessStatusState>(&mut app, "Commit 12,500 dollars to authority prep");
 
     assert!(has_authority_readiness(profile(&app)));
-    approx(profile(&app).money, AUTHORITY_READY_WORKING_CAPITAL + 500.0);
+    approx(
+        profile(&app).money(),
+        AUTHORITY_READY_WORKING_CAPITAL + 500.0,
+    );
     assert!(profile(&app).dispatch_board_cache.is_none());
     assert!(business_status_summary(profile(&app)).contains("Authority prep reserve is set"));
     assert!(labels::<BusinessStatusState>(&app)
@@ -132,7 +138,7 @@ fn test_business_status_menu_activates_own_authority() {
         p.career.xp = LEVEL_XP[(AUTHORITY_ACTIVATION_LEVEL - 1) as usize];
         p.career.deliveries = AUTHORITY_ACTIVATION_DELIVERIES;
         p.career.reputation = AUTHORITY_ACTIVATION_REPUTATION;
-        p.money = AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750.0;
+        p.set_money(AUTHORITY_ACTIVATION_COST + AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750.0);
         p.dispatch_board_cache = Some(serde_json::json!({"old": true}));
     }
 
@@ -141,7 +147,7 @@ fn test_business_status_menu_activates_own_authority() {
 
     assert_eq!(profile(&app).business_status, INDEPENDENT_AUTHORITY);
     approx(
-        profile(&app).money,
+        profile(&app).money(),
         AUTHORITY_ACTIVATION_WORKING_CAPITAL + 750.0,
     );
     assert!(profile(&app).dispatch_board_cache.is_none());
@@ -164,7 +170,7 @@ fn owner_operator_in_business_menu(app: &mut TestApp, money: f64) {
         let p = profile_mut(app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
-        p.money = money;
+        p.set_money(money);
     }
     app.push_state(BusinessStatusState::new());
 }
@@ -227,7 +233,7 @@ fn test_company_driver_garage_service_is_carrier_billed() {
     {
         let p = profile_mut(&mut app);
         p.business_status = COMPANY_DRIVER.to_string();
-        p.money = 25.0;
+        p.set_money(25.0);
         p.set_truck_fuel_gal(0.0);
         p.set_truck_damage_pct(12.0);
     }
@@ -242,14 +248,14 @@ fn test_company_driver_garage_service_is_carrier_billed() {
         profile(&app).truck_fuel_gal(),
         profile(&app).truck_specs().fuel_tank_gal,
     );
-    approx(profile(&app).money, 25.0);
+    approx(profile(&app).money(), 25.0);
 
     with_state_mut::<GarageState, _>(&mut app, |g, _| {
         freight_fate::states::base::Menu::menu_mut(g).index = 1
     });
     key(&mut app, Key::Return);
     approx(profile(&app).truck_damage_pct(), 0.0);
-    approx(profile(&app).money, 25.0);
+    approx(profile(&app).money(), 25.0);
 }
 
 #[test]
@@ -260,7 +266,7 @@ fn test_garage_sells_the_traction_equipment_ladder() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 20_000.0;
+        p.set_money(20_000.0);
         p.set_tire_wear_pct(30.0);
     }
     app.push_state(GarageState::new());
@@ -271,19 +277,19 @@ fn test_garage_sells_the_traction_equipment_ladder() {
         ff_core::pyfmt::round_py_n(100.0 * TIRE_SERVICE_COST_PER_PCT * WINTER_TIRE_PREMIUM, 2);
     assert_eq!(profile(&app).tire_type(), "winter");
     assert_eq!(profile(&app).tire_wear_pct(), 0.0);
-    approx(profile(&app).money, 20_000.0 - winter_cost);
+    approx(profile(&app).money(), 20_000.0 - winter_cost);
 
     // Chains go in the side box for a flat set price.
-    let money_before = profile(&app).money;
+    let money_before = profile(&app).money();
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.buy_chains(ctx));
     assert!(profile(&app).chains_owned());
     assert_eq!(profile(&app).chain_wear_pct(), 0.0);
-    approx(profile(&app).money, money_before - CHAIN_SET_COST);
+    approx(profile(&app).money(), money_before - CHAIN_SET_COST);
 
     // A fresh set aboard is not sold twice.
-    let money_before = profile(&app).money;
+    let money_before = profile(&app).money();
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.buy_chains(ctx));
-    approx(profile(&app).money, money_before);
+    approx(profile(&app).money(), money_before);
 }
 
 #[test]
@@ -293,19 +299,19 @@ fn test_company_driver_gets_carrier_chains_but_carrier_rubber() {
     {
         let p = profile_mut(&mut app);
         p.business_status = COMPANY_DRIVER.to_string();
-        p.money = 50.0;
+        p.set_money(50.0);
     }
     app.push_state(GarageState::new());
 
     // The carrier specs the rubber: no compound swap on the assigned rig.
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.swap_tire_compound(ctx));
     assert_eq!(profile(&app).tire_type(), "all_season");
-    approx(profile(&app).money, 50.0);
+    approx(profile(&app).money(), 50.0);
 
     // Chains are required equipment: carrier billed, never out of pocket.
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.buy_chains(ctx));
     assert!(profile(&app).chains_owned());
-    approx(profile(&app).money, 50.0);
+    approx(profile(&app).money(), 50.0);
 }
 
 // -- tests/test_smoke.py: the garage ---------------------------------------------------
@@ -319,17 +325,17 @@ fn test_garage_offers_partial_fuel_and_repairs_when_cash_is_short() {
 
     {
         let p = profile_mut(&mut app);
-        p.money = 100.0;
+        p.set_money(100.0);
         p.set_truck_fuel_gal(0.0);
     }
     select::<GarageState>(&mut app, "Refuel");
     let tank = profile(&app).truck_specs().fuel_tank_gal;
     assert!(profile(&app).truck_fuel_gal() >= 1.0 && profile(&app).truck_fuel_gal() < tank);
-    approx(profile(&app).money, 0.0);
+    approx(profile(&app).money(), 0.0);
 
     {
         let p = profile_mut(&mut app);
-        p.money = 170.0;
+        p.set_money(170.0);
         p.set_truck_damage_pct(10.0);
     }
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| {
@@ -340,7 +346,7 @@ fn test_garage_offers_partial_fuel_and_repairs_when_cash_is_short() {
     // a little under the two percent the old flat rate would have sold.
     let damage = profile(&app).truck_damage_pct();
     assert!((8.0..8.5).contains(&damage), "{damage}");
-    approx(profile(&app).money, 0.0);
+    approx(profile(&app).money(), 0.0);
 }
 
 #[test]
@@ -351,7 +357,7 @@ fn test_garage_services_tires_and_wash() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 1_000.0;
+        p.set_money(1_000.0);
         p.set_tire_wear_pct(10.0);
         p.set_road_grime_pct(25.0);
     }
@@ -363,11 +369,11 @@ fn test_garage_services_tires_and_wash() {
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.service_tires(ctx));
     assert_eq!(profile(&app).tire_wear_pct(), 0.0);
-    assert_eq!(profile(&app).money, 550.0);
+    assert_eq!(profile(&app).money(), 550.0);
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.wash_truck(ctx));
     assert_eq!(profile(&app).road_grime_pct(), 0.0);
-    assert_eq!(profile(&app).money, 515.0);
+    assert_eq!(profile(&app).money(), 515.0);
 }
 
 #[test]
@@ -378,7 +384,7 @@ fn test_garage_services_brakes_and_engine() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 10_000.0;
+        p.set_money(10_000.0);
         p.set_brake_wear_pct(20.0);
         p.set_engine_wear_pct(30.0);
     }
@@ -390,11 +396,11 @@ fn test_garage_services_brakes_and_engine() {
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.service_brakes(ctx));
     assert_eq!(profile(&app).brake_wear_pct(), 0.0);
-    assert_eq!(profile(&app).money, 10_000.0 - 20.0 * 40.0);
+    assert_eq!(profile(&app).money(), 10_000.0 - 20.0 * 40.0);
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.service_engine(ctx));
     assert_eq!(profile(&app).engine_wear_pct(), 0.0);
-    assert_eq!(profile(&app).money, 10_000.0 - 20.0 * 40.0 - 30.0 * 120.0);
+    assert_eq!(profile(&app).money(), 10_000.0 - 20.0 * 40.0 - 30.0 * 120.0);
 }
 
 #[test]
@@ -405,14 +411,14 @@ fn test_garage_partial_brake_service_when_broke() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 200.0; // 5 percent of brake service at 40 dollars per percent
+        p.set_money(200.0); // 5 percent of brake service at 40 dollars per percent
         p.set_brake_wear_pct(50.0);
     }
     app.push_state(GarageState::new());
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.service_brakes(ctx));
     approx(profile(&app).brake_wear_pct(), 45.0);
-    approx(profile(&app).money, 0.0);
+    approx(profile(&app).money(), 0.0);
 }
 
 // -- tests/test_business_arc.py and test_smoke.py: trucks and upgrades ------------------
@@ -424,7 +430,7 @@ fn test_company_driver_shops_hide_owned_truck_language() {
     {
         let p = profile_mut(&mut app);
         p.owned_trucks = vec!["rig".to_string(), "heavy_hauler".to_string()]; // old save values stay hidden
-        p.money = 200_000.0;
+        p.set_money(200_000.0);
     }
 
     app.push_state(TruckShopState::new(false));
@@ -434,7 +440,7 @@ fn test_company_driver_shops_hide_owned_truck_language() {
         .any(|t| t.to_lowercase().contains("owned")));
     key(&mut app, Key::Return);
     assert_eq!(profile(&app).truck, "rig");
-    approx(profile(&app).money, 200_000.0);
+    approx(profile(&app).money(), 200_000.0);
     assert!(app
         .main_lines()
         .last()
@@ -449,7 +455,7 @@ fn test_company_driver_shops_hide_owned_truck_language() {
         .any(|t| t.to_lowercase().contains("owned")));
     key(&mut app, Key::Return);
     assert!(profile(&app).upgrades.is_empty());
-    approx(profile(&app).money, 200_000.0);
+    approx(profile(&app).money(), 200_000.0);
     assert!(app
         .main_lines()
         .last()
@@ -465,16 +471,16 @@ fn test_owner_operator_can_buy_switch_and_upgrade_owned_equipment() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 200_000.0;
+        p.set_money(200_000.0);
     }
 
     app.push_state(UpgradeShopState::new());
     key(&mut app, Key::Return);
     assert!(!profile(&app).upgrades.is_empty());
-    assert!(profile(&app).money < 200_000.0);
+    assert!(profile(&app).money() < 200_000.0);
 
     app.pop_state();
-    let money_after_upgrade = profile(&app).money;
+    let money_after_upgrade = profile(&app).money();
     app.push_state(TruckShopState::new(false));
     select::<TruckShopState>(&mut app, "Heavy hauler");
     assert_eq!(profile(&app).truck, "heavy_hauler");
@@ -482,12 +488,12 @@ fn test_owner_operator_can_buy_switch_and_upgrade_owned_equipment() {
         .visible_owned_trucks()
         .iter()
         .any(|k| k == "heavy_hauler"));
-    approx(profile(&app).money, money_after_upgrade - 52_000.0);
+    approx(profile(&app).money(), money_after_upgrade - 52_000.0);
 
-    let money_before_switch = profile(&app).money;
+    let money_before_switch = profile(&app).money();
     select::<TruckShopState>(&mut app, "Standard rig");
     assert_eq!(profile(&app).truck, "rig");
-    approx(profile(&app).money, money_before_switch);
+    approx(profile(&app).money(), money_before_switch);
 }
 
 #[test]
@@ -497,12 +503,12 @@ fn test_upgrades_are_money_gated() {
     {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
-        p.money = 10.0;
+        p.set_money(10.0);
     }
     app.push_state(UpgradeShopState::new());
     key(&mut app, Key::Return);
     assert!(profile(&app).upgrades.is_empty());
-    assert_eq!(profile(&app).money, 10.0);
+    assert_eq!(profile(&app).money(), 10.0);
 }
 
 #[test]
@@ -553,7 +559,7 @@ fn test_bought_truck_starts_fresh_and_each_keeps_its_own_condition() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 60_000.0;
+        p.set_money(60_000.0);
         p.set_truck_fuel_gal(40.0);
         p.set_truck_damage_pct(30.0);
         p.set_tire_wear_pct(12.0);
@@ -694,7 +700,7 @@ fn test_owner_operator_can_add_specialty_trailer_program() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 20_000.0;
+        p.set_money(20_000.0);
     }
 
     app.push_state(TrailerProgramState::new());
@@ -706,7 +712,7 @@ fn test_owner_operator_can_add_specialty_trailer_program() {
         .active_trailer_programs()
         .iter()
         .any(|k| k == "reefer"));
-    approx(profile(&app).money, 12_000.0);
+    approx(profile(&app).money(), 12_000.0);
     assert!(profile(&app).dispatch_board_cache.is_none());
 }
 
@@ -720,7 +726,7 @@ fn test_own_authority_can_buy_owned_trailer() {
         p.business_status = INDEPENDENT_AUTHORITY.to_string();
         p.owned_trucks = vec!["rig".to_string()];
         p.trailer_programs = vec!["dry_van".to_string(), "reefer".to_string()];
-        p.money = reefer.purchase_price + 2_000.0;
+        p.set_money(reefer.purchase_price + 2_000.0);
         p.dispatch_board_cache = Some(serde_json::json!({"old": true}));
     }
 
@@ -734,7 +740,7 @@ fn test_own_authority_can_buy_owned_trailer() {
         .active_trailer_programs()
         .iter()
         .any(|k| k == "reefer"));
-    approx(profile(&app).money, 2_000.0);
+    approx(profile(&app).money(), 2_000.0);
     assert!(profile(&app).dispatch_board_cache.is_none());
     assert!(current_label::<TrailerProgramState>(&app).contains("owned trailer"));
 }
@@ -747,7 +753,7 @@ fn test_leased_on_owner_operator_does_not_see_trailer_purchase() {
         let p = profile_mut(&mut app);
         p.business_status = LEASED_OWNER_OPERATOR.to_string();
         p.owned_trucks = vec!["rig".to_string()];
-        p.money = 200_000.0;
+        p.set_money(200_000.0);
     }
 
     app.push_state(TrailerProgramState::new());
@@ -777,7 +783,7 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     // terminal, and this pins the rows it offers a level-one driver.
     let mut app = TestApp::new();
     career(&mut app, "Course Buyer", "Chicago");
-    profile_mut(&mut app).money = 50_000.0;
+    profile_mut(&mut app).set_money(50_000.0);
     app.push_state(EndorsementCourseState::new());
 
     let rows = labels::<EndorsementCourseState>(&app);
@@ -815,9 +821,9 @@ fn endorsement_courses_price_each_unearned_endorsement() {
         help.contains("Course only: 185 dollars from level 10."),
         "{help}"
     );
-    let before = profile(&app).money;
+    let before = profile(&app).money();
     select::<EndorsementCourseState>(&mut app, "Refrigerated certificate course:");
-    assert!(profile(&app).money < before);
+    assert!(profile(&app).money() < before);
     assert!(profile(&app)
         .career
         .purchased_endorsements
@@ -845,7 +851,7 @@ fn test_business_status_lets_a_qualified_driver_stay_a_company_driver() {
         p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
         p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         p.career.reputation = OWNER_OPERATOR_REPUTATION;
-        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0;
+        p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0);
     }
 
     app.push_state(BusinessStatusState::new());
@@ -912,14 +918,14 @@ fn test_business_status_lets_an_owner_operator_go_back_to_company_driving() {
         p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
         p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         p.career.reputation = OWNER_OPERATOR_REPUTATION;
-        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+        p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
     }
     app.push_state(BusinessStatusState::new());
     select::<BusinessStatusState>(&mut app, "Buy into leased-on owner-operator");
     assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
     let owned = profile(&app).owned_trucks.clone();
     assert_eq!(owned.len(), 1);
-    let money_after_buy_in = profile(&app).money;
+    let money_after_buy_in = profile(&app).money();
     let expected_back = (truck_model_or_panic(&owned[0]).price
         * ff_core::models::solvency::REPOSSESSION_EQUITY_SHARE)
         .min(OWNER_OPERATOR_BUY_IN);
@@ -943,7 +949,7 @@ fn test_business_status_lets_an_owner_operator_go_back_to_company_driving() {
     assert_eq!(profile(&app).business_status, COMPANY_DRIVER);
     assert!(profile(&app).owned_trucks.is_empty());
     assert!(profile(&app).visible_owned_trucks().is_empty());
-    approx(profile(&app).money, money_after_buy_in + expected_back);
+    approx(profile(&app).money(), money_after_buy_in + expected_back);
     assert_eq!(profile(&app).driving_record.repossessions, 0);
     assert!(
         profile(&app).owner_operator_declined,

@@ -15,6 +15,7 @@ pub mod enforcement;
 pub mod jobs;
 pub mod loyalty;
 pub mod market;
+pub mod money_guard;
 pub mod profile;
 pub mod safety_record;
 pub mod save_migration;

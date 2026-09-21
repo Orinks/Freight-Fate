@@ -643,7 +643,7 @@ impl Rig {
             self.problem("speed", format!("speed went non-finite: {speed}"));
         }
         let (money, fatigue) = match &self.app.ctx.profile {
-            Some(profile) => (profile.money, profile.fatigue),
+            Some(profile) => (profile.money(), profile.fatigue),
             None => (0.0, 0.0),
         };
         if !money.is_finite() {

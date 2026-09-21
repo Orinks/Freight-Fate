@@ -807,8 +807,8 @@ impl DrivingState {
         );
         let money = {
             let p = profile_mut_of(ctx);
-            p.money -= fine;
-            p.money
+            p.spend(fine);
+            p.money()
         };
         self.ticket_fines_paid += fine;
         let saw_it = match self.trip.active_post_at(self.trip.position_mi) {

@@ -141,7 +141,7 @@ fn slot_with_local_save(
     let guard = install_identity(app, Some(&identity()));
     install_cloud(app, transport, true);
     let mut profile = ff_core::models::profile::Profile::named(name);
-    profile.money = 3294.0;
+    profile.set_money(3294.0);
     profile.save().unwrap();
     let state = CloudSlotState::new(&mut app.ctx, name, vec![a_revision()], None, None);
     (push(app, state), guard)
@@ -267,7 +267,7 @@ fn test_a_conflict_names_both_copies_so_the_choice_can_be_answered() {
     let mut app = TestApp::new();
     // This computer's copy: a real save, described by backup_summary.
     let mut profile = ff_core::models::profile::Profile::named("armstrong45");
-    profile.money = 3294.0;
+    profile.set_money(3294.0);
     profile.save().unwrap();
     let expected_mine =
         freight_fate::cloud_saves::backup_summary(&Value::Object(profile.to_dict()));
