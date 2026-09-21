@@ -425,9 +425,16 @@ def test_check_accepts_single_push_release_sync(tmp_path, monkeypatch, capsys):
     assert release_notes.check_command(args) == 1
 
 
-def test_build_workflow_uses_curated_nightly_decision_and_notes():
+def test_the_nightly_workflow_uses_curated_decisions_and_notes():
+    """build.yml is gone; the nightly is the Career 1.9 snapshot now.
+
+    1.8 gets no further releases (owner, 2026-09-20), so the Python
+    packaging workflow was deleted at the cutover and this branch keeps
+    only the scheduled workflow that builds the Rust game. The curated
+    release-note machinery is shared, so the assertions follow it there.
+    """
     workflow = (
-        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build.yml"
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
     ).read_text(encoding="utf-8")
 
     assert "tools/release_notes.py should-build-nightly" in workflow
