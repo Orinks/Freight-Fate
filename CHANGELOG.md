@@ -71,6 +71,8 @@
 
 ### Fixed
 
+- **The truck drives off again after a stop.** Leaving a fuel or rest stop no longer leaves the brakes held, with the truck stuck at 0 miles per hour. (Shane, Jerry and Jessie)
+
 - **A deleted career no longer asks which copy to keep.** The Online menu named a career you no longer have, and nothing could clear it.
 
 - **Grain elevators, quarries, lumber yards and materials yards now start with street directions.** Those four kinds of stop never had them.

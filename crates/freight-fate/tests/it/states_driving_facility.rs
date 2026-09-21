@@ -895,6 +895,38 @@ fn test_a_blown_gate_loop_back_lets_the_arrival_latch_go() {
 }
 
 #[test]
+fn test_a_stop_menu_lets_go_of_every_assist_brake() {
+    // Shane, Jerry and Jessie, 2026-09-21: facility stopping assistance
+    // brought the truck into a stop, and back on the road it would not move
+    // -- parking brake off, engine revving, 0 mph. The arrival's brake was
+    // still latched under the menu, and the brake ramp now holds any pedal an
+    // assist is holding, so the truck sat on it for good.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.truck.start_engine();
+    d.trip.truck.velocity_mps = 0.0;
+    d.destination_arrival_active = true;
+    d.destination_assist_brake = 1.0;
+    d.keeper_snub = 0.4;
+    d.aeb_brake = 0.5;
+
+    assert!(secure_truck_for_stopped_menu(&mut d, &mut app.ctx));
+    assert!(!d.destination_arrival_active);
+    assert_eq!(d.destination_assist_brake, 0.0);
+    assert_eq!(d.keeper_snub, 0.0);
+    assert_eq!(d.aeb_brake, 0.0);
+    assert!(d.curve_servo.is_none());
+
+    // Back on the road: release the parking brake and the service brake
+    // comes off on its own.
+    d.trip.truck.release_parking_brake();
+    for _ in 0..120 {
+        d.update_frame(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert_eq!(d.trip.truck.brake, 0.0);
+}
+
+#[test]
 fn test_the_approach_assist_delivers_the_truck_to_the_dock() {
     // Jerry, Hobbs Food Processing Plant, 2026-08-22: through the ramp light
     // on green, "Destination approach assistance slowing", 8 miles per hour,
