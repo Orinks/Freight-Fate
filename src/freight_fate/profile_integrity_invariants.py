@@ -6,11 +6,22 @@ import json
 from pathlib import Path
 
 from .achievements import ACHIEVEMENTS
-from .models.career import LEVEL_XP, XP_PER_MILE_ON_TIME, Career
+from .models.career import (
+    CREDENTIALS_EXPORT,
+    DELIVERY_COMPLETION_XP,
+    LEVEL_XP,
+    XP_CLEAN_BONUS,
+    XP_PER_MILE_ON_TIME,
+    XP_SPECIALTY_MULT,
+    XP_STREAK_MAX_BONUS,
+    Career,
+)
+from .models.carrier_fleet import FLEET_TIERS
 from .models.economy import PAY_ADVANCE_LIMIT
 from .models.market import MARKET_CARGO_KEYS
-from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile
-from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckCondition
+from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile, _fresh_condition
+from .models.start_options import all_start_options
+from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG
 
 # Signature keys ride inside the saved file but never inside a cloud upload --
 # the upload strips them and the server signs its own revision instead.
@@ -33,22 +44,30 @@ def _profile_fields() -> list[str]:
     return sorted((set(Profile.__dataclass_fields__) | {"version"}) - _LOCAL_ONLY_FIELDS)
 
 
+def _xp_best_case_multiplier() -> float:
+    """Every share bonus in `record_delivery` taken at once, at its best.
+
+    Both bonuses multiply the whole award, flat completion XP included, so
+    this factor belongs to both terms below.
+    """
+    return (1.0 + XP_STREAK_MAX_BONUS) * (1.0 + XP_CLEAN_BONUS)
+
+
 def _xp_per_mile_max() -> float:
     """The most XP one mile can teach, taking every bonus at its best.
 
     The validator's ceiling is `deliveries * flat + miles * this`. It has to
     sit at or above what the game can actually award, because anything lower
-    convicts honest drivers -- the tighter the fit, the more a later balance
-    pass costs. Recompute it here from the real constants when the XP model
-    grows terms (class, streak, and condition multipliers all land on this
-    line in the 1.9 career arc).
+    convicts honest drivers -- a copied 1.2 here was below even the base
+    on-time rate on this line. Recompute it from the real constants whenever
+    the XP model grows a term.
     """
-    return XP_PER_MILE_ON_TIME
+    return XP_PER_MILE_ON_TIME * XP_SPECIALTY_MULT * _xp_best_case_multiplier()
 
 
 def _xp_flat_per_delivery() -> float:
-    """XP a settled load teaches regardless of distance (none on this line)."""
-    return 0.0
+    """XP a settled load teaches regardless of distance, at its best."""
+    return DELIVERY_COMPLETION_XP * _xp_best_case_multiplier()
 
 
 def _truck_condition_fields() -> list[str]:
@@ -58,14 +77,29 @@ def _truck_condition_fields() -> list[str]:
     record against an exact list, and this record is where new per-truck state
     lands (brake and engine wear, traction gear). A hand-kept copy on the
     server would reject the next build's saves the moment one is added.
+
+    Read from the record the game actually writes, not from the TruckCondition
+    dataclass. On this line the records are plain dicts built by
+    ``_fresh_condition``, and they outgrew that dataclass when the physics arc
+    added brake wear, engine wear, and traction gear -- it kept four fields
+    while a real record carries nine. Exporting the dataclass therefore told
+    the server that five legitimate keys were unknown, which would have failed
+    every 1.9 save on the exact-field check the moment the two sides met.
     """
-    return sorted(TruckCondition.__dataclass_fields__)
+    return sorted(_fresh_condition())
 
 
 def invariant_data() -> dict:
+    # Source-tree-only export for the orinks.net validator; never called by
+    # the game at runtime, so frozen builds (which carry no world_data
+    # tree) are unaffected.
     data_root = Path(__file__).resolve().parent / "data" / "world_data"
-    cities = json.loads((data_root / "us" / "cities.json").read_text(encoding="utf-8"))["cities"]
-    countries = json.loads((data_root / "geo.json").read_text(encoding="utf-8"))["countries"]
+    cities = json.loads((data_root / "us" / "cities.json").read_text(encoding="utf-8"))[
+        "cities"
+    ]  # runtime-data-ok
+    countries = json.loads((data_root / "geo.json").read_text(encoding="utf-8"))[
+        "countries"
+    ]  # runtime-data-ok
     states = countries["US"]["states"]
     city_labels = {
         slug: f"{city['spoken_city']}, {states.get(city.get('state'), city.get('state', ''))}".rstrip(
@@ -83,6 +117,17 @@ def invariant_data() -> dict:
         # that their backup was rejected. See the money and XP checks in
         # convex/freightFateSharedProfileValidation.ts.
         "startingMoney": _json_number(STARTING_MONEY),
+        # The most cash any career-start option hands over. The money ceiling
+        # must credit this, not the company-driver default: the owner-operator
+        # start opens with 18,000 dollars, and a ceiling built on 5,000
+        # rejected every honest owner-operator backup until their earnings
+        # eventually outgrew the gap. Wrong in the generous direction is the
+        # survivable wrong here, so the validator uses the maximum rather
+        # than a per-carrier lookup that would break on a start option the
+        # server has not heard of yet.
+        "startingMoneyMax": _json_number(
+            max(option.starting_money for option in all_start_options())
+        ),
         "payAdvanceLimit": _json_number(PAY_ADVANCE_LIMIT),
         "xpPerMileMax": _json_number(_xp_per_mile_max()),
         "xpFlatPerDelivery": _json_number(_xp_flat_per_delivery()),
@@ -90,6 +135,24 @@ def invariant_data() -> dict:
         "marketCargoKeys": sorted(MARKET_CARGO_KEYS),
         "profileFields": _profile_fields(),
         "careerFields": sorted(Career.__dataclass_fields__),
+        # Public-profile display data: orinks.net derives each driver's
+        # endorsements (level-earned plus self-paid courses) and, for company
+        # drivers, the carrier fleet tier straight from the validated career.
+        # Exported rather than copied so the site's projection moves with the
+        # next balance pass instead of drifting behind it.
+        # A course-only credential carries no level at all: the site's
+        # held-check is `level >= entry.level || purchased`, and a missing
+        # key comparing false is what keeps a background-checked credential
+        # from being credited to every driver of some level.
+        "endorsements": {
+            key: (
+                {"label": row["label"], "tier": row["tier"]}
+                if row["level"] is None
+                else {"level": row["level"], "label": row["label"], "tier": row["tier"]}
+            )
+            for key, row in sorted(CREDENTIALS_EXPORT.items())
+        },
+        "fleetTiers": [{"minLevel": tier.min_level, "label": tier.label} for tier in FLEET_TIERS],
         "truckConditionFields": _truck_condition_fields(),
         "sourceSaveVersion": SAVE_VERSION,
         "truckLabels": {key: truck.label for key, truck in TRUCK_CATALOG.items()},

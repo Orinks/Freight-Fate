@@ -65,9 +65,12 @@ FOG_VISIBILITY_MI = 2.0
 # (e.g. "Chance Light Rain", "Patchy Fog"); matching is case-insensitive.
 _CONDITION_RULES: tuple[tuple[WeatherKind, tuple[str, ...]], ...] = (
     (WeatherKind.THUNDERSTORM, ("thunder", "t-storm", "tstorm", "squall")),
+    # Glaze conditions before snow and rain: "Freezing Rain" must land on ice,
+    # not match the plain rain group below.
+    (WeatherKind.ICE, ("freezing", "sleet", "ice", "icy", "glaze")),
     (
         WeatherKind.SNOW,
-        ("snow", "sleet", "flurr", "blizzard", "wintry", "ice", "icy", "freezing", "frost"),
+        ("snow", "flurr", "blizzard", "wintry", "frost"),
     ),
     (WeatherKind.HEAVY_RAIN, ("heavy rain", "heavy shower")),
     (WeatherKind.RAIN, ("rain", "shower", "drizzle", "spray")),
@@ -116,17 +119,25 @@ def _get_json(url: str) -> dict:
         return json.loads(resp.read().decode("utf-8"))
 
 
-# Resolving a city's nearest observation station is stable, so cache it across
-# refreshes (keyed by coarse coordinates) to avoid repeating the two lookups.
-_station_cache: dict[tuple[float, float], str] = {}
+# Resolving a city's nearby observation stations is stable, so cache the list
+# across refreshes (keyed by coarse coordinates) to avoid repeating the two
+# lookups. The pick records which of them last answered with a FRESH
+# observation: the nearest station is not always a live one -- a dead or
+# parked station pinned one I-90 cell to simulated fallback for a whole
+# session (2026-08-12 manual playtest) -- so fetches walk past stale stations
+# instead of trusting index zero forever.
+STATION_WALK_LIMIT = 3
+_station_cache: dict[tuple[float, float], list[str]] = {}
+_station_pick: dict[tuple[float, float], int] = {}
 _station_lock = threading.Lock()
 
 
-def _resolve_station_obs_url(lat: float, lon: float) -> str:
-    """Return the 'latest observation' URL for the station nearest a point.
+def _resolve_station_urls(lat: float, lon: float) -> list[str]:
+    """Return 'latest observation' URLs for the stations nearest a point,
+    nearest first, capped at :data:`STATION_WALK_LIMIT`.
 
     Walks the NWS discovery chain: ``/points`` yields the station list URL, and
-    that list yields the nearest station. The result is cached per location.
+    that list yields the stations. The result is cached per location.
     """
     key = (round(lat, 2), round(lon, 2))
     with _station_lock:
@@ -140,11 +151,11 @@ def _resolve_station_obs_url(lat: float, lon: float) -> str:
     station_urls = stations.get("observationStations") or []
     if not station_urls:
         raise ValueError(f"no observation stations near {lat:.4f},{lon:.4f}")
-    obs_url = f"{station_urls[0]}/observations/latest"
+    urls = [f"{u}/observations/latest" for u in station_urls[:STATION_WALK_LIMIT]]
 
     with _station_lock:
-        _station_cache[key] = obs_url
-    return obs_url
+        _station_cache[key] = urls
+    return urls
 
 
 def _wind_to_kmh(wind: dict | None) -> float:
@@ -187,16 +198,9 @@ def _visibility_to_mi(vis: dict | None) -> float | None:
     return value / 1609.344  # metres (wmoUnit:m, the NWS default)
 
 
-def _default_fetch(
-    lat: float, lon: float
+def _parse_observation(
+    data: dict,
 ) -> tuple[str, float, float | None, float | None, float | None]:
-    """Fetch (condition, wind, temperature, visibility, observation time)
-    from NWS.
-
-    The temperature and visibility are None when the station reports no
-    current value. Raises on network failure."""
-    obs_url = _resolve_station_obs_url(lat, lon)
-    data = _get_json(obs_url)
     props = data["properties"]
     text = props.get("textDescription") or ""
     wind_kmh = _wind_to_kmh(props.get("windSpeed"))
@@ -210,6 +214,50 @@ def _default_fetch(
         except (TypeError, ValueError):
             log.warning("NWS observation carried an invalid timestamp: %r", timestamp)
     return text, wind_kmh, temp_c, visibility_mi, observed_at
+
+
+def _default_fetch(
+    lat: float, lon: float
+) -> tuple[str, float, float | None, float | None, float | None]:
+    """Fetch (condition, wind, temperature, visibility, observation time)
+    from NWS, from the nearest station with a FRESH observation.
+
+    Stations die and park: the nearest one can sit on a reading days old
+    while the next one over reports on the hour. The walk tries the station
+    that last answered fresh first, then the others in distance order, and
+    returns the first fresh observation. If every station within the walk
+    limit is stale, the freshest of them is returned and the caller's stale
+    handling takes over. Temperature and visibility are None when the
+    station reports no current value. Raises on network failure."""
+    key = (round(lat, 2), round(lon, 2))
+    urls = _resolve_station_urls(lat, lon)
+    with _station_lock:
+        preferred = _station_pick.get(key, 0)
+    order = [preferred] + [i for i in range(len(urls)) if i != preferred]
+    now = time.time()
+    freshest: tuple[float, tuple, int] | None = None
+    for i in order:
+        parsed = _parse_observation(_get_json(urls[i]))
+        observed_at = parsed[4]
+        # No timestamp reads as current: the worker treats it as now.
+        age_s = None if observed_at is None else now - float(observed_at)
+        if age_s is None or age_s <= OBSERVATION_MAX_AGE_S:
+            with _station_lock:
+                _station_pick[key] = i
+            return parsed
+        if freshest is None or age_s < freshest[0]:
+            freshest = (age_s, parsed, i)
+    assert freshest is not None
+    return freshest[1]
+
+
+class _StaleObservation(Exception):
+    """Internal control-flow signal: NWS answered fine, but the newest
+    observation the station has on offer is older than
+    :data:`OBSERVATION_MAX_AGE_S`. This is an expected, routine condition for
+    a dead or parked station -- not a fetch failure -- so ``_worker`` catches
+    it in its own clause, ahead of the generic error handler, and never lets
+    it surface as a warning-with-traceback."""
 
 
 @dataclass(frozen=True)
@@ -239,13 +287,35 @@ class RealWeatherProvider:
         self._clock = clock
         self._wall_clock = wall_clock
         self._lock = threading.Lock()
-        self._cache: dict[str, _CachedObservation] = {}
+        # Observations belong to stations, not to request keys: the city menu
+        # warms "city:denver", the trip then asks for "route:denver:x:0", and
+        # both are the same place. Observations are cached per station
+        # identity (the same coordinate rounding the station-URL cache uses)
+        # with request keys as aliases, so same-place keys share one fetch.
+        self._obs_by_station: dict[str, _CachedObservation] = {}
+        self._station_for_key: dict[str, str] = {}
         self._failed_at: dict[str, float] = {}
         self._inflight: set[str] = set()
+        # Route segments currently in a stale-observation stretch, so the
+        # miss is logged once when the stretch starts rather than on every
+        # RETRY_AFTER_S retry until the station catches up.
+        self._stale_logged: set[str] = set()
+
+    @staticmethod
+    def _station_identity(lat: float, lon: float) -> str:
+        return f"{round(lat, 2)},{round(lon, 2)}"
+
+    def _entry_for(self, city: str) -> _CachedObservation | None:
+        """The aliased station observation for a request key. Caller holds
+        the lock."""
+        station = self._station_for_key.get(city)
+        if station is None:
+            return None
+        return self._obs_by_station.get(station)
 
     def get(self, city: str) -> WeatherKind | None:
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None or not self._usable(entry):
                 return None
             return entry.kind
@@ -255,7 +325,7 @@ class RealWeatherProvider:
         no fresh reading -- still loading, offline, too stale, or the station
         omitted it. Callers fall back to the seasonal model on None."""
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None or not self._usable(entry):
                 return None
             return entry.temperature_c
@@ -268,12 +338,21 @@ class RealWeatherProvider:
         freshly fetched, still-usable response last-known.
         """
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             return (
                 entry is not None
                 and self._usable(entry)
                 and self._clock() - entry.fetched_at >= CACHE_TTL_S
             )
+
+    def has_any_observation(self) -> bool:
+        """Whether any live observation has been seen this session.
+
+        The weather layer uses this to tell "the network is having a moment"
+        (hold last-known conditions) apart from "this session has never been
+        online" (the only case where simulated fallback is honest)."""
+        with self._lock:
+            return bool(self._obs_by_station)
 
     def refreshing(self, city: str) -> bool:
         """Whether a network request for this location is actually in flight."""
@@ -283,7 +362,7 @@ class RealWeatherProvider:
     def observation_age_s(self, city: str) -> float | None:
         """Age of the cached station observation, separate from fetch activity."""
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None:
                 return None
             return max(0.0, self._wall_clock() - entry.observed_at)
@@ -309,7 +388,7 @@ class RealWeatherProvider:
         with self._lock:
             if city in self._inflight:
                 return False
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is not None and self._usable(entry):
                 return False
             return city in self._failed_at
@@ -317,11 +396,15 @@ class RealWeatherProvider:
     def request(self, city: str, lat: float, lon: float) -> None:
         """Ensure fresh data for ``city`` is available or being fetched."""
         now = self._clock()
+        station = self._station_identity(lat, lon)
         with self._lock:
             if city in self._inflight:
                 return
-            entry = self._cache.get(city)
+            entry = self._obs_by_station.get(station)
             if entry is not None and self._usable(entry) and now - entry.fetched_at < CACHE_TTL_S:
+                # Another key already fetched this place: alias and serve it.
+                self._station_for_key[city] = station
+                self._failed_at.pop(city, None)
                 return
             failed = self._failed_at.get(city)
             if failed is not None and now - failed < RETRY_AFTER_S:
@@ -333,20 +416,25 @@ class RealWeatherProvider:
         thread.start()
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
+        station = self._station_identity(lat, lon)
         try:
             fetched = self._fetch(lat, lon)
             text, wind, temp_c, visibility_mi = fetched[:4]
             observed_at = fetched[4] if len(fetched) > 4 else None
             if observed_at is None:
                 observed_at = self._wall_clock()
-            if self._wall_clock() - float(observed_at) > OBSERVATION_MAX_AGE_S:
-                raise ValueError("NWS observation is too old to use")
+            observed_at = float(observed_at)
+            age_s = self._wall_clock() - observed_at
+            if age_s > OBSERVATION_MAX_AGE_S:
+                raise _StaleObservation(age_s)
             kind = map_condition(text, wind, visibility_mi)
             with self._lock:
-                self._cache[city] = _CachedObservation(
-                    kind, temp_c, self._clock(), float(observed_at)
+                self._obs_by_station[station] = _CachedObservation(
+                    kind, temp_c, self._clock(), observed_at
                 )
+                self._station_for_key[city] = station
                 self._failed_at.pop(city, None)
+                self._stale_logged.discard(city)
             log.info(
                 "Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s, vis %s)",
                 city,
@@ -356,6 +444,28 @@ class RealWeatherProvider:
                 f"{temp_c:.0f}C" if temp_c is not None else "n/a",
                 f"{visibility_mi:.1f}mi" if visibility_mi is not None else "n/a",
             )
+        except _StaleObservation as exc:
+            # NWS answered; the station just has nothing newer than the
+            # dead-station cutoff. Fall back like any other miss (any
+            # previously cached conditions keep serving for up to
+            # STALE_AFTER_S) but treat this as routine, not an error: no
+            # traceback, and only one log line per stretch of staleness --
+            # not one every RETRY_AFTER_S until the station catches up.
+            with self._lock:
+                self._failed_at[city] = self._clock()
+                already_logged = city in self._stale_logged
+                self._stale_logged.add(city)
+            if not already_logged:
+                age_min = exc.args[0] / 60.0
+                limit_min = OBSERVATION_MAX_AGE_S / 60.0
+                log.info(
+                    "Real weather for %s: newest station observation is %.0f min "
+                    "old (limit %.0f min) -- holding previous conditions until a "
+                    "newer reading arrives",
+                    city,
+                    age_min,
+                    limit_min,
+                )
         except Exception:
             with self._lock:
                 self._failed_at[city] = self._clock()

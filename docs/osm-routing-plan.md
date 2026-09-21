@@ -58,6 +58,57 @@ These were chosen deliberately and shape everything below:
   determinism contract in `docs/route-stop-data.md`).
 - No raw OSM IDs, tags, or source keys exposed in speech, menus, or help text.
 
+### Ramp advisory-speed contract
+
+The first roadside-advisory slice is deliberately limited to exit ramps.
+During an OSM harvest, `maxspeed:advisory:forward` or
+`maxspeed:advisory:backward` wins for travel in that OSM way direction, with
+undirected `maxspeed:advisory` as the fallback. OSM's maxspeed syntax makes a
+bare number kilometres per hour; `km/h`, `kmh`, `kph`, and explicit `mph` are
+normalized to mph. Conditional, symbolic, multiple, implausible, or malformed
+values are rejected rather than guessed. The harvester resolves OSM way
+direction into the leg's A-to-B/B-to-A direction before storing it.
+
+An accepted value is stored with a read citation to OpenStreetMap. If the
+ramp has no trustworthy tag, the runtime retains the existing explicit
+`Calculated` result from corridor speed and connector class. That fallback is
+not sign evidence and must never acquire an OSM/read source or be described as
+an observed sign. Ordinary-road advisory tags remain the curve layer's job.
+
+An ordinary advisory sign is not a truck-specific safe-speed guarantee. FMCSA
+warns that exit/ramp advisory speeds are generally set for passenger vehicles
+and that a large truck's safe speed is usually lower. Freight Fate therefore
+uses an observed value only as a cap: the operating target is the lower of the
+read sign and the existing calculated ramp target. A high OSM value can never
+make the truck or its assists take a ramp faster. Truck-rollover advisory signs
+need their own explicit source signal and are not inferred from a generic
+`maxspeed:advisory` tag. Sources consulted 2026-08-26:
+https://www.fmcsa.dot.gov/safety/driver-safety/cmv-driving-tips-too-fast-conditions
+and MUTCD 11th Edition section 2C.12,
+https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/Chapter2c.pdf.
+
+OpenStreetMap documents `maxspeed:advisory` as a recommended, non-legally
+binding speed and documents the `:forward`/`:backward` suffixes relative to
+way direction. OSM data is ODbL 1.0 and requires OpenStreetMap contributor
+credit; Freight Fate stores normalized facts and citations, not copied map
+geometry, under the project's existing OSM attribution practice. Sources
+consulted 2026-08-26: https://wiki.openstreetmap.org/wiki/Key:maxspeed:advisory,
+https://wiki.openstreetmap.org/wiki/Key:maxspeed, and
+https://www.openstreetmap.org/copyright.
+
+The production ingestion path is `tools/build_interchanges.py --ramp-controls`:
+the local-PBF topology pass reads advisory tags and OSM node order from
+`motorway_link` ways, resolves actual travel order (including `oneway=-1`),
+matches each directed gore to the nearest interchange and the leg geometry's
+A-to-B heading, then writes `ramp_advisory_forward`,
+`ramp_advisory_backward`, and `ramp_advisory_source` through `save_world`.
+The 2026-08-26 national local-PBF sweep matched trusted readings to **6,539
+interchanges** in the checked-in world. It stored 10,693 directional values
+because many physical interchanges have readings in both directions. Values
+range from 5 to 80 mph; metric signs retain their normalized mph equivalent.
+The deterministic harvester-boundary fixture exercises the same production
+transform without depending on the dated national extracts.
+
 ---
 
 ## Workstream A: Region Taxonomy (Fixes Reno Now)
@@ -291,6 +342,41 @@ Operational notes: rate limits are per-endpoint on the free tier (directions a
 few thousand/day); the resumable batch + `.route-cache` handle polite staging,
 and Docker self-hosting (regional/national OSM extract plus RAM) is the unlimited
 path for large batches. OSRM stays as a graceful fallback.
+
+### Local service/facility approaches
+
+The city-service local-geometry layer is deliberately separate from the ORS HGV
+highway-corridor layer. `tools/build_local_geometry.py` uses local Geofabrik PBF
+extracts to build a small public-road graph around each supported city-service
+target and writes `local_geometry.json` for offline runtime use. The first bake
+adds turn-level geometry for 412 sourced city-service drives and fallback
+metadata for the rest of the 2,401 local targets.
+
+The freight facility endpoint layer is separate again. `tools/build_facility_endpoints.py`
+scans the same local PBF cache at `C:\Users\joshu\.cache\freight-fate-osm\regions\`
+and writes `facility_endpoints.json`: 1,462 of 1,819 facilities now have
+source-backed OSM freight/industrial endpoint matches, and 357 remain explicit
+representative fallbacks. This layer does not snap endpoints to roads and does
+not claim gates, yards, docks, driveways, or HGV-legal turn-by-turn routing.
+
+`tools/build_facility_approaches.py` is the next bounded layer. It reuses those
+source-backed endpoints plus `local_approaches.json`, then scans only selected
+local PBFs for high-confidence public-road paths. The current checked-in bake
+uses Illinois, Indiana, and Ohio from the local cache and writes
+`facility_approaches.json`: 71 source-backed facility endpoints now have
+road-snapped public-road context, and 6 are long enough to use as playable
+turn-level public-road approach geometry. The remaining facilities stay
+explicit fallback records. This still is not ORS `driving-hgv`, and it does
+not prove private gates, yards, docks, driveways, or truck-legal access.
+
+This local graph output is not ORS `driving-hgv` and should not be described as
+truck-legal routing. ORS HGV remains feasible for selected sourced service
+endpoints when `ORS_API_KEY` is available, but using it for the full local batch
+would be hundreds of live directions calls and would still not make
+representative freight-facility endpoints into real gates, yards, or docks.
+Future work can add a credential-gated ORS local batch or a self-hosted HGV
+router, then compare it against the current PBF graph output before replacing
+any checked-in local geometry.
 
 ### Other ORS/HeiGIT APIs (optional, for later workstreams)
 

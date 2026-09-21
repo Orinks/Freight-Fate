@@ -1,0 +1,14 @@
+[package]
+name = "prism"
+description = "Safe wrapper over the Prism screen-reader / TTS C library"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license = "MIT"
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+prism-sys = { path = "../prism-sys" }
+log.workspace = true
+thiserror.workspace = true

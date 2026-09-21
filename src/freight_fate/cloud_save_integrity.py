@@ -4,18 +4,23 @@ from __future__ import annotations
 
 import base64
 import binascii
+import copy
 import json
 import math
 from collections.abc import Mapping
 from decimal import Decimal
 
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-
 from .models.profile import Profile
 
 PUBLIC_KEYS = {
     "2026-07": base64.b64decode("RJ1PR6fVDk98eb3uMysfmvzfURO/wPkLX5O52OapNoY="),
+    # Staging-only key: the 1.9 test line signs against the staged
+    # orinks-net deployment (see DEFAULT_BASE_URL in online_presence.py).
+    # Remove alongside the base-URL flip in the pre-release checklist.
+    # Rotated 2026-08-11: the original half lived only in a Convex preview
+    # deployment, which Convex deleted at its five-day mark, taking the
+    # private key with it. Staging now runs on a permanent deployment.
+    "2026-08-staging": base64.b64decode("wFlZNTcOB8fNsc9a6oDcjJu8OER5/vZZCdL8wahdPNw="),
 }
 SUPPORTED_VALIDATOR_VERSION = 1
 
@@ -131,6 +136,13 @@ def verify_cloud_revision(
         ) from exc
     if len(signature) != 64:
         raise CloudSaveIntegrityError("integrity_failed", "The backup signature is unreadable.")
+    # cryptography.hazmat is a real import cost (part of the ~0.1s keyring/
+    # crypto startup tax the 1.9 profiling pass found) and only a cloud
+    # restore actually verifies a signature, so it is deferred to here
+    # instead of paying on every launch that never touches cloud saves.
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
     try:
         Ed25519PublicKey.from_public_bytes(keys[key_id]).verify(
             signature, canonical_profile(payload)
@@ -140,7 +152,10 @@ def verify_cloud_revision(
             "integrity_failed", "The backup signature is invalid."
         ) from exc
     try:
-        profile = Profile.from_dict(payload)
+        # Profile.from_dict normalizes nested save structures in place. Keep
+        # the signed payload byte-for-byte stable so callers can verify it
+        # again before committing a cloud restore to disk.
+        profile = Profile.from_dict(copy.deepcopy(payload))
     except Exception as exc:
         raise CloudSaveIntegrityError("invalid_profile", "The backup cannot be loaded.") from exc
     # Defense in depth behind the signature: a payload blessed by an older

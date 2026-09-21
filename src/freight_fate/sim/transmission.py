@@ -19,7 +19,41 @@ NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
-SHIFT_TIME = 1.0  # seconds of torque interruption
+# Torque-interrupt length. Real AMTs are quickest in the low box -- small
+# inertia steps and launch urgency -- and take the longest up top, so the
+# time scales with the gear being ENGAGED (owner's ear after the Camp
+# Verde-Kingman run, then tightened to modern-AMT figures 2026-07-23:
+# power upshifts run 0.25 through the low box to 0.5 in 10th). Downshifts
+# keep their own full-second figure: a real box has to rev-match UP into
+# the lower gear, which is genuinely slower than a power upshift -- and
+# that deliberateness is also what keeps a jake descent from cycling the
+# retarder fast enough to break a chained truck loose (physics bench).
+# DOWNSHIFT_TIME is also the conservative figure the grade-loss estimate
+# uses.
+SHIFT_TIME = 0.5  # seconds of torque interruption, 10th-gear power-upshift ceiling
+SHIFT_TIME_LOW = 0.25  # through gear 4
+DOWNSHIFT_TIME = 1.0  # rev-matched downshifts, and the jake preselect
+# Manual shifts: the player's clutch is already the torque interruption, so
+# the box only charges the lever's own travel through neutral. Stacking the
+# AMT interrupt on top left up to 0.6 s of dead pedal AFTER the clutch was
+# out in the top gears (Josh's "manual needs tuning", measured 2026-07-23).
+MANUAL_LEVER_TIME = 0.25
+
+
+def shift_time_for(gear: int) -> float:
+    """Seconds of torque interruption for a shift engaging ``gear``."""
+    g = max(1, min(10, gear))
+    if g <= 4:
+        return SHIFT_TIME_LOW
+    return SHIFT_TIME_LOW + (SHIFT_TIME - SHIFT_TIME_LOW) * (g - 4) / 6.0
+
+
+# With the engine brake working, a real automatic pre-selects a lower range
+# to put the engine where the retarder bites (high RPM) instead of upshifting
+# away from it. Downshift while below the target band, but never into a gear
+# that would spin the engine past the ceiling.
+JAKE_PRESELECT_RPM = 1700
+JAKE_MAX_RPM = 2150
 PROGRESSIVE_UPSHIFT_RPM = (1450, 1550, 1650, 1700, 1750, 1800, 1800, 1800, 1800, 1850)
 
 
@@ -81,7 +115,7 @@ class Transmission:
         if self.clutch < 0.8 and target != NEUTRAL:
             return ShiftResult(False, "Clutch not pressed", grind=True)
         self.gear = target
-        self._shift_timer = SHIFT_TIME
+        self._shift_timer = MANUAL_LEVER_TIME
         return ShiftResult(True, self._gear_name(target))
 
     def shift_up(self) -> ShiftResult:
@@ -104,12 +138,17 @@ class Transmission:
         start_gear: int = 1,
         upshift_steps: int = 1,
         downshift_target: int | None = None,
+        engine_braking: bool = False,
+        downshift_rpm: float = AUTO_DOWNSHIFT_RPM,
+        retarder_slipping: bool = False,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
         While braking the box never upshifts -- a real automatic holds the gear
         for engine braking instead of grabbing a taller one as you slow, which
-        otherwise read as "geared up while stopping"."""
+        otherwise read as "geared up while stopping". With the engine brake
+        active it goes further and pre-selects DOWN toward the retard band,
+        because a jake in overdrive at low RPM is barely a brake at all."""
         if not self.automatic or self.shifting:
             return None
         if self.in_reverse:
@@ -117,29 +156,83 @@ class Transmission:
         if self.gear == NEUTRAL:
             if throttle > 0.05:
                 self.gear = max(1, min(self.num_gears, start_gear))
-                self._shift_timer = SHIFT_TIME
+                self._shift_timer = shift_time_for(self.gear)
                 self._gear_hold_timer = 0.0
                 return self.gear
             return None
-        if not moving and self.gear > 1:
+        restart_gear = max(1, min(self.num_gears, start_gear))
+        if not moving and self.gear > restart_gear:
             # Stopped (or knocked to a crawl by a collision) in a high gear:
-            # a real automatic returns to first instead of lugging until the
-            # engine dies on every restart.
-            self.gear = 1
-            self._shift_timer = SHIFT_TIME
+            # a real automatic returns to its starting gear -- first when
+            # grossed out, third when light -- instead of lugging until the
+            # engine dies on every restart. Snapping all the way to first
+            # regardless used to throw away the light rig's start gear
+            # before the truck had rolled a foot.
+            self.gear = restart_gear
+            self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
-        if self._gear_hold_timer < minimum_shift_interval_s:
+        # The comfort hold between shifts never delays engine protection
+        # (road past the jake ceiling upshifts NOW) -- and above the launch
+        # box it never delays an upshift the revs have already earned. Two
+        # owner rulings meet here: the hold IS part of the approved stately
+        # launch feel through the low gears (each gear revs out, then a
+        # beat), but past gear five the same hold left the engine hanging
+        # at the crest of the pull -- the driver heard the rev top out and
+        # then waited a second for the gear (owner report, 2026-07-23).
+        # After an upshift the rpm falls a whole ratio step, so up there
+        # the rev-out time is all the anti-hunt spacing the box needs.
+        earned_upshift = (
+            self.gear >= 5 and throttle > 0.2 and rpm > upshift_rpm and can_upshift and not braking
+        )
+        if (
+            self._gear_hold_timer < minimum_shift_interval_s
+            and not (engine_braking and rpm > JAKE_MAX_RPM)
+            and not earned_upshift
+        ):
             return None
-        if rpm > upshift_rpm and self.gear < self.num_gears and not braking and can_upshift:
+        # Braking or engine-braking holds the gear -- except that a real
+        # automatic protects its engine: once the road spins it past the
+        # ceiling, the box upshifts anyway. On a downgrade that trades
+        # engine safety for a taller gear and a weaker jake, which is
+        # exactly the runaway spiral a mismanaged descent earns.
+        hold_gear = (braking or engine_braking) and rpm < JAKE_MAX_RPM
+        if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear and can_upshift:
             self.gear = min(self.num_gears, self.gear + max(1, upshift_steps))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
-        if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
+        if (
+            engine_braking
+            and moving
+            and self.gear > 1
+            and rpm < JAKE_PRESELECT_RPM
+            and not retarder_slipping
+        ):
+            # Never pre-select DEEPER while the drive axle is already breaking
+            # loose: a lower gear multiplies the retard torque that broke it.
+            # Real retarder management is traction-linked for the same reason.
+            lower = GEAR_RATIOS[self.gear - 2]
+            current = GEAR_RATIOS[self.gear - 1]
+            if rpm * lower / current <= JAKE_MAX_RPM:
+                self.gear -= 1
+                # Downshifts stay deliberate at the full interruption: the
+                # quick low-box time is a POWER-shift feel. On a jake
+                # descent the box cycles preselect-down against
+                # engine-protect-up, and quick downshifts doubled that
+                # cycle rate -- enough extra jake-connected time to break
+                # a chained truck loose on ice (physics bench regression).
+                self._shift_timer = DOWNSHIFT_TIME
+                self._gear_hold_timer = 0.0
+                return self.gear
+        if rpm < downshift_rpm and self.gear > 1 and moving and not retarder_slipping:
+            # The anti-lugging downshift also respects traction while the
+            # retarder works: on a low-grip descent the road spins the
+            # engine, there is no stall to protect against, and the lower
+            # gear would multiply the retard past what the drives can hold.
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = DOWNSHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
         return None
@@ -152,7 +245,7 @@ class Transmission:
         if not self.automatic or self.gear <= 1:
             return None
         self.gear -= 1
-        self._shift_timer = SHIFT_TIME
+        self._shift_timer = shift_time_for(self.gear)
         self._gear_hold_timer = 0.0
         return self.gear
 

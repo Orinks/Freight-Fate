@@ -13,37 +13,36 @@ enforcement semantics). Additive + idempotent (overwrites the leg's landmarks).
 
     python bake_landmarks.py [--only "a_b_us:c_d_us;..."] [--per-leg 8] [--write]
 """
+
 from __future__ import annotations
 
 import argparse
-import json
 import math
-import os
 import sys
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
 sys.path.insert(0, str(ROOT / "tools"))
+import overpass_corridor as oc  # noqa: E402
 from enrich_routes_landmarks import (  # noqa: E402
     NARRATABLE_OSM_TAGS,
     classify_narratable_feature,
     spoken_landmark_text,
 )
+from world_source import load_world, save_world  # noqa: E402
 
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 R_MI = 3958.8
 
 # Curated landmark categories owned elsewhere -- hand-placed heritage markers and
 # the authored billboards from bake_billboards.py. This tool regenerates only the
 # OSM-derived features, so it must PRESERVE these when it overwrites a leg (else a
 # re-bake silently wipes the Loneliest Road marker and every placed billboard).
-CURATED_CATEGORIES = {"highway_marker", "billboard_sign"}
-POINT_OFF_MI = 4.0      # keep a pass/museum/river crossing within this of the route
-SAMPLE_STEP_MI = 20.0   # bbox sample spacing along the corridor
-BBOX_RADIUS_M = 14000   # ~14 km half-box at each sample
+# ``village`` joins them: bake_villages.py owns it and sources it from a local
+# OSM extract, not from this bbox query, so a landmark re-bake must not wipe it.
+CURATED_CATEGORIES = {"highway_marker", "billboard_sign", "village"}
+POINT_OFF_MI = 4.0  # keep a pass/museum/river crossing within this of the route
+SAMPLE_STEP_MI = 20.0  # bbox sample spacing along the corridor
+BBOX_RADIUS_M = 14000  # ~14 km half-box at each sample
 
 
 def hav(lat1, lon1, lat2, lon2):
@@ -115,7 +114,9 @@ def _point_in_ring(lat, lon, ring):
     for i in range(n):
         yi, xi = ring[i]
         yj, xj = ring[j]
-        if ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi):
+        if ((yi > lat) != (yj > lat)) and (
+            lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi
+        ):
             inside = not inside
         j = i
     return inside
@@ -178,11 +179,7 @@ def _element_line(el):
 
 def overpass(bbox):
     body = "\n".join(f'  {t}["{k}"="{v}"]({bbox});' for t, k, v in NARRATABLE_OSM_TAGS)
-    q = f"[out:json][timeout:90];\n(\n{body}\n);\nout geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        return json.loads(resp.read())
+    return oc.post(f"[out:json][timeout:120];\n(\n{body}\n);\nout geom;")
 
 
 _REL_CACHE: dict = {}
@@ -192,12 +189,8 @@ def fetch_relation(rel_id):
     """Full geometry for one relation by id (a bbox query strips members outside it)."""
     if rel_id in _REL_CACHE:
         return _REL_CACHE[rel_id]
-    q = f"[out:json][timeout:90];rel({rel_id});out geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            els = json.loads(resp.read()).get("elements", [])
+        els = oc.post(f"[out:json][timeout:120];rel({rel_id});out geom;").get("elements", [])
         result = els[0] if els else None
     except Exception:
         result = None
@@ -298,7 +291,7 @@ def main():
     a = ap.parse_args()
     only = {frozenset(p.split(":")) for p in a.only.split(";") if ":" in p}
 
-    d = json.loads(WORLD.read_text(encoding="utf-8"))
+    d = load_world()
     total_lm = updated = 0
     for leg in d["legs"]:
         if only and frozenset((leg["from"], leg["to"])) not in only:
@@ -318,7 +311,7 @@ def main():
             updated += 1
     print(f"landmarks: {total_lm} across {updated} legs")
     if a.write:
-        WORLD.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
+        save_world(d)
         print("WRITTEN")
     else:
         print("(dry run)")

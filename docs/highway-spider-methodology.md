@@ -291,7 +291,8 @@ for corridor in corridors.json ordered by (tier, phase):
     SEAL:    coverage.json updated; PR opened against dev
 ```
 
-Corridors build serially (world.json is one file; parallel edits conflict),
+Corridors build serially (a tool loads and saves the whole world; parallel
+edits conflict even though the source is now sharded per state),
 but TRACE and PLAN are read-only and can run ahead for the next several
 corridors while the current one builds.
 

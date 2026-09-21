@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from enrich_routes_base import *
+from terrain_rules import RANK, terrain_for
 
 
 _TRUCK_POI_KEYWORDS = (
@@ -94,7 +95,7 @@ def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = Fal
         or hgv
         or hgv_diesel
         or is_brand
-        or amenity == "parking"
+        or amenity in {"parking", "truck_stop"}
     )
     if not truck_signal:
         if rural_fallback and amenity == "fuel" and tags.get("fuel:diesel", "") != "no":
@@ -113,6 +114,8 @@ def _truck_relevance(tags: dict[str, str], name: str, rural_fallback: bool = Fal
         score += 3
     if amenity == "parking":
         score += 1
+    if amenity == "truck_stop":
+        score += 10
     return score
 
 
@@ -259,12 +262,14 @@ def _maxspeed_at_point(
     point: dict[str, float],
     cache_dir: Path,
     rate_limit_s: float,
-) -> tuple[float, bool] | None:
+) -> tuple[float, bool, bool] | None:
     """Best posted limit on the corridor's highway near one route point.
 
     Queries OSM ways carrying a ``maxspeed`` within a short radius and prefers
     the way whose ``ref`` matches the leg's highway shield (e.g. ``I 95``), so a
-    parallel frontage road's 45 mph doesn't override the interstate."""
+    parallel frontage road's 45 mph doesn't override the interstate. Returns
+    ``(mph, is_hgv, on_shield)`` -- callers use ``on_shield`` to judge whether
+    an implausible reading came from the mainline or a nearby city street."""
     box = _bbox(point["lat"], point["lon"], 400)
     classes = "|".join(_MAXSPEED_HIGHWAY_CLASSES)
     query = f"""
@@ -297,7 +302,9 @@ def _maxspeed_at_point(
             best, best_on_shield = (mph, is_hgv), True
         elif on_shield == best_on_shield and (best is None or mph > best[0]):
             best = (mph, is_hgv)
-    return best
+    if best is None:
+        return None
+    return best[0], best[1], best_on_shield
 
 
 def _highway_digits(highway: str) -> str:
@@ -331,12 +338,20 @@ def bake_maxspeed(
         if len(points) < 2:
             skipped.append(f"{leg['from']}-{leg['to']}")
             continue
+        interstate = str(leg.get("highway", "")).strip().upper().startswith("I-")
         samples: list[dict[str, Any]] = []
         for point in points:
             result = _maxspeed_at_point(leg, point, cache_dir, rate_limit_s)
             if result is None:
                 continue
-            mph, is_hgv = result
+            mph, is_hgv, on_shield = result
+            # No US interstate mainline posts below 45; a shield-less sub-45
+            # reading near an interstate corridor is a city street inside the
+            # sample box (typical at the mile-0/end city anchors), not the
+            # highway. Baking it would hold a street limit for miles of
+            # interstate, so skip the point instead.
+            if interstate and not on_shield and mph < 45.0:
+                continue
             at_mi = round(float(point["at_mi"]), 1)
             # Collapse a repeated limit into the step function it represents.
             if samples and samples[-1]["mph"] == mph and samples[-1]["hgv"] == is_hgv:
@@ -573,11 +588,14 @@ def _grade_segments(
         grades.append(grade)
     avg = sum(grades) / len(grades)
     max_abs = max(abs(grade) for grade in grades)
+    # Relief in context, not the bare steepest number: a flat leg with a lone
+    # 3% blip carries almost no relief and stays flat, where a real climb does.
+    relief_ft = (max(elevations_ft) - min(elevations_ft)) if elevations_ft else 0.0
+    derived = terrain_for(max_abs, relief_ft)
+    # Never quietly downgrade a hand-set curated label; only ever firm it up.
     terrain = str(leg.get("terrain", "flat"))
-    if max_abs > 3.0:
-        terrain = "mountain"
-    elif max_abs > 0.8 and terrain == "flat":
-        terrain = "hills"
+    if RANK[derived] > RANK[terrain]:
+        terrain = derived
     return [
         {
             "start_mi": 0.0,

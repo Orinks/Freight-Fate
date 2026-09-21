@@ -163,8 +163,7 @@ def overpass_query(bbox: str, timeout_s: int = 60) -> str:
     string. The bake fills it per corridor sample point.
     """
     body = "\n".join(
-        f'  {osm_type}["{key}"="{value}"]({bbox});'
-        for osm_type, key, value in NARRATABLE_OSM_TAGS
+        f'  {osm_type}["{key}"="{value}"]({bbox});' for osm_type, key, value in NARRATABLE_OSM_TAGS
     )
     return f"[out:json][timeout:{timeout_s}];\n(\n{body}\n);\nout tags center;"
 

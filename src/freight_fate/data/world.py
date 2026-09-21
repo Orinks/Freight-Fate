@@ -10,16 +10,39 @@ from __future__ import annotations
 
 import heapq
 import json
-import re
-import zlib
+import threading
 from pathlib import Path
 
 from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
+from .world_corridor import raw_metadata_complete
 from .world_loader import load_world_data
+from .world_local_data import (
+    load_city_service_data,
+    load_facility_approaches,
+    load_facility_endpoints,
+    load_local_approaches,
+    load_local_geometries,
+)
 from .world_models import *
+from .world_parsing import (
+    _expand_market_locations,
+    _is_legacy_market_name,
+    _market_tags_for_city,
+    _merge_overlay,
+    _parse_location,
+    _parse_stop,
+    _service_city_slug,
+    _stable_facility_id,
+)
+from .world_parsing import (
+    minimum_curated_pois as minimum_curated_pois,
+)
+from .world_parsing import (
+    minimum_fuel_capable_pois as minimum_fuel_capable_pois,
+)
+from .world_services import WorldServiceMixin
 
-WORLD_PATH = Path(__file__).parent / "world.json"
 WORLD_DATA_PATH = Path(__file__).parent / "world_data"
 WORLD_INDEX_PATH = WORLD_DATA_PATH / "index.json"
 # Alternate routes should feel like dispatch choices, not graph leftovers.
@@ -45,7 +68,16 @@ def _load_base_world_data(root: Path) -> dict:
     return load_world_data(root)
 
 
-class World:
+# Routing cost multiplier for a leg carrying a truck_advisory (see
+# shortest_route). Calibrated, not tasted: carriers accept the ~1.7x
+# distance detour through Cortez and Moab rather than run the warned
+# US-550 passes, so any factor clearing that ratio encodes the observed
+# decision; 2.5 clears it with margin while a pair of towns whose only
+# road is the warned one still routes.
+TRUCK_ADVISORY_COST_MULT = 2.5
+
+
+class World(WorldServiceMixin):
     def __init__(self, data: dict) -> None:
         geo = data.get("geo") if isinstance(data.get("geo"), dict) else {}
         countries = geo.get("countries") if isinstance(geo.get("countries"), dict) else {}
@@ -85,6 +117,23 @@ class World:
         self._legacy_facility_ids = _build_legacy_facility_ids(
             self.cities, self._legacy_names_by_key
         )
+        # The checked-in local-driving data (city services, facility endpoints
+        # and approaches, surface-street geometry) predates the slug migration
+        # and is keyed by old display names and pre-slug facility ids; remap it
+        # onto canonical keys once at load so every runtime lookup stays direct.
+        self._service_city_keys = _build_service_city_keys(self.cities, self._legacy_names_by_key)
+        # The nationwide local-driving data (city services, facility endpoints
+        # and approaches, surface-street geometry) is ~31 MB of JSON that only
+        # matters once a player is threading into a specific facility or city
+        # service. Loading and remapping it at startup was pure latency; it is
+        # built on first access instead. The remap keys off structures already
+        # built above, so a lazy build is safe.
+        self._local_data_lock = threading.RLock()
+        self._city_service_data_cache: dict | None = None
+        self._facility_approaches_cache: dict | None = None
+        self._facility_endpoints_cache: dict | None = None
+        self._local_approaches_cache: dict | None = None
+        self._local_geometries_cache: dict | None = None
 
         self.legs: list[Leg] = []
         for leg in data["legs"]:
@@ -93,59 +142,32 @@ class World:
             leg_from = self.resolve_city_key(leg["from"])
             leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
+            highway = leg["highway"]
             stops = tuple(_parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ()))
             corridor = leg.get("corridor", {})
-            route_points = tuple(
-                _parse_route_point(p, miles, leg_from, leg_to)
-                for p in corridor.get("route_points", ())
-            )
-            elevation_samples = tuple(
-                _parse_elevation_sample(s, miles, leg_from, leg_to)
-                for s in corridor.get("elevation_samples", ())
-            )
-            grade_segments = tuple(
-                _parse_grade_segment(s, miles, leg_from, leg_to)
-                for s in corridor.get("grade_segments", ())
-            )
-            state_crossings = tuple(
-                _parse_state_crossing(c, miles, leg_from, leg_to, self.cities[leg_from].state)
-                for c in corridor.get("state_crossings", ())
-            )
-            checkpoints = tuple(
-                _parse_checkpoint(c, miles, leg_from, leg_to)
-                for c in corridor.get("checkpoints", ())
-            )
-            state_miles = tuple(
-                _parse_state_mileage(m, leg_from, leg_to) for m in corridor.get("state_miles", ())
-            )
-            toll_events = tuple(
-                _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])
-                for e in corridor.get("toll_events", ())
-            )
-            interchanges = tuple(
-                _parse_interchange(x, miles, leg_from, leg_to, leg["highway"])
-                for x in corridor.get("interchanges", ())
-            )
-            speed_limits = _parse_speed_limits(
-                corridor.get("speed_limits", ()), miles, leg_from, leg_to
-            )
+            from_state = self.cities[leg_from].state
+            # Only the eager fields are built now; the heavy per-mile corridor
+            # (grades, interchanges, landmarks, speed limits, ...) is parsed by
+            # LazyLeg the first time a leg is driven. Dispatch completeness is
+            # baked here from raw corridor counts so the route graph never has
+            # to trigger that parse -- the counted fields parse one-for-one, so
+            # this is identical to asking a fully built leg.
+            meta_complete = raw_metadata_complete(corridor, from_state, self.cities[leg_to].state)
             self.legs.append(
-                Leg(
+                LazyLeg(
                     leg_from,
                     leg_to,
                     miles,
-                    leg["highway"],
+                    highway,
                     leg["terrain"],
                     stops,
-                    route_points,
-                    elevation_samples,
-                    grade_segments,
-                    state_crossings,
-                    checkpoints,
-                    state_miles,
-                    toll_events,
-                    interchanges,
-                    speed_limits,
+                    lanes=max(0, int(leg.get("lanes", 0))),
+                    local_cue="",
+                    local_speed_mph=0.0,
+                    divided=leg["divided"] if isinstance(leg.get("divided"), bool) else None,
+                    truck_advisory=str(leg.get("truck_advisory", "")).strip(),
+                    meta_complete=meta_complete,
+                    detail_source=(corridor, miles, leg_from, leg_to, from_state, highway),
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
@@ -153,6 +175,71 @@ class World:
             self._adjacency[leg.a].append(leg)
             self._adjacency[leg.b].append(leg)
         self._supported_route_cache: dict[tuple[str, str], Route | None] = {}
+
+    @property
+    def _city_service_data(self) -> dict:
+        if self._city_service_data_cache is None:
+            with self._local_data_lock:
+                if self._city_service_data_cache is None:
+                    self._city_service_data_cache = {
+                        self.resolve_city_key(name): services
+                        for name, services in load_city_service_data().items()
+                    }
+        return self._city_service_data_cache
+
+    @property
+    def _facility_approaches(self) -> dict:
+        if self._facility_approaches_cache is None:
+            with self._local_data_lock:
+                if self._facility_approaches_cache is None:
+                    self._facility_approaches_cache = self._remap_facility_ids(
+                        load_facility_approaches()
+                    )
+        return self._facility_approaches_cache
+
+    @property
+    def _facility_endpoints(self) -> dict:
+        if self._facility_endpoints_cache is None:
+            with self._local_data_lock:
+                if self._facility_endpoints_cache is None:
+                    self._facility_endpoints_cache = self._remap_facility_ids(
+                        load_facility_endpoints()
+                    )
+        return self._facility_endpoints_cache
+
+    @property
+    def _local_approaches(self) -> dict:
+        if self._local_approaches_cache is None:
+            with self._local_data_lock:
+                if self._local_approaches_cache is None:
+                    self._local_approaches_cache = self._remap_local_ids(load_local_approaches())
+        return self._local_approaches_cache
+
+    @property
+    def _local_geometries(self) -> dict:
+        if self._local_geometries_cache is None:
+            with self._local_data_lock:
+                if self._local_geometries_cache is None:
+                    self._local_geometries_cache = self._remap_local_ids(load_local_geometries())
+        return self._local_geometries_cache
+
+    def _remap_facility_ids(self, data: dict) -> dict:
+        """Rekey a facility-id-keyed local-data dict onto current ids."""
+        return {self._resolve_facility_id(key): value for key, value in data.items()}
+
+    def _remap_local_ids(self, data: dict) -> dict:
+        """Rekey local approach/geometry target ids onto canonical keys."""
+        return {self._canonical_local_id(key): value for key, value in data.items()}
+
+    def _canonical_local_id(self, target_id: str) -> str:
+        if target_id.startswith("city_service:"):
+            _, city_slug, service_key = target_id.split(":", 2)
+            key = self._service_city_keys.get(city_slug)
+            return f"city_service:{key}:{service_key}" if key else target_id
+        if target_id.startswith("facility:"):
+            facility_id = target_id[len("facility:") :]
+            return f"facility:{self._resolve_facility_id(facility_id)}"
+        return target_id
 
     def _validate_city_locations(self, city: str, locations: tuple[Location, ...]) -> None:
         if not locations:
@@ -312,18 +399,6 @@ class World:
             f"{city_obj.name} Company Yard", city_obj.name, city_obj.state, "company_yard"
         )
 
-    def facility_approach_route(self, city: str, location_name: str) -> Route:
-        """A short, drivable local route from the company terminal to a facility."""
-        key = self.resolve_city_key(city)
-        location = self.facility_location(key, location_name)
-        base_miles = FACILITY_APPROACH_MILES.get(location.type, 4.0)
-        seed = zlib.crc32(f"{key}:{location.name}:{location.type}".encode())
-        offset = (seed % 7) * 0.25
-        miles = round(base_miles + offset, 1)
-        road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
-        leg = Leg(key, key, miles, road, "flat", ())
-        return Route([key, key], [leg])
-
     def shortest_route(
         self,
         start: str,
@@ -359,6 +434,16 @@ class World:
                     continue
                 nxt = leg.other(city)
                 cost = leg.miles * penalties.get(leg, 1.0) if has_penalties else leg.miles
+                if leg.truck_advisory:
+                    # Strong avoidance, never refusal. Calibrated against the
+                    # decision real carriers make at Red Mountain Pass: they
+                    # accept the ~1.7x-distance detour through Cortez and
+                    # Moab rather than run a warned pass, so the multiplier
+                    # only has to clear that ratio for the detour to win
+                    # wherever one exists; 2.5 clears it with margin. A pair
+                    # of towns whose ONLY road is the warned one still
+                    # routes -- the advisory is a warning, not a wall.
+                    cost *= TRUCK_ADVISORY_COST_MULT
                 nd = d + cost
                 if nd < dist.get(nxt, float("inf")):
                     dist[nxt] = nd
@@ -526,660 +611,22 @@ def _build_legacy_facility_ids(
     return legacy_ids
 
 
-def _overlay_city_key(name: str, cities: dict) -> str:
-    """The key an overlay city name lands on: itself, or the slug it aliases.
+def _build_service_city_keys(
+    cities: dict[str, City], legacy_names_by_key: dict[str, tuple[str, ...]]
+) -> dict[str, str]:
+    """Map the city slug embedded in local city-service ids to the city key.
 
-    Overlays written before the slug migration name cities by display name;
-    treating those as the base city they alias keeps the merge additive
-    instead of duplicating the city under its old name.
+    The checked-in local approach and geometry ids were generated from
+    pre-slug display names (``city_service:sault-ste-marie:garage``); current
+    spoken names map too so future data keyed either way keeps resolving.
     """
-    if name in cities:
-        return name
-    slug = LEGACY_CITY_SLUGS.get(name)
-    return slug if slug in cities else name
-
-
-def _leg_pair_key(leg: dict, cities: dict) -> frozenset:
-    return frozenset(
-        (_overlay_city_key(leg.get("from"), cities), _overlay_city_key(leg.get("to"), cities))
-    )
-
-
-def _merge_overlay(base: dict, overlay: dict) -> dict:
-    """Return ``base`` with overlay cities and legs added, never overridden.
-
-    The merge is purely additive so the checked-in base stays authoritative:
-    a city already present (by key, or by a pre-slug legacy name aliasing one)
-    keeps its base definition, and a leg already present (by unordered endpoint
-    pair) keeps its base definition. Only genuinely new cities and legs from
-    the overlay are appended. The base dict is not mutated.
-    """
-    merged = dict(base)
-    cities = dict(base.get("cities", {}))
-    for name, city in overlay.get("cities", {}).items():
-        if _overlay_city_key(name, cities) not in cities:
-            cities[name] = city
-    merged["cities"] = cities
-
-    legs = list(base.get("legs", []))
-    seen = {_leg_pair_key(leg, cities) for leg in legs}
-    for leg in overlay.get("legs", []):
-        key = _leg_pair_key(leg, cities)
-        if key not in seen:
-            seen.add(key)
-            legs.append(leg)
-    merged["legs"] = legs
-    return merged
-
-
-def _parse_location(
-    raw: dict, city_key: str, spoken_city: str, city_lat: float, city_lon: float
-) -> Location:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{spoken_city} facility must be an object")
-    name = _clean_facility_name(spoken_city, str(raw.get("name", "")).strip())
-    facility_type = str(raw.get("type", "")).strip()
-    if facility_type not in FREIGHT_LOCATION_TYPES:
-        raise ValueError(f"{spoken_city} facility {name!r} has unknown type {facility_type!r}")
-    default_roles = FACILITY_CARGO_ROLES.get(facility_type, {})
-    raw_cargo = tuple(str(cargo).strip() for cargo in raw.get("cargo", ()) if str(cargo).strip())
-    default_cargo = _dedupe(default_roles.get("ships", ()) + default_roles.get("receives", ()))
-    cargo = raw_cargo or default_cargo
-    ships = _role_cargo(raw, "ships", cargo, default_roles.get("ships", ()))
-    receives = _role_cargo(raw, "receives", cargo, default_roles.get("receives", ()))
-    roles = tuple(role for role, values in (("shipper", ships), ("receiver", receives)) if values)
-    source_note = str(
-        raw.get("source_note")
-        or raw.get("source")
-        or FACILITY_SOURCE_NOTES.get(facility_type, "Curated representative facility.")
-    ).strip()
-    spoken = str(raw.get("spoken_name") or raw.get("spoken") or "").strip()
-    locality = str(raw.get("locality", "")).strip()
-    traits = tuple(str(trait).strip() for trait in raw.get("traits", ()) if str(trait).strip())
-    return Location(
-        name=name,
-        type=facility_type,
-        cargo=cargo,
-        id=str(raw.get("id") or _stable_facility_id(city_key, facility_type, name)).strip(),
-        city=city_key,
-        locality=locality,
-        roles=roles,
-        ships=ships,
-        receives=receives,
-        lat=float(raw.get("lat", city_lat)),
-        lon=float(raw.get("lon", city_lon)),
-        traits=traits,
-        source_note=source_note,
-        spoken=spoken,
-        template=bool(raw.get("template", False)),
-        min_level=int(raw.get("min_level", FACILITY_LEVEL_UNLOCKS.get(facility_type, 1))),
-    )
-
-
-def _expand_market_locations(
-    city_key: str,
-    spoken_city: str,
-    lat: float,
-    lon: float,
-    explicit_locations: tuple[Location, ...],
-    market_tags: tuple[str, ...],
-) -> tuple[Location, ...]:
-    locations = list(explicit_locations)
-    existing_types = {location.type for location in locations}
-    existing_names = {location.name.lower() for location in locations}
-    desired_types = list(BASE_MARKET_FACILITY_TYPES)
-    for tag in market_tags:
-        desired_types.extend(MARKET_TAG_FACILITY_TYPES.get(tag, ()))
-    for facility_type in _dedupe(desired_types):
-        if facility_type in existing_types:
-            continue
-        location = _template_location(city_key, spoken_city, lat, lon, facility_type, market_tags)
-        if location.name.lower() in existing_names:
-            location = _template_location(
-                city_key,
-                spoken_city,
-                lat,
-                lon,
-                facility_type,
-                market_tags,
-                name_suffix=" Facility",
-            )
-        locations.append(location)
-        existing_types.add(location.type)
-        existing_names.add(location.name.lower())
-    return tuple(locations)
-
-
-def _template_location(
-    city_key: str,
-    spoken_city: str,
-    lat: float,
-    lon: float,
-    facility_type: str,
-    market_tags: tuple[str, ...],
-    name_suffix: str = "",
-) -> Location:
-    template = FACILITY_NAME_TEMPLATES[facility_type]
-    name = template.format(city=spoken_city) + name_suffix
-    roles = FACILITY_CARGO_ROLES[facility_type]
-    cargo = _dedupe(roles["ships"] + roles["receives"])
-    source_note = (
-        f"{FACILITY_SOURCE_NOTES[facility_type]} Generated offline as a "
-        f"representative {spoken_city} metro-market facility; not a claim about a "
-        "specific real-world shipper."
-    )
-    jitter_lat, jitter_lon = _jittered_coordinates(city_key, facility_type, lat, lon)
-    return Location(
-        name=name,
-        type=facility_type,
-        cargo=cargo,
-        id=_stable_facility_id(city_key, facility_type, name),
-        city=city_key,
-        roles=("shipper", "receiver"),
-        ships=roles["ships"],
-        receives=roles["receives"],
-        lat=jitter_lat,
-        lon=jitter_lon,
-        traits=("representative", "template") + market_tags,
-        source_note=source_note,
-        template=True,
-        min_level=FACILITY_LEVEL_UNLOCKS.get(facility_type, 1),
-    )
-
-
-def _market_tags_for_city(
-    city_key: str, state_code: str, raw_city: dict, locations: tuple[Location, ...]
-) -> tuple[str, ...]:
-    tags: set[str] = set(REGION_MARKET_TAGS.get(str(raw_city.get("region", "")), ()))
-    tags.update(STATE_MARKET_TAGS.get(state_code, ()))
-    tags.update(CITY_MARKET_TAGS.get(city_key, ()))
-    for location in locations:
-        tags.update(_tags_for_facility_type(location.type))
-    return tuple(sorted(tags))
-
-
-def _tags_for_facility_type(facility_type: str) -> tuple[str, ...]:
-    return {
-        "air_cargo": ("air",),
-        "distribution": ("retail",),
-        "food_terminal": ("food", "cold_chain"),
-        "industrial_park": ("industrial",),
-        "intermodal": ("intermodal",),
-        "manufacturing": ("manufacturing",),
-        "port": ("port",),
-        "rail": ("intermodal",),
-        "retail_distribution": ("retail",),
-        "terminal": ("cross_dock",),
-        "warehouse": ("retail",),
-    }.get(facility_type, ())
-
-
-def _role_cargo(
-    raw: dict, key: str, cargo: tuple[str, ...], defaults: tuple[str, ...]
-) -> tuple[str, ...]:
-    values = tuple(str(value).strip() for value in raw.get(key, ()) if str(value).strip())
-    if values:
-        return values
-    plausible = tuple(value for value in cargo if value in defaults)
-    return plausible or tuple(value for value in cargo if value)
-
-
-def _clean_facility_name(city: str, name: str) -> str:
-    if not name:
-        raise ValueError(f"{city} has a facility without a name")
-    lowered = name.lower()
-    if any(marker in lowered for marker in RAW_FACILITY_TEXT_MARKERS):
-        raise ValueError(f"{city} facility {name!r} exposes raw source text")
-    return name
-
-
-def _stable_facility_id(city: str, facility_type: str, name: str) -> str:
-    return f"{_slug(city)}:{facility_type}:{_slug(name)}"
-
-
-def _slug(text: str) -> str:
-    out: list[str] = []
-    pending_dash = False
-    for char in text.lower():
-        if char.isalnum():
-            if pending_dash and out:
-                out.append("-")
-            out.append(char)
-            pending_dash = False
-        else:
-            pending_dash = True
-    return "".join(out).strip("-") or "facility"
-
-
-def _dedupe(values: tuple[str, ...] | list[str]) -> tuple[str, ...]:
-    out: list[str] = []
-    seen: set[str] = set()
-    for value in values:
-        if value and value not in seen:
-            seen.add(value)
-            out.append(value)
-    return tuple(out)
-
-
-def _jittered_coordinates(
-    city: str, facility_type: str, lat: float, lon: float
-) -> tuple[float, float]:
-    if lat == 0.0 and lon == 0.0:
-        return lat, lon
-    seed = zlib.crc32(f"{city}:{facility_type}".encode())
-    lat_offset = ((seed & 0xFF) - 128) / 5000.0
-    lon_offset = (((seed >> 8) & 0xFF) - 128) / 5000.0
-    return round(lat + lat_offset, 5), round(lon + lon_offset, 5)
-
-
-def _is_legacy_market_name(city_names: tuple[str, ...], name: str) -> bool:
-    """True when ``name`` is one of the old whole-city market placeholders.
-
-    Checked against every name the city has answered to (current spoken plus
-    frozen legacy display names) so pre-slug saves keep resolving."""
-    normalized = name.strip().lower()
-    if not normalized:
-        return True
-    for city_name in city_names:
-        city_lower = city_name.lower()
-        if normalized in {
-            city_lower,
-            f"{city_lower} freight market",
-            f"{city_lower} metro freight market",
-        }:
-            return True
-    return False
-
-
-def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} stop {raw!r} is missing explicit at_mi")
-    name = str(raw.get("name", "")).strip()
-    if not name:
-        raise ValueError(f"{from_city} to {to_city} has a stop without a name")
-    lowered_name = name.lower()
-    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} exposes raw OSM/source text")
-    if "at_mi" not in raw:
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} is missing explicit at_mi")
-    at_mi = float(raw["at_mi"])
-    if not 0.0 < at_mi < leg_miles:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has at_mi {at_mi}, "
-            f"outside leg mileage 0-{leg_miles}"
-        )
-    stop_type = str(raw.get("type", "")).strip() or _classify_stop(name)
-    if stop_type not in STOP_TYPE_LABELS:
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} has unknown type {stop_type!r}")
-    source = str(raw.get("source", "")).strip()
-    actions = tuple(
-        str(action).strip() for action in raw.get("actions", DEFAULT_POI_ACTIONS[stop_type])
-    )
-    if not actions:
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} has no actions")
-    unknown = sorted(set(actions) - POI_ACTIONS)
-    if unknown:
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} has unknown actions {unknown}")
-    default_actions = set(DEFAULT_POI_ACTIONS[stop_type])
-    disallowed = sorted(set(actions) - default_actions)
-    if disallowed:
-        source_backed = set(disallowed) <= SOURCE_BACKED_POI_ACTIONS
-        if not source_backed:
-            raise ValueError(
-                f"{from_city} to {to_city} stop {name!r} actions {disallowed} "
-                f"do not match type {stop_type!r}"
-            )
-    services = tuple(
-        str(service).strip() for service in raw.get("services", ()) if str(service).strip()
-    )
-    parking = str(raw.get("parking", "")).strip() or _default_parking_certainty(
-        stop_type, services, actions
-    )
-    if parking not in PARKING_CERTAINTY_LABELS:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown parking certainty {parking!r}"
-        )
-    directions = tuple(
-        str(direction).strip()
-        for direction in raw.get("directions", ("both",))
-        if str(direction).strip()
-    )
-    if not directions:
-        raise ValueError(f"{from_city} to {to_city} stop {name!r} has no directions")
-    unknown_directions = sorted(set(directions) - STOP_DIRECTIONS)
-    if unknown_directions:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown directions {unknown_directions}"
-        )
-    if "both" in directions and len(directions) > 1:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} mixes 'both' with "
-            "direction-specific applicability"
-        )
-    curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
-    if curation not in STOP_CURATION_LEVELS:
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown curation {curation!r}"
-        )
-    if curation == "curated" and _infer_stop_curation(name, source) == "placeholder":
-        raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} looks synthetic but is marked curated"
-        )
-    for action in SOURCE_BACKED_POI_ACTIONS & set(actions):
-        if action not in services:
-            raise ValueError(
-                f"{from_city} to {to_city} stop {name!r} action {action!r} "
-                "requires matching source-backed service metadata"
-            )
-        if not source:
-            raise ValueError(
-                f"{from_city} to {to_city} stop {name!r} action {action!r} requires a source note"
-            )
-    return Stop(name, at_mi, stop_type, source, actions, services, parking, directions, curation)
-
-
-def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} route point must be an object")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "route point", allow_endpoints=True)
-    lat = float(raw["lat"])
-    lon = float(raw["lon"])
-    if not -90.0 <= lat <= 90.0 or not -180.0 <= lon <= 180.0:
-        raise ValueError(f"{from_city} to {to_city} route point has invalid coordinates")
-    return RoutePoint(at_mi, lat, lon)
-
-
-def _parse_elevation_sample(raw, leg_miles: float, from_city: str, to_city: str) -> ElevationSample:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} elevation sample must be an object")
-    at_mi = _parse_at_mi(
-        raw, leg_miles, from_city, to_city, "elevation sample", allow_endpoints=True
-    )
-    elevation_ft = float(raw["elevation_ft"])
-    if not -300.0 <= elevation_ft <= 20_500.0:
-        raise ValueError(f"{from_city} to {to_city} elevation sample has invalid elevation")
-    source = str(raw.get("source", "")).strip()
-    return ElevationSample(at_mi, elevation_ft, source)
-
-
-def _parse_grade_segment(raw, leg_miles: float, from_city: str, to_city: str) -> GradeSegment:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} grade segment must be an object")
-    if "start_mi" not in raw:
-        raise ValueError(f"{from_city} to {to_city} grade segment is missing explicit start_mi")
-    start_mi = float(raw["start_mi"])
-    if not 0.0 <= start_mi <= leg_miles:
-        raise ValueError(
-            f"{from_city} to {to_city} grade segment start has start_mi {start_mi}, "
-            f"outside leg mileage 0-{leg_miles}"
-        )
-    end_mi = float(raw["end_mi"])
-    if not 0.0 <= end_mi <= leg_miles or end_mi <= start_mi:
-        raise ValueError(
-            f"{from_city} to {to_city} grade segment has invalid range {start_mi}-{end_mi}"
-        )
-    avg_grade_pct = float(raw["avg_grade_pct"])
-    if not -15.0 <= avg_grade_pct <= 15.0:
-        raise ValueError(
-            f"{from_city} to {to_city} grade segment has unrealistic grade {avg_grade_pct}"
-        )
-    terrain = str(raw.get("terrain", "")).strip() or "flat"
-    if terrain not in {"flat", "hills", "mountain"}:
-        raise ValueError(f"{from_city} to {to_city} grade segment has unknown terrain {terrain!r}")
-    source = str(raw.get("source", "")).strip()
-    return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
-
-
-def _parse_speed_limit(raw, leg_miles: float, from_city: str, to_city: str) -> SpeedLimitSample:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} speed limit must be an object")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "speed limit", allow_endpoints=True)
-    mph = float(raw["mph"])
-    if not 5.0 <= mph <= 85.0:
-        raise ValueError(f"{from_city} to {to_city} speed limit has unrealistic mph {mph}")
-    source = str(raw.get("source", "")).strip()
-    return SpeedLimitSample(at_mi, mph, source, bool(raw.get("hgv", False)))
-
-
-def _parse_speed_limits(
-    raw_samples, leg_miles: float, from_city: str, to_city: str
-) -> tuple[SpeedLimitSample, ...]:
-    """Parse the baked maxspeed profile, ordered along the leg.
-
-    Sorting by ``at_mi`` lets the runtime treat it as a step function without
-    trusting the order the samples happen to be stored in."""
-    samples = tuple(_parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples)
-    return tuple(sorted(samples, key=lambda s: s.at_mi))
-
-
-def _parse_state_crossing(
-    raw, leg_miles: float, from_city: str, to_city: str, default_from_state: str
-) -> StateCrossing:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} state crossing must be an object")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "state crossing")
-    state = str(raw.get("state", "")).strip()
-    if not state:
-        raise ValueError(f"{from_city} to {to_city} has a state crossing without a state")
-    from_state = str(raw.get("from_state", "")).strip() or default_from_state
-    place = str(raw.get("place", "")).strip() or "state line"
-    source = str(raw.get("source", "")).strip()
-    return StateCrossing(at_mi, from_state, state, place, source)
-
-
-def _parse_checkpoint(raw, leg_miles: float, from_city: str, to_city: str) -> RouteCheckpoint:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} checkpoint must be an object")
-    name = str(raw.get("name", "")).strip()
-    if not name:
-        raise ValueError(f"{from_city} to {to_city} has a checkpoint without a name")
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, f"checkpoint {name!r}")
-    checkpoint_type = str(raw.get("type", "")).strip() or "place"
-    state = str(raw.get("state", "")).strip()
-    highway = str(raw.get("highway", "")).strip()
-    source = str(raw.get("source", "")).strip()
-    return RouteCheckpoint(name, at_mi, checkpoint_type, state, highway, source)
-
-
-def _parse_state_mileage(raw, from_city: str, to_city: str) -> StateMileage:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} state mileage must be an object")
-    state = str(raw.get("state", "")).strip()
-    if not state:
-        raise ValueError(f"{from_city} to {to_city} has state mileage without a state")
-    miles = float(raw["miles"])
-    if miles <= 0.0:
-        raise ValueError(f"{from_city} to {to_city} state mileage must be positive")
-    return StateMileage(state, miles)
-
-
-def _parse_toll_event(
-    raw, leg_miles: float, from_city: str, to_city: str, default_road: str
-) -> TollEvent:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} toll event must be an object")
-    name = str(raw.get("name", "")).strip()
-    if not name:
-        raise ValueError(f"{from_city} to {to_city} toll event has no name")
-    lowered_name = name.lower()
-    if any(marker in lowered_name for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(
-            f"{from_city} to {to_city} toll event {name!r} exposes raw OSM/source text"
-        )
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, f"toll event {name!r}")
-    road = str(raw.get("road", "")).strip() or default_road
-    authority = str(raw.get("authority", "")).strip()
-    method = str(raw.get("method", "")).strip()
-    source = str(raw.get("source", "")).strip()
-    if not authority:
-        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no authority")
-    if method not in TOLL_METHOD_LABELS:
-        raise ValueError(
-            f"{from_city} to {to_city} toll event {name!r} has unknown method {method!r}"
-        )
-    amount = float(raw["amount"])
-    if amount < 0.0 or amount > 500.0:
-        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has invalid amount")
-    if not source:
-        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no source")
-    return TollEvent(
-        name=name,
-        at_mi=at_mi,
-        road=road,
-        authority=authority,
-        method=method,
-        amount=amount,
-        estimated=bool(raw.get("estimated", True)),
-        source=source,
-    )
-
-
-def _parse_interchange(
-    raw, leg_miles: float, from_city: str, to_city: str, default_highway: str
-) -> Interchange:
-    if not isinstance(raw, dict):
-        raise ValueError(f"{from_city} to {to_city} interchange must be an object")
-    # OSM exit refs occasionally carry stray internal spaces ("103 B"); a real
-    # exit number never does, so collapse them ("103 B" -> "103B").
-    exit_ref = re.sub(r"\s+", "", str(raw.get("exit_ref", "")).strip())
-    name = str(raw.get("name", "")).strip()
-    via = str(raw.get("via", "")).strip()
-    raw_dests = raw.get("destinations", ())
-    if isinstance(raw_dests, str):
-        raw_dests = [raw_dests]
-    destinations = tuple(d for d in (str(item).strip() for item in raw_dests) if d)
-    label = f"interchange {exit_ref or name or '(unnamed)'!r}"
-    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, label)
-    # An interchange must carry *something* sayable beyond a milepost.
-    if not (exit_ref or destinations or name):
-        raise ValueError(
-            f"{from_city} to {to_city} interchange at {at_mi} has no exit ref, "
-            "destinations, or name"
-        )
-    blob = " ".join((name, via, *destinations)).lower()
-    if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(f"{from_city} to {to_city} {label} exposes raw OSM/source text")
-    highway = str(raw.get("highway", "")).strip() or default_highway
-    source = str(raw.get("source", "")).strip()
-    if not source:
-        raise ValueError(f"{from_city} to {to_city} {label} has no source")
-    return Interchange(
-        at_mi=at_mi,
-        exit_ref=exit_ref,
-        name=name,
-        destinations=destinations,
-        via=via,
-        highway=highway,
-        source=source,
-    )
-
-
-def _route_token(value: str) -> str:
-    """Leading route shield of a string, normalized for comparison:
-    'I 70 East' -> 'I70', 'US 1 North' -> 'US1', 'Trenton' -> ''."""
-    match = re.match(r"\s*((?:I|US|[A-Za-z]{2})[-\s]?\d+)", str(value).strip())
-    return re.sub(r"[-\s]", "", match.group(1)).upper() if match else ""
-
-
-def _destinations_without_via(via: str, destinations: tuple[str, ...]) -> tuple[str, ...]:
-    """Drop destinations that merely restate the via route (via 'I 70' with a
-    destination of 'I 70 East'), so the spoken phrase never says it twice. The
-    via itself still carries the route, so emptying the list reads cleanly
-    ('exit 101A for I-70')."""
-    token = _route_token(via)
-    if not token:
-        return destinations
-    return tuple(d for d in destinations if _route_token(d) != token)
-
-
-def _join_destinations(destinations: tuple[str, ...]) -> str:
-    """['Trenton', 'New York'] -> 'Trenton and New York'; Oxford-comma 3+."""
-    items = [d for d in destinations if d]
-    if not items:
-        return ""
-    if len(items) == 1:
-        return items[0]
-    if len(items) == 2:
-        return f"{items[0]} and {items[1]}"
-    return f"{', '.join(items[:-1])}, and {items[-1]}"
-
-
-def _parse_at_mi(
-    raw: dict,
-    leg_miles: float,
-    from_city: str,
-    to_city: str,
-    label: str,
-    *,
-    allow_endpoints: bool = False,
-) -> float:
-    if "at_mi" not in raw:
-        raise ValueError(f"{from_city} to {to_city} {label} is missing explicit at_mi")
-    at_mi = float(raw["at_mi"])
-    in_range = 0.0 <= at_mi <= leg_miles if allow_endpoints else 0.0 < at_mi < leg_miles
-    if not in_range:
-        raise ValueError(
-            f"{from_city} to {to_city} {label} has at_mi {at_mi}, outside leg mileage 0-{leg_miles}"
-        )
-    return at_mi
-
-
-def _classify_stop(name: str) -> str:
-    lower = name.lower()
-    if "weigh" in lower:
-        return "weigh_station"
-    if "parking" in lower:
-        return "truck_parking"
-    if "rest area" in lower:
-        return "public_rest_area"
-    if "service plaza" in lower:
-        return "service_plaza"
-    if "truck" in lower:
-        return "truck_stop"
-    if any(word in lower for word in ("travel", "fuel", "plaza", "center")):
-        return "travel_center"
-    return "travel_center"
-
-
-def _default_parking_certainty(
-    stop_type: str,
-    services: tuple[str, ...],
-    actions: tuple[str, ...],
-) -> str:
-    if "parking" not in services and "park" not in actions:
-        return "none"
-    if stop_type in {"truck_stop", "travel_center", "service_plaza"}:
-        return "likely"
-    if stop_type in {"public_rest_area", "truck_parking"}:
-        return "limited"
-    return "unknown"
-
-
-def _infer_stop_curation(name: str, source: str) -> str:
-    text = f"{name} {source}".lower()
-    synthetic_markers = (
-        "corridor rest area",
-        "corridor truck parking",
-        "corridor fuel stop",
-        "descriptive gameplay stop seeded",
-        "seeded for offline route coverage",
-        "no actionable overpass poi candidate",
-    )
-    return "placeholder" if any(marker in text for marker in synthetic_markers) else "curated"
-
-
-def minimum_curated_pois(miles: float) -> int:
-    if miles < POI_DENSITY_SHORT_LEG_MILES:
-        return 1
-    if miles <= POI_DENSITY_MEDIUM_LEG_MILES:
-        return 2
-    return 3
-
-
-def minimum_fuel_capable_pois(miles: float) -> int:
-    if miles < POI_DENSITY_SHORT_LEG_MILES:
-        return 0
-    return 1
+    service_keys: dict[str, str] = {}
+    for key, city in cities.items():
+        service_keys.setdefault(_service_city_slug(city.name), key)
+    for key, old_names in legacy_names_by_key.items():
+        for old_name in old_names:
+            service_keys[_service_city_slug(old_name)] = key
+    return service_keys
 
 
 def _max_alternate_miles(best_miles: float) -> float:

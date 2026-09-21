@@ -1,5 +1,5 @@
 # ruff: noqa: F821,I001
-"""Discover highway interchanges along each leg and curate them into world.json.
+"""Discover highway interchanges along each leg and curate them into the world source.
 
 Development-time helper (never called at runtime). For every Interstate leg it:
 
@@ -20,7 +20,7 @@ requirement, so a leg with no clean OSM exit data simply gets none.
 
 Run from the repo root:
     uv run python tools/build_interchanges.py            # report only
-    uv run python tools/build_interchanges.py --write     # update world.json
+    uv run python tools/build_interchanges.py --write     # update the world source
     uv run python tools/build_interchanges.py --only "New York->Philadelphia" --write
     uv run --group tooling python tools/build_interchanges.py --pbf us.osm.pbf --write
 """
@@ -43,8 +43,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import leg_geometry as lg
+from build_interchanges_base import select_only
+from world_source import WORLD_SOURCE_PATH, load_world, save_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_DIR = ROOT / ".route-cache" / "interchanges"
 PUBLIC_OVERPASS_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
@@ -59,11 +62,9 @@ def _overpass_mirrors() -> tuple[str, ...]:
     call time -- not frozen at import -- so the env is always honored. A local
     instance turns the junction sweep from hours (public throttling) into minutes.
     """
-    return tuple(
-        url
-        for url in (os.environ.get("OVERPASS_URL"), *PUBLIC_OVERPASS_MIRRORS)
-        if url
-    )
+    return tuple(url for url in (os.environ.get("OVERPASS_URL"), *PUBLIC_OVERPASS_MIRRORS) if url)
+
+
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freight-Fate)"
 ACCESSED_DATE = "2026-06-23"
@@ -189,9 +190,7 @@ def _ors_geometry(
         if tools_dir not in sys.path:
             sys.path.insert(0, tools_dir)
         _ENRICH_MODULE = importlib.import_module("enrich_routes")
-    parsed = _ENRICH_MODULE._cached_ors_route(
-        data, leg, ROOT / ".route-cache", rate_limit, api_key
-    )
+    parsed = _ENRICH_MODULE._cached_ors_route(data, leg, ROOT / ".route-cache", rate_limit, api_key)
     coords = parsed.get("coordinates") or []  # dense [[lon, lat], ...]
     if len(coords) < 2:
         return None
@@ -802,6 +801,12 @@ def discover_leg(
     if shield_rx is None:
         return []
     if geom is None:
+        # The archived polyline is the road this leg drives; ask OSRM only for
+        # a leg that has none. A live OSRM answer is a CAR route over today's
+        # OSM, which on a rerouted leg agrees with neither the archive nor the
+        # truck.
+        geom = lg.corridor_geometry(leg)
+    if geom is None:
         route_points = list(leg.get("corridor", {}).get("route_points", ()))
         geom = _osrm_geometry(route_points, rate_limit)
     if not geom:
@@ -940,14 +945,46 @@ _MAXSPEED_MODULE.__dict__.update(
     {name: value for name, value in globals().items() if not name.startswith("__")}
 )
 
+_RAMPCONTROL_MODULE = importlib.import_module("build_interchanges_rampcontrols")
+for _name, _value in _RAMPCONTROL_MODULE.__dict__.items():
+    if not _name.startswith("__") and _name not in globals():
+        globals()[_name] = _value
+_RAMPCONTROL_MODULE.__dict__.update(
+    {
+        name: value
+        for name, value in globals().items()
+        if not name.startswith("__") and name not in _RAMPCONTROL_MODULE.__dict__
+    }
+)
+run_ramp_controls = _RAMPCONTROL_MODULE.run_ramp_controls
+
+_RESTRICTIONS_MODULE = importlib.import_module("build_interchanges_restrictions")
+for _name, _value in _RESTRICTIONS_MODULE.__dict__.items():
+    if not _name.startswith("__") and _name not in globals():
+        globals()[_name] = _value
+_RESTRICTIONS_MODULE.__dict__.update(
+    {
+        name: value
+        for name, value in globals().items()
+        if not name.startswith("__") and name not in _RESTRICTIONS_MODULE.__dict__
+    }
+)
+run_restrictions = _RESTRICTIONS_MODULE.run_restrictions
+
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Curate OSM interchanges into world.json.")
+    parser = argparse.ArgumentParser(description="Curate OSM interchanges into the world source.")
     parser.add_argument(
-        "--write", action="store_true", help="Write discovered interchanges back into world.json."
+        "--write",
+        action="store_true",
+        help="Write discovered interchanges back into the world source.",
     )
     parser.add_argument(
-        "--only", default="", help="Limit to one leg, e.g. 'New York->Philadelphia'."
+        "--only",
+        default="",
+        help="Legs to rebuild, as SLUG pairs -- "
+        "'corpus_christi_tx_us->san_antonio_tx_us', semicolons between several. "
+        "Spoken city names do not match anything.",
     )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=1.0)
@@ -996,6 +1033,22 @@ def main(argv: list[str] | None = None) -> int:
         "unless --pbf is given.",
     )
     parser.add_argument(
+        "--restrictions",
+        action="store_true",
+        help="Bake posted low-clearance (maxheight) and weight-limit "
+        "(maxweight) advisories onto legs as corridor.restrictions, read "
+        "from local per-state extracts like --maxspeed. An empty baked "
+        "list records a clean sweep.",
+    )
+    parser.add_argument(
+        "--ramp-controls",
+        action="store_true",
+        help="Bake ramp-terminal controls (traffic light / stop sign) onto "
+        "baked interchanges from highway=traffic_signals and highway=stop "
+        "nodes sitting on motorway_link ways, read from local per-state "
+        "extracts like --maxspeed.",
+    )
+    parser.add_argument(
         "--osm-region-dir",
         type=Path,
         default=OSM_REGION_CACHE_DIR,
@@ -1007,15 +1060,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
+    if args.ramp_controls:
+        return run_ramp_controls(data, args)
+    if args.restrictions:
+        return run_restrictions(data, args)
     if args.maxspeed:
         return run_maxspeed(data, args)
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = select_only(legs, args.only)
 
     eligible = 0
     index_legs: list[dict[str, Any]] = []
@@ -1089,8 +1143,8 @@ def main(argv: list[str] | None = None) -> int:
         # Flush periodically so a long crawl is crash-safe and resumable: a
         # re-run without --force skips legs already written here.
         if args.write and updated_legs and processed % 10 == 0:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({updated_legs} legs so far)", flush=True)
+            save_world(data)
+            print(f"    ...checkpointed the world source ({updated_legs} legs so far)", flush=True)
 
     print(
         f"\n{eligible} Interstate legs eligible; "
@@ -1098,10 +1152,10 @@ def main(argv: list[str] | None = None) -> int:
         f"{total_added} interchanges total."
     )
     if args.write and updated_legs:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {WORLD_PATH}")
+        save_world(data)
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 

@@ -29,6 +29,7 @@ SEASONS = ("winter", "spring", "summer", "autumn")
 
 # Temperatures at which precipitation type and ice risk flip, in Celsius.
 FREEZING_C = 1.0  # at or below this, rain falls as snow and ice forms
+FREEZING_RAIN_FLOOR_C = -4.0  # rain in the (floor, freezing] band glazes as ice
 WARM_STORM_C = 12.0  # thunderstorms need convective warmth above this
 
 # Per region: (annual mean C, seasonal half-swing C, daily half-swing C).
@@ -38,6 +39,11 @@ REGION_CLIMATE: dict[str, tuple[float, float, float]] = {
     "northeast": (9.0, 13.0, 6.0),
     "appalachia": (11.0, 11.0, 7.0),
     "great_lakes": (8.0, 14.0, 6.0),
+    # Coldest tier: the Iron Range and Upper Peninsula run Duluth-like
+    # winters, well below the lower-lakes belt.
+    "upper_midwest": (4.5, 16.0, 7.0),
+    # Continental interior between the lakes and the plains.
+    "corn_belt": (11.0, 14.0, 8.0),
     "heartland": (11.0, 14.0, 7.0),
     "southern_plains": (17.0, 11.0, 8.0),
     "mid_south": (16.0, 11.0, 7.0),
@@ -78,6 +84,48 @@ def real_clock_game_hours(now: datetime.datetime | None = None) -> float:
     return days_offset * 24.0 + hour
 
 
+def player_calendar_hours(profile, *, live_calendar: bool) -> float:
+    """The clock the player's own calendar runs on.
+
+    There are two clocks in a career and only one of them is ever spoken. The
+    raw ``game_hours`` is elapsed career time; what the player is TOLD the
+    date is comes from here -- the real wall-clock date when live weather is
+    driving the calendar, otherwise career time plus the profile's own
+    calendar offset. Every date the game reads back to a player, and every
+    badge that answers to a date, has to use this one.
+
+    ``live_calendar`` is the caller's answer to "is live weather driving the
+    calendar right now", which needs both a weather provider and the
+    ``live_weather_controls_calendar`` setting. The caller knows; this does
+    not, and guessing here is how the two clocks drifted apart in the first
+    place (the April 1 badge fired in August, 2026-08-11).
+    """
+    if live_calendar:
+        return real_clock_game_hours()
+    offset = getattr(profile, "calendar_game_hours", None)
+    return float(offset if offset is not None else profile.game_hours)
+
+
+# Careers start on the calendar anchor March 21, 2001 -- a Wednesday -- so
+# the day of the week falls out of the career clock directly.
+_CAREER_START_WEEKDAY = datetime.date(2001, 3, 21).weekday()
+WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+
+def day_of_week(game_hours: float) -> int:
+    """Day of the week (0=Monday .. 6=Sunday) for a point on the career clock."""
+    return (_CAREER_START_WEEKDAY + int(game_hours // 24.0)) % 7
+
+
+def weekday_name(game_hours: float) -> str:
+    return WEEKDAY_NAMES[day_of_week(game_hours)]
+
+
+def is_weekend(game_hours: float) -> bool:
+    """Saturday or Sunday: commuter rush hours do not form."""
+    return day_of_week(game_hours) >= 5
+
+
 def season(game_hours: float) -> str:
     """Northern-hemisphere season for the career clock."""
     doy = day_of_year(game_hours)
@@ -99,6 +147,18 @@ def date_text(game_hours: float) -> str:
     # 2001 is a non-leap year; January 1 is day-of-year 1.
     date = datetime.date(2001, 1, 1) + datetime.timedelta(days=(doy - 1) % 365)
     return f"{date:%B} {date.day}"
+
+
+def is_friday_the_thirteenth(game_hours: float) -> bool:
+    """Whether the career calendar has landed on a Friday the thirteenth.
+
+    The career runs the same fixed 365-day year every lap, mapped onto 2001,
+    so the unlucky dates are the ones 2001 had -- and they come round again
+    each career year, which is what a superstition wants anyway.
+    """
+    doy = int(day_of_year(game_hours))
+    date = datetime.date(2001, 1, 1) + datetime.timedelta(days=(doy - 1) % 365)
+    return date.day == 13 and date.weekday() == 4
 
 
 def career_year(game_hours: float) -> int:
@@ -133,11 +193,15 @@ def adjust_for_temperature(kind: WeatherKind, temp_c: float | None) -> WeatherKi
         return kind
     wet = (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM)
     if temp_c <= FREEZING_C:
+        if kind is WeatherKind.RAIN and temp_c > FREEZING_RAIN_FLOOR_C:
+            # The freezing-rain band: rain that glazes on contact. Colder than
+            # the band (or heavier precipitation) falls as plain snow.
+            return WeatherKind.ICE
         if kind in wet:
             return WeatherKind.SNOW
         return kind
-    if kind is WeatherKind.SNOW:
-        # Too warm to snow: a cold rain, or just overcast when mild.
+    if kind in (WeatherKind.SNOW, WeatherKind.ICE):
+        # Too warm to freeze: a cold rain, or just overcast when mild.
         return WeatherKind.RAIN if temp_c < 6.0 else WeatherKind.CLOUDY
     if kind is WeatherKind.THUNDERSTORM and temp_c < WARM_STORM_C:
         return WeatherKind.HEAVY_RAIN

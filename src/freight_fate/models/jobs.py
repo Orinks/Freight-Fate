@@ -17,18 +17,28 @@ from ..data.world import (
     Route,
     World,
 )
+from ..sim.hos import HosClock
 from ..sim.trip_models import (
     DESTINATION_APPROACH_LIMIT_MPH,
-    DESTINATION_APPROACH_ZONE_MI,
+    DESTINATION_LOCAL_APPROACH_MI,
     FACILITY_ACCESS_LIMIT_MPH,
     FACILITY_GATE_LIMIT_MPH,
     FACILITY_GATE_ZONE_MI,
     URBAN_LIMIT_MPH,
     URBAN_RADIUS_MI,
     _leg_speed_limit_at,
+    approach_shed_mi,
     corridor_speed_limit,
 )
+from .business_constants import DIRECT_FREIGHT_PAY_MULT
 from .market import Market, market_condition
+from .start_options import DEFAULT_START_KEY, pay_plan_for_key, start_option
+from .trailers import (
+    TANK_CAPACITY_TONS,
+    equipment_text_for_cargo,
+    required_program_text,
+    trailer_keys_for_cargo,
+)
 
 
 @dataclass(frozen=True)
@@ -40,7 +50,24 @@ class CargoType:
     endorsement: str | None  # required license endorsement, if any
     fragile: bool = False
     min_level: int = 1
-    equipment: str = "dry van"
+    equipment: str = ""
+    # Liquid bulk. A tank load is the only freight that keeps moving after the
+    # truck has stopped, so the physics layer needs to know, and whether the
+    # shell has baffles in it decides how badly. Sanitation rules forbid
+    # baffles in food-grade tanks -- the crevices cannot be washed out -- so
+    # the freight that is hardest to haul is the milk, not the fuel.
+    tank: bool = False
+    baffled: bool = False
+
+    @property
+    def equipment_text(self) -> str:
+        return self.equipment or equipment_text_for_cargo(self.key)
+
+    def fill_fraction(self, weight_tons: float) -> float:
+        """How full the tank is for a load of this weight, 0 to 1."""
+        if not self.tank or TANK_CAPACITY_TONS <= 0.0:
+            return 0.0
+        return max(0.0, min(1.0, float(weight_tons) / TANK_CAPACITY_TONS))
 
 
 CARGO_CATALOG: dict[str, CargoType] = {
@@ -48,91 +75,59 @@ CARGO_CATALOG: dict[str, CargoType] = {
     "retail": CargoType("retail", "retail goods", 2.25, (6, 16), None),
     "parcel": CargoType("parcel", "parcel freight", 2.55, (4, 12), None),
     "container": CargoType("container", "shipping containers", 2.40, (12, 24), None),
-    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None, equipment="bulk trailer"),
-    "grain": CargoType("grain", "grain", 2.20, (18, 25), None, equipment="hopper trailer"),
-    "farm_inputs": CargoType(
-        "farm_inputs", "farm inputs", 2.35, (10, 22), None, equipment="dry van or bulk trailer"
-    ),
-    "construction": CargoType(
-        "construction",
-        "construction materials",
-        2.35,
-        (14, 25),
-        None,
-        equipment="flatbed or dry van",
-    ),
+    "bulk": CargoType("bulk", "bulk materials", 2.30, (15, 25), None),
+    "grain": CargoType("grain", "grain", 2.20, (18, 25), None),
+    "farm_inputs": CargoType("farm_inputs", "farm inputs", 2.35, (10, 22), None),
+    "construction": CargoType("construction", "construction materials", 2.35, (14, 25), None),
     "lumber_paper": CargoType(
-        "lumber_paper",
-        "lumber and paper products",
-        2.45,
-        (10, 24),
-        None,
-        min_level=2,
-        equipment="flatbed or dry van",
+        "lumber_paper", "lumber and paper products", 2.45, (10, 24), None, min_level=2
     ),
     "automotive": CargoType(
-        "automotive",
-        "automotive parts",
-        2.75,
-        (8, 20),
-        None,
-        fragile=True,
-        min_level=2,
-        equipment="dry van",
+        "automotive", "automotive parts", 2.75, (8, 20), None, fragile=True, min_level=2
     ),
     "machinery": CargoType(
-        "machinery",
-        "heavy machinery",
-        2.90,
-        (15, 25),
-        "heavy_haul",
-        fragile=True,
-        equipment="heavy-haul trailer",
+        "machinery", "heavy machinery", 2.90, (15, 25), "heavy_haul", fragile=True
     ),
-    "steel": CargoType(
-        "steel",
-        "steel products",
-        2.85,
-        (16, 25),
-        "heavy_haul",
-        min_level=3,
-        equipment="flatbed trailer",
-    ),
-    "food": CargoType(
-        "food",
-        "fresh food",
-        2.60,
-        (8, 18),
-        "refrigerated",
-        fragile=True,
-        equipment="refrigerated trailer",
-    ),
+    "steel": CargoType("steel", "steel products", 2.85, (16, 25), "heavy_haul", min_level=3),
+    "food": CargoType("food", "fresh food", 2.60, (8, 18), "refrigerated", fragile=True),
     "refrigerated": CargoType(
-        "refrigerated",
-        "refrigerated goods",
-        2.85,
-        (8, 18),
-        "refrigerated",
-        fragile=True,
-        equipment="refrigerated trailer",
+        "refrigerated", "refrigerated goods", 2.85, (8, 18), "refrigerated", fragile=True
     ),
     "chemicals": CargoType(
-        "chemicals",
-        "packaged industrial chemicals",
-        3.05,
-        (10, 22),
-        "high_value",
-        min_level=4,
-        equipment="sealed van or tanker-compatible trailer",
+        "chemicals", "packaged industrial chemicals", 3.05, (10, 22), "high_value", min_level=4
     ),
     "electronics": CargoType(
-        "electronics",
-        "electronics",
-        3.30,
-        (4, 12),
-        "high_value",
-        fragile=True,
-        equipment="secure dry van",
+        "electronics", "electronics", 3.30, (4, 12), "high_value", fragile=True
+    ),
+    # Liquid bulk: the back half of the career, where the freight stops being
+    # heavier and starts being harder. Both pay well over dry freight because
+    # the load fights back -- it arrives at the stop bar a second after you do.
+    #
+    # Fuel rides in a baffled shell: the bulkheads spend the fore-and-aft wave
+    # and it settles in a few cycles. It is the one to learn on.
+    "fuel_bulk": CargoType(
+        "fuel_bulk",
+        "bulk fuel",
+        3.45,
+        (11, 25),
+        "tank",
+        min_level=16,
+        tank=True,
+        baffled=True,
+    ),
+    # Liquid food rides in a smooth bore, because sanitation rules forbid
+    # baffles in a food-grade tank -- nobody can wash out the crevices. So the
+    # gentlest cargo in the game travels in the most vicious equipment, and
+    # a half-loaded milk tank is the hardest thing on the roster to stop.
+    "liquid_food": CargoType(
+        "liquid_food",
+        "liquid food products",
+        3.85,
+        (9, 24),
+        "tank",
+        min_level=21,
+        tank=True,
+        baffled=False,
     ),
 }
 
@@ -141,6 +136,7 @@ ENDORSEMENT_LABELS = {
     "refrigerated": "refrigerated endorsement",
     "heavy_haul": "heavy-haul endorsement",
     "high_value": "high-value endorsement",
+    "tank": "tank vehicle endorsement",
 }
 
 FACILITY_CARGO: dict[str, set[str]] = {
@@ -153,11 +149,11 @@ MARKET_TAG_CARGO_BONUS = {
     "air": {"electronics", "parcel", "general"},
     "automotive": {"automotive", "steel", "machinery", "electronics"},
     "border": {"retail", "container", "general", "parcel"},
-    "chemical": {"chemicals", "bulk"},
+    "chemical": {"chemicals", "bulk", "fuel_bulk"},
     "cold_chain": {"food", "refrigerated"},
     "construction": {"construction", "bulk", "steel", "lumber_paper"},
-    "energy": {"chemicals", "bulk"},
-    "food": {"food", "refrigerated", "grain"},
+    "energy": {"chemicals", "bulk", "fuel_bulk"},
+    "food": {"food", "refrigerated", "grain", "liquid_food"},
     "industrial": {"steel", "machinery", "bulk", "construction"},
     "intermodal": {"container", "general", "retail", "automotive"},
     "lumber": {"lumber_paper", "construction"},
@@ -197,7 +193,12 @@ def facility_text(location_type: str, location_name: str, city: str, locality: s
     if location_type == "metro_market" or _is_legacy_facility_name(city, location_name):
         return f"the {city} metro freight market"
     place = f" near {locality}" if locality and locality not in location_name else ""
-    return f"{facility_label(location_type)} {location_name}{place} in {city}"
+    # Drop the type prefix when the proper name already carries it, so
+    # "cross-dock Chicago Cross-Dock in Chicago" is not the type twice
+    # (research doc R6).
+    from ..speech_text import typed_name
+
+    return f"{typed_name(facility_label(location_type), location_name)}{place} in {city}"
 
 
 def facility_offer_text(
@@ -239,11 +240,23 @@ class Job:
     origin_locality: str = ""
     destination_locality: str = ""
     bobtail: bool = False  # empty reposition run: relocate, no cargo or pay
+    # A carrier-ASSIGNED reposition (dispatch sent you empty to a nearby city)
+    # rather than a driver-chosen bobtail (self-serve, owner-operators only).
+    # Always False when bobtail is False. Distinguishes the settlement and
+    # abandon-penalty rules: an assigned reposition still pays a reduced
+    # empty-mile rate and still earns mileage XP, and walking away from it
+    # costs reputation, not the flat dollar penalty a real load carries.
+    assigned: bool = False
     # Speakable city names, set at dispatch. Legacy payloads predate these
     # fields, but there origin/destination hold the old spoken display name,
     # so the fallback properties below always read cleanly.
     origin_spoken: str = ""
     destination_spoken: str = ""
+    # The deadline was stretched to cover a 10-hour rest the driver's
+    # CURRENT shift clock will force mid-run (a fresh clock would not
+    # have needed one). Spoken so the long number reads as the law, not
+    # dispatcher generosity.
+    deadline_covers_rest: bool = False
 
     @property
     def spoken_origin(self) -> str:
@@ -253,21 +266,40 @@ class Job:
     def spoken_destination(self) -> str:
         return self.destination_spoken or self.destination
 
-    def describe(self, index: int | None = None, total: int | None = None) -> str:
+    def describe(
+        self,
+        index: int | None = None,
+        total: int | None = None,
+        pay_label: str = "Pays",
+        trailer_note: str = "",
+        display_pay: float | None = None,
+        market_preview: str = "",
+        distance_text: str = "",
+    ) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
         condition = market_condition(self.market_mult)
         market = f" Lane note: Market is {condition}." if condition != "steady" else ""
+        preview = f" {market_preview}" if market_preview else ""
         endorsement = ""
         if self.cargo.endorsement:
             endorsement = f" Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
         origin = "from " + self.origin_offer_text()
         dest = "to " + self.destination_offer_text()
+        trailer = f" {trailer_note}" if trailer_note else ""
+        pay = self.pay if display_pay is None else display_pay
+        distance = distance_text or f"{self.distance_mi:.0f} miles"
         return (
             f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
-            f"{origin} {dest}. {self.distance_mi:.0f} miles. "
-            f"Pays {self.pay:,.0f} dollars. "
-            f"Deadline {self.deadline_game_h:.0f} hours. "
-            f"Equipment: {self.cargo.equipment}.{market}{endorsement}"
+            f"{origin} {dest}. {distance}. "
+            f"{pay_label} {pay:,.0f} dollars. "
+            f"Deadline {self.deadline_game_h:.0f} hours"
+            + (
+                ", planned around the 10-hour rest your hours will force. "
+                if self.deadline_covers_rest
+                else ". "
+            )
+            + f"Equipment: {self.cargo.equipment_text}.{trailer}{preview}{market}"
+            + f"{endorsement}"
         )
 
     def origin_facility_text(self) -> str:
@@ -297,16 +329,32 @@ class Job:
         )
 
     def equipment_text(self) -> str:
-        return self.cargo.equipment or "standard dry van"
+        return self.cargo.equipment_text
 
-    def locked_reason(self, endorsements: set[str], level: int) -> str:
+    def locked_reason(
+        self,
+        endorsements: set[str],
+        level: int,
+        *,
+        trailer_programs: set[str] | tuple[str, ...] | None = None,
+        carrier_trailer_support: bool = True,
+    ) -> str:
         if level < self.cargo.min_level:
             return f"Level {self.cargo.min_level} drivers unlock this cargo."
         if self.cargo.endorsement and self.cargo.endorsement not in endorsements:
             return f"Requires {ENDORSEMENT_LABELS[self.cargo.endorsement]}."
+        if (
+            not carrier_trailer_support
+            and trailer_programs is not None
+            and not (set(trailer_programs) & set(self.required_trailers()))
+        ):
+            return f"Requires {required_program_text(self.cargo.key)} trailer program."
         return ""
 
-    def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.10) -> float:
+    def required_trailers(self) -> tuple[str, ...]:
+        return trailer_keys_for_cargo(self.cargo.key)
+
+    def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.15) -> float:
         """Final payment given delivery time and cargo condition.
 
         On-time pay works like real shipper scorecards: hitting the delivery
@@ -347,6 +395,8 @@ def job_payload(job: Job) -> dict:
         "deadline_game_h": job.deadline_game_h,
         "market_mult": job.market_mult,
         "bobtail": job.bobtail,
+        "assigned": job.assigned,
+        "deadline_covers_rest": job.deadline_covers_rest,
     }
 
 
@@ -382,8 +432,10 @@ def job_from_payload(data: dict) -> Job:
         origin_locality=str(data.get("origin_locality", "")),
         destination_locality=str(data.get("destination_locality", "")),
         bobtail=bool(data.get("bobtail", False)),
+        assigned=bool(data.get("assigned", False)),
         origin_spoken=str(data.get("origin_spoken", "")),
         destination_spoken=str(data.get("destination_spoken", "")),
+        deadline_covers_rest=bool(data.get("deadline_covers_rest", False)),
     )
 
 
@@ -405,14 +457,36 @@ def normalize_job_cities(job: Job, world: World) -> Job:
     return job
 
 
-def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
-    """A zero-pay empty 'bobtail' run to relocate to a nearby city.
+# Carriers really do pay empty (deadhead) miles, just at a reduced rate --
+# there is no freight paying the bill, only the value of getting the truck
+# to where freight is. 60 percent of the loaded per-mile floor is the
+# industry's common shape for deadhead/reposition pay, so an ASSIGNED
+# reposition (dispatch sent you, not a self-serve bobtail) pays that share
+# of the carrier's loaded practical-mile rate (CompanyPayPlan.min_per_mile,
+# the same floor a real load's wage is built on in
+# business.company_driver_pay). A self-serve bobtail keeps paying nothing:
+# that one is the driver's own choice to burn fuel, not dispatch's.
+ASSIGNED_REPOSITION_PAY_FRACTION = 0.6
+
+
+def make_reposition_job(
+    world: World,
+    origin: str,
+    destination: str,
+    *,
+    assigned: bool = False,
+    carrier_key: str | None = None,
+) -> Job | None:
+    """An empty 'bobtail' run to relocate to a nearby city.
 
     Reuses the normal delivery drive for fuel, weather, and save/resume, but
-    carries no cargo and pays nothing. It is player-chosen personal conveyance,
-    so the ELD records it as off duty instead of freight-duty driving; on
-    arrival the player simply parks at the destination city's hub and can shop
-    its dispatch board.
+    carries no cargo. A self-serve bobtail (``assigned=False``, the default)
+    is player-chosen personal conveyance and pays nothing; the ELD records it
+    as off duty instead of freight-duty driving. A carrier-ASSIGNED
+    reposition (``assigned=True``) is dispatch's call, not the driver's, so it
+    pays a reduced per-mile rate -- see ASSIGNED_REPOSITION_PAY_FRACTION.
+    Either way, on arrival the player simply parks at the destination city's
+    hub and can shop its dispatch board.
     """
     origin = world.resolve_city_key(origin)
     destination = world.resolve_city_key(destination)
@@ -422,6 +496,10 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
     miles = round(route.miles, 1)
     dest = world.city(destination)
     dest_loc = dest.locations[0] if dest.locations else None
+    pay = 0.0
+    if assigned:
+        plan = pay_plan_for_key(carrier_key)
+        pay = round(miles * plan.min_per_mile * ASSIGNED_REPOSITION_PAY_FRACTION, 2)
     return Job(
         CARGO_CATALOG["general"],
         0.0,
@@ -429,12 +507,13 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
         "company yard",
         destination,
         miles,
-        0.0,
+        pay,
         required_hours(miles, route, world) * 3.0 + 24.0,
         origin_type="company_yard",
         destination_location=dest_loc.name if dest_loc else f"{dest.name} yard",
         destination_type=dest_loc.type if dest_loc else "company_yard",
         bobtail=True,
+        assigned=assigned,
         # Always state-qualified: a dispatch names places the player may
         # never have heard of, and "McCall, Idaho" orients where "McCall"
         # cannot (player request).
@@ -448,9 +527,44 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
 # Newark at 11 miles) rather than a real dispatch.
 MIN_JOB_DISTANCE_MI = 25.0
 
+# The dispatch board itself grows with seniority: proven drivers get shown
+# more freight per visit. These are career-ladder unlocks, spoken at the
+# matching level-up.
+BOARD_OFFER_LEVELS = {6: 6, 10: 7, 12: 8}
+BASE_BOARD_OFFERS = 5
+
+# Specialized company drivers (level 11+) see endorsement freight weighted
+# up instead of down, and premium-lane drivers (level 12+) see long freight
+# favored on the board.
+SPECIALIZED_FREIGHT_LEVEL = 11
+SPECIALIZED_FREIGHT_WEIGHT = 1.25
+PREMIUM_LANE_LEVEL = 12
+PREMIUM_LANE_LONG_HAUL_BIAS = 0.5
+
+
+def lane_key(world, job: Job) -> str:
+    """Canonical from:to lane for dispatch-variety memory."""
+    return f"{world.resolve_city_key(job.origin)}:{world.resolve_city_key(job.destination)}"
+
+
+def board_offer_count(level: int) -> int:
+    """How many offers the dispatch board shows at this career level."""
+    count = BASE_BOARD_OFFERS
+    for min_level, offers in BOARD_OFFER_LEVELS.items():
+        if level >= min_level:
+            count = max(count, offers)
+    return count
+
+
 # Career-arc distance caps: short regional hops while learning the ropes,
 # cross-country hauls unlocking as a progression reward around level 4-5.
 LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
+# Above level 5 the cap keeps growing gradually toward the longest supported
+# coast-to-coast corridor (~2,800 miles). The old 500-mile-per-level growth
+# blew past every real U.S. route by level 12, so haul length stopped feeling
+# like progression; this keeps longer freight unlocking into the late teens.
+LEVEL_DISTANCE_CAP_STEP_MI = 120.0
+MAX_DISPATCH_DISTANCE_MI = 3000.0
 LONG_HAUL_MILES = 600.0  # what counts as a cross-country haul
 HOOKUP_FEE = 120.0  # flat load/unload fee keeping short hops worthwhile
 # Dispatch minimums: a small "worth rolling the truck" flat floor plus a
@@ -519,6 +633,7 @@ def plan_hos(
     miles: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> HosPlan:
     """Estimate the FMCSA-compliant plan for a property-carrying trip.
 
@@ -530,32 +645,64 @@ def plan_hos(
     drive_h = (
         route_drive_hours(route, world=world) if route is not None else miles / DEADLINE_AVG_MPH
     )
-    return _plan_hos_for_drive_hours(drive_h, route)
+    if clock is None:
+        return _plan_hos_for_drive_hours(drive_h, route)
+    return _plan_hos_for_drive_hours(
+        drive_h,
+        route,
+        start_drive_h=clock.driving_min / 60.0,
+        start_window_h=clock.duty_min / 60.0,
+        start_since_break_h=clock.since_break_min / 60.0,
+    )
 
 
-def _plan_hos_for_drive_hours(drive_h: float, route: Route | None = None) -> HosPlan:
-    """Apply the HOS break/sleep model to already-estimated driving hours."""
+def _plan_hos_for_drive_hours(
+    drive_h: float,
+    route: Route | None = None,
+    *,
+    start_drive_h: float = 0.0,
+    start_window_h: float = 0.0,
+    start_since_break_h: float = 0.0,
+) -> HosPlan:
+    """Apply the HOS break/sleep model to already-estimated driving hours.
+
+    The ``start_*`` hours seed the first shift with the driver's CURRENT
+    clock, so a load accepted six hours into a shift plans its 10-hour
+    sleep where the law will actually force one. A fresh clock (all
+    zeros) reproduces the original fresh-driver plan exactly. The
+    14-hour window is tracked here too -- irrelevant for a fresh driver
+    (11 driving + a break fits easily) but decisive mid-shift.
+    """
 
     breaks = 0
     sleeps = 0
     remaining = drive_h
-    since_break = 0.0
-    drive_this_shift = 0.0
+    since_break = max(0.0, start_since_break_h)
+    drive_this_shift = max(0.0, start_drive_h)
+    window_this_shift = max(0.0, start_window_h)
     while remaining > 1e-6:
         if since_break >= 8.0:
             breaks += 1
             since_break = 0.0
-        if drive_this_shift >= 11.0:
+            window_this_shift += 0.5  # the 30-minute break burns window
+        if drive_this_shift >= 11.0 or window_this_shift >= 14.0:
             sleeps += 1
             drive_this_shift = 0.0
+            window_this_shift = 0.0
             since_break = 0.0
-        step = min(remaining, 8.0 - since_break, 11.0 - drive_this_shift)
+        step = min(
+            remaining,
+            8.0 - since_break,
+            11.0 - drive_this_shift,
+            14.0 - window_this_shift,
+        )
         remaining -= step
         since_break += step
         drive_this_shift += step
+        window_this_shift += step
     break_stops = sleep_stops = 0
     if route is not None:
-        for stop in route.stop_details:
+        for stop in route.accessible_stop_details():
             actions = set(stop.actions)
             break_stops += "break" in actions or "food" in actions
             sleep_stops += "sleep" in actions
@@ -566,11 +713,13 @@ def required_hours(
     miles: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> float:
     """Honest hours for the run: driving at an achievable average, plus the
     30-minute break every 8 driving hours and a 10-hour sleep for every
-    11-hour shift the distance demands. Dispatch cannot ask for less."""
-    return plan_hos(miles, route, world).total_h
+    11-hour shift the distance demands -- planned from the driver's CURRENT
+    shift clock when one is given. Dispatch cannot ask for less."""
+    return plan_hos(miles, route, world, clock).total_h
 
 
 def route_required_hours(
@@ -590,10 +739,16 @@ def dispatch_deadline_hours(
     slack: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> float:
-    """Deadline from the current route-aware timing model plus dispatch slack."""
+    """Deadline from the current route-aware timing model plus dispatch slack.
 
-    return required_hours(miles, route, world) * slack + DEADLINE_DISPATCH_MIN_SLACK_H
+    ``clock`` is the driver's live shift ledger: a load that will need a
+    10-hour sleep because of hours ALREADY burned gets that sleep in its
+    deadline, instead of a fresh-driver promise nobody could legally keep
+    (owner catch, 2026-07-24)."""
+
+    return required_hours(miles, route, world, clock) * slack + DEADLINE_DISPATCH_MIN_SLACK_H
 
 
 def fair_active_deadline(
@@ -620,12 +775,63 @@ def fair_active_deadline(
     return round(max(job.deadline_game_h, full_floor, remaining_floor), 1)
 
 
+def _curve_ceilings(route: Route) -> list[tuple[float, float, float]]:
+    """Non-overlapping ``(start_mi, end_mi, advisory)`` bands over route miles.
+
+    The planner walks the route on posted limits, so every bend a driver has
+    to slow for was time the plan never budgeted (measured 2026-08-16: 2.8
+    percent of drive time on average, 5.6 percent Denver to Salt Lake City).
+    This is the road's own answer to "how fast may a truck be here", read
+    from the same baked curve records the pacenote layer speaks.
+
+    Overlapping bends -- a chained S through a canyon -- collapse to the
+    TIGHTEST advisory across the overlap, because that is the one binding on
+    the truck. Connector arcs are excluded: ramps are not on the through
+    route the planner is timing.
+    """
+    from ..data.curves import route_curves  # heavy module, and only needed here
+
+    bands: list[tuple[float, float, float]] = []
+    edges: set[float] = set()
+    for curve in route_curves(route, list(route.cities)):
+        if curve.end_mi > curve.start_mi and curve.advisory_mph > 0:
+            bands.append((curve.start_mi, curve.end_mi, float(curve.advisory_mph)))
+            edges.add(curve.start_mi)
+            edges.add(curve.end_mi)
+    if not bands:
+        return []
+    cuts = sorted(edges)
+    out: list[tuple[float, float, float]] = []
+    for lo, hi in zip(cuts, cuts[1:], strict=False):
+        if hi <= lo:
+            continue
+        mid = (lo + hi) / 2.0
+        covering = [adv for s, e, adv in bands if s <= mid < e]
+        if not covering:
+            continue
+        advisory = min(covering)
+        # Merge with the previous band when it is the same speed and touches,
+        # so a long chain of identical advisories is one span, not fifty.
+        if out and out[-1][2] == advisory and abs(out[-1][1] - lo) < 1e-9:
+            out[-1] = (out[-1][0], hi, advisory)
+        else:
+            out.append((lo, hi, advisory))
+    return out
+
+
 def route_drive_hours(
     route: Route | None,
     start_mi: float = 0.0,
     world: World | None = None,
 ) -> float:
-    """Route-aware drive-time estimate using posted limits where available."""
+    """Route-aware drive-time estimate on posted limits AND curve advisories.
+
+    Each sampled segment is timed piecewise: the miles inside a bend at that
+    bend's advisory, the rest at the planning limit. Only the bend's own
+    recorded span is charged -- the plan does not invent a deceleration ramp
+    on either side of it, which is the sort of unmeasured loss
+    ``DEADLINE_PLANNING_SPEED_FACTOR`` is already there to carry.
+    """
 
     if route is None:
         return 0.0
@@ -640,6 +846,7 @@ def route_drive_hours(
         acc += leg.miles
     city_mileposts = leg_starts + [route.miles]
     is_facility_approach = len(route.cities) >= 2 and route.cities[0] == route.cities[-1]
+    ceilings = [] if is_facility_approach else _curve_ceilings(route)
     for index, (leg_start, leg) in enumerate(zip(leg_starts, route.legs, strict=True)):
         leg_end = leg_start + leg.miles
         segment_start = max(start_mi, leg_start)
@@ -663,8 +870,36 @@ def route_drive_hours(
                 is_facility_approach,
                 world,
             )
-            hours += step / max(DEADLINE_MIN_SEGMENT_MPH, mph)
+            hours += _segment_hours(global_start, global_start + step, mph, ceilings)
             offset += step
+    return hours
+
+
+def _segment_hours(
+    start_mi: float, end_mi: float, mph: float, ceilings: list[tuple[float, float, float]]
+) -> float:
+    """Hours across ``[start_mi, end_mi)``, slowed inside bends to their advisory."""
+    if end_mi <= start_mi:
+        return 0.0
+    floor_mph = max(DEADLINE_MIN_SEGMENT_MPH, mph)
+    if not ceilings:
+        return (end_mi - start_mi) / floor_mph
+    hours = 0.0
+    cursor = start_mi
+    for band_start, band_end, advisory in ceilings:
+        if band_end <= cursor:
+            continue
+        if band_start >= end_mi:
+            break
+        if band_start > cursor:
+            hours += (band_start - cursor) / floor_mph
+            cursor = band_start
+        overlap_end = min(band_end, end_mi)
+        if overlap_end > cursor:
+            hours += (overlap_end - cursor) / max(DEADLINE_MIN_SEGMENT_MPH, min(mph, advisory))
+            cursor = overlap_end
+    if cursor < end_mi:
+        hours += (end_mi - cursor) / floor_mph
     return hours
 
 
@@ -687,7 +922,14 @@ def _route_planning_limit(
         limit = baked if baked is not None else corridor_speed_limit(leg.highway, region)
         if baked is None and any(abs(route_mi - mp) <= URBAN_RADIUS_MI for mp in city_mileposts):
             limit = min(limit, URBAN_LIMIT_MPH)
-        if route_mi >= max(0.0, route.miles - DESTINATION_APPROACH_ZONE_MI):
+        # The arrival zones the drive will really build: the local approach
+        # road capped at ramp speed, and the shed into it sized from the
+        # corridor limit here. Planning cannot see which facility the job ends
+        # at, so it plans the synthetic approach every job at least gets.
+        approach_mi = DESTINATION_LOCAL_APPROACH_MI + approach_shed_mi(
+            limit, DESTINATION_APPROACH_LIMIT_MPH
+        )
+        if route_mi >= max(0.0, route.miles - approach_mi):
             limit = min(limit, DESTINATION_APPROACH_LIMIT_MPH)
     if route_mi >= max(0.0, route.miles - FACILITY_GATE_ZONE_MI):
         limit = min(limit, FACILITY_GATE_LIMIT_MPH)
@@ -746,15 +988,21 @@ class JobBoard:
     old saves while enrichment coverage expands.
     """
 
-    def __init__(self, world: World, seed: int | None = None) -> None:
+    def __init__(self, world: World, seed: int | None = None, hos: HosClock | None = None) -> None:
         self.world = world
+        # The driver's live shift clock: deadlines plan around the hours
+        # already burned, the way a real dispatcher asks what you have left.
+        self.hos = hos
         self._rng = random.Random(seed)
 
     @staticmethod
     def distance_cap(level: int) -> float:
         if level in LEVEL_DISTANCE_CAPS:
             return LEVEL_DISTANCE_CAPS[level]
-        return LEVEL_DISTANCE_CAPS[5] + 500.0 * (level - 5)
+        return min(
+            MAX_DISPATCH_DISTANCE_MI,
+            LEVEL_DISTANCE_CAPS[5] + LEVEL_DISTANCE_CAP_STEP_MI * (level - 5),
+        )
 
     def offers(
         self,
@@ -763,10 +1011,13 @@ class JobBoard:
         count: int = 5,
         level: int = 1,
         market: Market | None = None,
+        carrier_key: str | None = None,
+        direct_freight: bool = False,
     ) -> list[Job]:
         jobs: list[Job] = []
         city = self.world.resolve_city_key(city)
         city_obj = self.world.city(city)
+        carrier_key = carrier_key or DEFAULT_START_KEY
         candidates = [c for c in self._candidates(city) if c[1] >= MIN_JOB_DISTANCE_MI]
         cap = self.distance_cap(level)
         reachable = [c for c in candidates if c[1] <= cap]
@@ -778,12 +1029,12 @@ class JobBoard:
         # Pick a spread of DISTINCT destinations up front so the board never
         # collapses to one back-and-forth city (a start with a single nearby
         # neighbour used to be locked into one route). Nearer cities stay likelier.
-        dest_cycle = self._spread_destinations(reachable, level, count)
+        dest_cycle = self._spread_destinations(city, reachable, level, count, carrier_key)
         attempts = 0
         while len(jobs) < count and attempts < count * 30:
             attempts += 1
-            location = self._choose_origin_location(city_obj, level)
-            cargo_key = self._choose_cargo_for_location(city_obj, location, level)
+            location = self._choose_origin_location(city_obj, level, carrier_key)
+            cargo_key = self._choose_cargo_for_location(city_obj, location, level, carrier_key)
             cargo = CARGO_CATALOG[cargo_key]
             locked = cargo.endorsement and cargo.endorsement not in endorsements
             # a locked job may appear once in a while as a teaser, otherwise skip
@@ -804,16 +1055,69 @@ class JobBoard:
                     level,
                     location,
                     dest_location,
+                    carrier_key,
+                    direct_freight,
                 )
             )
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
+    def offer_to(
+        self,
+        city: str,
+        destination: str,
+        endorsements: set[str],
+        market: Market | None = None,
+        level: int = 1,
+        carrier_key: str | None = None,
+        direct_freight: bool = False,
+    ) -> Job | None:
+        """One offer to a specific destination, for the playtest lever.
+
+        Ignores the level distance cap on purpose: a tester forcing a
+        destination wants that run regardless of career progress. Returns
+        None when no supported corridor reaches the destination or no
+        unlocked cargo pairing exists.
+        """
+        city = self.world.resolve_city_key(city)
+        destination = self.world.resolve_city_key(destination)
+        city_obj = self.world.city(city)
+        carrier_key = carrier_key or DEFAULT_START_KEY
+        matches = [c for c in self._candidates(city) if c[0] == destination]
+        if not matches:
+            return None
+        destination, miles, _legs = min(matches, key=lambda c: c[1])
+        for _ in range(30):
+            location = self._choose_origin_location(city_obj, level, carrier_key)
+            cargo_key = self._choose_cargo_for_location(city_obj, location, level, carrier_key)
+            cargo = CARGO_CATALOG[cargo_key]
+            if cargo.endorsement and cargo.endorsement not in endorsements:
+                continue
+            dest_location = self._destination_location(destination, cargo, level)
+            if dest_location is None:
+                continue
+            return self._make_job(
+                cargo,
+                city,
+                location.name,
+                destination,
+                miles,
+                market,
+                level,
+                location,
+                dest_location,
+                carrier_key,
+                direct_freight,
+            )
+        return None
+
     def _spread_destinations(
         self,
+        origin: str,
         reachable: list[tuple[str, float, int]],
         level: int,
         count: int,
+        carrier_key: str = DEFAULT_START_KEY,
     ) -> list[tuple[str, float, int]]:
         """A weighted spread of distinct destinations (nearer = likelier).
 
@@ -831,11 +1135,43 @@ class JobBoard:
         chosen: list[tuple[str, float, int]] = []
         available = pool[:]
         while available and len(chosen) < target:
-            weights = [1.0 / (cand[1] ** exponent) for cand in available]
+            weights = [
+                self._destination_weight(origin, cand, level, carrier_key, exponent)
+                for cand in available
+            ]
             pick = self._rng.choices(available, weights)[0]
             chosen.append(pick)
             available.remove(pick)
         return chosen or pool
+
+    def _destination_weight(
+        self,
+        origin: str,
+        candidate: tuple[str, float, int],
+        level: int,
+        carrier_key: str = DEFAULT_START_KEY,
+        exponent: float | None = None,
+    ) -> float:
+        """Weighted lane fit for a carrier's modest dispatch tendencies."""
+        destination, miles, _legs = candidate
+        exponent = exponent if exponent is not None else (2.0 if level <= 2 else 1.0)
+        weight = 1.0 / (miles**exponent)
+        option = start_option(carrier_key)
+        cap = max(1.0, self.distance_cap(level))
+        if option.dispatch.short_haul_bias:
+            short_factor = max(0.0, 1.0 - min(miles, cap) / cap)
+            weight *= 1.0 + option.dispatch.short_haul_bias * short_factor
+        if option.dispatch.long_haul_bias:
+            long_factor = min(1.0, miles / cap)
+            weight *= 1.0 + option.dispatch.long_haul_bias * long_factor
+        if level >= PREMIUM_LANE_LEVEL:
+            # Premium-lane seniority: dispatch shows the long freight first.
+            weight *= 1.0 + PREMIUM_LANE_LONG_HAUL_BIAS * min(1.0, miles / cap)
+        if option.dispatch.regional_bias:
+            origin_region = self.world.cities[origin].region
+            if self.world.cities[destination].region == origin_region:
+                weight *= 1.0 + option.dispatch.regional_bias
+        return max(weight, 1e-12)
 
     def _candidates(self, city: str) -> list[tuple[str, float, int]]:
         """(destination, route miles, route leg count) for every other city."""
@@ -869,7 +1205,12 @@ class JobBoard:
         weights = [1.0 / (c[1] ** exponent) for c in pool]
         return self._rng.choices(pool, weights)[0]
 
-    def _choose_origin_location(self, city, level: int) -> Location:
+    def _choose_origin_location(
+        self,
+        city,
+        level: int,
+        carrier_key: str = DEFAULT_START_KEY,
+    ) -> Location:
         plausible = [
             location
             for location in city.locations
@@ -877,16 +1218,22 @@ class JobBoard:
         ]
         if not plausible:
             plausible = list(city.locations)
-        weights = [self._facility_weight(city, location) for location in plausible]
+        weights = [self._facility_weight(city, location, carrier_key) for location in plausible]
         return self._rng.choices(plausible, weights)[0]
 
-    def _choose_cargo_for_location(self, city, location: Location, level: int) -> str:
+    def _choose_cargo_for_location(
+        self,
+        city,
+        location: Location,
+        level: int,
+        carrier_key: str = DEFAULT_START_KEY,
+    ) -> str:
         cargo_keys = self._cargo_for_location(location, level=level)
         if not cargo_keys:
             cargo_keys = tuple(
                 cargo.key for cargo in CARGO_CATALOG.values() if cargo.min_level <= level
             )
-        weights = [self._cargo_weight(city, key) for key in cargo_keys]
+        weights = [self._cargo_weight(city, key, carrier_key, level=level) for key in cargo_keys]
         return self._rng.choices(cargo_keys, weights)[0]
 
     def _cargo_for_location(
@@ -926,7 +1273,12 @@ class JobBoard:
             [self._facility_weight(self.world.cities[city], loc) for loc in plausible],
         )[0]
 
-    def _facility_weight(self, city, location: Location) -> float:
+    def _facility_weight(
+        self,
+        city,
+        location: Location,
+        carrier_key: str = DEFAULT_START_KEY,
+    ) -> float:
         weight = FACILITY_SELECTION_WEIGHTS.get(location.type, 0.85)
         for tag in city.market_tags:
             boosted = MARKET_TAG_CARGO_BONUS.get(tag, set())
@@ -934,16 +1286,30 @@ class JobBoard:
                 weight += 0.25
         if location.template:
             weight *= 0.9
+        option = start_option(carrier_key)
+        if option.cargo_weight_bonus:
+            cargo_keys = set(location.ships + location.receives)
+            if cargo_keys & set(option.cargo_weight_bonus):
+                weight += 0.2
         return max(0.1, weight)
 
-    def _cargo_weight(self, city, cargo_key: str) -> float:
+    def _cargo_weight(
+        self,
+        city,
+        cargo_key: str,
+        carrier_key: str = DEFAULT_START_KEY,
+        level: int = 1,
+    ) -> float:
         weight = 1.0
         for tag in city.market_tags:
             if cargo_key in MARKET_TAG_CARGO_BONUS.get(tag, set()):
                 weight += 0.65
         cargo = CARGO_CATALOG[cargo_key]
         if cargo.endorsement:
-            weight *= 0.8
+            # Specialized company drivers see endorsement freight favored
+            # instead of rationed; junior boards keep it occasional.
+            weight *= SPECIALIZED_FREIGHT_WEIGHT if level >= SPECIALIZED_FREIGHT_LEVEL else 0.8
+        weight += start_option(carrier_key).cargo_weight_bonus.get(cargo_key, 0.0)
         return weight
 
     def _make_job(
@@ -957,17 +1323,30 @@ class JobBoard:
         level: int,
         origin_facility: Location,
         destination_facility: Location,
+        carrier_key: str = DEFAULT_START_KEY,
+        direct_freight: bool = False,
     ) -> Job:
         weight = self._rng.uniform(*cargo.weight_tons)
         rate = cargo.rate_per_mile * self._rng.uniform(0.9, 1.15)
         mult = market.multiplier(cargo.key) if market is not None else 1.0
         base_pay = HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0)
-        pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult, 2)
+        direct_mult = DIRECT_FREIGHT_PAY_MULT if direct_freight else 1.0
+        pay = round(max(base_pay, minimum_pay_for_level(miles, level)) * mult * direct_mult, 2)
         # deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         # shipper slack on top, plus a flat hour for fuel and the unexpected
         route = self.world.supported_route(origin, destination)
         slack = self._rng.uniform(*DEADLINE_DISPATCH_SLACK_RANGE)
-        deadline = dispatch_deadline_hours(miles, slack, route, self.world)
+        deadline = (
+            dispatch_deadline_hours(miles, slack, route, self.world, self.hos)
+            * start_option(carrier_key).dispatch.deadline_slack
+        )
+        # Speak the stretch when the driver's current clock forces a sleep a
+        # fresh clock would not have needed -- the long number is the law.
+        covers_rest = (
+            self.hos is not None
+            and plan_hos(miles, route, self.world, self.hos).sleeps
+            > plan_hos(miles, route, self.world).sleeps
+        )
         return Job(
             cargo,
             weight,
@@ -985,6 +1364,7 @@ class JobBoard:
             destination_facility_id=destination_facility.id,
             origin_locality=origin_facility.locality,
             destination_locality=destination_facility.locality,
+            deadline_covers_rest=covers_rest,
             origin_spoken=self.world.spoken_city(origin, qualified=True),
             destination_spoken=self.world.spoken_city(destination, qualified=True),
         )

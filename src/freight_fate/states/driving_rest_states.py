@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..models import enforcement, solvency
 from .driving_core import *
 
 
@@ -10,7 +11,7 @@ class ShoulderSleepConfirmationState(MenuState):
     title = "Emergency shoulder sleep"
     intro_help = (
         "Use up and down arrows to navigate, Enter to select. "
-        "Escape cancels and returns to the previous menu."
+        "Escape cancels and returns to the previous screen."
     )
 
     def __init__(
@@ -20,6 +21,7 @@ class ShoulderSleepConfirmationState(MenuState):
         self.driving = driving
         self.reason = reason
         self.anchor_mi = anchor_mi
+        self.direct_from_driving = ctx._app.state is driving
 
     def announce_entry(self) -> None:
         self.ctx.say(
@@ -36,7 +38,7 @@ class ShoulderSleepConfirmationState(MenuState):
             MenuItem(
                 "Cancel and keep looking for a safe stop",
                 self.go_back,
-                help="Return to the previous menu without resting here.",
+                help="Return to the previous screen without resting here.",
             ),
             MenuItem(
                 "Sleep on the shoulder anyway",
@@ -46,18 +48,213 @@ class ShoulderSleepConfirmationState(MenuState):
             ),
         ]
 
+    def go_back(self) -> None:
+        if not self.direct_from_driving:
+            super().go_back()
+            return
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say(
+            "Shoulder sleep canceled. Back on the road. The parking brake is set; "
+            f"press {self.ctx.control_hint('parking_brake')} to release it when ready.",
+            interrupt=True,
+        )
+
     def _sleep(self) -> None:
+        if not _secure_truck_for_stopped_menu(self.driving):
+            self.ctx.say(
+                "Come to a complete stop first. Cancel, finish stopping, "
+                "then try Emergency shoulder sleep again."
+            )
+            return
         anchor = self.anchor_mi
         if anchor is None:
             anchor = self.driving.trip.position_mi
         text = _perform_shoulder_sleep(self.driving, anchor)
-        self.ctx.pop_state()
-        if self.ctx._app.state is not self.driving:
-            self.ctx.pop_state()
-        self.ctx.say(text, interrupt=False)
+        while self.ctx._app.state is not self.driving:
+            self.ctx.pop_state(reentry=False)
+        self.ctx.say(text, interrupt=True)
 
 
-class TrafficStopState(MenuState):
+def _record_hours(driving: DrivingState) -> float:
+    """Where the career clock stands right now, mid-trip included."""
+    p = driving.ctx.profile
+    return float(p.game_hours) + driving.trip.game_minutes / 60.0
+
+
+def _suspension_text(profile, hours: float, verb: str = "suspended") -> str:
+    """What a fresh timed suspension or disqualification means, and what still
+    works while it runs."""
+    left = enforcement.days_text(profile.driving_record.days_left(hours))
+    return (
+        f"Your CDL is {verb} for {left}. Driving jobs are off the dispatch "
+        f"board until it clears, {enforcement.clears_text(profile)}. Your money "
+        "and your truck are safe; rest, repairs, the garage, and the truck "
+        "dealer are still open."
+    )
+
+
+def _serious_violation_text(profile, count: int, hours: float) -> str:
+    """Spoken movement on the serious-violation ladder, consequence attached."""
+    if count <= 1:
+        return (
+            "That is a serious violation on your record. One more inside three "
+            "years and your CDL is suspended for 60 days, and driving jobs stop "
+            "until it clears."
+        )
+    which = enforcement.ordinal_word(count)
+    return (
+        f"That is your {which} serious violation in three years. {_suspension_text(profile, hours)}"
+    )
+
+
+def _major_offense_text(profile, kind: str, hours: float) -> str:
+    """The major-offense outcome, said as fact with the way forward."""
+    name = str(getattr(profile, "name", "") or "This driver")
+    if kind == enforcement.SUSPENSION_LIFETIME:
+        return (
+            "That is your second major offense. Under federal rules a second "
+            "major offense disqualifies a commercial licence for life, so this "
+            "driver will not drive commercially again. Nothing is taken away: "
+            f"{name} keeps every dollar, the truck, and the whole record, and "
+            "you can open this career any time to look back over it. Rest, "
+            "repairs, the garage, and the truck dealer still work here, and "
+            "the dispatch board can still be read, but there is no driving "
+            "work and no date this clears. When you want the road again, "
+            "start a new career from the title menu. Everything you learned "
+            "still applies."
+        )
+    return (
+        "Running from a police stop in a commercial vehicle is a felony, and a "
+        "major offense on your CDL, which is a one-year disqualification. "
+        f"{_suspension_text(profile, hours, verb='disqualified')} One more "
+        "major offense is a lifetime disqualification."
+    )
+
+
+def _log_enforcement(
+    ctx, driving: DrivingState, *, fine: float, serious: bool = False, major: bool = False
+) -> str:
+    """Book a spoken roadside enforcement event onto the career record.
+
+    Only enforcement the player actually heard reaches the record. The silent
+    at-delivery settlement strike stays money-only, so a suspension can never
+    materialise at a delivery summary with no warning behind it.
+    """
+    p = ctx.profile
+    if p is None or driving._enforcement_bypassed():
+        return ""  # the debug hours modes freeze the ladder as well as the stop
+    record = p.driving_record
+    record.record_citation(fine)
+    hours = _record_hours(driving)
+    if major:
+        text = _major_offense_text(p, record.record_major_offense(hours), hours)
+    elif serious:
+        text = _serious_violation_text(p, record.record_serious_violation(hours), hours)
+    else:
+        return ""
+    driving.record_events.append(text)
+    return text
+
+
+def _times_now_text(count: int) -> str:
+    """Speak a repeat count the way a person would: 'twice now', 'three
+    times now' -- never frozen at the second occurrence's wording."""
+    if count == 2:
+        return "twice now"
+    return f"{enforcement.count_word(count)} times now"
+
+
+def _log_fatigue_event(ctx, driving: DrivingState) -> str:
+    """Book running off the road asleep, and say what it just cost."""
+    p = ctx.profile
+    hours = _record_hours(driving)
+    hit = enforcement.FATIGUE_EVENT_REPUTATION_HIT
+    count, serious = p.driving_record.record_fatigue_event(hours)
+    if count < enforcement.FATIGUE_EVENTS_BEFORE_SERIOUS:
+        text = (
+            "Running off the road asleep is a preventable safety incident and "
+            f"it goes on your record: {hit:.0f} points off your reputation. Do "
+            "it again and it becomes a fatigued-driving violation on your CDL."
+        )
+    else:
+        text = (
+            f"That is {_times_now_text(count)} that you have run off the road "
+            "asleep. Driving impaired by fatigue is a federal violation, so "
+            f"this one counts against your licence as well as {hit:.0f} points "
+            f"off your reputation. {_serious_violation_text(p, serious, hours)}"
+        )
+    driving.record_events.append(text)
+    return text
+
+
+class _RoadsideExitMixin:
+    """How a roadside stop lets the player go -- which depends on whether they
+    may still legally drive.
+
+    An ordinary ticket ends with merging back up to speed. A stop that just
+    pulled the licence cannot: the driver is not allowed to move the truck, so
+    offering the highway would be the game inviting them to break the rule it
+    just enforced, and there would be no way off the shoulder at all. In that
+    case the run ends here the way the felony stop already ends -- the load
+    goes back to dispatch and the driver is released to the terminal, where
+    "Wait out the CDL suspension" is waiting for them.
+    """
+
+    def _licence_pulled(self) -> bool:
+        record = getattr(self.ctx.profile, "driving_record", None)
+        if record is None:
+            return False
+        return bool(record.lifetime_disqualified) or record.suspended(self.ctx.profile.game_hours)
+
+    def _roadside_exit_item(self, *, highway_help: str) -> MenuItem:
+        if self._licence_pulled():
+            return MenuItem(
+                "Return to terminal",
+                self._end_run_suspended,
+                help="Your licence is pulled, so the truck stays put. Dispatch "
+                "takes the load back and you continue from the terminal.",
+            )
+        return MenuItem("Pull back onto the highway", self.go_back, help=highway_help)
+
+    def _suspended_exit_text(self) -> str:
+        """Said as part of the outcome: why the run stops and what happens next."""
+        p = self.ctx.profile
+        record = p.driving_record
+        load = (
+            f"Dispatch takes the {self.driving.job.cargo.label} load back and reassigns it"
+            if self.driving.phase == DRIVE_PHASE_DELIVERY and not self.driving.job.bobtail
+            else "There is no loaded trailer to hand back, and the assignment is canceled"
+        )
+        if record.lifetime_disqualified:
+            return (
+                " You cannot drive this truck away: the licence is gone for good. "
+                f"{load}, and a relief driver takes the truck in. You are released "
+                f"to {self.ctx.world.home_terminal(p.current_city).spoken_name}."
+            )
+        return (
+            " You cannot drive this truck away from here -- the licence is pulled "
+            f"as of now. {load}, and a relief driver takes the truck in. You are "
+            f"released to {self.ctx.world.home_terminal(p.current_city).spoken_name}, "
+            "where you can wait the suspension out."
+        )
+
+    def _end_run_suspended(self) -> None:
+        """Close out the run from the shoulder and release to the terminal."""
+        from .city import CityMenuState
+
+        d = self.driving
+        p = self.ctx.profile
+        p.store_truck_condition(d.truck)
+        p.game_hours += d.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+        self.ctx.reset_to(CityMenuState(self.ctx))
+
+
+class TrafficStopState(_RoadsideExitMixin, MenuState):
     """A roadside traffic stop after a speeding pull-over: a spoken license and
     logbook check, an on-the-spot ticket or a warning, then back to the road."""
 
@@ -75,6 +272,8 @@ class TrafficStopState(MenuState):
         over: float,
         limit: float,
         clean_stop: bool = False,
+        warned: bool = False,
+        construction_zone: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
@@ -82,6 +281,12 @@ class TrafficStopState(MenuState):
         self.over = over
         self.limit = limit
         self.clean_stop = clean_stop
+        # The driver kept rolling through a failure-to-stop warning before
+        # finally pulling in: reckless-class behavior, not just speed.
+        self.warned = warned
+        # Whether the trooper clocked this speed inside roadwork, carried from
+        # where the violation happened rather than read at the shoulder.
+        self.construction_zone = construction_zone
         self._outcome_text = ""
         self._resolve()
 
@@ -120,25 +325,42 @@ class TrafficStopState(MenuState):
             return
         # A prompt, fully-compliant stop earns a small chance the trooper lets a
         # ticket slide with a warning instead.
-        if self.clean_stop and d._patrol_rng.random() < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
+        # Named seed, quantised on where the stop happened: reloading the
+        # save must not re-roll whether the trooper let it slide.
+        waiver_key = f"{d.trip_seed}:police:waiver:{round(d.trip.position_mi, 1)}"
+        waiver_roll = random.Random(waiver_key).random()
+        if self.clean_stop and waiver_roll < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
             self._outcome_text = (
                 f"You were {over_text} over the {limit_text} limit. I was gonna "
                 "give you a ticket, but since you pulled over promptly, I'll let "
                 "it go this time. Keep it down."
             )
             return
-        fine = SPEEDING_TICKET_FINES[min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]
+        # Priced by how far over the limit, how many citations the career
+        # already carries, and whether it happened in a construction zone,
+        # against the real state fine schedules.
+        fine = enforcement.speeding_citation_fine(
+            self.over,
+            enforcement.career_citations(p),
+            construction_zone=self.construction_zone,
+        )
         d.speeding_tickets += 1
         d.ticket_fines_paid += fine
         p.money -= fine
         hit = hos.HOS_REPUTATION_HIT * (0.7 if self.signaled else 1.0)
         p.career.reputation = max(0.0, rep - hit)
         self.ctx.audio.play("ui/error")
+        serious = enforcement.is_serious_speed(self.over) or self.warned
+        ladder = _log_enforcement(self.ctx, d, fine=fine, serious=serious)
         self._outcome_text = (
             f"You were {over_text} over the {limit_text} limit. Speeding "
             f"ticket: {fine:,.0f} dollars, paid on the spot, and a reputation "
-            "hit."
+            "hit." + enforcement.construction_zone_fine_clause(self.construction_zone)
         )
+        if ladder:
+            self._outcome_text += f" {ladder}"
+        if self._licence_pulled():
+            self._outcome_text += self._suspended_exit_text()
 
     def announce_entry(self) -> None:
         polite = " You signaled and pulled over promptly." if self.signaled else ""
@@ -150,10 +372,8 @@ class TrafficStopState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem(
-                "Pull back onto the highway",
-                self.go_back,
-                help="Signal, check your mirror, and merge back up to speed.",
+            self._roadside_exit_item(
+                highway_help="Signal, check your mirror, and merge back up to speed."
             )
         ]
 
@@ -162,7 +382,352 @@ class TrafficStopState(MenuState):
         self.ctx.say("Back on the highway. Watch your speed.", interrupt=True)
 
 
-class RestStopState(MenuState):
+class EnforcementStopState(_RoadsideExitMixin, MenuState):
+    """Roadside enforcement stop for non-speeding violations."""
+
+    intro_help = "Press Enter or Escape to pull back onto the highway when you are ready."
+
+    def __init__(
+        self,
+        ctx,
+        driving: DrivingState,
+        *,
+        title: str,
+        summary: str,
+        fine: float,
+        reputation_hit: float,
+        signaled: bool,
+        return_message: str,
+        out_of_service: bool = False,
+        warned: bool = False,
+        construction_zone: bool = False,
+        inspection_on_stop: bool = False,
+    ) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self._title = title
+        self.summary = summary
+        # Repeat offenders pay more for the same stop and nothing caps it, and
+        # a construction zone doubles whatever that came to -- one schedule
+        # for every citation in the game, priced in models/enforcement.
+        self.construction_zone = construction_zone
+        self.fine = enforcement.citation_fine(
+            fine,
+            enforcement.career_citations(ctx.profile),
+            construction_zone=construction_zone,
+        )
+        self.reputation_hit = reputation_hit
+        self.signaled = signaled
+        self.return_message = return_message
+        self.out_of_service = out_of_service
+        self.warned = warned
+        # A scale bypass got caught precisely because the inspection was
+        # skipped. The trooper does not just write the ticket and wave you on
+        # -- they do the inspection right there, on the shoulder, the same
+        # INSPECTION_MIN the check-in lane would have cost you.
+        self.inspection_on_stop = inspection_on_stop
+        self._outcome_text = ""
+        # Whether the stop has been told once already. See announce_entry:
+        # the fine is charged here, in _resolve, exactly once, and a later
+        # telling has to sound like history rather than a fresh charge.
+        self._stop_announced = False
+        self._resolve()
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self._title
+
+    def presence(self):
+        from ..discord_presence import PresenceState
+
+        base = self.driving.presence()
+        detail = base.detail if base is not None else ""
+        return PresenceState("Pulled over", detail)
+
+    def _resolve(self) -> None:
+        p = self.ctx.profile
+        d = self.driving
+        d.ticket_fines_paid += self.fine
+        p.money -= self.fine
+        hit = self.reputation_hit * (0.8 if self.signaled else 1.0)
+        p.career.reputation = max(0.0, p.career.reputation - hit)
+        self.ctx.audio.play("ui/error")
+        ladder = _log_enforcement(self.ctx, d, fine=self.fine, serious=self.warned)
+        self._outcome_text = (
+            f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a reputation hit."
+            + enforcement.construction_zone_fine_clause(self.construction_zone)
+        )
+        if ladder:
+            self._outcome_text += f" {ladder}"
+        if self.out_of_service:
+            # The ten hours pass HERE, parked on the shoulder with the
+            # officer's order in hand -- never as a silent mid-drive jump.
+            # Capture the plain-language WHY before the reset wipes the
+            # ledger: the stop must explain itself completely (owner ask,
+            # 2026-07-24).
+            causes = d.hos.violation_causes(self.ctx.settings.hos_mode)
+            why = " The order stands because " + " and ".join(causes) + "." if causes else ""
+            # Ten hours parked is a real overnight fast-forward, the same as
+            # every other sleep path -- the engine must not idle through the
+            # whole order (log, 2026-08-12: it did, and the audio froze at
+            # pre-stop revs for the entire ten hours).
+            engine_off = _shut_down_engine(d)
+            d._place_out_of_service()
+            lead = f" {engine_off.strip()}" if engine_off else ""
+            self._outcome_text += (
+                f"{lead}{why} Out of service: ten hours pass parked on the shoulder "
+                f"before you may roll. It is now {clock_text(d.trip.local_hour)}, "
+                "your hours of service are reset, and you wake rested -- but "
+                "the delivery deadline kept counting the whole time."
+                f"{_wake_air_instruction(d, from_rest_menu=False)}"
+            )
+        if self.inspection_on_stop:
+            # Reuses the same check-in cost the scale itself would have
+            # charged -- the driver dodged the lane, not the inspection.
+            _advance_rest_clock(
+                d, INSPECTION_MIN, "on_duty_not_driving", "weigh station bypass inspection"
+            )
+            d.hos.on_duty(INSPECTION_MIN)
+            self._outcome_text += (
+                " Since you didn't stop at the scale, they run the full inspection "
+                f"right here on the shoulder: {INSPECTION_MIN:.0f} minutes on the clock."
+            )
+        if self._licence_pulled():
+            self._outcome_text += self._suspended_exit_text()
+
+    def announce_entry(self) -> None:
+        """The stop, said once as it happens and afterwards as history.
+
+        ``_resolve`` runs in ``__init__`` and charges the fine exactly once,
+        but this line was word-for-word identical every time it was spoken,
+        so a second telling was indistinguishable from a second charge --
+        and a driver with no screen has no other way to tell them apart.
+        Tester Darren's log has it twice, three seconds apart, on a 1,200
+        dollar work-zone citation (I-75, 2026-08-18).
+
+        Not silenced, because re-reading the stop is the only route back to
+        the detail. Led in the past tense instead, so the money is plainly
+        already spent.
+        """
+        polite = " You signaled and pulled over promptly." if self.signaled else ""
+        if self._stop_announced:
+            self.ctx.say(
+                "Reading back the stop you have already settled. "
+                f"{self.summary} {self._outcome_text} {self.current_text()}",
+                interrupt=True,
+            )
+            return
+        self._stop_announced = True
+        self.ctx.say(
+            f"You stop on the shoulder for an enforcement inspection.{polite} "
+            f"{self.summary} {self._outcome_text} {self.current_text()}",
+            interrupt=True,
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            self._roadside_exit_item(
+                highway_help="Signal, check your mirror, and merge back up to speed."
+            )
+        ]
+
+    def go_back(self) -> None:
+        self.ctx.pop_state()
+        self.ctx.say(self.return_message, interrupt=True)
+
+
+class FelonyStopState(MenuState):
+    """Failure-to-stop outcome after the player ignores an active siren."""
+
+    title = "Felony stop"
+    intro_help = "Press Enter or Escape to continue from the terminal after the enforcement stop."
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.load_lost = driving.phase == DRIVE_PHASE_DELIVERY and not driving.job.bobtail
+        self._summary = ""
+        self._standing_text = ""
+        self._resolve()
+
+    def _resolve(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        d.failure_to_stop_count += 1
+        # The felony is priced like every other citation: the 5,000-dollar
+        # statutory top of range, scaled by what this driver already has on
+        # the record and by where the chase was.
+        zone = d.trip.in_construction_zone
+        fine = enforcement.citation_fine(
+            enforcement.FAILURE_TO_STOP_FINE,
+            enforcement.career_citations(p),
+            construction_zone=zone,
+        )
+        d.ticket_fines_paid += fine
+        p.money -= fine
+        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
+        # The part that used to go nowhere: fleeing a stop in a commercial
+        # vehicle is a major offense, and the licence answers for it.
+        self._standing_text = _log_enforcement(self.ctx, d, fine=fine, major=True)
+        # add_damage, not a raw assignment: spike damage has to cross the
+        # bands so a spiked truck can go out of service like any other wreck.
+        d.truck.add_damage(FAILURE_TO_STOP_DAMAGE_PCT)
+        d.truck.velocity_mps = 0.0
+        d.truck.throttle = 0.0
+        d.truck.brake = 1.0
+        d.truck.set_parking_brake()
+        _advance_rest_clock(
+            d,
+            FAILURE_TO_STOP_PROCESSING_MIN,
+            "on_duty_not_driving",
+            "felony failure-to-stop enforcement",
+        )
+        d.hos.on_duty(FAILURE_TO_STOP_PROCESSING_MIN)
+        p.store_truck_condition(d.truck)
+        p.game_hours += d.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+
+        load_text = (
+            f"Dispatch cancels the {d.job.cargo.label} load; there is no pay for this run."
+            if self.load_lost
+            else "There was no loaded trailer to lose, but the active assignment is canceled."
+        )
+        self._summary = (
+            "Troopers laid spike strips across the lane after you kept driving "
+            "with lights and siren behind you. "
+            f"Felony failure-to-stop fine: {fine:,.0f} dollars, "
+            "paid on the spot, with a major reputation hit."
+            f"{enforcement.construction_zone_fine_clause(zone)} "
+            f"Spike strips added {FAILURE_TO_STOP_DAMAGE_PCT:.0f} percent truck "
+            f"damage, and processing took {FAILURE_TO_STOP_PROCESSING_MIN / 60.0:.0f} "
+            f"hours. {load_text} You are released back to "
+            f"{self.ctx.world.home_terminal(p.current_city).spoken_name}."
+        )
+        if self._standing_text:
+            self._summary += f" {self._standing_text}"
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"{self.title}. {self._summary} {self.current_text()}", interrupt=True)
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "Return to terminal",
+                self.go_back,
+                help="End the canceled run and continue from the city terminal.",
+            )
+        ]
+
+    def go_back(self) -> None:
+        from .city import CityMenuState
+
+        self.ctx.reset_to(CityMenuState(self.ctx))
+
+
+class _FuelPumpMixin:
+    """The fuel island, for every state that can be standing on one.
+
+    A truck stop's pumps and its parking lot are separate facilities, and the
+    lot filling up does not lock the island: a driver turned away from an
+    overnight space can still pull to the pumps, fuel, and leave. Keeping the
+    purchase here rather than on ``RestStopState`` alone is what lets
+    ``ParkingFullState`` offer it -- before this, a full lot swallowed the
+    whole stop, and an overnight run could pass a row of open pumps and
+    still go dry.
+    """
+
+    _fueled_here = False  # a fuel purchase this visit (free showers)
+
+    def _fuel_label(self) -> str:
+        d = self.driving
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            return "Fuel: tank is full"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Refuel {need:.0f} gallons on the carrier fuel card"
+        cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
+        return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
+
+    def _refuel(self) -> None:
+        from ..models.loyalty import loyalty_earnings_text
+
+        d = self.driving
+        p = self.ctx.profile
+        region = d.trip.current_region
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            self.ctx.say("The tank is already full.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            # the carrier fuel card covers road fuel for company drivers
+            d.truck.refuel(need)
+            self._fueled_here = True
+            _advance_rest_clock(d, FUEL_STOP_MIN)
+            d.hos.on_duty(FUEL_STOP_MIN)
+            self._save_here(silent=True)
+            self.ctx.audio.play("vehicle/fuel_pump")
+
+            # Award loyalty points for fueling
+            loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
+            loyalty_text = loyalty_earnings_text(
+                need, loyalty_result["points_earned"], loyalty_result["rewards"]
+            )
+
+            self.ctx.say(
+                f"Refueled {need:.0f} gallons on the carrier fuel card. "
+                f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
+            )
+            self.ctx.award_achievement("route_refuel")
+            self.refresh()
+            return
+        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        if p.money < cost:
+            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
+            if partial_gal < 5:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("You cannot afford fuel here.")
+                return
+            need = partial_gal
+            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        p.money -= cost
+        d.truck.refuel(need)
+        self._fueled_here = True
+        _advance_rest_clock(d, FUEL_STOP_MIN)
+        d.hos.on_duty(FUEL_STOP_MIN)
+        self._save_here(silent=True)
+        self.ctx.audio.play("vehicle/fuel_pump")
+
+        # Award loyalty points for fueling
+        loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
+        loyalty_text = loyalty_earnings_text(
+            need, loyalty_result["points_earned"], loyalty_result["rewards"]
+        )
+
+        self.ctx.say(
+            f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars. Fueling took "
+            f"{FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
+        )
+        self.ctx.award_achievement("route_refuel")
+        self.refresh()
+
+    def _save_here(self, *, silent: bool = False) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        p.store_truck_condition(d.truck)
+        p.active_trip = d.snapshot()
+        self.ctx.save_profile()
+        if not silent:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Saved at {self.stop.spoken_name}. Your drive will resume from this rest stop."
+            )
+
+
+class RestStopState(_FuelPumpMixin, MenuState):
     """Spoken route POI menu: actions come from the corridor metadata."""
 
     intro_help = (
@@ -171,10 +736,12 @@ class RestStopState(MenuState):
         "clock, and your delivery deadline keeps counting."
     )
 
-    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+    def __init__(self, ctx, driving: DrivingState, stop, *, prefer_sleep: bool = False) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.stop = stop
+        self._prefer_sleep = prefer_sleep
+        self._fueled_here = False  # a fuel purchase this visit (free showers)
         self._confirm_sleep_rested = False
 
     @property
@@ -183,7 +750,19 @@ class RestStopState(MenuState):
 
     def enter(self) -> None:
         self._confirm_sleep_rested = False
-        super().enter()
+        self.items = self.build_items()
+        if self._prefer_sleep:
+            self.index = next(
+                (i for i, item in enumerate(self.items) if item.text.startswith("Sleep ")),
+                0,
+            )
+            # This is an arrival hint, not a permanent focus policy. Returning
+            # from a submenu must preserve the row the player invoked.
+            self._prefer_sleep = False
+        else:
+            self.index = min(self.index, max(0, len(self.items) - 1))
+        self.ctx.audio.play(self.open_sound_key)
+        self.announce_entry()
 
     # Moving off a sleep item withdraws its pending double-press confirmation,
     # so a stale "press Enter again" can never sleep you silently later.
@@ -228,10 +807,35 @@ class RestStopState(MenuState):
         return self.presence()
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop))
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.local_hour))
         parts = [f"{self.stop.spoken_name}."]
+        if getattr(self.stop, "type", "") == "weigh_station":
+            # An inspection, not hospitality: no parking chatter, no live lot
+            # lookup, no brand amenities. The one-template announce read a
+            # scale its truck-stop script -- "no truck parking... Loyalty
+            # program: Loyalty points: 0" -- at an open scale (owner
+            # playtest, 2026-08-20).
+            parts.extend(
+                [
+                    "Inspection station.",
+                    f"It is {clock_text(self.driving.trip.local_hour)}.",
+                    self.current_text(),
+                ]
+            )
+            self.ctx.say(" ".join(parts))
+            return
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
+
+        # Check real-time parking availability if enabled
+        if self.ctx.settings.real_parking and self.driving.trip.parking_provider:
+            availability = self._check_parking_availability()
+            if availability:
+                parts.append(availability)
+
+        brand_text = spoken_amenities(self.stop.name, getattr(self.stop, "type", ""))
+        if brand_text:
+            parts.append(f"{brand_text}.")
         parts.extend(
             [
                 f"It is {clock_text(self.driving.trip.local_hour)}.",
@@ -240,9 +844,58 @@ class RestStopState(MenuState):
         )
         self.ctx.say(" ".join(parts))
 
+    def _check_parking_availability(self) -> str | None:
+        """Check real-time parking availability for this stop."""
+        if not self.driving.trip.parking_provider:
+            return None
+
+        try:
+            # Ask about the state and position the truck is actually at; the
+            # provider answers empty for states without a live TPIMS feed.
+            state = self.driving.trip.state_at()
+            if not state:
+                return None
+            latitude, longitude = self.driving.trip.latlon_at()
+
+            # Get nearby parking locations
+            locations = self.driving.trip.parking_provider.get_available_locations_near(
+                state,
+                latitude=latitude,
+                longitude=longitude,
+                radius_mi=25.0,
+            )
+
+            if not locations:
+                return "No real-time parking data available nearby."
+
+            # Find the closest location with available spaces
+            total_available = sum(loc.available or 0 for loc in locations)
+            if total_available > 0:
+                return f"Real-time parking: {total_available} spaces available nearby."
+            else:
+                return "Real-time parking: nearby lots are full."
+        except Exception:
+            # Gracefully handle API failures
+            return None
+
     def build_items(self) -> list[MenuItem]:
         actions = set(self.stop.actions)
         items: list[MenuItem] = []
+
+        # Loyalty program status -- at hospitality stops. A scale hands out
+        # citations, not points.
+        if getattr(self.stop, "type", "") != "weigh_station":
+            p = self.ctx.profile
+            loyalty_summary = p.loyalty.summary()
+            items.append(
+                MenuItem(
+                    f"Loyalty program: {loyalty_summary}",
+                    self._loyalty_menu,
+                    help="Check your loyalty points, shower credits, and redeem "
+                    "rewards at this truck stop.",
+                )
+            )
+
         if "fuel" in actions:
             items.append(
                 MenuItem(
@@ -259,7 +912,8 @@ class RestStopState(MenuState):
                     "Food and coffee break",
                     self._food_break,
                     help="A short off-duty break for food or coffee. The clock and "
-                    "your deadline advance fifteen minutes.",
+                    "your deadline advance fifteen minutes. Coffee eases fatigue "
+                    "a little, but does not satisfy the 30-minute break rule.",
                 )
             )
         if "break" in actions:
@@ -288,9 +942,13 @@ class RestStopState(MenuState):
                     "The clock and your deadline advance 10 hours.",
                 )
             )
-        else:
-            # No proper sleeper facility here, but you can always bed down in the
-            # lot -- a legal reset, just cramped and poor rest.
+        elif getattr(self.stop, "type", "") != "weigh_station":
+            # No proper sleeper facility here, but you can always bed down in
+            # the lot -- a legal reset, just cramped and poor rest. Except at
+            # a scale: nobody sleeps in an active inspection facility, and
+            # there is no motel on the far side of the platform (the scale
+            # was offering both, plus a loyalty program -- owner playtest,
+            # 2026-08-20).
             items.append(
                 MenuItem(
                     "Sleep 10 hours in the lot",
@@ -300,12 +958,70 @@ class RestStopState(MenuState):
                     "tired, and the clock advances 10 hours.",
                 )
             )
+            items.append(
+                MenuItem(
+                    f"Motel room: sleep 10 hours for {MOTEL_COST:.0f} dollars",
+                    self._motel_sleep,
+                    help="A real bed near the lot. Costs money out of your own "
+                    "pocket, but gives the same legal reset with full-quality "
+                    "rest: you wake fresh. The clock advances 10 hours.",
+                )
+            )
         if "repair" in actions:
             items.append(
                 MenuItem(
                     "Use repair service",
                     self._repair,
                     help="Pay the shop to repair truck damage before returning to the road.",
+                )
+            )
+        if solvency.out_of_pocket_options(self.ctx.profile):
+            owed = solvency.money_text(solvency.debt_owed(self.ctx.profile))
+            items.append(
+                MenuItem(
+                    f"Pay down what you owe: {owed} owed",
+                    self._pay_debt,
+                    help="Put your own cash toward the balance you owe, right from this stop.",
+                )
+            )
+        brand = classify_brand(self.stop.name)
+        if brand is not None and brand.tier == "travel_center":
+            if "tires" in brand.signature:
+                tire_help = (
+                    f"{brand.spoken} runs a dedicated tire bay: road tire "
+                    "service close to the terminal garage price, done fast. "
+                    "Company drivers bill the carrier; owner-operators pay."
+                )
+            else:
+                tire_help = (
+                    f"{brand.spoken} can mount tires on the road, at a "
+                    "markup over the terminal garage. Tire specialists "
+                    "like Love's and Speedco do the same work cheaper "
+                    "and faster."
+                )
+            items.append(MenuItem(self._tire_label, self._service_tires, help=tire_help))
+            if "repair" in brand.signature:
+                items.append(
+                    MenuItem(
+                        self._brake_label,
+                        self._service_brakes,
+                        help=f"{brand.spoken} runs a full truck service "
+                        "shop and can reline worn brake shoes on the "
+                        "road, at a markup over the terminal garage. "
+                        "Company drivers bill the carrier; "
+                        "owner-operators pay.",
+                    )
+                )
+        stop_buffs = buffs_for_stop(self.stop.name, tuple(self.stop.actions))
+        if brand is not None and brand.bans_big_rigs and not self.driving.job.bobtail:
+            # The famous ban: with a trailer on you never got past the lot.
+            stop_buffs = ()
+        for buff in stop_buffs:
+            items.append(
+                MenuItem(
+                    (lambda b=buff: self._buff_label(b)),
+                    (lambda b=buff: self._buy_buff(b)),
+                    help=buff.help,
                 )
             )
         if "roadside_assistance" in actions:
@@ -392,44 +1108,9 @@ class RestStopState(MenuState):
         )
         self.refresh()
 
-    def _fuel_label(self) -> str:
-        d = self.driving
-        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
-        if need < 1:
-            return "Fuel: tank is full"
-        cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
-        return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
-
-    def _refuel(self) -> None:
-        d = self.driving
-        p = self.ctx.profile
-        region = d.trip.current_region
-        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
-        if need < 1:
-            self.ctx.say("The tank is already full.")
-            return
-        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        if p.money < cost:
-            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
-            if partial_gal < 5:
-                self.ctx.audio.play("ui/error")
-                self.ctx.say("You cannot afford fuel here.")
-                return
-            need = partial_gal
-            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        p.money -= cost
-        d.truck.refuel(need)
-        _advance_rest_clock(d, FUEL_STOP_MIN)
-        d.hos.on_duty(FUEL_STOP_MIN)
-        self._save_here(silent=True)
-        self.ctx.audio.play("vehicle/fuel_pump")
-        self.ctx.say(
-            f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
-            f"You have {p.money:,.0f} dollars. Fueling took "
-            f"{FUEL_STOP_MIN:.0f} minutes."
-        )
-        self.ctx.award_achievement("route_refuel")
-        self.refresh()
+    def _loyalty_menu(self) -> None:
+        """Show loyalty program details and redemption options."""
+        self.ctx.push_state(LoyaltyRewardsState(self.ctx, self.driving, self.stop))
 
     def _take_break(self) -> None:
         d = self.driving
@@ -450,14 +1131,17 @@ class RestStopState(MenuState):
     def _food_break(self) -> None:
         d = self.driving
         p = self.ctx.profile
-        _advance_rest_clock(d, 15.0)
+        _advance_rest_clock(d, 15.0, "off_duty", "food and coffee")
         d.hos.take_break(15.0)
-        p.fatigue = max(0.0, p.fatigue - 3.0)
+        p.fatigue = hos.rest_coffee_break(p.fatigue)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
             f"You took a short food and coffee break. "
             f"It is {clock_text(d.trip.local_hour)}. "
+            "The coffee helps you stay alert a little longer, but "
+            "this short stop does not reset your 30-minute break "
+            "requirement. "
             f"{_deadline_text(d)}"
         )
 
@@ -484,14 +1168,38 @@ class RestStopState(MenuState):
         p.fatigue = hos.rest_sleeper_split(p.fatigue, minutes, completed=completed)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
-        status = (
-            f"Sleeper split credited. {d.hos.summary(self.ctx.settings.hos_mode)} "
-            if completed
-            else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
-        )
+        mode = self.ctx.settings.hos_mode
+        if completed:
+            status = f"Sleeper split credited. {d.hos.summary(mode)} "
+        else:
+            # A rest that did NOT reset the shift leads with that consequence:
+            # the old wording buried "split pending" in one clause and the
+            # owner drove into a window violation believing he had hours left
+            # (2026-07-24). The countdown warnings re-arm too, so the 60- and
+            # 30-minute window calls speak again after waking.
+            d.hos.re_arm_warnings()
+            pending = d.hos.split_pending_summary() or "Sleeper berth rest recorded."
+            if mode in hos.HOS_NON_ENFORCED_MODES:
+                status = f"{pending} "
+            else:
+                _, duty_limit, _ = hos.LIMITS[mode]
+                duty_left_h = max(0.0, duty_limit - d.hos.duty_min) / 60.0
+                if duty_left_h <= 0.0:
+                    window = (
+                        "Warning: this sleep did NOT reset your hours, and your "
+                        "duty window has already closed. Do not drive: finish "
+                        "the split or take a full 10-hour reset first. "
+                    )
+                else:
+                    closes = clock_text((d.trip.local_hour + duty_left_h) % 24.0)
+                    window = (
+                        "This sleep did NOT reset your hours. Your duty window "
+                        f"closes in {duty_left_h:.1f} hours, at {closes}. "
+                    )
+                status = f"{window}{pending} "
         self.ctx.say(
             f"{engine_off}You slept {hours} hours in the sleeper berth. "
-            f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
+            f"It is {clock_text(d.trip.local_hour)}. {status}{_deadline_text(d)}"
             f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
@@ -518,6 +1226,41 @@ class RestStopState(MenuState):
         self.ctx.award_achievement("slept_on_route")
         if before_fatigue < hos.FATIGUE_SEVERE:
             self.ctx.award_achievement("sleep_before_exhaustion")
+
+    def _motel_sleep(self) -> None:
+        """A paid bed where the parking is rough: a legal reset with real rest.
+
+        Lodging is personal money even for company drivers -- the carrier
+        pays for the truck, not the room."""
+        d = self.driving
+        p = self.ctx.profile
+        if p.money < MOTEL_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"A motel room costs {MOTEL_COST:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        p.money -= MOTEL_COST
+        # A motel bed is still a real sleep: no truck idles all night just
+        # because the driver is not in it. Every other sleep option shuts the
+        # engine down first; the motel room was the one path that skipped it
+        # while still sending the driver off to bed.
+        engine_off = _shut_down_engine(d)
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = 0.0
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"{engine_off}You took a motel room for {MOTEL_COST:,.0f} dollars "
+            f"and slept a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"Hours of service reset and you wake fresh. You have "
+            f"{p.money:,.0f} dollars. {_deadline_text(d)}{_wake_air_instruction(d)}"
+        )
+        # No Five-by-Two here: the badge is ten hours IN THE BUNK, and a
+        # motel bed is the night you specifically did not spend in it
+        # (owner report, 2026-08-20). The cramped-lot sleep keeps the
+        # award -- the stop has no beds, so the lot night IS a bunk night.
 
     def _emergency_lot_sleep(self) -> None:
         """Bed down in a break/fuel stop's lot when out of hours: a legal HOS
@@ -548,6 +1291,21 @@ class RestStopState(MenuState):
         if damage < 1.0:
             self.ctx.say("The truck does not need repair.")
             return
+        if not player_pays_operating_costs(p.business_status):
+            d.truck.damage_pct = 0.0
+            _advance_rest_clock(d, 60.0)
+            d.hos.on_duty(60.0)
+            self._save_here(silent=True)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Shop repaired {damage:.0f} percent damage on the carrier "
+                f"account. It is {clock_text(d.trip.current_hour)}. "
+                f"{_deadline_text(d)}"
+            )
+            self.ctx.award_achievement("garage_repair")
+            if damage >= 75.0:
+                self.ctx.award_achievement("deep_repair")
+            return
         cost = self.ctx.economy.repair_cost(damage)
         if p.money < cost:
             self.ctx.audio.play("ui/error")
@@ -565,6 +1323,13 @@ class RestStopState(MenuState):
             f"You have {p.money:,.0f} dollars. {_deadline_text(d)}"
         )
         self.ctx.award_achievement("garage_repair")
+        if damage >= 75.0:
+            self.ctx.award_achievement("deep_repair")
+
+    def _pay_debt(self) -> None:
+        from .city import PayDebtState
+
+        self.ctx.push_state(PayDebtState(self.ctx))
 
     def _roadside_assistance(self) -> None:
         d = self.driving
@@ -573,45 +1338,214 @@ class RestStopState(MenuState):
         if damage < 1.0:
             self.ctx.say("The truck does not need roadside assistance.")
             return
-        repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
-        p.money -= cost
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
+        carrier_paid = not player_pays_operating_costs(p.business_status)
+        if not carrier_paid:
+            p.money -= cost
         d.truck.damage_pct = min(damage, FIELD_REPAIR_DAMAGE_PCT)
         _advance_rest_clock(d, MECHANIC_WAIT_MIN)
         d.hos.on_duty(MECHANIC_WAIT_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
+        billing = "on the carrier breakdown account" if carrier_paid else f"for {cost:,.0f} dollars"
         self.ctx.say(
             f"Roadside assistance patched the truck to "
-            f"{d.truck.damage_pct:.0f} percent damage for "
-            f"{cost:,.0f} dollars. It is "
+            f"{d.truck.damage_pct:.0f} percent damage {billing}. It is "
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
+        self.ctx.award_achievement("roadside_fix")
+
+    def _tire_bay(self) -> bool:
+        brand = classify_brand(self.stop.name)
+        return brand is not None and "tires" in brand.signature
+
+    def _tire_rate(self) -> float:
+        return ROAD_TIRE_SPECIALIST_COST_PER_PCT if self._tire_bay() else ROAD_TIRE_COST_PER_PCT
+
+    def _tire_label(self) -> str:
+        wear = self.driving.truck.tire_wear_pct
+        if wear < 1:
+            return "Tires: tread is in top shape"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Replace tires: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * self._tire_rate(), 2)
+        return f"Replace tires: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _brake_label(self) -> str:
+        wear = self.driving.truck.brake_wear_pct
+        if wear < 1:
+            return "Brakes: shoes are in top shape"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Brake job: {wear:.0f} percent wear, carrier billed"
+        cost = round(wear * ROAD_BRAKE_COST_PER_PCT, 2)
+        return f"Brake job: {wear:.0f} percent wear for {cost:,.0f} dollars"
+
+    def _service_tires(self) -> None:
+        minutes = ROAD_TIRE_SPECIALIST_MIN if self._tire_bay() else ROAD_TIRE_MIN
+        self._road_wear_service(
+            attr="tire_wear_pct",
+            cost_per_pct=self._tire_rate(),
+            minutes=minutes,
+            duty_note="road tire service",
+            fresh_say="The tires are already in top shape.",
+            service_noun="tire service",
+            carrier_done="replaced the tires",
+            done_say="Tires replaced.",
+        )
+
+    def _service_brakes(self) -> None:
+        self._road_wear_service(
+            attr="brake_wear_pct",
+            cost_per_pct=ROAD_BRAKE_COST_PER_PCT,
+            minutes=ROAD_BRAKE_MIN,
+            duty_note="road brake service",
+            fresh_say="The brakes are already in top shape.",
+            service_noun="a brake job",
+            carrier_done="relined the brakes",
+            done_say="Brakes relined.",
+        )
+
+    def _road_wear_service(
+        self,
+        *,
+        attr: str,
+        cost_per_pct: float,
+        minutes: float,
+        duty_note: str,
+        fresh_say: str,
+        service_noun: str,
+        carrier_done: str,
+        done_say: str,
+    ) -> None:
+        """Brand-shop wear service on the road, all-or-nothing like road repair.
+
+        Partial service stays a terminal-garage courtesy; a road shop sells
+        the whole job or none of it."""
+        d = self.driving
+        p = self.ctx.profile
+        wear = getattr(d.truck, attr)
+        if wear < 1.0:
+            self.ctx.say(fresh_say)
+            return
+        if not player_pays_operating_costs(p.business_status):
+            setattr(d.truck, attr, 0.0)
+            _advance_rest_clock(d, minutes, "on_duty_not_driving", duty_note)
+            d.hos.on_duty(minutes)
+            self._save_here(silent=True)
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"The shop {carrier_done} at {wear:.0f} percent wear on the "
+                f"carrier account. It is {clock_text(d.trip.local_hour)}. "
+                f"{_deadline_text(d)}"
+            )
+            self.refresh()
+            return
+        cost = round(wear * cost_per_pct, 2)
+        if p.money < cost:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"{service_noun.capitalize()} costs {cost:,.0f} dollars here. You cannot afford it."
+            )
+            return
+        p.money -= cost
+        setattr(d.truck, attr, 0.0)
+        _advance_rest_clock(d, minutes, "on_duty_not_driving", duty_note)
+        d.hos.on_duty(minutes)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(
+            f"{done_say} {cost:,.0f} dollars. It is "
+            f"{clock_text(d.trip.local_hour)}. You have {p.money:,.0f} "
+            f"dollars. {_deadline_text(d)}"
+        )
+        self.refresh()
+
+    def _buff_price(self, buff) -> float:
+        if buff.free_with_fuel and self._fueled_here:
+            return 0.0
+        return buff.price
+
+    def _buff_label(self, buff) -> str:
+        price = self._buff_price(buff)
+        if price <= 0.0:
+            return f"{buff.label}: free with your fuel purchase"
+        return f"{buff.label}: {price:,.0f} dollars"
+
+    def _buy_buff(self, buff) -> None:
+        """Apply a consumable buff purchase (data/buffs.py).
+
+        Food, drink, and showers are personal money even for company
+        drivers -- the carrier pays for the truck, not your dinner. Rig
+        care (lube, tires) is truck work, so the carrier covers it."""
+        d = self.driving
+        p = self.ctx.profile
+        price = self._buff_price(buff)
+        rig_buff = buff.group in ("engine", "tire")
+        carrier_pays = rig_buff and not player_pays_operating_costs(p.business_status)
+        if not carrier_pays and p.money < price:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"The {buff.label.lower()} costs {price:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        if not carrier_pays:
+            p.money -= price
+        if rig_buff:
+            d.rig_buffs[buff.group] = {"id": buff.id, "label": buff.label, "rate": buff.rate}
+            _advance_rest_clock(d, buff.stop_minutes, "on_duty_not_driving", buff.label.lower())
+            d.hos.on_duty(buff.stop_minutes)
+        else:
+            if buff.fatigue_instant > 0.0:
+                p.fatigue = max(0.0, p.fatigue - buff.fatigue_instant)
+            p.add_timed_buff(
+                {
+                    "id": buff.id,
+                    "label": buff.label,
+                    "group": buff.group,
+                    "rate": buff.rate,
+                    "expires_h": d._absolute_game_hour() + buff.duration_game_h,
+                    "worn_off": buff.worn_off,
+                }
+            )
+            # Real off-duty time: a 30-minute meal also satisfies the
+            # break rule, same as any other break. Never extra hours.
+            _advance_rest_clock(d, buff.stop_minutes, "off_duty", buff.label.lower())
+            d.hos.take_break(buff.stop_minutes)
+        self._save_here(silent=True)
+        self.ctx.audio.play("ui/notify")
+        if carrier_pays:
+            billing = "Billed to the carrier."
+        elif price <= 0.0:
+            billing = "Free with your fuel purchase."
+        else:
+            billing = f"{price:,.0f} dollars. You have {p.money:,.0f} dollars."
+        self.ctx.say(
+            f"{buff.purchased} {billing} It is {clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+        self.refresh()
 
     def _inspect(self) -> None:
         d = self.driving
         _advance_rest_clock(d, INSPECTION_MIN)
         d.hos.on_duty(INSPECTION_MIN)
         self.ctx.audio.play("ui/notify")
+        # Whether the screening lane waves you through or pulls you in is the
+        # safety record's job. A clean career is waved through nearly every
+        # time; a career carrying citations, out-of-service history and a
+        # beaten-up truck is pulled in at every open scale.
+        selected = d._scale_selects_driver(self.stop)
+        outcome = (
+            "Officers pull you into the inspection lane."
+            if selected
+            else "Officers wave you straight back onto the highway."
+        )
         self.ctx.say(
-            f"Inspection check-in complete at {self.stop.spoken_name}. "
+            f"Inspection check-in complete at {self.stop.spoken_name}. {outcome} "
+            f"{d.safety_record_line()} "
             f"It is {clock_text(d.trip.local_hour)}. "
             f"{_deadline_text(d)}"
         )
-        self.ctx.award_achievement("inspection")
-
-    def _save_here(self, *, silent: bool = False) -> None:
-        d = self.driving
-        p = self.ctx.profile
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
-        p.active_trip = d.snapshot()
-        self.ctx.save_profile()
-        if not silent:
-            self.ctx.audio.play("ui/notify")
-            self.ctx.say(
-                f"Saved at {self.stop.spoken_name}. Your drive will resume from this rest stop."
-            )
+        _record_inspection(self.ctx)
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
@@ -625,14 +1559,13 @@ class RestStopState(MenuState):
         )
 
 
-class ParkingFullState(MenuState):
-    """The overnight lot is full: push on, or risk the shoulder."""
+class LoyaltyRewardsState(MenuState):
+    """Loyalty program reward redemption menu."""
 
-    title = "Parking full"
+    title = "Loyalty rewards"
     intro_help = (
-        "The truck parking here is full. Use up and down arrows and "
-        "Enter to choose. Escape returns to the road to find "
-        "another stop."
+        "Use up and down arrows to navigate, Enter to select. "
+        "Escape cancels and returns to the previous menu."
     )
 
     def __init__(self, ctx, driving: DrivingState, stop) -> None:
@@ -641,19 +1574,217 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient("poi/rest_stop_night")
+
+        p = self.ctx.profile
+        loyalty = p.loyalty
+
         self.ctx.say(
-            f"The truck parking at {self.stop.spoken_name} is full tonight. "
+            f"{self.title}. {loyalty.summary()} "
+            f"You are at {self.stop.spoken_name}. "
+            f"Choose a reward to redeem or go back."
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        from ..models.loyalty import reward_cost_text
+
+        p = self.ctx.profile
+        loyalty = p.loyalty
+        items: list[MenuItem] = []
+
+        # Shower credits option
+        if loyalty.shower_credits > 0:
+            items.append(
+                MenuItem(
+                    f"Use shower credit ({loyalty.shower_credits} available)",
+                    self._use_shower_credit,
+                    help="Use a shower credit earned from fueling 50+ gallons.",
+                )
+            )
+
+        # Point redemption options
+        if loyalty.can_redeem("shower"):
+            cost_text = reward_cost_text("shower")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_shower,
+                    help="Redeem loyalty points for a free shower.",
+                )
+            )
+
+        if loyalty.can_redeem("parking"):
+            cost_text = reward_cost_text("parking")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_parking,
+                    help="Redeem loyalty points for a parking discount.",
+                )
+            )
+
+        if loyalty.can_redeem("food"):
+            cost_text = reward_cost_text("food")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_food,
+                    help="Redeem loyalty points for a food discount.",
+                )
+            )
+
+        if loyalty.can_redeem("laundry"):
+            cost_text = reward_cost_text("laundry")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_laundry,
+                    help="Redeem loyalty points for a laundry discount.",
+                )
+            )
+
+        if not items:
+            items.append(
+                MenuItem(
+                    "No rewards available - need more points",
+                    None,
+                    help="Fuel at truck stops to earn loyalty points.",
+                )
+            )
+
+        items.append(
+            MenuItem(
+                "Back to truck stop",
+                self.go_back,
+                help="Return to the truck stop menu.",
+            )
+        )
+
+        return items
+
+    def _use_shower_credit(self) -> None:
+        p = self.ctx.profile
+        if p.loyalty.use_shower_credit():
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say("Shower credit used. You can now use the shower at no cost.")
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("No shower credits available.")
+
+    def _redeem_shower(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("shower")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Shower redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem shower. Insufficient points.")
+
+    def _redeem_parking(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("parking")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Parking discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem parking discount. Insufficient points.")
+
+    def _redeem_food(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("food")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Food discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem food discount. Insufficient points.")
+
+    def _redeem_laundry(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("laundry")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Laundry discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem laundry discount. Insufficient points.")
+
+
+class ParkingFullState(_FuelPumpMixin, MenuState):
+    """The overnight lot is full: fuel anyway, push on, or risk the shoulder."""
+
+    title = "Parking full"
+    intro_help = (
+        "The truck parking here is full, but the pumps are open. Use up "
+        "and down arrows and Enter to choose. Escape returns to the road "
+        "to find another stop."
+    )
+
+    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.stop = stop
+        self._fueled_here = False
+
+    def announce_entry(self) -> None:
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.current_hour))
+        # The lot and the island are separate facilities, and a driver who
+        # cannot park here can still fuel here. Saying so up front is what
+        # stops a full lot from reading as a closed truck stop.
+        pumps = " The fuel island is open." if "fuel" in set(self.stop.actions) else ""
+        self.ctx.say(
+            f"The truck parking at {self.stop.spoken_name} is full tonight.{pumps} "
             f"It is {clock_text(self.driving.trip.local_hour)}. "
             f"{self.current_text()}"
         )
 
     def build_items(self) -> list[MenuItem]:
-        return [
+        items: list[MenuItem] = []
+        if "fuel" in set(self.stop.actions):
+            # First: a driver turned away at 2 AM needs the tank before they
+            # need the choice of where to sleep, and running dry between
+            # overnight stops is the failure this ordering exists to prevent.
+            items.append(
+                MenuItem(
+                    self._fuel_label,
+                    self._refuel,
+                    help="The lot is full, but the pumps are open. Fill the tank "
+                    "at this region's diesel price, plus a 35 dollar service "
+                    "fee, then choose where to spend the night.",
+                )
+            )
+        items.append(
             MenuItem(
                 "Drive on to the next stop",
                 self._drive_on,
                 help="Return to the road and try the next rest stop.",
+            )
+        )
+        return items + [
+            MenuItem(
+                f"Motel room: sleep 10 hours for {MOTEL_COST:.0f} dollars",
+                self._motel,
+                help="The lot is full, but a motel near the exit has a bed. "
+                "Costs your own money; full-quality rest and a legal "
+                "10-hour reset.",
             ),
             MenuItem(
                 "Park on the shoulder and sleep",
@@ -668,13 +1799,51 @@ class ParkingFullState(MenuState):
         self._drive_on()
 
     def _drive_on(self) -> None:
+        # No sleep happened here, so the engine is whatever it already was --
+        # never claim it needs a restart it may not need.
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
         self.ctx.say(
-            "Back on the road. The next stop is announced as you "
-            f"approach it. Press {self.ctx.control_hint('engine')} to start the engine.",
+            "Back on the road. The next stop is announced as you approach it. "
+            "The parking brake is set. Press "
+            f"{self.ctx.control_hint('engine')} to start the engine if needed, then "
+            f"{self.ctx.control_hint('parking_brake')} to release the brake and drive on.",
             interrupt=True,
         )
+
+    def _motel(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        if p.money < MOTEL_COST:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"A motel room costs {MOTEL_COST:,.0f} dollars and you have {p.money:,.0f}."
+            )
+            return
+        p.money -= MOTEL_COST
+        # Same as every other sleep option: no truck idles all night just
+        # because the driver bedded down in a motel instead of the sleeper.
+        engine_off = _shut_down_engine(d)
+        _advance_rest_clock(d, hos.SLEEP_MIN)
+        d.hos.sleep()
+        p.fatigue = 0.0
+        p.store_truck_condition(d.truck)
+        p.active_trip = d.snapshot()
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        self.ctx.pop_state()
+        self.ctx.say(
+            f"{engine_off}You took a motel room for {MOTEL_COST:,.0f} dollars "
+            f"and slept a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"Hours of service reset and you wake fresh. You have "
+            f"{p.money:,.0f} dollars. Press {self.ctx.control_hint('engine')} "
+            "to start the engine.",
+            interrupt=True,
+        )
+        # No Five-by-Two here: the badge is ten hours IN THE BUNK, and a
+        # motel bed is the night you specifically did not spend in it
+        # (owner report, 2026-08-20). The cramped-lot sleep keeps the
+        # award -- the stop has no beds, so the lot night IS a bunk night.
 
     def _shoulder(self) -> None:
         self.ctx.push_state(

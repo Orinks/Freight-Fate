@@ -1,3 +1,17 @@
 # AppImage launcher runs on Linux; a CRLF checkout would break its shebang.
 tools/appimage/AppRun text eol=lf
 tools/appimage/*.desktop text eol=lf
+
+# Career 1.9 ships the encrypted sound pack as a regular git file. Raw audio
+# stays local. music.pak is downloaded from a private release URL when needed
+# and is not tracked.
+#
+# Marked -text so no checkout can newline-convert the pack. Git's own binary
+# detection already spares it, this just refuses to depend on that.
+src/freight_fate/sounds.pak -text
+
+# The cloud-validator invariants export is pinned byte for byte against the
+# Rust exporter's output, which is LF on every platform. A CRLF checkout
+# would make the fixture disagree with the file it is pinning.
+crates/ff-core/tests/profile_integrity_invariants.json text eol=lf
+tools/linux_smoke.sh text eol=lf

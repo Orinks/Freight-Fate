@@ -25,7 +25,8 @@ class OnlineHubState(MenuState):
         "Use up and down arrows to pick an item. Enter opens an item or "
         "changes a setting forward, Right arrow also changes a setting "
         "forward, and Left arrow changes it backward. Escape goes back. "
-        "Everything here is optional and off until you turn it on."
+        "Nothing here does anything until you connect an orinks.net account, "
+        "and everything here can be turned off again."
     )
 
     def build_items(self) -> list[MenuItem]:
@@ -37,6 +38,19 @@ class OnlineHubState(MenuState):
                 help="Hear who is hauling right now on the public orinks.net "
                 "drivers board. Viewing the board shares nothing about you.",
             ),
+            # This line's master switch survives the move into the hub: one
+            # row that stands every orinks.net and sharing service down (or
+            # back up) without losing the individual consents beneath it.
+            MenuItem(
+                lambda: f"Online services: {'on' if s.online_services else 'off'}",
+                lambda: self._toggle_online_services(1),
+                help="Master switch for the orinks.net and sharing services. "
+                "When off, the drivers board, profile sharing, cloud backup, "
+                "Mastodon sharing, and Discord presence all behave as "
+                "disabled without losing their individual settings. Live "
+                "weather, traffic, and parking are separate: they follow "
+                "their own toggles under Settings.",
+            ),
             MenuItem(
                 lambda: (
                     "orinks.net account: connected"
@@ -44,8 +58,27 @@ class OnlineHubState(MenuState):
                     else "Set up orinks.net account"
                 ),
                 self._online_account_setup,
-                help="Connect the game to your orinks.net account without turning on Profile "
-                "sharing or Cloud backup.",
+                help="Connect the game to your orinks.net account. Connecting turns "
+                "Profile sharing on and starts backing your careers up to that "
+                "account; both are single items on this menu if you want either off. "
+                "To change your driver name or sign a computer out afterwards, use "
+                "Open my driver setup page below.",
+            ),
+            # Deliberately its own row rather than a job the account row does
+            # once connected: that row is also the way back in when
+            # orinks.net stops accepting this computer, which is exactly when
+            # a player needs to re-activate rather than browse. Keeping both
+            # available means the spoken recovery advice (cloud_saves
+            # AUTH_HELP) still names something that works, and the row never
+            # changes what it does under a player's fingers.
+            MenuItem(
+                "Open my driver setup page",
+                self._open_setup_page,
+                help="Opens your orinks.net driver setup page in a browser. "
+                "That page is where you change your driver name, turn profile "
+                "sharing on or off, see the computers signed in to your "
+                "account, and sign any of them out. Nothing about it has to "
+                "be typed or remembered: the game knows the address.",
             ),
             MenuItem(
                 # The identity check lives INSIDE the label so it is
@@ -64,8 +97,11 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_online_presence(1),
                 help="Profile sharing is one optional public setting for your driver profile, "
                 "official achievements, automatic road-journal posts, updates feed, "
-                "and on-duty board activity. Nothing is shared until you set it up: "
-                "Set up the orinks.net account first. Cloud saves remain private and separate.",
+                "and on-duty board activity. Career statistics on the public profile "
+                "include lifetime career earnings; the money you currently have is "
+                "never published. Nothing is shared until you set it up: "
+                "Set up the orinks.net account first, which turns this on. "
+                "Cloud saves remain private and separate.",
             ),
             MenuItem(
                 lambda: (
@@ -77,13 +113,26 @@ class OnlineHubState(MenuState):
                 help="After each game save, upload that career to your "
                 "own orinks.net account so you can restore it on another "
                 "computer. Backups are private to your account and never "
-                "appear as public downloads. Uses the same orinks.net account sign-in.",
+                "appear as public downloads. Uses the same orinks.net account "
+                "sign-in, and comes on when you connect that account. The "
+                "career statistics on your public profile are read from these "
+                "backups, so turning this off empties them.",
             ),
             MenuItem(
-                "Restore a cloud backup",
+                # Dynamic like the Mastodon row below, and for a sharper
+                # reason: a career stops backing up entirely until someone
+                # picks which copy wins, and this row is the only place that
+                # choice can be made. Under the bare name a player who wants
+                # to KEEP what he has just played reads "Restore" as "replace
+                # my career with the cloud one" and arrows straight past the
+                # thing that would unblock him -- Brandon (armstrong445) did
+                # exactly that, landing on this row five times across twenty
+                # minutes without opening it, and signed out and re-activated
+                # instead, which cannot clear a conflict (2026-08-15). The
+                # waiting decision now says itself, on the row.
+                self._cloud_backup_label,
                 self._cloud_backup_menu,
-                help="List the careers backed up to your orinks.net account "
-                "and bring one onto this computer.",
+                help=self._cloud_backup_help,
             ),
             MenuItem(
                 # Same freshness rule as Profile sharing: the identity and
@@ -101,8 +150,10 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_mastodon_sharing(1),
                 help="When on, finishing a delivery that earns an achievement, a "
                 "level, or a perfect streak posts a short public summary "
-                "to your own Mastodon account with the FreightFate "
-                "hashtag. Routine deliveries are never posted. Link a "
+                "to your own Mastodon account with the Freight Fate Runs "
+                "hashtag, which is separate from the Freight Fate tag "
+                "players use to talk about the game. Routine deliveries "
+                "are never posted. Link a "
                 "Mastodon account first with the Mastodon account item.",
             ),
             MenuItem(
@@ -145,10 +196,14 @@ class OnlineHubState(MenuState):
         self._adjust(direction)
 
     def _adjust(self, direction: int) -> None:
-        # The board, account setup, restore, and Mastodon link rows are
-        # actions, so left/right does nothing there instead of changing a
-        # nearby toggle.
+        # The board, account setup, setup page, restore, and Mastodon link
+        # rows are actions, so left/right does nothing there instead of
+        # changing a nearby toggle. This list is positional: a row added to
+        # build_items has to be added here at the same index, or every toggle
+        # below it starts answering for its neighbour.
         actions = [
+            lambda _d: None,
+            self._toggle_online_services,
             lambda _d: None,
             lambda _d: None,
             self._toggle_online_presence,
@@ -172,10 +227,73 @@ class OnlineHubState(MenuState):
 
         self.ctx.push_state(DriversOnlineState(self.ctx))
 
+    def _toggle_online_services(self, _d: int) -> None:
+        """Toggle the master online services switch.
+
+        When turned off all online features stop immediately. Individual
+        toggle values are preserved so re-enabling restores the previous
+        configuration without re-setting each service.
+        """
+        s = self.ctx.settings
+        s.online_services = not s.online_services
+        s.save()
+        # Both directions walk the same list: every live service re-reads the
+        # master switch and stands down or reconnects to match.
+        self.ctx.apply_presence()
+        self.ctx.apply_online_presence()
+        self.ctx.apply_cloud_saves()
+        self.ctx.apply_mastodon_sharing()
+        self._announce()
+
     def _online_account_setup(self) -> None:
         from .online_states import OnlineSetupState
 
         self.ctx.push_state(OnlineSetupState(self.ctx))
+
+    def _open_setup_page(self) -> None:
+        """Open the driver setup page, or hand over the address if it cannot.
+
+        Same shape as the Mastodon link page's opener: the clipboard write is
+        attempted first so the fallback can promise something true, and
+        webbrowser.open failing is never the end of the road -- a remote or
+        streamed session is the normal case where it does nothing at all.
+        """
+        import webbrowser
+
+        from ..online_presence import setup_page_url
+        from .online_states import write_clipboard_text
+
+        url = setup_page_url()
+        copied = write_clipboard_text(url)
+        try:
+            webbrowser.open(url)
+        except Exception:
+            if copied:
+                self.ctx.say(
+                    "The browser could not be opened. The address is on your "
+                    "clipboard. Paste it into your browser's address bar.",
+                    interrupt=True,
+                )
+            else:
+                # Spelled the way a player has to type it, since neither the
+                # browser nor the clipboard is going to carry it for them.
+                self.ctx.say(
+                    "The browser could not be opened and the clipboard did "
+                    f"not take the address. Go to {url} in any browser.",
+                    interrupt=True,
+                )
+            return
+        clipboard_note = (
+            " The address is also on your clipboard in case the browser did not open."
+            if copied
+            else ""
+        )
+        self.ctx.say(
+            "Opening your driver setup page in your browser. Sign in there "
+            "with your orinks.net account to change your driver name, your "
+            "profile sharing, or the computers signed in to your account." + clipboard_note,
+            interrupt=True,
+        )
 
     def _toggle_online_presence(self, _d: int) -> None:
         from .online_states import OnlineSetupState, ProfileSharingSyncState
@@ -212,6 +330,52 @@ class OnlineHubState(MenuState):
         s.save()
         self.ctx.apply_cloud_saves()
         self._announce()
+
+    def _waiting_conflicts(self) -> list[str]:
+        """Careers whose backups are stopped until a copy is chosen.
+
+        Never raises: this feeds a menu label that is spoken on every pass
+        through the Online menu, and a cloud service that is off, missing or
+        mid-start must cost the player a menu, not the menu itself.
+        """
+        try:
+            return sorted(self.ctx.cloud_saves_service().conflicts())
+        except Exception:
+            return []
+
+    def _cloud_backup_label(self) -> str:
+        waiting = self._waiting_conflicts()
+        if not waiting:
+            return "Restore a cloud backup"
+        if len(waiting) == 1:
+            # Name the career: with several backed up, "a career" sends the
+            # player looking for which one.
+            return (
+                f"Restore a cloud backup. {waiting[0]} is waiting for you to "
+                "choose which copy to keep"
+            )
+        return (
+            f"Restore a cloud backup. {len(waiting)} careers are waiting for "
+            "you to choose which copy to keep"
+        )
+
+    def _cloud_backup_help(self) -> str:
+        base = (
+            "List the careers backed up to your orinks.net account and bring "
+            "one onto this computer."
+        )
+        if not self._waiting_conflicts():
+            return base
+        # Say the consequence before the instruction: the reason to open a
+        # row named "Restore" when you want to keep your own save is that
+        # nothing backs up until you do, and that is what a player needs to
+        # hear to override the name.
+        return (
+            "Open this to choose which copy to keep. A career here changed on "
+            "another computer, and it is not backing up at all until you "
+            "pick. Choosing this computer's save keeps what you have played "
+            "and sends it up; nothing is overwritten until you choose. " + base
+        )
 
     def _cloud_backup_menu(self) -> None:
         from .cloud_save_states import CloudBackupState

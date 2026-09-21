@@ -8,6 +8,14 @@ import os
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 os.environ["FREIGHT_FATE_NO_SPEECH"] = "1"
+# Builder machines carry the loose assets/sounds tree (it is not in the repo;
+# the shipped audio is sounds.pak). Where the tree exists, tests exercise the
+# loose-file path the sound authors rely on; a clean clone (CI) runs the same
+# suite against the committed pack instead.
+from pathlib import Path as _Path  # noqa: E402
+
+if (_Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "sounds" / "ui").exists():
+    os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] = "1"
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pytest
@@ -20,6 +28,32 @@ settings.register_profile(
     suppress_health_check=[HealthCheck.function_scoped_fixture],
 )
 settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
+
+# Ceiling on what ``-n auto`` may spawn. A worker here is not cheap: it loads
+# pygame and the audio stack, and most suites build whole App() instances, so
+# the suite is bound by that setup rather than by how many cores are free.
+# Measured on the 28-core developer machine, 140 driving tests:
+#
+#     n=4  48s    n=8  31s    n=12  33s    n=16  31s    n=auto(28)  crashed
+#
+# Past eight there is nothing left to win, and at twenty-eight the run dies
+# with an INTERNALERROR in the reporter rather than merely running slowly --
+# so the uncapped default was costing correctness, not just a usable desktop.
+# CI runners have far fewer cores than this ceiling, so they are unaffected;
+# PYTEST_XDIST_AUTO_NUM_WORKERS still overrides it either way.
+MAX_XDIST_AUTO_WORKERS = 8
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_xdist_auto_num_workers(config):
+    """Resolve ``-n auto`` to something that leaves the machine usable."""
+    override = os.environ.get("PYTEST_XDIST_AUTO_NUM_WORKERS")
+    if override:
+        try:
+            return int(override)
+        except ValueError:
+            pass  # xdist warns about this itself; fall through to the cap
+    return max(1, min(MAX_XDIST_AUTO_WORKERS, os.cpu_count() or 1))
 
 
 @pytest.fixture(autouse=True)

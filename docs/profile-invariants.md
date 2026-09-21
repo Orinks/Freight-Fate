@@ -20,12 +20,6 @@ Maintenance rule: when a feature adds or changes a field, this doc and the
 client module change **in the same PR** as the feature. A field with no
 entry here is a field the gate silently trusts.
 
-Which fields exist depends on the client line: entries marked **(1.9
-alpha)** below belong to fields the 1.9 alpha line writes; this line's
-saves do not carry them, and this line's client module mirrors only the
-fields it knows. The server enforces the full list — a rule over a field
-a given save does not carry simply does not fire for that save.
-
 ## 1. Hard invariants (client-enforced, version-stable)
 
 Ranges — all numeric fields must be finite (no NaN, no infinity):
@@ -44,13 +38,14 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 - `pay_advance`: 0 to 1,000,000.
 - `career.xp`: 0 to 100,000,000 (structural; see 2.2).
 - `career.reputation`: 0 to 100.
-- `career.deliveries`, `on_time_deliveries`: non-negative integers.
-- `career.on_time_streak`, `career.dispatch_declines_used`: non-negative
-  integers **(1.9 alpha)**.
+- `career.deliveries`, `on_time_deliveries`, `on_time_streak`,
+  `dispatch_declines_used`: non-negative integers.
 - `career.total_miles`, `career.total_earnings`: non-negative.
 - Every `truck_conditions` record **(1.9 alpha)**: `tire_wear_pct`,
   `brake_wear_pct`, `engine_wear_pct`, `damage_pct`, `chain_wear_pct`
-  each 0 to 100; `fuel_gal` 0 to the largest buildable tank.
+  each 0 to 100; `fuel_gal` 0 to the largest buildable tank (biggest
+  catalog tank plus the long-range upgrade's 50 extra gallons — 250
+  today).
 - `integrity_modified`, `integrity_notice_pending`: real booleans. The
   first is the client's sticky local-tamper mark (set when a save fails
   its per-install signature; signed into every later save so it cannot be
@@ -62,19 +57,24 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 Relations:
 
 - `on_time_deliveries` never exceeds `deliveries`.
-- `on_time_streak` never exceeds `on_time_deliveries` **(1.9 alpha)**.
+- `on_time_streak` never exceeds `on_time_deliveries`.
 - No achievement id appears twice.
 - A known upgrade key's tier never exceeds that upgrade's top tier, and no
   tier is below 1.
 
-Closed sets (stable enums — an unknown value is an edit; all **1.9
-alpha** fields today):
+Closed sets (stable enums — an unknown value is an edit):
 
 - `business_status`: `company_driver`, `leased_owner_operator`,
   `independent_authority`.
 - `truck_conditions[*].tire_type`: `all_season`, `winter`.
-- `career.purchased_endorsements` entries: `refrigerated`, `heavy_haul`,
-  `high_value`.
+- `career.purchased_endorsements` entries: any key on the credential
+  ladder (`models::credentials::CREDENTIALS` in the Rust runtime — the
+  four original keys plus `manual_transmission`, `flatbed_securement`,
+  `doubles_triples`, `hazmat`, `twic`, `lcv`). The client check reads the
+  ladder itself, so it cannot drift from the catalog.
+- `career.pending_credentials` entries: `{key, ready_at_h}` records for a
+  course paid but waiting on its background check; keys come from the
+  same closed set.
 
 Version tolerance (deliberate): unknown truck, trailer, buff, upgrade, or
 achievement KEYS pass the client check — a save written by a newer build
@@ -109,12 +109,17 @@ ceiling rather than under it: a copied value that falls even slightly
 behind a balance pass convicts the drivers who played best, which is what
 happened when a hardcoded 1.2 per mile met the 1.9 arc's higher rates.
 
-2.3 **Endorsements.** Earned endorsements come free at levels 2/3/4
-(refrigerated/heavy_haul/high_value) — they are DERIVED from level, never
-stored. Stored `purchased_endorsements` **(1.9 alpha)** mean the player
-paid the course (900 / 1,600 / 1,300 dollars); a purchased endorsement on
-a profile whose earnings history could not have afforded it is
-suspicious, not fatal.
+2.3 **Credentials.** Level-granted credentials (the carrier certificates
+at levels 2/2/3/4 and the tank endorsement at 16) are DERIVED from level,
+never stored; their rows in the exported `endorsements` table carry a
+`level`. Course-only credentials (manual transmission training, the
+doubles and hazmat endorsements, the TWIC port card, the LCV certificate)
+carry NO `level` key in the export — the site and the validator must
+never level-derive them; they are real only when stored in
+`purchased_endorsements`. A stored course on a profile whose earnings
+history could not have afforded it is suspicious, not fatal. Each row
+also carries a `tier` (`training` / `certificate` / `endorsement` /
+`specialist`) for public-profile grouping.
 
 2.4 **Achievements against the stats that earn them.** Every id in
 `achievements` (see `src/freight_fate/achievements.py` for the canonical
@@ -124,11 +129,10 @@ set) has a triggering condition; the gate spot-checks the cheap ones:
 XP, `twenty_five_grand` against `total_earnings`. An achievement without
 its stats fails.
 
-2.5 **Equipment against business status (1.9 alpha).** `owned_trucks`,
-`upgrades`, and `owned_trailers` belong to owner-operators; a
-`company_driver` with a garage full of owned equipment fails.
-`truck_conditions` keys should be a subset of `owned_trucks` plus the
-carrier's standard tractor.
+2.5 **Equipment against business status.** `owned_trucks`, `upgrades`,
+and `owned_trailers` belong to owner-operators; a `company_driver` with a
+garage full of owned equipment fails. `truck_conditions` keys should be a
+subset of `owned_trucks` plus the carrier's standard tractor.
 
 2.6 **Market sanity.** `market.multipliers` values are drawn from
 0.9 to 1.15; anything outside a small tolerance of that band is edited.
@@ -165,7 +169,20 @@ local signature no longer quarantines: the save loads, the player hears a
 one-time notice, and the profile carries the sticky `integrity_modified`
 mark from then on (mark, don't block — local play is the player's own;
 the mark is what shared features read). Quarantine (`.invalid` rename) is
-reserved for files too damaged to decode at all. Plain unsigned `.json`
-saves keep amnesty as the honest pre-signing legacy shape and convert to
-signed containers on load; an unsigned *container* is always a tamper,
-because the game never writes one.
+reserved for files too damaged to decode at all. An unsigned save is
+always a tamper, packed or plain: every build of the 1.9 line signs what
+it writes, and saves from before the line are refused by the load gate, so
+nothing honest arrives unsigned. (Plain unsigned `.json` kept an amnesty
+as the pre-signing legacy shape until 2026-09-17; by then it was only the
+easy way to edit a career, because the game signed the file on load.)
+Signed plain `.json` still converts to a signed container on load.
+
+The load gate makes one arithmetic check of its own, in
+`models/profile/plausibility.rs`: a balance above the richest start plus
+lifetime earnings plus the pay advance limit plus the equity share of the
+whole equipment catalog marks the save, valid signature or not. That is
+what a balance rewritten in memory looks like, since the game signs it
+itself. The ceiling is derived from the game's own credit sites and is
+deliberately looser than the server's to-the-dollar money rule: the server
+refuses an upload and marks nothing, while a mark made here is sticky and
+spoken, so it must never land on an honest career.

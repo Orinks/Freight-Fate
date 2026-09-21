@@ -120,7 +120,22 @@ class MessageLog:
         lapsed = self._reviewed_at is None or now - self._reviewed_at > REVIEW_WINDOW_S
         self._reviewed_at = now
         if lapsed:
-            self.filter = None
+            # The POSITION goes stale after ten seconds; the chosen category
+            # does not. Clearing both meant a driver who set the filter to
+            # events and then spent eleven seconds actually driving got
+            # dropped back to all messages -- which from the seat is
+            # indistinguishable from it happening at random (Tim S,
+            # 2026-08-21). "Show me events" is a stated preference, and it is
+            # exactly the preference someone sets to make the cab navigable.
+            #
+            # Clearing it was NOT arbitrary, though, and the reason has to
+            # survive: a filter left on Event once hid an entire delivery
+            # settlement in review (playtest). The harm there was SILENCE --
+            # the settlement was not merely filtered, it was unreachable
+            # without the player knowing there was anything to reach. So the
+            # filter stands and `hidden_newer_count` reports what it is
+            # keeping out, which answers the old bug without discarding the
+            # preference that fixed Tim's.
             self._move_to_latest()
 
     def message_in_review(self) -> Message | None:
@@ -209,6 +224,24 @@ class MessageLog:
         self.filter = self._FILTERS[position + 1]
         self._move_to_latest()
         return self.category_name()
+
+    def hidden_newer_count(self) -> int:
+        """Messages newer than the cursor that the filter is keeping out.
+
+        Zero when nothing is filtered. This is what stops a category filter
+        from hiding something the driver needed: the review can say "and two
+        newer messages outside this filter" rather than leaving them to find
+        out later that the settlement never appeared.
+        """
+        if self.filter is None:
+            return 0
+        visible = self.filtered_messages()
+        if not visible:
+            return sum(1 for m in self.messages if m.category is not self.filter)
+        self._clamp_index()
+        newest_shown = visible[self.index]
+        after = self.messages.index(newest_shown) + 1
+        return sum(1 for m in self.messages[after:] if m.category is not self.filter)
 
     def category_name(self) -> str:
         if self.filter is None:

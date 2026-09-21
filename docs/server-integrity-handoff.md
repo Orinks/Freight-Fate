@@ -29,10 +29,13 @@ Local saves:
   inside the signed payload, so hand-clearing it invalidates the signature
   and it comes right back. Mark, don't block: local single-player editing
   is the player's own business; the mark is what shared features read.
-- A packed container with no signature at all is treated as tampered (the
-  game never writes one). Plain unsigned `.json` saves keep amnesty as the
-  honest pre-signing shape and convert on load; that amnesty is scheduled
-  to retire a release or two after the container ships (see ROADMAP).
+- A save with no signature at all is treated as tampered, packed or plain
+  (the game never writes one). Plain unsigned `.json` kept an amnesty as
+  the pre-signing shape until 2026-09-17, when it retired on the 1.9 line.
+- A balance no career could hold is treated as tampered even under a valid
+  signature (`models/profile/plausibility.rs`), which catches a number
+  rewritten in memory and then saved by the game. The ceiling is looser
+  than the server's money rule on purpose; see `docs/profile-invariants.md`.
 - Files too damaged to decode are quarantined (`.invalid` rename); the
   main menu says so in plain speech.
 

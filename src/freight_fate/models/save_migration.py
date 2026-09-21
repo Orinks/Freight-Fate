@@ -9,10 +9,6 @@ survived loading before must keep loading after.
 
 from __future__ import annotations
 
-from dataclasses import asdict
-
-from .trucks import TruckCondition, build_truck_specs
-
 # Flat per-profile condition fields written by save versions 4 and earlier,
 # before each owned truck kept its own record.
 LEGACY_TRUCK_FIELDS = (
@@ -32,29 +28,16 @@ def migrate_save_data(data: dict) -> tuple[dict, bool]:
 
 
 def _migrate_to_per_truck_conditions(data: dict) -> dict:
-    """v4 -> v5: move the flat condition fields into per-truck records.
+    """Pre-per-truck save: flag the conversion, and leave the records to the
+    profile.
 
-    The truck the player was driving keeps its values (clamped to honest
-    ranges); every other owned truck starts purchase-fresh.
+    The fan-out itself lives in ``profile._migrate_flat_conditions``, which is
+    the authority on a condition record's shape on this line -- it also carries
+    brake wear, engine wear and traction gear, which this module's older
+    four-field record knew nothing about. Building the records here would
+    satisfy the profile's "already migrated?" check with a record missing those
+    fields, and the wear would be lost on every legacy save. The flat fields are
+    deliberately left in place for that fan-out to read.
     """
-    active = str(data.get("truck", "rig"))
-    owned = data.get("owned_trucks")
-    owned_keys = [str(k) for k in owned] if isinstance(owned, list) and owned else [active]
-    upgrades = data.get("upgrades")
-    if not isinstance(upgrades, dict):
-        upgrades = {}
-    conditions = {key: asdict(TruckCondition.fresh(key, upgrades)) for key in owned_keys}
-    record = conditions.setdefault(active, asdict(TruckCondition.fresh(active, upgrades)))
-    tank = build_truck_specs(active, upgrades).fuel_tank_gal
-    for legacy_key, new_key, high in (
-        ("truck_fuel_gal", "fuel_gal", tank),
-        ("truck_damage_pct", "damage_pct", 100.0),
-        ("tire_wear_pct", "tire_wear_pct", 100.0),
-        ("road_grime_pct", "grime_pct", 100.0),
-    ):
-        value = data.pop(legacy_key, None)
-        if isinstance(value, (int, float)):
-            record[new_key] = max(0.0, min(high, float(value)))
-    data["truck_conditions"] = conditions
     data["migration_notice_pending"] = True
     return data

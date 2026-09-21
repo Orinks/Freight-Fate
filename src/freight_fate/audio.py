@@ -3,11 +3,13 @@
 Two interchangeable backends sit behind the :class:`AudioEngine` facade:
 
 * **BASS** (via ``sound_lib``) — the preferred backend. The truck engine is a
-  single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides. With no audio device (headless CI) it initializes
-  BASS's "no sound" device, so the full code path still runs silently.
+  multisample ring: one real cab loop per rpm band, crossfaded equal-power
+  with per-band playback-rate tracking (BASS attribute slides). When the
+  licensed cuts are absent it falls back to the single idle loop pitched up
+  with RPM. With no audio device (headless CI) it initializes BASS's
+  "no sound" device, so the full code path still runs silently.
 * **pygame.mixer** — automatic fallback when sound_lib/BASS cannot
-  initialize. Uses the classic four-band engine loop crossfade.
+  initialize. Crossfades the same four bands at their native pitch.
 
 Set ``FREIGHT_FATE_AUDIO_BACKEND=pygame`` to skip BASS entirely.
 
@@ -22,32 +24,92 @@ extension: ``play("ui/menu_select")`` plays
 from __future__ import annotations
 
 import contextlib
+import ctypes
 import io
 import logging
+import math
 import os
+import random
+import re
+import struct
+import sys
+import threading
+import time
+import wave
 from pathlib import Path
 
 import pygame
 
-from . import assets_pack
+from . import assets_pack, cab_filter
 from .audio_fades import Fade, FadeScheduler
 from .audio_loops import SustainLoop, to_seconds
 
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
+# Licensed sound-library overlay (gitignored, never committed). A machine that
+# owns the purchased libraries drops encoded assets here under the same keys;
+# they take precedence over the committed tree, so a clean clone still runs on
+# the synthesized fallbacks. Release builds bake the overlay into sounds.pak.
+ASSETS_LICENSED = Path(__file__).parent / "assets" / "sounds-licensed"
+
+# BASS addon plugins shipped with the game. BASSHLS teaches BASS to open
+# HTTP Live Streaming radio URLs (the AFN 360 Global channels); core BASS
+# already handles plain Shoutcast/Icecast streams on its own.
+PLUGIN_LIB = Path(__file__).parent / "lib"
+
+
+def _bass_plugin_names() -> tuple[str, ...]:
+    if sys.platform == "win32":
+        return ("basshls.dll",)
+    if sys.platform == "darwin":
+        return ("libbasshls.dylib",)
+    return ("libbasshls.so",)
+
 
 # Reserved loop slots. The pygame backend maps them onto mixer channels;
 # the BASS backend uses them as keys for its stream table.
-CH_ENGINE = (0, 1, 2, 3)  # idle, low, mid, high crossfade ring (pygame only)
-CH_ROAD = 4
-CH_WEATHER = 5
-CH_WEATHER_B = 6
-CH_AMBIENT = 7
-CH_HORN = 8
-CH_REVERSE = 9
-RESERVED = 9
+CH_ENGINE = (0, 1, 2, 3, 4)  # the engine band crossfade ring (pygame only)
+CH_ROAD = 5
+CH_WEATHER = 6
+CH_WEATHER_B = 7
+CH_AMBIENT = 8
+CH_HORN = 9
+CH_REVERSE = 10
+CH_AIR = 11  # compressor charging the tanks below governor release
+CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
+CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
+CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
+CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
+CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
+CH_SIREN = 17  # the held enforcement siren, panned and levelled to the cruiser
+CH_SCALE = 18  # weigh-station approach bed, swelling on real seconds
+CH_SURGE = 19  # liquid running in a tank trailer: gated, silent on other freight
+CH_LANE_GUIDE = 20  # optional lane-guide tone, panned by the guide (off by default)
+# Everything above must be inside the reservation. set_reserved(n) protects
+# channels 0..n-1 from find_channel, and this sat at 14 while CH_RADIO_FX,
+# CH_EDGE and CH_ALERT were added above it -- so on the pygame fallback a
+# burst of one-shots could evict the FM fringe bed, the edge ladder, or the
+# stop bar's held tone mid-warning. Guidance a blind driver is steering by
+# must never be stealable: keep this one past the last named slot.
+RESERVED = CH_SURGE + 1
 NUM_CHANNELS = 32
+
+# A held alert tone is a dead man's switch. Its owner re-asserts it every
+# frame through hold_alert, and it stops on its own the moment that stops --
+# a menu opening over the drive, the moment it warned about ending, an owner
+# that lost track of it. A continuous tone in a blind player's headphones
+# must never be able to outlive the thing it is warning about: the stop bar's
+# solid tone once ran until the game was killed (Shane, 2026-08-03).
+ALERT_HOLD_TIMEOUT_S = 0.4
+
+# The same dead man's switch, for a cue its owner sounds itself instead of
+# holding on a channel -- a rhythmic tick, a manoeuvre that ends with a click.
+# The owner re-asserts the latch every frame it has, and asks ``cue_held``
+# before playing the sound that ends the cue. A driving state that lost the
+# frame to a menu comes back with the latch already lapsed, so the manoeuvre
+# ends in silence instead of clicking off over the pause screen.
+CUE_HOLD_TIMEOUT_S = 0.4
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
 # attack -> sustain -> release sound: play the attack, loop this tuned interior
@@ -55,21 +117,75 @@ NUM_CHANNELS = 32
 HORN_LOOP_START = 11816
 HORN_LOOP_END = 12379
 
-# RPM centers for the pygame engine loop crossfade.
+# The multisample engine voice: one steady cab loop per band, cut from the
+# real 896 recording at these native rpms. Both backends crossfade the ring
+# with ``engine_band_weights``; the BASS backend additionally slides each
+# band's playback rate to track rpm inside the band (see ENGINE_BAND_RATE_*).
 ENGINE_BANDS = (
-    ("engine/idle", 620),
-    ("engine/low", 1000),
-    ("engine/mid", 1500),
-    ("engine/high", 2100),
+    ("engine/idle", 680.0),
+    ("engine/low", 950.0),
+    ("engine/mid", 1150.0),
+    ("engine/midhigh", 1425.0),
+    ("engine/high", 1900.0),
 )
+ENGINE_BAND_KEYS = frozenset(key for key, _native in ENGINE_BANDS)
 
-# BASS engine model: one idle loop, pitched up with RPM.
+# The jake voice A/B: only the 1600 rpm band has a classic alternative -- it
+# is the one representative cut kept from the original synthesized jake, not
+# a full second ring -- so this is a single key swap, not a per-band table.
+JAKE_RECORDED_KEY = "engine/jake_1600"
+JAKE_CLASSIC_KEY = "engine/jake_1600_synth"
+# Every recorded jake cut is engine/jake_<rpm band>; the classic voice is the
+# one synthesized cut that stands in for all of them. Derived rather than
+# written out: a bare prefix literal reads as a sound key to the
+# asset-existence sweep, and there is no file by that name.
+JAKE_BAND_PREFIX = JAKE_RECORDED_KEY.rsplit("_", 1)[0] + "_"
+# Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
+# midpoint (log-space), this fraction of the gap wide. Two things follow:
+# a cut never plays far from its recorded speed (rate excursions stay under
+# ~16 percent -- past that the moving formants smear, the launch-pull
+# weirdness the owner heard), and the two members of a blend always track
+# the same rpm honestly, so there is no clamped-versus-tracking pitch clash
+# (the ~10 Hz "stop-start" beat at 1700-1800 under the old full-gap fade).
+ENGINE_XFADE_LOG_FRAC = 0.30
+# Safety clamp only -- the windows above keep normal tracking well inside.
+# 0.78 covers the widest pair's window edge (the 950 cut entering at ~764);
+# 1.30 up lets the 1800 cut reach redline (2200/1800 = 1.22).
+ENGINE_BAND_RATE_MIN = 0.78
+ENGINE_BAND_RATE_MAX = 1.30
+
+# Legacy BASS engine model: one idle loop, pitched up with RPM. Still the
+# fallback when the licensed multisample cuts are absent (a clean clone has
+# only the synthesized engine/idle).
 ENGINE_LOOP_KEY = "engine/idle"
+# The classic voice: the 1.8.x recording under its own key, because the
+# licensed overlay owns "engine/idle" -- when the rebuilt cuts are installed
+# the shared key IS the rebuilt idle, and the Settings "classic" promise
+# (the original engine sound) must not quietly follow it.
+ENGINE_CLASSIC_LOOP_KEY = "engine_classic/idle"
 ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 1.75
 ENGINE_SLIDE_MS = 120
+# A large rpm jump is a shift re-entry: the engine is ALREADY at the new
+# speed when the clutch hooks up, so the voice must step, not glide -- the
+# 120 ms slide across a 400 rpm drop reads as a little meow on every shift,
+# machine-gunned through a launch (owner's ear, 2026-07-22).
+ENGINE_SLIDE_SNAP_MS = 25
+ENGINE_SLIDE_SNAP_RPM = 150.0
 ENGINE_LOOP_GAIN = 1.0
+# Loop-repetition camouflage (owner + outside review, 2026-07-27): even a
+# seam-clean 1-2 s loop is recognizable -- the ear locks onto its spectral
+# fingerprint recurring at a perfectly fixed period. Each band's playback
+# rate and gain take a slow, bounded random walk, so the loop period is
+# never exactly the same twice and the recurrence stops landing where the
+# ear predicted. Rate stays within ~5 cents (well under the formant-smear
+# threshold); gain within ~0.5 dB. BASS ring only -- the pygame fallback
+# has no per-channel rate control.
+ENGINE_WOBBLE_RATE_MAX = 0.003  # +/- fraction of playback rate (~5 cents)
+ENGINE_WOBBLE_RATE_STEP = 0.004  # random-walk speed, fraction per second
+ENGINE_WOBBLE_GAIN_MAX = 0.06  # +/- fraction of band gain (~0.5 dB)
+ENGINE_WOBBLE_GAIN_STEP = 0.10
 
 # Ignition crossfade. When the engine is deliberately started, the "engine/start"
 # one-shot plays at full volume while the idle loop is held silent; near the tail
@@ -89,16 +205,107 @@ ENGINE_RESUME_FADE_S = 0.25
 ENGINE_START_SETTLE_S = 0.6  # ease from crank level down to idle load
 ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 
+# How far the ducked channels (engine, weather, and the music slot the radio
+# rides) drop while the event voice speaks, when the Settings > Audio option
+# is on: half volume, the modest broadcast-style duck -- the road stays
+# present, the words win (XAG 105; speech priority research, R13).
+SPEECH_DUCK_LEVEL = 0.5
+
+# How long the same duck holds for an EARCON, which has no voice for the
+# pacer to project. Real seconds, and sized to the cues themselves: the
+# longest ladder earcon is the two-note coaching chime at 0.18 s, so this
+# covers it and its tail without the mix audibly breathing.
+EARCON_DUCK_S = 0.25
+
 BASS_NO_SOUND_DEVICE = 0
+
+# Radio streaming (BASS only). Opening a URL blocks until the server answers;
+# on a station that has gone dark that is the operating system's own TCP
+# timeout, far longer than a player will wait and far too long to spend
+# inside a frame. The connect runs on a worker thread, bounded by these.
+# (Pattern from PR #150 by CatalystForChaos.) Thirty seconds, not the eight
+# this started at: small Icecast stations behind a home connection (Darren
+# Duff radio, 2026-08-22) can take longer than that to answer, and at eight
+# the radio wrote them off as dead and handed over while they were still
+# coming. The price is a longer silence on a station that really is gone.
+RADIO_CONNECT_TIMEOUT_MS = 30000  # give up on a station that will not answer
+RADIO_READ_TIMEOUT_MS = 30000  # and on one that answers then stalls
+# How long shutdown waits for a connect still in flight before freeing BASS.
+RADIO_SHUTDOWN_JOIN_S = 2.0
+
+
+def parse_icy_stream_title(raw) -> str | None:
+    """The song a Shoutcast/Icecast stream says it is playing, or None.
+
+    ICY metadata arrives as ``StreamTitle='Artist - Title';StreamUrl='';``
+    in whatever bytes the station felt like sending -- UTF-8 from most
+    Icecast mounts, Latin-1 from older Shoutcast ones -- so it is decoded
+    leniently and only the title field is kept. Empty, missing, or
+    whitespace-only titles are None, not "", so callers can say "no song
+    information" instead of reading out nothing.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, bytes):
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            text = raw.decode("latin-1", errors="replace")
+    else:
+        text = str(raw)
+    match = re.search(r"StreamTitle='(.*?)';", text, re.S)
+    if match is None:
+        return None
+    title = " ".join(match.group(1).split())
+    return title or None
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
     """Loose-file lookup; source checkouts and asset tooling only."""
-    for ext in extensions:
-        path = ASSETS / f"{key}.{ext}"
-        if path.exists():
-            return path
+    for root in (ASSETS_LICENSED, ASSETS):
+        for ext in extensions:
+            path = root / f"{key}.{ext}"
+            if path.exists():
+                return path
     return None
+
+
+def _pack_carries_whole_ring(pack) -> bool:
+    """Whether ``pack`` holds every engine band cut.
+
+    Cached on the pack itself; membership only, so nothing is decompressed.
+    """
+    complete = getattr(pack, "_ff_whole_ring", None)
+    if complete is None:
+        complete = all(
+            any(pack.has(f"{key}.{ext}") for ext in ("ogg", "wav")) for key in ENGINE_BAND_KEYS
+        )
+        pack._ff_whole_ring = complete
+    return complete
+
+
+# Sounds the game synthesizes at runtime rather than shipping. Registered
+# under an ordinary sound key, so play/start_loop reach them through the same
+# path as a packed asset on every backend. Deterministic by construction: the
+# generator is pure arithmetic, so the same build always produces the same
+# bytes. Used for the enforcement signature, whose whole job is to be a shape
+# nothing else in the game -- and nothing a radio station can broadcast --
+# already occupies.
+_GENERATED: dict[str, tuple[bytes, str]] = {}
+
+# Measured playing times, by sound key. See asset_length_s below.
+_LENGTHS: dict[str, float] = {}
+
+
+def register_generated_sound(key: str, data: bytes, ext: str = "wav") -> None:
+    """Publish synthesized audio under ``key`` for every backend."""
+    _GENERATED[key] = (data, ext)
+    _LENGTHS.pop(key, None)  # anything measured before this was measuring nothing
+    _CAB_SEALED.pop(key, None)  # and any sealed render of the old bytes with it
+
+
+def generated_sound_keys() -> tuple[str, ...]:
+    return tuple(sorted(_GENERATED))
 
 
 def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
@@ -107,8 +314,19 @@ def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | N
     Frozen builds carry the sounds packed into ``sounds.pak``
     (see ``assets_pack``); source checkouts read the editable
     ``assets/sounds`` tree.
+
+    The engine bands are the one exception to pack-then-loose: they crossfade
+    into each other, so they have to come from one recording. A pack that
+    predates the checkout beside it would otherwise serve four bands from the
+    pack and the fifth off disk, blending two different engines. Unless the
+    pack carries the whole ring, the ring reads from the loose tree.
     """
+    generated = _GENERATED.get(key)
+    if generated is not None:
+        return generated
     pack = assets_pack.open_default()
+    if pack is not None and key in ENGINE_BAND_KEYS and not _pack_carries_whole_ring(pack):
+        pack = None
     if pack is not None:
         for ext in extensions:
             data = pack.read(f"{key}.{ext}")
@@ -121,6 +339,91 @@ def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | N
         except OSError:
             log.warning("Unreadable sound file: %s", path, exc_info=True)
     return None
+
+
+# Engine band cuts with the sealed-cab transfer applied, by key. The transfer
+# is deterministic and the cuts change only on a repack, so sealing each cut
+# once per process is enough for every engine start after the first.
+_CAB_SEALED: dict[str, tuple[bytes, str]] = {}
+
+
+def _playback_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
+    """Bytes for a sound as the player should HEAR it.
+
+    The engine band cuts pass through the sealed-cab transfer
+    (``cab_filter``, owner's ear 2026-08-13): the recorded voice reads as a
+    truck heard from outside, and the cab between engine and ear is applied
+    here, at load, rather than baked into assets -- feedback rounds are
+    parameter tweaks. The classic voice's ogg keeps its old sound untouched,
+    and non-engine keys pass straight through.
+    """
+    if key not in ENGINE_BAND_KEYS:
+        return _asset_bytes(key, extensions)
+    cached = _CAB_SEALED.get(key)
+    if cached is not None:
+        return cached
+    found = _asset_bytes(key, extensions)
+    if found is not None and found[1] == "wav":
+        found = (cab_filter.seal_wav(found[0]), "wav")
+    if found is not None:
+        _CAB_SEALED[key] = found
+    return found
+
+
+def _wav_seconds(data: bytes) -> float:
+    with contextlib.closing(wave.open(io.BytesIO(data), "rb")) as clip:
+        rate = clip.getframerate()
+        return clip.getnframes() / rate if rate > 0 else 0.0
+
+
+def _ogg_seconds(data: bytes) -> float:
+    """Playing time of an Ogg Vorbis stream, from its own page headers.
+
+    The last page's granule position IS the final sample number, and the
+    sample rate sits in the identification header on the first page, so the
+    whole answer is two reads and a division -- no decoding, no backend, and
+    the same number on a machine with no audio device at all.
+    """
+    first = data.find(b"OggS")
+    if first < 0 or len(data) < first + 28:
+        return 0.0
+    packet = first + 27 + data[first + 26]  # page header, then its segment table
+    if data[packet : packet + 7] != b"\x01vorbis":
+        return 0.0
+    (rate,) = struct.unpack_from("<I", data, packet + 12)
+    last = data.rfind(b"OggS")
+    if last < 0 or rate <= 0:
+        return 0.0
+    (granule,) = struct.unpack_from("<q", data, last + 6)
+    return granule / rate if granule > 0 else 0.0
+
+
+def asset_length_s(key: str) -> float:
+    """How long the clip behind ``key`` sounds for, in seconds.
+
+    Zero when the key resolves to nothing, or to a container this cannot
+    measure. Cached, because callers ask about the same handful of keys
+    repeatedly and the answer cannot change while the game is running.
+
+    A one-shot handed to :meth:`AudioEngine.play` comes back with no handle,
+    so a caller that needs to know when it has finished -- the Learn game
+    sounds demo, which must not lay a second copy over the first -- has this
+    and nothing else to go on.
+    """
+    cached = _LENGTHS.get(key)
+    if cached is not None:
+        return cached
+    found = _asset_bytes(key, ("ogg", "wav"))
+    seconds = 0.0
+    if found is not None:
+        data, ext = found
+        try:
+            seconds = _ogg_seconds(data) if ext == "ogg" else _wav_seconds(data)
+        except Exception:  # noqa: BLE001 - an unreadable header is "unknown", never a crash
+            log.warning("Could not measure the length of %s", key, exc_info=True)
+            seconds = 0.0
+    _LENGTHS[key] = seconds
+    return seconds
 
 
 def verify_sound_assets() -> None:
@@ -143,6 +446,53 @@ def engine_freq_mult(rpm: float) -> float:
     return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
 
 
+def engine_band_weights(rpm: float, natives: tuple[float, ...]) -> tuple[float, ...]:
+    """Crossfade weights for the engine band ring at ``rpm``.
+
+    Below the first native rpm the first band carries alone, above the last
+    the last does. Between neighbours, one band carries alone until the rpm
+    enters the pair's narrow log-space window around their geometric
+    midpoint (ENGINE_XFADE_LOG_FRAC of the gap); inside it the pair blends
+    equal-power (the loops are uncorrelated recordings, so cos/sin keeps
+    the summed level flat). The pure zones either side of each window are
+    what keep every sounding cut close to its recorded speed.
+    """
+    n = len(natives)
+    weights = [0.0] * n
+    if rpm <= natives[0]:
+        weights[0] = 1.0
+    elif rpm >= natives[-1]:
+        weights[-1] = 1.0
+    else:
+        for i in range(n - 1):
+            if rpm <= natives[i + 1]:
+                # Position within the gap in log space, remapped through the
+                # centered window: below it the lower band is pure, above it
+                # the upper band is pure.
+                t = math.log(rpm / natives[i]) / math.log(natives[i + 1] / natives[i])
+                half = ENGINE_XFADE_LOG_FRAC / 2.0
+                s = (t - (0.5 - half)) / ENGINE_XFADE_LOG_FRAC
+                if s <= 0.0:
+                    weights[i] = 1.0
+                elif s >= 1.0:
+                    weights[i + 1] = 1.0
+                else:
+                    weights[i] = math.cos(s * math.pi / 2.0)
+                    weights[i + 1] = math.sin(s * math.pi / 2.0)
+                break
+    return tuple(weights)
+
+
+# Facility docks: big-room interiors get the warehouse loop, yards the gate.
+_WAREHOUSE_FACILITY_TYPES = {"warehouse", "dry_warehouse", "cold_storage", "distribution"}
+
+
+def facility_ambient_key(facility_type: str) -> str:
+    if facility_type in _WAREHOUSE_FACILITY_TYPES:
+        return "ambient/warehouse"
+    return "poi/facility_gate"
+
+
 def engine_load_gain(throttle: float) -> float:
     """Audible engine effort: present off-throttle, fuller under power.
 
@@ -158,6 +508,8 @@ def engine_load_gain(throttle: float) -> float:
 
 
 def _one_shot_category(key: str) -> str:
+    if key.startswith("enforcement/") or key == "events/police_siren":
+        return "siren"
     if key.startswith("ui/"):
         return "ui"
     if key.startswith("weather/"):
@@ -172,6 +524,11 @@ def _loop_category(channel: int) -> str:
         return "engine"
     if channel in (CH_WEATHER, CH_WEATHER_B):
         return "weather"
+    if channel == CH_SIREN:
+        # Off the shared sfx bus on purpose: a siren behind you is the one
+        # sound in the game that must be raisable without dragging every
+        # clunk, hiss and chime up with it.
+        return "siren"
     return "sfx"
 
 
@@ -179,6 +536,11 @@ class _PygameBackend:
     """The original pygame.mixer implementation (engine band crossfade)."""
 
     name = "pygame"
+    # While the event voice speaks, engine/weather/music step down to this
+    # and back (see AudioEngine.set_speech_duck). Not a setting value:
+    # settings own the volumes, this rides on top of them. A class default,
+    # so the bare-__new__ backends tests build carry it too.
+    speech_duck = 1.0
 
     def __init__(self) -> None:
         self.enabled = False
@@ -188,8 +550,10 @@ class _PygameBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
+        self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
         # channel -> sustain-loop state (segment Sounds + phase); see
         # start_sustain_loop. Kept separate from _loops so per-frame update()
         # can re-queue the loop body for gapless repetition.
@@ -202,6 +566,8 @@ class _PygameBackend:
         self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._engine_last_throttle = 0.0
+        self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
         try:
             if not pygame.mixer.get_init():
@@ -220,7 +586,7 @@ class _PygameBackend:
             return None
         snd = self._cache.get(key)
         if snd is None:
-            found = _asset_bytes(key, ("ogg", "wav"))
+            found = _playback_bytes(key, ("ogg", "wav"))
             if found is None:
                 log.warning("Missing or unreadable sound: %s", key)
                 return None
@@ -271,6 +637,10 @@ class _PygameBackend:
             self._loops[channel] = (key, volume)
             self._apply_channel_volume(channel)
 
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._loop_pans[channel] = max(-1.0, min(1.0, pan))
+        self._apply_channel_volume(channel)
+
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         if not self.enabled:
             return
@@ -280,6 +650,7 @@ class _PygameBackend:
         if channel in self._loops:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
+        self._loop_pans.pop(channel, None)
 
     def _build_segments(self, key: str, loop_start: int, loop_end: int):
         """Slice a decoded sound into (head, body, tail) Sounds; cached per key.
@@ -418,7 +789,13 @@ class _PygameBackend:
             0.0,
             min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
         )
-        pygame.mixer.Channel(channel).set_volume(vol)
+        pan = self._loop_pans.get(channel, 0.0)
+        if pan:
+            left = vol * (1.0 - max(0.0, pan))
+            right = vol * (1.0 + min(0.0, pan))
+            pygame.mixer.Channel(channel).set_volume(left, right)
+        else:
+            pygame.mixer.Channel(channel).set_volume(vol)
 
     # -- truck engine crossfade ----------------------------------------------
 
@@ -538,20 +915,29 @@ class _PygameBackend:
             self.play("engine/shutdown")
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
-        """Crossfade the four engine loops around the current RPM."""
+        """Crossfade the engine band loops around the current RPM."""
         if not (self.enabled and self._engine_running):
             return
         self._engine_last_rpm = rpm
+        self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
         # During the ignition handoff, boost load toward full so the loop meets
         # the crank tail; the boost eases back to 0 afterward.
         load_gain += self._engine_intro_load * (1.0 - load_gain)
-        for i, (_key, center) in enumerate(ENGINE_BANDS):
-            # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
-            w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
+        weights = engine_band_weights(rpm, tuple(native for _key, native in ENGINE_BANDS))
+        for i, w in enumerate(weights):
             self.set_loop_volume(
-                CH_ENGINE[i], ENGINE_LOOP_GAIN * w * load_gain * self._engine_intro_gain
+                CH_ENGINE[i],
+                ENGINE_LOOP_GAIN * w * load_gain * self._engine_duck * self._engine_intro_gain,
             )
+
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self._engine_duck:
+            return
+        self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def set_road_noise(self, speed_mps: float) -> None:
         gain = min(1.0, speed_mps / 30.0)
@@ -573,7 +959,11 @@ class _PygameBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if not self.enabled or self._music_track == track:
             return
-        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        # Music ships as Opus (tools/encode_music_opus.py): far smaller for
+        # background beds at the same perceived quality. Ogg stays in the
+        # preference list so a partial migration and the effects tree, which
+        # are still Vorbis, keep resolving.
+        found = _asset_bytes(f"music/{track}", ("opus", "ogg", "wav"))
         if found is None:
             log.warning("Missing music track: %s", track)
             return
@@ -581,12 +971,40 @@ class _PygameBackend:
         try:
             buffer = io.BytesIO(data)
             pygame.mixer.music.load(buffer, namehint=ext)
-            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
             pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
             self._music_buffer = buffer
         except pygame.error:
             log.warning("Could not play music %s", track, exc_info=True)
+
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
+
+    def radio_now_playing(self) -> str | None:
+        return None
+
+    def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
+        """Play one media file from disk on the music channel.
+
+        Raises RuntimeError when the file cannot be read or decoded, so the
+        radio layer can skip to the next playlist entry."""
+        if not self.enabled:
+            raise RuntimeError("audio disabled")
+        try:
+            with open(path, "rb") as f:
+                data = f.read()
+            buffer = io.BytesIO(data)
+            pygame.mixer.music.load(buffer, namehint=path.rsplit(".", 1)[-1])
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
+            pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
+        except (OSError, pygame.error) as exc:
+            raise RuntimeError(f"could not play {path}") from exc
+        self._music_track = f"file:{path}"
+        self._music_buffer = buffer
+
+    def music_playing(self) -> bool:
+        return self._music_track is not None and bool(pygame.mixer.music.get_busy())
 
     def stop_music(self, fade_ms: int = 1000) -> None:
         if not self.enabled or self._music_track is None:
@@ -597,11 +1015,25 @@ class _PygameBackend:
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
-        return {
+        volume = {
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
+            "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
+        if category in ("engine", "weather"):
+            volume *= self.speech_duck
+        return volume
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Scale engine, weather, and music under the event voice, live."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self.speech_duck:
+            return
+        self.speech_duck = duck
+        # Reapply everything the factor touches; set_volumes with no
+        # arguments is exactly that pass.
+        self.set_volumes()
 
     def set_volumes(
         self,
@@ -611,6 +1043,7 @@ class _PygameBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -624,12 +1057,14 @@ class _PygameBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
         if not self.enabled:
             return
         for ch in list(self._loops):
             self._apply_channel_volume(ch)
         if self._music_track is not None:
-            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
 
     def shutdown(self) -> None:
         if self.enabled:
@@ -647,23 +1082,39 @@ class _BassBackend:
     """
 
     name = "bass"
+    # While the event voice speaks, engine/weather/music step down to this
+    # and back (see AudioEngine.set_speech_duck). Not a setting value:
+    # settings own the volumes, this rides on top of them. A class default,
+    # so the bare-__new__ backends tests build carry it too.
+    speech_duck = 1.0
 
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
             BASS_ATTRIB_FREQ,
             BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_CONFIG_NET_READTIMEOUT,
+            BASS_CONFIG_NET_TIMEOUT,
             BASS_POS_BYTE,
+            BASS_TAG_META,
             BASS_ChannelBytes2Seconds,
             BASS_ChannelGetLength,
+            BASS_ChannelGetTags,
             BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
+            BASS_SetConfig,
         )
         from sound_lib.main import BassError, bass_call
         from sound_lib.output import Output
-        from sound_lib.stream import FileStream
+        from sound_lib.stream import FileStream, URLStream
+
+        BASS_SetConfig(BASS_CONFIG_NET_TIMEOUT, RADIO_CONNECT_TIMEOUT_MS)
+        BASS_SetConfig(BASS_CONFIG_NET_READTIMEOUT, RADIO_READ_TIMEOUT_MS)
 
         self._FileStream = FileStream
+        self._URLStream = URLStream
+        self._get_tags = BASS_ChannelGetTags
+        self._TAG_META = BASS_TAG_META
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
@@ -681,6 +1132,7 @@ class _BassBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
         # slot -> (key, stream) still ringing out its release tail after a
@@ -693,12 +1145,33 @@ class _BassBackend:
         self._engine_running = False
         self._engine_stream = None
         self._engine_base_freq = 0.0
+        # Multisample ring: (native_rpm, stream, base_freq) per resolved band.
+        # Empty when running on the legacy single pitched loop.
+        self._engine_bands: list[tuple[float, object, float]] = []
+        # Player preference: True forces the legacy pitched loop even when
+        # the multisample cuts are installed (Settings, "classic").
+        self.engine_voice_classic = False
         self._engine_intro_stream = None  # ignition one-shot, kept for the crossfade
         self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
         self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._engine_last_throttle = 0.0
+        self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
+        self._engine_wobble: list[list[float]] = []
+        self._wobble_rng = random.Random()
+        # Radio connects happen on worker threads (see play_radio_stream);
+        # every field below is guarded by _radio_lock. The generation counter
+        # tells a finished worker whether its request is still the current
+        # one; the pending slot is how an opened stream crosses back to the
+        # game thread, which alone touches _music_stream.
+        self._radio_lock = threading.Lock()
+        self._radio_generation = 0
+        self._radio_pending: tuple[str, int, object] | None = None  # (url, fade_ms, stream)
+        self._radio_connecting_url: str | None = None
+        self._radio_failed_url: str | None = None
+        self._radio_threads: list[threading.Thread] = []
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -708,7 +1181,62 @@ class _BassBackend:
             except BassError:
                 log.warning("No audio device; using the BASS no-sound device")
                 self._output = Output(device=BASS_NO_SOUND_DEVICE)
+        self._log_output_device()
+        self._load_plugins()
         self.enabled = True
+
+    def _log_output_device(self) -> None:
+        """Name the output device the game is about to play through.
+
+        A player reporting silence is far more often pointed at the wrong
+        device -- speech on one output, the game on the system default -- or
+        muted, than missing a sound file. The log could not tell those apart
+        without naming the device, so it names it.
+        """
+        try:
+            index = self._output.get_device()
+            names = self._output.get_device_names()
+            name = names[index - 1] if 0 < index <= len(names) else "unknown"
+        except Exception:  # diagnostics must never be the thing that fails
+            log.info("Audio output device: could not be identified", exc_info=True)
+            return
+        if index != BASS_NO_SOUND_DEVICE:
+            log.info("Audio output device %d: %s", index, name)
+        elif os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
+            # Asked for: headless runs, tests, and the release smoke check.
+            log.info("Audio output: no-sound device, as asked for by this run")
+        else:
+            # Not asked for, and the reason a player hears nothing.
+            log.warning("Audio output is the BASS no-sound device; nothing will be audible")
+
+    def _load_plugins(self) -> None:
+        """Load optional BASS addon plugins (currently BASSHLS).
+
+        A missing or refused plugin is not an error: stations that need it
+        simply fail to open and the radio falls back with a spoken note.
+        """
+        import sound_lib
+        from sound_lib.external.pybass import BASS_UNICODE, BASS_PluginLoad
+
+        lib_dirs = (PLUGIN_LIB, Path(sound_lib.__file__).parent / "lib")
+        for name in _bass_plugin_names():
+            for lib_dir in lib_dirs:
+                path = lib_dir / name
+                if not path.is_file():
+                    continue
+                # UTF-16 + BASS_UNICODE sidesteps ANSI-codepage install paths.
+                if sys.platform == "win32":
+                    handle = BASS_PluginLoad(
+                        str(path).encode("utf-16-le") + b"\x00\x00", BASS_UNICODE
+                    )
+                else:
+                    handle = BASS_PluginLoad(str(path), 0)
+                if handle:
+                    log.info("Loaded BASS plugin: %s", path)
+                    break
+                log.warning("BASS could not load plugin: %s", path)
+            else:
+                log.info("BASS plugin not present: %s", name)
 
     # -- assets -------------------------------------------------------------
 
@@ -733,7 +1261,7 @@ class _BassBackend:
         return stream
 
     def _sfx_stream(self, key: str, looping: bool = False):
-        found = _asset_bytes(key, ("ogg", "wav"))
+        found = _playback_bytes(key, ("ogg", "wav"))
         if found is None:
             log.warning("Missing sound: %s", key)
             return None
@@ -822,6 +1350,16 @@ class _BassBackend:
             key, _, stream = self._loops[channel]
             self._loops[channel] = (key, volume, stream)
             self._apply_loop_volume(channel)
+
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        if channel not in self._loops:
+            return
+        stream = self._loops[channel][2]
+        # A dying stream drops its pan silently; the volume path logs.
+        with contextlib.suppress(self._BassError):
+            self._bass_call(
+                self._set_attr, stream.handle, self._ATTRIB_PAN, max(-1.0, min(1.0, pan))
+            )
 
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         releasing = self._releasing.pop(channel, None)
@@ -967,15 +1505,47 @@ class _BassBackend:
                     curve=ENGINE_START_FADE_IN_CURVE,
                 )
             )
-        stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
-        if stream is not None:
-            try:
-                self._engine_base_freq = stream.get_frequency()
-                stream.set_volume(0.0)
-                stream.play()
-            except self._BassError:
-                stream = None
-        self._engine_stream = stream
+        self._engine_bands = []
+        self._engine_wobble = []
+        if not self.engine_voice_classic:
+            for key, native in ENGINE_BANDS:
+                band_stream = self._sfx_stream(key, looping=True)
+                if band_stream is None:
+                    continue
+                try:
+                    base_freq = band_stream.get_frequency()
+                    band_stream.set_volume(0.0)
+                    band_stream.play()
+                except self._BassError:
+                    continue
+                self._engine_bands.append((native, band_stream, base_freq))
+                self._engine_wobble.append([0.0, 0.0])  # [rate walk, gain walk]
+        if len(self._engine_bands) < 2:
+            # Not enough cuts for a crossfade ring (a clean clone carries only
+            # the synthesized engine/idle): legacy single pitched loop.
+            for _native, band_stream, _freq in self._engine_bands:
+                with contextlib.suppress(self._BassError):
+                    band_stream.stop()
+            self._engine_bands = []
+            stream = None
+            if self.engine_voice_classic:
+                stream = self._sfx_stream(ENGINE_CLASSIC_LOOP_KEY, looping=True)
+                if stream is None:
+                    log.warning(
+                        "Classic engine cut %s is not in this build; using %s pitched instead",
+                        ENGINE_CLASSIC_LOOP_KEY,
+                        ENGINE_LOOP_KEY,
+                    )
+            if stream is None:
+                stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
+            if stream is not None:
+                try:
+                    self._engine_base_freq = stream.get_frequency()
+                    stream.set_volume(0.0)
+                    stream.play()
+                except self._BassError:
+                    stream = None
+            self._engine_stream = stream
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
     def _begin_engine_start_crossfade(self) -> None:
@@ -1065,17 +1635,32 @@ class _BassBackend:
 
     def _set_engine_intro_gain(self, gain: float) -> None:
         self._engine_intro_gain = max(0.0, min(1.0, gain))
-        self.set_engine_rpm(self._engine_last_rpm)
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def _set_engine_intro_load(self, value: float) -> None:
         self._engine_intro_load = max(0.0, min(1.0, value))
-        self.set_engine_rpm(self._engine_last_rpm)
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def _end_engine_starting(self) -> None:
         self._engine_starting = False
 
     def update(self, dt: float) -> None:
+        self._collect_radio_stream()
         self._fades.update(dt)
+        # Advance the per-band anti-repetition walks; set_engine_rpm applies
+        # them. Diffusion scales with sqrt(dt) so the walk speed is frame-rate
+        # independent; the clamp keeps each walk meandering inside its box.
+        if self._engine_wobble and dt > 0.0:
+            scale = math.sqrt(dt)
+            for wob in self._engine_wobble:
+                for i, (step, bound) in enumerate(
+                    (
+                        (ENGINE_WOBBLE_RATE_STEP, ENGINE_WOBBLE_RATE_MAX),
+                        (ENGINE_WOBBLE_GAIN_STEP, ENGINE_WOBBLE_GAIN_MAX),
+                    )
+                ):
+                    wob[i] += self._wobble_rng.uniform(-step, step) * scale
+                    wob[i] = max(-bound, min(bound, wob[i]))
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         self.reverse_stop()
@@ -1087,6 +1672,10 @@ class _BassBackend:
         self._engine_intro_load = 0.0
         self._engine_starting = False
         self._engine_intro_stream = None
+        for _native, stream, _freq in self._engine_bands:
+            self._fade_out(stream, 250)
+        self._engine_bands = []
+        self._engine_wobble = []
         if self._engine_stream is not None:
             self._fade_out(self._engine_stream, 250)
             self._engine_stream = None
@@ -1094,33 +1683,76 @@ class _BassBackend:
             self.play("engine/shutdown")
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
-        """Slide the engine loop's playback frequency to track RPM."""
-        if not (self._engine_running and self._engine_stream is not None):
+        """Track RPM: crossfade the multisample ring, or pitch the legacy loop.
+
+        With the ring, each band's playback rate also slides toward
+        ``rpm / native_rpm`` (clamped) so the pitch is continuous through a
+        crossfade instead of stepping between the cuts' recorded speeds.
+        """
+        if not (self._engine_running and (self._engine_bands or self._engine_stream)):
             return
+        # A step-sized rpm change (shift re-entry) snaps; wander glides.
+        slide_ms = (
+            ENGINE_SLIDE_SNAP_MS
+            if abs(rpm - self._engine_last_rpm) > ENGINE_SLIDE_SNAP_RPM
+            else ENGINE_SLIDE_MS
+        )
         self._engine_last_rpm = rpm
-        target = self._engine_base_freq * engine_freq_mult(rpm)
+        self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
         # During the ignition handoff, boost load toward full so the loop meets
         # the crank tail; the boost eases back to 0 afterward.
         load_gain += self._engine_intro_load * (1.0 - load_gain)
-        vol = max(
+        level = max(
             0.0,
             min(
                 1.0,
                 ENGINE_LOOP_GAIN
                 * load_gain
+                * self._engine_duck
                 * self.engine_volume
+                * self.speech_duck
                 * self.master_volume
                 * self._engine_intro_gain,
             ),
         )
+        if self._engine_bands:
+            natives = tuple(native for native, _stream, _freq in self._engine_bands)
+            weights = engine_band_weights(rpm, natives)
+            for (native, stream, base_freq), w, wob in zip(
+                self._engine_bands, weights, self._engine_wobble, strict=True
+            ):
+                rate = max(ENGINE_BAND_RATE_MIN, min(ENGINE_BAND_RATE_MAX, rpm / native))
+                rate *= 1.0 + wob[0]
+                try:
+                    self._bass_call(
+                        self._slide,
+                        stream.handle,
+                        self._ATTRIB_FREQ,
+                        base_freq * rate,
+                        slide_ms,
+                    )
+                    stream.set_volume(level * w * (1.0 + wob[1]))
+                except self._BassError:
+                    self._engine_bands = []
+                    return
+            return
+        target = self._engine_base_freq * engine_freq_mult(rpm)
         try:
             self._bass_call(
-                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
+                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, slide_ms
             )
-            self._engine_stream.set_volume(vol)
+            self._engine_stream.set_volume(level)
         except self._BassError:
             self._engine_stream = None
+
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self._engine_duck:
+            return
+        self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def set_road_noise(self, speed_mps: float) -> None:
         gain = min(1.0, speed_mps / 30.0)
@@ -1139,9 +1771,7 @@ class _BassBackend:
                     base_freq = stream.get_frequency()
                     stream._road_base_freq = base_freq
                 target = base_freq * mult
-                self._bass_call(
-                    self._slide, stream.handle, self._ATTRIB_FREQ, target, 120
-                )
+                self._bass_call(self._slide, stream.handle, self._ATTRIB_FREQ, target, 120)
             except self._BassError:
                 pass
 
@@ -1158,7 +1788,12 @@ class _BassBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if self._music_track == track:
             return
-        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        self._cancel_radio_connect()
+        # Music ships as Opus (tools/encode_music_opus.py): far smaller for
+        # background beds at the same perceived quality. Ogg stays in the
+        # preference list so a partial migration and the effects tree, which
+        # are still Vorbis, keep resolving.
+        found = _asset_bytes(f"music/{track}", ("opus", "ogg", "wav"))
         if found is None:
             log.warning("Missing music track: %s", track)
             return
@@ -1176,7 +1811,7 @@ class _BassBackend:
                 self._slide,
                 stream.handle,
                 self._ATTRIB_VOL,
-                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
                 max(0, int(fade_ms)),
             )
         except self._BassError:
@@ -1185,7 +1820,182 @@ class _BassBackend:
         self._music_stream = stream
         self._music_track = track
 
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        """Tune a live internet stream, connecting off the game thread.
+
+        Opening a URL blocks until the server answers, which on a dead or
+        stalling station is seconds -- too long to spend inside a frame. The
+        connect runs on a worker; update() collects the opened stream back on
+        the game thread. A failed connect raises on the NEXT call for the
+        same URL, which is exactly when the driving state's reconnect loop
+        retries a silent radio -- the fallback machinery still gets its
+        exception and speaks, just without the freeze.
+        """
+        # Same URL only dedupes while the stream is actually producing audio;
+        # a stalled or dead connection must be torn down and recreated, or a
+        # re-tune to the same station silently does nothing.
+        if self._music_track == url and self.music_playing():
+            return
+        with self._radio_lock:
+            if url == self._radio_connecting_url:
+                return  # already on its way; silence is the caller's retry cue
+            if self._radio_failed_url == url:
+                # The last attempt never produced audio; say so now, and let
+                # a later tune back to this station start a fresh attempt.
+                self._radio_failed_url = None
+                raise RuntimeError("radio stream unavailable")
+            self._radio_generation += 1
+            generation = self._radio_generation
+            self._radio_pending = None
+            self._radio_connecting_url = url
+        if self._music_stream is not None:
+            self._fade_out(self._music_stream, 800)
+            self._music_stream = None
+            self._music_track = None
+        thread = threading.Thread(
+            target=self._radio_worker,
+            args=(url, generation, max(0, int(fade_ms))),
+            name="radio-connect",
+            daemon=True,
+        )
+        with self._radio_lock:
+            self._radio_threads = [t for t in self._radio_threads if t.is_alive()]
+            self._radio_threads.append(thread)
+        thread.start()
+
+    def _radio_worker(self, url: str, generation: int, fade_ms: int) -> None:
+        """Open a stream off-thread, unless the driver has moved on since."""
+        try:
+            stream = self._URLStream(url=url, autofree=True)
+        except Exception:  # BassError, but a bad URL can raise from ctypes too
+            log.info("Radio stream unavailable: %s", url, exc_info=True)
+            with self._radio_lock:
+                if generation == self._radio_generation:
+                    self._radio_failed_url = url
+                    self._radio_connecting_url = None
+            return
+        with self._radio_lock:
+            if generation == self._radio_generation:
+                self._radio_pending = (url, fade_ms, stream)
+                self._radio_connecting_url = None
+                stream = None  # handed over to the game thread
+        if stream is not None:  # a newer request already won
+            with contextlib.suppress(Exception):
+                stream.free()
+
+    def _collect_radio_stream(self) -> None:
+        """Wire up a stream a worker finished opening; game thread only."""
+        with self._radio_lock:
+            pending, self._radio_pending = self._radio_pending, None
+        if pending is None:
+            return
+        url, fade_ms, stream = pending
+        if self._music_track is not None:
+            # Something else claimed the music channel while the station was
+            # connecting (a menu bed, another tune); the late arrival loses.
+            with contextlib.suppress(Exception):
+                stream.free()
+            return
+        try:
+            stream.set_volume(0.0)
+            stream.play()
+            self._bass_call(
+                self._slide,
+                stream.handle,
+                self._ATTRIB_VOL,
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
+                fade_ms,
+            )
+        except self._BassError:
+            log.warning("Could not play radio stream: %s", url, exc_info=True)
+            with self._radio_lock:
+                self._radio_failed_url = url
+            return
+        self._music_stream = stream
+        self._music_track = url
+
+    def _cancel_radio_connect(self) -> None:
+        """Orphan any connect in flight; its stream is freed, not wired up."""
+        with self._radio_lock:
+            self._radio_generation += 1
+            pending, self._radio_pending = self._radio_pending, None
+            self._radio_connecting_url = None
+            self._radio_failed_url = None
+        if pending is not None:
+            with contextlib.suppress(Exception):
+                pending[2].free()
+
+    def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
+        """Play one media file from disk on the music channel.
+
+        Reads the bytes and decodes from memory like the shipped music does,
+        so a NAS path is read once per track rather than streamed over SMB.
+        Raises RuntimeError when the file cannot be read or decoded, so the
+        radio layer can skip to the next playlist entry."""
+        key = f"file:{path}"
+        self._cancel_radio_connect()
+        try:
+            with open(path, "rb") as f:
+                data = f.read()
+        except OSError as exc:
+            raise RuntimeError(f"could not read {path}") from exc
+        if self._music_stream is not None:
+            self._fade_out(self._music_stream, 800)
+            self._music_stream = None
+            self._music_track = None
+        stream = self._stream(data, key, looping=False)
+        if stream is None:
+            raise RuntimeError(f"could not decode {path}")
+        try:
+            stream.set_volume(0.0)
+            stream.play()
+            self._bass_call(
+                self._slide,
+                stream.handle,
+                self._ATTRIB_VOL,
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
+                max(0, int(fade_ms)),
+            )
+        except self._BassError as exc:
+            raise RuntimeError(f"could not play {path}") from exc
+        self._music_stream = stream
+        self._music_track = key
+
+    def music_playing(self) -> bool:
+        if self._music_stream is None:
+            return False
+        try:
+            return bool(self._music_stream.is_playing)
+        except Exception:
+            return False
+
+    def radio_now_playing(self) -> str | None:
+        """The song title the playing stream reports in its ICY metadata.
+
+        Read straight off the BASS channel each call: the tag block is a
+        pointer into BASS's own buffer, so this is a string copy, not a
+        network round trip. None when nothing is streaming, when the stream
+        carries no metadata, or when the last title block was empty.
+        """
+        stream = self._music_stream
+        if stream is None or not self.music_playing():
+            return None
+        try:
+            addr = self._get_tags(stream.handle, self._TAG_META)
+        except Exception:
+            return None
+        if not addr:
+            return None
+        try:
+            raw = ctypes.string_at(addr)
+        except Exception:
+            return None
+        return parse_icy_stream_title(raw)
+
     def stop_music(self, fade_ms: int = 1000) -> None:
+        # Cancel before the early return: a radio still connecting has no
+        # stream yet, and stopping the radio must orphan that connect too.
+        self._cancel_radio_connect()
         if self._music_stream is None:
             return
         self._fade_out(self._music_stream, fade_ms)
@@ -1195,11 +2005,25 @@ class _BassBackend:
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
-        return {
+        volume = {
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
+            "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
+        if category in ("engine", "weather"):
+            volume *= self.speech_duck
+        return volume
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Scale engine, weather, and music under the event voice, live."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self.speech_duck:
+            return
+        self.speech_duck = duck
+        # Reapply everything the factor touches; set_volumes with no
+        # arguments is exactly that pass.
+        self.set_volumes()
 
     def set_volumes(
         self,
@@ -1209,6 +2033,7 @@ class _BassBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1222,28 +2047,17 @@ class _BassBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
         for ch in list(self._loops):
             self._apply_loop_volume(ch)
-        if self._engine_stream is not None:
-            try:
-                self._engine_stream.set_volume(
-                    max(
-                        0.0,
-                        min(
-                            1.0,
-                            ENGINE_LOOP_GAIN
-                            * self.engine_volume
-                            * self.master_volume
-                            * self._engine_intro_gain,
-                        ),
-                    )
-                )
-            except self._BassError:
-                self._engine_stream = None
+        # Reapply engine volume through the rpm path: it knows the current
+        # model (multisample ring or legacy loop) and keeps the load contour.
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
         if self._music_stream is not None:
             try:
                 self._music_stream.set_volume(
-                    max(0.0, min(1.0, self.music_volume * self.master_volume))
+                    max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck))
                 )
             except self._BassError:
                 self._music_stream = None
@@ -1255,6 +2069,13 @@ class _BassBackend:
         self.engine_stop(shutdown_sound=False)
         self.stop_music(fade_ms=0)
         self._retained.clear()
+        # A connect still in flight holds a worker inside BASS; freeing BASS
+        # underneath it is a crash. Give it a bounded moment to come back.
+        with self._radio_lock:
+            threads = [t for t in self._radio_threads if t.is_alive()]
+        deadline = time.monotonic() + RADIO_SHUTDOWN_JOIN_S
+        for thread in threads:
+            thread.join(max(0.0, deadline - time.monotonic()))
         with contextlib.suppress(self._BassError):
             self._output.free()
         self.enabled = False
@@ -1275,12 +2096,14 @@ class _NullBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
 
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
     def start_loop(
         self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300
     ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
+    def set_loop_pan(self, channel: int, pan: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
     def start_sustain_loop(
         self,
@@ -1301,6 +2124,18 @@ class _NullBackend:
     def reverse_start(self) -> None: ...
     def reverse_stop(self) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
+
+    def radio_now_playing(self) -> str | None:
+        return None
+
+    def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
+        raise RuntimeError("audio disabled")
+
+    def music_playing(self) -> bool:
+        return False
+
     def stop_music(self, fade_ms: int = 1000) -> None: ...
     def set_volumes(
         self,
@@ -1310,6 +2145,7 @@ class _NullBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1323,6 +2159,8 @@ class _NullBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
 
     def shutdown(self) -> None: ...
 
@@ -1332,6 +2170,15 @@ class AudioEngine:
 
     def __init__(self) -> None:
         self._impl = self._pick_backend()
+        self._banks: dict[str, list[str]] = {}  # base -> discovered numbered keys
+        self._bank_order: dict[str, list[str]] = {}  # base -> remaining shuffled cuts
+        self._last_bank_key: dict[str, str] = {}  # base -> cut played last
+        self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
+        self._logged_volumes: tuple[float | None, ...] | None = None
+        self._alert_hold_key = ""  # continuous alert tone being re-asserted
+        self._alert_hold_s = 0.0  # time left before the hold lapses
+        self._cue_holds: dict[str, float] = {}  # caller-owned held cues, name -> time left
+        self._jake_voice_classic = False  # Settings: real (recorded) or classic (synth)
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -1383,15 +2230,198 @@ class AudioEngine:
 
     # -- one-shots and loops ------------------------------------------------------
 
+    def _voice_key(self, key: str) -> str:
+        """Route a sound key through the player's chosen jake voice.
+
+        Every caller -- the real drive and the Learn game sounds demo alike --
+        asks for ``engine/jake_1600`` by name; this is the one place that
+        swaps it for the classic synth cut when the setting calls for it, so
+        neither call site needs to know the A/B exists.
+        """
+        if key == JAKE_CLASSIC_KEY:
+            # Asked for the classic cut BY NAME -- the Learn game sounds entry
+            # that exists to demo it. Never re-voiced, or the demo of one
+            # voice would play the other.
+            return key
+        if not key.startswith(JAKE_BAND_PREFIX):
+            return key
+        # ONE voice per setting, whatever the rpm -- and that is true in BOTH
+        # directions, which is what took three goes to get right.
+        #
+        # There is exactly one real jake recording (engine/jake_1600) and one
+        # synth cut kept from before it (engine/jake_1600_synth). The other
+        # five band files -- 1200, 1400, 1800, 2000, 2200 -- are all synths.
+        #
+        # 2026-08-17 fixed the classic direction: every band maps to the
+        # synth, so "classic" stopped meaning "synth at 1600, Jerry's
+        # recording everywhere else". The REAL direction was left alone, and
+        # it had the same fault in mirror image -- band keys passed straight
+        # through, so "real" meant the recording at 1600 and a synth at every
+        # other band. Rpm moves constantly on a descent, so the two voices
+        # alternated and the owner heard both, whichever setting he chose
+        # (2026-08-19: "both the synth and the recording play when the jake is
+        # used despite the setting").
+        #
+        # The single recording therefore stands for every band on "real", the
+        # way the single synth already stood for every band on "classic".
+        # Level still tracks rpm and retard stage (JAKE_STAGE_GAIN), so the
+        # growl still answers the grade; what it no longer does is change
+        # voice halfway down one.
+        return JAKE_CLASSIC_KEY if self._jake_voice_classic else JAKE_RECORDED_KEY
+
+    def voice_key(self, key: str) -> str:
+        """The key this one will really sound as, after the jake A/B.
+
+        Public because a caller that caches "which cut is playing" has to
+        cache the ROUTED key. Caching the band key instead meant that on the
+        classic voice -- where every band maps to the one synth cut -- each
+        rpm band change looked like a new sound and restarted the same file
+        over itself, 120 ms of crossfade at a time, all the way down a grade.
+        """
+        return self._voice_key(key)
+
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
-        self._impl.play(key, volume, pan)
+        self._impl.play(self._voice_key(key), volume, pan)
+
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor.
+
+        1.0 is normal running; the drive loop drops it through a shift's
+        torque interrupt so the engine genuinely falls away, then eases it
+        back as the clutch hooks up.
+        """
+        impl_fn = getattr(self._impl, "set_engine_duck", None)
+        if impl_fn is not None:
+            impl_fn(duck)
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Step engine, weather, and music (the radio's slot) down under the
+        event voice and back: 1.0 is the normal mix, ``SPEECH_DUCK_LEVEL``
+        while the road is talking. The player's volume settings are never
+        touched -- the factor rides on top of them and every reapplication
+        (a settings change, a new loop) keeps honoring it until the caller
+        restores 1.0.
+        """
+        impl_fn = getattr(self._impl, "set_speech_duck", None)
+        if impl_fn is not None:
+            impl_fn(duck)
+
+    def set_engine_voice(self, classic: bool) -> None:
+        """Pick the engine voice: the recorded multisample ring or the
+        classic single pitched loop (BASS backend; pygame has one model).
+
+        Applies live -- a running engine re-voices in place at its current
+        rpm without replaying the ignition crank, so the Settings toggle is
+        an instant A/B.
+        """
+        impl = self._impl
+        if getattr(impl, "engine_voice_classic", None) in (None, classic):
+            if hasattr(impl, "engine_voice_classic"):
+                impl.engine_voice_classic = classic
+            return
+        impl.engine_voice_classic = classic
+        if self.engine_running:
+            rpm = getattr(impl, "_engine_last_rpm", ENGINE_RPM_IDLE)
+            throttle = getattr(impl, "_engine_last_throttle", 0.0)
+            impl.engine_stop(shutdown_sound=False)
+            impl.engine_start(play_start_sound=False)
+            impl.set_engine_rpm(rpm, throttle)
+
+    def set_jake_voice(self, classic: bool) -> None:
+        """Pick the jake voice: the recorded 1600 jake or the classic synth.
+
+        Applies live -- a jake growl already sounding on the descent restarts
+        on the new cut in place, the same instant A/B the engine voice
+        setting gives.
+        """
+        if self._jake_voice_classic == classic:
+            return
+        self._jake_voice_classic = classic
+        loop = getattr(self._impl, "_loops", {}).get(CH_JAKE)
+        if loop is None:
+            return
+        key, volume = loop[0], loop[1]
+        if not key.startswith(JAKE_BAND_PREFIX):
+            return  # not a jake loop at all; nothing to swap
+        # EVERY band, not just 1600. A descent runs through 1200 to 2200, so
+        # guarding on the one band meant flipping the setting anywhere else
+        # did nothing at all -- the old voice kept sounding until rpm next
+        # crossed a boundary, and the driver heard the setting they had just
+        # left (owner, 2026-08-19: "either the synthesized brake plays or the
+        # recorded one, not both"). Restart on the band that is actually
+        # sounding; _voice_key picks the voice.
+        # Leaving classic, the synth stood in for every band, so 1600 -- the
+        # cut it was made from -- is the honest band to come back on. Leaving
+        # real, restart the band that is sounding and let _voice_key pick the
+        # voice.
+        band = JAKE_RECORDED_KEY if key == JAKE_CLASSIC_KEY else key
+        self.start_loop(CH_JAKE, band, volume=volume, fade_ms=120)
+
+    def has_asset(self, key: str) -> bool:
+        """Whether a sound key resolves (pack, licensed overlay, or loose).
+
+        Cached; call sites use it to prefer a licensed cue and fall back to
+        the committed one -- or to stay silent where silence was the old
+        behavior -- on a clean clone.
+        """
+        key = self._voice_key(key)
+        if key in _GENERATED:
+            # Synthesized cues are published after this engine was built, so a
+            # miss cached before registration must never be the final answer.
+            return True
+        cached = self._asset_known.get(key)
+        if cached is None:
+            cached = _asset_bytes(key, ("ogg", "wav")) is not None
+            self._asset_known[key] = cached
+        return cached
+
+    def _bank_keys(self, base: str) -> list[str]:
+        """Discover a numbered round-robin bank (``base_01``..) once, cached."""
+        keys = self._banks.get(base)
+        if keys is None:
+            keys = []
+            for i in range(1, 100):
+                key = f"{base}_{i:02d}"
+                if _asset_bytes(key, ("ogg", "wav")) is None:
+                    break
+                keys.append(key)
+            self._banks[base] = keys
+        return keys
+
+    def play_bank(self, base: str, fallback: str, volume: float = 1.0, pan: float = 0.0) -> None:
+        """Play one cut from a round-robin bank, or ``fallback`` if none exist.
+
+        Real mechanical events never sound twice the same, so banked cuts
+        (``base_01``..``base_NN``, the licensed overlay) play in a shuffled
+        cycle -- every cut once before any repeats, never the same cut twice
+        in a row. A clean clone without the bank keeps the single classic cue.
+        """
+        keys = self._bank_keys(base)
+        if not keys:
+            self.play(fallback, volume, pan)
+            return
+        order = self._bank_order.get(base)
+        if not order:
+            order = random.sample(keys, len(keys))
+            # A fresh shuffle may lead with the cut that just played; swap it
+            # to the back so no cut ever sounds twice in a row.
+            if len(order) > 1 and order[0] == self._last_bank_key.get(base):
+                order[0], order[-1] = order[-1], order[0]
+            self._bank_order[base] = order
+        key = order.pop(0)
+        self._last_bank_key[base] = key
+        # Per-trigger level jitter, ~±1.4 dB: no two clunks land identically.
+        self.play(key, volume * random.uniform(0.85, 1.17), pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
-        self._impl.start_loop(channel, key, volume, fade_ms)
+        self._impl.start_loop(channel, self._voice_key(key), volume, fade_ms)
 
     def set_loop_volume(self, channel: int, volume: float) -> None:
         self._impl.set_loop_volume(channel, volume)
+
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._impl.set_loop_pan(channel, pan)
 
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         self._impl.stop_loop(channel, fade_ms)
@@ -1422,6 +2452,50 @@ class AudioEngine:
         """Stop looping ``channel`` and let its release tail play to the end."""
         self._impl.release_sustain_loop(channel, fade_ms)
 
+    # -- held alert tones ------------------------------------------------------
+
+    def hold_alert(self, key: str, volume: float = 1.0, fade_ms: int = 60) -> None:
+        """Sound the continuous alert tone ``key`` for the next moment only.
+
+        Call this every frame for as long as the alert applies. The tone
+        starts on the first call and stops itself a fraction of a second
+        after the calls stop, so it can never be left ringing by a caller
+        that returned early, ended, or lost the frame to a menu. Calling it
+        again after a silencing transition brings the same tone back.
+        """
+        self.start_loop(CH_ALERT, key, volume=volume, fade_ms=fade_ms)
+        self._alert_hold_key = key
+        self._alert_hold_s = ALERT_HOLD_TIMEOUT_S
+
+    def release_alert(self, fade_ms: int = 120) -> None:
+        """Stop a held alert tone now, rather than waiting for it to lapse."""
+        if not self._alert_hold_key:
+            return
+        self._alert_hold_key = ""
+        self._alert_hold_s = 0.0
+        self.stop_loop(CH_ALERT, fade_ms=fade_ms)
+
+    # -- held cues an owner sounds itself --------------------------------------
+
+    def hold_cue(self, name: str) -> None:
+        """Mark the cue ``name`` as still going, for the next moment only.
+
+        The caller plays the sound; this is only the latch that says the
+        caller is still there. Call it every frame the cue applies. See
+        ``CUE_HOLD_TIMEOUT_S``: the countdown runs on the app's audio clock,
+        which ticks on every screen, so an owner that stopped getting the
+        frame lapses instead of picking up where it left off.
+        """
+        self._cue_holds[name] = CUE_HOLD_TIMEOUT_S
+
+    def cue_held(self, name: str) -> bool:
+        """Whether ``name`` was re-asserted recently enough to still be live."""
+        return self._cue_holds.get(name, 0.0) > 0.0
+
+    def release_cue(self, name: str) -> None:
+        """Drop the latch on ``name`` now, having ended the cue deliberately."""
+        self._cue_holds.pop(name, None)
+
     # -- truck engine ----------------------------------------------------------------
 
     def engine_start(self, play_start_sound: bool = True) -> None:
@@ -1442,6 +2516,19 @@ class AudioEngine:
     def update(self, dt: float) -> None:
         """Advance time-based audio fades. Call once per frame from the main loop."""
         self._impl.update(dt)
+        # The held-alert watchdog. This runs from the app loop no matter which
+        # screen is up, so a tone whose owner stopped updating goes quiet on
+        # its own instead of running until the player quits the game.
+        if self._alert_hold_s > 0.0:
+            self._alert_hold_s -= dt
+            if self._alert_hold_s <= 0.0:
+                self.release_alert()
+        # Same watchdog for the latches whose sound the owner plays itself.
+        if self._cue_holds:
+            for name in list(self._cue_holds):
+                self._cue_holds[name] -= dt
+                if self._cue_holds[name] <= 0.0:
+                    del self._cue_holds[name]
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
         self._impl.set_engine_rpm(rpm, throttle)
@@ -1501,9 +2588,26 @@ class AudioEngine:
         self._impl.reverse_stop()
 
     def stop_world(self) -> None:
-        """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
+        """Stop engine, road, weather, ambience, and any held alert tone
+        (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN):
+        # A pause or an arrival cuts the alert now, without the watchdog's
+        # fraction of a second of tone over the top of the menu.
+        self.release_alert(fade_ms=200)
+        for ch in (
+            CH_ROAD,
+            CH_WEATHER,
+            CH_WEATHER_B,
+            CH_AMBIENT,
+            CH_HORN,
+            CH_AIR,
+            CH_JAKE,
+            CH_RADIO_FX,
+            # The edge texture is road noise like the rest: left out, a driver
+            # who paused with a tire on the rumble strip took the strip into
+            # the menu with them. It comes back on its own when the drive does.
+            CH_EDGE,
+        ):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------
@@ -1511,6 +2615,26 @@ class AudioEngine:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         """Stream a music track, e.g. ``play_music("menu_theme")``."""
         self._impl.play_music(track, fade_ms)
+
+    def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        """Stream a live radio URL when the active backend supports it."""
+        self._impl.play_radio_stream(url, fade_ms)
+
+    def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
+        """Play one local media file (a personal playlist entry) as music.
+
+        Raises RuntimeError when the file cannot be read or decoded."""
+        self._impl.play_music_file(path, fade_ms)
+
+    def music_playing(self) -> bool:
+        """Whether the music channel is still producing sound."""
+        return self._impl.music_playing()
+
+    def radio_now_playing(self) -> str | None:
+        """The song the playing radio stream reports, or None when it
+        reports nothing (or nothing is streaming)."""
+        impl = getattr(self._impl, "radio_now_playing", None)
+        return impl() if impl is not None else None
 
     def stop_music(self, fade_ms: int = 1000) -> None:
         self._impl.stop_music(fade_ms)
@@ -1525,8 +2649,19 @@ class AudioEngine:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
-        self._impl.set_volumes(master, sfx, music, weather, engine, ui)
+        self._impl.set_volumes(master, sfx, music, weather, engine, ui, siren)
+        # The other half of a silence report: a healthy backend playing at
+        # zero looks exactly like a broken one until the levels are written
+        # down. Logged on change only, so it cannot flood the file.
+        levels = (master, sfx, music, weather, engine, ui, siren)
+        if levels != self._logged_volumes:
+            self._logged_volumes = levels
+            log.info(
+                "Volumes: master=%s sfx=%s music=%s weather=%s engine=%s ui=%s siren=%s",
+                *levels,
+            )
 
     def shutdown(self) -> None:
         self._impl.shutdown()

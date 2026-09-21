@@ -2,17 +2,33 @@
 
 from __future__ import annotations
 
+import contextlib
 from datetime import datetime
 from pathlib import Path
 
 import pygame
 
 from .. import __version__, updater
-from ..achievements import ACHIEVEMENTS, earned_ids
-from ..data.regions import REGION_LABELS
-from ..models.profile import DEFAULT_CITY, Profile, ProfileIntegrityError
+from ..achievements import (
+    ACHIEVEMENTS,
+    achievements_in_category,
+    categories,
+    earned_ids,
+    entry_text,
+)
+from ..models.profile import LegacyCareerError, Profile, ProfileIntegrityError
+from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
-from ..settings import TIME_SCALES
+from ..playtest_levers import apply_continue_levers
+from ..settings import (
+    DRIVING_ASSIST_FIELDS,
+    DRIVING_ASSIST_PRESETS,
+    DRIVING_SPEECH_MODES,
+    LANE_KEEPING_MODES,
+    LANE_KEEPING_TO_LEGACY,
+    PLACE_CALLOUT_MODES,
+    TIME_SCALES,
+)
 from .base import MenuItem, MenuState, State
 from .main_menu_help import (
     HELP_PAGES as HELP_PAGES,
@@ -23,9 +39,46 @@ from .main_menu_help import (
 from .main_menu_help import (
     controls_help_page as controls_help_page,
 )
+from .text_entry import TextEntryState
 from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 
 _last_invalid_saves: list[Path] = []
+# Careers the load gate refused because they were created before the 1.9
+# line. They must stay visible in the career list with a spoken label -- a
+# missing career reads as data loss to a blind player -- so _loadable_saves
+# collects them here for the menus to show alongside the loadable ones.
+_legacy_saves: list[LegacyCareerError] = []
+
+# Reused within a single _reuse_loadable_saves_scan() block (see below) so a
+# state that asks several times in one pass -- MainMenuState.enter() calls
+# _loadable_saves() three times: build_items, announce_entry's legacy-save
+# check, and its own profile lookup -- pays for one save-directory scan
+# instead of three. Outside such a block every call still rescans, so a
+# state that lists saves after creating or deleting one never sees stale
+# results.
+_loadable_saves_cache: list[tuple[Path, Profile]] | None = None
+_loadable_saves_cache_active = False
+
+
+@contextlib.contextmanager
+def _reuse_loadable_saves_scan():
+    """Coalesce every _loadable_saves() call made inside this block.
+
+    Reentrant: a nested call is a no-op, so this can wrap a method that also
+    wraps itself (or calls another wrapped method) without the inner scope
+    prematurely dropping the cache the outer scope is still relying on.
+    """
+    global _loadable_saves_cache_active, _loadable_saves_cache
+    already_active = _loadable_saves_cache_active
+    _loadable_saves_cache_active = True
+    if not already_active:
+        _loadable_saves_cache = None
+    try:
+        yield
+    finally:
+        if not already_active:
+            _loadable_saves_cache_active = False
+            _loadable_saves_cache = None
 
 
 def pending_notice_state(ctx) -> State | None:
@@ -38,6 +91,10 @@ def pending_notice_state(ctx) -> State | None:
         from .save_notice import SaveModifiedNoticeState
 
         return SaveModifiedNoticeState(ctx)
+    if ctx.profile.driving_record.notice_pending:
+        from .save_notice import DrivingRecordNoticeState
+
+        return DrivingRecordNoticeState(ctx)
     return None
 
 
@@ -75,6 +132,18 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
 
     p = ctx.profile
     if p.active_trip:
+        # A save from before local city-service drives were retired can still
+        # carry one mid-trip. There is no route or phase left to resume it
+        # with, so it drops the driver at the terminal instead of failing to
+        # load -- this branch reads only that old snapshot shape and stays
+        # even after every other city-service-drive code path is gone.
+        if p.active_trip.get("kind") == "city_service_drive":
+            p.active_trip = None
+            ctx.save_profile()
+            ctx.say(
+                "Local service drives were retired in this update; you are parked at the terminal."
+            )
+            return CityMenuState(ctx, queue_entry_announcement=True)
         if p.active_trip.get("kind") == "pickup":
             state = PickupFacilityState.from_snapshot(ctx, p.active_trip)
         else:
@@ -89,13 +158,24 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
 
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
-    """Return readable saves in newest-first order."""
-    global _last_invalid_saves
+    """Return readable saves in newest-first order.
+
+    Inside a :func:`_reuse_loadable_saves_scan` block, the first real scan's
+    result (and the ``_last_invalid_saves``/``_legacy_saves`` it populates)
+    is reused for the rest of the block instead of rescanning the save
+    directory again.
+    """
+    global _last_invalid_saves, _legacy_saves, _loadable_saves_cache
+    if _loadable_saves_cache_active and _loadable_saves_cache is not None:
+        return _loadable_saves_cache
     _last_invalid_saves = []
+    _legacy_saves = []
     saves = []
     for path in Profile.list_saves():
         try:
             profile = Profile.load(path)
+        except LegacyCareerError as legacy:
+            _legacy_saves.append(legacy)
         except ProfileIntegrityError:
             _last_invalid_saves.append(path)
         except Exception:
@@ -104,6 +184,8 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
             # Loading may have converted a legacy file in place; report the
             # path the career actually lives at now.
             saves.append((profile.path, profile))
+    if _loadable_saves_cache_active:
+        _loadable_saves_cache = saves
     return saves
 
 
@@ -157,8 +239,11 @@ def _saved_label(path: Path) -> str:
 
 
 def _career_summary(path: Path, profile: Profile, *, include_saved: bool = True) -> str:
+    from ..models.business import status_label
+
     parts = [
         f"{profile.name}: level {profile.career.level}",
+        f"{profile.carrier_name} {status_label(profile.business_status)}",
         f"{profile.money:,.0f} dollars",
         _career_location(profile),
         f"{profile.career.deliveries} deliveries",
@@ -184,11 +269,12 @@ class MainMenuState(MenuState):
         cls._update_prompted = False
 
     def enter(self) -> None:
-        super().enter()
-        profile = self.ctx.profile
-        if profile is None:
-            saves = _loadable_saves()
-            profile = saves[0][1] if saves else None
+        with _reuse_loadable_saves_scan():
+            super().enter()
+            profile = self.ctx.profile
+            if profile is None:
+                saves = _loadable_saves()
+                profile = saves[0][1] if saves else None
         sequence = select_menu_music_sequence(profile)
         self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState
@@ -215,11 +301,30 @@ class MainMenuState(MenuState):
                 if count == 1
                 else f"{count} saved careers could not be read and were moved aside. "
             )
+        if self.ctx.settings.lane_keeping_unreadable:
+            # Falling back to full lane keeping is the right answer and a
+            # silent one is not: it deletes the destination-exit decision
+            # outright, and nothing later in the drive would explain why.
+            self.ctx.settings.lane_keeping_unreadable = False
+            warning += (
+                "Your lane keeping setting could not be read, so it is set to "
+                "full: the truck holds the lane and takes your exits. Change it "
+                "in Settings, Gameplay, Driving assistance. "
+            )
+        if not _loadable_saves() and _legacy_saves:
+            # Every saved career predates 1.9, so there is no Continue item
+            # where the player expects one. Say where the careers went before
+            # that silence reads as data loss; once a 1.9 career exists, the
+            # labels in Choose career carry the explanation instead.
+            warning += (
+                "Your saved careers are from an earlier version of Freight "
+                "Fate; they are listed under Choose career. "
+            )
         self.ctx.say(
             f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
-            f"An audio trucking adventure across America. {warning}"
+            f"An audio trucking adventure across America. {warning}".rstrip()
         )
-        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
+        self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -234,6 +339,10 @@ class MainMenuState(MenuState):
                     help=f"Load the newest save for {latest_profile.name}.",
                 )
             )
+        if saves or _legacy_saves:
+            # Careers from earlier versions cannot continue, but they still
+            # belong on the list: even with nothing loadable, Choose career is
+            # where a player finds them and hears what happened.
             items.append(
                 MenuItem(
                     "Choose career",
@@ -241,6 +350,7 @@ class MainMenuState(MenuState):
                     help="Choose any saved career instead of only the newest one.",
                 )
             )
+        if saves:
             items.append(
                 MenuItem(
                     "Manage careers", self._manage_careers, help="Reset or delete saved careers."
@@ -268,6 +378,14 @@ class MainMenuState(MenuState):
         )
         items.append(
             MenuItem(
+                "Learn game sounds",
+                self._learn_sounds,
+                help="Play any sound the road uses and hear what it means, "
+                "before you meet it at speed.",
+            )
+        )
+        items.append(
+            MenuItem(
                 "Settings",
                 self._settings,
                 help="Units, transmission mode, volumes, weather, voices, "
@@ -286,7 +404,7 @@ class MainMenuState(MenuState):
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Press Enter on Quit to exit the game.")
+        self.ctx.push_state(ConfirmQuitState(self.ctx))
 
     def presence(self):
         from ..discord_presence import PresenceState
@@ -300,6 +418,7 @@ class MainMenuState(MenuState):
             self.refresh()
             return
         self.ctx.profile = saves[0][1]
+        lever_notes = apply_continue_levers(self.ctx)
         p = self.ctx.profile
         if p.active_trip:
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
@@ -315,6 +434,8 @@ class MainMenuState(MenuState):
         # lines, and only the plain city-menu hand-off needs telling not to
         # cut it off (see _world_entry_state).
         enter_world(self.ctx, queue_entry_announcement=True)
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
@@ -327,6 +448,11 @@ class MainMenuState(MenuState):
 
     def _help(self) -> None:
         self.ctx.push_state(HelpState(self.ctx))
+
+    def _learn_sounds(self) -> None:
+        from .learn_sounds import LearnSoundsState
+
+        self.ctx.push_state(LearnSoundsState(self.ctx))
 
     def _achievements(self) -> None:
         self.ctx.push_state(AchievementCareerState(self.ctx))
@@ -362,6 +488,49 @@ class MainMenuState(MenuState):
             "That is the log from the previous run.",
             interrupt=True,
         )
+
+
+class ConfirmQuitState(MenuState):
+    """One spoken yes/no gate in front of quitting the game.
+
+    Escape at the main menu raises it, and so does the window's close button
+    or Alt+F4 from anywhere -- that close used to end the process on the spot,
+    which cost Darren two routes to a mis-hit key (2026-08-22).
+
+    ``unsaved_drive`` is what makes the gate worth reading rather than a
+    keystroke to swat away: quitting from the title loses nothing, quitting
+    mid-leg loses the leg, and only the second one needs saying.
+    """
+
+    title = "Quit Freight Fate?"
+    open_sound_key = "ui/error"
+
+    def __init__(self, ctx, *, unsaved_drive: bool = False) -> None:
+        super().__init__(ctx)
+        self.unsaved_drive = unsaved_drive
+
+    def _question(self) -> str:
+        if not self.unsaved_drive:
+            return "Quit Freight Fate?"
+        # The same bargain the pause menu's quit already explains, in the
+        # same words: you can only save at a stop.
+        return (
+            "Quit Freight Fate? You are part way through a drive. You can "
+            "only save at a stop, so this drive will resume from your last "
+            "stop, not from here."
+        )
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"{self._question()} {self.current_text()}", review=False)
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, stay in Freight Fate", self.go_back),
+            MenuItem("Yes, quit Freight Fate", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.quit()
 
 
 class AchievementCareerState(MenuState):
@@ -400,10 +569,11 @@ class AchievementCareerState(MenuState):
 
 
 class AchievementsState(MenuState):
+    """The category menu: pick a category, then browse its achievements."""
+
     intro_help = (
-        "Use up and down arrows to review achievements. Earned and "
-        "locked entries are both shown. Enter repeats the selected "
-        "entry. Escape goes back."
+        "Use up and down arrows to choose a category. Enter opens it "
+        "and lists its achievements. Escape goes back."
     )
 
     def __init__(self, ctx, profile: Profile) -> None:
@@ -419,7 +589,7 @@ class AchievementsState(MenuState):
         total = len(ACHIEVEMENTS)
         self.ctx.say(
             f"Achievements for {self.profile.name}. {earned} of {total} earned. "
-            "Locked achievements are shown as goals, with no story spoilers. "
+            "Enter a category to browse it. "
             f"{self.current_text()}"
         )
 
@@ -430,19 +600,21 @@ class AchievementsState(MenuState):
                 self._summary_label, self._summary, help="Hear the total earned achievement count."
             )
         ]
-        for achievement in ACHIEVEMENTS:
-            unlocked = achievement.id in earned
-            if unlocked:
-                label = f"Earned: {achievement.name} - {achievement.description}"
-                help_text = f"{achievement.category}. {achievement.description}"
-            else:
-                # Locked entries show only the title; the description stays
-                # hidden until the achievement is earned.
-                label = f"Locked: {achievement.name}"
-                help_text = f"{achievement.category}. Keep playing to unlock it."
-            items.append(MenuItem(label, lambda text=label: self.ctx.say(text), help=help_text))
+        for category in categories():
+            achs = achievements_in_category(category.id)
+            done = sum(1 for a in achs if a.id in earned)
+            items.append(
+                MenuItem(
+                    f"{category.title}. {done} of {len(achs)}",
+                    lambda c=category, a=achs: self._open_category(c, a),
+                    help=category.description,
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
+
+    def _open_category(self, category, achs) -> None:
+        self.ctx.push_state(AchievementCategoryState(self.ctx, self.profile, category, achs))
 
     def _summary_label(self) -> str:
         earned = len(earned_ids(self.profile))
@@ -453,6 +625,59 @@ class AchievementsState(MenuState):
         earned = len(earned_ids(self.profile))
         total = len(ACHIEVEMENTS)
         self.ctx.say(f"{self.profile.name} has earned {earned} of {total} achievements.")
+
+
+class AchievementCategoryState(MenuState):
+    """One category's achievements: earned ones tell their story, locked
+    ones show their goal, and hidden ones keep the secret until earned.
+    """
+
+    intro_help = (
+        "Use up and down arrows to review this category's achievements. "
+        "Enter repeats the selected entry. Escape goes back to the "
+        "category list."
+    )
+
+    def __init__(self, ctx, profile: Profile, category, achs) -> None:
+        super().__init__(ctx)
+        self.profile = profile
+        self.category = category
+        self.achs = achs
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self.category.title
+
+    def _earned_count(self) -> int:
+        earned = earned_ids(self.profile)
+        return sum(1 for a in self.achs if a.id in earned)
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.category.title}. {self._earned_count()} of {len(self.achs)} earned. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        earned = earned_ids(self.profile)
+        items = []
+        for achievement in self.achs:
+            unlocked = achievement.id in earned
+            name, description = entry_text(achievement, unlocked)
+            if unlocked:
+                label = f"Earned: {name} - {description}"
+                help_text = description
+            elif achievement.hidden:
+                label = f"Locked: {name}"
+                help_text = description
+            else:
+                # Locked, non-hidden entries show only the title; the
+                # description stays hidden until the achievement is earned.
+                label = f"Locked: {name}"
+                help_text = "Keep playing to unlock it."
+            items.append(MenuItem(label, lambda text=label: self.ctx.say(text), help=help_text))
+        items.append(MenuItem("Back to the categories", self.go_back))
+        return items
 
 
 class LoadDriverState(MenuState):
@@ -473,11 +698,30 @@ class LoadDriverState(MenuState):
                     help=f"Load {profile.name}, {_career_location(profile)}.",
                 )
             )
+        # Careers the 1.9 load gate refused stay on the list with a spoken
+        # label -- silently dropping them reads as data loss. Picking one
+        # opens the notice that explains and offers a fresh start.
+        for legacy in _legacy_saves:
+            items.append(
+                MenuItem(
+                    f"{legacy.name}: career from an earlier version of Freight Fate",
+                    lambda e=legacy: self._explain_legacy(e),
+                    help="This career cannot continue in version 1.9. Enter "
+                    "explains why and offers a new career; the save itself "
+                    "is not touched.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
 
+    def _explain_legacy(self, legacy: LegacyCareerError) -> None:
+        from .save_notice import LegacyCareerNoticeState
+
+        self.ctx.push_state(LegacyCareerNoticeState(self.ctx, legacy.name))
+
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
+        lever_notes = apply_continue_levers(self.ctx)
         self.ctx.say(f"Welcome back, {profile.name}.")
         # The welcome above must be heard in full before the city menu's own
         # "Parked at..." announcement -- see _world_entry_state.
@@ -485,6 +729,8 @@ class LoadDriverState(MenuState):
             pending_notice_state(self.ctx)
             or _world_entry_state(self.ctx, queue_entry_announcement=True)
         )
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
 
 class ManageCareersState(MenuState):
@@ -604,11 +850,13 @@ class ConfirmCareerActionState(MenuState):
         name = self.profile.name
         if self.action == "reset":
             fresh = Profile(name=name, current_city=self.profile.current_city)
+            apply_start_option(fresh, option_for_profile(self.profile))
             fresh.save()
             message = (
                 f"{name} reset. The career starts over at "
                 f"{self.ctx.world.spoken_city(fresh.current_city)} "
-                f"with {fresh.money:,.0f} dollars."
+                f"with {fresh.carrier_name} "
+                f"and {fresh.money:,.0f} dollars."
             )
         else:
             self.path.unlink(missing_ok=True)
@@ -619,190 +867,32 @@ class ConfirmCareerActionState(MenuState):
         self.ctx.say(message, interrupt=True)
 
 
-class NameEntryState(State):
-    """Accessible text entry: characters are echoed as you type."""
+class NameEntryState(TextEntryState):
+    """New-career driver name entry on the shared accessible text field."""
 
-    captures_text_input = True
     MAX_LEN = 24
-
-    def __init__(self, ctx) -> None:
-        super().__init__(ctx)
-        self.name = ""
+    heading = "New career"
+    field_label = "Driver name"
 
     def enter(self) -> None:
-        self.ctx.say("New career. Type your driver name, then press Enter. Press Escape to cancel.")
-
-    def handle_event(self, event: pygame.event.Event) -> None:
-        if event.type != pygame.KEYDOWN:
-            return
-        if event.key == pygame.K_ESCAPE:
-            self.ctx.audio.play("ui/menu_back")
-            self.ctx.pop_state()
-        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-            self._confirm()
-        elif event.key == pygame.K_BACKSPACE:
-            if self.name:
-                removed, self.name = self.name[-1], self.name[:-1]
-                self.ctx.say(f"Deleted {removed}. " + (self.name or "Empty."), review=False)
-            else:
-                self.ctx.audio.play("ui/error")
-        elif event.key == pygame.K_F2:
-            self.ctx.say(self.name if self.name else "Empty.", review=False)
-        elif event.unicode and event.unicode.isprintable() and len(self.name) < self.MAX_LEN:
-            self.name += event.unicode
-            self.ctx.audio.play("ui/tick")
-            spoken = "space" if event.unicode == " " else event.unicode
-            self.ctx.say(spoken, review=False)
+        self.ctx.say(
+            "New career. Type your driver name, then press Enter. "
+            "Left and right arrows review the letters you have typed, "
+            "Home and End jump to the start or end. Press Escape to cancel."
+        )
 
     def _confirm(self) -> None:
         name = self.name.strip() or "Driver"
         self.ctx.audio.play("ui/menu_select")
-        self.ctx.push_state(HomeTerminalState(self.ctx, name))
-
-    def lines(self) -> list[str]:
-        return [
-            "New career",
-            "",
-            f"Driver name: {self.name}_",
-            "Press Enter to confirm, Escape to cancel, F2 to review.",
-        ]
+        self.ctx.push_state(CareerStartState(self.ctx, name))
 
 
-def _region_menu_name(region: str) -> str:
-    """Region label suited to a menu item and first-letter jump.
-
-    The spoken labels read naturally as prose ("in the Great Lakes"), but a
-    list where every entry starts with "the" defeats type-ahead, so the leading
-    article is dropped for menu display.
-    """
-    label = REGION_LABELS.get(region, region.replace("_", " "))
-    return label[4:] if label.startswith("the ") else label
-
-
-class HomeTerminalState(MenuState):
-    """Pick the region of the country where a brand-new career begins.
-
-    Region selection is the first of two levels: choosing a region opens a
-    :class:`HomeCityState` listing only that region's cities. A short region
-    list keeps the spoken navigation manageable as the map grows toward national
-    coverage, instead of one long flat list of every city.
-    """
-
-    title = "Home region"
-    intro_help = (
-        "Pick the part of the country where your trucking career "
-        "begins. Use up and down arrows, Home and End, or type a "
-        "letter to jump to a region. Enter opens that region's cities. "
-        "Escape goes back to name entry."
-    )
-
-    def __init__(self, ctx, driver_name: str) -> None:
-        super().__init__(ctx)
-        self.driver_name = driver_name
-        by_region: dict[str, list[str]] = {}
-        for city in ctx.world.cities.values():
-            by_region.setdefault(city.region, []).append(city.key)
-        for keys in by_region.values():
-            keys.sort(key=lambda k: ctx.world.cities[k].name)
-        self._cities_by_region = by_region
-        self._regions = sorted(by_region, key=_region_menu_name)
-        default = (
-            ctx.world.cities[DEFAULT_CITY].region if DEFAULT_CITY in ctx.world.cities else None
-        )
-        if default in self._regions:
-            self.index = self._regions.index(default)
-
-    def announce_entry(self) -> None:
-        self.ctx.say("Home region. Pick the part of the country where your career starts.")
-        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
-
-    def build_items(self) -> list[MenuItem]:
-        items: list[MenuItem] = []
-        for region in self._regions:
-            name = _region_menu_name(region)
-            count = len(self._cities_by_region[region])
-            noun = "city" if count == 1 else "cities"
-            items.append(
-                MenuItem(
-                    f"{name} ({count} {noun})",
-                    lambda r=region: self._pick_region(r),
-                    help=f"Open {name} to choose a starting city. {count} {noun} available.",
-                )
-            )
-        return items
-
-    def _pick_region(self, region: str) -> None:
-        self.ctx.push_state(
-            HomeCityState(self.ctx, self.driver_name, region, self._cities_by_region[region])
-        )
-
-
-class HomeCityState(MenuState):
-    """Pick the home terminal city within a chosen region."""
-
-    title = "Home terminal"
-    intro_help = (
-        "Pick the city where your trucking career begins. Use up and "
-        "down arrows, Home and End, or type a letter to jump to a "
-        "city. Enter confirms your home terminal. Escape goes back to "
-        "the region list."
-    )
-
-    def __init__(self, ctx, driver_name: str, region: str, city_names: list[str]) -> None:
-        super().__init__(ctx)
-        self.driver_name = driver_name
-        self.region = region
-        self._cities = list(city_names)
-        if DEFAULT_CITY in self._cities:
-            self.index = self._cities.index(DEFAULT_CITY)
-
-    def announce_entry(self) -> None:
-        region = _region_menu_name(self.region)
-        self.ctx.say(f"{region} terminals. Pick the city where your career starts.")
-        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
-
-    def build_items(self) -> list[MenuItem]:
-        items: list[MenuItem] = []
-        for key in self._cities:
-            city = self.ctx.world.cities[key]
-            terminal = self.ctx.world.home_terminal(key)
-            place = city.spoken_qualified
-            items.append(
-                MenuItem(
-                    place,
-                    lambda k=key: self._pick(k),
-                    help=f"Start at {terminal.spoken_name} in {place}.",
-                )
-            )
-        return items
-
-    def _pick(self, city: str) -> None:
-        name = self.driver_name
-        existing = {p.stem.lower() for p in Profile.list_saves()}
-        profile = Profile(name=name, current_city=city)
-        terminal = self.ctx.world.home_terminal(city)
-        self.ctx.profile = profile
-        profile.save()
-        self.ctx.pop_state(True, False)  # this city picker
-        self.ctx.pop_state(True, False)  # region picker
-        self.ctx.pop_state(True, False)  # name entry
-        loaded_over = (
-            f"Loaded over existing driver named {name}. " if name.lower() in existing else ""
-        )
-        # Welcome first, then whatever comes next -- every state announces
-        # itself on entry, so speaking this after the push meant one of the two
-        # lines was always cut off. Cutting the city menu's "parked at" was
-        # harmless because the welcome repeats it; cutting the orinks.net offer
-        # left the player being asked a question they never heard. Both states
-        # built here queue their announcement behind this line.
-        self.ctx.say(
-            f"{loaded_over}Welcome aboard, {name}. Your truck is parked at "
-            f"{terminal.spoken_name} in the {self.ctx.world.spoken_city(city)} "
-            f"service area with {profile.money:,.0f} dollars and a full tank. "
-            "Your first stop is the dispatch board.",
-            interrupt=True,
-        )
-        self.ctx.push_state(_first_state_after_career_creation(self.ctx))
+from .main_menu_career import (  # noqa: E402,F401
+    CareerStartState,
+    HomeCityState,
+    HomeTerminalState,
+    _region_menu_name,
+)
 
 
 class SettingsState(MenuState):
@@ -820,10 +910,14 @@ class SettingsState(MenuState):
         "its own list of settings."
     )
 
+    # Gameplay is now a category with its own submenu (Driving assistance,
+    # Difficulty and hours of service, World and traffic, and Controls) rather
+    # than a flat list -- it opens GameplaySettingsState. The rest are plain
+    # category lists.
     CATEGORIES = (
         ("Gameplay", "gameplay"),
         ("Audio", "audio"),
-        ("Speech and weather", "speech"),
+        ("Speech", "speech"),
         ("Updates", "updates"),
         ("Problem reports", "reports"),
     )
@@ -834,7 +928,8 @@ class SettingsState(MenuState):
             for label, key in self.CATEGORIES
         ]
         # The Online items moved to the main menu; this stays in the old spot
-        # for a release or two so muscle memory still lands somewhere useful.
+        # (after Speech) for a release or two so muscle memory still lands
+        # somewhere useful.
         items.insert(
             3,
             MenuItem(
@@ -848,6 +943,9 @@ class SettingsState(MenuState):
         return items
 
     def _open(self, category: str) -> None:
+        if category == "gameplay":
+            self.ctx.push_state(GameplaySettingsState(self.ctx))
+            return
         self.ctx.push_state(SettingsCategoryState(self.ctx, category))
 
     def _open_online_hub(self) -> None:
@@ -863,6 +961,103 @@ class SettingsState(MenuState):
         # not before it, so it is not the one left cancelled by the other.
         self.ctx.pop_state()
         self.ctx.say("Settings saved.", interrupt=True)
+
+
+# Spoken once to a player whose settings predate a layout, the first time they
+# open the Gameplay submenu, one entry per settings layout version they missed.
+# A blind player cannot see a menu change shape, so the words carry the whole
+# change -- and the reassurance that nothing about their actual settings moved,
+# which is true by construction: every move keeps the saved key it always had.
+SETTINGS_LAYOUT_NOTICES = {
+    1: (
+        "Gameplay is now a category with its own submenu: Driving assistance, "
+        "Difficulty and hours of service, World and traffic, and Controls. "
+        "Weather, traffic, and parking sources moved into World and traffic, "
+        "from what used to be Speech and weather. Nothing about your settings "
+        "changed; this is just where to find them now."
+    ),
+    2: (
+        "Two rows moved. Speed keeper is now in Driving assistance, with the "
+        "rest of the driving help, instead of Controls. Lane and edge cue "
+        "prominence is now called Lane and edge cue volume and lives in Audio, "
+        "right under Gameplay cues volume, because that is the volume it "
+        "layers on. Your choices came with them. Overspeed warning no longer "
+        "has a row at all: it used to chime at the speed cruise itself holds, "
+        "and now it stays quiet until you are genuinely heading for a ticket."
+    ),
+    3: (
+        "Speech verbosity is now called Driving speech, in the Speech "
+        "category, and it has two more steps than before. What used to be "
+        "normal is now called standard, and what used to be terse is now "
+        "called quiet -- your choice came with you. Standard and quiet both "
+        "still speak every safety call, route instruction, and money "
+        "consequence; quiet only trades confirmations and status updates for "
+        "short sounds instead of words. A third choice sits below them: "
+        "urgent only, which speaks the safety calls, what things cost, and "
+        "the directions you cannot take back -- the turn itself, the exit, "
+        "the stop you are pulling into -- while a heads-up about a bend or a "
+        "town coming up becomes a short sound."
+    ),
+}
+
+
+class GameplaySettingsState(MenuState):
+    """The Gameplay parent: a submenu of submenus.
+
+    Gameplay used to be one flat list long enough to lose things in. It is now
+    a category that opens four smaller lists, each its own spoken screen, using
+    the same per-category machinery as every other settings screen.
+    """
+
+    title = "Gameplay"
+    intro_help = (
+        "Gameplay settings are grouped into four screens. Use up and down "
+        "arrows to pick one, Enter to open it, and Escape to go back. Each "
+        "screen opens its own list of settings."
+    )
+
+    SUBCATEGORIES = (
+        ("Driving assistance", "assistance"),
+        ("Difficulty and hours of service", "difficulty"),
+        ("World and traffic", "world"),
+        ("Controls", "controls"),
+    )
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(label, lambda key=key: self._open(key), help=f"Open {label.lower()} settings.")
+            for label, key in self.SUBCATEGORIES
+        ]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def announce_entry(self) -> None:
+        super().announce_entry()
+        s = self.ctx.settings
+        if s.settings_layout_notice_from >= 0:
+            # Said once and only to a player whose settings moved under them,
+            # oldest layout first so two moves arrive in the order they
+            # happened. Queued behind the menu's own entry line rather than
+            # interrupting it, and cleared to disk immediately so a mid-notice
+            # quit does not replay it forever -- but a player who never reaches
+            # this screen keeps the flag, and hears it whenever they arrive.
+            owed = [
+                text
+                for version, text in sorted(SETTINGS_LAYOUT_NOTICES.items())
+                if version > s.settings_layout_notice_from
+            ]
+            s.settings_layout_notice_from = -1
+            s.save()
+            for text in owed:
+                self.ctx.say(text, interrupt=False, review=False)
+
+    def _open(self, category: str) -> None:
+        self.ctx.push_state(SettingsCategoryState(self.ctx, category))
+
+    def go_back(self) -> None:
+        self.ctx.settings.save()
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
 
 
 class SettingsCategoryState(MenuState):
@@ -881,9 +1076,12 @@ class SettingsCategoryState(MenuState):
     )
 
     TITLES = {
-        "gameplay": "Gameplay",
+        "assistance": "Driving assistance",
+        "difficulty": "Difficulty and hours of service",
+        "world": "World and traffic",
+        "controls": "Controls",
         "audio": "Audio",
-        "speech": "Speech and weather",
+        "speech": "Speech",
         "updates": "Updates",
         "reports": "Problem reports",
     }
@@ -898,7 +1096,136 @@ class SettingsCategoryState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         s = self.ctx.settings
-        if self.category == "gameplay":
+        if self.category == "assistance":
+            items = [
+                MenuItem(
+                    lambda: f"Driving assistance preset: {self._assist_preset_label()}",
+                    lambda: self._cycle_assist_preset(1),
+                    help="Realistic provides modern truck safety support. Balanced adds partial lane keeping, a firmer hand on descents, and stopping at your destination. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                )
+            ]
+            items.extend(
+                MenuItem(
+                    lambda field=field, label=label: (
+                        f"{label}: "
+                        + (
+                            self._descent_level_label()
+                            if field == "descent_speed_control"
+                            else s.pedal_latch
+                            if field == "pedal_latch"
+                            else ("on" if getattr(s, field) else "off")
+                        )
+                    ),
+                    lambda field=field: self._toggle_driving_assist(field),
+                    help=help_text,
+                )
+                for field, label, help_text in self._driving_assist_specs()
+            )
+            items.append(
+                MenuItem(
+                    lambda: f"Lane keeping: {self._lane_keeping_label()}",
+                    lambda: self._cycle_lane_keeping(1),
+                    help="Formerly Lane drift. How much of the lane-holding "
+                    "work the truck does. Full holds the lane for you, turns "
+                    "Left and Right into tap lane changes, and takes your "
+                    "exits, including the destination exit, without a signal. "
+                    "Partial drifts gently with generous steering help; off "
+                    "drifts like a real wheel and every exit needs its signal "
+                    "and its exit lane. On partial or off the road sound "
+                    "leans toward where the wheel should go -- follow it into "
+                    "a bend and back to lane center -- and the road edge "
+                    "answers with real textures: a stutter clipping the "
+                    "rumble strip, a buzz fully on it, gravel off the "
+                    "pavement. Realistic sets this to off, Balanced to "
+                    "partial, All assists to full.",
+                )
+            )
+            items.append(
+                MenuItem(
+                    lambda: f"Following gap: {self._acc_gap_label()}",
+                    lambda: self._cycle_acc_gap(1),
+                    help="How much room adaptive cruise leaves to the vehicle "
+                    "ahead when it is following traffic. Close is two and a "
+                    "half seconds, normal three, far three and a half. Bad "
+                    "weather still opens the gap further whichever you pick, "
+                    "so close never means close on ice. All three leave you "
+                    "well clear of a following-too-close citation. This is "
+                    "your preference rather than a difficulty, so the "
+                    "assistance preset above does not change it.",
+                )
+            )
+            # Lane and edge cue volume moved to Audio, next to the Gameplay
+            # cues volume it scales. It is a volume, and a second volume
+            # control hiding in the assists list is how it came to be a row
+            # nobody could explain.
+            items.append(MenuItem("Back", self.go_back))
+            return items
+        if self.category == "difficulty":
+            return [
+                MenuItem(
+                    lambda: f"Driving mode: {self._pace_label()}",
+                    lambda: self._cycle_pace(1),
+                    help="Driving mode controls pacing and pressure. Relaxed "
+                    "gives wider hazard response windows, gentler "
+                    "collision damage and fatigue, calmer speech, and the most "
+                    "time to respond. Standard keeps balanced pressure and moves "
+                    "the clock twice as fast, so a driving day takes half as long "
+                    "and decisions arrive sooner. Real time keeps Standard's "
+                    "pressure and runs the driving clock at the speed of a real "
+                    "clock, so a mile takes as long as it really would. With the "
+                    "weather source set to real world it is the most true to "
+                    "life the game gets. You can change it mid-drive from the "
+                    "pause menu.",
+                ),
+                MenuItem(
+                    lambda: f"Hours of service: {self._hos_label()}",
+                    lambda: self._cycle_hos(1),
+                    help="Realistic enforces full hours rules and normal "
+                    "road hazards. Relaxed eases the hours limits and "
+                    "makes road hazards rare, so you can focus on "
+                    "driver responsibility: hours, fueling, and repairs.",
+                ),
+                # The overspeed warning no longer has a row. It armed at the
+                # same 5-over pace predictive cruise itself holds, so it
+                # chimed at drivers for a speed the truck picked, and the
+                # setting existed to switch that off. It now arms above
+                # cruise's pace and below the enforcement leeway, which
+                # leaves nothing worth turning off.
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "world":
+            return [
+                MenuItem(
+                    lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+                    lambda: self._toggle_real_weather(1),
+                    help="Real world uses live city conditions when available.",
+                ),
+                MenuItem(
+                    lambda: f"Traffic source: {'real time' if s.real_traffic else 'simulated'}",
+                    lambda: self._toggle_real_traffic(1),
+                    help="Real time uses live traffic incidents from state 511 "
+                    "APIs when available.",
+                ),
+                MenuItem(
+                    lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
+                    lambda: self._toggle_real_parking(1),
+                    help="Real time uses live truck parking availability from "
+                    "TPIMS APIs when available.",
+                ),
+                MenuItem(
+                    lambda: (
+                        "Live weather controls calendar: "
+                        f"{'on' if s.live_weather_controls_calendar else 'off'}"
+                    ),
+                    lambda: self._toggle_live_weather_calendar(1),
+                    help="When on, live weather uses today's real date and "
+                    "season. When off, the career date advances at midnight and "
+                    "seasons pass while weather conditions still come from the "
+                    "real world.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "controls":
             return [
                 MenuItem(
                     lambda: (
@@ -918,39 +1245,10 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Automatic direction changes: {s.automatic_direction_changes}",
                     lambda: self._cycle_automatic_direction_changes(1),
-                    help="Simple changes between forward and reverse when you keep "
-                    "holding the control after the truck stops. Deliberate waits "
-                    "for you to release the control and press it again. This only "
-                    "affects automatic transmission.",
-                ),
-                MenuItem(
-                    lambda: f"Trip pacing: {self._pace_label()}",
-                    lambda: self._cycle_pace(1),
-                    help="Controls how quickly game time and distance pass "
-                    "at highway speed. The clock always slows to near real "
-                    "time while you accelerate, brake, or maneuver, and runs "
-                    "at double pace while parked with the parking brake set.",
-                ),
-                MenuItem(
-                    lambda: f"Hours of service: {self._hos_label()}",
-                    lambda: self._cycle_hos(1),
-                    help="Realistic enforces full hours rules and normal "
-                    "road hazards. Relaxed eases the hours limits and "
-                    "makes road hazards rare, so you can focus on "
-                    "driver responsibility: hours, fueling, and repairs.",
-                ),
-                MenuItem(
-                    lambda: f"Lane drift: {self._steering_label()}",
-                    lambda: self._cycle_steering(1),
-                    help="Choose whether lane drift is off, light, or realistic.",
-                ),
-                MenuItem(
-                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
-                    lambda: self._toggle_speed_keeper(1),
-                    help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and work zones, automatic "
-                    "speed control uses the keeper, then switches back to adaptive "
-                    "cruise on open roads. Braking cancels the whole session.",
+                    help="Both styles change direction with a fresh press at a "
+                    "standstill; a brake held through a stop just holds the "
+                    "truck. Deliberate requires the release-and-press gesture "
+                    "everywhere. This only affects automatic transmission.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
@@ -966,6 +1264,10 @@ class SettingsCategoryState(MenuState):
                     "braking, the rumble strip, and road seams. Has no effect "
                     "without a controller connected.",
                 ),
+                # The speed keeper moved to Driving assistance: it holds a speed
+                # for you, which is what every other row on that screen does.
+                # Controls is the keyboard, the controller, and the units the
+                # numbers arrive in.
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -981,6 +1283,34 @@ class SettingsCategoryState(MenuState):
                     help="Horn, alerts, road, facility, and gameplay cue sounds.",
                 ),
                 MenuItem(
+                    lambda: f"Lane and edge cue volume: {self._cue_loudness_label()}",
+                    lambda: self._cycle_cue_loudness(1),
+                    help="How loud the road cues are when you leave your line, "
+                    "next to everything else: the rumble-strip and shoulder "
+                    "textures, the lane locator you turn on with I while "
+                    "driving, and the warning bars before a hairpin. It rides "
+                    "on the Gameplay cues volume above rather than replacing "
+                    "it, so this row moves those cues alone. Quieter keeps "
+                    "them under the engine, standard matches it, and louder "
+                    "cuts through for drivers who want no doubt about which "
+                    "edge they are on.",
+                ),
+                MenuItem(
+                    lambda: f"Lane guide sound: {'tone' if s.lane_guide_tone else 'road noise'}",
+                    self._toggle_lane_guide_tone,
+                    help="What leans toward the side you are drifting to. "
+                    "Road noise is the road you are already hearing, which "
+                    "moves toward the side you need to steer and goes quiet "
+                    "when you are straight -- nothing is added to the cab. "
+                    "Tone plays a soft note instead, for the same length of "
+                    "time and panned the same way. It is there because on "
+                    "some setups the road is too quiet under the engine to "
+                    "tell which side it went to. Road noise is the default "
+                    "and the one most drivers should stay on: a note held in "
+                    "your ear is tiring over a long haul and can crowd out "
+                    "the rest of what the cab is telling you.",
+                ),
+                MenuItem(
                     lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
                     lambda: self._volume("weather_volume", 0.1),
                     help="Rain, wind, thunder, snow, and fog sounds.",
@@ -991,9 +1321,53 @@ class SettingsCategoryState(MenuState):
                     help="Engine start, shutdown, and running engine sounds.",
                 ),
                 MenuItem(
+                    lambda: f"Engine voice: {s.engine_voice}",
+                    lambda: self._toggle_engine_voice(1),
+                    help=(
+                        "Real plays the engine recorded from a working truck cab, "
+                        "following the rpm through its range. Classic keeps the "
+                        "original engine sound. Changes apply immediately, even "
+                        "while driving."
+                    ),
+                ),
+                MenuItem(
+                    lambda: (
+                        f"Engine brake voice: {'recorded' if s.jake_voice == 'real' else 'classic'}"
+                    ),
+                    lambda: self._toggle_jake_voice(1),
+                    help=(
+                        "Recorded is the real engine brake growl the road plays "
+                        "today -- drivers call it the jake. Classic is the "
+                        "synthesized growl from earlier versions. Changes apply "
+                        "immediately, even while driving."
+                    ),
+                ),
+                MenuItem(
                     lambda: f"Music volume: {round(s.music_volume * 100)} percent",
                     lambda: self._volume("music_volume", 0.1),
-                    help="Background music volume.",
+                    help="Menu and facility background music volume.",
+                ),
+                MenuItem(
+                    lambda: f"In-cab radio volume: {round(s.radio_volume * 100)} percent",
+                    lambda: self._volume("radio_volume", 0.1),
+                    help="Music volume while driving. Kept lower by default so speech, engine, and safety cues stay clear.",
+                ),
+                MenuItem(
+                    lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
+                    lambda: self._toggle_radio_streamer_safe(1),
+                    help="Off plays the full dial, including real public streams and "
+                    "personal playlists. Turn it on while streaming or recording to "
+                    "keep the radio on built-in safe stations only.",
+                ),
+                MenuItem(
+                    lambda: (
+                        "Game sounds step back for speech: "
+                        f"{'on' if s.duck_audio_for_speech else 'off'}"
+                    ),
+                    lambda: self._toggle_duck_for_speech(1),
+                    help="While the road voice speaks, the engine, weather, and "
+                    "radio drop to half volume, then come back. Warnings stay "
+                    "easy to hear in a loud cab without the voice getting louder.",
                 ),
                 MenuItem(
                     lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
@@ -1054,23 +1428,50 @@ class SettingsCategoryState(MenuState):
             actions = [action for _, action, _ in self._speech_control_specs()]
         else:
             actions = {
-                "gameplay": [
+                "difficulty": [
+                    self._cycle_pace,
+                    self._cycle_hos,
+                ],
+                "world": [
+                    self._toggle_real_weather,
+                    self._toggle_real_traffic,
+                    self._toggle_real_parking,
+                    self._toggle_live_weather_calendar,
+                ],
+                "controls": [
                     self._toggle_units,
                     self._toggle_transmission,
                     self._cycle_automatic_direction_changes,
-                    self._cycle_pace,
-                    self._cycle_hos,
-                    self._cycle_steering,
-                    self._toggle_speed_keeper,
                     self._toggle_controller,
                     self._toggle_haptics,
+                ],
+                "assistance": [
+                    self._cycle_assist_preset,
+                    *[
+                        (lambda d, field=field: self._toggle_driving_assist(field, d))
+                        for field, _, _ in self._driving_assist_specs()
+                    ],
+                    # The last row of this category was left out of the
+                    # arrow-key path, so Left and Right did nothing on it
+                    # while every other row answered. Every row added here
+                    # after Lane keeping must be appended below it, in the
+                    # same order build_items appends them.
+                    self._cycle_lane_keeping,
+                    self._cycle_acc_gap,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
                     lambda d: self._volume("sfx_volume", 0.1 * d),
+                    self._cycle_cue_loudness,
+                    self._toggle_lane_guide_tone,
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
+                    self._toggle_engine_voice,
+                    self._toggle_jake_voice,
                     lambda d: self._volume("music_volume", 0.1 * d),
+                    lambda d: self._volume("radio_volume", 0.1 * d),
+                    self._toggle_radio_streamer_safe,
+                    self._toggle_duck_for_speech,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1091,9 +1492,65 @@ class SettingsCategoryState(MenuState):
         speech = self.ctx.speech
         specs = [
             (
-                lambda: f"Speech verbosity: {['terse', 'normal'][s.speech_verbosity]}",
-                self._cycle_verbosity,
-                "Controls how often driving status reminders speak.",
+                lambda: f"Driving speech: {s.driving_speech.replace('_', ' ')}",
+                self._cycle_driving_speech,
+                "How much the road tells you. Standard speaks every "
+                "confirmation and status update in words, a driving tip "
+                "once per leg, and a status readout when it changes; quiet "
+                "cuts confirmations and status to short sounds; and urgent "
+                "only also turns the heads-up about a bend or a town coming "
+                "up into a short sound, keeping the safety calls, what "
+                "things cost, and the turn itself. Billboards, place "
+                "names and landmarks are not part of this -- they have "
+                "their own switches below.",
+            ),
+            (
+                lambda: f"Roadside chatter: {s.chatter_summary()}",
+                self._set_all_chatter,
+                "The ambient color spoken between navigation cues: parks, "
+                "rivers, mountain passes, museums, and billboards. Right "
+                "arrow turns everything on, Left arrow turns everything "
+                "off, and the switches below fine-tune each kind. Safety "
+                "and navigation announcements are never affected, and town "
+                "names have their own Place callouts setting below.",
+            ),
+            (
+                lambda: f"Speak parks and forests: {'on' if s.chatter_parks else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_parks"),
+                "Callouts when the road enters a national park, national "
+                "forest, or other protected public land.",
+            ),
+            (
+                lambda: f"Speak river crossings: {'on' if s.chatter_rivers else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_rivers"),
+                "Callouts when the road crosses a named river.",
+            ),
+            (
+                lambda: f"Speak mountain passes: {'on' if s.chatter_passes else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_passes"),
+                "Callouts approaching a named mountain pass, plus famous "
+                "highway markers like the Loneliest Road in America.",
+            ),
+            (
+                lambda: f"Speak museums and attractions: {'on' if s.chatter_museums else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_museums"),
+                "Callouts for museums and roadside attractions near the route.",
+            ),
+            (
+                lambda: f"Speak billboards: {'on' if s.chatter_billboards else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_billboards"),
+                "Occasional roadside billboards, read as you pass them. "
+                "Expect attorney ads and questionable tourist traps.",
+            ),
+            (
+                lambda: f"Place callouts: {s.place_callouts}",
+                self._cycle_place_callouts,
+                "How much the co-driver says about places along the road. "
+                "Sparse speaks only the town names that explain a speed "
+                "limit change, like Entering Strawberry right before its 35. "
+                "All adds the towns the route passes. Off silences place "
+                "names entirely; speed limit announcements themselves are "
+                "never affected.",
             ),
             (
                 lambda: (
@@ -1107,7 +1564,10 @@ class SettingsCategoryState(MenuState):
                 lambda: f"Driving event voice: {self._event_voice_label()}",
                 self._cycle_event_voice,
                 "Speaks road events through the main voice or a separate SAPI or "
-                "OneCore voice, so a screen reader cannot cut them off.",
+                "OneCore voice, so a screen reader cannot cut them off. The rate, "
+                "pitch, volume, and voice rows below appear in this category only "
+                "when the voice speaking to you supports them; with a screen "
+                "reader running, those four are set in the screen reader itself.",
             ),
         ]
         if speech.supports_rate:
@@ -1142,34 +1602,231 @@ class SettingsCategoryState(MenuState):
                     "Which installed voice the game speaks with.",
                 )
             )
-        specs.append(
-            (
-                lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
-                self._toggle_real_weather,
-                "Real world uses live city conditions when available.",
-            )
-        )
-        specs.append(
-            (
-                lambda: (
-                    "Live weather controls calendar: "
-                    f"{'on' if s.live_weather_controls_calendar else 'off'}"
-                ),
-                self._toggle_live_weather_calendar,
-                "When on, live weather uses today's real date and season. When off, "
-                "the career date advances at midnight and seasons pass while weather "
-                "conditions still come from the real world.",
-            )
-        )
+        # Weather, traffic, and parking sources, and the live-weather calendar,
+        # used to live here. They are world simulation, not speech, so they
+        # moved to Gameplay, World and traffic.
         return specs
 
-    def _toggle_speed_keeper(self, _d: int = 1) -> None:
-        self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+    @staticmethod
+    def _driving_assist_specs():
+        return (
+            (
+                "automatic_emergency_braking",
+                "Automatic emergency braking",
+                "After a spoken hazard warning, the truck brakes automatically if you have not slowed enough.",
+            ),
+            (
+                "lane_departure_warning",
+                "Lane-departure warning",
+                "Speaks and sounds a warning when the truck drifts toward a lane edge.",
+            ),
+            (
+                "stop_and_go_assist",
+                "Stop-and-go assistance",
+                "Adaptive cruise can slow behind modeled traffic and resume while it remains safe.",
+            ),
+            (
+                "descent_speed_control",
+                "Descent speed control",
+                "Manages engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also selects safe targets and uses stronger intervention.",
+            ),
+            (
+                "exit_speed_assist",
+                "Exit speed assistance",
+                "Slows for an already-selected exit; you still confirm and take it.",
+            ),
+            (
+                "destination_approach_assist",
+                "Destination approach assistance",
+                "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
+            ),
+            (
+                "selected_stop_assist",
+                "Planned rest-stop stopping assistance",
+                "After T plans a sleep-capable route stop and X signals for its exit, this assistance stops at the entrance so the rest-stop menu can open. You still set the exit lane. It never chooses, signals, takes, or cancels an exit. Presets never change it.",
+            ),
+            (
+                "curve_speed_assist",
+                "Curve speed assistance",
+                "Reduces speed workload for mapped curves; you still steer. It slows for the bend itself on the service brakes and never the engine brake; on a real downgrade it does raise the jake, because that is the grade's work and not the bend's.",
+            ),
+            (
+                "route_transition_assist",
+                "Route-transition assistance",
+                "Helps manage speed and lane workload at confirmed route transitions.",
+            ),
+            # The speed keeper is an input-accessibility aid, not a driving
+            # assist -- it lives in Gameplay, Controls, and there is exactly one
+            # row for it. It used to appear here too, a second live control for
+            # the one setting, which is a real hazard in a spoken list.
+            (
+                "pedal_latch",
+                "Latching pedals",
+                "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Assists first, the default, lets cruise, the speed keeper, and curve assist manage speed over a latched throttle. Latch first treats the latch as a manual override those assists stand down for, the original behavior. Off turns latching pedals plain. Presets never change this.",
+            ),
+            (
+                "predictive_cruise",
+                "Predictive cruise",
+                "Cruise reads the road a mile and a half ahead: it banks a little speed before a climb so the truck carries it up the hill, gives up the last few miles an hour at a crest instead of fighting for them, and stops adding speed it would only have to brake away before a descent. It says what it is doing the first time on each hill. Presets never change this.",
+            ),
+            (
+                "curve_callouts",
+                "Curve callouts",
+                "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
+            ),
+            # The speed keeper holds a speed for you, so it belongs with the
+            # rest of the driving help rather than in Controls, where it sat
+            # among the keyboard, controller and units rows. Like the other
+            # input-accessibility aids above it, presets never touch it.
+            (
+                "speed_keeper",
+                "Speed keeper",
+                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and construction zones, pressing K holds your current speed so the accelerator does not need to stay held, then switches back to adaptive cruise on open roads. The keeper eases off early for the next turn or the next lower limit. Braking cancels the whole session. Presets never change this.",
+            ),
+        )
+
+    def announce_entry(self) -> None:
+        # Entry speaks the landing row through ``ctx.say`` rather than
+        # ``speak_current``, so a row-specific notice attached only to the
+        # latter is never heard by a player whose row is the one they land
+        # on -- which is every player for Driving mode, the first row of
+        # Difficulty and hours of service. Both notices are guarded by their
+        # own counter, so running them here costs nothing on a visit that
+        # arrows in from elsewhere.
+        super().announce_entry()
+        self._maybe_say_lane_keeping_rename()
+        self._maybe_say_pace_retired()
+
+    def speak_current(self) -> None:
+        super().speak_current()
+        self._maybe_say_lane_keeping_rename()
+        self._maybe_say_pace_retired()
+
+    def _maybe_say_pace_retired(self) -> None:
+        """Tell a player who was on Realistic why their row now says Standard.
+
+        Their game clock runs at half the rate they set it to, so a driving
+        day now takes twice the real time it used to. Nothing else on the
+        row would say so: the label reads Standard as though they had
+        chosen it. Same budget and same queueing as the lane-keeping rename
+        -- it follows the row announcement rather than interrupting it, so a
+        player arrowing straight past loses it and hears it next visit.
+        """
+        s = self.ctx.settings
+        if self.category != "difficulty" or s.pace_retired_notice_left <= 0:
+            return
+        if not self.items or not self.items[self.index].text.startswith("Driving mode"):
+            return
+        s.pace_retired_notice_left -= 1
+        s.save()
+        self.ctx.say(
+            "This row used to offer Realistic, and yours was set to it. "
+            "It has been retired: it was the fastest setting here, not the "
+            "most true to life, and the name said the opposite of what it "
+            "did. You are on Standard now, so the game clock runs at half "
+            "the speed it did and a driving day takes twice the real time.",
+            interrupt=False,
+        )
+
+    def _maybe_say_lane_keeping_rename(self) -> None:
+        """Tell a returning player their Lane drift row is now Lane keeping.
+
+        Only the real control says it, and only for a player whose settings
+        file actually carried the old name. It queues behind the row
+        announcement rather than interrupting it, which means a player who
+        keeps arrowing loses it -- so the budget is three, and a lost
+        announcement corrects itself on the next visit.
+        """
+        s = self.ctx.settings
+        if self.category != "assistance" or s.lane_keeping_rename_notice_left <= 0:
+            return
+        if not self.items or not self.items[self.index].text.startswith("Lane keeping"):
+            return
+        s.lane_keeping_rename_notice_left -= 1
+        s.save()
+        was = LANE_KEEPING_TO_LEGACY.get(s.lane_keeping, "off")
+        unchanged = {
+            "full": "the truck still holds the lane and takes your exits",
+            "partial": "the drift and the steering help are just as they were",
+            "off": "you still hold the lane and take your own exits",
+        }.get(s.lane_keeping, "the truck still holds the lane and takes your exits")
+        self.ctx.say(
+            f"This row used to be Lane drift, and yours read {was}. "
+            f"Nothing about your driving changed: {unchanged}.",
+            interrupt=False,
+        )
+
+    def _assist_preset_label(self) -> str:
+        return {
+            "realistic": "Realistic",
+            "balanced": "Balanced",
+            "all": "All assists",
+            "custom": "Custom",
+        }[self.ctx.settings.driving_assistance_preset]
+
+    def _descent_level_label(self) -> str:
+        return self.ctx.settings.descent_speed_control.title()
+
+    def _cycle_assist_preset(self, direction: int) -> None:
+        presets = tuple(DRIVING_ASSIST_PRESETS)
+        current = self.ctx.settings.driving_assistance_preset
+        index = presets.index(current) if current in presets else (-1 if direction > 0 else 0)
+        lane_before = self.ctx.settings.lane_keeping
+        self.ctx.settings.apply_driving_assistance_preset(
+            presets[(index + direction) % len(presets)]
+        )
         self._announce()
+        if self.ctx.settings.lane_keeping != lane_before:
+            note = (
+                "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
+                if self.ctx.settings.lane_is_automated()
+                else f"Lane keeping back to {self._lane_keeping_label()}."
+            )
+            self.ctx.say(note, interrupt=False)
+
+    def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
+        if field == "pedal_latch":
+            modes = ["assists first", "latch first", "off"]
+            try:
+                i = modes.index(self.ctx.settings.pedal_latch)
+            except ValueError:
+                i = 0
+            self.ctx.settings.pedal_latch = modes[(i + _direction) % len(modes)]
+            self._announce()
+            return
+        if field in (
+            "curve_callouts",
+            "predictive_cruise",
+            "selected_stop_assist",
+            "speed_keeper",
+        ):
+            # Input-accessibility aids and information layers, not realism
+            # choices: they live outside the presets, so toggling one never
+            # reads as Custom.
+            setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
+            self._announce()
+            return
+        if field not in DRIVING_ASSIST_FIELDS:
+            return
+        was_custom = self.ctx.settings.driving_assistance_preset == "custom"
+        if field == "descent_speed_control":
+            levels = ("off", "realistic", "balanced", "interactive")
+            current = levels.index(self.ctx.settings.descent_speed_control)
+            self.ctx.settings.descent_speed_control = levels[(current + _direction) % len(levels)]
+        else:
+            setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
+        self.ctx.settings.refresh_driving_assistance_preset()
+        self._announce()
+        # Queue the preset note behind the toggle announcement (an interrupting
+        # say here would cut off the new on/off state the player just changed),
+        # and only on the change into Custom -- repeating it on every later
+        # toggle is noise the preset row already answers.
+        if self.ctx.settings.driving_assistance_preset == "custom" and not was_custom:
+            self.ctx.say("Driving assistance preset: Custom.", interrupt=False)
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard", 40.0: "fast"}.get(scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard", 1.0: "real time"}.get(scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {
@@ -1178,12 +1835,39 @@ class SettingsCategoryState(MenuState):
             "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
-    def _steering_label(self) -> str:
-        return {
-            "off": "off",
-            "light": "light",
-            "realistic": "realistic",
-        }.get(self.ctx.settings.steering_assist, "off")
+    def _acc_gap_label(self) -> str:
+        """The choice, and the number that makes it mean something.
+
+        A sighted player could infer "close" from a picture of a road. This
+        one is read aloud and nothing else on the row says how much room any
+        of the words buys, so the seconds go in the label rather than being
+        left to the help text.
+        """
+        from .driving_core import ACC_GAP_CHOICES, ACC_GAP_DEFAULT
+
+        choice = self.ctx.settings.acc_following_gap
+        seconds = ACC_GAP_CHOICES.get(choice, ACC_GAP_CHOICES[ACC_GAP_DEFAULT])
+        spoken = f"{seconds:g}".replace(".5", " and a half")
+        return f"{choice}, {spoken} seconds"
+
+    def _cycle_acc_gap(self, d: int) -> None:
+        from .driving_core import ACC_GAP_CHOICES, ACC_GAP_DEFAULT
+
+        order = list(ACC_GAP_CHOICES)
+        try:
+            i = order.index(self.ctx.settings.acc_following_gap)
+        except ValueError:
+            i = order.index(ACC_GAP_DEFAULT)
+        self.ctx.settings.acc_following_gap = order[(i + d) % len(order)]
+        self._announce()
+
+    def _lane_keeping_label(self) -> str:
+        # The value carries its own meaning: a player cycling the row hears
+        # what changes hands, not a bare difficulty word (owner ask
+        # 2026-07-27). It has to, because "off" here means the hardest mode
+        # while "off" on the rows around it means less help. The labels and
+        # the loader's fallback share one source in settings.py.
+        return self.ctx.settings.lane_keeping_label()
 
     def _announce(self) -> None:
         self.refresh()
@@ -1229,8 +1913,20 @@ class SettingsCategoryState(MenuState):
         value = getattr(self.ctx.settings, attr)
         setattr(self.ctx.settings, attr, max(0.0, min(1.0, round(value + delta, 2))))
         self.ctx.settings.save()
-        self.ctx.apply_volumes()
+        self._apply_audio_volumes()
         self._announce()
+
+    def _apply_audio_volumes(self) -> None:
+        self.ctx.apply_volumes()
+        if self._driving_radio_active():
+            self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume)
+
+    def _driving_radio_active(self) -> bool:
+        for state in reversed(self.ctx._app.states):
+            radio = getattr(state, "radio", None)
+            if radio is not None:
+                return bool(getattr(radio, "enabled", False))
+        return False
 
     def _cycle_hos(self, d: int) -> None:
         modes = ["realistic", "relaxed"]
@@ -1241,13 +1937,72 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
         self._announce()
 
-    def _cycle_steering(self, d: int) -> None:
-        modes = ["off", "light", "realistic"]
+    def _cue_loudness_label(self) -> str:
+        """The spoken value, in the words a volume row uses.
+
+        The saved values are unchanged -- "subtle", "standard", "prominent" --
+        so nobody's choice resets. What changes is that the row now says
+        quieter or louder, which is what a player is actually choosing
+        between. "Prominence" described the row to whoever wrote it, not to
+        whoever hears it.
+        """
+        return {"subtle": "quieter", "standard": "standard", "prominent": "louder"}.get(
+            self.ctx.settings.lane_cue_loudness, "standard"
+        )
+
+    def _toggle_lane_guide_tone(self, _d: int = 1) -> None:
+        s = self.ctx.settings
+        s.lane_guide_tone = not s.lane_guide_tone
+        s.save()
+        self._announce()
+
+    def _cycle_cue_loudness(self, d: int) -> None:
+        levels = ["subtle", "standard", "prominent"]
         try:
-            i = modes.index(self.ctx.settings.steering_assist)
+            i = levels.index(self.ctx.settings.lane_cue_loudness)
+        except ValueError:
+            i = 1
+        self.ctx.settings.lane_cue_loudness = levels[(i + d) % len(levels)]
+        self._announce()
+
+    def _cycle_lane_keeping(self, d: int) -> None:
+        modes = list(LANE_KEEPING_MODES)
+        try:
+            i = modes.index(self.ctx.settings.lane_keeping)
         except ValueError:
             i = 0
-        self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
+        self.ctx.settings.lane_keeping = modes[(i + d) % len(modes)]
+        # Lane keeping is a preset field, so a hand-picked value is answered
+        # by the preset row the same way any other assist is.
+        self.ctx.settings.refresh_driving_assistance_preset()
+        self._announce()
+
+    def _toggle_engine_voice(self, _d: int = 1) -> None:
+        """Flip between the recorded engine and the classic loop, live."""
+        s = self.ctx.settings
+        s.engine_voice = "classic" if s.engine_voice == "real" else "real"
+        self.ctx.apply_volumes()  # re-voices a running engine in place
+        self._announce()
+
+    def _toggle_jake_voice(self, _d: int = 1) -> None:
+        """Flip between the recorded jake and the classic synth, live."""
+        s = self.ctx.settings
+        s.jake_voice = "classic" if s.jake_voice == "real" else "real"
+        self.ctx.apply_volumes()  # re-voices a sounding jake growl in place
+        self._announce()
+
+    def _toggle_radio_streamer_safe(self, _d: int) -> None:
+        self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
+        self.ctx.apply_active_radio_settings()
+        self._announce()
+
+    def _toggle_duck_for_speech(self, _d: int = 1) -> None:
+        s = self.ctx.settings
+        s.duck_audio_for_speech = not s.duck_audio_for_speech
+        s.save()
+        if not s.duck_audio_for_speech:
+            # A duck held at the moment of the flip must not stick.
+            self.ctx.audio.set_speech_duck(1.0)
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:
@@ -1260,8 +2015,28 @@ class SettingsCategoryState(MenuState):
         self.ctx.apply_haptics()
         self._announce()
 
-    def _cycle_verbosity(self, d: int) -> None:
-        self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 2
+    def _cycle_driving_speech(self, d: int) -> None:
+        s = self.ctx.settings
+        i = DRIVING_SPEECH_MODES.index(s.driving_speech)
+        s.driving_speech = DRIVING_SPEECH_MODES[(i + d) % len(DRIVING_SPEECH_MODES)]
+        self._announce()
+
+    def _cycle_place_callouts(self, d: int) -> None:
+        s = self.ctx.settings
+        i = PLACE_CALLOUT_MODES.index(s.place_callouts)
+        s.place_callouts = PLACE_CALLOUT_MODES[(i + d) % len(PLACE_CALLOUT_MODES)]
+        self._announce()
+
+    def _set_all_chatter(self, d: int) -> None:
+        # The master switch is directional like every other Left/Right
+        # control: Right (or Enter) turns every chatter kind on, Left turns
+        # every kind off.
+        self.ctx.settings.set_all_chatter(d >= 0)
+        self._announce()
+
+    def _toggle_chatter(self, field: str) -> None:
+        settings = self.ctx.settings
+        setattr(settings, field, not getattr(settings, field))
         self._announce()
 
     def _toggle_menu_position(self, _d: int) -> None:
@@ -1316,6 +2091,17 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_traffic(self, _d: int) -> None:
+        self.ctx.settings.real_traffic = not self.ctx.settings.real_traffic
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_parking(self, _d: int) -> None:
+        self.ctx.settings.real_parking = not self.ctx.settings.real_parking
+        self.ctx.settings.save()
         self._announce()
 
     def _toggle_live_weather_calendar(self, _d: int) -> None:

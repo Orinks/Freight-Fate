@@ -45,6 +45,16 @@ MAX_FIELD_LEN = 128
 # push more than one update per this many seconds; identical states are dropped.
 MIN_UPDATE_INTERVAL_S = 15.0
 
+# A player who walks away -- most often by pausing mid-drive, but equally by
+# leaving the game parked at a menu -- reports the identical snapshot for hours,
+# and their Discord status keeps telling everyone they are 60% into a run they
+# are not driving. After this long without any snapshot change the presence
+# comes down and stays down; any change -- resuming, rolling again, a new leg --
+# puts it straight back up. This mirrors the drivers board's IDLE_SIGNOFF_S in
+# :mod:`freight_fate.online_presence`, deliberately on the same clock so a
+# player who is hidden in one place is hidden in the other.
+IDLE_CLEAR_S = 30 * 60.0
+
 # How often the worker re-evaluates while idle (also flushes a throttled change).
 _WORKER_TICK_S = MIN_UPDATE_INTERVAL_S
 
@@ -225,6 +235,7 @@ class DiscordPresence:
         enabled: bool = True,
         client_id: str | None = None,
         min_interval_s: float = MIN_UPDATE_INTERVAL_S,
+        idle_clear_s: float = IDLE_CLEAR_S,
         clock: Callable[[], float] = time.monotonic,
         rpc_factory: RpcFactory | None = _default_rpc_factory,
         session_start: float | None = None,
@@ -238,6 +249,7 @@ class DiscordPresence:
         self._enabled = bool(enabled) and self._available
         self._client_id = client_id
         self._min_interval = max(0.0, float(min_interval_s))
+        self._idle_clear = max(1.0, float(idle_clear_s))
         self._clock = clock
         self._rpc_factory = rpc_factory
         self._session_start = session_start if session_start is not None else time.time()
@@ -247,6 +259,8 @@ class DiscordPresence:
         self._desired: PresenceState | None = None
         self._last_sent: PresenceState | None = None
         self._last_send_t: float | None = None
+        self._desired_changed_t: float | None = None
+        self._showing = False  # Discord is currently displaying our activity
         self._rpc: _RpcClient | None = None
         self._last_connect_attempt: float | None = None
 
@@ -285,6 +299,10 @@ class DiscordPresence:
             if state == self._desired:
                 return  # nothing changed; skip even the wakeup
             self._desired = state
+            # Any genuine change restarts the idle clock; the dedupe above
+            # means a paused or parked game re-reporting the same snapshot
+            # every frame does not.
+            self._desired_changed_t = self._clock()
         if self._threaded:
             self._wake.set()
         else:
@@ -310,8 +328,11 @@ class DiscordPresence:
         if enabled:
             # Re-show whatever the game last reported, reconnecting at once
             # rather than waiting out the idle backoff (this is a user action).
+            # Turning the setting on is also proof the player is here, so the
+            # idle clock starts over rather than hiding what it just put up.
             with self._lock:
                 self._last_sent = None
+                self._desired_changed_t = self._clock()
             self._last_connect_attempt = None
             self.start()
         else:
@@ -351,6 +372,12 @@ class DiscordPresence:
                 return min(remaining, _WORKER_TICK_S)
         return _WORKER_TICK_S
 
+    def _idle_for(self, now: float) -> float:
+        """Seconds the reported snapshot has gone unchanged."""
+        if self._desired_changed_t is None:
+            return 0.0
+        return now - self._desired_changed_t
+
     def _pump(self) -> None:
         """One connect-then-maybe-send cycle. Swallows all RPC errors."""
         if self._stop.is_set():
@@ -360,9 +387,18 @@ class DiscordPresence:
         with self._lock:
             desired = self._desired
             last_sent = self._last_sent
-        if desired is None or desired == last_sent:
-            return  # nothing new to show (de-dupe)
+        if desired is None:
+            return  # nothing reported yet
         now = self._clock()
+        if self._idle_for(now) >= self._idle_clear:
+            # The same snapshot for this long means the player has walked
+            # away, so take the presence down instead of leaving a stale
+            # "60% there" up all evening. _last_sent keeps the idle snapshot
+            # so the next real change is still detected and re-shows it.
+            self._hide(now)
+            return
+        if desired == last_sent:
+            return  # nothing new to show (de-dupe)
         if self._last_send_t is not None and now - self._last_send_t < self._min_interval:
             return  # throttled; the worker re-checks after the window closes
         try:
@@ -375,6 +411,22 @@ class DiscordPresence:
             return
         with self._lock:
             self._last_sent = desired
+        self._showing = True
+        self._last_send_t = now
+
+    def _hide(self, now: float) -> None:
+        """Take an idle presence down, once. Leaves _last_sent alone."""
+        if not self._showing:
+            return  # already hidden; wait for a change rather than re-clearing
+        try:
+            self._rpc.clear()  # type: ignore[union-attr]
+        except Exception:
+            log.debug("Discord presence clear failed; will reconnect", exc_info=True)
+            self._close()
+            return
+        self._showing = False
+        # A clear spends the same rate-limit budget as an update, so it counts
+        # against the throttle that a resume will have to wait out.
         self._last_send_t = now
 
     def _ensure_connected(self) -> bool:
@@ -408,6 +460,7 @@ class DiscordPresence:
         rpc = self._rpc
         self._rpc = None
         self._last_send_t = None
+        self._showing = False
         with self._lock:
             self._last_sent = None
         if rpc is None:
