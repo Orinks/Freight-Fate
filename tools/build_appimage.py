@@ -1,14 +1,16 @@
-"""Package the staged Nuitka Linux build as a cross-distro AppImage.
+"""Package the staged Linux build as a cross-distro AppImage.
 
-Runs after ``tools/build_release.py`` and expects ``dist/FreightFate`` to
-exist. linuxdeploy bundles the shared libraries the Ubuntu build links
-against (Ubuntu-specific sonames do not exist on Fedora/Arch/openSUSE,
-and the SDL/X11 chain pygame needs is not installed everywhere), while
-the host-integration stacks below stay excluded so the game keeps using
+Runs after ``tools/build_release.py`` and expects its staged folder,
+``build/FreightFate``. The Rust build needs almost no bundled libraries --
+SDL2 and Prism are compiled in, BASS carries its decoders beside the
+executable -- so the AppImage is mostly the launcher, the desktop entry and
+the self-update path the tarball cannot offer. linuxdeploy still runs over
+it, with the host-integration stacks below excluded so the game keeps using
 the target system's GLib, D-Bus, AT-SPI/speech stack, and OpenSSL.
 
 Run from the repository root:
 ``uv run python tools/build_appimage.py --tag <label>``
+(``--rust`` is accepted for callers that still pass it.)
 """
 
 from __future__ import annotations
@@ -27,20 +29,37 @@ import tomllib
 ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "dist"
 APP_NAME = "FreightFate"
-STAGED_DIR = DIST_DIR / APP_NAME
+STAGED_DIR = ROOT / "build" / APP_NAME
 WORK_DIR = ROOT / "build" / "appimage"
 TOOLS_DIR = WORK_DIR / "tools"
 APPDIR = WORK_DIR / "AppDir"
 APPIMAGE_ASSETS_DIR = ROOT / "tools" / "appimage"
 ICON_SOURCE = APPIMAGE_ASSETS_DIR / "freightfate.png"
 
+# Both tools are published per architecture under the same release, named
+# by `uname -m`: x86_64 for the PC build, aarch64 for the ARM64 one (the
+# Blazie BT Speak and BT Braille, Raspberry Pi). The AppImage is named the
+# same way, which is the AppImage convention; the tarball's `arm64` label is
+# build_release.py's.
 LINUXDEPLOY_URL = (
     "https://github.com/linuxdeploy/linuxdeploy/releases/download/"
-    "1-alpha-20251107-1/linuxdeploy-x86_64.AppImage"
+    "1-alpha-20251107-1/linuxdeploy-{arch}.AppImage"
 )
 APPIMAGE_RUNTIME_URL = (
-    "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64"
+    "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-{arch}"
 )
+SUPPORTED_ARCHITECTURES = ("x86_64", "aarch64")
+
+
+def appimage_architecture(machine: str | None = None) -> str:
+    """The `uname -m` name the AppImage tools and the output file use."""
+    machine = (machine or platform.machine()).lower()
+    if machine in {"x86_64", "amd64"}:
+        return "x86_64"
+    if machine in {"aarch64", "arm64"}:
+        return "aarch64"
+    raise RuntimeError(f"No AppImage tooling pinned for machine {machine!r}.")
+
 
 # Libraries that must come from the target system, not the AppImage.
 # Grouped by why bundling them would break users:
@@ -101,10 +120,6 @@ EXCLUDED_LIBRARY_GLOBS = (
     "libkrb5*",
     "libk5crypto*",
     "libkeyutils*",
-    # Already shipped at the dist top level by Nuitka.
-    "libpython*",
-    "libreadline*",
-    "libtinfo*",
 )
 
 # Sonames that must never appear in usr/lib (subset of the globs above that
@@ -119,18 +134,6 @@ FORBIDDEN_BUNDLED_PREFIXES = (
     "libgdk-3",
     "libatk",
     "libatspi",
-)
-
-# Sonames that must be present for other distros to work. pygame's manylinux
-# wheel already ships its SDL chain auditwheel-mangled inside the Nuitka dist,
-# so what linuxdeploy adds here are the unmangled Ubuntu-soname dependencies of
-# the compiled stdlib/native modules (verified deployed during Fedora 43
-# validation of the 1.8.5.1 build).
-REQUIRED_BUNDLED_SONAMES = (
-    "libffi.so.8",
-    "libpcre2-8.so.0",
-    "libbz2.so.1.0",
-    "liblzma.so.5",
 )
 
 
@@ -160,13 +163,13 @@ def download(url: str, target: Path, attempts: int = 4) -> Path:
     raise AssertionError("unreachable")
 
 
-def assemble_appdir() -> None:
-    """Build the AppDir skeleton from the staged Nuitka distribution."""
+def assemble_appdir(staged_dir: Path = STAGED_DIR) -> None:
+    """Build the AppDir skeleton from the staged distribution."""
     if APPDIR.exists():
         shutil.rmtree(APPDIR)
     (APPDIR / "opt").mkdir(parents=True)
-    print(f"Copying {STAGED_DIR} into AppDir")
-    shutil.copytree(STAGED_DIR, APPDIR / "opt" / "freightfate")
+    print(f"Copying {staged_dir} into AppDir")
+    shutil.copytree(staged_dir, APPDIR / "opt" / "freightfate")
 
 
 def run_linuxdeploy(linuxdeploy: Path, runtime: Path, label: str) -> Path:
@@ -200,7 +203,7 @@ def run_linuxdeploy(linuxdeploy: Path, runtime: Path, label: str) -> Path:
 
 
 def verify_bundled_libraries() -> None:
-    """Fail the build when usr/lib bundles host stacks or misses portability libs."""
+    """Fail the build when usr/lib bundles host-integration stacks."""
     lib_dir = APPDIR / "usr" / "lib"
     bundled = {path.name for path in lib_dir.iterdir()} if lib_dir.exists() else set()
 
@@ -210,10 +213,6 @@ def verify_bundled_libraries() -> None:
             "AppImage must not bundle host-integration libraries "
             f"(GLib/GTK/OpenSSL stay on the target system): {forbidden}"
         )
-
-    missing = sorted(set(REQUIRED_BUNDLED_SONAMES) - bundled)
-    if missing:
-        raise RuntimeError(f"AppImage is missing libraries needed on non-Debian distros: {missing}")
     print(f"Verified {len(bundled)} bundled libraries in usr/lib")
 
 
@@ -224,6 +223,11 @@ def main() -> int:
         "--keep-workdir",
         action="store_true",
         help="Keep build/appimage for debugging instead of reusing it clean.",
+    )
+    parser.add_argument(
+        "--rust",
+        action="store_true",
+        help="accepted for old callers; the Rust build is the only one",
     )
     args = parser.parse_args()
 
@@ -241,16 +245,19 @@ def main() -> int:
         shutil.rmtree(WORK_DIR)
     WORK_DIR.mkdir(parents=True, exist_ok=True)
 
-    linuxdeploy = download(LINUXDEPLOY_URL, TOOLS_DIR / "linuxdeploy-x86_64.AppImage")
+    arch = appimage_architecture()
+    linuxdeploy = download(
+        LINUXDEPLOY_URL.format(arch=arch), TOOLS_DIR / f"linuxdeploy-{arch}.AppImage"
+    )
     linuxdeploy.chmod(0o755)
-    runtime = download(APPIMAGE_RUNTIME_URL, TOOLS_DIR / "runtime-x86_64")
+    runtime = download(APPIMAGE_RUNTIME_URL.format(arch=arch), TOOLS_DIR / f"runtime-{arch}")
 
-    assemble_appdir()
+    assemble_appdir(STAGED_DIR)
     produced = run_linuxdeploy(linuxdeploy, runtime, label)
     verify_bundled_libraries()
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
-    target = DIST_DIR / f"{APP_NAME}-{label}-linux-x86_64.AppImage"
+    target = DIST_DIR / f"{APP_NAME}-{label}-linux-{arch}.AppImage"
     if target.exists():
         target.unlink()
     shutil.move(produced, target)

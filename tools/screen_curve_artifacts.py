@@ -63,6 +63,23 @@ records are named in ``curve_artifacts.jsonl`` by ``(leg, seq)`` and
 ``data/curves.py`` skips them on load, exactly like the interstate screen
 skips its records in memory rather than rewriting the archive.
 
+THE ORDER MATTERS, AND NOTHING ENFORCES IT
+------------------------------------------
+These four passes form a chain, each reading the output of the last. Run them
+in this order after any change to the curve data::
+
+    uv run python tools/curve_valhalla_facts.py --all      # what road is it on
+    uv run python tools/bake_curve_connectors.py --write   # mainline or connector
+    uv run python tools/clamp_curve_advisories.py --write  # cap the advisory
+    uv run python tools/screen_curve_artifacts.py          # drop impossible geometry
+
+Skipping the last one has now stranded ``curve_artifacts.jsonl`` twice in a
+single session. It names rows by ``(leg, seq)`` and only considers non-connector
+rows, so the moment ``connector`` moves it can silently stop covering a row it
+used to screen -- which is how a 44 ft radius turning 182 degrees survived as
+mainline on US-30 out of Columbus. A stale screen does not announce itself; it
+just quietly stops catching things.
+
 Usage
 -----
     uv run python tools/screen_curve_artifacts.py             # write + report
@@ -91,23 +108,18 @@ from reclassify_terrain import (  # noqa: E402  (path shim above must run first)
 from world_source import load_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-CURVES_PATH = (
-    ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
-)
-OUTPUT_PATH = (
-    ROOT
-    / "src"
-    / "freight_fate"
-    / "data"
-    / "world_data"
-    / "us"
-    / "gameplay"
-    / "curve_artifacts.jsonl"
-)
+CURVES_PATH = ROOT / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
+OUTPUT_PATH = ROOT / "data" / "world_data" / "us" / "gameplay" / "curve_artifacts.jsonl"
 
 # Same definition data/curves.py's RouteCurve.severity uses for "hairpin" --
 # import-free copy so this tool has no runtime dependency on the baked data
 # module (mirrors reclassify_terrain.py's own world_source-only imports).
+# The screen's own question is "could a road here really do this?", so it
+# keeps the BROAD test: a very low advisory is an extreme claim about the
+# ground whether or not the road comes back on itself. That is deliberately
+# not the spoken hairpin test, which MUTCD settles on shape alone (see
+# data/curves.py HAIRPIN_DEFLECTION_DEG). One predicate was doing both jobs
+# and they want different answers.
 HAIRPIN_MAX_MPH = 25
 HAIRPIN_DEFLECTION_DEG = 150.0
 
@@ -161,7 +173,8 @@ def _load_geometry() -> dict[str, dict[str, Any]]:
     return geom
 
 
-def _is_hairpin_severity(row: dict[str, Any]) -> bool:
+def _is_extreme_claim(row: dict[str, Any]) -> bool:
+    """Whether this row claims geometry worth asking the ground about."""
     return row["advisory_mph"] <= HAIRPIN_MAX_MPH or row["deflection_deg"] >= HAIRPIN_DEFLECTION_DEG
 
 
@@ -197,7 +210,7 @@ def find_artifacts(data: dict[str, Any]) -> list[dict[str, Any]]:
         highway = str(leg.get("highway") or "")
         if highway.upper().startswith("I-"):
             continue  # interstate mainline has its own runtime screen
-        candidates = [r for r in rows if not r.get("connector") and _is_hairpin_severity(r)]
+        candidates = [r for r in rows if not r.get("connector") and _is_extreme_claim(r)]
         if not candidates:
             continue
 

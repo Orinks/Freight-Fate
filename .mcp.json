@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "freight-fate": {
+      "command": "target\\release\\freightfate.exe",
+      "args": [
+        "--agent-server",
+        "--operator-keys"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -8,10 +8,10 @@ menu items, and the truck dealer entry names the source-backed local
 dealer; the local-drive routing that once used these coordinates is
 retired, but the same three checked-in files still back the data:
 
-- `src/freight_fate/data/city_services.json` -- the chosen POI per service.
-- `src/freight_fate/data/local_approaches.json` -- nearest-road approach per
+- `data/city_services.json` -- the chosen POI per service.
+- `data/local_approaches.json` -- nearest-road approach per
   target (the distance the runtime drives when there is no turn-level route).
-- `src/freight_fate/data/local_geometry.json` -- turn-by-turn local streets
+- `data/local_geometry.json` -- turn-by-turn local streets
   where a route could be built.
 
 OSM changes over time (new depots, renamed roads, corrected tags), so this
@@ -59,12 +59,12 @@ on the order of an hour. The default `--cache-dir` matches step 1.
 ## Step 3 -- verify and gate
 
 ```
-uv run pytest tests/test_city_services.py tests/test_local_approaches.py \
-  tests/test_local_geometry.py tests/test_build_city_services_tool.py
-uv run ruff check tools src tests
+cargo test -p ff-core --test it data_local_
+uv run pytest tests/test_build_city_services_tool.py
+uv run ruff check tests tools
 ```
 
-The coverage-count assertions in `test_local_*` pin the sweep's own inventory;
+The coverage-count assertions in `crates/ff-core/tests/it/data_local_*.rs` pin the sweep's own inventory;
 when the map has grown since the last sweep, update them to the fresh numbers
 (this is expected -- the tests document the sweep, they do not constrain it).
 

@@ -4,40 +4,48 @@ Thanks for helping make Freight Fate better. This project is audio-first and
 accessibility-first, so contributions should keep blind and low-vision players
 at the center of every change.
 
-## What Is Being Accepted Right Now
+## Contributions by release line
 
-Freight Fate 1.9 is in development on its own branch, and preview snapshots of
-it will start appearing before long. Until they do, the 1.8 line is in
-maintenance: pull requests are being accepted only for major and minor bug
-fixes, not new features.
+Freight Fate 1.9 is in development on `feat/career-1.9`, with preview
+snapshots available for testing. The 1.8 line is in maintenance and accepts
+bug fixes only.
 
-Feature work is still welcome in principle -- open an issue describing it, and
-it can be picked up for 1.9 or later. This is about where the code lands, not
-about the idea. Feature pull requests are welcome again once 1.9 preview
-snapshots begin.
+For a new feature, open an issue first so maintainers can agree on its scope
+and release line. Check [the roadmap](ROADMAP.md) for the work planned for
+each release.
 
-## Branch Targets
+## Branch targets
 
 - Open feature, fix, data, and documentation pull requests against `dev`.
 - Use `main` only for stable release, hotfix, or release-sync work.
 - If your PR targets the wrong branch, a maintainer may retarget it before
   review.
 
-## Before Opening a Pull Request
+## Before opening a pull request
 
 - Keep practical code files at or below 1000 lines. Split large code or test
   files into cohesive modules instead of adding more to an oversized file.
 - Run `uv sync --group dev` before tests in a fresh checkout or worktree.
-- Run focused tests for the area you changed. For broad or shared behavior,
-  run the full suite with `uv run pytest`.
-- Run `uv run ruff check src tests tools` and
-  `uv run python -m compileall src tests tools`.
+- Gameplay is Rust on Career 1.9: run `cargo test -p ff-core` and
+  `cargo test -p freight-fate` for anything the player can hear or do. That
+  local run is the full suite; the per-push CI skips the whole-map sweeps
+  (`#[cfg_attr(ci_quick, ignore = ...)]`) and the nightly snapshot runs them.
+- `uv run pytest` covers only the Python tooling -- the build, bake,
+  indexing and release tooling under `tools/`, plus the workflow and
+  sound-pack guards. It takes a few seconds, so just run all of it. There is
+  no Python game any more; a new gameplay test belongs in `cargo test`.
+- Run `uv run ruff check tests tools` and
+  `uv run python -m compileall tests tools`.
 - For user-facing changes, include how you checked the spoken text, keyboard
   flow, or other accessibility impact.
+- Include a sandboxed agent-server session when live gameplay testing is
+  authorized. See [agent-server testing](CLAUDE.md#rust----gameplay-and-what-ci-gates)
+  for the controls and evidence to record. Keep automated tests, agent play,
+  and the owner's listening pass distinct in the results.
 - For player-facing changes, add a `CHANGELOG.md` entry (see Changelog
-  Entries below); CI enforces this.
+  entries below); CI enforces this.
 
-## Accessibility Expectations
+## Accessibility expectations
 
 - Every gameplay path must remain usable by keyboard and screen reader.
 - Speech text should be clear, player-facing, and free of maintainer or CI
@@ -46,7 +54,7 @@ snapshots begin.
 - If you add or change menu items, driving prompts, warnings, settings, or
   status text, test the spoken result.
 
-## World And Route Data
+## World and route data
 
 World data changes are welcome. Please keep them deterministic and offline:
 
@@ -59,28 +67,38 @@ World data changes are welcome. Please keep them deterministic and offline:
 - After data changes, run the world and route tests, such as:
 
   ```powershell
-  uv run pytest tests/test_world.py tests/test_world_overlay.py
+  cargo test -p ff-core data_world
   ```
 
-## Changelog Entries
+  and the tooling that builds the data:
+
+  ```powershell
+  uv run pytest tests/test_index_world.py
+  ```
+
+## Changelog entries
 
 Nightly and stable release notes are built only from the curated entries in
 `CHANGELOG.md` -- never from commit subjects -- so a player-facing change
 without an entry ships silently. CI fails a pull request that changes
-user-facing paths (`src/`, `docs/`, `CHANGELOG.md`, `README.md`, and the
-release tooling) without adding one.
+user-facing paths without adding one: anything under `data/` (except
+`data/spider/`), `assets/`, `docs/` or `crates/` (except a crate's `tests/`
+and `benches/`), plus `CHANGELOG.md`, `README.md`, `pyproject.toml`,
+`tools/build_release.py` and `tools/release_notes.py`.
 
 - Add a bullet under `## Unreleased` in the fitting section (`Added`,
   `Changed`, `Fixed`, and so on).
-- Write for players, not maintainers: a bold lead sentence, then plain
-  language about what they will hear or notice in the game. Match the voice
-  of the existing entries; they are read aloud by screen readers, so avoid
-  jargon, tables, and decorative symbols.
+- Write for players, not maintainers: a bold lead sentence that says what
+  is different now, then at most one sentence about what they will hear or
+  notice. Under 25 words. Entries are read aloud by screen readers, so avoid
+  jargon, tables, and decorative symbols. The full recipe, and where the
+  rationale and sub-cases go instead, is in
+  `.claude/skills/writing-changelog-entries/SKILL.md`.
 - A change with nothing player-facing in it (internal refactors, CI, tests,
   tooling) can skip the entry by putting `[skip changelog]` or
   `changelog: none` in every commit message of the pull request.
 
-## Pull Request Notes
+## Pull request notes
 
 In your PR body, briefly say:
 

@@ -86,7 +86,7 @@ side (falling chime left, rising chime right, steady tone ahead). The original g
 already return multi-leg routes. What is missing:
 
 - **Turn cues at leg boundaries.** At each segment boundary, speak the baked
-  cue ("Turn right onto Palm Street; half a mile") through `say_event`,
+  cue ("Turn right onto Palm Street, then half a mile on it") through `say_event`,
   reusing the local-turn sound cue support that shipped with the checked-in
   local direction data.
 - **Per-segment speed zones.** The builders bake `speed_mph` per segment
@@ -139,9 +139,16 @@ Raising tier-1 coverage from 6 facilities means re-running the bounded
 road-snap batch with a wider net:
 
 - Extend `--states` beyond Illinois/Indiana/Ohio batch by batch (the full
-  50-state extract cache is ~23 GB and already local).
-- Revisit `HIGH_CONFIDENCE_TYPES`: grain elevators, ports, and cold storage
-  are currently excluded but have source-backed endpoints at high rates.
+  50-state extract cache is ~23 GB and already local). Batches merge into
+  the checked-in file by default (`--merge-existing`, since 2026-09-16): a
+  prior turn-level chain is never replaced by a fallback, a facility the
+  batch did not attempt keeps its record, and the far-pin regeocode
+  metadata survives, so a partial run can only add. `--no-merge-existing`
+  is the whole-file rebuild.
+- `HIGH_CONFIDENCE_TYPES` widened 2026-09-16 to cold storage, food
+  processors, grocery DCs, grain elevators, ports and port terminals.
+  Steel, automotive and chemical/petroleum terminals stay excluded until
+  the endpoint sweep stops matching them by name substring.
 - Watch the size budget: `facility_approaches.json` ships in the release
   executable via the baked-world pipeline; keep the per-facility segment
   lists bounded (the builder already caps route length at 18 miles).

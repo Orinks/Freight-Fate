@@ -1,0 +1,2132 @@
+{
+  "achievementCategories": [
+    {
+      "key": "road",
+      "title": "Out on the Road"
+    },
+    {
+      "key": "working_day",
+      "title": "The Working Day"
+    },
+    {
+      "key": "career",
+      "title": "Career and Rank"
+    },
+    {
+      "key": "radio_songs",
+      "title": "The Dial and Song Towns"
+    },
+    {
+      "key": "weather_seasons",
+      "title": "Weather and the Calendar"
+    },
+    {
+      "key": "places",
+      "title": "Places on the Map"
+    },
+    {
+      "key": "hidden",
+      "title": "Deep Cuts"
+    }
+  ],
+  "achievementDetails": {
+    "abilene_arrival": {
+      "category": "radio_songs",
+      "description": "Freight delivered into Abilene, out where the West begins in earnest and nobody honks at a slow dock turn. The song got there first, but the load still needed a truck."
+    },
+    "air_ready": {
+      "category": "road",
+      "description": "You built up enough air to kick the brakes loose like a pro. The glory goes to the compressor today -- even the fastest thing on the interstate needs its PSI."
+    },
+    "all_regions": {
+      "category": "places",
+      "description": "You've now hauled freight in all fourteen regions on the map. The list of towns is finally long enough to leave somebody breathless."
+    },
+    "all_terrain_route": {
+      "category": "road",
+      "description": "One route that served flat land, rolling hills, and a real mountain grade before the dock. Your stomach rode the whole ride; the freight never noticed a thing."
+    },
+    "all_upgrades": {
+      "category": "career",
+      "description": "Every upgrade in the catalog installed on your rig. They quit building cars like they used to, but a fully optioned tractor still turns heads at the fuel island."
+    },
+    "amarillo_arrival": {
+      "category": "places",
+      "description": "Rolled into Amarillo in the early light, the load on the dock by daybreak. You weren't quite riding in on a pony, but the Panhandle dawn made up the difference."
+    },
+    "appalachia_delivery": {
+      "category": "places",
+      "description": "You delivered into Appalachian coal-and-ridge country, where the roads bend like fiddle tunes. The hills watched you come in, and the dock was glad you did."
+    },
+    "april_first": {
+      "category": "hidden",
+      "description": "A delivery settled on the first day of April. Dispatch swore the load was real, and for once the joke was on nobody -- paperwork clean, payment posted."
+    },
+    "authority_active": {
+      "category": "career",
+      "description": "Own authority is active: your freight, your rates, your compliance folder. Nobody left to lease the risk to, and nobody to hand the upside to either."
+    },
+    "bakersfield_arrival": {
+      "category": "places",
+      "description": "Freight on the dock in Bakersfield. The streets out here have a twang all their own, and your air brakes kept the beat."
+    },
+    "baton_rouge_arrival": {
+      "category": "places",
+      "description": "You rolled into Baton Rouge with a load and a paycheck coming, which beats thumbing it with a harmonica. Freedom is nice; a settlement sheet is nicer."
+    },
+    "big_payday": {
+      "category": "career",
+      "description": "One load cleared four grand gross all by itself. Just this once the big money landed squarely on the right side of the law, and the settlement sheet grinned back."
+    },
+    "birmingham_morning": {
+      "category": "places",
+      "description": "Freight delivered in Birmingham while the morning was still finding its feet. Eight-thirty in Alabama hits different when you have been rolling since before the birds."
+    },
+    "bobtail_done": {
+      "category": "career",
+      "description": "You ran a bobtail reposition -- no trailer, no load, just a tractor finding its next job. Turning a rig around takes a lot less acreage without the box."
+    },
+    "brake_smoke": {
+      "category": "road",
+      "description": "You cooked the brakes hot enough to start losing them. They came back. Next hill, try the gear you should have been in."
+    },
+    "break_taken": {
+      "category": "working_day",
+      "description": "You took your 30-minute break and let the clock breathe. One more cup of truck-stop coffee, and your knees filed a note of gratitude."
+    },
+    "chattanooga_arrival": {
+      "category": "radio_songs",
+      "description": "Freight rolled into Chattanooga ahead of anything on rails, through the ridge cuts where the river bends twice to look around. The old trains would have needed a schedule."
+    },
+    "christmas_delivery": {
+      "category": "weather_seasons",
+      "description": "You signed for a load on Christmas Day. The dock was quiet, the receiver was nice about it, and somewhere a table went ahead without you."
+    },
+    "clean_delivery": {
+      "category": "road",
+      "description": "You delivered with barely a scratch on the rig. The truck's still pretty enough to smile down from a billboard -- not one new dent stealing the look."
+    },
+    "coast_to_coast": {
+      "category": "road",
+      "description": "One run that crossed most of a continent, salt air to salt air. Your seat cushion has seen more states this trip than most folks see in a year."
+    },
+    "coffee_regular": {
+      "category": "working_day",
+      "description": "Twenty-five breaks taken properly, and every one of them started at a coffee pot of dubious reputation. It is not the coffee. It is the sitting down."
+    },
+    "construction_zone": {
+      "category": "working_day",
+      "description": "You crept through a construction zone like every cone had a lawyer on retainer. The swagger shrank down to posted speed, orange vests, and patient merging."
+    },
+    "dakota_delivery": {
+      "category": "places",
+      "description": "A load delivered into the Dakotas, where the horizon does most of the talking and the wind files a counterclaim. Somebody has to keep the prairie stocked."
+    },
+    "dawn_run": {
+      "category": "road",
+      "description": "You pulled out before the world got loud, first light still rehearsing on the horizon. The early start echoes all day -- mostly in yawns, occasionally in bonuses."
+    },
+    "deadline_squeaker": {
+      "category": "road",
+      "description": "On time with almost nothing to spare -- the kind of arrival where the dock crew was already drafting the late note. They tore it up, and you never saw it."
+    },
+    "deep_repair": {
+      "category": "career",
+      "description": "You brought the truck in at seventy-five percent damage or worse and paid to make it whole. There is only one direction to go from down there, and you took it."
+    },
+    "desert_summer": {
+      "category": "weather_seasons",
+      "description": "A summer delivery into the desert Southwest, where the asphalt shimmers and the door handle can bite. Whatever is on the other side of hot, you drove through it."
+    },
+    "detention_paid": {
+      "category": "road",
+      "description": "A shipper held you past the free time and the carrier billed them for it. The clock was the only thing working, and for once it was working for you."
+    },
+    "detroit_run": {
+      "category": "places",
+      "description": "You hauled a load out of Detroit and pointed it down the road. The home you left keeps calling, but the freight pays better than the homesickness does."
+    },
+    "doubles_load": {
+      "category": "road",
+      "description": "Your first twin-trailer set delivered whole. The rear pup wandered every mile and the mirrors never lied. Two hookups, two walk-arounds, one clean arrival."
+    },
+    "dropped_the_bad_one": {
+      "category": "road",
+      "description": "You dragged a trailer with a write-up on it all the way across the country and left it in the receiver's yard. It is their problem now. You did check the lights at every stop."
+    },
+    "eastbound_delivery": {
+      "category": "places",
+      "description": "You ran a load net eastbound and put it on the dock. East is east, the hammer was down, and the receiver never had to wait on you."
+    },
+    "eighty_eight_mph": {
+      "category": "hidden",
+      "description": "Eighty-eight miles an hour in a loaded truck. Nothing happened, nowhere else and no other year. Just a very fast truck and a very brief lapse of judgment."
+    },
+    "el_paso_arrival": {
+      "category": "places",
+      "description": "You brought freight into El Paso, the far west end of Texas. The old ballads about this town end in heartbreak; yours ended with a signed delivery receipt."
+    },
+    "every_fleet_tier": {
+      "category": "career",
+      "description": "From the trainer rig to first pick of the lot, you have driven something out of every band the carrier keeps. The good iron was worth waiting for."
+    },
+    "farm_load": {
+      "category": "road",
+      "description": "You hauled farm freight where it was needed -- feed, seed, or the season's grain. Somewhere down a gravel drive, a rancher checked the sky and said much obliged."
+    },
+    "fifteen_states": {
+      "category": "places",
+      "description": "You have delivered freight in fifteen different states. The trailer plate is a conversation starter now, and the glovebox is mostly toll receipts."
+    },
+    "fifty_deliveries": {
+      "category": "career",
+      "description": "Fifty career deliveries logged. The board knows your handle now, and the windshield's collected a small nation of bugs."
+    },
+    "fifty_five_mph": {
+      "category": "hidden",
+      "description": "It isn't the mid-90s anymore like Jim Kitchen had you believe in Trucker. It's okay, floor it and hit 88."
+    },
+    "fifty_thousand_miles": {
+      "category": "career",
+      "description": "Fifty thousand miles of trailers and two-lane towns behind you. You answer to a long ribbon of road now, and it is not the sort of job a person walks away from."
+    },
+    "first_day": {
+      "category": "career",
+      "description": "Dispatch handed you your first load number, the shipper watched you back a trailer into the dock, and the air finally built past governor release. Your first day is in the books."
+    },
+    "first_delivery": {
+      "category": "road",
+      "description": "Your very first load is signed for and gone. No fanfare needed -- the receiver got the freight and the paperwork held up clean."
+    },
+    "first_delivery_drop": {
+      "category": "road",
+      "description": "Your first drop at the receiving end. They keep the whole trailer, freight and all, you hook a clean empty, and you are back on the road before a dock would have called your number."
+    },
+    "first_dispatch": {
+      "category": "career",
+      "description": "You grabbed your first load off the board. No long line of trucks stacked up behind you yet, good buddy -- just a handle, a load number, and somewhere to be."
+    },
+    "first_drop_hook": {
+      "category": "road",
+      "description": "Your first drop and hook. You backed under a trailer somebody else loaded hours ago, cranked the gear up, and were rolling before a dock would have found you a door."
+    },
+    "first_late": {
+      "category": "road",
+      "description": "Your first late delivery is on the books. The bonus walked, the receiver sighed, and you learned exactly how much of a deadline is actually cushion."
+    },
+    "first_on_time": {
+      "category": "road",
+      "description": "You hit the dock before the deadline. Didn't take most of a week behind the wheel to manage it, and dispatch only ever reads the timestamp anyway."
+    },
+    "first_pickup": {
+      "category": "career",
+      "description": "Cargo's aboard and the seal is set. Eighteen wheels don't roll on by themselves -- somebody had to back it into the dock and sign for it first."
+    },
+    "first_rest_stop": {
+      "category": "working_day",
+      "description": "You pulled into a rest stop for the very first time. The romance lasted exactly as long as the vending machine took to size you up and judge."
+    },
+    "first_ticket": {
+      "category": "working_day",
+      "description": "Your first on-the-spot speeding ticket, signed and paid at the roadside. When dispatch heard, they did not even sound surprised -- which stings worse than the fine."
+    },
+    "first_upgrade": {
+      "category": "career",
+      "description": "Your first upgrade -- a small taste of souped-up confidence. The ghost in that old hopped-up Lincoln approved, then asked why the invoice was so reasonable."
+    },
+    "five_deliveries": {
+      "category": "career",
+      "description": "Five career deliveries logged. That itch to get rolling down the highway again finally has a stat line that agrees with you."
+    },
+    "five_hundred_mile_run": {
+      "category": "road",
+      "description": "One dispatch, over a thousand miles, start to finish. Long enough that the weather changed its mind twice and you stopped noticing the radio."
+    },
+    "five_tractors": {
+      "category": "career",
+      "description": "Five different tractors under you. Slip-seating means no truck is yours, and you have started noticing which of the spares pulls and which one just makes noise."
+    },
+    "fleet_flagship": {
+      "category": "career",
+      "description": "You reached the top of the company fleet: the flagship tractor with the big bunk and the long legs. The yard hands you the keys before anyone else gets asked."
+    },
+    "fleet_upgrade": {
+      "category": "career",
+      "description": "Dispatch swapped your assigned tractor for a newer fleet unit, handed over fueled, serviced, and washed. Seniority has a smell, and it is fresh upholstery."
+    },
+    "fort_worth_arrival": {
+      "category": "radio_songs",
+      "description": "A load delivered into Fort Worth, where the stockyards went showbiz but the freight stayed honest. Dallas sits close enough to wave at and far enough to ignore."
+    },
+    "four_seasons": {
+      "category": "weather_seasons",
+      "description": "You have settled deliveries in spring, summer, fall, and winter. The road changes clothes four times a year, and you have now seen the whole wardrobe."
+    },
+    "friday_thirteenth": {
+      "category": "hidden",
+      "description": "Delivered on a Friday the thirteenth without a scratch on you. Whatever was supposed to happen took the day off."
+    },
+    "fuel_fumes": {
+      "category": "road",
+      "description": "You made the dock with the fuel gauge past pleading and into prayer. Somewhere back down the road you passed the last cheap diesel and said, probably fine."
+    },
+    "garage_repair": {
+      "category": "career",
+      "description": "You fixed the rig in a proper garage instead of cobbling it together from borrowed parts. Honest work and an honest bill, and the truck rolled out earning its keep again."
+    },
+    "georgia_arrival": {
+      "category": "places",
+      "description": "Delivered somewhere in Georgia with the freight rolling in well after dark. No first-class ticket -- just a sleeper, a thermos, and a place you'd rather be."
+    },
+    "grueling_clean": {
+      "category": "road",
+      "description": "Twelve hundred-plus miles, on time, and not a fresh scratch on the rig. They swear no run comes easy; you delivered the exception."
+    },
+    "gulf_coast_by_two": {
+      "category": "places",
+      "description": "Delivered on the Mississippi Gulf coast with the clock still shy of two. Shrimp boats, salt air, and a bill of lading signed before the afternoon heat got serious."
+    },
+    "half_million_earned": {
+      "category": "career",
+      "description": "Five hundred thousand dollars in career earnings, gross of everything the road took back along the way. Nobody would call it easy money, but it spends just the same."
+    },
+    "hazard_avoided": {
+      "category": "working_day",
+      "description": "You slowed in time to dodge a road hazard. Could've been a one-way ramp to somewhere awful -- your brake pedal had other plans."
+    },
+    "hazmat_load": {
+      "category": "road",
+      "description": "Your first placarded load delivered without incident. Every scale watched you through, every restriction sign applied to you, and the paperwork rode shotgun. Careful pays."
+    },
+    "heavy_haul_load": {
+      "category": "road",
+      "description": "Your first heavy-haul load, the kind of tonnage that makes a trailer groan and a grade think twice. Every gear change felt like moving a legend."
+    },
+    "heavy_hauler": {
+      "category": "career",
+      "description": "You bought the heavy hauler. The hills got a politely worded threat, and the fuel bill immediately demanded a speaking part of its own."
+    },
+    "high_value_load": {
+      "category": "road",
+      "description": "Your first high-value load delivered with the seals intact. Cargo worth more than the truck rides quiet, stays locked up tight, and never stops for souvenirs."
+    },
+    "home_return": {
+      "category": "career",
+      "description": "Ten deliveries or more into your career, you brought a load into your old home terminal city. The streets got smaller while you were gone; the welcome did not."
+    },
+    "hooked_a_bad_one": {
+      "category": "road",
+      "description": "You hooked a trailer out of a drop yard and found a write-up on the walk-around. Somebody parked it, signed for it, and went home. Now it is yours."
+    },
+    "houston_arrival": {
+      "category": "radio_songs",
+      "description": "Freight delivered into Houston, a city sprawling far enough to have its own weather and at least four rush hours. Every mile of it counted toward somewhere that matters."
+    },
+    "hundred_deliveries": {
+      "category": "career",
+      "description": "One hundred deliveries in the book. You never made a fuss about it, just kept the wheels rolling down the road, load after load, until the number turned serious."
+    },
+    "hundred_fifty_cities": {
+      "category": "places",
+      "description": "One hundred fifty cities delivered. On a map of six hundred some towns that is a serious dent, and the far side of the country is starting to feel left out."
+    },
+    "hundred_grand": {
+      "category": "career",
+      "description": "You've banked a hundred thousand dollars, one load at a time. Slow as smuggling a Cadillac out a piece at a time -- and a whole lot more legal."
+    },
+    "hundred_k_miles": {
+      "category": "career",
+      "description": "One hundred thousand lifetime miles. At this point the road owns a controlling share of you, and someday it can have the rest -- but not today, driver."
+    },
+    "inspection": {
+      "category": "working_day",
+      "description": "You rolled through an inspection with the paperwork in order. All that radio mischief stayed outside while your axle weights behaved themselves indoors."
+    },
+    "jackson_arrival": {
+      "category": "radio_songs",
+      "description": "A load delivered into Jackson. Folks have argued for sixty years over which Jackson the song means, Tennessee or Mississippi, so this badge takes either. Your bill of lading, at least, is specific."
+    },
+    "jake_only_descent": {
+      "category": "road",
+      "description": "Two miles of real downgrade and you never once put a foot on the service brake. The engine held the whole thing, and the drums came off that hill as cool as they went on."
+    },
+    "jam_and_cones": {
+      "category": "working_day",
+      "description": "Construction cones and a genuine traffic jam, both inside one trip. For a while there the truck was less a vehicle and more a waiting room with mud flaps."
+    },
+    "jersey_delivery": {
+      "category": "places",
+      "description": "You delivered in New Jersey and lived to merge again. Between the toll plazas and the jughandles, walking tall through Jersey takes a certain kind of nerve."
+    },
+    "kansas_city_arrival": {
+      "category": "radio_songs",
+      "description": "Freight delivered into Kansas City, home of burnt ends, wide boulevards, and local celebrities who will not help you back into a dock. You managed anyway."
+    },
+    "kentucky_delivery": {
+      "category": "places",
+      "description": "A load signed for in Kentucky, where the pastures look painted and the fences run forever. The grass gets called blue; the money you made on it was plain green."
+    },
+    "laredo_arrival": {
+      "category": "places",
+      "description": "Freight delivered in Laredo, right up against the border. The old song about this town is a slow goodbye; your visit was strictly business, and everybody stayed cheerful."
+    },
+    "lcv_load": {
+      "category": "road",
+      "description": "Your first turnpike doubles run delivered. Two long trailers on the only corridors that allow them, and every lane change planned half a mile out. The certificate earned its keep."
+    },
+    "level_fifteen": {
+      "category": "career",
+      "description": "Career level fifteen. The working-capital target is taped to the sun visor now, and the owner-operator checklist reads less like a dream and more like a plan."
+    },
+    "level_five": {
+      "category": "career",
+      "description": "Career level five. Dispatch stopped double-checking your paperwork, the lanes run a little wider, and you can even turn a load down without getting a lecture."
+    },
+    "level_ten": {
+      "category": "career",
+      "description": "Career level ten and senior status at the carrier. Premium freight, a deeper board, and new hires who assume you know where every dock in the country hides."
+    },
+    "level_thirty": {
+      "category": "career",
+      "description": "Career level thirty, the top of the ladder. Every rank, every gate, every unlock -- the whole climb is behind you, and the road ahead is simply yours to choose."
+    },
+    "level_three": {
+      "category": "career",
+      "description": "You reached career level 3. Here you are again, on stage in some new town -- except this chapter happens to pay better rates."
+    },
+    "level_twenty_five": {
+      "category": "career",
+      "description": "Career level twenty-five. Whether or not you ever file the paperwork, this career now qualifies for its own operating authority. In freight, that counts as arriving."
+    },
+    "long_day_run": {
+      "category": "road",
+      "description": "One dispatch that stretched past a full day on the trip clock, sleep and all. The kind of run where the last hundred miles feel personally aimed at you."
+    },
+    "long_haul": {
+      "category": "road",
+      "description": "One loaded haul over 900 miles. The blacktop unspooled ahead like a ribbon with no end in sight, long enough for the seat cushion to earn seniority."
+    },
+    "low_visibility": {
+      "category": "weather_seasons",
+      "description": "You ran through fog thick enough to bend a banjo string and never lost the road. Headlights, GPS, and brake distance picked up the tune."
+    },
+    "lubbock_arrival": {
+      "category": "places",
+      "description": "Rolled out of Lubbock with a load, the high plains opening up ahead. They say happiness is a hometown shrinking in the rearview mirror, and tonight the freight led the way."
+    },
+    "manual_driver": {
+      "category": "road",
+      "description": "You ran in manual and made the gearbox part of the band. Every clean shift sounds cool, right up until the grade changes key on you."
+    },
+    "max_gross_load": {
+      "category": "road",
+      "description": "You delivered a load pushing the legal weight limit, every axle earning its keep. The big mama of manifests, and the scale house waved it through anyway."
+    },
+    "max_level": {
+      "category": "career",
+      "description": "Career level twenty. Same towns, same docks, same diner pie -- but the page turns a little easier when you've read the whole book."
+    },
+    "memphis_arrival": {
+      "category": "radio_songs",
+      "description": "Freight put down in Memphis, at the top of the Delta where the river hauls nearly as much as the highway. Whatever brought you here, the dock only asked for the bills."
+    },
+    "midnight_delivery": {
+      "category": "road",
+      "description": "Freight delivered in the smallest hours, between midnight and the first hint of gray. Whatever kept you company out there signed nothing and vanished at the dock."
+    },
+    "montana_delivery": {
+      "category": "places",
+      "description": "Freight settled in Montana, where the interstate runs long, the radio runs out, and the sky goes on far past the windshield. Worth the mileage every single time."
+    },
+    "month_on_road": {
+      "category": "career",
+      "description": "A full month on the career clock. Thirty days of docks, diners, and dawn departures -- and tomorrow you will get up and ask the road for another one."
+    },
+    "mountain_clean": {
+      "category": "road",
+      "description": "You took a mountain grade and brought the freight down clean. The rocky high country tested the brakes; the brakes politely declined to fail."
+    },
+    "multi_leg_haul": {
+      "category": "career",
+      "description": "A single dispatch that strung four corridors together. Front to back it was a long line of road, and you ran the whole thing nose to tail."
+    },
+    "multi_state": {
+      "category": "road",
+      "description": "One route, three states. Still working up to a list of towns long enough to rattle off in one breath, but the map had to stop and clear its throat."
+    },
+    "muskogee_arrival": {
+      "category": "radio_songs",
+      "description": "A load delivered into Muskogee, Oklahoma, where folks still take pride in living right and shaking your hand. Clean paperwork counts as manners out here."
+    },
+    "nashville_delivery": {
+      "category": "places",
+      "description": "You put a load on a dock in Nashville, where every songwriter is ten years into being discovered any day now. Your freight got its big break on the first try."
+    },
+    "never_fought_the_law": {
+      "category": "road",
+      "description": "Fifty deliveries and not one ticket. No arguing at the window, no citation in the door pocket, no story to tell about it either."
+    },
+    "new_england_delivery": {
+      "category": "places",
+      "description": "A delivery into northern New England: narrow bridges, frost heaves, and town names that pick fights with the GPS. The chowder alone justifies the deadhead home."
+    },
+    "new_orleans_arrival": {
+      "category": "radio_songs",
+      "description": "A load brought into New Orleans, past the wards and the water, where even the freight moves a little behind the beat. Nobody minded, and the coffee fixed it."
+    },
+    "new_year_run": {
+      "category": "hidden",
+      "description": "Midnight on New Year's found you between two towns with the heater on. Somebody somewhere was counting backwards. You were counting mile markers."
+    },
+    "night_shift_regular": {
+      "category": "road",
+      "description": "Ten loads signed for in the small hours. You have gone properly nocturnal: empty lanes, cheap fuel, and receivers who are surprised to see anybody."
+    },
+    "no_toll_long": {
+      "category": "road",
+      "description": "Three hundred-plus loaded miles and not a single toll. They always swear no run comes easy -- this one clearly never got that memo."
+    },
+    "norcal_giants": {
+      "category": "places",
+      "description": "You delivered up in far Northern California, where the biggest living things on Earth watch the trucks go by. The trailer felt small the whole way in."
+    },
+    "one_for_the_road": {
+      "category": "road",
+      "description": "A load delivered after midnight, on fumes, in the rain, still on time. Everything went wrong slowly enough that none of it managed to matter."
+    },
+    "owner_operator_buyin": {
+      "category": "career",
+      "description": "You bought into your first tractor position as a leased-on owner-operator. The revenue is bigger, the bills are yours, and so is every decision from here on."
+    },
+    "perfect_streak": {
+      "category": "road",
+      "description": "Five straight deliveries on time, undamaged, and ticket-free. A streak that quiet doesn't make for a good CB story, but it pays."
+    },
+    "phoenix_arrival": {
+      "category": "places",
+      "description": "Freight delivered in Phoenix. By the time you rolled in, the desert had stopped pretending it was ever going to cool off."
+    },
+    "pnw_delivery": {
+      "category": "places",
+      "description": "Freight delivered in the Pacific Northwest, where the evergreens crowd the shoulders and the rain keeps its own schedule. The air alone was worth the trip."
+    },
+    "port_load": {
+      "category": "road",
+      "description": "Your first container hauled off the secure side of the waterfront. The card got you through the gate; the chassis and the crane line did the rest. Salt air, steel boxes."
+    },
+    "predictive_crest": {
+      "category": "road",
+      "description": "You let cruise read the hill before you got to it: it banked a little speed on the flat and carried it up a grade that would have taken it off you. Nothing you had to do about it."
+    },
+    "quarter_million_bank": {
+      "category": "career",
+      "description": "You banked 250,000 dollars, hauled in one settlement at a time. The teller stopped counting out loud somewhere around the third deposit. The bank is fine, by the way."
+    },
+    "radio_dial_wanderer": {
+      "category": "radio_songs",
+      "description": "Twenty-five different stations found and left behind. You are not listening to the radio so much as reading the country off it."
+    },
+    "radio_faded_out": {
+      "category": "radio_songs",
+      "description": "You rode a station all the way to the end of its reach, hiss creeping in under the music until the last of it went. Nobody hung up on you. The hill just got in the way."
+    },
+    "radio_fringe_catch": {
+      "category": "radio_songs",
+      "description": "You pulled in a station from far outside anything it has business reaching, flickering in and out at highway speed. Height is range, and you were up where the air is thin."
+    },
+    "radio_three_states": {
+      "category": "radio_songs",
+      "description": "One station carried you across three states before you finally lost it. Somewhere back there a transmitter is still trying."
+    },
+    "rain_driver": {
+      "category": "weather_seasons",
+      "description": "You drove through the rain and kept it civil. The whole world goes by through that glass, with the wipers keeping time and your following distance keeping order."
+    },
+    "reefer_load": {
+      "category": "road",
+      "description": "Your first refrigerated load delivered with the temperature holding steady. The trailer ran cold the whole way there; no reason your mood had to."
+    },
+    "refused_the_trailer": {
+      "category": "road",
+      "description": "You walked a trailer, found what was wrong with it, and refused it. Thirty minutes for the swap, and the write-up stayed with the people whose problem it was."
+    },
+    "rep_ninety": {
+      "category": "career",
+      "description": "Reputation at ninety or better. Walk through any truck stop like you own the coffee machine, because at this point dispatch practically curtsies."
+    },
+    "return_trip": {
+      "category": "road",
+      "description": "You delivered a load, then hauled the very next one straight back where you came from. Some drivers chase new horizons; this week the horizon ran a shuttle."
+    },
+    "roadside_fix": {
+      "category": "career",
+      "description": "Broke down bad enough to call for roadside help, waited out the mechanic, and finished the run anyway. Every touring act has a night like this; yours had freight."
+    },
+    "route66_run": {
+      "category": "places",
+      "description": "You hauled between two towns strung along the old Mother Road. The neon's faded, but the asphalt still gets its kicks under your tires."
+    },
+    "route_refuel": {
+      "category": "working_day",
+      "description": "You topped off the tank before it got dramatic. Filled 'er up at the old roadside cafe and kept right on truckin' down the line."
+    },
+    "sacramento_arrival": {
+      "category": "places",
+      "description": "Freight delivered in Sacramento, just down the road from a famously well-sung prison. You heard a train whistle on the way in and kept rolling, free as you please."
+    },
+    "saginaw_arrival": {
+      "category": "radio_songs",
+      "description": "A delivery into Saginaw, up where the bay wind finds every gap in the cab insulation. Half the town works the water; the freight still comes in by road."
+    },
+    "san_antonio_arrival": {
+      "category": "radio_songs",
+      "description": "Freight settled in San Antonio, down where the missions keep their bells and the breakfast tacos outrank the barbecue. The river walks; your trailer rolled."
+    },
+    "scale_regular": {
+      "category": "working_day",
+      "description": "Five inspections weathered across your career. The scale house is a wall every driver has to get over sooner or later; by now you could climb it in your sleep."
+    },
+    "second_ticket": {
+      "category": "working_day",
+      "description": "Two speeding tickets inside a single run. The first one was a lesson; the second one was a decision. The trooper recognized the truck, which is never a good sign."
+    },
+    "securement_load": {
+      "category": "road",
+      "description": "Your first open-deck load delivered with every chain still tight. Fifty miles out you stopped and checked the tie-downs, the way the book says. Nothing shifted, nothing slid."
+    },
+    "self_paid_course": {
+      "category": "career",
+      "description": "You bought an endorsement course with your own money instead of waiting on carrier sponsorship. Ambition has tuition, and you covered it in cash at the counter."
+    },
+    "seventy_five_cities": {
+      "category": "places",
+      "description": "Seventy-five different cities have signed for your freight. Receivers you have never met already know the truck, and somehow the coffee is bad in every one."
+    },
+    "sixteen_tons": {
+      "category": "road",
+      "description": "You have moved sixteen tons in a single load, and what did you get. A settlement line, a sore back, and a dispatcher already asking about the next one."
+    },
+    "sixty_nine_mph": {
+      "category": "hidden",
+      "description": "You held it at exactly sixty-nine miles an hour for a solid mile. The number has no significance whatsoever. You know precisely what you did."
+    },
+    "sleep_before_exhaustion": {
+      "category": "working_day",
+      "description": "You bunked down before the fatigue started steering. Somebody once warned you about staring down that centerline too long -- this time you listened."
+    },
+    "slept_on_route": {
+      "category": "working_day",
+      "description": "Ten hours in the bunk and you woke up legal. Unglamorous sleeper math -- and somehow the most heroic move on the whole board."
+    },
+    "southbound_run": {
+      "category": "road",
+      "description": "A delivery that ran hard south, shedding latitude with every fuel stop. Warmer air, looser shoulders, and somebody at the bottom of the map waiting on freight."
+    },
+    "speed_limit_saint": {
+      "category": "road",
+      "description": "A whole run and not one speeding strike. The souped-up itch tapped the throttle once, then you sat it down to think hard about the insurance."
+    },
+    "spotless_long": {
+      "category": "road",
+      "description": "Three hundred-plus miles delivered on time with no damage, no strikes, and no tickets. In and out so smooth the paperwork is the only proof you were there."
+    },
+    "state_crossing": {
+      "category": "road",
+      "description": "You crossed your first state line with freight aboard. One side to the other, you kept the rig between the lines and the load rode clean across the border."
+    },
+    "storm_driving": {
+      "category": "weather_seasons",
+      "description": "You drove through a genuine thunderstorm and kept the trailer behind you where it belongs. You could feel the weather coming on long before the first drop hit."
+    },
+    "tank_load": {
+      "category": "road",
+      "description": "Your first liquid bulk load delivered with the shell intact and the surge spent. Twenty-some tons of cargo spent the whole trip trying to drive. You did not let it."
+    },
+    "ten_deliveries": {
+      "category": "career",
+      "description": "Ten career deliveries in the books. It has been a long, strange stretch of road to get here, and the receipts are piling up faster than the war stories."
+    },
+    "ten_four_day": {
+      "category": "hidden",
+      "description": "A load settled on the fourth of October, which every driver reads as ten-four. Some white knight on the channel started it, and by noon the whole band was saying the date back."
+    },
+    "ten_thousand_miles": {
+      "category": "career",
+      "description": "Ten thousand lifetime miles behind you. The white-line fever stopped being a symptom a long way back -- now it's just the job."
+    },
+    "texas_triangle": {
+      "category": "places",
+      "description": "Origin and destination both inside the Texas triangle, one more load bouncing between the big towns. Some drivers spread out; this week the whole map was one state."
+    },
+    "thirty_states": {
+      "category": "places",
+      "description": "Thirty states have taken freight off your trailer. Most folks need a lifetime and a camper to see that much country; you did it hauling other people's furniture."
+    },
+    "thousand_miles": {
+      "category": "career",
+      "description": "A thousand lifetime miles behind you. That white line gets in the blood like a fever, and the windshield's got the bug count to prove you've caught it."
+    },
+    "three_regions": {
+      "category": "road",
+      "description": "You've worked three freight regions now. Can't wait to get rolling out to the next one -- though dispatch still mispronounces wherever it turns out to be."
+    },
+    "three_trucks": {
+      "category": "career",
+      "description": "Three tractors with your name on the titles. Call it a fleet if you like; the insurance folder certainly does. Somebody still has to drive them all, though."
+    },
+    "thrifty_run": {
+      "category": "road",
+      "description": "A whole delivery run at better than eight miles to the gallon. Light foot, early lift, and a truck that was in the right gear for once."
+    },
+    "toll_paid": {
+      "category": "road",
+      "description": "You hit a toll and let the carrier eat it. Eastbound, westbound, loaded down -- one little beep at the booth, then accounting took the wheel."
+    },
+    "top_reputation": {
+      "category": "career",
+      "description": "Your reputation pinned the meter. Trailer for a throne, the whole channel knows the handle, and dispatch finally takes your word for it."
+    },
+    "traffic_slowing": {
+      "category": "working_day",
+      "description": "Heavy traffic, and you kept the following distance sane. The road runs long and life moves fast on it, so you let the jam breathe instead of tailgating into a mess."
+    },
+    "true_north_run": {
+      "category": "road",
+      "description": "A delivery that ran hard north, latitude stacking up the whole way. When the wandering gets aimless, some folks find a bearing and follow it; yours had a dock at the end."
+    },
+    "tulsa_arrival": {
+      "category": "places",
+      "description": "Pulled into Tulsa with the clock on your side and the load in on time. You ran it tight, and the dock was glad to see you right when they expected you."
+    },
+    "twenty_five_cities": {
+      "category": "places",
+      "description": "Deliveries settled in twenty-five different cities. The atlas in the door pocket is starting to fall open to the right page all on its own."
+    },
+    "twenty_five_deliveries": {
+      "category": "career",
+      "description": "Twenty-five career deliveries logged. Not a rookie number anymore, not a veteran number yet -- just a little more road behind you than most folks ever get."
+    },
+    "twenty_five_grand": {
+      "category": "career",
+      "description": "You've banked 25,000 dollars, stacked up load by load. Slower than sneaking a Cadillac out of the plant in your lunchbox, but a whole lot more legal."
+    },
+    "two_hundred_deliveries": {
+      "category": "career",
+      "description": "Two hundred career deliveries in the book. This stopped being a phase somewhere around load fifty; now it is a body of work with its own gravity."
+    },
+    "vegas_arrival": {
+      "category": "places",
+      "description": "Hauled a load into Las Vegas without leaving a nickel in a machine. The only thing you gambled was the merge, and the house lost."
+    },
+    "virginia_line": {
+      "category": "places",
+      "description": "You put freight on a dock in Virginia, out where the ridgelines run the show. Some county lines out here are worth singing about; you crossed yours with the trailer full."
+    },
+    "waco_survivor": {
+      "category": "places",
+      "description": "Freight delivered in Waco without a scratch worth mentioning. Whatever the songs say about this town, you rolled in, got the signature, and kept your health intact."
+    },
+    "weather_collector": {
+      "category": "weather_seasons",
+      "description": "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did."
+    },
+    "westbound_delivery": {
+      "category": "places",
+      "description": "A load delivered headed the other way. Westbound and willing, you drank the weak coffee, pushed the sun down ahead of you, and put it on the dock."
+    },
+    "wichita_arrival": {
+      "category": "places",
+      "description": "A load signed for in Wichita. Somewhere out on the plains a lineman waved; you were too busy watching the wind push the trailer."
+    },
+    "winslow_arrival": {
+      "category": "radio_songs",
+      "description": "A load delivered into Winslow, a small Arizona town with one world-famous corner. Park the rig, stretch your legs, and enjoy being the second-most photographed thing downtown."
+    },
+    "winter_delivery": {
+      "category": "weather_seasons",
+      "description": "A load delivered in the dead of winter, heater roaring and shoulders tight. The cold months lean hard on a trucking family; you leaned back and kept rolling."
+    },
+    "winter_or_wind": {
+      "category": "weather_seasons",
+      "description": "Snow or crosswind, you kept the trailer in line and the wheels turning. The kind of grim stretch that earns roadside markers stayed in your mirror, not the headlines."
+    },
+    "wyoming_delivery": {
+      "category": "places",
+      "description": "A delivery completed in Wyoming, high plains rolling out in every direction. Not much traffic to fight out here -- mostly wind, antelope, and the occasional legend."
+    }
+  },
+  "achievementIds": [
+    "abilene_arrival",
+    "air_ready",
+    "all_regions",
+    "all_terrain_route",
+    "all_upgrades",
+    "amarillo_arrival",
+    "appalachia_delivery",
+    "april_first",
+    "authority_active",
+    "bakersfield_arrival",
+    "baton_rouge_arrival",
+    "big_payday",
+    "birmingham_morning",
+    "bobtail_done",
+    "brake_smoke",
+    "break_taken",
+    "chattanooga_arrival",
+    "christmas_delivery",
+    "clean_delivery",
+    "coast_to_coast",
+    "coffee_regular",
+    "construction_zone",
+    "dakota_delivery",
+    "dawn_run",
+    "deadline_squeaker",
+    "deep_repair",
+    "desert_summer",
+    "detention_paid",
+    "detroit_run",
+    "doubles_load",
+    "dropped_the_bad_one",
+    "eastbound_delivery",
+    "eighty_eight_mph",
+    "el_paso_arrival",
+    "every_fleet_tier",
+    "farm_load",
+    "fifteen_states",
+    "fifty_deliveries",
+    "fifty_five_mph",
+    "fifty_thousand_miles",
+    "first_day",
+    "first_delivery",
+    "first_delivery_drop",
+    "first_dispatch",
+    "first_drop_hook",
+    "first_late",
+    "first_on_time",
+    "first_pickup",
+    "first_rest_stop",
+    "first_ticket",
+    "first_upgrade",
+    "five_deliveries",
+    "five_hundred_mile_run",
+    "five_tractors",
+    "fleet_flagship",
+    "fleet_upgrade",
+    "fort_worth_arrival",
+    "four_seasons",
+    "friday_thirteenth",
+    "fuel_fumes",
+    "garage_repair",
+    "georgia_arrival",
+    "grueling_clean",
+    "gulf_coast_by_two",
+    "half_million_earned",
+    "hazard_avoided",
+    "hazmat_load",
+    "heavy_haul_load",
+    "heavy_hauler",
+    "high_value_load",
+    "home_return",
+    "hooked_a_bad_one",
+    "houston_arrival",
+    "hundred_deliveries",
+    "hundred_fifty_cities",
+    "hundred_grand",
+    "hundred_k_miles",
+    "inspection",
+    "jackson_arrival",
+    "jake_only_descent",
+    "jam_and_cones",
+    "jersey_delivery",
+    "kansas_city_arrival",
+    "kentucky_delivery",
+    "laredo_arrival",
+    "lcv_load",
+    "level_fifteen",
+    "level_five",
+    "level_ten",
+    "level_thirty",
+    "level_three",
+    "level_twenty_five",
+    "long_day_run",
+    "long_haul",
+    "low_visibility",
+    "lubbock_arrival",
+    "manual_driver",
+    "max_gross_load",
+    "max_level",
+    "memphis_arrival",
+    "midnight_delivery",
+    "montana_delivery",
+    "month_on_road",
+    "mountain_clean",
+    "multi_leg_haul",
+    "multi_state",
+    "muskogee_arrival",
+    "nashville_delivery",
+    "never_fought_the_law",
+    "new_england_delivery",
+    "new_orleans_arrival",
+    "new_year_run",
+    "night_shift_regular",
+    "no_toll_long",
+    "norcal_giants",
+    "one_for_the_road",
+    "owner_operator_buyin",
+    "perfect_streak",
+    "phoenix_arrival",
+    "pnw_delivery",
+    "port_load",
+    "predictive_crest",
+    "quarter_million_bank",
+    "radio_dial_wanderer",
+    "radio_faded_out",
+    "radio_fringe_catch",
+    "radio_three_states",
+    "rain_driver",
+    "reefer_load",
+    "refused_the_trailer",
+    "rep_ninety",
+    "return_trip",
+    "roadside_fix",
+    "route66_run",
+    "route_refuel",
+    "sacramento_arrival",
+    "saginaw_arrival",
+    "san_antonio_arrival",
+    "scale_regular",
+    "second_ticket",
+    "securement_load",
+    "self_paid_course",
+    "seventy_five_cities",
+    "sixteen_tons",
+    "sixty_nine_mph",
+    "sleep_before_exhaustion",
+    "slept_on_route",
+    "southbound_run",
+    "speed_limit_saint",
+    "spotless_long",
+    "state_crossing",
+    "storm_driving",
+    "tank_load",
+    "ten_deliveries",
+    "ten_four_day",
+    "ten_thousand_miles",
+    "texas_triangle",
+    "thirty_states",
+    "thousand_miles",
+    "three_regions",
+    "three_trucks",
+    "thrifty_run",
+    "toll_paid",
+    "top_reputation",
+    "traffic_slowing",
+    "true_north_run",
+    "tulsa_arrival",
+    "twenty_five_cities",
+    "twenty_five_deliveries",
+    "twenty_five_grand",
+    "two_hundred_deliveries",
+    "vegas_arrival",
+    "virginia_line",
+    "waco_survivor",
+    "weather_collector",
+    "westbound_delivery",
+    "wichita_arrival",
+    "winslow_arrival",
+    "winter_delivery",
+    "winter_or_wind",
+    "wyoming_delivery"
+  ],
+  "achievementLabels": {
+    "abilene_arrival": "Prettiest Town on the Manifest",
+    "air_ready": "Star of the Interstate",
+    "all_regions": "Been Everywhere, For Real",
+    "all_terrain_route": "Flats, Foothills, and the Big Climb",
+    "all_upgrades": "Every Box on the Order Sheet",
+    "amarillo_arrival": "Amarillo by Daybreak",
+    "appalachia_delivery": "Freight Up the Holler",
+    "april_first": "Nobody's Fool on the First",
+    "authority_active": "Running Under Your Own Numbers",
+    "bakersfield_arrival": "The Bakersfield Sound",
+    "baton_rouge_arrival": "Better Off Than Busted Flat",
+    "big_payday": "Paid Like a Boss Hog",
+    "birmingham_morning": "Birmingham Before the Coffee Kicks In",
+    "bobtail_done": "Room Enough to Turn Around",
+    "brake_smoke": "Smoke, Smoke, Smoke Those Drums",
+    "break_taken": "Coffee Break, Driver",
+    "chattanooga_arrival": "Quicker Than the Old Express",
+    "christmas_delivery": "Hard Candy Christmas Run",
+    "clean_delivery": "Pretty as a Billboard",
+    "coast_to_coast": "Coast-to-Coast Hauler",
+    "coffee_regular": "One More Cup for the Road",
+    "construction_zone": "Honky-Tonk of Cones",
+    "dakota_delivery": "Freight for the High Plains",
+    "dawn_run": "Rolling Before the Roosters",
+    "deadline_squeaker": "Hot Brakes, Warm Handshake",
+    "deep_repair": "Back from the Bottom of the Ledger",
+    "desert_summer": "Through the Furnace Door",
+    "detention_paid": "Paid to Sit Still",
+    "detroit_run": "Last Load Out of Detroit",
+    "doubles_load": "Two Boxes, One Driver",
+    "dropped_the_bad_one": "Somebody Else's Turn",
+    "eastbound_delivery": "Eastbound and Gone",
+    "eighty_eight_mph": "Where We're Going, We Need Roads",
+    "el_paso_arrival": "A Ballad Out West",
+    "every_fleet_tier": "Every Rung of the Yard",
+    "farm_load": "Feed, Seed, and Freight",
+    "fifteen_states": "Fifteen State Lines Behind You",
+    "fifty_deliveries": "Fifty Loads Down the Road",
+    "fifty_five_mph": "Wrong Game, No Limit",
+    "fifty_thousand_miles": "Highway Lifer",
+    "first_day": "First Day",
+    "first_delivery": "Signed, Sealed, Hauled",
+    "first_delivery_drop": "Leave It Where It Lies",
+    "first_dispatch": "Breaker, Breaker",
+    "first_drop_hook": "Drop It and Hook It",
+    "first_late": "Keep the Bonus, Boss",
+    "first_on_time": "Beat the Clock, Fewer Days",
+    "first_pickup": "Loaded and Rolling",
+    "first_rest_stop": "Sweetheart of the Truck Stop",
+    "first_ticket": "Yeah, Officer, That Was Me",
+    "first_upgrade": "Soup It Up a Little",
+    "five_deliveries": "Just Can't Wait to Roll",
+    "five_hundred_mile_run": "And Five Hundred More",
+    "five_tractors": "Whatever the Yard Has Free",
+    "fleet_flagship": "First Pick of the Yard",
+    "fleet_upgrade": "Newer Iron from the Yard",
+    "fort_worth_arrival": "Cowtown Crossed Your Mind",
+    "four_seasons": "All Four Pages of the Calendar",
+    "friday_thirteenth": "Superstition, Signed For",
+    "fuel_fumes": "Hope Is Not a Fuel Plan",
+    "garage_repair": "A Working Man's Receipt",
+    "georgia_arrival": "Midnight Freight to Georgia",
+    "grueling_clean": "Long, Hard, and Spotless",
+    "gulf_coast_by_two": "Coast Freight by Two O'Clock",
+    "half_million_earned": "Half a Million in Lifetime Freight",
+    "hazard_avoided": "Highway to Maybe Not",
+    "hazmat_load": "Placards Up",
+    "heavy_haul_load": "Big John on the Drive Axles",
+    "heavy_hauler": "Eighteen Wheels and Then Some",
+    "high_value_load": "Sparkle in the Dry Van",
+    "home_return": "The Porch Light Was Still On",
+    "hooked_a_bad_one": "You Get What You Get",
+    "houston_arrival": "One Day Closer, Says the Odometer",
+    "hundred_deliveries": "Just Keep Rollin' On",
+    "hundred_fifty_cities": "Half the Map, Signed For",
+    "hundred_grand": "Hundred-Grand Hood Ornament",
+    "hundred_k_miles": "Leave Me on the Interstate",
+    "inspection": "Smokey at the Scale",
+    "jackson_arrival": "The Jackson Everybody Sings About",
+    "jake_only_descent": "Down the Mountain on the Jake",
+    "jam_and_cones": "Stuck in Every Flavor of Slow",
+    "jersey_delivery": "Giant of the Turnpike",
+    "kansas_city_arrival": "Brighter Than the Local TV Star",
+    "kentucky_delivery": "Bluegrass on the Bill of Lading",
+    "laredo_arrival": "Down the Old Cowboy Road",
+    "lcv_load": "The Long Combination",
+    "level_fifteen": "Halfway Up the Ladder",
+    "level_five": "Regular on the Regional Board",
+    "level_ten": "Lead Driver, Says So on the Vest",
+    "level_thirty": "All the Way to the Top Rung",
+    "level_three": "Another Page, Another Town",
+    "level_twenty_five": "Qualified for Your Own Numbers",
+    "long_day_run": "The Long Way to the Dock",
+    "long_haul": "Where the Ribbon Don't End",
+    "low_visibility": "Foggy Mountain Haul",
+    "lubbock_arrival": "Lubbock in the Rearview",
+    "manual_driver": "Stick-Shift Solo",
+    "max_gross_load": "Grossed Out at the Scale House",
+    "max_level": "Veteran of the Long Haul",
+    "memphis_arrival": "However You Got to Memphis",
+    "midnight_delivery": "The Small Hours Ride Along",
+    "montana_delivery": "Under the Biggest Sky",
+    "month_on_road": "Thirty Days of Diesel",
+    "mountain_clean": "Over the Rockies, Spotless",
+    "multi_leg_haul": "Four Legs and Rolling",
+    "multi_state": "Been Most Everywhere, Man",
+    "muskogee_arrival": "Still Proud in Muskogee",
+    "nashville_delivery": "An Overnight Success, Eventually",
+    "never_fought_the_law": "Never Fought the Law",
+    "new_england_delivery": "Down East with a Dry Van",
+    "new_orleans_arrival": "Good Morning, Crescent City",
+    "new_year_run": "Working Through the Countdown",
+    "night_shift_regular": "Night Moves on the Interstate",
+    "no_toll_long": "Turns Out, an Easy Run",
+    "norcal_giants": "Shadow of the Giants",
+    "one_for_the_road": "One More for the Ditch",
+    "owner_operator_buyin": "Your Name on the Title",
+    "perfect_streak": "Five Clean, In a Row",
+    "phoenix_arrival": "Clear to Phoenix",
+    "pnw_delivery": "Pines to the Pacific",
+    "port_load": "Through the Gate",
+    "predictive_crest": "No Mountain High Enough",
+    "quarter_million_bank": "A Vault with Mud Flaps",
+    "radio_dial_wanderer": "Worked the Whole Dial",
+    "radio_faded_out": "Somewhere in the Static",
+    "radio_fringe_catch": "Skip on the Far End",
+    "radio_three_states": "Same Song, Three State Lines",
+    "rain_driver": "World Through a Wet Windshield",
+    "reefer_load": "Cold Freight, Warm Heart",
+    "refused_the_trailer": "Send It Back",
+    "rep_ninety": "Strut Past the Fuel Island",
+    "return_trip": "Right Back Where You Started",
+    "roadside_fix": "The Show Rolls On",
+    "route66_run": "The Mother Road",
+    "route_refuel": "Filler-Up and Keep Truckin'",
+    "sacramento_arrival": "A Whistle Outside Folsom",
+    "saginaw_arrival": "Cold Bay, Warm Welcome",
+    "san_antonio_arrival": "Backing Down to San Antone",
+    "scale_regular": "On a First-Name Basis at the Scale",
+    "second_ticket": "Twice in One Trip, Really",
+    "securement_load": "Chained and Checked",
+    "self_paid_course": "Paid for the Classroom Yourself",
+    "seventy_five_cities": "Seventy-Five Docks Deep",
+    "sixteen_tons": "Another Day Older",
+    "sixty_nine_mph": "Summer of Sixty-Nine",
+    "sleep_before_exhaustion": "Mama Warned You About This",
+    "slept_on_route": "Five-by-Two and Out",
+    "southbound_run": "Down the Map with a Load",
+    "speed_limit_saint": "Slow Rod Lincoln",
+    "spotless_long": "Vanished Like a Professional",
+    "state_crossing": "Kept It Between the Lines",
+    "storm_driving": "Dark Line on the Radar",
+    "tank_load": "The Load That Pushes Back",
+    "ten_deliveries": "What a Long, Strange Haul",
+    "ten_four_day": "Copy That, October",
+    "ten_thousand_miles": "Ten Thousand Down the Line",
+    "texas_triangle": "All Your Loads Live in Texas",
+    "thirty_states": "Thirty States and Counting",
+    "thousand_miles": "Caught the White-Line Bug",
+    "three_regions": "Three Regions and Ramblin'",
+    "three_trucks": "A Yard of Your Own",
+    "thrifty_run": "Sipping It All the Way",
+    "toll_paid": "Bandit Pays the Toll",
+    "top_reputation": "CB Royalty",
+    "traffic_slowing": "Bumper-to-Bumper Blues",
+    "true_north_run": "The Compass Said Keep Going",
+    "tulsa_arrival": "Tulsa, Right on Schedule",
+    "twenty_five_cities": "Twenty-Five Pins in the Map",
+    "twenty_five_deliveries": "Twenty-Five and Rolling Steady",
+    "twenty_five_grand": "Built It a Piece at a Time",
+    "two_hundred_deliveries": "Two Hundred and Playing for Keeps",
+    "vegas_arrival": "Long Live Las Vegas",
+    "virginia_line": "Runnin' the County Line",
+    "waco_survivor": "Made It to Waco Just Fine",
+    "weather_collector": "Every Sky in the Logbook",
+    "westbound_delivery": "Westbound, Foot Down",
+    "wichita_arrival": "Wichita on the Line",
+    "winslow_arrival": "A Corner Worth Standing On",
+    "winter_delivery": "December Never Stood a Chance",
+    "winter_or_wind": "A Mile Past the Last Marker",
+    "wyoming_delivery": "Where the Herds Still Graze"
+  },
+  "careerFields": [
+    "deliveries",
+    "dispatch_declines_used",
+    "on_time_deliveries",
+    "on_time_streak",
+    "pending_credentials",
+    "purchased_endorsements",
+    "reputation",
+    "standing",
+    "total_earnings",
+    "total_miles",
+    "unacknowledged_grants",
+    "xp"
+  ],
+  "careerTitles": [
+    "Yard Trainee",
+    "New Hire Company Driver",
+    "Solo Company Driver",
+    "Regional Company Driver",
+    "Regional Regular",
+    "Experienced Company Driver",
+    "Long-Haul Company Driver",
+    "Heavy Freight Driver",
+    "High-Value Company Driver",
+    "Lead Company Driver",
+    "Specialized Company Driver",
+    "Premium Lane Driver",
+    "Carrier Mentor Driver",
+    "Business Prep Driver",
+    "Owner-Operator Candidate",
+    "Leased-On Applicant",
+    "Tractor Buy-In Candidate",
+    "Leased-On Owner-Operator",
+    "Settled Owner-Operator",
+    "Established Owner-Operator",
+    "Authority Prep Candidate",
+    "Direct Freight Prep",
+    "Trailer Strategy Owner",
+    "Authority-Ready Operator",
+    "Independent Authority Operator",
+    "Contract Freight Builder",
+    "Specialized Trailer Operator",
+    "Premium Lane Operator",
+    "Veteran Independent Operator",
+    "Freight Fate Independent"
+  ],
+  "carrierLabels": {
+    "great_lakes_training": "Great Lakes Training Transport",
+    "northstar": "Northstar Freight Lines",
+    "prairie_link": "Prairie Link Regional",
+    "roadstead_owner_operator": "Northstar Freight Lines",
+    "summit_value": "Summit Value Logistics"
+  },
+  "cityLabels": {
+    "aberdeen_sd_us": "Aberdeen, South Dakota",
+    "abilene_tx_us": "Abilene, Texas",
+    "abingdon_va_us": "Abingdon, Virginia",
+    "ada_ok_us": "Ada, Oklahoma",
+    "akron_oh_us": "Akron, Ohio",
+    "alamo_nv_us": "Alamo, Nevada",
+    "alamogordo_nm_us": "Alamogordo, New Mexico",
+    "alamosa_co_us": "Alamosa, Colorado",
+    "albany_ga_us": "Albany, Georgia",
+    "albany_ny_us": "Albany, New York",
+    "albany_or_us": "Albany, Oregon",
+    "albert_lea_mn_us": "Albert Lea, Minnesota",
+    "albuquerque_nm_us": "Albuquerque, New Mexico",
+    "alexandria_la_us": "Alexandria, Louisiana",
+    "allentown_pa_us": "Allentown, Pennsylvania",
+    "altoona_pa_us": "Altoona, Pennsylvania",
+    "altus_ok_us": "Altus, Oklahoma",
+    "amarillo_tx_us": "Amarillo, Texas",
+    "americus_ga_us": "Americus, Georgia",
+    "ames_ia_us": "Ames, Iowa",
+    "anderson_in_us": "Anderson, Indiana",
+    "ann_arbor_mi_us": "Ann Arbor, Michigan",
+    "ardmore_ok_us": "Ardmore, Oklahoma",
+    "asheville_nc_us": "Asheville, North Carolina",
+    "ashland_ky_us": "Ashland, Kentucky",
+    "astoria_or_us": "Astoria, Oregon",
+    "athens_ga_us": "Athens, Georgia",
+    "atlanta_ga_us": "Atlanta, Georgia",
+    "atlantic_city_nj_us": "Atlantic City, New Jersey",
+    "atoka_ok_us": "Atoka, Oklahoma",
+    "augusta_ga_us": "Augusta, Georgia",
+    "aurora_il_us": "Aurora, Illinois",
+    "austin_nv_us": "Austin, Nevada",
+    "austin_tx_us": "Austin, Texas",
+    "baker_city_or_us": "Baker City, Oregon",
+    "bakersfield_ca_us": "Bakersfield, California",
+    "baltimore_md_us": "Baltimore, Maryland",
+    "bangor_me_us": "Bangor, Maine",
+    "barnstable_ma_us": "Barnstable, Massachusetts",
+    "barstow_ca_us": "Barstow, California",
+    "bartlesville_ok_us": "Bartlesville, Oklahoma",
+    "baton_rouge_la_us": "Baton Rouge, Louisiana",
+    "battle_mountain_nv_us": "Battle Mountain, Nevada",
+    "beaumont_tx_us": "Beaumont, Texas",
+    "beckley_wv_us": "Beckley, West Virginia",
+    "bellingham_wa_us": "Bellingham, Washington",
+    "bemidji_mn_us": "Bemidji, Minnesota",
+    "bend_or_us": "Bend, Oregon",
+    "bentonville_ar_us": "Bentonville, Arkansas",
+    "big_spring_tx_us": "Big Spring, Texas",
+    "billings_mt_us": "Billings, Montana",
+    "binghamton_ny_us": "Binghamton, New York",
+    "birmingham_al_us": "Birmingham, Alabama",
+    "bishop_ca_us": "Bishop, California",
+    "bismarck_nd_us": "Bismarck, North Dakota",
+    "bloomington_il_us": "Bloomington, Illinois",
+    "bloomington_in_us": "Bloomington, Indiana",
+    "blythe_ca_us": "Blythe, California",
+    "boise_city_ok_us": "Boise City, Oklahoma",
+    "boise_id_us": "Boise, Idaho",
+    "boston_ma_us": "Boston, Massachusetts",
+    "bowling_green_ky_us": "Bowling Green, Kentucky",
+    "bozeman_mt_us": "Bozeman, Montana",
+    "bridgeport_ct_us": "Bridgeport, Connecticut",
+    "bristol_tn_us": "Bristol, Tennessee",
+    "brookings_sd_us": "Brookings, South Dakota",
+    "brownsville_tx_us": "Brownsville, Texas",
+    "brownwood_tx_us": "Brownwood, Texas",
+    "brunswick_ga_us": "Brunswick, Georgia",
+    "buckeye_az_us": "Buckeye, Arizona",
+    "buffalo_ny_us": "Buffalo, New York",
+    "buffalo_wy_us": "Buffalo, Wyoming",
+    "bullhead_city_az_us": "Bullhead City, Arizona",
+    "burlington_co_us": "Burlington, Colorado",
+    "burlington_ia_us": "Burlington, Iowa",
+    "burlington_vt_us": "Burlington, Vermont",
+    "butte_mt_us": "Butte, Montana",
+    "camp_verde_az_us": "Camp Verde, Arizona",
+    "cape_charles_va_us": "Cape Charles, Virginia",
+    "cape_coral_fl_us": "Cape Coral, Florida",
+    "cape_girardeau_mo_us": "Cape Girardeau, Missouri",
+    "carlisle_pa_us": "Carlisle, Pennsylvania",
+    "carlsbad_nm_us": "Carlsbad, New Mexico",
+    "carson_city_nv_us": "Carson City, Nevada",
+    "cartersville_ga_us": "Cartersville, Georgia",
+    "casa_grande_az_us": "Casa Grande, Arizona",
+    "casper_wy_us": "Casper, Wyoming",
+    "cedar_city_ut_us": "Cedar City, Utah",
+    "cedar_rapids_ia_us": "Cedar Rapids, Iowa",
+    "champaign_il_us": "Champaign, Illinois",
+    "charleston_sc_us": "Charleston, South Carolina",
+    "charleston_wv_us": "Charleston, West Virginia",
+    "charlotte_nc_us": "Charlotte, North Carolina",
+    "charlottesville_va_us": "Charlottesville, Virginia",
+    "chattanooga_tn_us": "Chattanooga, Tennessee",
+    "cheyenne_wy_us": "Cheyenne, Wyoming",
+    "chicago_il_us": "Chicago, Illinois",
+    "chico_ca_us": "Chico, California",
+    "childress_tx_us": "Childress, Texas",
+    "chillicothe_oh_us": "Chillicothe, Ohio",
+    "chippewa_falls_wi_us": "Chippewa Falls, Wisconsin",
+    "cincinnati_oh_us": "Cincinnati, Ohio",
+    "clarendon_tx_us": "Clarendon, Texas",
+    "clarksdale_ms_us": "Clarksdale, Mississippi",
+    "clarksville_tn_us": "Clarksville, Tennessee",
+    "cleveland_oh_us": "Cleveland, Ohio",
+    "clovis_nm_us": "Clovis, New Mexico",
+    "coeur_d_alene_id_us": "Coeur d'Alene, Idaho",
+    "coffeyville_ks_us": "Coffeyville, Kansas",
+    "colby_ks_us": "Colby, Kansas",
+    "college_station_tx_us": "College Station, Texas",
+    "colorado_springs_co_us": "Colorado Springs, Colorado",
+    "columbia_mo_us": "Columbia, Missouri",
+    "columbia_sc_us": "Columbia, South Carolina",
+    "columbus_ga_us": "Columbus, Georgia",
+    "columbus_in_us": "Columbus, Indiana",
+    "columbus_ms_us": "Columbus, Mississippi",
+    "columbus_ne_us": "Columbus, Nebraska",
+    "columbus_oh_us": "Columbus, Ohio",
+    "conway_ar_us": "Conway, Arkansas",
+    "cookeville_tn_us": "Cookeville, Tennessee",
+    "coos_bay_or_us": "Coos Bay, Oregon",
+    "coral_springs_fl_us": "Coral Springs, Florida",
+    "cordele_ga_us": "Cordele, Georgia",
+    "corpus_christi_tx_us": "Corpus Christi, Texas",
+    "corvallis_or_us": "Corvallis, Oregon",
+    "cottonwood_az_us": "Cottonwood, Arizona",
+    "crescent_city_ca_us": "Crescent City, California",
+    "crestview_fl_us": "Crestview, Florida",
+    "cullman_al_us": "Cullman, Alabama",
+    "cumberland_md_us": "Cumberland, Maryland",
+    "dallas_tx_us": "Dallas, Texas",
+    "dalton_ga_us": "Dalton, Georgia",
+    "danville_va_us": "Danville, Virginia",
+    "davenport_ia_us": "Davenport, Iowa",
+    "dayton_oh_us": "Dayton, Ohio",
+    "daytona_beach_fl_us": "Daytona Beach, Florida",
+    "decatur_il_us": "Decatur, Illinois",
+    "del_rio_tx_us": "Del Rio, Texas",
+    "delta_co_us": "Delta, Colorado",
+    "denver_co_us": "Denver, Colorado",
+    "des_moines_ia_us": "Des Moines, Iowa",
+    "detroit_mi_us": "Detroit, Michigan",
+    "devils_lake_nd_us": "Devils Lake, North Dakota",
+    "dickinson_nd_us": "Dickinson, North Dakota",
+    "dodge_city_ks_us": "Dodge City, Kansas",
+    "dothan_al_us": "Dothan, Alabama",
+    "douglas_az_us": "Douglas, Arizona",
+    "dover_de_us": "Dover, Delaware",
+    "dublin_ga_us": "Dublin, Georgia",
+    "dubuque_ia_us": "Dubuque, Iowa",
+    "duluth_mn_us": "Duluth, Minnesota",
+    "dumas_tx_us": "Dumas, Texas",
+    "durango_co_us": "Durango, Colorado",
+    "durant_ok_us": "Durant, Oklahoma",
+    "durham_nc_us": "Durham, North Carolina",
+    "dyersburg_tn_us": "Dyersburg, Tennessee",
+    "eagle_pass_tx_us": "Eagle Pass, Texas",
+    "eau_claire_wi_us": "Eau Claire, Wisconsin",
+    "edwards_co_us": "Edwards, Colorado",
+    "effingham_il_us": "Effingham, Illinois",
+    "el_centro_ca_us": "El Centro, California",
+    "el_dorado_ar_us": "El Dorado, Arkansas",
+    "el_paso_tx_us": "El Paso, Texas",
+    "elberton_ga_us": "Elberton, Georgia",
+    "elizabethtown_ky_us": "Elizabethtown, Kentucky",
+    "elkhart_in_us": "Elkhart, Indiana",
+    "elko_nv_us": "Elko, Nevada",
+    "ely_nv_us": "Ely, Nevada",
+    "emporia_ks_us": "Emporia, Kansas",
+    "enid_ok_us": "Enid, Oklahoma",
+    "erie_pa_us": "Erie, Pennsylvania",
+    "escanaba_mi_us": "Escanaba, Michigan",
+    "eugene_or_us": "Eugene, Oregon",
+    "eureka_ca_us": "Eureka, California",
+    "eureka_nv_us": "Eureka, Nevada",
+    "evansville_in_us": "Evansville, Indiana",
+    "everett_wa_us": "Everett, Washington",
+    "fairfield_ca_us": "Fairfield, California",
+    "fallon_nv_us": "Fallon, Nevada",
+    "fargo_nd_us": "Fargo, North Dakota",
+    "farmington_nm_us": "Farmington, New Mexico",
+    "fayetteville_ar_us": "Fayetteville, Arkansas",
+    "fayetteville_nc_us": "Fayetteville, North Carolina",
+    "fernley_nv_us": "Fernley, Nevada",
+    "findlay_oh_us": "Findlay, Ohio",
+    "flagstaff_az_us": "Flagstaff, Arizona",
+    "flint_mi_us": "Flint, Michigan",
+    "florence_al_us": "Florence, Alabama",
+    "florence_sc_us": "Florence, South Carolina",
+    "fond_du_lac_wi_us": "Fond du Lac, Wisconsin",
+    "fort_collins_co_us": "Fort Collins, Colorado",
+    "fort_dodge_ia_us": "Fort Dodge, Iowa",
+    "fort_myers_fl_us": "Fort Myers, Florida",
+    "fort_smith_ar_us": "Fort Smith, Arkansas",
+    "fort_stockton_tx_us": "Fort Stockton, Texas",
+    "fort_wayne_in_us": "Fort Wayne, Indiana",
+    "fort_worth_tx_us": "Fort Worth, Texas",
+    "fortuna_ca_us": "Fortuna, California",
+    "fresno_ca_us": "Fresno, California",
+    "gadsden_al_us": "Gadsden, Alabama",
+    "gainesville_fl_us": "Gainesville, Florida",
+    "galesburg_il_us": "Galesburg, Illinois",
+    "gallup_nm_us": "Gallup, New Mexico",
+    "garden_city_ks_us": "Garden City, Kansas",
+    "gary_in_us": "Gary, Indiana",
+    "gillette_wy_us": "Gillette, Wyoming",
+    "glasgow_mt_us": "Glasgow, Montana",
+    "glendive_mt_us": "Glendive, Montana",
+    "glenwood_springs_co_us": "Glenwood Springs, Colorado",
+    "globe_az_us": "Globe, Arizona",
+    "grand_forks_nd_us": "Grand Forks, North Dakota",
+    "grand_island_ne_us": "Grand Island, Nebraska",
+    "grand_junction_co_us": "Grand Junction, Colorado",
+    "grand_rapids_mi_us": "Grand Rapids, Michigan",
+    "grand_rapids_mn_us": "Grand Rapids, Minnesota",
+    "grants_pass_or_us": "Grants Pass, Oregon",
+    "great_bend_ks_us": "Great Bend, Kansas",
+    "great_falls_mt_us": "Great Falls, Montana",
+    "green_bay_wi_us": "Green Bay, Wisconsin",
+    "green_river_ut_us": "Green River, Utah",
+    "greensboro_nc_us": "Greensboro, North Carolina",
+    "greenville_ms_us": "Greenville, Mississippi",
+    "greenville_nc_us": "Greenville, North Carolina",
+    "greenville_sc_us": "Greenville, South Carolina",
+    "grenada_ms_us": "Grenada, Mississippi",
+    "gulfport_ms_us": "Gulfport, Mississippi",
+    "hagerstown_md_us": "Hagerstown, Maryland",
+    "hammond_la_us": "Hammond, Louisiana",
+    "harrisburg_pa_us": "Harrisburg, Pennsylvania",
+    "harrison_ar_us": "Harrison, Arkansas",
+    "harrisonburg_va_us": "Harrisonburg, Virginia",
+    "hartford_ct_us": "Hartford, Connecticut",
+    "hattiesburg_ms_us": "Hattiesburg, Mississippi",
+    "havre_mt_us": "Havre, Montana",
+    "hays_ks_us": "Hays, Kansas",
+    "hazard_ky_us": "Hazard, Kentucky",
+    "helena_mt_us": "Helena, Montana",
+    "henryetta_ok_us": "Henryetta, Oklahoma",
+    "hereford_tx_us": "Hereford, Texas",
+    "hibbing_mn_us": "Hibbing, Minnesota",
+    "hickory_nc_us": "Hickory, North Carolina",
+    "hinesville_ga_us": "Hinesville, Georgia",
+    "hobbs_nm_us": "Hobbs, New Mexico",
+    "holbrook_az_us": "Holbrook, Arizona",
+    "hot_springs_ar_us": "Hot Springs, Arkansas",
+    "hot_springs_sd_us": "Hot Springs, South Dakota",
+    "houghton_mi_us": "Houghton, Michigan",
+    "houma_la_us": "Houma, Louisiana",
+    "houston_tx_us": "Houston, Texas",
+    "huntington_wv_us": "Huntington, West Virginia",
+    "huntsville_al_us": "Huntsville, Alabama",
+    "hutchinson_ks_us": "Hutchinson, Kansas",
+    "idaho_falls_id_us": "Idaho Falls, Idaho",
+    "indianapolis_in_us": "Indianapolis, Indiana",
+    "indio_ca_us": "Indio, California",
+    "iowa_city_ia_us": "Iowa City, Iowa",
+    "iron_mountain_mi_us": "Iron Mountain, Michigan",
+    "jacksboro_tx_us": "Jacksboro, Texas",
+    "jackson_mi_us": "Jackson, Michigan",
+    "jackson_ms_us": "Jackson, Mississippi",
+    "jackson_tn_us": "Jackson, Tennessee",
+    "jacksonville_fl_us": "Jacksonville, Florida",
+    "jacksonville_nc_us": "Jacksonville, North Carolina",
+    "jamestown_nd_us": "Jamestown, North Dakota",
+    "jamestown_ny_us": "Jamestown, New York",
+    "johnson_city_tn_us": "Johnson City, Tennessee",
+    "jonesboro_ar_us": "Jonesboro, Arkansas",
+    "joplin_mo_us": "Joplin, Missouri",
+    "junction_city_ks_us": "Junction City, Kansas",
+    "junction_tx_us": "Junction, Texas",
+    "kalamazoo_mi_us": "Kalamazoo, Michigan",
+    "kalispell_mt_us": "Kalispell, Montana",
+    "kansas_city_mo_us": "Kansas City, Missouri",
+    "kearney_ne_us": "Kearney, Nebraska",
+    "keene_nh_us": "Keene, New Hampshire",
+    "kellogg_id_us": "Kellogg, Idaho",
+    "kenosha_wi_us": "Kenosha, Wisconsin",
+    "kerrville_tx_us": "Kerrville, Texas",
+    "key_west_fl_us": "Key West, Florida",
+    "killeen_tx_us": "Killeen, Texas",
+    "kingman_az_us": "Kingman, Arizona",
+    "kingsport_tn_us": "Kingsport, Tennessee",
+    "kirksville_mo_us": "Kirksville, Missouri",
+    "klamath_falls_or_us": "Klamath Falls, Oregon",
+    "knoxville_tn_us": "Knoxville, Tennessee",
+    "kokomo_in_us": "Kokomo, Indiana",
+    "la_crosse_wi_us": "La Crosse, Wisconsin",
+    "la_grande_or_us": "La Grande, Oregon",
+    "lafayette_in_us": "Lafayette, Indiana",
+    "lafayette_la_us": "Lafayette, Louisiana",
+    "lagrange_ga_us": "LaGrange, Georgia",
+    "lake_charles_la_us": "Lake Charles, Louisiana",
+    "lake_city_fl_us": "Lake City, Florida",
+    "lake_havasu_city_az_us": "Lake Havasu City, Arizona",
+    "lakeland_fl_us": "Lakeland, Florida",
+    "lamar_co_us": "Lamar, Colorado",
+    "lampasas_tx_us": "Lampasas, Texas",
+    "lancaster_ca_us": "Lancaster, California",
+    "lansing_mi_us": "Lansing, Michigan",
+    "laramie_wy_us": "Laramie, Wyoming",
+    "laredo_tx_us": "Laredo, Texas",
+    "las_cruces_nm_us": "Las Cruces, New Mexico",
+    "las_vegas_nm_us": "Las Vegas, New Mexico",
+    "las_vegas_nv_us": "Las Vegas, Nevada",
+    "lawrence_ks_us": "Lawrence, Kansas",
+    "lawton_ok_us": "Lawton, Oklahoma",
+    "lewiston_id_us": "Lewiston, Idaho",
+    "lewiston_me_us": "Lewiston, Maine",
+    "lexington_ky_us": "Lexington, Kentucky",
+    "lexington_ne_us": "Lexington, Nebraska",
+    "libby_mt_us": "Libby, Montana",
+    "liberal_ks_us": "Liberal, Kansas",
+    "lima_oh_us": "Lima, Ohio",
+    "limon_co_us": "Limon, Colorado",
+    "lincoln_ne_us": "Lincoln, Nebraska",
+    "little_rock_ar_us": "Little Rock, Arkansas",
+    "logan_ut_us": "Logan, Utah",
+    "london_ky_us": "London, Kentucky",
+    "lone_pine_ca_us": "Lone Pine, California",
+    "longview_tx_us": "Longview, Texas",
+    "longview_wa_us": "Longview, Washington",
+    "los_angeles_ca_us": "Los Angeles, California",
+    "louisville_ky_us": "Louisville, Kentucky",
+    "lubbock_tx_us": "Lubbock, Texas",
+    "lufkin_tx_us": "Lufkin, Texas",
+    "lumberton_nc_us": "Lumberton, North Carolina",
+    "lusk_wy_us": "Lusk, Wyoming",
+    "lynchburg_va_us": "Lynchburg, Virginia",
+    "macon_ga_us": "Macon, Georgia",
+    "madison_wi_us": "Madison, Wisconsin",
+    "mammoth_lakes_ca_us": "Mammoth Lakes, California",
+    "manchester_nh_us": "Manchester, New Hampshire",
+    "mankato_mn_us": "Mankato, Minnesota",
+    "mansfield_oh_us": "Mansfield, Ohio",
+    "marble_falls_tx_us": "Marble Falls, Texas",
+    "marion_oh_us": "Marion, Ohio",
+    "marion_va_us": "Marion, Virginia",
+    "marquette_mi_us": "Marquette, Michigan",
+    "marshalltown_ia_us": "Marshalltown, Iowa",
+    "mason_city_ia_us": "Mason City, Iowa",
+    "mattoon_il_us": "Mattoon, Illinois",
+    "mcalester_ok_us": "McAlester, Oklahoma",
+    "mcallen_tx_us": "McAllen, Texas",
+    "mccall_id_us": "McCall, Idaho",
+    "mckinney_tx_us": "McKinney, Texas",
+    "mcminnville_or_us": "McMinnville, Oregon",
+    "meadville_pa_us": "Meadville, Pennsylvania",
+    "medford_or_us": "Medford, Oregon",
+    "memphis_tn_us": "Memphis, Tennessee",
+    "merced_ca_us": "Merced, California",
+    "meridian_ms_us": "Meridian, Mississippi",
+    "miami_fl_us": "Miami, Florida",
+    "midland_tx_us": "Midland, Texas",
+    "miles_city_mt_us": "Miles City, Montana",
+    "milwaukee_wi_us": "Milwaukee, Wisconsin",
+    "mineral_wells_tx_us": "Mineral Wells, Texas",
+    "minneapolis_mn_us": "Minneapolis, Minnesota",
+    "minot_nd_us": "Minot, North Dakota",
+    "missoula_mt_us": "Missoula, Montana",
+    "mitchell_sd_us": "Mitchell, South Dakota",
+    "moab_ut_us": "Moab, Utah",
+    "mobile_al_us": "Mobile, Alabama",
+    "modesto_ca_us": "Modesto, California",
+    "mojave_ca_us": "Mojave, California",
+    "monroe_la_us": "Monroe, Louisiana",
+    "montgomery_al_us": "Montgomery, Alabama",
+    "montpelier_vt_us": "Montpelier, Vermont",
+    "montrose_co_us": "Montrose, Colorado",
+    "morehead_ky_us": "Morehead, Kentucky",
+    "morgantown_wv_us": "Morgantown, West Virginia",
+    "morristown_tn_us": "Morristown, Tennessee",
+    "moses_lake_wa_us": "Moses Lake, Washington",
+    "mount_shasta_ca_us": "Mount Shasta, California",
+    "mount_sterling_ky_us": "Mount Sterling, Kentucky",
+    "mount_vernon_il_us": "Mount Vernon, Illinois",
+    "mountain_home_ar_us": "Mountain Home, Arkansas",
+    "muncie_in_us": "Muncie, Indiana",
+    "murfreesboro_tn_us": "Murfreesboro, Tennessee",
+    "muskegon_mi_us": "Muskegon, Michigan",
+    "muskogee_ok_us": "Muskogee, Oklahoma",
+    "myrtle_beach_sc_us": "Myrtle Beach, South Carolina",
+    "naples_fl_us": "Naples, Florida",
+    "nashville_tn_us": "Nashville, Tennessee",
+    "natchez_ms_us": "Natchez, Mississippi",
+    "natchitoches_la_us": "Natchitoches, Louisiana",
+    "nephi_ut_us": "Nephi, Utah",
+    "new_bern_nc_us": "New Bern, North Carolina",
+    "new_haven_ct_us": "New Haven, Connecticut",
+    "new_london_ct_us": "New London, Connecticut",
+    "new_orleans_la_us": "New Orleans, Louisiana",
+    "new_york_ny_us": "New York, New York",
+    "newark_nj_us": "Newark, New Jersey",
+    "newberg_or_us": "Newberg, Oregon",
+    "newport_or_us": "Newport, Oregon",
+    "newport_ri_us": "Newport, Rhode Island",
+    "nogales_az_us": "Nogales, Arizona",
+    "norfolk_ne_us": "Norfolk, Nebraska",
+    "norfolk_va_us": "Norfolk, Virginia",
+    "north_platte_ne_us": "North Platte, Nebraska",
+    "north_port_fl_us": "North Port, Florida",
+    "ocala_fl_us": "Ocala, Florida",
+    "oceanside_ca_us": "Oceanside, California",
+    "odessa_tx_us": "Odessa, Texas",
+    "ogallala_ne_us": "Ogallala, Nebraska",
+    "ogden_ut_us": "Ogden, Utah",
+    "oklahoma_city_ok_us": "Oklahoma City, Oklahoma",
+    "okmulgee_ok_us": "Okmulgee, Oklahoma",
+    "olympia_wa_us": "Olympia, Washington",
+    "omaha_ne_us": "Omaha, Nebraska",
+    "ontario_or_us": "Ontario, Oregon",
+    "opelika_al_us": "Opelika, Alabama",
+    "orange_tx_us": "Orange, Texas",
+    "orlando_fl_us": "Orlando, Florida",
+    "oshkosh_wi_us": "Oshkosh, Wisconsin",
+    "ottumwa_ia_us": "Ottumwa, Iowa",
+    "owatonna_mn_us": "Owatonna, Minnesota",
+    "owensboro_ky_us": "Owensboro, Kentucky",
+    "oxford_ms_us": "Oxford, Mississippi",
+    "oxnard_ca_us": "Oxnard, California",
+    "ozona_tx_us": "Ozona, Texas",
+    "paducah_ky_us": "Paducah, Kentucky",
+    "page_az_us": "Page, Arizona",
+    "pagosa_springs_co_us": "Pagosa Springs, Colorado",
+    "paintsville_ky_us": "Paintsville, Kentucky",
+    "palestine_tx_us": "Palestine, Texas",
+    "palm_bay_fl_us": "Palm Bay, Florida",
+    "palm_coast_fl_us": "Palm Coast, Florida",
+    "pampa_tx_us": "Pampa, Texas",
+    "panama_city_fl_us": "Panama City, Florida",
+    "paris_tx_us": "Paris, Texas",
+    "parkersburg_wv_us": "Parkersburg, West Virginia",
+    "payson_az_us": "Payson, Arizona",
+    "pendleton_or_us": "Pendleton, Oregon",
+    "pensacola_fl_us": "Pensacola, Florida",
+    "peoria_il_us": "Peoria, Illinois",
+    "petersburg_va_us": "Petersburg, Virginia",
+    "philadelphia_pa_us": "Philadelphia, Pennsylvania",
+    "phoenix_az_us": "Phoenix, Arizona",
+    "pierre_sd_us": "Pierre, South Dakota",
+    "pikeville_ky_us": "Pikeville, Kentucky",
+    "pine_bluff_ar_us": "Pine Bluff, Arkansas",
+    "pittsburgh_pa_us": "Pittsburgh, Pennsylvania",
+    "plainview_tx_us": "Plainview, Texas",
+    "pocatello_id_us": "Pocatello, Idaho",
+    "ponca_city_ok_us": "Ponca City, Oklahoma",
+    "poplar_bluff_mo_us": "Poplar Bluff, Missouri",
+    "port_angeles_wa_us": "Port Angeles, Washington",
+    "port_huron_mi_us": "Port Huron, Michigan",
+    "port_saint_lucie_fl_us": "Port Saint Lucie, Florida",
+    "portland_me_us": "Portland, Maine",
+    "portland_or_us": "Portland, Oregon",
+    "portsmouth_nh_us": "Portsmouth, New Hampshire",
+    "prescott_az_us": "Prescott, Arizona",
+    "providence_ri_us": "Providence, Rhode Island",
+    "provo_ut_us": "Provo, Utah",
+    "pueblo_co_us": "Pueblo, Colorado",
+    "quincy_il_us": "Quincy, Illinois",
+    "raleigh_nc_us": "Raleigh, North Carolina",
+    "rapid_city_sd_us": "Rapid City, South Dakota",
+    "raton_nm_us": "Raton, New Mexico",
+    "rawlins_wy_us": "Rawlins, Wyoming",
+    "redding_ca_us": "Redding, California",
+    "reno_nv_us": "Reno, Nevada",
+    "rice_lake_wi_us": "Rice Lake, Wisconsin",
+    "richfield_ut_us": "Richfield, Utah",
+    "richmond_in_us": "Richmond, Indiana",
+    "richmond_ky_us": "Richmond, Kentucky",
+    "richmond_va_us": "Richmond, Virginia",
+    "ridgecrest_ca_us": "Ridgecrest, California",
+    "riverside_ca_us": "Riverside, California",
+    "roanoke_va_us": "Roanoke, Virginia",
+    "rochester_mn_us": "Rochester, Minnesota",
+    "rochester_ny_us": "Rochester, New York",
+    "rock_springs_wy_us": "Rock Springs, Wyoming",
+    "rockford_il_us": "Rockford, Illinois",
+    "rocky_mount_nc_us": "Rocky Mount, North Carolina",
+    "rolla_mo_us": "Rolla, Missouri",
+    "rome_ga_us": "Rome, Georgia",
+    "roseburg_or_us": "Roseburg, Oregon",
+    "roswell_nm_us": "Roswell, New Mexico",
+    "russellville_ar_us": "Russellville, Arkansas",
+    "ruston_la_us": "Ruston, Louisiana",
+    "rutland_vt_us": "Rutland, Vermont",
+    "sacramento_ca_us": "Sacramento, California",
+    "saginaw_mi_us": "Saginaw, Michigan",
+    "saint_george_ut_us": "Saint George, Utah",
+    "saint_joseph_mo_us": "Saint Joseph, Missouri",
+    "salem_or_us": "Salem, Oregon",
+    "salina_ks_us": "Salina, Kansas",
+    "salinas_ca_us": "Salinas, California",
+    "salisbury_md_us": "Salisbury, Maryland",
+    "salt_lake_city_ut_us": "Salt Lake City, Utah",
+    "san_angelo_tx_us": "San Angelo, Texas",
+    "san_antonio_tx_us": "San Antonio, Texas",
+    "san_diego_ca_us": "San Diego, California",
+    "san_francisco_ca_us": "San Francisco, California",
+    "san_jose_ca_us": "San Jose, California",
+    "san_luis_obispo_ca_us": "San Luis Obispo, California",
+    "sandpoint_id_us": "Sandpoint, Idaho",
+    "santa_ana_ca_us": "Santa Ana, California",
+    "santa_barbara_ca_us": "Santa Barbara, California",
+    "santa_fe_nm_us": "Santa Fe, New Mexico",
+    "santa_maria_ca_us": "Santa Maria, California",
+    "santa_rosa_ca_us": "Santa Rosa, California",
+    "sarasota_fl_us": "Sarasota, Florida",
+    "sault_ste_marie_mi_us": "Sault Ste. Marie, Michigan",
+    "savannah_ga_us": "Savannah, Georgia",
+    "scottsbluff_ne_us": "Scottsbluff, Nebraska",
+    "scranton_pa_us": "Scranton, Pennsylvania",
+    "seattle_wa_us": "Seattle, Washington",
+    "sedalia_mo_us": "Sedalia, Missouri",
+    "sedona_az_us": "Sedona, Arizona",
+    "selma_al_us": "Selma, Alabama",
+    "sheboygan_wi_us": "Sheboygan, Wisconsin",
+    "shelby_mt_us": "Shelby, Montana",
+    "sheridan_wy_us": "Sheridan, Wyoming",
+    "sherman_tx_us": "Sherman, Texas",
+    "show_low_az_us": "Show Low, Arizona",
+    "shreveport_la_us": "Shreveport, Louisiana",
+    "sidney_ne_us": "Sidney, Nebraska",
+    "sierra_vista_az_us": "Sierra Vista, Arizona",
+    "silverthorne_co_us": "Silverthorne, Colorado",
+    "sioux_city_ia_us": "Sioux City, Iowa",
+    "sioux_falls_sd_us": "Sioux Falls, South Dakota",
+    "socorro_nm_us": "Socorro, New Mexico",
+    "south_bend_in_us": "South Bend, Indiana",
+    "spartanburg_sc_us": "Spartanburg, South Carolina",
+    "spearfish_sd_us": "Spearfish, South Dakota",
+    "spokane_wa_us": "Spokane, Washington",
+    "spring_hill_fl_us": "Spring Hill, Florida",
+    "springfield_il_us": "Springfield, Illinois",
+    "springfield_ma_us": "Springfield, Massachusetts",
+    "springfield_mo_us": "Springfield, Missouri",
+    "st_cloud_mn_us": "St. Cloud, Minnesota",
+    "st_louis_mo_us": "St. Louis, Missouri",
+    "state_college_pa_us": "State College, Pennsylvania",
+    "statesboro_ga_us": "Statesboro, Georgia",
+    "staunton_va_us": "Staunton, Virginia",
+    "stephenville_tx_us": "Stephenville, Texas",
+    "stillwater_ok_us": "Stillwater, Oklahoma",
+    "stockton_ca_us": "Stockton, California",
+    "stratford_tx_us": "Stratford, Texas",
+    "stuttgart_ar_us": "Stuttgart, Arkansas",
+    "sulphur_la_us": "Sulphur, Louisiana",
+    "sumter_sc_us": "Sumter, South Carolina",
+    "superior_mt_us": "Superior, Montana",
+    "susanville_ca_us": "Susanville, California",
+    "syracuse_ny_us": "Syracuse, New York",
+    "tacoma_wa_us": "Tacoma, Washington",
+    "tallahassee_fl_us": "Tallahassee, Florida",
+    "tampa_fl_us": "Tampa, Florida",
+    "temple_tx_us": "Temple, Texas",
+    "terre_haute_in_us": "Terre Haute, Indiana",
+    "texarkana_ar_us": "Texarkana, Arkansas",
+    "the_dalles_or_us": "The Dalles, Oregon",
+    "tifton_ga_us": "Tifton, Georgia",
+    "toledo_oh_us": "Toledo, Ohio",
+    "toms_river_nj_us": "Toms River, New Jersey",
+    "tonopah_nv_us": "Tonopah, Nevada",
+    "topeka_ks_us": "Topeka, Kansas",
+    "traverse_city_mi_us": "Traverse City, Michigan",
+    "trenton_nj_us": "Trenton, New Jersey",
+    "tri_cities_wa_us": "Tri-Cities, Washington",
+    "trinidad_co_us": "Trinidad, Colorado",
+    "troy_al_us": "Troy, Alabama",
+    "tucson_az_us": "Tucson, Arizona",
+    "tucumcari_nm_us": "Tucumcari, New Mexico",
+    "tulsa_ok_us": "Tulsa, Oklahoma",
+    "tupelo_ms_us": "Tupelo, Mississippi",
+    "tuscaloosa_al_us": "Tuscaloosa, Alabama",
+    "twin_falls_id_us": "Twin Falls, Idaho",
+    "tyler_tx_us": "Tyler, Texas",
+    "ukiah_ca_us": "Ukiah, California",
+    "utica_ny_us": "Utica, New York",
+    "uvalde_tx_us": "Uvalde, Texas",
+    "valdosta_ga_us": "Valdosta, Georgia",
+    "valencia_ca_us": "Valencia, California",
+    "van_horn_tx_us": "Van Horn, Texas",
+    "vernon_tx_us": "Vernon, Texas",
+    "vicksburg_ms_us": "Vicksburg, Mississippi",
+    "victoria_tx_us": "Victoria, Texas",
+    "victorville_ca_us": "Victorville, California",
+    "vincennes_in_us": "Vincennes, Indiana",
+    "vineland_nj_us": "Vineland, New Jersey",
+    "virginia_beach_va_us": "Virginia Beach, Virginia",
+    "visalia_ca_us": "Visalia, California",
+    "waco_tx_us": "Waco, Texas",
+    "walla_walla_wa_us": "Walla Walla, Washington",
+    "walsenburg_co_us": "Walsenburg, Colorado",
+    "washington_dc_us": "Washington, District of Columbia",
+    "waterloo_ia_us": "Waterloo, Iowa",
+    "watertown_ny_us": "Watertown, New York",
+    "watertown_sd_us": "Watertown, South Dakota",
+    "wausau_wi_us": "Wausau, Wisconsin",
+    "wells_nv_us": "Wells, Nevada",
+    "wenatchee_wa_us": "Wenatchee, Washington",
+    "west_palm_beach_fl_us": "West Palm Beach, Florida",
+    "west_wendover_nv_us": "West Wendover, Nevada",
+    "wheatland_wy_us": "Wheatland, Wyoming",
+    "wheeling_wv_us": "Wheeling, West Virginia",
+    "wichita_falls_tx_us": "Wichita Falls, Texas",
+    "wichita_ks_us": "Wichita, Kansas",
+    "williamsport_pa_us": "Williamsport, Pennsylvania",
+    "williston_nd_us": "Williston, North Dakota",
+    "willits_ca_us": "Willits, California",
+    "willmar_mn_us": "Willmar, Minnesota",
+    "wilmington_de_us": "Wilmington, Delaware",
+    "wilmington_nc_us": "Wilmington, North Carolina",
+    "winchester_va_us": "Winchester, Virginia",
+    "winnemucca_nv_us": "Winnemucca, Nevada",
+    "winona_mn_us": "Winona, Minnesota",
+    "winslow_az_us": "Winslow, Arizona",
+    "winston_salem_nc_us": "Winston-Salem, North Carolina",
+    "wolf_point_mt_us": "Wolf Point, Montana",
+    "woodburn_or_us": "Woodburn, Oregon",
+    "worcester_ma_us": "Worcester, Massachusetts",
+    "wytheville_va_us": "Wytheville, Virginia",
+    "yakima_wa_us": "Yakima, Washington",
+    "youngstown_oh_us": "Youngstown, Ohio",
+    "yreka_ca_us": "Yreka, California",
+    "yuba_city_ca_us": "Yuba City, California",
+    "yuma_az_us": "Yuma, Arizona",
+    "zanesville_oh_us": "Zanesville, Ohio"
+  },
+  "companyCareerTitles": [
+    "Yard Trainee",
+    "New Hire Company Driver",
+    "Solo Company Driver",
+    "Regional Company Driver",
+    "Regional Regular",
+    "Experienced Company Driver",
+    "Long-Haul Company Driver",
+    "Heavy Freight Driver",
+    "High-Value Company Driver",
+    "Lead Company Driver",
+    "Specialized Company Driver",
+    "Premium Lane Driver",
+    "Carrier Mentor Driver",
+    "Business Prep Driver",
+    "Dedicated Company Driver",
+    "Fleet Senior Driver",
+    "Lead Fleet Driver",
+    "Company Fleet Captain",
+    "Veteran Company Hauler",
+    "Senior Fleet Regular",
+    "Carrier Elite Driver",
+    "Premium Company Lane Driver",
+    "Master Company Driver",
+    "Distinguished Fleet Driver",
+    "Senior Fleet Mentor",
+    "Carrier Lifetime Driver",
+    "Elite Specialized Company Driver",
+    "Top-Seniority Company Driver",
+    "Company Career Veteran",
+    "Freight Fate Company Driver"
+  ],
+  "endorsements": {
+    "doubles_triples": {
+      "label": "doubles",
+      "tier": "endorsement"
+    },
+    "flatbed_securement": {
+      "label": "flatbed securement",
+      "level": 2,
+      "tier": "certificate"
+    },
+    "hazmat": {
+      "label": "hazmat",
+      "tier": "endorsement"
+    },
+    "heavy_haul": {
+      "label": "heavy-haul",
+      "level": 3,
+      "tier": "certificate"
+    },
+    "high_value": {
+      "label": "high-value",
+      "level": 4,
+      "tier": "certificate"
+    },
+    "lcv": {
+      "label": "LCV",
+      "tier": "specialist"
+    },
+    "manual_transmission": {
+      "label": "manual transmission",
+      "tier": "training"
+    },
+    "refrigerated": {
+      "label": "refrigerated",
+      "level": 2,
+      "tier": "certificate"
+    },
+    "tank": {
+      "label": "tank vehicle",
+      "level": 16,
+      "tier": "endorsement"
+    },
+    "twic": {
+      "label": "TWIC port card",
+      "tier": "specialist"
+    }
+  },
+  "fleetTiers": [
+    {
+      "label": "yard standard",
+      "minLevel": 1
+    },
+    {
+      "label": "regional fleet",
+      "minLevel": 4
+    },
+    {
+      "label": "long-haul fleet",
+      "minLevel": 9
+    },
+    {
+      "label": "premium fleet",
+      "minLevel": 13
+    },
+    {
+      "label": "first pick of the yard",
+      "minLevel": 17
+    }
+  ],
+  "levelXp": [
+    0,
+    1000,
+    2500,
+    4500,
+    7000,
+    10000,
+    14000,
+    19000,
+    25000,
+    32000,
+    40000,
+    50000,
+    62000,
+    76000,
+    92000,
+    110000,
+    130000,
+    152000,
+    176000,
+    202000,
+    216000,
+    231000,
+    247000,
+    264000,
+    282000,
+    301000,
+    321000,
+    342000,
+    364000,
+    387000
+  ],
+  "marketCargoKeys": [
+    "automotive",
+    "bulk",
+    "chemicals",
+    "construction",
+    "container",
+    "electronics",
+    "farm_inputs",
+    "food",
+    "general",
+    "grain",
+    "lumber_paper",
+    "machinery",
+    "parcel",
+    "refrigerated",
+    "retail",
+    "steel"
+  ],
+  "payAdvanceLimit": 1500,
+  "profileFields": [
+    "achievement_stats",
+    "achievements",
+    "active_buffs",
+    "active_trip",
+    "authority_readiness",
+    "business_status",
+    "calendar_offset_days",
+    "career",
+    "carrier_key",
+    "carrier_name",
+    "created_line",
+    "current_city",
+    "dispatch_board_cache",
+    "driving_record",
+    "duty_log",
+    "fatigue",
+    "fines_owed",
+    "game_hours",
+    "hos",
+    "hos_key_notice_left",
+    "integrity_modified",
+    "integrity_notice_pending",
+    "loyalty",
+    "market",
+    "migration_notice_pending",
+    "money",
+    "name",
+    "out_of_service_events",
+    "owned_trailers",
+    "owned_trucks",
+    "owner_operator_declined",
+    "pay_advance",
+    "pay_advance_used_for_load",
+    "radio_favorites",
+    "recent_lanes",
+    "selection_score",
+    "start_mode",
+    "trailer_programs",
+    "truck",
+    "truck_conditions",
+    "tutorial_done",
+    "upgrades",
+    "version",
+    "weigh_station_transponder"
+  ],
+  "sourceSaveVersion": 11,
+  "startingMoney": 5000,
+  "startingMoneyMax": 18000,
+  "trailerCatalog": {
+    "bulk": {
+      "label": "Bulk",
+      "purchasePrice": 58000
+    },
+    "double_van": {
+      "label": "Twin trailers",
+      "purchasePrice": 74000
+    },
+    "dry_van": {
+      "label": "Dry van",
+      "purchasePrice": 42000
+    },
+    "flatbed": {
+      "label": "Flatbed",
+      "purchasePrice": 48000
+    },
+    "reefer": {
+      "label": "Reefer",
+      "purchasePrice": 82000
+    },
+    "tank": {
+      "label": "Tank",
+      "purchasePrice": 96000
+    }
+  },
+  "truckConditionFields": [
+    "brake_wear_pct",
+    "chain_wear_pct",
+    "chains_owned",
+    "damage_pct",
+    "engine_wear_pct",
+    "fuel_gal",
+    "grime_pct",
+    "tire_type",
+    "tire_wear_pct"
+  ],
+  "truckLabels": {
+    "aero_cruiser": "aero cruiser",
+    "big_bunk_conventional": "big bunk conventional",
+    "cabover_revival": "cabover revival",
+    "centurion_longhood": "centurion longhood",
+    "chrome_shop_special": "chrome shop special",
+    "city_shuttle": "city shuttle",
+    "continental_expedition": "continental expedition",
+    "deep_sleeper_custom": "deep sleeper custom",
+    "dock_hopper": "dock hopper",
+    "dry_lightning": "dry lightning",
+    "farm_road_workhorse": "farm road workhorse",
+    "granite_grade_king": "granite grade king",
+    "hand_me_down_sleeper": "hand-me-down sleeper",
+    "heavy_hauler": "heavy hauler",
+    "highline_sleeper": "highline sleeper",
+    "interstate_condo": "interstate condo",
+    "long_run_midroof": "long run mid-roof",
+    "midnight_flyer": "midnight flyer",
+    "midroof_runner": "mid-roof runner",
+    "mountain_spec_hauler": "mountain spec hauler",
+    "night_flag_aero": "night flag aero",
+    "old_longnose": "old longnose",
+    "owner_spec_showpiece": "owner spec showpiece",
+    "plain_jane_conventional": "plain jane conventional",
+    "presidential_sleeper": "presidential sleeper",
+    "ridgeline_sleeper": "ridgeline sleeper",
+    "rig": "standard rig",
+    "short_haul_stubnose": "short-haul stubnose",
+    "silver_aero": "silver aero",
+    "steel_hauler": "steel hauler",
+    "summit_flagship": "summit flagship",
+    "sunset_day_cab": "sunset day cab",
+    "trainer_day_cab": "trainer day cab",
+    "wide_glide_tourer": "wide glide tourer",
+    "yard_mule": "yard mule"
+  },
+  "truckPrices": {
+    "aero_cruiser": 95000,
+    "big_bunk_conventional": 89000,
+    "cabover_revival": 118000,
+    "centurion_longhood": 204000,
+    "chrome_shop_special": 124000,
+    "city_shuttle": 36000,
+    "continental_expedition": 216000,
+    "deep_sleeper_custom": 132000,
+    "dock_hopper": 39000,
+    "dry_lightning": 86000,
+    "farm_road_workhorse": 57000,
+    "granite_grade_king": 146000,
+    "hand_me_down_sleeper": 31000,
+    "heavy_hauler": 52000,
+    "highline_sleeper": 82000,
+    "interstate_condo": 99000,
+    "long_run_midroof": 74000,
+    "midnight_flyer": 176000,
+    "midroof_runner": 54000,
+    "mountain_spec_hauler": 104000,
+    "night_flag_aero": 198000,
+    "old_longnose": 49000,
+    "owner_spec_showpiece": 188000,
+    "plain_jane_conventional": 34000,
+    "presidential_sleeper": 185000,
+    "ridgeline_sleeper": 58000,
+    "rig": 0,
+    "short_haul_stubnose": 44000,
+    "silver_aero": 142000,
+    "steel_hauler": 97000,
+    "summit_flagship": 128000,
+    "sunset_day_cab": 38000,
+    "trainer_day_cab": 26000,
+    "wide_glide_tourer": 136000,
+    "yard_mule": 24000
+  },
+  "upgradePrices": {
+    "aero_kit": [
+      9000
+    ],
+    "engine_tune": [
+      12000,
+      26000
+    ],
+    "long_range_tank": [
+      7500
+    ],
+    "reinforced_brakes": [
+      6500
+    ]
+  },
+  "xpFlatPerDelivery": 250.12499999999997,
+  "xpPerMileMax": 4.002
+}

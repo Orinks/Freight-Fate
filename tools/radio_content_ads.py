@@ -298,4 +298,294 @@ AD_PLAN: tuple[AdPlan, ...] = (
         ),
         formats=("country", "classic_rock", "blues", "oldies", "tejano", "jazz", "night"),
     ),
+    # Second wave, 2026-09-11: twenty more spots so a station's stopsets
+    # take hours, not an afternoon, to come back round. Same voice bench.
+    AdPlan(
+        key="ad_copperline_parts",
+        business="Copperline Truck Parts",
+        voice="Archer",
+        script=(
+            "Copperline Truck Parts keeps the counter open around the "
+            "clock, and the man behind it has turned wrenches on "
+            "everything you drive. Brake shoes, filters, belts, marker "
+            "lights, and the odd fitting nobody else stocks, pulled while "
+            "you wait. Call ahead from the road and the parts are bagged "
+            "with your name on them. Copperline Truck Parts, three doors "
+            "down from the scale house. Fixed today, not Tuesday."
+        ),
+        formats=("country", "classic_rock", "blues", "tejano", "oldies"),
+    ),
+    AdPlan(
+        key="ad_tallgrass_coop",
+        business="Tallgrass Co-op",
+        voice="Roger",
+        script=(
+            "The Tallgrass Co-op has been open since before the "
+            "interstate, and the coffee pot has never been off. Feed, "
+            "seed, fence wire, and diesel out back with room to swing a "
+            "fifty-three. If you're hauling ag, the dock crew knows your "
+            "paperwork better than you do, and the pie case in the office "
+            "is not for show. Tallgrass Co-op. Turn where the grain "
+            "elevator is."
+        ),
+        formats=("country", "gospel", "blues", "oldies"),
+    ),
+    AdPlan(
+        key="ad_harbor_light_seafood",
+        business="Harbor Light Seafood Shack",
+        voice="Alexandra",
+        script=(
+            "Harbor Light Seafood Shack fries what the boats brought in "
+            "this morning, not what the freezer remembers. Shrimp "
+            "baskets, catfish plates, gumbo by the quart, and hushpuppies "
+            "that leave before the check does. Truck parking runs along "
+            "the seawall, and a to-go order is ready by the time you've "
+            "backed in. Harbor Light. Follow the gulls off the causeway "
+            "exit."
+        ),
+        formats=("blues", "jazz", "country", "tejano", "night"),
+    ),
+    AdPlan(
+        key="ad_northstar_driver_health",
+        business="Northstar Driver Health",
+        voice="Janet",
+        script=(
+            "A lapsed medical card parks you faster than any weigh "
+            "station. Northstar Driver Health does DOT physicals with no "
+            "appointment, seven days a week, at clinics right off the "
+            "truck routes. Sleep studies, vision checks, and the "
+            "paperwork filed with the state before you're back in the "
+            "cab. Bring your card, leave with a new one. Northstar Driver "
+            "Health. Keep the card current and the wheels turning."
+        ),
+        formats=("country", "classic_rock", "gospel", "jazz", "tejano", "synthwave"),
+    ),
+    AdPlan(
+        key="ad_prairie_mutual_credit",
+        business="Prairie Mutual Credit Union",
+        voice="Jade",
+        script=(
+            "Prairie Mutual Credit Union has financed trucks since trucks "
+            "had running boards. Tractor loans with rates written in plain "
+            "numbers, payments that flex with a slow month, and a loan "
+            "officer who asks about your lanes before your credit score. "
+            "Apply from your phone, sign at any branch, and drive off the "
+            "lot the same week. Prairie Mutual. Your truck, your name, "
+            "your terms."
+        ),
+        formats=("country", "classic_rock", "blues", "gospel", "oldies"),
+    ),
+    AdPlan(
+        key="ad_ridgeback_mattress",
+        business="Ridgeback Mattress",
+        voice="Alexandra",
+        script=(
+            "Ridgeback builds mattresses for sleepers, not showrooms. Cut "
+            "to fit your bunk, firm where your back needs it, cool enough "
+            "for an idle-free summer night. Every one ships rolled to a "
+            "terminal near you and unpacks in five minutes, and if you're "
+            "not sleeping better after thirty nights, it goes back on us. "
+            "Ridgeback Mattress. The best ten hours of your shift."
+        ),
+        formats=("country", "classic_rock", "night", "jazz", "synthwave", "blues"),
+    ),
+    AdPlan(
+        key="ad_cinder_block_barbecue",
+        business="Cinder Block Barbecue",
+        voice="Roger",
+        script=(
+            "Cinder Block Barbecue smokes brisket for fourteen hours, the "
+            "same as your clock. Sliced or chopped, ribs by the half rack, "
+            "and sides the size of a hubcap. The lot fits doubles, the "
+            "line moves, and they'll walk a tray out to the cab when you'd "
+            "rather not lose your spot. Cinder Block Barbecue, where the "
+            "smoke crosses the highway. You'll smell us before you see us."
+        ),
+        formats=("country", "blues", "classic_rock", "oldies", "tejano", "gospel"),
+    ),
+    AdPlan(
+        key="ad_two_rivers_tarp",
+        business="Two Rivers Tarp and Strap",
+        voice="Archer",
+        script=(
+            "Two Rivers Tarp and Strap makes securement gear you can trust "
+            "at seventy in a crosswind. Lumber tarps with real D-rings, "
+            "four-inch straps rated and tagged, chains and binders that "
+            "match the load, not the price. Buy at the counter, or off the "
+            "truck that meets you at the mill. Two Rivers Tarp and Strap. "
+            "Throw it, tie it, forget about it."
+        ),
+        formats=("country", "classic_rock", "blues"),
+    ),
+    AdPlan(
+        key="ad_sunbreak_lenses",
+        business="Sunbreak Driving Lenses",
+        voice="Jade",
+        script=(
+            "Sunbreak makes glasses for people who face the sun for a "
+            "living. Polarized for glare off wet pavement, amber for fog "
+            "and dusk, and a clear night lens that takes the halo off "
+            "oncoming lights. Frames that clear a headset, lenses that "
+            "shrug off a dashboard summer, and a spare pair in the box. "
+            "Sunbreak Driving Lenses. See the road the road is hiding."
+        ),
+        formats=("classic_rock", "country", "synthwave", "oldies", "jazz"),
+    ),
+    AdPlan(
+        key="ad_casa_reyes_taqueria",
+        business="Casa Reyes Taqueria",
+        voice="Alexandra",
+        script=(
+            "Casa Reyes Taqueria never closes, and neither does the grill. "
+            "Barbacoa on Sundays, tacos al pastor off the spit every "
+            "night, and breakfast tacos from four in the morning for the "
+            "drivers rolling out first. There's truck parking on the side "
+            "lot and a walk-up window, so you never lock the cab. Casa "
+            "Reyes, on the access road. Come as you are, leave full."
+        ),
+        formats=("tejano", "country", "blues", "night", "oldies"),
+    ),
+    AdPlan(
+        key="ad_bluebonnet_western",
+        business="Bluebonnet Western Wear",
+        voice="Roger",
+        script=(
+            "Bluebonnet Western Wear stocks the hats, the jeans, and the "
+            "belt buckles that fit a life spent sitting down. Boots in "
+            "widths the mall never heard of, shirts with snaps that "
+            "survive a truck stop washer, and a hat steamer running all "
+            "day. Try it on, wear it out, and walk taller at the fuel "
+            "desk. Bluebonnet Western Wear. Dressed for the long way home."
+        ),
+        formats=("country", "tejano", "oldies", "gospel"),
+    ),
+    AdPlan(
+        key="ad_hearthside_pet_supply",
+        business="Hearthside Pet Supply",
+        voice="Janet",
+        script=(
+            "Your codriver has four legs and no complaints. Hearthside Pet "
+            "Supply carries food, harnesses, seat covers, and travel bowls "
+            "sized for a cab, at travel centers along the major routes. "
+            "Order ahead and it's waiting at the counter with the receipt, "
+            "so your dog gets dinner and you get back on the road. "
+            "Hearthside Pet Supply. Because they ride along for free."
+        ),
+        formats=("country", "oldies", "gospel", "blues", "night"),
+    ),
+    AdPlan(
+        key="ad_overdrive_cab_fitness",
+        business="Overdrive Cab Fitness",
+        voice="Jade",
+        script=(
+            "Overdrive Cab Fitness is a ten-minute workout you can do in a "
+            "sleeper. Resistance bands that anchor to the bunk rail, a "
+            "folding mat, and a voice coach on your phone who knows you're "
+            "in a truck stop lot, not a gym. Loosen the back, wake up the "
+            "legs, and drive the next stretch sitting straighter. Overdrive "
+            "Cab Fitness. Stretch it out, then roll on."
+        ),
+        formats=("classic_rock", "synthwave", "country", "jazz"),
+    ),
+    AdPlan(
+        key="ad_miller_vance_tax",
+        business="Miller and Vance Tax",
+        voice="Archer",
+        script=(
+            "Miller and Vance do taxes for drivers and nobody else. Per "
+            "diem, quarterly filings, the truck payment, the fuel receipts "
+            "you've been keeping in a coffee can. Send them a photo and "
+            "it's entered the same day, and the audit letter, if one ever "
+            "comes, goes to them and not to your kitchen table. Miller and "
+            "Vance Tax. Keep more of every mile."
+        ),
+        formats=("country", "classic_rock", "blues", "jazz", "gospel"),
+    ),
+    AdPlan(
+        key="ad_sawtooth_chains",
+        business="Sawtooth Chains and Winter Gear",
+        voice="Roger",
+        script=(
+            "Sawtooth Chains and Winter Gear sells tire chains you can "
+            "hang in the dark with gloves on. Cam-lock sets sized to your "
+            "tires, bungees that hold, a headlamp, and a mat to kneel on "
+            "that isn't your good jacket. Stock up before the pass, not at "
+            "the chain-up area. Sawtooth. When the sign says chains "
+            "required, be the truck that's ready."
+        ),
+        formats=("country", "classic_rock", "blues"),
+    ),
+    AdPlan(
+        key="ad_hilltop_family_restaurant",
+        business="Hilltop Family Restaurant",
+        voice="Alexandra",
+        script=(
+            "Hilltop Family Restaurant puts the Sunday buffet out at "
+            "eleven and keeps it hot until the last plate. Fried chicken, "
+            "greens cooked all morning, biscuits from scratch, and banana "
+            "pudding somebody's grandmother approved. Drivers get a booth "
+            "by the window where they can see the truck, and a thermos "
+            "filled for the road. Hilltop Family Restaurant. Sit a spell, "
+            "then we'll send you on."
+        ),
+        formats=("gospel", "country", "oldies", "blues"),
+    ),
+    AdPlan(
+        key="ad_glassline_windshield",
+        business="Glassline Mobile Windshield",
+        voice="Archer",
+        script=(
+            "One rock at seventy and the whole windshield's a spiderweb by "
+            "lunch. Glassline Mobile Windshield comes to the truck stop, "
+            "the terminal, or the shoulder, fixes a chip in twenty "
+            "minutes, and swaps a full glass before your break's over. "
+            "Every replacement is DOT-rated and comes with a warranty that "
+            "rides with the truck. Glassline. Clear glass, same day, where "
+            "you're parked."
+        ),
+        formats=("country", "classic_rock", "blues", "tejano", "jazz", "synthwave"),
+    ),
+    AdPlan(
+        key="ad_velvet_room",
+        business="The Velvet Room",
+        voice="Janet",
+        script=(
+            "The Velvet Room is a supper club two blocks off the truck "
+            "route, with live jazz every night from nine and a kitchen "
+            "that serves until one. No cover with a valid CDL, a quiet "
+            "corner table if you want one, and a lot out back with room "
+            "to leave the trailer on. Dress code is clean and awake. The "
+            "Velvet Room. Downtown, after the loads are done."
+        ),
+        formats=("jazz", "night", "blues", "oldies"),
+    ),
+    AdPlan(
+        key="ad_pulse_arcade_bar",
+        business="Pulse Arcade Bar",
+        voice="Jade",
+        script=(
+            "Pulse Arcade Bar keeps sixty cabinets from the eighties lit "
+            "all night, a synth set on the sound system, and a mocktail "
+            "list as long as the beer one. Two hours of pinball resets a "
+            "brain better than another cup of coffee, and the lot down the "
+            "street lets a tractor sit until sunrise. Pulse Arcade Bar, "
+            "off the strip. Insert coin, forget the clock."
+        ),
+        formats=("synthwave", "night", "classic_rock", "jazz"),
+    ),
+    AdPlan(
+        key="ad_late_shift_pharmacy",
+        business="Late Shift Pharmacy",
+        voice="Janet",
+        script=(
+            "Late Shift Pharmacy fills prescriptions at three in the "
+            "morning, because three in the morning is when you're there. "
+            "Transfers from any pharmacy in the country, over-the-counter "
+            "shelves stocked for a cab, and a pharmacist who'll walk out "
+            "to the lot if the cold is that bad. Drive-through lanes tall "
+            "enough for a tractor. Late Shift Pharmacy. Open when the road "
+            "is."
+        ),
+        formats=("night", "country", "jazz", "blues", "oldies"),
+    ),
 )

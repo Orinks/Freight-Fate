@@ -6,7 +6,7 @@ deadlines, and build a driving career entirely by ear.
 
 Freight Fate is designed for blind and low-vision players first: every screen
 is fully voiced through your screen reader (NVDA, JAWS, SAPI, VoiceOver,
-Speech Dispatcher, and more via [Prism](https://pypi.org/project/prismatoid/)),
+Speech Dispatcher, and more through the native Prism speech bridge),
 and the road speaks to you through a rich procedural soundscape. A simple
 visual display mirrors all speech for sighted players and helpers.
 
@@ -25,7 +25,7 @@ visual display mirrors all speech for sighted players and helpers.
   lumber/paper facilities, cross-docks, and company yards.
 - **Real driving** — a tuned Class 8 truck simulation: 450 horsepower,
   ten gears (manual with clutch, or automatic), air-brake pressure,
-  parking brakes, engine braking, grades, stalls, brake fade, and honest
+  parking brakes, engine braking, grades, stalls, brake fade, and
   fuel economy.
 - **Business progression** — choose a grounded company-driver carrier with
   assigned equipment plus modest wage and dispatch tradeoffs, or start as a
@@ -60,10 +60,10 @@ visual display mirrors all speech for sighted players and helpers.
   and delivery realism without pretending that every suburb or shipper needs a
   separate highway node.
 - **Original audio** — sound effects and music are original project assets,
-  with sources documented in the audio credits. Audio
-  plays through BASS (via [sound_lib](https://pypi.org/project/sound_lib/)),
-  with the engine note pitch-tracking RPM in real time; pygame.mixer takes
-  over automatically if BASS cannot initialize.
+  with sources documented in the audio credits. The Rust audio engine plays
+  them through BASS, with the engine note pitch-tracking RPM in real time. If
+  BASS is unavailable, the game continues with a silent audio backend rather
+  than failing to start.
 - **Screen reader native** — menus with first-letter navigation, contextual
   F1 help everywhere, on-demand information keys while driving, a message log
   you can walk back through from any screen, and a choice of terse or normal
@@ -73,112 +73,92 @@ visual display mirrors all speech for sighted players and helpers.
   route, resting, or delivering, with the broad route and cargo. Only general
   game activity is shared — never your save files or personal details — and it
   is on by default but easily switched off under Discord presence on the
-  Online menu, on the main menu. The game starts and runs perfectly whether or
+  Online menu, on the main menu. The game starts and runs whether or
   not Discord is open.
 
 ## Download and play
 
-The easiest way to play is a prebuilt portable build from the
-[releases page](https://github.com/Orinks/Freight-fate/releases):
-
-- **Stable releases** (`v1.6.0` and so on) are the finished, numbered
-  versions — pick the latest one.
-- **Developer snapshots** (`nightly-...`, marked pre-release) are automatic
-  nightly builds of work in progress: new features sooner, rough edges
-  included. Heads up: a career saved on a developer snapshot may not load
-  on an older stable release, so treat nightly saves as one-way.
-
-Download the archive for your platform, extract it anywhere, and run the
-game from the extracted `FreightFate` folder — `FreightFate.exe` on
-Windows, `FreightFate` on macOS and Linux. There is nothing to install,
-and the game is truly portable: your saves and settings live in a `saves`
-folder inside the game folder, so you can move or copy the whole folder
-(USB stick included) and your career travels with it. The game checks for
-newer releases at the main menu and can download, install, and restart
-itself — updates replace only the game's own files and never touch the
-`saves` folder. Switch between stable and snapshot updates in Settings
-under "Update channel".
-
-On Linux there is also a single-file AppImage
-(`FreightFate-<version>-linux-x86_64.AppImage`): mark it executable and run
-it, no extraction needed, and it works beyond Ubuntu (Fedora, Arch,
-openSUSE). Since an AppImage is read-only, its saves live in
-`~/.local/share/FreightFate`. The in-game updater works here too — it
-downloads the new AppImage, swaps the file in place, and restarts the game.
+1. Open [Freight Fate releases](https://github.com/Orinks/Freight-fate/releases).
+2. Choose the latest numbered stable release. Stable is recommended for most
+   players. If you want to test Career 1.9, choose the newest prerelease build.
+   Its dated tag looks like `1.9-tester-20260829`, spoken as "1 point 9 tester,
+   August 29, 2026." In Settings, choose `Update channel: developer snapshots`
+   to receive later Career 1.9 prerelease builds. A career saved in a tester
+   build may not load in an older stable release.
+3. Under Assets, Windows players should download the file ending in
+   `-windows-portable.zip`. Career 1.9 testers using an Apple Silicon Mac
+   should download the file ending in `-macos-arm64.zip`. The Career 1.9 Mac
+   build does not support Intel Macs. Career 1.9 testers on Linux have a
+   tarball and an AppImage each for PCs (`-linux-x64.tar.gz`,
+   `-linux-x86_64.AppImage`) and for ARM64 machines such as the Blazie BT
+   Speak and BT Braille or a Raspberry Pi (`-linux-arm64.tar.gz`,
+   `-linux-aarch64.AppImage`); the player manual says how to tell which
+   you need.
+4. Extract the zip file. On Windows, open the extracted `FreightFate` folder
+   and run `FreightFate.exe`. On an Apple Silicon Mac, move `FreightFate.app`
+   to Applications and follow the first-launch instructions in the player
+   manual.
 
 For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).
 
 Want to help with code, docs, or world data? Start with
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[the Freight Fate contribution guide](CONTRIBUTING.md).
 
 ## Run from source
 
-You need two tools installed and on your PATH:
+Career 1.9 is a native Rust game. Python is not part of the game; it remains
+in this repository only for build, packaging, data-generation, and other
+maintainer tools under `tools/`.
 
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) — manages
-  Python and all dependencies for you (it downloads a suitable Python
-  automatically, so a system Python is not required). The official
-  installer puts uv on your PATH for you; close and reopen the terminal
-  afterwards so the change takes effect.
+Install these prerequisites first:
 
-  On Windows (PowerShell):
+- [Git](https://git-scm.com/downloads)
+- [Rust through rustup](https://www.rust-lang.org/tools/install)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-  ```powershell
-  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-  ```
+Then clone Career 1.9 and run the game:
 
-  On macOS or Linux:
-
-  ```bash
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
-
-- [git](https://git-scm.com/downloads) — required even after cloning,
-  because one dependency (`sound_lib`) installs straight from a git
-  repository. If `uv sync` fails resolving `sound_lib`, a missing git is
-  almost always why.
-
-```bash
-git clone https://github.com/Orinks/Freight-fate.git
-cd Freight-fate
-uv sync
-uv run freight-fate
+```powershell
+git clone https://github.com/Orinks/Freight-Fate.git
+cd Freight-Fate
+uv sync --group dev
+uv run python tools/fetch_bass.py
+cargo run --release -p freight-fate
 ```
 
-On Linux you also need SDL and Speech Dispatcher packages from your
-distribution (for example `libsdl2-2.0-0` and `speech-dispatcher` on
-Debian/Ubuntu).
+The BASS fetcher downloads and verifies the required audio libraries. A raw
+source run needs this command because `cargo run` does not fetch BASS itself.
+
+The first Cargo build takes longer because it compiles the workspace. Later
+runs reuse `target/`.
+
+On macOS, the repository supplies the CMake compatibility setting needed to
+compile its bundled SDL2. Source builders do not need to add
+`CMAKE_POLICY_VERSION_MINIMUM` to a private `.cargo/config.toml`.
 
 ## Build a standalone copy
 
-`tools/build_release.py` produces the same portable build that the
-releases page ships, using Nuitka. macOS uses Nuitka's app mode with
-ad-hoc signing so Gatekeeper does not block the unsigned bundle on
-downloaded builds:
+After installing Git, Rust, and `uv`, run the release builder from PowerShell:
 
-```bash
-uv sync --group build
-uv run python tools/build_release.py
+```powershell
+./build-release.ps1
 ```
 
-This freezes the game into `dist/FreightFate/`, boots it once as a smoke
-check, and archives it as `dist/FreightFate-<version>-windows-portable.zip`
-(or `-macos.zip` / `-linux-x64.tar.gz`). Useful flags:
+The script installs the required project dependencies, builds the native game,
+fetches and verifies BASS and the public music pack, checks the staged game,
+and writes the Windows portable zip to `dist/`. Players using the portable zip
+and contributors using this standalone build script do not need to find or
+copy audio files themselves.
 
-- `--skip-smoke` — skip booting the frozen build (for cross-checking on
-  headless machines).
-- `--tag <label>` — override the version label in the archive name, as the
-  nightly workflow does.
+### Advanced maintainer overrides
 
-On Windows the build compiles with Visual Studio's C++ toolchain when
-one is installed. Without it, Nuitka downloads a MinGW64 GCC toolchain
-on first build, and the script caps compile parallelism to one job per
-2 GB of RAM — the parallel compilers otherwise exhaust memory midway
-through and the build dies with a GCC error. No build step needs
-administrator rights, so if a build fails, re-run it in a normal
-prompt and report the first error line rather than retrying elevated.
+The release script passes extra options to `tools/build_release.py`. Maintainers
+can use `--tag` or `--cargo-target-dir` when preparing a specific release.
+`FREIGHT_FATE_MUSIC_URL`, `FREIGHT_FATE_MUSIC_SHA256`, and
+`FREIGHT_FATE_BASS_PATH` remain emergency overrides for pinned release inputs.
+Normal players and ordinary source builders do not need these overrides.
 
 If the build succeeds but the archive seems to vanish on Windows, check
 your antivirus: freshly built unsigned executables are sometimes
@@ -383,24 +363,38 @@ rather than minutes of waiting.
 
 ## Development
 
+Gameplay code and gameplay tests for Career 1.9 live in the Cargo workspace.
+Use the Rust checks for gameplay changes:
+
 ```bash
-uv sync --group dev
-uv run pre-commit install
-uv run pre-commit install --hook-type pre-push
-uv run pytest          # full test suite, headless
-uv run ruff check src tests tools
+cargo fmt --all --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test -p ff-core
+cargo test -p freight-fate
 ```
 
-The pre-commit hooks run Ruff lint fixes and formatting before commits. The
-pre-push hook runs the release-note gate before publishing commits. It uses
-`tools.release_notes check --base auto --head HEAD`, so user-facing changes need
-a player-facing `CHANGELOG.md` entry unless the whole change set uses
-`changelog: none` or `[skip changelog]`.
+Python remains supported for repository tooling. When changing packaging,
+world-data generation, release notes, or another Python tool, set up its
+environment and run focused Python checks for that tool:
+
+```bash
+uv sync --group dev
+uv run pytest tests/test_build_release_rust.py
+uv run ruff check tests tools
+```
+
+Do not add Python gameplay code or Python gameplay tests. The Python game was
+removed after its last release, `v1.8.8.1`; it survives only in git history.
+
+The pre-push hook runs the release-note gate before publishing commits.
+User-facing changes need a player-facing `CHANGELOG.md` entry unless the
+entire change set is non-player-facing and uses `changelog: none` or
+`[skip changelog]`.
 
 ### World data
 
-The route tools edit `src/freight_fate/data/world_source/`, but the game loads
-the indexed `src/freight_fate/data/world_data/` tree. After changing world data,
+The route tools edit `data/world_source/`, but the game loads the indexed
+`data/world_data/` tree. After changing world data,
 regenerate the index so the two stay in sync:
 
 ```bash
@@ -411,28 +405,29 @@ uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do
 A pre-commit hook and a test both fail if `world_data/` drifts from the source,
 so commit the regenerated `world_data/` files alongside your source edits.
 
-Both trees are sharded by the state a leg starts in — `legs/TX.json`,
-`legs/CA.json` — because a single file had reached 60 MB, past GitHub's warning
-line and heading for its 100 MB limit. Tools never touch the shards directly:
+Both trees group legs by their starting state in files such as `legs/TX.json`
+and `legs/CA.json`. Tools do not edit these files directly:
 `tools/world_source.py` gives them `load_world()`, which returns the whole world
 as one dict, and `save_world(data)`, which writes only the shards that actually
-changed. So a one-leg edit is a small reviewable diff, and the code that edits
-world data is unchanged from when it was one file.
+changed. A one-leg edit therefore changes only its state's file.
 
 ### Playtesting
 
 Freight Fate is audio-first, so the way to review a playthrough is the transcript
-of what the game says. `tools/playtest.py` drives the real game states headless
-(no window, no speech) and prints that transcript:
+of what the game says. The Rust playtest harness drives the real game states
+headlessly and is used by the Cargo integration tests. Run a focused transcript
+test by name while iterating, then the whole game crate before landing:
 
 ```bash
-uv run python tools/playtest.py                       # new-career delivery
-uv run python tools/playtest.py --route "Newark->New York"   # one corridor
-uv run python tools/playtest.py --route "New York->Boston" --events-only
+cargo test -p freight-fate --test it transcript_shane_deadline -- --nocapture
+cargo test -p freight-fate
 ```
 
-Use `--route` to exercise a specific corridor after editing its route data. The
-same harness backs the `@pytest.mark.smoke` delivery tests.
+A manual test scenario starts from the game binary itself:
+`cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find <feature>`
+drops you at a road feature, and `-- --playtest-sandbox --launch` opens the full
+game in a throwaway save directory. `tools/playtest_watch.py` follows either
+session's log.
 
 ### Changelog and snapshots
 
@@ -445,43 +440,6 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-### Sound pack for source builds
-
-Career 1.9 stores its approved encrypted sound and music packs at
-`src/freight_fate/sounds.pak` and `src/freight_fate/music.pak` using Git
-Large File Storage (Git LFS).
-
-On Windows, install Git LFS from PowerShell with Winget:
-
-```powershell
-winget install --id GitHub.GitLFS --exact --source winget
-```
-
-Open a new PowerShell window, then initialize Git LFS and update the checkout:
-
-```powershell
-git lfs install
-git pull
-```
-
-On macOS or Linux, follow the
-[Git Large File Storage installation instructions](https://git-lfs.com/), then
-run `git lfs install` once for your user account before cloning or updating the
-project.
-
-A plain `git fetch` updates Git references and the small LFS pointers, but
-does not update the working tree or download the packs. With Git LFS
-installed, a normal `git pull` or checkout downloads both packs
-automatically; a separate `git lfs pull` is not normally needed. If
-`sounds.pak` or `music.pak` contains text beginning with
-`version https://git-lfs.github.com/spec/v1` instead of binary pack data, run
-`git lfs install` followed by `git lfs pull` from the repository root.
-
-GitHub Actions uses an LFS-enabled checkout for jobs that test or package the
-project. Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
-[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
-licensing.
-
 ## License
 
 Freight Fate is licensed under the
@@ -490,15 +448,14 @@ to use, modify, and share for any noncommercial purpose, but only the copyright
 holder may sell it or put it to commercial use. This is a source-available
 license, not an OSI-approved open-source license. Bundled audio credits and
 provenance are tracked in
-[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
+[the Freight Fate audio credits](assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the
-[BASS](https://www.un4seen.com/) library (through the `sound_lib` Python
-package), which is proprietary and **free for non-commercial use only**. If
+[BASS](https://www.un4seen.com/) library through Freight Fate's Rust bindings.
+BASS is proprietary and **free for non-commercial use only**. If
 Freight Fate is ever sold commercially (Steam, itch.io paid downloads, and
 so on), a paid license must be purchased from
 [un4seen developments](https://www.un4seen.com/bass.html#license) first.
 The same terms cover the bundled BASSHLS addon
-(`src/freight_fate/lib/basshls.dll`), which lets the radio play HLS
-streams; its license text ships alongside it.
-The game falls back to pygame.mixer automatically when BASS is unavailable.
+(`basshls.dll`), which lets the radio play HLS streams; its license text ships
+alongside it. When BASS is unavailable, the Rust game runs without sound.

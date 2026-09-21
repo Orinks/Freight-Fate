@@ -11,7 +11,7 @@ the US. This transform separates identity from speech:
   on demand
 - every leg ``from``/``to`` is rewritten to the new slugs
 
-It also generates ``src/freight_fate/data/legacy_aliases.py``, a frozen map
+It also generates ``tools/ffworld/legacy_aliases.py``, a frozen map
 of every pre-migration city name to its slug. Old saves store bare city
 names and facility IDs derived from them; the runtime resolves both through
 this map forever, so a future city that reuses a name (Jackson TN) can never
@@ -36,7 +36,7 @@ from typing import Any
 from world_source import WORLD_SOURCE_PATH, load_world, save_world
 
 ROOT = Path(__file__).resolve().parents[1]
-ALIASES_PATH = ROOT / "src" / "freight_fate" / "data" / "legacy_aliases.py"
+ALIASES_PATH = ROOT / "tools" / "ffworld" / "legacy_aliases.py"
 
 COUNTRY_NAMES = {"US": "United States"}
 

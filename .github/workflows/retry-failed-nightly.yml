@@ -1,8 +1,12 @@
 name: Retry failed nightly
 
+# One workflow to watch since the 1.9 cutover (2026-09-20): build.yml was
+# deleted with the 1.8 line, so "Career 1.9 snapshot" is the nightly and
+# `dev` is the branch it builds.
+
 on:
   workflow_run:
-    workflows: [Build]
+    workflows: [Career 1.9 snapshot]
     types: [completed]
 
 permissions:
@@ -12,6 +16,10 @@ permissions:
 concurrency:
   group: retry-nightly-${{ github.event.workflow_run.id }}
   cancel-in-progress: false
+
+env:
+  SNAPSHOT_WORKFLOW: "Career 1.9 snapshot"
+  SNAPSHOT_BRANCH: "dev"
 
 jobs:
   retry:
@@ -30,20 +38,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="nightly-$(date -u +%Y%m%d)"
+          TAG="1.9-tester-$(date -u +%Y%m%d)"
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "$TAG already exists; the nightly recovered while waiting."
+            echo "$TAG already exists; the snapshot recovered while waiting."
             exit 0
           fi
 
           ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
-            --workflow Build --branch dev --limit 20 \
+            --workflow "$SNAPSHOT_WORKFLOW" --branch "$SNAPSHOT_BRANCH" --limit 20 \
             --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
           if [ "$ACTIVE" -gt 0 ]; then
-            echo "A dev Build is already queued or running; not dispatching a duplicate."
+            echo "A snapshot is already queued or running; not dispatching a duplicate."
             exit 0
           fi
 
-          echo "Scheduled nightly is still missing after 45 minutes; dispatching one retry."
-          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false
+          echo "Scheduled snapshot is still missing after 45 minutes; dispatching one retry."
+          gh workflow run "$SNAPSHOT_WORKFLOW" --repo "$GITHUB_REPOSITORY" \
+            --ref "$SNAPSHOT_BRANCH" -f dry_run=false

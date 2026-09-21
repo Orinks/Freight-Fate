@@ -164,6 +164,35 @@ mode begins at level 25 when the other gates are met, then levels 26-30 make the
 endgame feel like an established independent driving business. It is still not a
 fleet or brokerage simulator.
 
+### Company career ranks (declined buy-in / returned to company)
+
+Drivers who Stay a company driver, go back to company driving, or remain on
+carrier wages at or past the level-18 buy-in fork use a parallel title table.
+Levels 1-14 match the table above; levels 15-30 are senior company / fleet
+ranks instead of owner-operator prep or independent titles:
+
+| Level | Title | Unlock emphasis |
+| --- | --- | --- |
+| 15 | Dedicated Company Driver | Company career past the buy-in fork. |
+| 16 | Fleet Senior Driver | Steadier premium company freight. |
+| 17 | Lead Fleet Driver | Best assigned company tractor. |
+| 18 | Company Fleet Captain | Fleet-captain standing on carrier payroll. |
+| 19 | Veteran Company Hauler | Long-haul company rhythm. |
+| 20 | Senior Fleet Regular | Specialty company freight. |
+| 21 | Carrier Elite Driver | Strongest carrier lanes. |
+| 22 | Premium Company Lane Driver | Premium company placement. |
+| 23 | Master Company Driver | Mentoring weight and priority board. |
+| 24 | Distinguished Fleet Driver | Distinguished fleet standing. |
+| 25 | Senior Fleet Mentor | Senior mentoring on company iron. |
+| 26 | Carrier Lifetime Driver | Lifetime company standing. |
+| 27 | Elite Specialized Company Driver | Specialized company freight. |
+| 28 | Top-Seniority Company Driver | Top-seniority prestige lanes. |
+| 29 | Company Career Veteran | Prestige company freight. |
+| 30 | Freight Fate Company Driver | Top company-driver career rank. |
+
+Owner-operators keep the owner-operator titles above. Spoken Business status,
+profile/public title, and level-up announcements all follow the active table.
+
 ## Authority Prep Reserve
 
 Authority readiness is the first concrete hook toward true authority without

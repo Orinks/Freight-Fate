@@ -17,16 +17,13 @@ enforcement semantics). Additive + idempotent (overwrites the leg's landmarks).
 from __future__ import annotations
 
 import argparse
-import json
 import math
-import os
 import sys
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+import overpass_corridor as oc  # noqa: E402
 from enrich_routes_landmarks import (  # noqa: E402
     NARRATABLE_OSM_TAGS,
     classify_narratable_feature,
@@ -34,7 +31,6 @@ from enrich_routes_landmarks import (  # noqa: E402
 )
 from world_source import load_world, save_world  # noqa: E402
 
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 R_MI = 3958.8
 
 # Curated landmark categories owned elsewhere -- hand-placed heritage markers and
@@ -183,11 +179,7 @@ def _element_line(el):
 
 def overpass(bbox):
     body = "\n".join(f'  {t}["{k}"="{v}"]({bbox});' for t, k, v in NARRATABLE_OSM_TAGS)
-    q = f"[out:json][timeout:90];\n(\n{body}\n);\nout geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        return json.loads(resp.read())
+    return oc.post(f"[out:json][timeout:120];\n(\n{body}\n);\nout geom;")
 
 
 _REL_CACHE: dict = {}
@@ -197,12 +189,8 @@ def fetch_relation(rel_id):
     """Full geometry for one relation by id (a bbox query strips members outside it)."""
     if rel_id in _REL_CACHE:
         return _REL_CACHE[rel_id]
-    q = f"[out:json][timeout:90];rel({rel_id});out geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            els = json.loads(resp.read()).get("elements", [])
+        els = oc.post(f"[out:json][timeout:120];rel({rel_id});out geom;").get("elements", [])
         result = els[0] if els else None
     except Exception:
         result = None

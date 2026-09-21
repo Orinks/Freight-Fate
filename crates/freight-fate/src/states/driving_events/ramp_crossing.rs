@@ -1,0 +1,636 @@
+//! Working the pedals for a ramp terminal, and crossing it: honour the light
+//! or the sign, or pay for it.
+
+use ff_core::models::enforcement::{
+    career_citations, citation_fine, construction_zone_fine_clause, RED_LIGHT_FINE, STOP_SIGN_FINE,
+};
+use ff_core::pyfmt::fmt_grouped;
+use ff_core::pyrandom::PyRandom;
+use ff_core::speech_pacing::{EventPriority, SpeechCategory};
+
+use crate::app::{GameContext, SayEvent};
+use crate::states::driving::DrivingState;
+use crate::states::driving_core::*;
+
+use super::ramp_terminal::CrossMeeting;
+use crate::states::driving_stops::assist_servo_brake;
+
+impl DrivingState {
+    /// Route-transition assistance works the pedals for the terminal.
+    ///
+    /// Stopping a rig blind inside the bar's grace window while the light
+    /// cycles in real time is a positioning task whose failure mode is
+    /// trailer damage -- the 2026-07-22 playtest ended a clean run with cross
+    /// traffic in the trailer. With route-transition assistance on, the assist
+    /// brakes for a red (or a yellow it cannot legally beat), holds the stop
+    /// at the bar, and keeps a green crossing under the clean-roll speed. The
+    /// phases still speak. Pulling ahead when the light releases is the
+    /// driver's move unless facility stopping assistance is on, in which case
+    /// that assist takes it (`terminal_release_text`).
+    pub fn update_ramp_terminal_assist(&mut self, ctx: &mut GameContext) {
+        self.update_ramp_terminal_assist_with_input(ctx, false);
+    }
+
+    /// A live accelerator press overrides this assist, including its red-light hold.
+    pub fn update_ramp_terminal_assist_with_input(
+        &mut self,
+        ctx: &mut GameContext,
+        accelerating: bool,
+    ) {
+        if !ctx.settings.route_transition_assist {
+            return;
+        }
+        let Some(ramp_mi) = self.ramp_mi else {
+            return;
+        };
+        if self.ramp_terminal_done {
+            return;
+        }
+        if !matches!(
+            self.ramp_control.as_str(),
+            "signal" | "stop" | "yield" | "roundabout"
+        ) || !self.ramp_light_announced
+        {
+            return;
+        }
+        if accelerating {
+            // Clear only this assist's held application. The input layer owns
+            // the pedals; never erase a driver's brake or another assist's.
+            self.ramp_assist_brake = 0.0;
+            return;
+        }
+        if self.ramp_waiting_at_light {
+            // Holding for green: the assist keeps the brakes on.
+            self.trip.truck.throttle = 0.0;
+            self.trip.truck.brake = 1.0;
+            return;
+        }
+        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
+        let speed = self.trip.truck.speed_mph();
+        if self.ramp_control == "signal" {
+            let phase = self.ramp_light_phase();
+            let must_stop = phase == "red" || (phase == "yellow" && gap_mi > 0.0);
+            if !must_stop {
+                // The green stands the servo down, and the NEXT red is a new
+                // take: it has to announce itself again. Left latched, a
+                // light that went red, green, then red again on the approach
+                // braked the truck hard from ramp speed without a word --
+                // "braking for the light" had been spent on the first red
+                // (Tyler Cross-Dock replay, 2026-09-03).
+                self.ramp_assist_said = false;
+                self.ramp_assist_brake = 0.0;
+                // A green (or a yellow already at the bar) is legal to roll,
+                // but not at speed: lift for the clean-roll threshold with
+                // room to spare. This is a roll, not a stop; a held service
+                // floor here spent reservoir air after the ramp cap had
+                // already started slowing the truck (Joshua, 2026-08-28).
+                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
+                    && speed > GREEN_ROLL_MPH - 5.0
+                {
+                    self.trip.truck.throttle = 0.0;
+                }
+                return;
+            }
+        }
+        if matches!(self.ramp_control.as_str(), "yield" | "roundabout") {
+            let clear = self
+                .cross_bubble
+                .as_ref()
+                .is_none_or(|bubble| bubble.clear_to_cross());
+            if clear {
+                // A clear yield is rolled, not stopped: the assist lifts to
+                // roll speed and the gap verdict lands at the line. Braking
+                // to a dead stop on a clear yield is the
+                // rear-end setup the roadmap warns the LEAD car will pull.
+                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
+                    && speed > YIELD_ROLL_MPH - 3.0
+                {
+                    self.trip.truck.throttle = 0.0;
+                }
+                return;
+            }
+            // Not clear: fall through and brake for the line like a stop.
+        }
+        if speed <= RED_STOP_MPH && gap_mi <= RAMP_ASSIST_HOLD_MI {
+            // At the bar with the truck stopped: the assist owns the hold.
+            self.trip.truck.throttle = 0.0;
+            self.trip.truck.brake = 1.0;
+            self.ramp_assist_brake = 0.0;
+            if matches!(self.ramp_control.as_str(), "stop" | "yield" | "roundabout") {
+                // The assist holds the stop; the release now waits for the
+                // bubble's gap, same as an unassisted stop. The hold above
+                // keeps the brakes on through the wait.
+                let noun = match self.ramp_control.as_str() {
+                    "stop" => "sign",
+                    "yield" => "yield",
+                    _ => "roundabout entry",
+                };
+                let blocked = self
+                    .cross_bubble
+                    .as_ref()
+                    .is_some_and(|bubble| !bubble.clear_to_cross());
+                if blocked {
+                    if !self.ramp_waiting_at_sign {
+                        self.ramp_waiting_at_sign = true;
+                        let what = self.crossing_description();
+                        self.say_route_navigation(
+                            ctx,
+                            &format!(
+                                "Stopped at the {noun}. {what}; assistance is holding for your gap."
+                            ),
+                        );
+                    }
+                    return;
+                }
+                self.ramp_terminal_done = true;
+                let lead = if self.ramp_waiting_at_sign {
+                    "Gap in traffic.".to_string()
+                } else {
+                    format!("Stopped at the {noun}.")
+                };
+                self.ramp_waiting_at_sign = false;
+                let message = self.terminal_release_text(ctx, &lead, true);
+                self.say_route_navigation(ctx, &message);
+            } else if !self.ramp_waiting_at_light {
+                self.ramp_waiting_at_light = true;
+                // ROUTE, not the ambient default: names an automation (the ramp
+                // assist) that just took the brakes, same as the stop-sign
+                // sibling above (automation-handoff sweep, 2026-08-20, the
+                // deferred 2026-08-15 audit).
+                self.say_route_confirmation(
+                    ctx,
+                    "Stopped at the red light. Assistance is holding the brakes for green.",
+                );
+            }
+            return;
+        }
+        if speed <= RED_STOP_MPH {
+            // Already stopped, but short of the hold window: a driver braking
+            // on their own on top of the assist lands here, and a standing
+            // truck has nothing left to brake for. The assist must hand the
+            // pedals back -- pinning throttle at zero and the brake at its
+            // floor against a truck that is already stopped is a hold with no
+            // release, and the driver cannot move again (playtest softlock,
+            // 2026-07-24). The queue guidance is what tells them to close the
+            // gap to the bar from here. Dropping the held application matters
+            // for the same reason: a creep to the bar must start from an open
+            // pedal, not from whatever the approach was holding.
+            self.ramp_assist_brake = 0.0;
+            return;
+        }
+        // Brake down the approach: needed deceleration to stop at the bar,
+        // recomputed each tick, mapped onto brake application. As the gap
+        // closes the demand rises and the pedal follows.
+        let gap_m = 0.5f64.max(gap_mi * 1609.344);
+        let v_mps = 0.0f64.max(self.trip.truck.velocity_mps);
+        let needed = (v_mps * v_mps) / (2.0 * gap_m);
+        if needed < RAMP_ASSIST_DECEL_RELEASE_MPS2 && gap_m > 30.0 {
+            self.ramp_assist_brake = 0.0;
+            return;
+        }
+        let idle = self.ramp_assist_brake <= 0.0;
+        if idle && needed < RAMP_ASSIST_DECEL_START_MPS2 && gap_m > 30.0 {
+            return;
+        }
+        self.ramp_assist_brake =
+            assist_servo_brake(self.ramp_assist_brake, needed, &self.trip.truck);
+        self.trip.truck.throttle = 0.0;
+        self.trip.truck.brake = self.trip.truck.brake.max(self.ramp_assist_brake);
+        if !self.ramp_assist_said {
+            self.ramp_assist_said = true;
+            // A transit stop: the bar is honored and then driven away from, so
+            // the session comes back on its own past it rather than waiting
+            // for a departure that never happens on a ramp.
+            self.pause_speed_control(ctx, true);
+            let what = match self.ramp_control.as_str() {
+                "signal" => "light",
+                "stop" => "stop sign",
+                "yield" => "yield",
+                "roundabout" => "roundabout",
+                _ => "stop sign",
+            };
+            self.say_route_confirmation(
+                ctx,
+                &format!("Route-transition assistance braking for the {what}."),
+            );
+        }
+    }
+
+    /// "A semi crossing from the left", or "Cross traffic" with nothing near.
+    fn crossing_description(&self) -> String {
+        match self
+            .cross_bubble
+            .as_ref()
+            .and_then(|bubble| bubble.approaching(8.0))
+        {
+            Some(nearest) => format!(
+                "A {} crossing from the {}",
+                nearest.vehicle_class, nearest.from_side
+            ),
+            None => "Cross traffic".to_string(),
+        }
+    }
+
+    /// Crossing the terminal: honor the light or the sign, or pay for it.
+    ///
+    /// A driver still braking gets the length of the grace distance past the
+    /// bar to finish the stop; carrying speed beyond it commits the run.
+    pub fn update_ramp_terminal(&mut self, ctx: &mut GameContext) {
+        let speed = self.trip.truck.speed_mph();
+        let past_bar = self
+            .ramp_mi
+            .is_some_and(|ramp_mi| ramp_mi <= RAMP_ACCESS_MI - RAMP_TERMINAL_GRACE_MI);
+        if self.ramp_control == "signal" {
+            self.cross_traffic_light(ctx, speed, past_bar);
+            return;
+        }
+        if self.ramp_control == "stop" {
+            self.cross_stop_sign(ctx, speed, past_bar);
+            return;
+        }
+        if matches!(self.ramp_control.as_str(), "yield" | "roundabout") {
+            self.cross_yield(ctx, speed, past_bar);
+            return;
+        }
+        self.ramp_terminal_done = true;
+    }
+
+    fn cross_traffic_light(&mut self, ctx: &mut GameContext, speed: f64, past_bar: bool) {
+        if self.ramp_light_is_red() {
+            if speed <= RED_STOP_MPH {
+                if !self.ramp_waiting_at_light {
+                    self.ramp_waiting_at_light = true;
+                    self.say_route_navigation(ctx, "Stopped at the red light.");
+                }
+                return;
+            }
+            if !past_bar {
+                return; // still braking down to the stop bar
+            }
+            self.ramp_terminal_done = true;
+            self.ramp_waiting_at_light = false;
+            // What the run actually meets is the bubble's answer now,
+            // not the old certainty: cross traffic flows on the player's
+            // red, so this usually finds a vehicle -- but a gambler who
+            // threads a real gap gets away with it, exactly like the road.
+            let (met, vehicle) = self.cross_violation_meets();
+            let pan = if vehicle
+                .as_ref()
+                .is_none_or(|vehicle| vehicle.from_side == "left")
+            {
+                -0.4
+            } else {
+                0.4
+            };
+            let cue = Self::cross_vehicle_sound(vehicle.as_ref());
+            if speed > STOP_ROLL_CLIP_MPH {
+                match met {
+                    CrossMeeting::Hit => {
+                        let severity = Self::cross_hit_severity(RED_RUN_DAMAGE, vehicle.as_ref());
+                        let hit = Self::cross_hit_clause(vehicle.as_ref());
+                        ctx.audio.play_with(&cue, 1.0, pan);
+                        ctx.audio.play("vehicle/collision");
+                        ctx.controller.rumble.impact(severity);
+                        // A driver already hard on the brakes, carried through
+                        // by the load, did not make a preventable mistake. The
+                        // violation still stands; the discipline does not.
+                        let preventable = !self.trip.truck.pushed_through_by_surge();
+                        self.trip.truck.apply_collision(severity, preventable);
+                        let damage = self.trip.truck.damage_pct;
+                        self.say_safety_interrupt(
+                            ctx,
+                            &format!(
+                                "You ran the red light at the ramp end and {hit}! Total damage \
+                                 {damage:.0} percent."
+                            ),
+                        );
+                    }
+                    CrossMeeting::Near => {
+                        ctx.audio.play_with(&cue, 1.0, pan);
+                        self.say_confirmation_interrupt(
+                            ctx,
+                            "You ran the red light at the ramp end. Cross traffic brakes hard and \
+                             leans on the horn.",
+                        );
+                    }
+                    CrossMeeting::Empty => {
+                        self.say_confirmation_interrupt(
+                            ctx,
+                            "You ran the red light at the ramp end. Nothing was crossing.",
+                        );
+                    }
+                }
+            } else if met == CrossMeeting::Empty {
+                self.say_confirmation_interrupt(
+                    ctx,
+                    "You crept through the red light. Nothing was crossing this time.",
+                );
+            } else {
+                ctx.audio.play_with(&cue, 1.0, pan);
+                self.say_confirmation_interrupt(
+                    ctx,
+                    "You crept through the red light. Cross traffic leans on the horn.",
+                );
+            }
+            self.cite_signal_run(ctx, "the red light", RED_LIGHT_FINE);
+            return;
+        }
+        self.ramp_terminal_done = true;
+        self.ramp_waiting_at_light = false;
+        ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
+        let on_yellow = self.ramp_light_phase() == "yellow";
+        let message = if speed > GREEN_ROLL_MPH {
+            "Through the light, far too fast. Stop at the entrance."
+        } else if on_yellow {
+            "Through on the yellow. Stop at the entrance."
+        } else {
+            "Green light. Through the intersection. Stop at the entrance."
+        };
+        self.say_route_confirmation(ctx, message);
+    }
+
+    fn cross_stop_sign(&mut self, ctx: &mut GameContext, speed: f64, past_bar: bool) {
+        if speed > RED_STOP_MPH && !past_bar {
+            return; // still braking down to the stop bar
+        }
+        if speed <= RED_STOP_MPH {
+            // Stopped at the sign: the clear call now waits for a real
+            // gap in the cross bubble instead of arriving with the stop.
+            // The crossing cues are the information -- each one is a
+            // vehicle in the ear it comes from -- and "clear" is spoken
+            // only when the window is genuinely open.
+            let blocked = self
+                .cross_bubble
+                .as_ref()
+                .is_some_and(|bubble| !bubble.clear_to_cross());
+            if blocked {
+                if !self.ramp_waiting_at_sign {
+                    self.ramp_waiting_at_sign = true;
+                    let what = self.crossing_description();
+                    self.say_route_navigation(
+                        ctx,
+                        &format!("Stopped at the sign. {what}; wait for your gap."),
+                    );
+                }
+                return;
+            }
+            self.ramp_terminal_done = true;
+            let lead = if self.ramp_waiting_at_sign {
+                "Gap in traffic."
+            } else {
+                "Stopped at the sign."
+            };
+            self.ramp_waiting_at_sign = false;
+            let message = self.terminal_release_text(ctx, lead, true);
+            self.say_route_navigation(ctx, &message);
+            return;
+        }
+        self.ramp_terminal_done = true;
+        // Same honesty as the light: the bubble says what the blown sign
+        // actually met. A stop-sign crossroad is often empty -- that is
+        // what makes rolling one tempting, and what makes the day a
+        // semi IS crossing the lesson it should be.
+        let (met, vehicle) = self.cross_violation_meets();
+        let pan = if vehicle
+            .as_ref()
+            .is_none_or(|vehicle| vehicle.from_side == "right")
+        {
+            0.4
+        } else {
+            -0.4
+        };
+        let cue = Self::cross_vehicle_sound(vehicle.as_ref());
+        if speed > STOP_ROLL_CLIP_MPH {
+            match met {
+                CrossMeeting::Hit => {
+                    let severity = Self::cross_hit_severity(STOP_ROLL_DAMAGE, vehicle.as_ref());
+                    let hit = Self::cross_hit_clause(vehicle.as_ref());
+                    ctx.audio.play_with(&cue, 1.0, pan);
+                    ctx.audio.play("vehicle/collision");
+                    ctx.controller.rumble.impact(severity);
+                    let preventable = !self.trip.truck.pushed_through_by_surge();
+                    self.trip.truck.apply_collision(severity, preventable);
+                    let damage = self.trip.truck.damage_pct;
+                    self.say_safety_interrupt(
+                        ctx,
+                        &format!(
+                            "You blew the stop sign at the ramp end and {hit}! Total damage \
+                             {damage:.0} percent."
+                        ),
+                    );
+                }
+                CrossMeeting::Near => {
+                    ctx.audio.play_with(&cue, 1.0, pan);
+                    self.say_confirmation_interrupt(
+                        ctx,
+                        "You blew the stop sign at the ramp end. Cross traffic brakes hard and \
+                         leans on the horn.",
+                    );
+                }
+                CrossMeeting::Empty => {
+                    self.say_confirmation_interrupt(
+                        ctx,
+                        "You blew the stop sign at the ramp end. The crossroad was empty.",
+                    );
+                }
+            }
+        } else if met == CrossMeeting::Empty {
+            self.say_confirmation_interrupt(
+                ctx,
+                "You rolled the stop sign at the ramp end. Nothing was crossing this time.",
+            );
+        } else {
+            ctx.audio.play_with(&cue, 1.0, pan);
+            self.say_confirmation_interrupt(
+                ctx,
+                "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
+            );
+        }
+        self.cite_signal_run(ctx, "the stop sign", STOP_SIGN_FINE);
+    }
+
+    /// Running the ramp-end light or sign risks a citation on the same rails
+    /// as the chain-law checkpoint: one flat, seeded roll for whether anyone
+    /// was watching the crossroad, then the career's own repeat scaling and
+    /// the work-zone doubling. What the crossing met is decided separately
+    /// by the cross bubble, so a blown light can cost the trailer, the fine,
+    /// both, or nothing -- dice, not a fixed price (owner playtest
+    /// 2026-07-15: "ALWAYS clips cross traffic and never draws a citation").
+    ///
+    /// Money rides ROUTE's never-dropped queue, like every other citation:
+    /// the collision line that may precede it is an interrupt, and a busy
+    /// stretch must not age the figure out.
+    fn cite_signal_run(&mut self, ctx: &mut GameContext, offense: &str, base_fine: f64) {
+        if ctx.profile.is_none() || self.enforcement_bypassed(ctx) {
+            return;
+        }
+        let at_mi = self
+            .ramp_stop
+            .as_ref()
+            .map_or(self.trip.position_mi, |stop| stop.at_mi);
+        let mut rng = PyRandom::new_from_str(&format!("{}:signal-run:{at_mi:.1}", self.trip_seed));
+        if rng.random() >= SIGNAL_RUN_CATCH_CHANCE {
+            return;
+        }
+        let zone = self.trip.in_construction_zone();
+        let fine = citation_fine(base_fine, career_citations(profile_of(ctx)), zone, None);
+        let money = {
+            let p = profile_mut_of(ctx);
+            p.spend(fine);
+            p.money()
+        };
+        self.ticket_fines_paid += fine;
+        let saw_it = match self.trip.active_post_at(self.trip.position_mi) {
+            Some(post) => format!("A trooper working this {} saw it", post.reason()),
+            None => "A patrol car sitting at the crossroad saw it".to_string(),
+        };
+        // Not a serious violation under 49 CFR 383.51 Table 2: the citation
+        // goes on the record and scales the next fine, nothing more.
+        self.log_enforcement(ctx, fine, false, false, &format!("Ran {offense}"));
+        ctx.audio.play("ui/error");
+        ctx.say_event_with(
+            format!(
+                "{saw_it}. Running {offense} is a citation, {} dollars.{} You have {} dollars.",
+                fmt_grouped(fine, 0),
+                construction_zone_fine_clause(zone),
+                fmt_grouped(money, 0)
+            ),
+            SayEvent::queued()
+                .priority(EventPriority::Route)
+                .category(SpeechCategory::Money),
+        );
+    }
+
+    /// The yield rule, straight from the sign: a gap taken at roll speed is
+    /// the clean crossing, stopping is always legal, and an occupied window is
+    /// the clip machinery -- at THEIR closing speed, because you rolled under
+    /// their bumper.
+    fn cross_yield(&mut self, ctx: &mut GameContext, speed: f64, past_bar: bool) {
+        let noun = if self.ramp_control == "roundabout" {
+            "roundabout"
+        } else {
+            "yield"
+        };
+        if speed <= RED_STOP_MPH {
+            // Stopped: exactly the stop sign's wait, spoken for a yield.
+            let blocked = self
+                .cross_bubble
+                .as_ref()
+                .is_some_and(|bubble| !bubble.clear_to_cross());
+            if blocked {
+                if !self.ramp_waiting_at_sign {
+                    self.ramp_waiting_at_sign = true;
+                    let what = self.crossing_description();
+                    self.say_route_navigation(
+                        ctx,
+                        &format!("Stopped at the {noun}. {what}; wait for your gap."),
+                    );
+                }
+                return;
+            }
+            self.ramp_terminal_done = true;
+            self.ramp_waiting_at_sign = false;
+            let message = self.terminal_release_text(ctx, "Gap in traffic.", true);
+            self.say_route_navigation(ctx, &message);
+            return;
+        }
+        if !past_bar {
+            return; // still rolling down to the line; the gap decides there
+        }
+        self.ramp_terminal_done = true;
+        let (met, vehicle) = self.cross_violation_meets();
+        let pan = if vehicle
+            .as_ref()
+            .is_none_or(|vehicle| vehicle.from_side == "right")
+        {
+            0.4
+        } else {
+            -0.4
+        };
+        let cue = Self::cross_vehicle_sound(vehicle.as_ref());
+        if met == CrossMeeting::Hit {
+            let severity = Self::cross_hit_severity(STOP_ROLL_DAMAGE, vehicle.as_ref());
+            // "into cross traffic and cross traffic clipped" reads twice; the
+            // yield line already names what was rolled into.
+            let hit = Self::cross_hit_clause(vehicle.as_ref())
+                .replace("cross traffic clipped", "it clipped");
+            ctx.audio.play_with(&cue, 1.0, pan);
+            ctx.audio.play("vehicle/collision");
+            ctx.controller.rumble.impact(severity);
+            let preventable = !self.trip.truck.pushed_through_by_surge();
+            self.trip.truck.apply_collision(severity, preventable);
+            let damage = self.trip.truck.damage_pct;
+            self.say_safety_interrupt(
+                ctx,
+                &format!(
+                    "You rolled the {noun} into cross traffic and {hit}! Total damage \
+                     {damage:.0} percent."
+                ),
+            );
+        } else if met == CrossMeeting::Near {
+            ctx.audio.play_with(&cue, 1.0, pan);
+            self.say_confirmation_interrupt(
+                ctx,
+                &format!(
+                    "You forced the gap at the {noun}. Cross traffic brakes hard and leans on the \
+                     horn."
+                ),
+            );
+        } else if speed > YIELD_ROLL_MPH {
+            self.say_route_confirmation(
+                ctx,
+                &format!("Through the {noun}, far too fast. Stop at the entrance."),
+            );
+        } else {
+            let message =
+                self.terminal_release_text(ctx, &format!("Through the {noun} in a gap."), false);
+            self.say_route_confirmation(ctx, &message);
+        }
+    }
+
+    /// The terminal is honored and the way is clear: who pulls ahead.
+    ///
+    /// The old release handed the last stretch back to the driver even with
+    /// facility stopping assistance on, so the truck sat at idle at a clear
+    /// sign until the driver drove it up to the entrance, where the assist
+    /// took the pedals again (agent drive, Chicago to Gary, 2026-09-01). The
+    /// owner's ruling: the assist goes from the signal to the entrance, hands
+    /// off. With it on, the release names the assist and arms the pull-ahead;
+    /// with it off, the release is the driver's, exactly as before.
+    ///
+    /// `clear` is the stopped release ("Clear; pull ahead"); a green or a gap
+    /// rolled through says only what happened.
+    pub(crate) fn terminal_release_text(
+        &mut self,
+        ctx: &GameContext,
+        lead: &str,
+        clear: bool,
+    ) -> String {
+        if self.approach_pull_ahead_available(ctx) {
+            self.approach_pull_ahead = true;
+            let clear = if clear { " Clear." } else { "" };
+            return format!(
+                "{lead}{clear} Facility stopping assistance is taking you to the entrance."
+            );
+        }
+        if clear {
+            format!("{lead} Clear; pull ahead to the entrance.")
+        } else {
+            format!("{lead} Pull ahead to the entrance.")
+        }
+    }
+
+    /// One interrupting SAFETY line.
+    pub(crate) fn say_safety_interrupt(&self, ctx: &mut GameContext, message: &str) {
+        let mut opts = SayEvent::new();
+        opts.category = Some(SpeechCategory::Safety);
+        ctx.say_event_with(message.to_string(), opts);
+    }
+
+    /// One interrupting CONFIRMATION line.
+    pub(crate) fn say_confirmation_interrupt(&self, ctx: &mut GameContext, message: &str) {
+        let mut opts = SayEvent::new();
+        opts.category = Some(SpeechCategory::Confirmation);
+        ctx.say_event_with(message.to_string(), opts);
+    }
+}

@@ -24,11 +24,10 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
+CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 EARTH_RADIUS_MI = 3958.7613
 ACCESSED_DATE = "2026-06-27"
@@ -560,9 +559,7 @@ def _match_road_mi(city: CityInfo, candidate: Candidate) -> float:
     return _haversine_mi(city.lat, city.lon, candidate.lat, candidate.lon) * ROAD_ESTIMATE_FACTOR
 
 
-def _no_candidate_reason(
-    city: CityInfo, bucket: CityBucket, key: str, source_path: Path
-) -> str:
+def _no_candidate_reason(city: CityInfo, bucket: CityBucket, key: str, source_path: Path) -> str:
     """Explain why a service fell back: either nothing was found, or the nearest
     real POI sits beyond the city-errand cap (name the discarded distance)."""
     others = [c for c in bucket.candidates if c.key == key]

@@ -50,6 +50,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from fill_truck_access_gaps import _gap_fill_access
 from world_source import load_world, save_world
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,6 +96,8 @@ TRUCK_STOP_CHAINS = (
     "roady's",
     "ambest",
     "travel centers of america",
+    "little america",
+    "iowa 80",
 )
 
 # OSM values that admit a combination vehicle.
@@ -227,6 +230,16 @@ def classify(stop: dict[str, Any], elements: list[dict[str, Any]]) -> tuple[str,
     curated = CURATED_ACCESS.get(f"{lat:.5f},{lon:.5f}")
     if curated is not None:
         return curated
+
+    # Convenience plazas stay bobtail-only unless the name itself is a travel
+    # or truck center. OSM hgv=yes on a car-scale Circle K / Exxon / QuikTrip
+    # is not tractor-trailer parking. Real truck_stop types keep their class.
+    if stop_type != "truck_stop" and _gap_fill_access(name) == "bobtail_only":
+        return "bobtail_only", (
+            f"{name} is a convenience plaza; combination-vehicle parking is "
+            f"not assumed from the brand or from an hgv tag on car-scale "
+            f"pumps, recorded {ACCESSED_DATE}."
+        )
 
     def _distance(element: dict[str, Any]) -> float:
         center = element.get("center") or element

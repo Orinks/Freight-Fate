@@ -46,7 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from pulse_synth import SR, bank_ir, convolve  # noqa: E402
 
-OUT = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+OUT = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 WASH_SECONDS = 3.0
 WASH_TAIL_S = 0.4

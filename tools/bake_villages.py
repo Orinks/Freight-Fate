@@ -8,7 +8,7 @@ only voice was forests and a river.
 
 Sources OSM ``place=village|town`` points (via ``tools/extract_osm_places.py``,
 because the self-hosted Overpass extract carries no ``place`` nodes), projects
-each onto the leg's real ORS driving-hgv polyline, and writes them into the
+each onto the leg's real checked-in route polyline, and writes them into the
 leg's ``corridor.landmarks`` under category ``village`` -- the same cue
 machinery as forests and rivers, filtered by its own chatter switch.
 
@@ -47,6 +47,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import enrich_routes as er  # noqa: E402  (the composed tool: ORS fetch + cache)
+import leg_geometry as lg  # noqa: E402
 from bake_landmarks import hav, project_on_route, route_cum  # noqa: E402
 from enrich_routes_landmarks import clean_landmark_name  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
@@ -181,9 +182,27 @@ def spoken_village(name: str, off_mi: float) -> str:
     return f"Entering {name}" if off_mi <= ENTER_OFF_MI else f"Passing {name}"
 
 
-def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
+def leg_route(leg, data, api_key) -> tuple[list[list[float]], str]:
+    """([[lon, lat], ...], how it was sourced) for one leg.
+
+    The archived polyline first. It is the road the leg drives -- including
+    after a reroute, where a cached ORS answer still describes the road the
+    truck left -- and it needs no router, no key and no network.
+    """
+    coords, _elevations = lg.archived_polyline(lg.leg_id_of(leg), lg.state_code_of(leg)) or (
+        None,
+        None,
+    )
+    if coords:
+        return coords, "the leg's checked-in route geometry"
+    if not api_key:
+        return [], ""
     parsed = er._cached_ors_route(data, leg, CACHE_PATH, 0.0, api_key)
-    coords = parsed["coordinates"]
+    return parsed["coordinates"], "the leg's OpenRouteService driving-hgv route"
+
+
+def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
+    coords, route_note = leg_route(leg, data, api_key)
     if len(coords) < 2:
         return [], 0, 0
     route = [(lat, lon) for lon, lat in coords]
@@ -192,7 +211,16 @@ def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
     cum = [c * scale for c in raw_cum]
 
     corridor = leg.setdefault("corridor", {})
-    taken = {_norm(lm.get("name")) for lm in corridor.get("landmarks", ())}
+    # Names another layer already speaks, so a village never doubles a river,
+    # a forest or a checkpoint. NOT this bake's own previous output: those are
+    # the very records being regenerated, and counting them as taken made a
+    # second run drop every village it found the first time -- the leg went
+    # from twenty-nine names to three and the tool reported success.
+    taken = {
+        _norm(lm.get("name"))
+        for lm in corridor.get("landmarks", ())
+        if lm.get("category") != "village"
+    }
     taken |= {_norm(cp.get("name")) for cp in corridor.get("checkpoints", ())}
     for slug in (leg["from"], leg["to"]):
         taken.add(_norm(data["cities"][slug].get("spoken_city") or slug))
@@ -228,7 +256,7 @@ def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
             "kind": "point",
             "source": (
                 f"OpenStreetMap place={place['place']} node {place['id']}, "
-                "projected onto the leg's OpenRouteService driving-hgv route"
+                f"projected onto {route_note}"
             ),
         }
         previous = best.get(_norm(name))
@@ -260,9 +288,9 @@ def main() -> int:
     args = ap.parse_args()
     only = {frozenset(p.split(":")) for p in args.only.split(";") if ":" in p}
 
+    # Only legs with no archived polyline need a router at all, so a missing
+    # key is reported per leg rather than refused up front.
     api_key = os.environ.get("ORS_API_KEY", "").strip()
-    if not api_key:
-        raise SystemExit("set ORS_API_KEY (use 'selfhosted' with the local ORS server)")
 
     data = load_world()
     index = grid_index(load_places())

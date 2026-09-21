@@ -1,0 +1,49 @@
+{
+ "dropped": [
+  {
+   "id": "rb-web-3e9560a2-b36e-4e44-b3bb-c4368835b2f4",
+   "name": "TheRadioStorm.com",
+   "why": "read: the same station as the curated the-radio-storm, listed twice by the directory. Both addresses resolve to 198.37.123.243 port 8242 and answer with icy-name TheRadioStorm.com; checked 2026-09-18. The curated row drops the other listing on its URL, but this one's hostname differs, so it needs saying here."
+  }
+ ],
+ "notes": "Hand curation the importer cannot derive, applied by tools/import_radio_catalog.py on top of what it builds. Every entry carries a why, and each one is a judgement about a single station: a name the source mangled past any rule, a format its keyword tags do not give, or a station the directory lists twice. Rules that hold for many stations belong in the cleaners instead, not here. An id no longer in the build is an error, not a no-op: the tool says so, so a stale entry is noticed rather than silently ignored.",
+ "overrides": {
+  "rb-9173b929-6647-41c5-8c42-5803bbb4698a": {
+   "name": "World Christian Radio (WWCR Shortwave 1)",
+   "why": "hand: the directory name loses its closing bracket mid-parenthetical. Which shortwave channel it is belongs in the name, so the bracket is closed rather than the text dropped."
+  },
+  "rb-96dc4e61-14c1-41b8-852f-a7a4ed3ae6c2": {
+   "name": "The Eagle 105.7 (aka, KYTS)",
+   "why": "hand: same truncated bracket; the call sign belongs in the name, so the bracket is closed."
+  },
+  "rb-web-1eb4a95f-2360-4ded-ae9b-0aa7b442311e": {
+   "name": "Infowars: The War Room With Owen Shroyer",
+   "why": "hand: the directory name is five bracketed segments, the last three of them stream jargon; read as the show it is."
+  },
+  "rb-web-69e1e6ac-272f-4fb2-9f14-9bab8df14959": {
+   "format": "80s",
+   "name": "Star104 The 80s Channel",
+   "why": "read: the stream identifies itself as 'Star104 - The 80s Channel' at star104.net. Its tags are directory keywords ('#80s, 1980s, 1980s hits'), not a format."
+  },
+  "rb-web-a20f2c78-374d-49fc-96eb-d73bfd28bacb": {
+   "format": "christmas",
+   "name": "Christmas104 (Star104)",
+   "why": "read: the stream identifies itself as 'Christmas104' at star104.net; the network is named in brackets, as with the other Star104 channels."
+  },
+  "rb-web-b4844481-c223-4fa0-9229-e0a19541c163": {
+   "format": "country",
+   "name": "Country104 (Star104)",
+   "why": "read: the stream identifies itself as 'Country104' at star104.net; the network is named in brackets so the four Star104 channels read as one station's channels."
+  },
+  "rb-web-b7f92f2e-0f4b-486d-a3c4-8d5051c37e6c": {
+   "stream_format": "mp3",
+   "why": "read: the station moved to the address in radio_stream_health.json, which serves audio/mpeg. The directory still lists the codec of the address it left."
+  },
+  "rb-web-e5e93ea0-6405-4451-92a9-28cb3e38d762": {
+   "format": "classic r&b",
+   "name": "Classic RnB from Star104",
+   "why": "read: the stream identifies itself as 'Classic RnB from Star104.net'. The domain ending is dropped because a screen reader spells it out; 'RnB' is the station's own spelling."
+  }
+ },
+ "schema": 1
+}

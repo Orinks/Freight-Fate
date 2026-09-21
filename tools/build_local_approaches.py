@@ -19,17 +19,65 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
-LOCAL_APPROACHES_PATH = ROOT / "src" / "freight_fate" / "data" / "local_approaches.json"
+CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
+LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 EARTH_RADIUS_MI = 3958.7613
 GRID_DEGREES = 0.08
 SEARCH_RADIUS_MI = 1.25
+
+# What to call a road OSM has no name for. Kept in step with the same names in
+# tools/build_local_geometry.py, which builds the turn-level segments this
+# file's approaches lead into -- a driver hearing "a service road" on approach
+# and "unnamed public road" one turn later would think they were two roads.
+UNNAMED_SERVICE = "a service road"
+UNNAMED_STREET = "a side street"
+SERVICE_CLASSES = frozenset({"service", "living_street"})
+# The service ways a combination is never routed through, kept in step
+# with tools/build_local_geometry.py, which explains each value and where
+# it is read from.
+# Who upstream says may use the way, kept in step with
+# tools/build_local_geometry.py, which names each value and its source.
+CLOSED_ACCESS = frozenset(
+    {
+        "private",
+        "no",
+        "military",
+        "permit",
+        "residents",
+        "employees",
+        "emergency",
+        "agricultural",
+        "forestry",
+    }
+)
+
+UNROUTABLE_SERVICE = frozenset(
+    {
+        "drive-through",
+        "drive_through",
+        "drive-thru",
+        "drive_thru",
+        "parking_aisle",
+        "emergency_access",
+        "bus",
+        "slipway",
+    }
+)
+# Every label that describes a road rather than naming one. The nearest-NAMED
+# snap below tests membership here rather than comparing against one literal,
+# so a second generic label cannot quietly start counting as a real name.
+GENERIC_ROADS = frozenset({UNNAMED_SERVICE, UNNAMED_STREET, "unnamed public road"})
+
+
+def is_named(road: str) -> bool:
+    """Does this label name a road, or merely describe one?"""
+    return bool(road) and road not in GENERIC_ROADS
+
 
 ROAD_HIGHWAYS = {
     "motorway",
@@ -63,6 +111,8 @@ class Target:
     best_distance_mi: float = 999.0
     best_named_road: str = ""
     best_named_distance_mi: float = 999.0
+    best_street_road: str = ""
+    best_street_distance_mi: float = 999.0
 
 
 def build_local_approaches(cache_dir: Path) -> dict[str, Any]:
@@ -184,7 +234,8 @@ def snap_roads(osm_path: Path, targets: list[Target]) -> None:
         road = road_label(tags)
         if not road:
             continue
-        named = road != "unnamed public road"
+        named = is_named(road)
+        street = named and tags.get("highway", "") not in SERVICE_CLASSES
         for lat, lon in way_coords(way):
             for target in nearby_targets(grid, lat, lon):
                 distance = haversine_mi(lat, lon, target.lat, target.lon)
@@ -194,15 +245,85 @@ def snap_roads(osm_path: Path, targets: list[Target]) -> None:
                 if named and distance < target.best_named_distance_mi:
                     target.best_named_distance_mi = distance
                     target.best_named_road = road
+                if street and distance < target.best_street_distance_mi:
+                    target.best_street_distance_mi = distance
+                    target.best_street_road = road
+
+
+def representative_record(target: Target) -> dict[str, Any]:
+    """The approach for a facility the world generated rather than surveyed."""
+    road = fallback_road(target)
+    straight_line = haversine_mi(
+        city_lat_lon(target)[0], city_lat_lon(target)[1], target.lat, target.lon
+    )
+    minimum_miles = 2.1 if target.target_type == "facility" else 0.4
+    approach_miles = round(max(minimum_miles, min(35.0, straight_line * 1.25 + 0.5)), 1)
+    return {
+        "target_type": target.target_type,
+        "city": target.city,
+        "name": target.name,
+        "role": target.role,
+        "lat": round(target.lat, 6),
+        "lon": round(target.lon, 6),
+        "road": road,
+        "approach_miles": approach_miles,
+        "distance_to_road_mi": 0.0,
+        "source_type": "representative_target_generated_context",
+        "estimated": True,
+        "fallback": True,
+        "fallback_reason": (
+            target.fallback_reason
+            or "Facility is generated for this metro market, so its approach is a "
+            "generated road context rather than a surveyed street."
+        ),
+        "source_note": target.source_note,
+        "turn_segments": [
+            f"Use {road} for the local approach.",
+            "Final gate or dock path is not turn-level sourced yet.",
+        ],
+    }
 
 
 def approach_record(target: Target) -> dict[str, Any]:
     # Prefer the nearest *named* road inside the radius over a closer unnamed
-    # way: the road name is what the player hears, and "unnamed public road"
+    # way: the road name is what the player hears, and a road described
     # right next to a named street is a worse answer than the street itself.
+    # A named STREET first, then a named service way, then anything.
+    #
+    # A service way is a connector at a site, not a street -- which is why
+    # this file already calls an unnamed one "a service road" rather than a
+    # side street. A representative facility has no site for one to connect
+    # to, so snapping to the nearest named way of any class handed the player
+    # whatever happened to be closest to a coordinate that is itself a
+    # stand-in. Glenwood Springs Dry Warehouse drew "Red Mountain / Jeanne
+    # Golay Trail", an unpaved service track on the hillside 0.29 miles off,
+    # and the approach spoke 2.5 miles of it (owner, 2026-09-20). The street
+    # a quarter mile further on is the better answer every time.
+    # A REPRESENTATIVE facility gets no real road name at all.
+    #
+    # `expand_market_locations` stamps every city with a set of template
+    # facilities -- "{city} Dry Warehouse", "{city} Cross-Dock" -- at a
+    # JITTERED coordinate around the city centre. No site stands there, so
+    # the nearest road to it is not that site's approach; it is whatever the
+    # jitter happened to land beside. Snapping anyway spoke a real street as
+    # the way in to a place that does not exist. A generated facility is
+    # approached by a generated road, and the two are honest together
+    # (owner, 2026-09-20: if it is real, bake it; if not, do not).
+    if target.estimated:
+        return representative_record(target)
+    has_street = (
+        bool(target.best_street_road) and target.best_street_distance_mi <= SEARCH_RADIUS_MI
+    )
     has_named = bool(target.best_named_road) and target.best_named_distance_mi <= SEARCH_RADIUS_MI
-    has_road = has_named or (bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI)
-    if has_named:
+    has_road = (
+        has_street
+        or has_named
+        or (bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI)
+    )
+    if has_street:
+        road = target.best_street_road
+        road_distance_mi = target.best_street_distance_mi
+    elif has_named:
         road = target.best_named_road
         road_distance_mi = target.best_named_distance_mi
     elif has_road:
@@ -256,9 +377,17 @@ def city_lat_lon(target: Target) -> tuple[float, float]:
 
 
 def fallback_road(target: Target) -> str:
+    """What to call an approach road the world did not survey."""
     if target.target_type == "city_service":
         return "local city service streets"
-    return "local facility access road"
+    # docs/ontology.md: the canonical spoken noun for a way with no name of
+    # its own is "a service road", article included, and "access road" is one
+    # of the synonyms that row rejects. This label used to read "local
+    # facility access road", which is both the wrong noun and not English in
+    # the sentence that speaks it ("Use local facility access road for the
+    # local approach"). It mattered little while a handful of rows carried
+    # it; it is now what every generated facility says.
+    return UNNAMED_SERVICE
 
 
 def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -280,7 +409,7 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
             item["fallback"] += 1
         else:
             item["osm_road"] += 1
-            if record["road"] != "unnamed public road":
+            if is_named(record["road"]):
                 item["named_road"] += 1
         if record["estimated"]:
             item["estimated"] += 1
@@ -290,7 +419,7 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "named_road": sum(
             1
             for record in approaches.values()
-            if not record["fallback"] and record["road"] != "unnamed public road"
+            if not record["fallback"] and is_named(record["road"])
         ),
         "fallback": sum(1 for record in approaches.values() if record["fallback"]),
         "estimated": sum(1 for record in approaches.values() if record["estimated"]),
@@ -322,13 +451,20 @@ def cell(lat: float, lon: float) -> tuple[int, int]:
 
 
 def road_label(tags: dict[str, str]) -> str:
-    if tags.get("highway") not in ROAD_HIGHWAYS:
+    highway = tags.get("highway", "")
+    if highway not in ROAD_HIGHWAYS:
+        return ""
+    if tags.get("service", "").strip().lower() in UNROUTABLE_SERVICE:
+        return ""
+    if tags.get("access", "").strip().lower() in CLOSED_ACCESS:
         return ""
     name = clean_name(tags.get("name", ""))
     ref = clean_name(tags.get("ref", ""))
     if name and ref:
         return f"{name} ({ref})"
-    return name or ref or "unnamed public road"
+    if name or ref:
+        return name or ref
+    return UNNAMED_SERVICE if highway in SERVICE_CLASSES else UNNAMED_STREET
 
 
 def clean_name(value: str) -> str:

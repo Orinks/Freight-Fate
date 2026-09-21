@@ -8,7 +8,7 @@ single source of truth for what an honest profile must satisfy.
 Two tiers, and the split matters:
 
 - **Hard invariants** are true in every version of the game. The client
-  enforces them too (`src/freight_fate/profile_invariants.py` is the
+  enforces them too (`crates/ff-core/src/profile_invariants.rs` is the
   executable mirror of section 1, run on every server-verified restore as
   defense in depth). No honest save ever breaks one.
 - **Plausibility rules** compare fields against each other and against the
@@ -17,7 +17,11 @@ Two tiers, and the split matters:
   `validator_version` when they change.
 
 Maintenance rule: when a feature adds or changes a field, this doc and the
-client module change **in the same PR** as the feature. A field with no
+client module change **in the same PR** as the feature.
+
+"The export" below is the catalog snapshot the server's validator is built
+from. `cargo run -p ff-core --bin ff-invariants -- <output>` writes it
+(`--check` compares instead); the Rust exporter is the only one. A field with no
 entry here is a field the gate silently trusts.
 
 ## 1. Hard invariants (client-enforced, version-stable)
@@ -67,8 +71,14 @@ Closed sets (stable enums — an unknown value is an edit):
 - `business_status`: `company_driver`, `leased_owner_operator`,
   `independent_authority`.
 - `truck_conditions[*].tire_type`: `all_season`, `winter`.
-- `career.purchased_endorsements` entries: `refrigerated`, `heavy_haul`,
-  `high_value`.
+- `career.purchased_endorsements` entries: any key on the credential
+  ladder (`models::credentials::CREDENTIALS` in the Rust runtime — the
+  four original keys plus `manual_transmission`, `flatbed_securement`,
+  `doubles_triples`, `hazmat`, `twic`, `lcv`). The client check reads the
+  ladder itself, so it cannot drift from the catalog.
+- `career.pending_credentials` entries: `{key, ready_at_h}` records for a
+  course paid but waiting on its background check; keys come from the
+  same closed set.
 
 Version tolerance (deliberate): unknown truck, trailer, buff, upgrade, or
 achievement KEYS pass the client check — a save written by a newer build
@@ -92,7 +102,7 @@ rejects the backup of every driver who took that step. A career that
 launders invented money through the garage is left to offline forensics.
 
 2.2 **XP against the curve and the miles.** Level thresholds are the
-`LEVEL_XP` table in `models/career.py`. The ceiling is
+`LEVEL_XP` table in `crates/ff-core/src/models/career.rs`. The ceiling is
 `deliveries * xpFlatPerDelivery + total_miles * xpPerMileMax`, both
 exported in the invariants, plus a slack of a dollar or so for rounding.
 
@@ -103,15 +113,21 @@ ceiling rather than under it: a copied value that falls even slightly
 behind a balance pass convicts the drivers who played best, which is what
 happened when a hardcoded 1.2 per mile met the 1.9 arc's higher rates.
 
-2.3 **Endorsements.** Earned endorsements come free at levels 2/3/4
-(refrigerated/heavy_haul/high_value) — they are DERIVED from level, never
-stored. Stored `purchased_endorsements` mean the player paid the course
-(900 / 1,600 / 1,300 dollars); a purchased endorsement on a profile whose
-earnings history could not have afforded it is suspicious, not fatal.
+2.3 **Credentials.** Level-granted credentials (the carrier certificates
+at levels 2/2/3/4 and the tank endorsement at 16) are DERIVED from level,
+never stored; their rows in the exported `endorsements` table carry a
+`level`. Course-only credentials (manual transmission training, the
+doubles and hazmat endorsements, the TWIC port card, the LCV certificate)
+carry NO `level` key in the export — the site and the validator must
+never level-derive them; they are real only when stored in
+`purchased_endorsements`. A stored course on a profile whose earnings
+history could not have afforded it is suspicious, not fatal. Each row
+also carries a `tier` (`training` / `certificate` / `endorsement` /
+`specialist`) for public-profile grouping.
 
 2.4 **Achievements against the stats that earn them.** Every id in
-`achievements` (see `src/freight_fate/achievements.py` for the canonical
-set) has a triggering condition; the gate spot-checks the cheap ones:
+`achievements` (see `crates/ff-core/src/achievements/catalog.rs` for the
+canonical set) has a triggering condition; the gate spot-checks the cheap ones:
 `five_deliveries`/`ten_deliveries` against `career.deliveries`,
 `thousand_miles`/`long_haul` against `total_miles`, `level_three` against
 XP, `twenty_five_grand` against `total_earnings`. An achievement without
@@ -157,7 +173,20 @@ local signature no longer quarantines: the save loads, the player hears a
 one-time notice, and the profile carries the sticky `integrity_modified`
 mark from then on (mark, don't block — local play is the player's own;
 the mark is what shared features read). Quarantine (`.invalid` rename) is
-reserved for files too damaged to decode at all. Plain unsigned `.json`
-saves keep amnesty as the honest pre-signing legacy shape and convert to
-signed containers on load; an unsigned *container* is always a tamper,
-because the game never writes one.
+reserved for files too damaged to decode at all. An unsigned save is
+always a tamper, packed or plain: every build of the 1.9 line signs what
+it writes, and saves from before the line are refused by the load gate, so
+nothing honest arrives unsigned. (Plain unsigned `.json` kept an amnesty
+as the pre-signing legacy shape until 2026-09-17; by then it was only the
+easy way to edit a career, because the game signed the file on load.)
+Signed plain `.json` still converts to a signed container on load.
+
+The load gate makes one arithmetic check of its own, in
+`models/profile/plausibility.rs`: a balance above the richest start plus
+lifetime earnings plus the pay advance limit plus the equity share of the
+whole equipment catalog marks the save, valid signature or not. That is
+what a balance rewritten in memory looks like, since the game signs it
+itself. The ceiling is derived from the game's own credit sites and is
+deliberately looser than the server's to-the-dollar money rule: the server
+refuses an upload and marks nothing, while a mark made here is sticky and
+spoken, so it must never land on an honest career.

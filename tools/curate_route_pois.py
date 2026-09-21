@@ -19,9 +19,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import ntad
+from ffworld.world import minimum_curated_pois
 from world_source import WORLD_SOURCE_PATH, load_world, save_world
-
-from freight_fate.data.world import minimum_curated_pois
 
 LOVES_ENDPOINT = "https://www.loves.com/api/fetch_stores"
 PILOT_ENDPOINT = "https://locations.pilotflyingj.com/search"
@@ -383,8 +383,11 @@ def main() -> None:
             print(
                 f"Annotated {report['annotate']['annotated_stops']} stops, then "
                 f"curated {report['added_pois']} survey POIs on "
-                f"{report['updated_legs']} legs; "
-                f"{len(report['remaining_gaps'])} legs still under threshold."
+                f"{report['updated_legs']} legs ({report['sleep_gap_fills']} of them "
+                f"filling sleep gaps); "
+                f"{len(report['remaining_gaps'])} legs still under threshold, "
+                f"{len(report['sleep_gaps_remaining'])} legs still with no sleep stop "
+                f"a loaded truck can use."
             )
         return
     if args.annotate_parking:
@@ -411,8 +414,11 @@ def main() -> None:
         print(json.dumps(report, indent=2))
     else:
         print(
-            f"Curated {report['added_pois']} POIs on {report['updated_legs']} legs; "
-            f"{len(report['remaining_gaps'])} legs still under threshold."
+            f"Curated {report['added_pois']} POIs on {report['updated_legs']} legs "
+            f"({report['sleep_gap_fills']} filling sleep gaps); "
+            f"{len(report['remaining_gaps'])} legs still under threshold, "
+            f"{len(report['sleep_gaps_remaining'])} legs still with no sleep stop "
+            f"a loaded truck can use."
         )
 
 
@@ -534,10 +540,10 @@ def fetch_jasons_law_candidates(source_file: Path | None = None) -> list[Candida
     if source_file is not None:
         payload = json.loads(source_file.read_text(encoding="utf-8"))
     else:
-        params = urllib.parse.urlencode(
-            {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"}
-        )
-        payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
+        # ntad.load reads the cached snapshot first and only asks BTS when there
+        # is none, so a re-run is offline and a survey that outgrows one ArcGIS
+        # page is still read whole.
+        payload = ntad.load("truck_parking")
     out: list[Candidate] = []
     for feature in payload.get("features", []):
         props = feature.get("properties", {})
@@ -605,6 +611,8 @@ def curate_world(
     added_pois = 0
     updated_legs = 0
     remaining_gaps = []
+    sleep_gap_fills = 0
+    sleep_gaps_remaining: list[dict[str, Any]] = []
     for leg in data["legs"]:
         original_stops = leg.get("stops", [])
         curated_stops = [stop for stop in original_stops if not _stop_is_placeholder(stop)]
@@ -625,6 +633,34 @@ def curate_world(
             ]
             need = minimum - len(curated_stops) - len(selected)
             selected.extend(_select_spread(projected, leg, curated_stops + selected, need))
+        # A leg with no stop a loaded truck can sleep at is a sleep gap
+        # whatever its stop count. Bobtail-only convenience stations count
+        # toward the density minimum, so two Kwik Trips kept the survey's
+        # own rest areas on I-35 (Heath Creek and New Market, Owatonna to
+        # Minneapolis) off the map and the cab answered "no sleep-capable
+        # route stop ahead" (owner, 2026-09-18). Public parking records that
+        # sit on the road itself fill such a leg regardless of the minimum;
+        # the bound is the annotate pass's own corridor tolerance, not a
+        # search radius, because these must be ON this road.
+        if not any(_truck_can_sleep(stop) for stop in curated_stops + selected):
+            on_road = [
+                item
+                for item in (_project_candidate(leg, candidate) for candidate in candidates)
+                if item is not None
+                and item.poi_type in _PUBLIC_PARKING_TYPES
+                and item.distance_mi is not None
+                and item.distance_mi <= SLEEP_GAP_CORRIDOR_MI
+                and _highway_matches(leg["highway"], item.highway)
+                and _not_duplicate(item, curated_stops, selected)
+            ]
+            on_road.sort(key=lambda item: item.at_mi or 0.0)
+            filled = [item.to_stop() for item in on_road]
+            selected.extend(filled)
+            sleep_gap_fills += len(filled)
+            if not filled:
+                sleep_gaps_remaining.append(
+                    {"from": leg["from"], "to": leg["to"], "highway": leg["highway"]}
+                )
         if selected or len(curated_stops) != len(original_stops):
             leg["stops"] = sorted(
                 curated_stops + selected,
@@ -651,7 +687,21 @@ def curate_world(
         "added_pois": added_pois,
         "updated_legs": updated_legs,
         "remaining_gaps": remaining_gaps,
+        "sleep_gap_fills": sleep_gap_fills,
+        "sleep_gaps_remaining": sleep_gaps_remaining,
     }
+
+
+def _truck_can_sleep(stop: dict[str, Any]) -> bool:
+    """A stop a loaded truck can legally park at for the night, as the record
+    says: a sleep action, parking not ruled out, and not typed bobtail-only.
+    The runtime screens assumed parking further at load; this reads only what
+    the JSON states, so a stop the screen would demote still counts here."""
+    return (
+        "sleep" in stop.get("actions", [])
+        and str(stop.get("parking", "")) != "none"
+        and str(stop.get("vehicle_access", "tractor_trailer")) != "bobtail_only"
+    )
 
 
 def annotate_truck_parking(
@@ -696,11 +746,23 @@ def annotate_truck_parking(
             best = _match_survey_record_to_stop(projected, stops, max_at_mi_delta)
             if best is None:
                 continue
-            spaces = max(int(best.get("parking_spaces", 0)), projected.parking_spaces)
+            before = int(best.get("parking_spaces", 0))
+            spaces = max(before, projected.parking_spaces)
             changed = False
-            if spaces > 0 and spaces != int(best.get("parking_spaces", 0)):
+            if spaces > 0 and spaces != before:
                 best["parking_spaces"] = spaces
                 changed = True
+                if before > 0 and "Jason's Law" in str(best.get("source", "")):
+                    # The record already carries a survey count; a paired
+                    # directional record raising it must say so, or the field
+                    # contradicts the sentence that sourced it (I-80 Turnout
+                    # westbound: 16 in the note, 25 in the field, 2026-09-18).
+                    best["source"] = (
+                        f"{str(best.get('source', '')).rstrip('. ')}. "
+                        f"Derived: the inventory's paired directional record "
+                        f"{projected.name} lists {projected.parking_spaces} truck "
+                        f"parking spaces, and the larger lot's count is kept."
+                    )
             if str(best.get("parking", "")) != "confirmed":
                 best["parking"] = "confirmed"
                 changed = True
@@ -800,6 +862,11 @@ def _survey_names_conflict(stop_name: str, record_name: str) -> bool:
 # to be the same lot even when states name it by county rather than place.
 _PUBLIC_PARKING_TYPES = {"public_rest_area", "truck_parking"}
 _PUBLIC_MATCH_DELTA_MI = 0.7
+# A survey record fills a sleep gap only when it sits on the leg's own road:
+# the same corridor tolerance annotate_truck_parking uses to say a record
+# describes a checked-in stop (max_corridor_mi), not the 20-mile search radius
+# the density fill offers chain stops from.
+SLEEP_GAP_CORRIDOR_MI = 1.0
 
 
 def _match_survey_record_to_stop(

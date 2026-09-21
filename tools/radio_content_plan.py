@@ -8,7 +8,9 @@ runs in the shipped game.
 Conventions (the asset contract):
 - ``STATIONS`` is keyed by content key -- the value the catalog's ``host``
   field will carry. Host clips become ``host_<key>_NN.ogg``, produced
-  jingles ``id_<key>_01/02``, and the spoken legal ID ``id_<key>_03``.
+  jingles ``id_<key>_01/02/04``, the spoken legal ID ``id_<key>_03``, and
+  the spoken liners after it ``id_<key>_05/06`` (second wave, merged in
+  from radio_content_liners.py).
 - Voice names are cast against the owner's REAL ElevenLabs roster (33
   on-account voices plus five proven library adds: Thomas, Patrick,
   Rachel, Michael, Amelia) -- never invent a name outside that set.
@@ -33,7 +35,7 @@ or menu names, no dates, no weather promises, no real brands.
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 
@@ -772,6 +774,21 @@ STATIONS: dict[str, StationPlan] = {
             ),
         ),
     ),
+}
+
+# Second wave (radio_content_liners.py): two spoken liners and a third
+# sung jingle per station, merged here so every consumer keeps reading
+# one STATIONS table. The runner numbers the liners _05 and _06 and the
+# jingle carries its own _04 key.
+from radio_content_liners import LINERS, THIRD_JINGLES  # noqa: E402
+
+STATIONS = {
+    key: replace(
+        plan,
+        id_lines=plan.id_lines + LINERS[key],
+        jingle_prompts=plan.jingle_prompts + (THIRD_JINGLES[key],),
+    )
+    for key, plan in STATIONS.items()
 }
 
 

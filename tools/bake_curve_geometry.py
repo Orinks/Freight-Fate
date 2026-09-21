@@ -19,6 +19,18 @@ leg emits two layers:
     ``index_world.py`` only manages the files it derives from the world source, so
     these extra files are safe under ``world_data/`` and ``--check`` ignores them.
 
+CONNECTORS ARE FINISHED AFTERWARDS. The ``connector`` flag this sweep writes
+is the straw sampler's positional window (first/last ``CONNECTOR_WINDOW_MI``
+of the leg) and it is only a bootstrap: it cannot see a mid-leg interchange
+or a long city departure, so ramp and street geometry shipped as interstate
+MAINLINE. After any run of this tool, re-run::
+
+    uv run python tools/curve_valhalla_facts.py --all
+    uv run python tools/bake_curve_connectors.py --write
+
+which re-derive every row's flag from the OSM road class under its apex.
+``tools/bake_curve_connectors.py --check`` fails if that has not been done.
+
 Phil's rev-2 riders, all folded in:
   1. keep-verbatim margin CURVE_PAD_M 80 -> 150 (edge-of-span curves survive the
      archive bake);
@@ -30,6 +42,15 @@ Selection / batching (fan out by region, compact between phases):
   uv run --group tooling python tools/bake_curve_geometry.py --only a:b;c:d
   uv run --group tooling python tools/bake_curve_geometry.py --region rockies
   uv run --group tooling python tools/bake_curve_geometry.py --all
+
+Curves-only re-bake (archived coords, no Overpass, writes only curves.jsonl):
+  uv run --group tooling python tools/bake_curve_geometry.py --curves-only --from-archive --only a:b
+  uv run --group tooling python tools/bake_curve_geometry.py --curves-only --from-archive --all
+
+``--curves-only`` requires ``--from-archive``. It re-detects curves with
+``analyse_curvature`` on the existing archived coordinates and merges only
+``world_data/us/gameplay/curves.jsonl``. It does not re-simplify or re-encode
+geometry, so the row count matches ``tools/inventory_world_data_blockers.py``.
 
 Runs are idempotent and merge: a shard keeps records for legs outside the
 selection and replaces those inside it, so region batches accumulate.
@@ -43,6 +64,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -55,6 +77,9 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import leg_geometry as lg  # noqa: E402
+import overpass_corridor as oc  # noqa: E402
+import reroute_leg as rr  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402  (the ratified primitives)
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import MAXSPEED_SOURCE, _maxspeed_from_tags  # noqa: E402
@@ -67,15 +92,11 @@ from world_source import load_world, save_world  # noqa: E402
 scs.CURVE_PAD_M = 150.0
 
 ROOT = Path(__file__).resolve().parent.parent
-WORLD_DATA = ROOT / "src" / "freight_fate" / "data" / "world_data"
+WORLD_DATA = ROOT / "data" / "world_data"
 GEOM_DIR = WORLD_DATA / "us" / "geometry"
 GAMEPLAY_DIR = WORLD_DATA / "us" / "gameplay"
-ESCAPE_CACHE = ROOT / "src" / "freight_fate" / "data" / "escape_ramps.json"
+ESCAPE_CACHE = ROOT / "data" / "escape_ramps.json"
 
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
-# The public Overpass endpoints answer 406 to an unidentified client, so a
-# small batch can run against them when the self-hosted server is not up.
-USER_AGENT = "Freight-Fate curve-geometry bake (https://github.com/Orinks/Freight-Fate)"
 SCHEMA_VERSION = 1
 SOURCE_NOTE = (
     "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass "
@@ -84,33 +105,34 @@ SOURCE_NOTE = (
 RAMP_SOURCE = "OpenStreetMap highway=escape ways (Overpass), development-time."
 RAMP_MATCH_M = 160.0  # an escape way farther than this from the route isn't on it
 RAMP_DEDUP_MI = 0.3  # same-side ramps closer than this are one physical ramp
-FLUSH_EVERY = 25  # write the world source + shards every N legs so progress is durable
+# Write the world source and shards every N legs so progress is durable. Ten
+# rather than twenty-five because a 24-leg re-bake flushed exactly once, at
+# the end, and so lost every leg when the twenty-first was spoiled by a
+# dropped connection.
+FLUSH_EVERY = 10
 
 
 # --- combined per-leg Overpass query (maxspeed + escape ramps, rider 2) -----
-def _overpass(query: str) -> dict[str, Any]:
-    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return json.loads(resp.read().decode("utf-8"))
-
-
 def query_leg_ways(coords: list[list[float]]) -> list[dict]:
-    """One bbox query for the leg's maxspeed-tagged ways.
+    """The leg's maxspeed-tagged ways, asked for a corridor at a time.
+
+    One box around the whole leg is most of a state, and the public Overpass
+    answers that with a 504 rather than tens of thousands of ways. Boxes strung
+    along the route return the same answer -- a way only governs a sample
+    point within 90 metres of it -- in requests the service will actually
+    serve. See ``tools/overpass_corridor.py``.
 
     (Runaway ramps come from the offline escape-ramp cache, not Overpass: the
     self-hosted extract is filtered and carries no highway=escape ways -- see
     ``tools/harvest_escape_ramps.py``.)"""
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
-    pad = 0.02
-    box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
-    query = f"""
-    [out:json][timeout:120];
-    way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});
-    out geom tags;
-    """
-    return _overpass(query).get("elements", [])
+    return oc.corridor_elements(
+        coords,
+        lambda box: (
+            "[out:json][timeout:180];"
+            f'way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});'
+            "out geom tags;"
+        ),
+    )
 
 
 # --- maxspeed step function (confirmed for the world source; gap-aware for shard) --
@@ -335,16 +357,65 @@ def select_legs(world: dict, args: argparse.Namespace) -> list[dict]:
 
 
 # --- driver -----------------------------------------------------------------
+def route_from_archive(leg: dict) -> dict[str, Any]:
+    """The leg's own archived polyline, in the shape an ORS answer has.
+
+    A rerouted leg's road is already checked in -- reroute_leg.py wrote it
+    from Valhalla's truck route, with elevation read at every vertex -- and
+    re-asking a router would either fetch the OLD route from cache or need a
+    service this machine does not have. So the archive IS the route source
+    here, and the rest of the bake is unchanged: same curvature analysis, same
+    Overpass maxspeed sweep, same round-trip check.
+    """
+    polyline = lg.archived_polyline(lg.leg_id_of(leg), lg.state_code_of(leg))
+    if polyline is None:
+        raise RuntimeError(f"no archived geometry for {lg.leg_id_of(leg)}")
+    coords, elevations = polyline
+    return {"coordinates": coords, "elevations_ft": elevations}
+
+
+def route_from_router(leg: dict, cities: dict) -> dict[str, Any]:
+    """Ask the truck router for this leg's road again, at full density.
+
+    Re-simplifying the archive cannot undo an over-simplification: the
+    vertices a loose tolerance dropped are gone, and a tighter one has
+    nothing to keep. A leg whose archive strayed from the road has to be
+    fetched again.
+
+    Same router, same loaded-semi profile and same city nodes as the reroute
+    used, so this re-states the leg's existing route rather than choosing a
+    new one -- every corridor layer keyed to a mile stays valid.
+    """
+    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    if fetched is None:
+        raise RuntimeError(f"the router returned no route for {lg.leg_id_of(leg)}")
+    shape, _miles, _toll = fetched
+    elevations = rr.fetch_elevation(shape)
+    if elevations is None:
+        raise RuntimeError(f"no elevation for {lg.leg_id_of(leg)}")
+    return {"coordinates": shape, "elevations_ft": elevations}
+
+
 def process_leg(
-    leg: dict, cities: dict, api_key: str, escape_cache: list[dict]
+    leg: dict,
+    cities: dict,
+    api_key: str,
+    escape_cache: list[dict],
+    from_archive: bool = False,
+    refetch: bool = False,
 ) -> dict[str, Any] | None:
     frm, to = leg["from"], leg["to"]
     highway = leg.get("highway", "")
     leg_miles = float(leg.get("miles", 0)) or None
-    start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
-    end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
-    via = tuple(leg.get("route_via", []) or ())
-    parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
+    if refetch:
+        parsed = route_from_router(leg, cities)
+    elif from_archive:
+        parsed = route_from_archive(leg)
+    else:
+        start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
+        end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
+        via = tuple(leg.get("route_via", []) or ())
+        parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
     coords = parsed["coordinates"]
     elev = parsed["elevations_ft"]
     cum_raw = scs._cumulative_m(coords)
@@ -419,6 +490,49 @@ def process_leg(
     }
 
 
+def process_leg_curves_only(leg: dict, cities: dict) -> dict[str, Any] | None:
+    """Re-detect gameplay curves on the archived polyline; leave every other layer.
+
+    Inventory's mismatch check is ``analyse_curvature`` on the decoded archive,
+    compared to the baked row count. Re-running adaptive_simplify / encode /
+    decode here would change the line or diverge from that count, so the
+    archived coordinates are analysed as they stand.
+    """
+    frm, to = leg["from"], leg["to"]
+    highway = leg.get("highway", "")
+    leg_miles = float(leg.get("miles", 0)) or None
+    parsed = route_from_archive(leg)
+    coords = parsed["coordinates"]
+    if len(coords) < 3:
+        return None
+    cum_raw = scs._cumulative_m(coords)
+    raw_mi = cum_raw[-1] / 1609.344
+    mile_scale = (leg_miles / raw_mi) if leg_miles else 1.0
+
+    curv = scs.analyse_curvature(coords, cum_raw)
+    idx = list(range(len(coords)))
+    conn_hi = (leg_miles or raw_mi) - scs.CONNECTOR_WINDOW_MI
+    gameplay_curves = []
+    for c in curv["curves"]:
+        row = scs._gameplay_curve(c, idx, cum_raw, mile_scale)
+        if row["end_mi"] <= scs.CONNECTOR_WINDOW_MI or row["start_mi"] >= conn_hi:
+            row["connector"] = True
+        gameplay_curves.append(row)
+    return {
+        "leg_id": f"{frm}:{to}",
+        "highway": highway,
+        "miles": round(leg_miles or raw_mi, 2),
+        "curves": gameplay_curves,
+        "raw_curves": len(curv["curves"]),
+        "raw_vertices": len(coords),
+    }
+
+
+def flush_curves_only(curves_by_leg) -> None:
+    """Rewrite gameplay/curves.jsonl only -- no world source, geom, ramps, or limits."""
+    _write_shard(GAMEPLAY_DIR / "curves.jsonl", curves_by_leg, {"layer": "curves"})
+
+
 def flush(world: dict, geom_by_state, curves_by_leg, ramps_by_leg, speed_by_leg) -> None:
     save_world(world)
     for state, by_leg in geom_by_state.items():
@@ -435,13 +549,78 @@ def main() -> int:
     g.add_argument("--region", help="all legs touching a region (e.g. rockies)")
     g.add_argument("--all", action="store_true", help="every leg in the network")
     ap.add_argument("--limit", type=int, help="cap leg count (with --all, for smoke tests)")
+    ap.add_argument(
+        "--refetch",
+        action="store_true",
+        help="ask the truck router for the road again instead of reading the "
+        "archive. Needed when the archived line was simplified so far it left "
+        "the road -- the dropped vertices cannot be recovered from it.",
+    )
+    ap.add_argument(
+        "--from-archive",
+        action="store_true",
+        help="take the route from world_data/us/geometry instead of routing it "
+        "afresh -- what a rerouted leg needs, since its road is already "
+        "checked in and no router on this machine would return it.",
+    )
+    ap.add_argument(
+        "--curves-only",
+        action="store_true",
+        help="re-detect curves on existing archived coordinates and rewrite only "
+        "gameplay/curves.jsonl. Skips Overpass, geometry, speed limits, ramps, "
+        "and the world source. Requires --from-archive.",
+    )
     args = ap.parse_args()
+
+    if args.curves_only and not args.from_archive:
+        print(
+            "error: --curves-only requires --from-archive "
+            "(curves are re-detected on existing archived coordinates)",
+            file=sys.stderr,
+        )
+        return 2
 
     world = load_world()
     cities = world["cities"]
-    api_key = os.environ.get("ORS_API_KEY", "selfhosted")
     legs = select_legs(world, args)
     legs.sort(key=lambda L: (L["from"], L["to"]))  # deterministic order (acceptance #2)
+
+    if args.curves_only:
+        curves_by_leg = _read_records(GAMEPLAY_DIR / "curves.jsonl")
+        print(f"selected {len(legs)} legs | curves-only from archive", flush=True)
+        done = failed = 0
+        for n, leg in enumerate(legs, 1):
+            key = (leg["from"], leg["to"])
+            try:
+                r = process_leg_curves_only(leg, cities)
+            except (RuntimeError, KeyError, OSError, ValueError) as exc:
+                failed += 1
+                print(f"  [{n}/{len(legs)}] {key[0]}:{key[1]} FAILED: {exc}", flush=True)
+                continue
+            if r is None:
+                failed += 1
+                print(
+                    f"  [{n}/{len(legs)}] {key[0]}:{key[1]} FAILED: no archive coords",
+                    flush=True,
+                )
+                continue
+            lid = r["leg_id"]
+            curves_by_leg[lid] = [{"leg": lid, **c} for c in r["curves"]]
+            done += 1
+            if n % 10 == 0 or n == len(legs) or len(legs) <= 40:
+                print(
+                    f"  [{n}/{len(legs)}] {lid}: {r['raw_vertices']} verts, "
+                    f"{len(r['curves'])} curves (raw {r['raw_curves']})",
+                    flush=True,
+                )
+            if n % FLUSH_EVERY == 0:
+                flush_curves_only(curves_by_leg)
+                print(f"    -- flushed at {n}", flush=True)
+        flush_curves_only(curves_by_leg)
+        print(f"\nDONE: {done} baked, {failed} fetch-failed", flush=True)
+        return 0
+
+    api_key = os.environ.get("ORS_API_KEY", "selfhosted")
     escape_cache = load_escape_cache()
     print(f"selected {len(legs)} legs | {len(escape_cache)} escape ramps in cache", flush=True)
 
@@ -458,13 +637,19 @@ def main() -> int:
     for n, leg in enumerate(legs, 1):
         key = (leg["from"], leg["to"])
         try:
-            r = process_leg(leg, cities, api_key, escape_cache)
+            r = process_leg(leg, cities, api_key, escape_cache, args.from_archive, args.refetch)
         except (
             urllib.error.URLError,
             urllib.error.HTTPError,
             RuntimeError,
             KeyError,
             OSError,
+            # Everything the network can do to a response body. The point of
+            # this handler is that a leg the network spoiled is skipped and
+            # reported, not that the sweep dies holding hours of finished work
+            # it has not flushed yet.
+            http.client.HTTPException,
+            ValueError,
         ) as exc:
             failed += 1
             print(f"  [{n}/{len(legs)}] {key[0]}:{key[1]} FAILED: {exc}", flush=True)
@@ -489,7 +674,10 @@ def main() -> int:
         ramps_by_leg[lid] = [{"leg": lid, **rp} for rp in r["ramps"]]
         speed_by_leg[lid] = [{"leg": lid, **s} for s in r["speed_full"]]
         done += 1
-        if n % 10 == 0 or n == len(legs):
+        # Every leg on a small selection. The every-tenth cadence was written
+        # for the 1,291-leg sweep; on a two-dozen-leg re-bake it means the
+        # better part of an hour with nothing on stdout, which reads as hung.
+        if n % 10 == 0 or n == len(legs) or len(legs) <= 40:
             print(
                 f"  [{n}/{len(legs)}] {lid}: {r['kept']}/{r['raw_vertices']} verts, "
                 f"{len(r['curves'])} curves, {len(r['ramps'])} ramps, "

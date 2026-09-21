@@ -42,17 +42,15 @@ import argparse
 import http.client
 import json
 import ssl
-import sys
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
 
-CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
-IMPORTED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
+CURATED_PATH = ROOT / "data" / "radio_catalog.json"
+IMPORTED_PATH = ROOT / "data" / "radio_imported.json"
 # Build input, not game data: the player's build never reads it, so it
 # lives with the other catalog inputs instead of inside the package.
 DEFAULT_OUTPUT = ROOT / "data" / "radio_stream_health.json"
@@ -260,12 +258,20 @@ def main(argv: list[str] | None = None) -> int:
     # Stations that only answered at the Shoutcast mount: alive, but the
     # URL in the data points at the status page. These want editing, not
     # dropping, so they are reported apart from the casualties.
+    #
+    # An earlier repair is carried forward unless this sweep repaired the
+    # same station again. The built catalog already carries the repaired
+    # URL, so a repaired station probes clean -- and forgetting the repair
+    # on a clean probe would send the next build back to the broken URL.
+    # That covers hand-entered rows too: a station that moved hosts while
+    # its old address still answers with a sign-off loop.
+    repaired_now = {r["id"] for r in results if r.get("repaired_url")}
     previous_repairs = []
     if args.output.exists():
         previous_repairs = [
             row
             for row in json.loads(args.output.read_text(encoding="utf-8")).get("repaired", [])
-            if row["id"] not in probed
+            if row["id"] not in repaired_now
         ]
     repaired = sorted(
         [r for r in results if r.get("repaired_url")] + previous_repairs,

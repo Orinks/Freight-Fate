@@ -37,9 +37,19 @@ Three cached inputs, all gitignored, all rebuildable:
     Licensed transmitter sites. Rebuild with
     ``uv run python tools/fetch_fcc_transmitters.py``.
 
-``data/radio_stream_health.json`` is checked in, not cached: it is what
-``tools/check_radio_streams.py`` last found, and it is what keeps dead
-streams off the dial between sweeps.
+Two checked-in inputs, not cached:
+
+``data/radio_stream_health.json``
+    What ``tools/check_radio_streams.py`` last found: it keeps dead streams
+    off the dial between sweeps, and carries the repaired address of a
+    station that moved.
+
+``data/radio_imported_overrides.json``
+    The hand curation no rule derives -- a name the source mangled past any
+    cleaner, a format its keyword tags do not give, a station the directory
+    lists twice. Everything here is applied on top of what this tool builds,
+    so a rebuild stops undoing a curator's judgement. An entry whose station
+    is no longer built fails the run rather than sitting there unread.
 """
 
 from __future__ import annotations
@@ -51,13 +61,12 @@ import re
 import sys
 from pathlib import Path
 
-from freight_fate.radio import canonical_stream_url, normalize_stream_url
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = ROOT / "data" / "radio-cache" / "pr150_stations.json"
-CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
-DEFAULT_OUTPUT = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
+CURATED_PATH = ROOT / "data" / "radio_catalog.json"
+DEFAULT_OUTPUT = ROOT / "data" / "radio_imported.json"
 HEALTH_PATH = ROOT / "data" / "radio_stream_health.json"
+OVERRIDES_PATH = ROOT / "data" / "radio_imported_overrides.json"
 RADIO_BROWSER_PATH = ROOT / "data" / "radio-cache" / "rb_us.json"
 FCC_PATH = ROOT / "data" / "radio-cache" / "fcc_transmitters.json"
 
@@ -79,11 +88,38 @@ _NAME_SPLIT = re.compile(r"\s*(?:\||-\s*-\s*-|/{2,})\s*")
 _MAX_NAME_CHARS = 60
 
 
+def drop_unclosed_parenthetical(name: str) -> str:
+    """ "NPR Syracuse University, NY (New" -> "NPR Syracuse University, NY".
+
+    An unclosed parenthetical is a maintainer's note that got away --
+    "KFLP All Agriculture (new link 2/2025" -- not part of the name, and a
+    screen reader reads the stub out with it. Where the truncated text is
+    worth keeping the closing bracket is put back by hand instead; see
+    radio_imported_overrides.json.
+    """
+    if name.count("(") > name.count(")"):
+        return name[: name.rindex("(")]
+    return name
+
+
+def restore_possessives(name: str) -> str:
+    """ "Birmingham s Beautiful QEZ" -> "Birmingham's Beautiful QEZ".
+
+    The upstream directory stripped every apostrophe, and the names were
+    read aloud that way. A lone lowercase s after a word, with more name to
+    follow, is the possessive it used to be. Both tiers carry these: the web
+    tier has had the repair since it was written, the local tier read
+    "Hampton s Jazz" out for a release longer.
+    """
+    return re.sub(r"\b([A-Za-z]{2,}) s\b(?=\s)", r"\1's", name)
+
+
 def clean_web_name(raw: str) -> str:
     """A web station name with the stream jargon taken out."""
     name = _NAME_SPLIT.split(raw.strip())[0]
     name = _NOISE_WORDS.sub(" ", name)
     name = re.sub(r"[(\[][^A-Za-z0-9]*[)\]]", " ", name)
+    name = restore_possessives(name)
     name = re.sub(r"\s+", " ", name).strip(" -|/,:;")
     if len(name) > _MAX_NAME_CHARS:
         head = name[:_MAX_NAME_CHARS]
@@ -103,10 +139,80 @@ def curated_call_signs(curated: dict) -> set[str]:
     return {call_sign_base(row.get("call_sign", "")) for row in curated["stations"]} - {""}
 
 
-# normalize_stream_url lives in freight_fate.radio: this build-time collision
-# check and the runtime dial (which collapses a multi-site station like KZYX
-# or WNPN to a single listing) must agree on what counts as "the same
-# stream", so there is exactly one implementation of that rule.
+# normalize_stream_url and canonical_stream_url mirror ff_core::radio: this
+# build-time collision check and the game's dial (which collapses a multi-site
+# station like KZYX or WNPN to a single listing) must agree on what counts as
+# "the same stream". Change one, change both.
+
+_URL_SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.\-]*://", re.IGNORECASE)
+
+# Live365 hands the same station out under its own name and under whichever
+# CDN edge answered that day (ais-sa5.cdnstream1.com, das-edge14-live365-
+# dal02.cdnstream.com, the legacy edge4.peta.live365.net), and at several
+# bitrates off one station id. The mount name carries the id, so the id is
+# the station: b09584_128mp3 and b09584_64aac are one station at two
+# bitrates, not two stations.
+_LIVE365_HOST_RE = re.compile(
+    r"^(?:streaming\.live365\.com"
+    r"|(?:ais|das)-[\w.-]*\.cdnstream1?\.com"
+    r"|[\w-]+\.peta\.live365\.net)$",
+    re.IGNORECASE,
+)
+_LIVE365_MOUNT_RE = re.compile(r"^([ab]\d{4,7})(?:_[0-9a-z]+)?$", re.IGNORECASE)
+_LIVE365_CANONICAL_HOST = "streaming.live365.com"
+
+
+def normalize_stream_url(url: str) -> str:
+    """A stream URL with scheme and a trailing slash stripped, for dedup only.
+
+    The same live stream is sometimes registered under both ``http://`` and
+    ``https://`` (and sometimes with a bare trailing slash); an exact-string
+    comparison treats those as different streams and let one station land on
+    the dial twice under two names (WHYY 90.9, 2026-08-12 field report).
+    Scheme and host are case-insensitive by spec, so only that part is
+    folded -- a genuinely case-sensitive path is never merged with a
+    different one. Live365 mounts fold further, onto the station id in the
+    mount name: the directory carries the same station under several CDN
+    edge hosts and bitrates, which put Radiostorm's At Work, Oldies and
+    Comedy channels on the web band twice each. Never stored or spoken --
+    comparison only. Mirrors ``ff_core::radio::normalize_stream_url`` so this build-time
+    collision check and the game agree on what counts as "the same
+    stream".
+    """
+    url = url.strip()
+    match = _URL_SCHEME_RE.match(url)
+    if match:
+        url = url[match.end() :]
+    url = url.rstrip("/")
+    host, _, rest = url.partition("/")
+    host = host.lower()
+    if _LIVE365_HOST_RE.match(host):
+        mount = _LIVE365_MOUNT_RE.match(rest.partition("?")[0])
+        if mount:
+            return f"{_LIVE365_CANONICAL_HOST}/{mount.group(1).lower()}"
+    return f"{host}/{rest}" if rest else host
+
+
+def canonical_stream_url(url: str) -> str:
+    """A Live365 stream pointed at Live365's own address, not one CDN edge.
+
+    The directory records whichever edge host answered the day it checked
+    (``ais-edge104-live365-dal02.cdnstream.com``), sometimes carrying the
+    checker's own player and ad-block tokens in the query. Those hostnames
+    come and go; ``streaming.live365.com`` is the address the station
+    publishes, and it redirects to a live edge at play time. Anything that
+    is not a Live365 mount is returned exactly as it came in.
+    """
+    match = _URL_SCHEME_RE.match(url.strip())
+    rest = url.strip()[match.end() :] if match else url.strip()
+    host, _, path = rest.partition("/")
+    if not _LIVE365_HOST_RE.match(host.lower()):
+        return url
+    mount = path.partition("?")[0].rstrip("/")
+    if not _LIVE365_MOUNT_RE.match(mount):
+        return url
+    return f"https://{_LIVE365_CANONICAL_HOST}/{mount}"
+
 
 # Leftovers the source file's name cleaning can strand at the front of a
 # local station's name once a sibling frequency or call sign is stripped:
@@ -124,7 +230,7 @@ def clean_local_name(raw: str) -> str:
     Returns "" when nothing but dial positions is left; the caller falls back
     to the call sign, and the readout then speaks the call sign once.
     """
-    name = re.sub(r"\s+", " ", raw).strip()
+    name = drop_unclosed_parenthetical(re.sub(r"\s+", " ", raw).strip())
     while True:
         stripped = _LEADING_JUNK.sub("", name)
         if stripped == name:
@@ -137,7 +243,7 @@ def clean_local_name(raw: str) -> str:
     bare = _LEADING_BARE_FREQ.sub("", name)
     if bare != name and bare:
         name = _LEADING_JUNK.sub("", bare)
-    return name.strip(" -|/,:;&")
+    return restore_possessives(name.strip(" -|/,:;&"))
 
 
 def convert_station(row: dict) -> dict:
@@ -259,10 +365,7 @@ def clean_terrestrial_name(raw: str) -> str:
     first, then read the call sign out of what is left.
     """
     name = _NOISE_WORDS.sub(" ", _NAME_SPLIT.split(raw.strip())[0])
-    # An unclosed parenthetical is a maintainer's note that got away --
-    # "KFLP All Agriculture (new link 2/2025" -- not part of the name.
-    if name.count("(") > name.count(")"):
-        name = name[: name.rindex("(")]
+    name = drop_unclosed_parenthetical(name)
     name = re.sub(r"\s+", " ", name).strip(" -|/,:;")
     return clean_local_name(name) or name
 
@@ -344,13 +447,41 @@ def stream_health(path: Path) -> tuple[set[str], dict[str, str]]:
     return dead, repaired
 
 
+def hand_curation(path: Path) -> tuple[dict[str, dict], set[str]]:
+    """The hand edits this build cannot derive: per-station fields, and drops.
+
+    Some station names and formats are a judgement, not a rule -- a name the
+    source mangled past any cleaner, or a station the directory lists twice
+    under two hostnames. Those live in a checked-in file rather than as
+    edits to the built catalog, so a rebuild stops undoing them.
+    """
+    if not path.exists():
+        return {}, set()
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    fields = {
+        station_id: {key: value for key, value in row.items() if key != "why"}
+        for station_id, row in doc.get("overrides", {}).items()
+    }
+    return fields, {row["id"] for row in doc.get("dropped", [])}
+
+
+def apply_overrides(station: dict, overrides: dict[str, dict]) -> dict:
+    """`station` with its hand-curated fields written over the built ones."""
+    override = overrides.get(station["id"])
+    if override:
+        station.update(override)
+    return station
+
+
 def build(
     source: dict,
     curated: dict,
     health: tuple[set[str], dict[str, str]] = (set(), {}),
     terrestrial: list[dict] | None = None,
+    curation: tuple[dict[str, dict], set[str]] = ({}, set()),
 ) -> dict:
     dead_ids, repaired_urls = health
+    overrides, dropped_ids = curation
     reserved = curated_call_signs(curated)
     curated_urls = {
         normalize_stream_url(row.get("stream_url") or "")
@@ -361,9 +492,13 @@ def build(
     dropped = 0
     seen_urls = set(curated_urls)
     dead_dropped = 0
+    hand_dropped = 0
     for row in source["local"]:
-        station = convert_station(row)
+        station = apply_overrides(convert_station(row), overrides)
         station["stream_url"] = repaired_urls.get(station["id"], station["stream_url"])
+        if station["id"] in dropped_ids:
+            hand_dropped += 1
+            continue
         if station["id"] in dead_ids:
             dead_dropped += 1
             continue
@@ -378,7 +513,11 @@ def build(
     # on the dial is still one station.
     added_terrestrial = 0
     for station in terrestrial or []:
+        apply_overrides(station, overrides)
         station["stream_url"] = repaired_urls.get(station["id"], station["stream_url"])
+        if station["id"] in dropped_ids:
+            hand_dropped += 1
+            continue
         key = normalize_stream_url(station["stream_url"])
         if call_sign_base(station["call_sign"]) in reserved or key in seen_urls:
             dropped += 1
@@ -393,8 +532,11 @@ def build(
     stations.sort(key=lambda s: (s["call_sign"], s["id"]))
     web_dropped = 0
     for row in source["web"]:  # already in listener-vote order; keep it
-        station = convert_web_station(row)
+        station = apply_overrides(convert_web_station(row), overrides)
         station["stream_url"] = repaired_urls.get(station["id"], station["stream_url"])
+        if station["id"] in dropped_ids:
+            hand_dropped += 1
+            continue
         if station["id"] in dead_ids:
             dead_dropped += 1
             continue
@@ -415,7 +557,9 @@ def build(
             "are that catalog's per-band defaults, not FCC contours. Curated "
             "call signs win: collisions are dropped at build and load time. "
             "Streams tools/check_radio_streams.py could not reach are left out; "
-            "see radio_stream_health.json. Rows with id rb-fcc-* are Radio "
+            "see radio_stream_health.json. Names and formats a rule cannot "
+            "derive, and stations the directory lists twice, come from "
+            "radio_imported_overrides.json. Rows with id rb-fcc-* are Radio "
             "Browser stations placed at their FCC-licensed transmitter site, "
             "with coverage from licensed power rather than a per-band default."
         ),
@@ -423,6 +567,7 @@ def build(
             "stations": len(stations),
             "dropped_collisions": dropped,
             "dropped_unreachable": dead_dropped,
+            "dropped_by_hand": hand_dropped,
             "fcc_placed": added_terrestrial,
         },
         "stations": stations,
@@ -438,6 +583,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--curated", type=Path, default=CURATED_PATH)
     parser.add_argument("--health", type=Path, default=HEALTH_PATH)
+    parser.add_argument("--overrides", type=Path, default=OVERRIDES_PATH)
     parser.add_argument("--radio-browser", type=Path, default=RADIO_BROWSER_PATH)
     parser.add_argument("--fcc", type=Path, default=FCC_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
@@ -458,6 +604,14 @@ def main(argv: list[str] | None = None) -> int:
         (args.fcc, "uv run python tools/fetch_fcc_transmitters.py"),
     ):
         if not path.exists():
+            # The caches are gitignored, so a clone does not have them. A
+            # contributor editing the overrides file must not be blocked by
+            # that -- but the skip is said out loud, because a check that
+            # quietly passes on missing input reads as one that proved
+            # something.
+            if args.check:
+                print(f"Skipped: {path} is not here. This check runs where the caches are.")
+                return 0
             # Building without these silently drops 800-odd terrestrial
             # stations and reports the checked-in file as out of date,
             # which reads as a bug in the data rather than a missing cache.
@@ -467,7 +621,24 @@ def main(argv: list[str] | None = None) -> int:
     terrestrial = terrestrial_rows(directory, transmitters)
     print(f"{len(terrestrial)} directory stations placed at a licensed transmitter")
 
-    text = render(build(source, curated, stream_health(args.health), terrestrial))
+    curation = hand_curation(args.overrides)
+    catalog = build(source, curated, stream_health(args.health), terrestrial, curation)
+
+    # An override for a station that is no longer built does nothing, and
+    # silence would leave it there for the next reader to trust. Name it.
+    overrides, dropped_ids = curation
+    built_ids = {station["id"] for station in catalog["stations"]}
+    stale = sorted((set(overrides) - built_ids) | (dropped_ids & built_ids))
+    if stale:
+        print(f"Stale entries in {args.overrides.name}:", file=sys.stderr)
+        for station_id in stale:
+            print(f"  {station_id}", file=sys.stderr)
+        return 1
+    print(
+        f"{len(overrides)} hand-curated stations, "
+        f"{catalog['counts']['dropped_by_hand']} dropped by hand"
+    )
+    text = render(catalog)
 
     if args.check:
         if not args.output.exists() or args.output.read_text(encoding="utf-8") != text:

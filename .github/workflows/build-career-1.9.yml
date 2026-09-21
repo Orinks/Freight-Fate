@@ -1,0 +1,566 @@
+name: Career 1.9 snapshot
+
+# The nightly for the 1.9 line, which since the 2026-09-20 cutover is
+# `dev` (see CAREER_BRANCH below).
+#
+# A scheduled run executes the copy of this file on the DEFAULT branch
+# (main), whatever the checked-out code is, so after changing it here push
+# the same file to main or the nightly quietly keeps the old job list. The
+# Prepare job fails a scheduled run whose file differs from CAREER_BRANCH's.
+
+on:
+  schedule:
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip release creation"
+        type: boolean
+        default: false
+      branch:
+        description: "Branch to build (a dry run is the way to try one)"
+        type: string
+        default: dev
+
+permissions:
+  contents: write
+
+concurrency:
+  group: career-19-snapshot
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  # `dev` since the 1.9 cutover (2026-09-20). This built feat/career-1.9
+  # while 1.9 was a side line; dev IS the 1.9 line now, and this is the
+  # only workflow that knows how to build the Rust game, so it is the
+  # nightly -- and now the only one that builds the game at all. build.yml
+  # ran the Python/Nuitka path and was deleted with the 1.8 line: dev has
+  # no Python gameplay left to feed it, and the owner ruled on 2026-09-20
+  # that 1.8 gets no further releases, so it had no job on either trigger.
+  #
+  # The `1.9-tester-*` tag scheme deliberately does NOT change. The
+  # in-game updater's developer-snapshot channel finds builds by that
+  # name, so renaming it would strand everyone already on one.
+  # A manual run may name another branch to try; the schedule always
+  # builds dev.
+  CAREER_BRANCH: ${{ inputs.branch || 'dev' }}
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      tag: ${{ steps.check.outputs.tag }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CAREER_BRANCH }}
+          fetch-depth: 0
+
+      - name: Refuse to run a stale copy of this workflow
+        # GITHUB_WORKFLOW_SHA is the commit the running workflow file came
+        # from: main on a schedule, the dispatched ref otherwise. HEAD is the
+        # career branch. A scheduled run on a stale main file must fail here
+        # rather than ship a snapshot missing whole platforms; a dispatch only
+        # warns, so the file can be iterated on the branch first.
+        run: |
+          git fetch --quiet origin "$GITHUB_WORKFLOW_SHA"
+          if git diff --quiet "$GITHUB_WORKFLOW_SHA" HEAD -- .github/workflows/build-career-1.9.yml; then
+            exit 0
+          fi
+          msg="main's .github/workflows/build-career-1.9.yml differs from $CAREER_BRANCH's; push the branch's copy to main."
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            echo "::error::$msg"
+            exit 1
+          fi
+          echo "::warning::$msg"
+
+      - name: Check snapshot conditions
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "tag=1.9-tester-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | head -1)
+          if [ -z "$LAST_TAG" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+          : > latest-stable-notes.md
+          LATEST_STABLE_TAG=$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // ""')
+          if [ -n "$LATEST_STABLE_TAG" ]; then
+            gh release view "$LATEST_STABLE_TAG" --json body -q .body > latest-stable-notes.md || true
+          fi
+          python3 tools/release_notes.py should-build-nightly \
+            --previous-tag "$LAST_TAG" \
+            --exclude-notes previous-notes.md \
+            --latest-stable-tag "$LATEST_STABLE_TAG" \
+            --exclude-stable-notes latest-stable-notes.md \
+            >> "$GITHUB_OUTPUT"
+
+  build_windows:
+    name: Build (Windows)
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Cache cargo registry and target directory
+        # Same shape as rust.yml: keyed on lockfile + rustc, target pruned
+        # to dependency artefacts before saving. This is what keeps the
+        # bundled SDL2 (and everything else) from recompiling every run.
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-windows
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        # Audio tests skip when the proprietary BASS runtime is absent. Fetch
+        # and verify it before Clippy or Cargo tests so a clean runner cannot
+        # report green without exercising the audio backend.
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        # The FULL suite: no `--cfg ci_quick`, so the whole-map sweeps the
+        # per-push workflow (rust.yml) leaves out run here every night.
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the portable release
+        run: ./build-release.ps1 --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate.exe --list-speech-backends | tee speech-backends.txt
+          grep -q "^SAPI " speech-backends.txt
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windows
+          path: dist/FreightFate-*-windows-portable.zip
+          if-no-files-found: error
+
+  build_macos:
+    name: Build (macOS Apple Silicon)
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      # The bundled SDL2 source declares a cmake_minimum_required older
+      # than CMake 4 accepts; this is CMake's own escape hatch for exactly
+      # that, and building SDL2 in is what keeps sdl2-compat/SDL3 out.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Cache cargo registry and target directory
+        # Same shape as rust.yml: keyed on lockfile + rustc, target pruned
+        # to dependency artefacts before saving. This is what keeps the
+        # bundled SDL2 (and everything else) from recompiling every run.
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-macos
+
+      # No brewed SDL: Homebrew's sdl2 is sdl2-compat, which loads SDL3 at
+      # runtime and dies on player Macs without Homebrew. SDL2 is compiled
+      # from source into the executable (`bundled` + `static-link`) using
+      # the runner's preinstalled cmake; the staging step fails the build
+      # if the executable links any SDL dynamically.
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the macOS release
+        # --smoke boots the PACKAGED app for five frames with dummy drivers:
+        # real dylib loading, real data, real boot. The old non-launch mode
+        # existed because hosted runners hung before first log -- the boot
+        # probes (speech, audio device) that 2026-08-30 moved onto worker
+        # threads; with them gone the launch proof is back. Bounded at 120 s
+        # inside the builder, which dumps the game log on failure.
+        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^AVSpeech " speech-backends.txt
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: macOS-arm64
+          path: dist/FreightFate-*-macos-arm64.zip
+          if-no-files-found: error
+
+  build_linux:
+    name: Build (Linux ${{ matrix.arch }})
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    # 22.04, not latest: the executable carries its build host's glibc as a
+    # floor (2.35 here), and one built on 24.04 would refuse to start on any
+    # distribution still shipping an older release, with no useful error.
+    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; what else is
+    # linked is the host's speech-dispatcher client.
+    #
+    # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
+    # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
+    # Module 4 and 5), Raspberry Pi desktops and other ARM64 Linux. The ARM
+    # runner is GitHub's hosted `ubuntu-22.04-arm`, same glibc floor. The
+    # steps are identical: fetch_bass.py, build_release.py and
+    # build_appimage.py each pick their architecture from `uname -m`.
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+            tarball: linux-x64
+          - arch: aarch64
+            runner: ubuntu-22.04-arm
+            tarball: linux-arm64
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+      # Same escape hatch as the Mac job: the bundled SDL2 declares a
+      # cmake_minimum_required older than CMake 4 accepts. 22.04 ships
+      # CMake 3.22, where this is a no-op, but the image updates.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Cache cargo registry and target directory
+        # The compiler is in the key: a CMake build directory configured by
+        # another compiler throws its cache away on reconfigure, options and
+        # install prefix included, and SDL2 then tries to install into
+        # /usr/local.
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-linux-${{ matrix.arch }}-gcc13
+
+      # SDL2 is compiled from source into the executable (`bundled` +
+      # `static-link`), and what it can open at run time is decided by the
+      # headers present now: a video or audio backend whose development
+      # package is missing here is compiled out for every player. So the
+      # whole desktop set goes in -- X11, Wayland with libdecor, PulseAudio,
+      # PipeWire, ALSA, D-Bus for IBus -- although the runner uses none of
+      # it. libdbus-1-dev is also what `keyring` links for the Secret
+      # Service; desktop-file-utils validates the AppImage's launcher entry.
+      - name: Install SDL2 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake pkg-config \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxinerama-dev libxss-dev libxfixes-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libdecor-0-dev \
+            libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libdrm-dev libgbm-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev \
+            libdbus-1-dev libudev-dev libibus-1.0-dev \
+            file desktop-file-utils
+
+      # Prism is compiled from source and linked into the executable. It
+      # needs gcc 13's standard library (std::atomic_unsigned_lock_free);
+      # 22.04 stops at 12, so gcc 13 comes from Ubuntu's toolchain PPA and
+      # crates/freight-fate/build.rs links its libstdc++ statically -- the
+      # player's system libstdc++ can be as old as 22.04's. Prism builds its
+      # speech-dispatcher backend only when the development package is here;
+      # without it Linux players would get no speech. Its Orca backend needs
+      # glibmm 2.68, which 22.04 does not carry, so it is left out; Orca
+      # users hear the game through Speech Dispatcher instead.
+      - name: Install Prism build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-13 g++-13 libspeechd-dev
+          echo "CC=gcc-13" >> "$GITHUB_ENV"
+          echo "CXX=g++-13" >> "$GITHUB_ENV"
+          # Prism's objects carry gcc 13 link-time bytecode; the system cc
+          # (gcc 11) cannot read it, so gcc 13 does the final link as well.
+          echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the Linux release
+        # --smoke boots the staged tarball payload for five frames with dummy
+        # drivers, the same proof the Mac job gets. Staging refuses an
+        # executable that links SDL2 dynamically and a payload missing BASS
+        # or its decoders.
+        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^Speech Dispatcher " speech-backends.txt
+
+      - name: Package the AppImage
+        timeout-minutes: 15
+        run: uv run python tools/build_appimage.py --rust --tag "${{ needs.prepare.outputs.tag }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Linux-${{ matrix.arch }}
+          path: |
+            dist/FreightFate-*-${{ matrix.tarball }}.tar.gz
+            dist/FreightFate-*-linux-${{ matrix.arch }}.AppImage
+          if-no-files-found: error
+
+  smoke_linux:
+    name: Smoke (${{ matrix.image }}, ${{ matrix.arch }})
+    needs: [prepare, build_linux]
+    # The build host proves one distribution. Players run the others, and
+    # what differs between them -- glibc, the dynamic loader, which
+    # libraries a desktop install carries -- is exactly what a build on
+    # Ubuntu cannot see. So the tarball and the AppImage are both booted,
+    # untouched, on each of the popular families, in a bare container that
+    # has less than any desktop does.
+    #
+    # The same matrix runs again on an ARM64 runner against the aarch64
+    # downloads, minus Arch: Docker Hub's archlinux image is amd64 only
+    # (Arch Linux ARM is a separate project with no official image). The
+    # Debian containers there are the nearest stand-in for the BT Speak and
+    # BT Braille, which are Debian on a Raspberry Pi Compute Module.
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12
+          - debian:13
+          - fedora:latest
+          - archlinux:latest
+          - opensuse/tumbleweed:latest
+        exclude:
+          - arch: aarch64
+            image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          sparse-checkout: tools/linux_smoke.sh
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-${{ matrix.arch }}
+          path: dist
+
+      - name: Boot the tarball and the AppImage
+        run: docker run --rm -v "$PWD:/work" "${{ matrix.image }}" bash /work/tools/linux_smoke.sh
+
+  release:
+    name: Release
+    needs: [prepare, build_windows, build_macos, build_linux, smoke_linux]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success' && needs.build_linux.result == 'success' && needs.smoke_linux.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Windows
+          path: release-assets
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: macOS-arm64
+          path: release-assets
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-x86_64
+          path: release-assets
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-aarch64
+          path: release-assets
+
+      - name: Verify release archives
+        shell: bash
+        run: |
+          shopt -s nullglob
+          windows_archives=(release-assets/FreightFate-*-windows-portable.zip)
+          if [ "${#windows_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Windows portable archive; found ${#windows_archives[@]}." >&2
+            exit 1
+          fi
+          macos_archives=(release-assets/FreightFate-*-macos-arm64.zip)
+          if [ "${#macos_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Apple Silicon macOS archive; found ${#macos_archives[@]}." >&2
+            exit 1
+          fi
+          linux_archives=(release-assets/FreightFate-*-linux-x64.tar.gz)
+          if [ "${#linux_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux tarball; found ${#linux_archives[@]}." >&2
+            exit 1
+          fi
+          linux_appimages=(release-assets/FreightFate-*-linux-x86_64.AppImage)
+          if [ "${#linux_appimages[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux AppImage; found ${#linux_appimages[@]}." >&2
+            exit 1
+          fi
+          linux_arm64_archives=(release-assets/FreightFate-*-linux-arm64.tar.gz)
+          if [ "${#linux_arm64_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 tarball; found ${#linux_arm64_archives[@]}." >&2
+            exit 1
+          fi
+          linux_arm64_appimages=(release-assets/FreightFate-*-linux-aarch64.AppImage)
+          if [ "${#linux_arm64_appimages[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 AppImage; found ${#linux_arm64_appimages[@]}." >&2
+            exit 1
+          fi
+
+      - name: Prepare and verify release notes and checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
+          (cd release-assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
+          (cd release-assets && sha256sum -c checksums.txt)
+
+          LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
+          if [ -n "$LAST_TAG" ]; then
+            gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+            python3 tools/release_notes.py nightly \
+              --previous-tag "$LAST_TAG" \
+              --exclude-notes previous-notes.md \
+              --output notes.md
+          else
+            python3 tools/release_notes.py nightly --first-snapshot --output notes.md
+          fi
+          test -s notes.md
+          python3 tools/release_notes.py check-size --input notes.md --max-characters 120000
+          test -s release-assets/checksums.txt
+
+      - name: Create prerelease
+        if: ${{ inputs.dry_run != true }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" -y --cleanup-tag
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            git push origin ":refs/tags/$TAG"
+          fi
+          gh release create "$TAG" release-assets/* --notes-file notes.md \
+            --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
+            --prerelease --target "$COMMIT_SHA"

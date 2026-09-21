@@ -34,7 +34,10 @@ determinism contract). Read those first if you have not.
   not to reset. Never delete a leg, stop, or checkpoint without reading it.
 - **Curated mileage is pay.** `leg["miles"]` drives pay and deadlines. The
   enrichment steps below never change it (`--refresh-geometry` preserves it;
-  `--adopt-ors-miles` is only for brand-new legs, always with `--only`).
+  `--adopt-ors-miles` is only for brand-new legs, always with `--only`). The
+  one job that does change it is replacing a leg's route outright -- see
+  *Putting a leg back on the road it is named for* -- and it says so in the
+  changelog when it does, because players feel it in the pay.
 - **Source notes on everything real.** Each checkpoint/stop records where it
   came from and how it was positioned. The placement tool writes these
   automatically; keep the convention if you edit by hand.
@@ -48,7 +51,7 @@ determinism contract). Read those first if you have not.
   failure is silent: the map serves the car number and the game confidently
   speaks a limit no legal rig may drive.
 - **Go through `tools/world_source.py`.** The source is per-state shards under
-  `src/freight_fate/data/world_source/`, not one file. `load_world()` hands you
+  `data/world_source/`, not one file. `load_world()` hands you
   the whole world as one dict and `save_world(data)` writes it back, so the
   tools in this recipe work exactly as they always have — but never open a
   shard directly, and never hand-edit one you have not read in full.
@@ -78,7 +81,8 @@ determinism contract). Read those first if you have not.
 Sparse legs are flagged by real-place checkpoint density:
 
 ```python
-from freight_fate.data.world import World
+# run from tools/ (or with tools/ on sys.path)
+from ffworld import World
 w = World.load()
 def density(leg):
     n = sum(1 for c in leg.checkpoints if c.type == "place"
@@ -241,9 +245,9 @@ showed 1.37% max on a 4,000 ft climb), so run this for every touched leg.
 
 ```sh
 uv run python tools/index_world.py && uv run python tools/index_world.py --check
-uv run pytest tests/test_world.py tests/test_world_overlay.py \
-    tests/test_route_coverage_tool.py tests/test_place_checkpoints.py
-uv run ruff check src tests tools
+cargo test -p ff-core data_world
+uv run pytest tests/test_index_world.py tests/test_curate_route_pois.py
+uv run ruff check tests tools
 ```
 
 Then re-run the density snippet: the leg should now clear 0.5 real places
@@ -263,7 +267,7 @@ A rig's limit therefore reaches the player by two independent routes, and
    it with `hgv: true` and it is already truck-correct.
 2. **Statutory.** OSM carries only the general `maxspeed`. Nothing in the data
    says trucks are held lower, so `STATE_TRUCK_MAX_MPH`
-   (`src/freight_fate/sim/trip_models.py`) pulls it down at runtime.
+   (`crates/ff-core/src/sim/trip_models.rs`) pulls it down at runtime.
 
 Route 2 exists because **OSM tagging coverage is not a fact about the law.**
 California I-80 alternates mile by mile between tagged and untagged; the
@@ -274,7 +278,7 @@ Never conclude "this road has no truck limit" from missing tags.
 truck-specific limit whichever way it arose, so S says "Truck limit 55.
 California holds trucks to this." on tagged and untagged miles alike. Keying
 off the cap alone silences the tagged roads — that regression shipped and was
-caught by a player on US-395 (2026-07-19); `tests/test_maxspeed.py` locks it.
+caught by a player on US-395 (2026-07-19); `crates/ff-core/tests/it/sim_maxspeed.rs` locks it.
 
 **Source the number, don't infer it.** Cite the statute or the DOT table, with
 the access date, in the comment above the entry. These laws move — several US
@@ -284,20 +288,21 @@ than none now that the game names the jurisdiction out loud.
 **Verify in-engine, never from the baked file.** The file holds the car
 number on untagged stretches by design; reading it and concluding the limit is
 wrong is a mistake that has been made twice. Build a `Trip` and call
-`speed_limit_at()`:
+`speed_limit_at()`: a throwaway test in
+`crates/ff-core/tests/it/sim_maxspeed.rs` can use that file's helpers.
 
-```sh
-uv run python - <<'PY'
-from freight_fate.data.world import get_world
-from freight_fate.sim.trip import Trip
-from freight_fate.sim.vehicle import TruckState
-from freight_fate.sim.weather import WeatherSystem
-route = get_world().route_options("Sacramento", "Reno")[0]
-trip = Trip(route, TruckState(), WeatherSystem("california", seed=1), seed=2)
-for m in (5, 20, 50, 90, 110, 125):
-    print(m, trip.speed_limit_at(m)[0], trip.truck_limit_at(m))
-PY
+```rust
+#[test]
+fn probe_sacramento_reno() {
+    let mut trip = trip_for(first_route_option(world(), "Sacramento", "Reno"), "california");
+    for m in [5.0, 20.0, 50.0, 90.0, 110.0, 125.0] {
+        println!("{m} {:?} {:?}", trip.speed_limit_at(m), trip.truck_limit_at(m));
+    }
+}
 ```
+
+Run it with `cargo test -p ff-core --test it probe_sacramento_reno --
+--nocapture`, read the numbers, and delete the probe.
 
 ### Taking this off the US grid
 
@@ -359,6 +364,57 @@ enrichment commit.
   re-running a batch is cheap and safe (all steps are idempotent).
 - The endpoint-city POI queries are cache-keyed per CITY, so working
   corridor-by-corridor gets cheaper as coverage grows.
+
+## Putting a leg back on the road it is named for
+
+The one job on this page that DOES change `leg["miles"]`, and therefore pay
+and deadlines. It is not enrichment; it is replacing the leg's route, and
+then enriching the new one.
+
+A leg can be labelled for an interstate its baked route never joins. Two
+different faults look identical from inside the data and a truck router tells
+them apart, so start by measuring rather than reading the label:
+
+```
+uv run python tools/curve_valhalla_facts.py --all      # map-matched coverage
+uv run python tools/probe_leg_labels.py --out .route-cache/label-split.json
+```
+
+That prints two lists. A leg whose ROUTER route barely touches the shield has
+the wrong LABEL, and `tools/repair_leg_labels.py --split` renames it. A leg
+whose router route rides the shield has the wrong ROUTE, and it wants this:
+
+```
+uv run python tools/reroute_leg.py --leg <from_slug>:<to_slug> --write
+uv run --group tooling python tools/reroute_enrich.py \
+    --all-pending --pbf ~/osm/us-latest.osm.pbf --write
+```
+
+`reroute_leg` settles the route, writes the polyline and the mileage, and
+drops every corridor layer that was a reading along the OLD road. Curated
+checkpoints are the exception: they are real towns with real coordinates, so
+they are re-positioned onto the new road and only dropped if it now runs more
+than three miles from them. Curated TOLL EVENTS are dropped and printed --
+nothing downstream puts them back, so a leg that still tolls wants
+re-curating by hand.
+
+`reroute_enrich` rebuilds everything else and refuses to call a leg finished
+if any layer came back empty or at less than half its old size. Between the
+two, the leg is INCOMPLETE, and `--check` on either tool lists any leg left
+that way. Run `tools/index_world.py` afterwards like any world edit, then the
+curve chain (`curve_valhalla_facts.py --all`, `bake_curve_connectors.py
+--write`, `clamp_curve_advisories.py --write`, `screen_curve_artifacts.py`),
+because the bends moved with the road.
+
+Two things bite:
+
+- **`--only` takes SLUGS on every tool in the chain**, semicolon-separated:
+  `corpus_christi_tx_us->san_antonio_tx_us`, never `Corpus Christi->San
+  Antonio`. The interchange family builds one index over a 12 GB extract per
+  run, so pass all the legs at once or pay for that read per leg.
+- **The interchange sub-mode flags do not compose.** `--maxspeed
+  --restrictions --ramp-controls` together dispatches to one and silently
+  skips the rest. `reroute_enrich` runs them in sequence.
 
 ## Building new corridors (composition)
 

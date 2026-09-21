@@ -72,13 +72,41 @@ CURVE_RADIUS_FT = 3000.0  # a vertex tighter than this is "curving" for a Class-
 A_LAT_G = 0.30  # comfortable dry-loaded lateral accel for the advisory speed
 RADIUS_WINDOW_M = 80.0  # sliding-arc window for the circle-fit radius (Phil's #2)
 DP_EPS_TANGENT_M = 30.0  # loose simplification on near-straight runs
+
+
 CURVE_PAD_M = 80.0  # keep-all margin around curve spans so edges re-fit identically
 POINT_BUDGET = 600  # tangent-only vertex cap (curves set their own floor)
 SIGN_WOBBLE_DEG = 1.0  # |turn| under this is neutral (doesn't set a direction)
 SIGN_HYSTERESIS_DEG = 5.0  # sustained opposing turn needed to split a run (Phil's #1)
 DEFLECTION_FLOOR_DEG = 8.0  # a real curve turns at least this much (per direction)
+ADVISORY_MAX_MPH = 80  # top of the AASHTO friction table; see _advisory_mph
 CONNECTOR_WINDOW_MI = 0.75  # first/last in-town stretch -> tag curves, don't drop
+# ^ a BOOTSTRAP, not the finished connector layer. Position alone cannot see a
+#   mid-leg interchange, and 0.75 mi does not get a truck out of Denver. After
+#   any sweep, re-run tools/curve_valhalla_facts.py and bake_curve_connectors.py:
+#   those read the road class OSM records under each apex and finish the flag.
 MATCH_CORRIDOR_M = 90.0  # how near a maxspeed way must be to govern a sample point
+
+# How far the archived line may ever sit from the road it describes.
+#
+# The tangent simplifier used to loosen its tolerance to 4,000 m chasing a
+# vertex budget, and on a leg whose CURVES alone exceed that budget it ran
+# all the way there every time -- the target was unreachable, so the loop
+# just kept loosening. Newark to Trenton came out as 340 vertices of city
+# street, one 37-mile straight line where the New Jersey Turnpike is, and
+# 305 vertices of Trenton: 2.5 miles off the road at the worst point. 985
+# legs carry a hop over 5 percent of their own length for this reason.
+#
+# The cap is MATCH_CORRIDOR_M rather than a number picked to look right:
+# that is the distance within which a way is taken to govern a sample
+# point, so a line straying further can no longer be matched to its own
+# road, and everything that asks 'what road is this' -- interchanges,
+# lanes, posted limits, tolls -- starts reading a road the truck never
+# drives.
+#
+# The vertex budget is a file-size target. Fidelity to the road is not, so
+# where the two disagree the leg is allowed to exceed the budget.
+MAX_EPS_TANGENT_M = MATCH_CORRIDOR_M
 SPEED_GAP_MI = 4.0  # a posting-free run longer than this becomes an explicit gap
 
 MPS_TO_MPH = 2.2369362920544
@@ -156,9 +184,17 @@ def _window_radius_ft(cum_m: list[float], turn: list[float], i: int) -> float:
 
 
 def _advisory_mph(radius_ft: float) -> float:
+    """Advisory speed at the apex, capped at the top of the friction table.
+
+    The point-mass control this solves is published for 20 through 80 mph and
+    stops there, because no US road is designed above 80. Left unclamped it
+    reads out 115 on a gentle bend, which is arithmetic past the edge of its
+    own table rather than a statement about a road. ADVISORY_MAX_MPH is an
+    import-free copy of ``data/curves.py``'s constant of the same name -- this
+    tool deliberately has no runtime dependency on the baked-data module."""
     r_m = radius_ft / FT_PER_M
     v = math.sqrt(A_LAT_G * 9.80665 * r_m)  # m/s
-    return int(round(v * MPS_TO_MPH / 5.0) * 5)
+    return min(int(round(v * MPS_TO_MPH / 5.0) * 5), ADVISORY_MAX_MPH)
 
 
 # --- curvature analysis + switchback-aware curve detection ------------------
@@ -332,9 +368,15 @@ def adaptive_simplify(
 
     ordered = build(DP_EPS_TANGENT_M)
     eps_t = DP_EPS_TANGENT_M
-    while len(ordered) > budget and eps_t < 4000:
+    while len(ordered) > budget and eps_t < MAX_EPS_TANGENT_M:
         eps_t *= 1.6
-        ordered = build(eps_t)
+        grown = build(eps_t)
+        # A wider tolerance cannot remove a vertex a CURVE is holding, so once
+        # loosening stops dropping points the budget is unreachable and every
+        # further step is paid for out of tangent fidelity for nothing.
+        if len(grown) >= len(ordered):
+            break
+        ordered = grown
     return ordered
 
 
@@ -377,6 +419,81 @@ def decode_geometry(geom: dict[str, Any]) -> list[list[float]]:
 # --- maxspeed: ONE bbox query per leg, matched locally ----------------------
 def _shield_numbers(highway: str) -> set[str]:
     return set(re.findall(r"\d+", str(highway)))
+
+
+# How a route shield is written, in the world and in OpenStreetMap, reduced to
+# a class and a number so the two can be compared.
+#
+# This exists because matching on the NUMBER alone credits US 95 to a leg
+# named I-95, and matching on "does the name start with I" -- which is what
+# the reroute check did -- scores every US and state route at zero however
+# faithfully it drives its own road. Both are wrong in the same place: they
+# treat the shield's class as either irrelevant or as always "interstate".
+_SHIELD_CLASSES = {
+    "I": "I",
+    "INTERSTATE": "I",
+    "US": "US",
+    "US HIGHWAY": "US",
+    "US HWY": "US",
+    "US ROUTE": "US",
+    "SR": "STATE",
+    "STATE HIGHWAY": "STATE",
+    "STATE ROUTE": "STATE",
+    "STATE ROAD": "STATE",
+    "HIGHWAY": "STATE",
+    "ROUTE": "STATE",
+    "CR": "CR",
+    "COUNTY ROAD": "CR",
+    "COUNTY ROUTE": "CR",
+}
+# Anything else of the form "<two letters> <number>" is a state route: OSM
+# writes Texas 6 as "TX 6" and the world writes it as "TX-6". A state name
+# spelled out ("Illinois Route 3") lands on STATE through the table above.
+#
+# Direction words are stripped as whole TOKENS rather than matched inside the
+# pattern. Doing it in the pattern ate the N of "NC-16" as a compass point and
+# read "South US Highway 181" as a state route, both silently.
+_DIRECTIONS = frozenset({"N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"})
+_SHIELD_RE = re.compile(r"^([A-Za-z][A-Za-z ]*?)\s*[-\s]\s*(\d+)")
+
+
+def shield_key(name: str) -> tuple[str, str] | None:
+    """``"South US Highway 181"`` -> ``("US", "181")``; a street name -> None."""
+    text = str(name).replace(".", " ").replace("-", " - ")
+    words = [word for word in text.split() if word]
+    while words and words[0].upper() in _DIRECTIONS:
+        words.pop(0)
+    while words and words[-1].upper() in _DIRECTIONS:
+        words.pop()
+    match = _SHIELD_RE.match(" ".join(words))
+    if not match:
+        return None
+    prefix = " ".join(match.group(1).upper().split())
+    if prefix in _SHIELD_CLASSES:
+        return _SHIELD_CLASSES[prefix], match.group(2)
+    # A spelled-out state name ("Illinois Route", "Kentucky Highway") is a
+    # state route, and so is a bare two-letter state code.
+    if prefix.endswith(" ROUTE") or prefix.endswith(" HIGHWAY") or prefix.endswith(" ROAD"):
+        return "STATE", match.group(2)
+    if len(prefix) == 2 and prefix.isalpha():
+        return "STATE", match.group(2)
+    return None
+
+
+def matches_shield(name: str, highway: str) -> bool:
+    """Is ``name`` (as OSM writes it) the road ``highway`` (as the world does)?
+
+    NOT the same job as ``repair_leg_labels.shield``, and the two must not be
+    merged. This one collapses every state route to one class so that "State
+    Highway 6" and "TX 6" compare equal -- right for asking whether a matched
+    road IS the leg's road. That tool keeps the written prefix, because its
+    answer becomes the leg's NAME and a player hears it: "NH-101", never
+    "STATE-101". Checked on the relabel candidates -- the shares agree to the
+    point, only the spelling differs.
+    """
+    wanted = shield_key(highway)
+    found = shield_key(name)
+    return bool(wanted and found and wanted == found)
 
 
 def _ref_matches_shield(ref: str, shield_nums: set[str]) -> bool:
@@ -533,7 +650,9 @@ def main() -> None:
         cum_raw = _cumulative_m(coords)
         raw_mi = cum_raw[-1] / 1609.344
         mile_scale = (leg_miles / raw_mi) if leg_miles else 1.0  # leg-miles convention (#4)
-        print(f"    {len(coords)} raw vertices, {raw_mi:.1f} mi (leg.miles={leg_miles})", flush=True)
+        print(
+            f"    {len(coords)} raw vertices, {raw_mi:.1f} mi (leg.miles={leg_miles})", flush=True
+        )
 
         # 1. detect curves on the full-resolution raw geometry (decides keep-mask)
         curv_raw = analyse_curvature(coords, cum_raw)
@@ -563,7 +682,12 @@ def main() -> None:
         state = nodes[frm]["state"].lower()
         leg_id = f"{frm}:{to}"
         geom_by_state.setdefault(state, []).append(
-            {"leg": leg_id, "highway": highway, "miles": round(leg_miles or raw_mi, 2), "geom": geom}
+            {
+                "leg": leg_id,
+                "highway": highway,
+                "miles": round(leg_miles or raw_mi, 2),
+                "geom": geom,
+            }
         )
         for s in speeds:
             speed_rows.append(json.dumps({"leg": leg_id, **s}, sort_keys=True))

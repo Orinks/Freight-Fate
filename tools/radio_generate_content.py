@@ -10,14 +10,22 @@ files. Build-time only, never imported at runtime.
 Every runner here is resume-friendly (skips an asset whose output file
 already exists unless ``--force``), prints per-asset progress, and prints a
 credit-usage delta (``GET /v1/user/subscription`` before/after) so a
-partial or repeated run never spends silently.
+partial or repeated run never spends silently. "Exists" means any of the
+music extensions the game reads (``.opus``, ``.ogg``, ``.wav``): the shipped
+tree was re-encoded to Opus after the first batch, and a runner that only
+looked for ``.ogg`` would buy every song again. A scoped key without the
+``user_read`` permission cannot read the meter; the delta then prints as
+unreadable and each response's own ``character-cost`` header is printed
+per asset instead.
 
 Station-ID asset numbering follows ``radio_content_plan``'s own contract,
 not a filename guess: each ``StationPlan.jingle_prompts`` entry already
-carries its own output ``asset_key`` (``id_<station>_01`` / ``_02``, per
-that module's docstring), so the two produced jingles land exactly there.
-The spoken legal ID -- built from ``id_lines[0]`` here, not from the plan
--- gets the one key the plan reserves for it: ``id_<station>_03``.
+carries its own output ``asset_key`` (``id_<station>_01`` / ``_02`` /
+``_04``, per that module's docstring), so the produced jingles land exactly
+there. The spoken IDs -- built from ``id_lines`` here, not from the plan --
+take the keys the plan reserves for them: ``id_lines[0]`` is the legal ID
+at ``id_<station>_03``, and every later line is a liner at
+``id_<station>_05``, ``_06``, ... (``_04`` belongs to the third jingle).
 """
 
 from __future__ import annotations
@@ -36,7 +44,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generate_radio import (  # noqa: E402
     ASSETS,
     MUSIC_API,
+    MUSIC_MODEL,
     TTS_API,
+    TTS_MODEL,
+    TTS_VOICE_SETTINGS,
     VOICE_CACHE,
     _normalize_to_target,
     _post_bytes,
@@ -53,7 +64,12 @@ SFX_DIR = ASSETS / "radio" / "imaging"
 
 # Same TTS delivery recipe generate_hosts already uses -- one voice
 # character across hosts, station IDs, and ads keeps the cast consistent.
-VOICE_SETTINGS = {"stability": 0.45, "similarity_boost": 0.75, "style": 0.35}
+VOICE_SETTINGS = TTS_VOICE_SETTINGS
+
+# Every container the game's music loader accepts, in its own preference
+# order (audio/assets.rs MUSIC_EXTENSIONS). The resume check has to look for
+# all of them: the shipped tree is Opus, the runners write Vorbis.
+MUSIC_EXTENSIONS = ("opus", "ogg", "wav", "mp3", "flac", "it", "xm", "s3m", "mod", "mo3")
 
 # mix_id_bed's two SFX layer names -> the SFX_PROMPTS key that fills each.
 ID_SFX_LAYERS = {"whoosh": "radio_imaging_whoosh_short", "riser": "radio_imaging_riser"}
@@ -65,18 +81,47 @@ def _subscription(key: str) -> dict:
         return json.load(resp)
 
 
-def credit_usage(key: str) -> int:
+def credit_usage(key: str) -> int | None:
     """``character_count`` used against the account's ``character_limit``
     (``GET /v1/user/subscription``). TTS and Music generation both draw
     against this pool, so every runner reads it before and after its batch
     and prints the delta -- the only way to see a run's real cost without a
     dashboard trip.
+
+    ``None`` when the key is scoped without ``user_read`` (the API answers
+    401 with a missing-permissions status): a generation-only key is a
+    reasonable thing to hand a build tool, and it must not stop the run.
     """
-    return int(_subscription(key).get("character_count", 0))
+    try:
+        return int(_subscription(key).get("character_count", 0))
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403):
+            return None
+        raise
 
 
-def _print_spend(before: int, after: int) -> None:
+def _print_spend(before: int | None, after: int | None) -> None:
+    if before is None or after is None:
+        print(
+            "  spend this run: not readable (the key lacks user_read; "
+            "see the per-asset cost lines above)",
+            flush=True,
+        )
+        return
     print(f"  spend this run: {after - before:,} characters ({before:,} -> {after:,})", flush=True)
+
+
+def existing_output(stem: str) -> Path | None:
+    """The music-tree file already standing in for ``stem``, if any.
+
+    Checked in the loader's preference order, so the answer is the file
+    the game would play; ``None`` means the asset still needs generating.
+    """
+    for ext in MUSIC_EXTENSIONS:
+        candidate = ASSETS / "music" / f"{stem}.{ext}"
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _select_stations(content_key: str | None) -> dict:
@@ -106,6 +151,16 @@ def _voice_id_for(voices: dict[str, str], name: str, context: str) -> str:
             "`uv run python tools/generate_radio.py --voices` first."
         )
     return voice_id
+
+
+def spoken_id_slot(line_index: int) -> int:
+    """The ``id_<station>_NN`` number for ``id_lines[line_index]``.
+
+    The legal ID keeps the ``_03`` the first batch shipped under; the
+    liners after it start at ``_05`` because ``_04`` is the third sung
+    jingle's key in the plan.
+    """
+    return 3 if line_index == 0 else 4 + line_index
 
 
 def _station_seed(station_key: str) -> int:
@@ -218,14 +273,13 @@ def run_plan_hosts(key: str, content_key: str | None = None, *, force: bool = Fa
         print(f"host lines for {station_key} ({plan.voice})...", flush=True)
         for i, line in enumerate(plan.host_lines, start=1):
             asset = f"host_{station_key}_{i:02d}"
-            out = ASSETS / "music" / f"{asset}.ogg"
-            if out.exists() and not force:
+            if existing_output(asset) and not force:
                 print(f"  skip {asset} (exists)", flush=True)
                 continue
             print(f"  speaking {asset}...", flush=True)
             body = {
                 "text": line,
-                "model_id": "eleven_multilingual_v2",
+                "model_id": TTS_MODEL,
                 "voice_settings": VOICE_SETTINGS,
             }
             try:
@@ -242,11 +296,12 @@ def run_plan_hosts(key: str, content_key: str | None = None, *, force: bool = Fa
 
 
 def run_plan_ids(key: str, content_key: str | None = None, *, force: bool = False) -> None:
-    """--plan-ids [STATION]: id_lines[0] TTS'd in the host voice ->
+    """--plan-ids [STATION]: every id_lines entry TTS'd in the host voice ->
     imaging_process -> mix_id_bed with the SFX beds -> id_<station>_03.ogg
-    (the spoken legal ID); each of the 2 jingle_prompts -> Eleven Music ->
-    loudness match -> the asset_key the plan already names for it
-    (id_<station>_01/02)."""
+    for the legal ID (id_lines[0]) and id_<station>_05, _06, ... for the
+    liners after it; each jingle_prompts entry -> Eleven Music -> loudness
+    match -> the asset_key the plan already names for it
+    (id_<station>_01/02/04)."""
     stations = _select_stations(content_key)
     voices = _load_voice_map()
     sfx_layers, sfx_rate = _load_id_sfx_layers()
@@ -254,15 +309,15 @@ def run_plan_ids(key: str, content_key: str | None = None, *, force: bool = Fals
     for station_key, plan in stations.items():
         voice_id = _voice_id_for(voices, plan.voice, f"station {station_key}")
 
-        spoken_asset = f"id_{station_key}_03"
-        spoken_out = ASSETS / "music" / f"{spoken_asset}.ogg"
-        if spoken_out.exists() and not force:
-            print(f"  skip {spoken_asset} (exists)", flush=True)
-        else:
-            print(f"spoken ID for {station_key} ({plan.voice})...", flush=True)
+        for line_index, line in enumerate(plan.id_lines):
+            spoken_asset = f"id_{station_key}_{spoken_id_slot(line_index):02d}"
+            if existing_output(spoken_asset) and not force:
+                print(f"  skip {spoken_asset} (exists)", flush=True)
+                continue
+            print(f"spoken ID {spoken_asset} for {station_key} ({plan.voice})...", flush=True)
             body = {
-                "text": plan.id_lines[0],
-                "model_id": "eleven_multilingual_v2",
+                "text": line,
+                "model_id": TTS_MODEL,
                 "voice_settings": VOICE_SETTINGS,
             }
             try:
@@ -270,21 +325,17 @@ def run_plan_ids(key: str, content_key: str | None = None, *, force: bool = Fals
             except urllib.error.HTTPError as exc:
                 detail = exc.read().decode("utf-8", "ignore")[:300]
                 print(f"    FAILED {spoken_asset}: HTTP {exc.code} {detail}", flush=True)
-            else:
-                samples, rate = _mp3_bytes_to_samples(mp3)
-                voiced = imaging_process(
-                    samples, rate, _station_seed(station_key), label=spoken_asset
-                )
-                layers = {
-                    name: _resample_linear(layer, sfx_rate, rate)
-                    for name, layer in sfx_layers.items()
-                }
-                mixed = mix_id_bed(voiced, layers, rate)
-                _write_asset(mixed, rate, f"music/{spoken_asset}.ogg")
+                continue
+            samples, rate = _mp3_bytes_to_samples(mp3)
+            voiced = imaging_process(samples, rate, _station_seed(station_key), label=spoken_asset)
+            layers = {
+                name: _resample_linear(layer, sfx_rate, rate) for name, layer in sfx_layers.items()
+            }
+            mixed = mix_id_bed(voiced, layers, rate)
+            _write_asset(mixed, rate, f"music/{spoken_asset}.ogg")
 
         for asset_key, prompt in plan.jingle_prompts:
-            out = ASSETS / "music" / f"{asset_key}.ogg"
-            if out.exists() and not force:
+            if existing_output(asset_key) and not force:
                 print(f"  skip {asset_key} (exists)", flush=True)
                 continue
             length_ms = _jingle_length_ms(prompt)
@@ -292,7 +343,7 @@ def run_plan_ids(key: str, content_key: str | None = None, *, force: bool = Fals
             body = {
                 "prompt": prompt,
                 "music_length_ms": length_ms,
-                "model_id": "music_v1",
+                "model_id": MUSIC_MODEL,
                 "force_instrumental": False,
             }
             try:
@@ -317,14 +368,13 @@ def run_plan_ads(key: str, *, force: bool = False) -> None:
     before = credit_usage(key)
     for ad in AD_PLAN:
         voice_id = _voice_id_for(voices, ad.voice, f"ad {ad.key}")
-        out = ASSETS / "music" / f"{ad.key}.ogg"
-        if out.exists() and not force:
+        if existing_output(ad.key) and not force:
             print(f"  skip {ad.key} (exists)", flush=True)
             continue
         print(f"  speaking {ad.key} ({ad.voice})...", flush=True)
         body = {
             "text": ad.script,
-            "model_id": "eleven_multilingual_v2",
+            "model_id": TTS_MODEL,
             "voice_settings": VOICE_SETTINGS,
         }
         try:
@@ -364,8 +414,7 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
     songs = SONG_PLAN[pool]
     generated = 0
     for song in songs:
-        out = ASSETS / "music" / f"{song.key}.ogg"
-        if out.exists() and not force:
+        if existing_output(song.key) and not force:
             print(f"  skip {song.key} (exists)", flush=True)
             continue
         if limit is not None and generated >= limit:
@@ -374,7 +423,7 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
         body = {
             "prompt": song.prompt,
             "music_length_ms": song.length_ms,
-            "model_id": "music_v1",
+            "model_id": MUSIC_MODEL,
             "force_instrumental": song.instrumental,
         }
         try:
@@ -386,9 +435,7 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
         _write_ogg(mp3, ASSETS / "music" / f"{song.key}.ogg")
         generated += 1
     if limit is not None:
-        remaining = sum(
-            1 for s in songs if force or not (ASSETS / "music" / f"{s.key}.ogg").exists()
-        )
+        remaining = sum(1 for s in songs if force or not existing_output(s.key))
         print(
             f"  limit {limit} reached, {remaining} of {len(songs)} pool songs remain ungenerated",
             flush=True,
@@ -419,12 +466,20 @@ def run_probe(key: str, *, force: bool = False) -> None:
     song = SONG_PLAN["oldies"][0]
     out = ASSETS / "music" / f"{song.key}.ogg"
 
-    before = _subscription(key)
+    try:
+        before = _subscription(key)
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403):
+            raise SystemExit(
+                "--probe measures against GET /v1/user/subscription, which this key "
+                "may not read (it lacks user_read). Grant the scope or use a full key."
+            ) from exc
+        raise
     before_count = int(before.get("character_count", 0))
     before_limit = int(before.get("character_limit", 0))
     print(f"  before: {before_count:,} / {before_limit:,} characters used", flush=True)
 
-    if out.exists() and not force:
+    if existing_output(song.key) and not force:
         print(
             f"  skip {song.key} (exists) -- pass --force to regenerate and re-measure", flush=True
         )
@@ -433,7 +488,7 @@ def run_probe(key: str, *, force: bool = False) -> None:
         body = {
             "prompt": song.prompt,
             "music_length_ms": song.length_ms,
-            "model_id": "music_v1",
+            "model_id": MUSIC_MODEL,
             "force_instrumental": song.instrumental,
         }
         mp3 = _post_bytes(MUSIC_API, key, body)

@@ -23,7 +23,7 @@ class SongPlan:
 
 # Song batches, MUSIC_SPECS prompt style: concrete genre, subject, vocal
 # and instrumentation notes, a mix/feel tag. Keys extend the shipped
-# catalog stems; titles must never collide with music.py.
+# catalog stems; titles must never collide with the Rust music catalog.
 SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
     "oldies": (
         SongPlan(
@@ -361,37 +361,37 @@ SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
             "Fence-line country tune about staying the course",
             "Steady modern country song about split rail fences and "
             "promises that hold, sincere male vocals, telecaster and pedal "
-            "steel trading fills, mid-tempo trucker shuffle, warm radio mix",
+            "steel trading fills, mid-tempo train beat, warm radio mix",
             184_000,
             False,
         ),
         SongPlan(
-            "radio_country_second_gear_sunrise",
-            "Second Gear Sunrise",
-            "Early-shift country song of first light",
-            "Hopeful country song about pulling out of the yard in second "
-            "gear as the sun comes up, warm female vocals, acoustic strum "
-            "with fiddle answering, gentle build to a big open chorus",
+            "radio_country_county_fair_lights",
+            "County Fair Lights",
+            "Up-tempo song of a first kiss at the county fair",
+            "Bright up-tempo country song about a first kiss at the top of "
+            "the Ferris wheel at the county fair, warm female vocals, "
+            "acoustic strum with fiddle answering, handclaps, big open chorus",
             176_000,
             False,
         ),
         SongPlan(
-            "radio_country_gravel_lot_serenade",
-            "Gravel Lot Serenade",
-            "Parking-lot slow dance for two rigs at dusk",
-            "Tender country waltz about two drivers sharing supper on a "
-            "gravel lot at dusk, duet of male and female vocals, brushed "
-            "drums, weeping pedal steel, small-town dance-floor sway",
+            "radio_country_porch_swing_promise",
+            "Porch Swing Promise",
+            "Front-porch love duet in three-four time",
+            "Tender country waltz about a promise made on a front porch "
+            "swing forty summers ago and kept, duet of male and female "
+            "vocals, brushed drums, weeping pedal steel, slow dance sway",
             198_000,
             False,
         ),
         SongPlan(
-            "radio_country_gooseneck_moon",
-            "Gooseneck Moon",
-            "Moonlit haul with a trailer full of memories",
-            "Wistful country waltz about hauling a gooseneck trailer under "
-            "a harvest moon, weathered male vocals, mandolin and dobro, "
-            "unhurried three-four sway, nostalgic late-evening feel",
+            "radio_country_harvest_moon_over_the_barn",
+            "Harvest Moon Over the Barn",
+            "Wistful waltz about the farm passing to the next generation",
+            "Wistful country waltz about a harvest moon over the barn and "
+            "a farm handed down to a daughter, weathered male vocals, "
+            "mandolin and dobro, unhurried three-four sway, late-evening feel",
             206_000,
             False,
         ),
@@ -438,42 +438,45 @@ SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
     ),
     "classic_rock": (
         SongPlan(
-            "radio_rock_ten_ton_heart",
-            "Ten Ton Heart",
-            "Heavy-hearted highway anthem",
-            "Classic rock anthem about hauling a ten ton heart down the "
-            "interstate, gritty male vocals, thick guitar riffs, pounding "
-            "drums, soaring twin-lead solo, seventies stadium energy",
+            "radio_rock_paper_crown",
+            "Paper Crown",
+            "Anthem for the small-town king who never left",
+            "Classic rock anthem about the high school king who still wears "
+            "his paper crown at the same bar twenty years on, gritty male "
+            "vocals, thick guitar riffs, pounding drums, soaring twin-lead "
+            "solo, seventies stadium energy",
             202_000,
             False,
         ),
         SongPlan(
-            "radio_rock_jake_brake_lullaby",
-            "Jake Brake Lullaby",
-            "Grinning rocker about the loudest lullaby",
-            "Swaggering blues-rock song joking that the jake brake is the "
-            "only lullaby a trucker knows, raspy male vocals, growling "
-            "slide guitar, half-time stomp groove, cowbell accents, live-room feel",
+            "radio_rock_bar_band_saturday",
+            "Bar Band Saturday",
+            "Grinning blues-rocker about the cover band that never quit",
+            "Swaggering blues-rock song about the Saturday night bar band "
+            "that never made it and never stopped playing, raspy male "
+            "vocals, growling slide guitar, half-time stomp groove, cowbell "
+            "accents, live-room feel",
             180_000,
             False,
         ),
         SongPlan(
-            "radio_rock_asphalt_aurora",
-            "Asphalt Aurora",
-            "Instrumental for northern lights over blacktop",
+            "radio_rock_lights_over_superior",
+            "Lights Over Superior",
+            "Instrumental for northern lights over the big lake",
             "Melodic classic rock instrumental about northern lights "
-            "shimmering over an empty highway, expressive lead guitar "
-            "melody, organ pads, spacious drums, slow-building epic arc, no vocals",
+            "shimmering over Lake Superior, expressive lead guitar melody, "
+            "organ pads, spacious drums, slow-building epic arc, no vocals",
             226_000,
             True,
         ),
         SongPlan(
-            "radio_rock_double_clutch_city",
-            "Double Clutch City",
-            "Horn-stabbed funk-rock for city hauling",
-            "Funky classic rock song about double clutching through city "
-            "traffic, confident male vocals, wah guitar riff, punchy horn "
-            "section stabs, syncopated drums, seventies street groove",
+            "radio_rock_last_payphone_in_town",
+            "Last Payphone in Town",
+            "Horn-stabbed funk-rock about a call that never came",
+            "Funky classic rock song about waiting by the last payphone in "
+            "town for a call that never came, confident male vocals, wah "
+            "guitar riff, punchy horn section stabs, syncopated drums, "
+            "seventies street groove",
             174_000,
             False,
         ),
@@ -498,22 +501,23 @@ SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
             False,
         ),
         SongPlan(
-            "radio_rock_timberline_run",
-            "Timberline Run",
-            "High-altitude boogie above the treeline",
-            "Hard-charging boogie rock song about running freight above "
-            "the timberline, howling male vocals, twin guitar harmonies, "
-            "relentless shuffle drums, mountain-sized breakdown, big finish",
+            "radio_rock_river_rising",
+            "River Rising",
+            "Boogie about a town sandbagging through a spring flood",
+            "Hard-charging boogie rock song about a river town filling "
+            "sandbags shoulder to shoulder as the spring flood rises, "
+            "howling male vocals, twin guitar harmonies, relentless shuffle "
+            "drums, big breakdown, big finish",
             184_000,
             False,
         ),
         SongPlan(
             "radio_rock_furnace_wind",
             "Furnace Wind",
-            "Desert-heat rocker with a slow-burn build",
-            "Slow-burning hard rock song about driving into a furnace "
-            "wind across the flats, smoky female vocals, hypnotic bass "
-            "riff, shimmering ride cymbal groove, explosive final chorus",
+            "Heat-wave rocker about a love that will not cool",
+            "Slow-burning hard rock song about a July heat wave and a love "
+            "that will not cool, smoky female vocals, hypnotic bass riff, "
+            "shimmering ride cymbal groove, explosive final chorus",
             216_000,
             False,
         ),
@@ -523,39 +527,42 @@ SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
             "radio_blues_eleven_bridges",
             "Eleven Bridges",
             "Counting crossings on a heavy-hearted run",
-            "Slow-rolling electric blues about counting eleven bridges "
-            "between here and forgiveness, weathered male vocals, stinging "
-            "guitar bends, organ swells, patient shuffle, late-night club feel",
+            "Slow-rolling electric blues about counting the eleven bridges "
+            "across the river between her side of town and his, weathered "
+            "male vocals, stinging guitar bends, organ swells, patient "
+            "shuffle, late-night club feel",
             218_000,
             False,
         ),
         SongPlan(
-            "radio_blues_mudflap_boogie",
-            "Mudflap Boogie",
-            "Greasy jump-blues floor shaker",
-            "Rowdy jump blues boogie about mudflaps slapping time on the "
-            "highway, shouting male vocals, honking baritone sax, "
-            "barrelhouse piano, walking bass, double-time hand-jive ending",
+            "radio_blues_fish_fry_friday",
+            "Fish Fry Friday",
+            "Greasy jump-blues floor shaker for the church fish fry",
+            "Rowdy jump blues boogie about the Friday night church fish "
+            "fry where everybody dances, shouting male vocals, honking "
+            "baritone sax, barrelhouse piano, walking bass, double-time "
+            "hand-jive ending",
             162_000,
             False,
         ),
         SongPlan(
-            "radio_blues_dock_light_darling",
-            "Dock Light Darling",
-            "Soul-blues serenade under warehouse lights",
-            "Smoldering soul blues serenade to a darling waiting under "
-            "the dock lights, velvet female vocals, horn section swells, "
-            "tremolo guitar, slow six-eight burn, heartfelt climax",
+            "radio_blues_back_porch_darling",
+            "Back Porch Darling",
+            "Soul-blues serenade on a summer back porch",
+            "Smoldering soul blues serenade to a darling on the back porch "
+            "on a hot summer night, velvet female vocals, horn section "
+            "swells, tremolo guitar, slow six-eight burn, heartfelt climax",
             204_000,
             False,
         ),
         SongPlan(
-            "radio_blues_worn_out_wipers",
-            "Worn Out Wipers",
-            "Rain-streaked slow blues lament",
-            "Mournful slow blues about worn out wipers and a windshield "
-            "full of rain, aching male vocals, weeping slide guitar, "
-            "sparse piano drips, brushed drums, gray-sky atmosphere",
+            "radio_blues_leaky_roof",
+            "Leaky Roof Blues",
+            "Rain-streaked slow blues about a landlord who never shows",
+            "Mournful slow blues about a leaky roof, a bucket on the floor "
+            "and a landlord who never shows, aching male vocals, weeping "
+            "slide guitar, sparse piano drips, brushed drums, gray-sky "
+            "atmosphere",
             224_000,
             False,
         ),

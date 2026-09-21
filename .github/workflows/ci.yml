@@ -6,14 +6,17 @@ permissions:
 
 on:
   push:
-    # feat/career-1.9 is the long-lived 1.9 release line and gets direct
-    # pushes instead of PRs, so it needs its own hosted CI trigger.
-    branches: [main, dev, feat/career-1.9]
+    # The 1.9 release line has its own Rust CI in rust.yml.
+    branches: [main, dev]
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
 
 jobs:
+  # The Python that still SHIPS: the build, bake, indexing and release tooling
+  # under tools/, plus the workflow and sound-pack guards. The game is Rust and
+  # rust.yml proves it; the Python game itself was deleted in the 2026-09-21
+  # sunset.
   test:
     strategy:
       fail-fast: false
@@ -25,14 +28,19 @@ jobs:
       SDL_VIDEODRIVER: dummy
       SDL_AUDIODRIVER: dummy
       FREIGHT_FATE_NO_SPEECH: "1"
-      # sys.monitoring coverage core (Python 3.12+): the default tracer makes
-      # the CPU-bound network sweeps ~5x slower, and that multiplier grows CI
-      # time with every map expansion. sysmon measured ~1.15x on the same test.
+      # sys.monitoring coverage core (Python 3.12+): cheaper than the default
+      # tracer on the CPU-bound bake and sweep tools this job still runs.
       COVERAGE_CORE: sysmon
     steps:
+      # sounds.pak is an ordinary 7.8 MB blob in git now, not a Git LFS object
+      # (see .gitattributes), so a plain checkout carries the real pack and
+      # the audio tests run here on every push. They used to depend on an LFS
+      # fetch: once the repository's LFS budget ran out that fetch returned a
+      # 132 byte pointer, and the tests either failed against it or skipped
+      # themselves -- a green run that had not checked a single sound. Only
+      # the 250 MB music.pak stays outside the repository, and the tests that
+      # read it skip here by design.
       - uses: actions/checkout@v6
-        with:
-          lfs: true
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -43,71 +51,16 @@ jobs:
         run: uv sync --dev
 
       - name: Lint
-        run: uv run ruff check src tests tools
+        run: uv run ruff check tests tools
 
       - name: Run tests
-        run: uv run pytest tests/ -n auto --durations=15 --cov=src/freight_fate --cov-report=xml
+        run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}
           path: coverage.xml
-
-  secret-store-packaging:
-    # The online driver token goes to Windows Credential Manager, the macOS
-    # Keychain, or Secret Service on Linux. keyring finds those backends
-    # through entry points, which Nuitka cannot see by following imports, so a
-    # build that lost them would keep every token in the fallback file instead
-    # -- on every platform, and without any visible symptom. Compiling the
-    # whole game on each pull request is far too slow, so this compiles a
-    # one-file probe with the same packaging flags the release build uses.
-    # macOS is here and not in the test matrix above for the same reason: this
-    # is the one check whose answer differs per platform toolchain.
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-15]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync --group dev --group build
-
-      - name: Check the secret store from a source checkout
-        run: uv run python tools/check_keyring_packaging.py
-
-      - name: Compile the probe with the release packaging flags
-        shell: bash
-        run: |
-          args=$(uv run python -c "from tools.build_release import KEYRING_NUITKA_ARGS; print(' '.join(KEYRING_NUITKA_ARGS))")
-          echo "packaging flags: $args"
-          # shellcheck disable=SC2086
-          uv run --group build python -m nuitka --mode=standalone \
-            --assume-yes-for-downloads --output-dir=build/probe $args \
-            tools/check_keyring_packaging.py
-
-      - name: Check the secret store from the compiled probe
-        shell: bash
-        run: |
-          # Nuitka names the binary .exe on Windows and .bin elsewhere, so
-          # find it rather than guessing the suffix per runner.
-          dist=build/probe/check_keyring_packaging.dist
-          probe=$(find "$dist" -maxdepth 1 -type f -name 'check_keyring_packaging*' -perm -u+x | head -1)
-          if [ -z "$probe" ]; then
-            echo "no compiled probe found in $dist:"
-            ls -l "$dist"
-            exit 1
-          fi
-          echo "running $probe"
-          "$probe"
 
   changelog:
     # The changelog gate runs locally as a pre-push hook, which not every
@@ -133,73 +86,3 @@ jobs:
             exit 0
           fi
           python3 tools/release_notes.py check --base "$BASE" --head HEAD
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [test, changelog]
-    if: ${{ !cancelled() && needs.test.result == 'success' }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          lfs: true
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Build wheel and sdist
-        run: uv build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-
-      - name: Retry today's failed snapshot
-        if: >-
-          ${{ !cancelled() &&
-              github.event_name == 'push' &&
-              github.ref == 'refs/heads/dev' &&
-              needs.changelog.result == 'success' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="nightly-$(date -u +%Y%m%d)"
-
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "$TAG already exists; no recovery build needed."
-            exit 0
-          fi
-
-          ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
-            --workflow Build --branch dev --limit 20 \
-            --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
-          if [ "$ACTIVE" -gt 0 ]; then
-            echo "A dev Build is already queued or running; no duplicate recovery needed."
-            exit 0
-          fi
-
-          RUN=$(gh run list --repo "$GITHUB_REPOSITORY" \
-            --workflow Build --event schedule --limit 1 \
-            --json conclusion,createdAt --jq '.[0] // empty | "\(.conclusion) \(.createdAt)"')
-          CONCLUSION=${RUN%% *}
-          CREATED=${RUN#* }
-
-          if [ "$CONCLUSION" != "failure" ]; then
-            echo "Latest scheduled Build conclusion is '$CONCLUSION'; not retrying."
-            exit 0
-          fi
-
-          # Only recover TODAY's failed snapshot. Before the daily cron has
-          # fired, the newest scheduled run is yesterday's -- and a stale
-          # failure there must not make a pre-cron push build today's
-          # snapshot hours early.
-          if [ "${CREATED%%T*}" != "$(date -u +%Y-%m-%d)" ]; then
-            echo "The failed scheduled Build is from ${CREATED%%T*}; today's snapshot has not run yet."
-            exit 0
-          fi
-
-          echo "Today's scheduled snapshot failed and $TAG is missing; dispatching recovery."
-          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false

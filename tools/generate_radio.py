@@ -49,7 +49,16 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from generate_sounds import ASSETS, _api_key  # noqa: E402
+from generate_sounds import ASSETS, _api_key, stash_master  # noqa: E402
+
+# Current ElevenLabs models (2026-09-11). Eleven v3 is the expressive TTS
+# model; music_v1 is deprecated in favour of music_v2_5. v3 only accepts
+# stability at 0.0, 0.5 or 1.0 (creative, natural, robust) and has no
+# ``style`` knob, so the delivery recipe is the natural setting plus the
+# same similarity the v2 reads used.
+TTS_MODEL = "eleven_v3"
+MUSIC_MODEL = "music_v2_5"
+TTS_VOICE_SETTINGS = {"stability": 0.5, "similarity_boost": 0.75, "use_speaker_boost": True}
 
 MUSIC_API = "https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128"
 TTS_API = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}?output_format=mp3_44100_128"
@@ -175,10 +184,14 @@ def _post_bytes(url: str, key: str, body: dict, timeout: int = 600) -> bytes:
         },
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
+        cost = resp.headers.get("character-cost")
+        if cost:
+            print(f"    cost {cost} credits", flush=True)
         return resp.read()
 
 
 def _write_ogg(mp3: bytes, out: Path) -> None:
+    stash_master(mp3, out.stem)
     out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
         tmp.write(mp3)
@@ -352,7 +365,7 @@ def generate_music(key: str, wanted: list[str]) -> None:
         body = {
             "prompt": prompt,
             "music_length_ms": length_ms,
-            "model_id": "music_v1",
+            "model_id": MUSIC_MODEL,
             "force_instrumental": instrumental,
         }
         try:
@@ -373,12 +386,8 @@ def generate_hosts(key: str) -> None:
             print(f"  speaking host_{station}_{i:02d}...", flush=True)
             body = {
                 "text": line,
-                "model_id": "eleven_multilingual_v2",
-                "voice_settings": {
-                    "stability": 0.45,
-                    "similarity_boost": 0.75,
-                    "style": 0.35,
-                },
+                "model_id": TTS_MODEL,
+                "voice_settings": TTS_VOICE_SETTINGS,
             }
             try:
                 mp3 = _post_bytes(TTS_API.format(voice_id=voice_id), key, body, timeout=180)

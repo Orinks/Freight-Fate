@@ -58,6 +58,57 @@ These were chosen deliberately and shape everything below:
   determinism contract in `docs/route-stop-data.md`).
 - No raw OSM IDs, tags, or source keys exposed in speech, menus, or help text.
 
+### Ramp advisory-speed contract
+
+The first roadside-advisory slice is deliberately limited to exit ramps.
+During an OSM harvest, `maxspeed:advisory:forward` or
+`maxspeed:advisory:backward` wins for travel in that OSM way direction, with
+undirected `maxspeed:advisory` as the fallback. OSM's maxspeed syntax makes a
+bare number kilometres per hour; `km/h`, `kmh`, `kph`, and explicit `mph` are
+normalized to mph. Conditional, symbolic, multiple, implausible, or malformed
+values are rejected rather than guessed. The harvester resolves OSM way
+direction into the leg's A-to-B/B-to-A direction before storing it.
+
+An accepted value is stored with a read citation to OpenStreetMap. If the
+ramp has no trustworthy tag, the runtime retains the existing explicit
+`Calculated` result from corridor speed and connector class. That fallback is
+not sign evidence and must never acquire an OSM/read source or be described as
+an observed sign. Ordinary-road advisory tags remain the curve layer's job.
+
+An ordinary advisory sign is not a truck-specific safe-speed guarantee. FMCSA
+warns that exit/ramp advisory speeds are generally set for passenger vehicles
+and that a large truck's safe speed is usually lower. Freight Fate therefore
+uses an observed value only as a cap: the operating target is the lower of the
+read sign and the existing calculated ramp target. A high OSM value can never
+make the truck or its assists take a ramp faster. Truck-rollover advisory signs
+need their own explicit source signal and are not inferred from a generic
+`maxspeed:advisory` tag. Sources consulted 2026-08-26:
+https://www.fmcsa.dot.gov/safety/driver-safety/cmv-driving-tips-too-fast-conditions
+and MUTCD 11th Edition section 2C.12,
+https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/Chapter2c.pdf.
+
+OpenStreetMap documents `maxspeed:advisory` as a recommended, non-legally
+binding speed and documents the `:forward`/`:backward` suffixes relative to
+way direction. OSM data is ODbL 1.0 and requires OpenStreetMap contributor
+credit; Freight Fate stores normalized facts and citations, not copied map
+geometry, under the project's existing OSM attribution practice. Sources
+consulted 2026-08-26: https://wiki.openstreetmap.org/wiki/Key:maxspeed:advisory,
+https://wiki.openstreetmap.org/wiki/Key:maxspeed, and
+https://www.openstreetmap.org/copyright.
+
+The production ingestion path is `tools/build_interchanges.py --ramp-controls`:
+the local-PBF topology pass reads advisory tags and OSM node order from
+`motorway_link` ways, resolves actual travel order (including `oneway=-1`),
+matches each directed gore to the nearest interchange and the leg geometry's
+A-to-B heading, then writes `ramp_advisory_forward`,
+`ramp_advisory_backward`, and `ramp_advisory_source` through `save_world`.
+The 2026-08-26 national local-PBF sweep matched trusted readings to **6,539
+interchanges** in the checked-in world. It stored 10,693 directional values
+because many physical interchanges have readings in both directions. Values
+range from 5 to 80 mph; metric signs retain their normalized mph equivalent.
+The deterministic harvester-boundary fixture exercises the same production
+transform without depending on the dated national extracts.
+
 ---
 
 ## Workstream A: Region Taxonomy (Fixes Reno Now)

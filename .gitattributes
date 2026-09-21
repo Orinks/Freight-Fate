@@ -2,8 +2,24 @@
 tools/appimage/AppRun text eol=lf
 tools/appimage/*.desktop text eol=lf
 
-# Career 1.9 ships its encrypted sound packs through Git LFS. Raw audio stays
-# local. music.pak carries the music/ subtree split out of sounds.pak so a
-# sound-only change does not drag the much larger music payload with it.
-src/freight_fate/sounds.pak filter=lfs diff=lfs merge=lfs -text
-src/freight_fate/music.pak filter=lfs diff=lfs merge=lfs -text
+# Career 1.9 ships the encrypted sound pack as a regular git file. Raw audio
+# stays local. music.pak is downloaded from a private release URL when needed
+# and is not tracked.
+#
+# Marked -text so no checkout can newline-convert the pack. Git's own binary
+# detection already spares it, this just refuses to depend on that.
+assets/sounds.pak -text
+
+# ff-bake copies these data files into world.ffdata byte for byte (the
+# baked TEXT_FILES), so a checkout's line endings would reach the container
+# and a Windows release would bake different bytes from a Linux or macOS one.
+data/street_limits.json text eol=lf
+data/buffs.json text eol=lf
+data/radio_catalog.json text eol=lf
+data/radio_imported.json text eol=lf
+
+# The cloud-validator invariants export is pinned byte for byte against the
+# Rust exporter's output, which is LF on every platform. A CRLF checkout
+# would make the fixture disagree with the file it is pinning.
+crates/ff-core/tests/profile_integrity_invariants.json text eol=lf
+tools/linux_smoke.sh text eol=lf

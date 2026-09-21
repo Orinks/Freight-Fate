@@ -59,7 +59,7 @@ from pulse_synth import (
 )
 
 pulse_synth.OUT = Path(r"C:\temp\fftest")
-ASSETS = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 FIRING_ORDER = [1, 5, 3, 6, 2, 4]
 

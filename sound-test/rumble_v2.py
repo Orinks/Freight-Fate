@@ -40,7 +40,7 @@ from pulse_synth import (
 
 # Write beside this file rather than into an audition/ subdirectory.
 pulse_synth.OUT = Path(__file__).resolve().parent
-ASSETS = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 
 def tilt_noise(n: int, peak_hz: float = 115.0, width: float = 1.1) -> np.ndarray:

@@ -45,8 +45,10 @@ import straw_curve_sample as scs  # noqa: E402  (decode + matcher primitives)
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
-CACHE_DIR = Path(os.environ.get("FF_OSM_CACHE", Path.home() / ".cache" / "freight-fate-osm" / "regions"))
+GEOM_DIR = ROOT / "data" / "world_data" / "us" / "geometry"
+CACHE_DIR = Path(
+    os.environ.get("FF_OSM_CACHE", Path.home() / ".cache" / "freight-fate-osm" / "regions")
+)
 
 CORRIDOR_CLASSES = {
     "motorway",
@@ -123,7 +125,9 @@ def collect_ways(
     overlapping leg's bucket. Accumulates across states so a leg that crosses a
     state line is judged over its whole length, not just its from-state slice."""
     processor = (
-        osmium.FileProcessor(str(pbf_path), entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY)
+        osmium.FileProcessor(
+            str(pbf_path), entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY
+        )
         .with_locations()
         .with_filter(osmium.filter.KeyFilter("highway"))
     )
@@ -310,8 +314,13 @@ def main() -> int:
             target["divided"] = verdict
             counts["divided" if verdict else "undivided"] += 1
         report.append(
-            {"leg": lid, "highway": L.get("highway"), "oneway_frac": round(frac, 2),
-             "matched_mi": round(matched, 1), "divided": verdict}
+            {
+                "leg": lid,
+                "highway": L.get("highway"),
+                "oneway_frac": round(frac, 2),
+                "matched_mi": round(matched, 1),
+                "divided": verdict,
+            }
         )
 
     if args.write:
@@ -319,23 +328,64 @@ def main() -> int:
         print("saved world source", flush=True)
     print(f"\nDONE: {counts}", flush=True)
     if args.json_out:
-        Path(args.json_out).write_text(json.dumps({"counts": counts, "legs": report}, indent=2), encoding="utf-8")
+        Path(args.json_out).write_text(
+            json.dumps({"counts": counts, "legs": report}, indent=2), encoding="utf-8"
+        )
         print(f"wrote {args.json_out}", flush=True)
     return 0
 
 
 _CODE_TO_NAME = {
-    "al": "Alabama", "ak": "Alaska", "az": "Arizona", "ar": "Arkansas", "ca": "California",
-    "co": "Colorado", "ct": "Connecticut", "de": "Delaware", "dc": "District of Columbia",
-    "fl": "Florida", "ga": "Georgia", "id": "Idaho", "il": "Illinois", "in": "Indiana",
-    "ia": "Iowa", "ks": "Kansas", "ky": "Kentucky", "la": "Louisiana", "me": "Maine",
-    "md": "Maryland", "ma": "Massachusetts", "mi": "Michigan", "mn": "Minnesota",
-    "ms": "Mississippi", "mo": "Missouri", "mt": "Montana", "ne": "Nebraska", "nv": "Nevada",
-    "nh": "New Hampshire", "nj": "New Jersey", "nm": "New Mexico", "ny": "New York",
-    "nc": "North Carolina", "nd": "North Dakota", "oh": "Ohio", "ok": "Oklahoma",
-    "or": "Oregon", "pa": "Pennsylvania", "ri": "Rhode Island", "sc": "South Carolina",
-    "sd": "South Dakota", "tn": "Tennessee", "tx": "Texas", "ut": "Utah", "vt": "Vermont",
-    "va": "Virginia", "wa": "Washington", "wv": "West Virginia", "wi": "Wisconsin", "wy": "Wyoming",
+    "al": "Alabama",
+    "ak": "Alaska",
+    "az": "Arizona",
+    "ar": "Arkansas",
+    "ca": "California",
+    "co": "Colorado",
+    "ct": "Connecticut",
+    "de": "Delaware",
+    "dc": "District of Columbia",
+    "fl": "Florida",
+    "ga": "Georgia",
+    "id": "Idaho",
+    "il": "Illinois",
+    "in": "Indiana",
+    "ia": "Iowa",
+    "ks": "Kansas",
+    "ky": "Kentucky",
+    "la": "Louisiana",
+    "me": "Maine",
+    "md": "Maryland",
+    "ma": "Massachusetts",
+    "mi": "Michigan",
+    "mn": "Minnesota",
+    "ms": "Mississippi",
+    "mo": "Missouri",
+    "mt": "Montana",
+    "ne": "Nebraska",
+    "nv": "Nevada",
+    "nh": "New Hampshire",
+    "nj": "New Jersey",
+    "nm": "New Mexico",
+    "ny": "New York",
+    "nc": "North Carolina",
+    "nd": "North Dakota",
+    "oh": "Ohio",
+    "ok": "Oklahoma",
+    "or": "Oregon",
+    "pa": "Pennsylvania",
+    "ri": "Rhode Island",
+    "sc": "South Carolina",
+    "sd": "South Dakota",
+    "tn": "Tennessee",
+    "tx": "Texas",
+    "ut": "Utah",
+    "vt": "Vermont",
+    "va": "Virginia",
+    "wa": "Washington",
+    "wv": "West Virginia",
+    "wi": "Wisconsin",
+    "wy": "Wyoming",
 }
 
 

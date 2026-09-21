@@ -26,6 +26,7 @@ from build_interchanges_maxspeed import (
     _interpolated_geometry,
     _leg_states,
     _pbf_for_states,
+    leg_corridor_geometry,
     _route_digits,
 )
 
@@ -446,11 +447,7 @@ def bake_restrictions_for_leg(
     ways: list[LocalRestrictionWay],
     rate_limit: float,
 ) -> list[dict[str, Any]]:
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    # Cached dense geometry only; never a live request (same policy as maxspeed).
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom = leg_corridor_geometry(leg, rate_limit)
     if not geom:
         return []
     return assemble_restrictions(ways, geom, float(leg["miles"]), str(leg.get("highway", "")))
@@ -459,10 +456,7 @@ def bake_restrictions_for_leg(
 def run_restrictions(data: dict[str, Any], args: argparse.Namespace) -> int:
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = select_only(legs, args.only)
 
     target_legs: list[dict[str, Any]] = []
     for leg in legs:
