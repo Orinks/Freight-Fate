@@ -319,6 +319,10 @@ pub trait AudioBackend {
     fn music_playing(&self) -> bool {
         false
     }
+    /// How long the playing music track runs, when the stream can tell.
+    fn music_length_s(&self) -> Option<f64> {
+        None
+    }
     fn stop_music(&mut self, _fade_ms: u32) {}
 
     // -- volume control ---------------------------------------------------------------

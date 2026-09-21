@@ -1,6 +1,7 @@
 //! Synthesized music: the settings rows, menu and Roadhouse rotations, and
 //! the fallback when a piece is not ready.
 
+use crate::audio_support::{bass_rig, sine_wav};
 use crate::states_main_menu_support::*;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
@@ -246,4 +247,62 @@ fn switching_back_to_original_restores_the_soundtrack() {
     app.ctx.settings.synth_music = false;
     app.ctx.restart_music();
     assert_eq!(app.ctx.music_rotation_track(), Some(original[0].as_str()));
+}
+
+/// The smallest ProTracker MOD BASS will load: one 64-row pattern playing a
+/// 32-sample square wave on channel 1, row 0. 1084 + 1024 + 32 bytes; it
+/// runs 64 rows at speed 6 and 125 BPM, 7.68 seconds.
+fn tiny_mod() -> Vec<u8> {
+    let mut m = vec![0u8; 1084];
+    m[..4].copy_from_slice(b"tiny");
+    m[42..44].copy_from_slice(&16u16.to_be_bytes()); // sample 1: 16 words
+    m[45] = 64; // volume
+    m[48..50].copy_from_slice(&1u16.to_be_bytes()); // repeat 1 word: no loop
+    m[950] = 1; // song length: 1 position
+    m[951] = 127;
+    m[1080..1084].copy_from_slice(b"M.K.");
+    let mut pattern = vec![0u8; 1024];
+    pattern[..3].copy_from_slice(&[0x01, 0xAC, 0x10]); // sample 1, C-2
+    m.extend_from_slice(&pattern);
+    m.extend((0..32).map(|i| if i < 16 { 0x40u8 } else { 0xC0 }));
+    m
+}
+
+#[test]
+fn a_tracker_module_plays_as_music_and_reports_its_length() {
+    use freight_fate::audio::Audio;
+    let Some(mut r) = bass_rig() else { return };
+    ff_core::assets_pack::register_generated_sound("music/hand_made/test/tiny", tiny_mod(), "mod");
+    r.engine.play_music_with("hand_made/test/tiny", 0);
+    assert!(r.engine.music_playing());
+    let len = r.engine.music_length_s().expect("module length");
+    assert!(len > 0.5 && len < 30.0, "{len}");
+    eprintln!("tiny module ran on BASS: {len:.2} s");
+}
+
+/// Callers look a track's length up once, right after starting it, while
+/// the previous track is still fading out: the answer must be the new one's.
+#[test]
+fn the_length_is_the_new_tracks_while_the_old_one_fades() {
+    use freight_fate::audio::Audio;
+    let Some(mut r) = bass_rig() else { return };
+    ff_core::assets_pack::register_generated_sound(
+        "music/hand_made/test/two_s",
+        sine_wav(2.0, 2),
+        "wav",
+    );
+    ff_core::assets_pack::register_generated_sound(
+        "music/hand_made/test/tiny_b",
+        tiny_mod(),
+        "mod",
+    );
+    r.engine.play_music_with("hand_made/test/two_s", 0);
+    let a = r.engine.music_length_s().expect("wav length");
+    assert!((a - 2.0).abs() < 0.01, "{a}");
+    r.engine.play_music_with("hand_made/test/tiny_b", 2000);
+    let b = r.engine.music_length_s().expect("module length");
+    assert!(
+        (b - 7.68).abs() < 0.05,
+        "reported {b}, not the module's 7.68 s"
+    );
 }

@@ -147,6 +147,8 @@ pub struct Api {
     pub stream_create_file: FnStreamCreateFile,
     pub stream_create_url: FnStreamCreateURL,
     pub stream_free: FnStreamFree,
+    pub music_load: FnMusicLoad,
+    pub music_free: FnMusicFree,
 
     pub channel_play: FnChannelPlay,
     pub channel_pause: FnChannelPause,
@@ -274,6 +276,8 @@ impl Api {
             stream_create_file: sym!("BASS_StreamCreateFile"),
             stream_create_url: sym!("BASS_StreamCreateURL"),
             stream_free: sym!("BASS_StreamFree"),
+            music_load: sym!("BASS_MusicLoad"),
+            music_free: sym!("BASS_MusicFree"),
 
             channel_play: sym!("BASS_ChannelPlay"),
             channel_pause: sym!("BASS_ChannelPause"),

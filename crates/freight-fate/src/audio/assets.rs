@@ -28,8 +28,14 @@ pub const SFX_EXTENSIONS: &[&str] = &["ogg", "wav"];
 /// Extension preference for music. Music ships as Opus
 /// (`tools/encode_music_opus.py`): far smaller for background beds at the
 /// same perceived quality. Ogg stays in the list so a partial migration and
-/// the effects tree, which are still Vorbis, keep resolving.
-pub const MUSIC_EXTENSIONS: &[&str] = &["opus", "ogg", "wav"];
+/// the effects tree, which are still Vorbis, keep resolving. MP3 is core
+/// BASS, FLAC its bundled plugin, and the tracker modules load through
+/// `BASS_MusicLoad` (see [`MODULE_EXTENSIONS`]) -- the hand-made pieces.
+pub const MUSIC_EXTENSIONS: &[&str] = &[
+    "opus", "ogg", "wav", "mp3", "flac", "it", "xm", "s3m", "mod", "mo3",
+];
+/// Tracker modules (as made in OpenMPT): played as BASS music, not streams.
+pub const MODULE_EXTENSIONS: &[&str] = &["it", "xm", "s3m", "mod", "mo3"];
 
 /// The directory standing in for the Python package (`src/freight_fate/`
 /// in a checkout, `<exe dir>/freight_fate/` when packaged): the parent of

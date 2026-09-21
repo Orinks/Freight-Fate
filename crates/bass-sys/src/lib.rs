@@ -228,6 +228,16 @@ pub const BASS_STREAM_STATUS: DWORD = 0x800000;
 /// `file`/`url` parameters are UTF-16 (Windows) rather than ANSI.
 pub const BASS_UNICODE: DWORD = 0x8000_0000;
 
+// --- MOD music flags (BASS_MusicLoad) -----------------------------------------
+
+/// Calculate the length on load, so `ChannelGetLength` answers
+/// (`BASS_MUSIC_PRESCAN` is `BASS_STREAM_PRESCAN` in bass.h).
+pub const BASS_MUSIC_PRESCAN: DWORD = BASS_STREAM_PRESCAN;
+/// Sensitive volume ramping, to avoid clicks.
+pub const BASS_MUSIC_RAMPS: DWORD = 0x400;
+/// Sinc-interpolated sample mixing.
+pub const BASS_MUSIC_SINCINTER: DWORD = 0x80_0000;
+
 /// Slide attribute logarithmically (`BASS_ChannelSlideAttribute` flag).
 pub const BASS_SLIDE_LOG: DWORD = 0x100_0000;
 
@@ -459,6 +469,16 @@ pub type FnStreamCreateURL = unsafe extern "system" fn(
     user: *mut c_void,
 ) -> HSTREAM;
 pub type FnStreamFree = unsafe extern "system" fn(handle: HSTREAM) -> BOOL;
+/// `HMUSIC BASS_MusicLoad(BOOL mem, const void *file, QWORD offset, DWORD length, DWORD flags, DWORD freq)`
+pub type FnMusicLoad = unsafe extern "system" fn(
+    mem: BOOL,
+    file: *const c_void,
+    offset: QWORD,
+    length: DWORD,
+    flags: DWORD,
+    freq: DWORD,
+) -> HMUSIC;
+pub type FnMusicFree = unsafe extern "system" fn(handle: HMUSIC) -> BOOL;
 
 pub type FnChannelPlay = unsafe extern "system" fn(handle: DWORD, restart: BOOL) -> BOOL;
 pub type FnChannelPause = unsafe extern "system" fn(handle: DWORD) -> BOOL;
@@ -573,5 +593,9 @@ mod tests {
         assert_eq!(BASS_CONFIG_NET_READTIMEOUT, 37);
         assert_eq!(BASS_TAG_META, 5);
         assert_eq!(BASS_ATTRIB_PAN, 3);
+        // bass.h via sound_lib's pybass.py; AUTOFREE doubles as MUSIC_AUTOFREE.
+        assert_eq!(BASS_MUSIC_PRESCAN, 0x20000);
+        assert_eq!(BASS_MUSIC_RAMPS, 0x400);
+        assert_eq!(BASS_MUSIC_SINCINTER, 0x80_0000);
     }
 }

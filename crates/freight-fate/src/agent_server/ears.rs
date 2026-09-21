@@ -462,6 +462,9 @@ impl Audio for TeeAudio {
     fn music_playing(&self) -> bool {
         self.inner.music_playing()
     }
+    fn music_length_s(&self) -> Option<f64> {
+        self.inner.music_length_s()
+    }
     fn radio_now_playing(&self) -> Option<String> {
         self.inner.radio_now_playing()
     }

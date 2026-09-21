@@ -169,6 +169,10 @@ impl AudioBackend for BassBackend {
         BassBackend::music_playing(self)
     }
 
+    fn music_length_s(&self) -> Option<f64> {
+        BassBackend::music_length_s(self)
+    }
+
     fn stop_music(&mut self, fade_ms: u32) {
         BassBackend::stop_music(self, fade_ms);
     }
