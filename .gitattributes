@@ -8,7 +8,7 @@ tools/appimage/*.desktop text eol=lf
 #
 # Marked -text so no checkout can newline-convert the pack. Git's own binary
 # detection already spares it, this just refuses to depend on that.
-src/freight_fate/sounds.pak -text
+assets/sounds.pak -text
 
 # The cloud-validator invariants export is pinned byte for byte against the
 # Rust exporter's output, which is LF on every platform. A CRLF checkout
