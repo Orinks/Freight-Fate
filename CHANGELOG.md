@@ -22,7 +22,7 @@
 
 - **Synthesized mode takes Freight Fate's own stations off the radio.** The dial keeps the synthesized Roadhouse, local and web stations, and your playlists.
 
-- **In Synthesized mode, streamer-safe keeps the radio on the Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
+- **In Synthesized mode, streamer-safe keeps the radio on the Roadhouse.** Station keys do nothing; the radio key turns it on and off.
 
 - **Radio playlists can play tracker modules.** Music made in OpenMPT and similar trackers plays like any other file in your playlist.
 

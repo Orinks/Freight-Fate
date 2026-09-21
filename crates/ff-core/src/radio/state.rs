@@ -1066,7 +1066,7 @@ impl RadioState {
     /// Save or unsave the current station; the spoken confirmation.
     pub fn toggle_favorite(&mut self) -> String {
         if self.station_locked() {
-            return super::STREAMER_SAFE_LOCKED.to_string();
+            return String::new();
         }
         let station = self.current_station();
         if station.fallback {

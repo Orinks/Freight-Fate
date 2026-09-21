@@ -5,7 +5,7 @@ use ff_core::models::enforcement;
 use ff_core::models::profile;
 use ff_core::models::solvency::debt_line;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
-use ff_core::radio::{PLAYLISTS_DIR_NAME, STREAMER_SAFE_LOCKED};
+use ff_core::radio::PLAYLISTS_DIR_NAME;
 use ff_core::settings::Settings;
 use ff_core::sim::trip_models::RoadStop;
 
@@ -395,14 +395,17 @@ impl DrivingStatusScreenState {
                 let locked = d.radio.station_locked();
                 if locked {
                     // Synthesized with streamer-safe mode on: the station keys
-                    // are refused, so the screen names only what still works.
+                    // do nothing, so the screen names only what still works.
+                    // This is an information screen the player asked for, not
+                    // a key response, so it still reports the lock in words --
+                    // it just no longer claims the keys "say so".
                     lines.push(
                         "Streamer-safe mode on, with Music source set to Synthesized.".to_string(),
                     );
                     lines.push(format!(
-                        "{STREAMER_SAFE_LOCKED} {} turns the radio on or off. Shift with Page \
-                         Down and Page Up, or semicolon and apostrophe, changes radio volume by \
-                         10 percent.",
+                        "Streamer-safe mode keeps the radio on the Roadhouse. Station keys do \
+                         nothing. {} turns the radio on or off. Shift with Page Down and Page \
+                         Up, or semicolon and apostrophe, changes radio volume by 10 percent.",
                         ctx.bindings.spoken(Action::Radio)
                     ));
                 } else {

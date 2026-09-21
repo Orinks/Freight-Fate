@@ -1,12 +1,11 @@
 //! The dial with Music source Synthesized (owner rulings, 2026-09-21).
 //! Freight Fate's own stations leave the dial; the Roadhouse stays, playing
 //! synthesized music. With streamer-safe mode on as well, the Roadhouse is
-//! the only station, and every station command says so rather than moving.
+//! the only station, and every station command does nothing and says
+//! nothing rather than moving (owner ruling, 2026-09-21).
 //! Its own file because `state` is already past the 1000-line limit.
 
-use super::{
-    dial_group, RadioAction, RadioState, RadioStation, SAFE_ROUTE_PLAYLIST, STREAMER_SAFE_LOCKED,
-};
+use super::{dial_group, RadioAction, RadioState, RadioStation, SAFE_ROUTE_PLAYLIST};
 
 impl RadioState {
     pub fn with_synth_music(mut self, synth_music: bool) -> Self {
@@ -26,19 +25,20 @@ impl RadioState {
     }
 
     /// Synthesized with streamer-safe mode on: the radio stays on the
-    /// Roadhouse, and station commands only say so.
+    /// Roadhouse, and station commands do nothing and say nothing.
     pub fn station_locked(&self) -> bool {
         self.synth_music && self.streamer_safe
     }
 
-    /// A station command's answer while the dial is locked: nothing moves.
+    /// A station command's answer while the dial is locked: nothing moves
+    /// and nothing is said (empty `message`; callers must not speak it).
     pub(super) fn locked_action(&mut self) -> Option<RadioAction> {
         if !self.station_locked() {
             return None;
         }
         let reception = self.current_reception();
         Some(RadioAction {
-            message: STREAMER_SAFE_LOCKED.to_string(),
+            message: String::new(),
             station: reception.station.clone(),
             enabled: self.enabled,
             reception,
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn synthesized_streamer_safe_refuses_every_station_command_out_loud() {
+    fn synthesized_streamer_safe_leaves_every_station_command_silent() {
         let mut radio = radio_with(true, true);
         let before = radio.current_station().id;
         assert_eq!(before, SAFE_ROUTE_PLAYLIST);
@@ -163,10 +163,10 @@ mod tests {
             radio.select_station("afn-tokyo", None),
         ];
         for action in actions {
-            assert_eq!(action.message, STREAMER_SAFE_LOCKED);
+            assert_eq!(action.message, "");
             assert_eq!(action.station.id, before);
         }
-        assert_eq!(radio.toggle_favorite(), STREAMER_SAFE_LOCKED);
+        assert_eq!(radio.toggle_favorite(), "");
         assert!(radio.favorite_ids.is_empty());
         assert_eq!(radio.current_station().id, before);
         // Power still works, and the game can still put the radio on the

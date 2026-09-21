@@ -90,8 +90,7 @@ Owner rulings, 2026-09-21:
   Roadhouse, terrestrial stations, web streams and personal playlists.
 - **Synthesized, streamer-safe on:** the synthesized Roadhouse is the only
   station. Station commands (tuning, seek, categories, favorites, the
-  station browser, playlists) do not change the station and say
-  "Streamer-safe mode keeps the radio on the Roadhouse." The radio key
+  station browser, playlists) do nothing and say nothing. The radio key
   still turns the radio on and off; volume and now playing still work.
 - Menus play synthesized music whenever Music source is Synthesized.
 

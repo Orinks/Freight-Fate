@@ -14,9 +14,7 @@
 //! radio tablet app ... and favorite stations in the app too."
 
 use ff_core::models::profile;
-use ff_core::radio::{
-    RadioReception, RadioStation, PLAYLISTS_DIR_NAME, RADIO_SEARCH_LIMIT, STREAMER_SAFE_LOCKED,
-};
+use ff_core::radio::{RadioReception, RadioStation, PLAYLISTS_DIR_NAME, RADIO_SEARCH_LIMIT};
 
 use crate::app::{GameContext, Say};
 use crate::states::base::{Menu, MenuCore, MenuItem};
@@ -98,14 +96,10 @@ impl RadioAppState {
     }
 
     /// Synthesized with streamer-safe mode on: the Roadhouse is the only
-    /// station, so there is no list to open or search. Says so.
+    /// station, so there is no list to open or search. Does nothing and
+    /// says nothing (owner ruling, 2026-09-21).
     fn dial_locked(ctx: &mut GameContext) -> bool {
-        if !(ctx.settings.synth_music && ctx.settings.radio_streamer_safe) {
-            return false;
-        }
-        ctx.audio.play("ui/error");
-        ctx.say(STREAMER_SAFE_LOCKED);
-        true
+        ctx.settings.synth_music && ctx.settings.radio_streamer_safe
     }
 
     fn open_list(&mut self, ctx: &mut GameContext, kind: &str) {
@@ -289,7 +283,12 @@ impl RadioStationListState {
             .driving
             .with(ctx, |d, ctx| d.tune_radio_to(ctx, &station_id))
             .unwrap_or_default();
-        ctx.say(&message);
+        // Defensive: a locked dial answers with an empty message (the list
+        // that reaches this row is never open while locked, but a command
+        // that returns nothing must never be spoken as nothing).
+        if !message.is_empty() {
+            ctx.say(&message);
+        }
         self.refresh(ctx, true);
     }
 }

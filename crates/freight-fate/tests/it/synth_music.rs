@@ -6,7 +6,7 @@ use crate::states_main_menu_support::*;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
-use ff_core::radio::{dial_group, SAFE_ROUTE_PLAYLIST, STREAMER_SAFE_LOCKED};
+use ff_core::radio::{dial_group, SAFE_ROUTE_PLAYLIST};
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
@@ -331,10 +331,11 @@ fn tuned_group(d: &mut DrivingState) -> i32 {
 }
 
 #[test]
-fn synthesized_streamer_safe_keeps_every_station_key_on_the_roadhouse() {
+fn synthesized_streamer_safe_leaves_every_station_key_silent() {
     let mut app = TestApp::new();
     let mut d = a_radio_drive(&mut app, true, true);
     assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
+    let log = app.record_audio();
     for event in [
         InputEvent::key(Key::PageDown),
         InputEvent::key(Key::PageUp),
@@ -345,16 +346,18 @@ fn synthesized_streamer_safe_keeps_every_station_key_on_the_roadhouse() {
         InputEvent::key(Key::O),
     ] {
         app.clear_speech();
+        log.borrow_mut().played.clear();
         d.handle_key_event(&mut app.ctx, &event);
         assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
-        let said = app.main_lines();
-        assert!(said.iter().any(|l| l == STREAMER_SAFE_LOCKED), "{said:?}");
+        assert!(app.main_lines().is_empty(), "{:?}", app.main_lines());
+        assert!(
+            !log.borrow().played.iter().any(|(k, _, _)| k == "ui/error"),
+            "{:?}",
+            log.borrow().played
+        );
     }
     assert!(d.radio.favorite_ids.is_empty());
-    assert_eq!(
-        d.tune_radio_to(&mut app.ctx, "afn-tokyo"),
-        STREAMER_SAFE_LOCKED
-    );
+    assert_eq!(d.tune_radio_to(&mut app.ctx, "afn-tokyo"), "");
     assert_eq!(d.radio.current_station().id, SAFE_ROUTE_PLAYLIST);
     // The power key is still just on and off, and volume still moves.
     d.handle_key_event(&mut app.ctx, &InputEvent::key(Key::M));
@@ -383,15 +386,18 @@ fn synthesized_streamer_safe_radio_app_has_no_station_list_to_open() {
     let drive = dm::a_drive_between(&mut app, "Denver", "Salt Lake City", "Radio App");
     dm::with_drive(&drive, |d| d.trip.truck.start_engine());
     let mut state = RadioAppState::new(DriveRef::of(&drive));
+    let log = app.record_audio();
     for row in ["Search stations", "Stations in range", "Favorites"] {
         app.clear_speech();
+        log.borrow_mut().played.clear();
         dm::activate(&mut state, &mut app.ctx, row);
         assert!(!dm::top_is::<RadioSearchEntryState>(&app), "{row}");
         assert!(!dm::top_is::<RadioStationListState>(&app), "{row}");
-        let said = app.main_lines();
+        assert!(app.main_lines().is_empty(), "{row}: {:?}", app.main_lines());
         assert!(
-            said.iter().any(|l| l == STREAMER_SAFE_LOCKED),
-            "{row}: {said:?}"
+            !log.borrow().played.iter().any(|(k, _, _)| k == "ui/error"),
+            "{row}: {:?}",
+            log.borrow().played
         );
     }
 }
@@ -506,8 +512,9 @@ fn the_locked_radio_screen_names_only_what_still_works() {
         .spoken(freight_fate::bindings::Action::Radio);
     let help = lines
         .iter()
-        .find(|l| l.starts_with(STREAMER_SAFE_LOCKED))
+        .find(|l| l.starts_with("Streamer-safe mode keeps the radio on the Roadhouse."))
         .unwrap_or_else(|| panic!("no locked line: {lines:#?}"));
+    assert!(help.contains("Station keys do nothing."), "{help}");
     assert!(
         help.contains(&format!("{power} turns the radio on or off")),
         "{help}"
@@ -547,7 +554,9 @@ fn the_original_radio_screen_is_unchanged() {
                     percent. O saves the station as a favorite. M toggles the radio."),
             "{lines:#?}"
         );
-        assert!(!lines.iter().any(|l| l.contains(STREAMER_SAFE_LOCKED)));
+        assert!(!lines
+            .iter()
+            .any(|l| l.contains("Streamer-safe mode keeps the radio on the Roadhouse.")));
     }
 }
 

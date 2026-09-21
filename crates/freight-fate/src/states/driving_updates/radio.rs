@@ -6,7 +6,7 @@ use ff_core::pyrandom::PyRandom;
 use ff_core::radio::{
     effective_range_miles, is_stream_entry, signal_volume_factor, station_identity,
     truck_elevation_ft, truck_position, RadioAction, RadioPlaybackError, RadioReception,
-    RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE, STREAMER_SAFE_LOCKED,
+    RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE,
 };
 use ff_core::radio_content::{content_duration_s, plan_break};
 use ff_core::radio_rotation::{cue_after, RotationCue, StationRotation};
@@ -955,7 +955,12 @@ impl DrivingState {
 
     pub fn finish_radio_action(&mut self, ctx: &mut GameContext, action: &RadioAction) {
         self.write_radio_settings(ctx);
-        ctx.say(&action.message);
+        // A locked dial's answer is an empty message (station commands do
+        // nothing and say nothing while Synthesized streamer-safe mode
+        // holds the radio on the Roadhouse) -- never speak it.
+        if !action.message.is_empty() {
+            ctx.say(&action.message);
+        }
     }
 
     /// Speak the dead-cab line when a radio key lands with no engine.
@@ -1031,7 +1036,7 @@ impl DrivingState {
         }
         self.sync_radio_settings(ctx);
         if self.radio.station_locked() && station_id != SAFE_ROUTE_PLAYLIST {
-            return STREAMER_SAFE_LOCKED.to_string();
+            return String::new();
         }
         let was_off = !self.radio.enabled;
         self.radio.enabled = true;
@@ -1107,6 +1112,11 @@ impl DrivingState {
     pub fn toggle_radio_favorite(&mut self, ctx: &mut GameContext) {
         self.sync_radio_settings(ctx);
         let message = self.radio.toggle_favorite();
+        // A locked dial answers with an empty message and touches nothing:
+        // favorites stay exactly as they were.
+        if message.is_empty() {
+            return;
+        }
         if ctx.profile.is_some() {
             let mut favorites: Vec<String> = self.radio.favorite_ids.iter().cloned().collect();
             favorites.sort();
