@@ -17,6 +17,10 @@ on:
         description: "Skip release creation"
         type: boolean
         default: false
+      branch:
+        description: "Branch to build (a dry run is the way to try one)"
+        type: string
+        default: dev
 
 permissions:
   contents: write
@@ -38,7 +42,9 @@ env:
   # The `1.9-tester-*` tag scheme deliberately does NOT change. The
   # in-game updater's developer-snapshot channel finds builds by that
   # name, so renaming it would strand everyone already on one.
-  CAREER_BRANCH: "dev"
+  # A manual run may name another branch to try; the schedule always
+  # builds dev.
+  CAREER_BRANCH: ${{ inputs.branch || 'dev' }}
 
 jobs:
   prepare:
@@ -162,6 +168,15 @@ jobs:
       - name: Build the portable release
         run: ./build-release.ps1 --tag "${{ needs.prepare.outputs.tag }}"
 
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate.exe --list-speech-backends | tee speech-backends.txt
+          grep -q "^SAPI " speech-backends.txt
+
       - uses: actions/upload-artifact@v7
         with:
           name: Windows
@@ -236,6 +251,15 @@ jobs:
         # inside the builder, which dumps the game log on failure.
         run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
 
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^AVSpeech " speech-backends.txt
+
       - uses: actions/upload-artifact@v7
         with:
           name: macOS-arm64
@@ -249,8 +273,8 @@ jobs:
     # 22.04, not latest: the executable carries its build host's glibc as a
     # floor (2.35 here), and one built on 24.04 would refuse to start on any
     # distribution still shipping an older release, with no useful error.
-    # SDL2 is compiled in, so nothing else of the host is linked; Prism's
-    # own floor is 2.34 (a manylinux_2_34 wheel).
+    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; what else is
+    # linked is the host's speech-dispatcher client.
     #
     # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
     # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
@@ -295,9 +319,13 @@ jobs:
         run: rustup show
 
       - name: Cache cargo registry and target directory
+        # The compiler is in the key: a CMake build directory configured by
+        # another compiler throws its cache away on reconfigure, options and
+        # install prefix included, and SDL2 then tries to install into
+        # /usr/local.
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: career-19-snapshot-linux-${{ matrix.arch }}
+          shared-key: career-19-snapshot-linux-${{ matrix.arch }}-gcc13
 
       # SDL2 is compiled from source into the executable (`bundled` +
       # `static-link`), and what it can open at run time is decided by the
@@ -320,6 +348,28 @@ jobs:
             libdbus-1-dev libudev-dev libibus-1.0-dev \
             file desktop-file-utils
 
+      # Prism is compiled from source and linked into the executable. It
+      # needs gcc 13's standard library (std::atomic_unsigned_lock_free);
+      # 22.04 stops at 12, so gcc 13 comes from Ubuntu's toolchain PPA and
+      # crates/freight-fate/build.rs links its libstdc++ statically -- the
+      # player's system libstdc++ can be as old as 22.04's. Prism builds its
+      # speech-dispatcher backend only when the development package is here;
+      # without it Linux players would get no speech. Its Orca backend needs
+      # glibmm 2.68, which 22.04 does not carry, so it is left out; Orca
+      # users hear the game through Speech Dispatcher instead.
+      - name: Install Prism build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-13 g++-13 libspeechd-dev
+          echo "CC=gcc-13" >> "$GITHUB_ENV"
+          echo "CXX=g++-13" >> "$GITHUB_ENV"
+          # Prism's objects carry gcc 13 link-time bytecode; the system cc
+          # (gcc 11) cannot read it, so gcc 13 does the final link as well.
+          echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
+
       - name: Check Rust formatting
         run: cargo fmt --all --check
 
@@ -337,9 +387,18 @@ jobs:
       - name: Build the Linux release
         # --smoke boots the staged tarball payload for five frames with dummy
         # drivers, the same proof the Mac job gets. Staging refuses an
-        # executable that links SDL2 dynamically and a payload missing BASS,
-        # its decoders, or Prism with its bundled speech-dispatcher.
+        # executable that links SDL2 dynamically and a payload missing BASS
+        # or its decoders.
         run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^Speech Dispatcher " speech-backends.txt
 
       - name: Package the AppImage
         timeout-minutes: 15
