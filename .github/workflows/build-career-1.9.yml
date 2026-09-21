@@ -301,9 +301,13 @@ jobs:
         run: rustup show
 
       - name: Cache cargo registry and target directory
+        # The compiler is in the key: a CMake build directory configured by
+        # another compiler throws its cache away on reconfigure, options and
+        # install prefix included, and SDL2 then tries to install into
+        # /usr/local.
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: career-19-snapshot-linux-${{ matrix.arch }}
+          shared-key: career-19-snapshot-linux-${{ matrix.arch }}-gcc13
 
       # SDL2 is compiled from source into the executable (`bundled` +
       # `static-link`), and what it can open at run time is decided by the
