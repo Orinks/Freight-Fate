@@ -184,7 +184,7 @@ impl CityMenuState {
 
     fn pay_advance_label(ctx: &GameContext) -> String {
         let p = profile(ctx);
-        let grant = pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load);
+        let grant = pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load);
         if grant > 0.0 {
             return format!("Request pay advance: {} dollars", fmt_grouped(grant, 0));
         }
@@ -201,7 +201,7 @@ impl CityMenuState {
         if !solvency::advance_refused_reason(p).is_empty() {
             return false;
         }
-        pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load) > 0.0
+        pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load) > 0.0
     }
 
     /// `_request_pay_advance`.
@@ -215,8 +215,12 @@ impl CityMenuState {
         let (grant, reason) = {
             let p = profile(ctx);
             (
-                pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load),
-                pay_advance_unavailable_reason(p.money, p.pay_advance, p.pay_advance_used_for_load),
+                pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load),
+                pay_advance_unavailable_reason(
+                    p.money(),
+                    p.pay_advance,
+                    p.pay_advance_used_for_load,
+                ),
             )
         };
         if grant <= 0.0 {
@@ -229,7 +233,7 @@ impl CityMenuState {
             p.earn(grant);
             p.pay_advance = round_py_n(p.pay_advance + grant, 2);
             p.pay_advance_used_for_load = true;
-            (p.money, p.pay_advance)
+            (p.money(), p.pay_advance)
         };
         ctx.save_profile();
         ctx.audio.play("ui/notify");
@@ -708,7 +712,7 @@ impl Menu for CityMenuState {
                 crate::states::city::py_capitalize(business),
                 rank.level,
                 rank.title,
-                fmt_grouped(p.money, 0)
+                fmt_grouped(p.money(), 0)
             )
         };
         ctx.say_with(line, Say::new().interrupt(interrupt));

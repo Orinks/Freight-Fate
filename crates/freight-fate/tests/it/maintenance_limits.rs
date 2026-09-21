@@ -186,14 +186,14 @@ fn maintenance_limits_recover_every_component_for_both_business_models() {
                     .any(|line| line.contains(failure) && line.contains("100 percent")),
                 "missing limit explanation for {failure}"
             );
-            let money = app.ctx.profile.as_ref().unwrap().money;
+            let money = app.ctx.profile.as_ref().unwrap().money();
             d.trip.truck.velocity_mps = 0.0;
             d.update_damage_bands(&mut app.ctx, 0.1);
             assert!(!d.trip.truck.out_of_service());
             assert!(d.trip.truck.parking_brake);
             assert!(!d.trip.truck.engine_on);
             assert!(d.trip.truck.speed_cap_mph.is_none());
-            let after = app.ctx.profile.as_ref().unwrap().money;
+            let after = app.ctx.profile.as_ref().unwrap().money();
             if business == COMPANY_DRIVER {
                 assert_eq!(money, after);
             } else {
@@ -306,14 +306,14 @@ fn maintenance_recovery_preserves_unfailed_components_and_ends_creep_grace() {
     d.trip.truck.brake_wear_pct = 100.0;
     d.trip.truck.tire_wear_pct = 42.0;
     d.trip.truck.engine_wear_pct = 63.0;
-    app.ctx.profile.as_mut().unwrap().money = 0.0;
+    app.ctx.profile.as_mut().unwrap().set_money(0.0);
     rolling(&mut d, 25.0);
     d.update_damage_bands(&mut app.ctx, OUT_OF_SERVICE_RECOVERY_GRACE_S);
     assert!(!d.trip.truck.out_of_service());
     assert_eq!(d.trip.truck.brake_wear_pct, 0.0);
     assert_eq!(d.trip.truck.tire_wear_pct, 42.0);
     assert_eq!(d.trip.truck.engine_wear_pct, 63.0);
-    assert!(app.ctx.profile.as_ref().unwrap().money < 0.0);
+    assert!(app.ctx.profile.as_ref().unwrap().money() < 0.0);
     assert!(app.event_lines().iter().any(|line| line.contains("debt")));
     assert!(d.trip.truck.parking_brake);
 }
@@ -326,7 +326,7 @@ fn required_service_stays_reachable_in_the_garage_without_cash() {
         for component in 0..3 {
             let mut app = TestApp::new();
             let _d = a_damage_drive(&mut app, business, 1);
-            app.ctx.profile.as_mut().unwrap().money = 0.0;
+            app.ctx.profile.as_mut().unwrap().set_money(0.0);
             match component {
                 0 => app.ctx.profile.as_mut().unwrap().set_tire_wear_pct(100.0),
                 1 => app.ctx.profile.as_mut().unwrap().set_brake_wear_pct(100.0),
@@ -346,9 +346,9 @@ fn required_service_stays_reachable_in_the_garage_without_cash() {
             ][component];
             assert_eq!(remaining, 0.0);
             if business == COMPANY_DRIVER {
-                assert_eq!(profile.money, 0.0);
+                assert_eq!(profile.money(), 0.0);
             } else {
-                assert!(profile.money < 0.0);
+                assert!(profile.money() < 0.0);
                 assert!(app.main_lines().iter().any(|line| line.contains("debt")));
             }
         }

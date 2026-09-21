@@ -573,7 +573,7 @@ impl DrivingState {
         let money = {
             let p = profile_mut_of(ctx);
             p.spend(fine);
-            p.money
+            p.money()
         };
         self.ticket_fines_paid += fine;
         // On the record like every other citation: this one was charged and

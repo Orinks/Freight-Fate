@@ -104,7 +104,7 @@ pub fn jake_toggle_fine_dodge() -> Outcome {
              is a rhythm game, and the warning repeats forever"
         ));
     } else if fines > 0 {
-        let money_delta = STARTING_MONEY - rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+        let money_delta = STARTING_MONEY - rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
         if (money_delta - rig.drive.jake_fines_paid).abs() > 0.01 {
             findings.push(format!(
                 "jake fines paid {:.0} but money moved {money_delta:.0}",

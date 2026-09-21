@@ -86,9 +86,9 @@ pub trait FuelPump: Menu {
         let mut cost = 0.0;
         if !carrier_card {
             cost = ctx.economy.fuel_cost(&region, need) + 35.0;
-            if profile_of(ctx).money < cost {
+            if profile_of(ctx).money() < cost {
                 let partial_gal =
-                    ((profile_of(ctx).money - 35.0) / ctx.economy.fuel_price(&region)).max(0.0);
+                    ((profile_of(ctx).money() - 35.0) / ctx.economy.fuel_price(&region)).max(0.0);
                 if partial_gal < 5.0 {
                     ctx.audio.play("ui/error");
                     ctx.say("You cannot afford fuel here.");
@@ -127,7 +127,7 @@ pub trait FuelPump: Menu {
                 fmt_f(FUEL_STOP_MIN, 0)
             ));
         } else {
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             ctx.say(&format!(
                 "Refueled {} gallons for {} dollars. You have {} dollars. Fueling took {} \
                  minutes. {margin}. {loyalty_text}",

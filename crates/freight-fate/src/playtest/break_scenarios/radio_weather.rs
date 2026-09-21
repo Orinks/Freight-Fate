@@ -121,7 +121,7 @@ pub fn chain_law_citation_balance() -> Outcome {
     rig.prepare(30.0, None);
     rig.run_frames(3); // let the trip push weather surface onto the truck
     rig.drive.trip.position_mi = 12.5; // past the area midpoint: checkpoint territory
-    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     // What this driver owes for it: the base, scaled by priors and by whether
     // the checkpoint caught them inside roadwork.
     let in_construction = rig.drive.trip.in_construction_zone();
@@ -138,7 +138,7 @@ pub fn chain_law_citation_balance() -> Outcome {
     if cited.is_empty() {
         findings.push("seeded checkpoint roll was a hit but no citation was written".to_string());
     } else {
-        let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+        let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
         let delta = money_before - money;
         if (delta - expected).abs() > 0.01 {
             findings.push(format!(

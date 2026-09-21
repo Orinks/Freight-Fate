@@ -226,7 +226,7 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
              objective: open the dispatch board and choose an unlocked load with a deadline \
              you can protect.",
             option.carrier_name,
-            fmt_grouped(p.money, 0)
+            fmt_grouped(p.money(), 0)
         );
     }
     format!(
@@ -495,7 +495,7 @@ pub fn career_summary(
             profile.carrier_name,
             status_label(&profile.business_status)
         ),
-        format!("{} dollars", fmt_grouped(profile.money, 0)),
+        format!("{} dollars", fmt_grouped(profile.money(), 0)),
         career_location(ctx, profile),
         format!("{} deliveries", profile.career.deliveries),
     ];
@@ -565,7 +565,7 @@ impl MainMenuState {
                 "Welcome back, {}. You are parked at {terminal_name} in {} with {} dollars.",
                 p.name,
                 ctx.world.spoken_city(&p.current_city, None),
-                fmt_grouped(p.money, 0)
+                fmt_grouped(p.money(), 0)
             )
         };
         ctx.say(&welcome);

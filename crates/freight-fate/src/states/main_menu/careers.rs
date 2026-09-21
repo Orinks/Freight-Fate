@@ -260,7 +260,7 @@ impl ConfirmCareerActionState {
                     "{name} reset. The career starts over at {} with {} and {} dollars.",
                     ctx.world.spoken_city(&fresh.current_city, None),
                     fresh.carrier_name,
-                    fmt_grouped(fresh.money, 0)
+                    fmt_grouped(fresh.money(), 0)
                 )
             }
             CareerAction::Delete => {

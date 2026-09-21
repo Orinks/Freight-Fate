@@ -137,7 +137,7 @@ impl ParkingFullState {
     }
 
     fn motel(&mut self, ctx: &mut GameContext) {
-        let money = profile_of(ctx).money;
+        let money = profile_of(ctx).money();
         if money < MOTEL_COST {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
@@ -162,7 +162,7 @@ impl ParkingFullState {
                 p.store_truck_condition(&d.trip.truck);
                 p.active_trip = Some(snapshot);
             }
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             format!(
                 "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
                  is {}. Hours of service reset and you wake fresh. You have {} dollars. {} \

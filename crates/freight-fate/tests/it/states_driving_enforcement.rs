@@ -618,13 +618,13 @@ fn test_speeding_with_no_post_watching_costs_nothing() {
     let mut drive = a_drive(&mut app, "Leadfoot");
     drive.trip.posts = Vec::new();
     let _log = app.record_audio();
-    let money_before = profile_of(&app.ctx).money;
+    let money_before = profile_of(&app.ctx).money();
 
     watch_speed(&mut drive, &mut app, 20.0);
 
     assert!(drive.pull_over.is_none());
     assert_eq!(drive.speeding_tickets, 0);
-    assert_eq!(profile_of(&app.ctx).money, money_before);
+    assert_eq!(profile_of(&app.ctx).money(), money_before);
 }
 
 #[test]
@@ -634,13 +634,13 @@ fn test_debug_off_mode_never_pulls_you_over() {
     one_post_watching_everything(&mut drive, 1.0);
     app.ctx.settings.hos_mode = "debug_off".to_string();
     let _log = app.record_audio();
-    let money_before = profile_of(&app.ctx).money;
+    let money_before = profile_of(&app.ctx).money();
 
     watch_speed(&mut drive, &mut app, 20.0);
 
     assert!(drive.pull_over.is_none());
     assert_eq!(drive.speeding_tickets, 0);
-    assert_eq!(profile_of(&app.ctx).money, money_before);
+    assert_eq!(profile_of(&app.ctx).money(), money_before);
 }
 
 #[test]

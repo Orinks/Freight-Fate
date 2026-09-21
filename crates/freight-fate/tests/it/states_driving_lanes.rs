@@ -593,7 +593,7 @@ fn test_plowing_the_barrels_costs_a_fine_and_a_serious_violation() {
     rolling(&mut d, 55.0);
     let (before_money, before_serious) = {
         let p = app.ctx.profile.as_ref().expect("a profile");
-        (p.money, p.driving_record.serious_violations.len())
+        (p.money(), p.driving_record.serious_violations.len())
     };
 
     let zone = Zone::new(5.0, 9.0, 45.0, "construction").with_closed_lane(Some(1));
@@ -604,7 +604,7 @@ fn test_plowing_the_barrels_costs_a_fine_and_a_serious_violation() {
     let expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0, false, None);
     assert_eq!(expected, WORK_ZONE_BARRELS_FINE);
     let p = app.ctx.profile.as_ref().expect("a profile");
-    assert_eq!(p.money, before_money - expected);
+    assert_eq!(p.money(), before_money - expected);
     assert_eq!(d.ticket_fines_paid, expected);
     assert_eq!(
         p.driving_record.serious_violations.len(),
@@ -642,7 +642,7 @@ fn test_the_barrel_citation_escalates_for_a_repeat_offender() {
     let before_money = {
         let p = app.ctx.profile.as_mut().expect("a profile");
         p.driving_record.citations = 2;
-        p.money
+        p.money()
     };
 
     let zone = Zone::new(5.0, 9.0, 45.0, "construction").with_closed_lane(Some(1));
@@ -652,7 +652,7 @@ fn test_the_barrel_citation_escalates_for_a_repeat_offender() {
     let expected = citation_fine(WORK_ZONE_BARRELS_FINE, 2, false, None);
     assert_eq!(expected, WORK_ZONE_BARRELS_FINE * 2.0);
     assert_eq!(
-        app.ctx.profile.as_ref().unwrap().money,
+        app.ctx.profile.as_ref().unwrap().money(),
         before_money - expected
     );
 }
@@ -664,7 +664,7 @@ fn test_the_barrel_fine_is_charged_once_per_work_zone() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     rolling(&mut d, 55.0);
-    let before_money = app.ctx.profile.as_ref().expect("a profile").money;
+    let before_money = app.ctx.profile.as_ref().expect("a profile").money();
     let zone = Zone::new(5.0, 9.0, 45.0, "construction").with_closed_lane(Some(1));
 
     run_into_the_barrels(&mut d, &mut app, &zone);
@@ -680,7 +680,7 @@ fn test_the_barrel_fine_is_charged_once_per_work_zone() {
 
     let expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0, false, None);
     assert_eq!(
-        app.ctx.profile.as_ref().unwrap().money,
+        app.ctx.profile.as_ref().unwrap().money(),
         before_money - expected
     );
     assert!(d.trip.truck.damage_pct > damage_after_one); // the truck still pays
@@ -695,7 +695,7 @@ fn test_no_open_lane_means_no_fine() {
     rolling(&mut d, 55.0);
     let (before_money, before_serious) = {
         let p = app.ctx.profile.as_ref().expect("a profile");
-        (p.money, p.driving_record.serious_violations.len())
+        (p.money(), p.driving_record.serious_violations.len())
     };
     d.trip.position_mi = 6.0;
     d.trip
@@ -711,7 +711,7 @@ fn test_no_open_lane_means_no_fine() {
     d.cite_barrel_strike(&mut app.ctx, &zone);
 
     let p = app.ctx.profile.as_ref().expect("a profile");
-    assert_eq!(p.money, before_money);
+    assert_eq!(p.money(), before_money);
     assert_eq!(d.ticket_fines_paid, 0.0);
     assert_eq!(p.driving_record.serious_violations.len(), before_serious);
 }

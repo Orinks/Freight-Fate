@@ -108,7 +108,7 @@ fn test_city_service_snapshot_drops_to_terminal() {
     let mut app = TestApp::new();
     let mut profile = Profile::named_in("Retired Drive", "Chicago");
     profile.active_trip = Some(json!({"kind": "city_service_drive", "job": {}, "trip_seed": 1}));
-    profile.money = 4_321.0;
+    profile.set_money(4_321.0);
     profile.game_hours = 88.0;
     let path = profile.path().to_path_buf();
     app.ctx.profile = Some(profile);
@@ -125,7 +125,7 @@ fn test_city_service_snapshot_drops_to_terminal() {
         .is_some());
     let profile = app.ctx.profile.as_ref().unwrap();
     assert!(profile.active_trip.is_none());
-    assert_eq!(profile.money, 4_321.0);
+    assert_eq!(profile.money(), 4_321.0);
     assert_eq!(profile.game_hours, 88.0);
     assert!(app.main_lines().iter().any(|line| line
         == "Local service drives were retired in this update; you are parked at the terminal."));

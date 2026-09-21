@@ -369,7 +369,7 @@ fn test_a_withheld_promotion_does_not_hand_over_a_freshly_serviced_truck() {
     let mut p = Profile::named("Dale");
     p.current_city = "Buffalo".to_string();
     p.career.xp = 152_000.0;
-    p.money = -5_000.0;
+    p.set_money(-5_000.0);
     let text = withheld_promotion_text(&p);
     assert!(text.contains("exactly as it stands"), "{text}");
     assert!(

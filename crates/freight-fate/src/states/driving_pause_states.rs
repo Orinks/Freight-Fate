@@ -213,7 +213,7 @@ impl PauseMenuState {
                 // the rescue is never refused; money can go negative
                 profile_mut_of(ctx).spend(cost);
             }
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             d.trip.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT;
             advance_rest_clock(d, ctx, MECHANIC_WAIT_MIN, None, "");
             hos_mut_of(ctx).on_duty(MECHANIC_WAIT_MIN);

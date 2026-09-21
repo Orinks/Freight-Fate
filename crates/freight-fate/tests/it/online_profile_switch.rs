@@ -101,7 +101,7 @@ fn changed_save_marks_only_after_persistent_content_changes() {
     profile.save().unwrap();
     app.ctx.profile = Some(profile);
 
-    app.ctx.profile.as_mut().unwrap().money += 50.0;
+    app.ctx.profile.as_mut().unwrap().earn(50.0);
     app.ctx.save_profile();
 
     let stamp = app
@@ -352,7 +352,7 @@ fn changing_business_status_marks_business_changed() {
         profile.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
         profile.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         profile.career.reputation = OWNER_OPERATOR_REPUTATION;
-        profile.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+        profile.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
     }
     app.push_state(BusinessStatusState::new());
 

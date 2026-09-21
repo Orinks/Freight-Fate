@@ -41,7 +41,7 @@ fn params(title: &str, out_of_service: bool, inspection_on_stop: bool) -> Enforc
 fn test_a_first_marginal_stop_is_a_warning_not_a_ticket() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
         TrafficStopState::new(ctx, d, true, 9.0, 65.0, false, false, false)
     });
@@ -51,7 +51,7 @@ fn test_a_first_marginal_stop_is_a_warning_not_a_ticket() {
         state.outcome_text()
     );
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     );
     assert_eq!(with_drive(&drive, |d| d.speeding_tickets), 0);
@@ -64,7 +64,7 @@ fn test_a_serious_stop_writes_the_ticket_once_and_charges_it_on_the_spot() {
     let money_before = {
         let profile = app.ctx.profile.as_mut().expect("a career");
         profile.career.reputation = 40.0;
-        profile.money
+        profile.money()
     };
     let expected = enforcement::speeding_citation_fine(24.0, 0, false);
     let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
@@ -76,7 +76,7 @@ fn test_a_serious_stop_writes_the_ticket_once_and_charges_it_on_the_spot() {
         state.outcome_text()
     );
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     );
     assert_eq!(with_drive(&drive, |d| d.speeding_tickets), 1);
@@ -211,13 +211,13 @@ fn test_a_bobtail_pulled_licence_says_there_is_no_trailer() {
 fn test_an_enforcement_stop_charges_once_and_reads_back_as_history() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let expected = enforcement::citation_fine(enforcement::LANE_MISUSE_FINE, 0, false, None);
     let mut state = drive_and_ctx(&drive, &mut app, |d, ctx| {
         EnforcementStopState::new(ctx, d, params("Lane misuse", false, false))
     });
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     );
 
@@ -235,7 +235,7 @@ fn test_an_enforcement_stop_charges_once_and_reads_back_as_history() {
     let second = last(&app);
     assert!(second.starts_with("Stop already settled."), "{second}");
     assert_eq!(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected,
         "the money moved exactly once"
     );
@@ -337,7 +337,7 @@ fn test_a_scale_bypass_is_inspected_on_the_shoulder_instead() {
 fn test_the_felony_stop_cancels_the_load_and_releases_to_the_terminal() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let damage_before = with_drive(&drive, |d| d.trip.truck.damage_pct);
     let mut state = drive_and_ctx(&drive, &mut app, |d, ctx| FelonyStopState::new(ctx, d));
 
@@ -351,7 +351,7 @@ fn test_the_felony_stop_cancels_the_load_and_releases_to_the_terminal() {
         "{}",
         state.summary()
     );
-    assert!(app.ctx.profile.as_ref().expect("a career").money < money_before);
+    assert!(app.ctx.profile.as_ref().expect("a career").money() < money_before);
     assert!(
         with_drive(&drive, |d| d.trip.truck.damage_pct)
             >= damage_before + FAILURE_TO_STOP_DAMAGE_PCT - 0.001

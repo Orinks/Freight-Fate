@@ -26,7 +26,13 @@ use ff_core::sim::vehicle::RUNAWAY_SPEED_MPH;
 pub fn floor_it_through_town() -> Outcome {
     let mut rig = Rig::new(RigOptions::default());
     let mut findings: Vec<String> = Vec::new();
-    let money_before = rig.app.ctx.profile.as_ref().map(|p| p.money).unwrap_or(0.0);
+    let money_before = rig
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .map(|p| p.money())
+        .unwrap_or(0.0);
     rig.prepare(30.0, None);
     rig.hold(Key::Up);
     let target = 25.0f64.min(rig.drive.trip.total_miles() - 8.0);
@@ -44,7 +50,13 @@ pub fn floor_it_through_town() -> Outcome {
             ));
         }
     }
-    let money_now = rig.app.ctx.profile.as_ref().map(|p| p.money).unwrap_or(0.0);
+    let money_now = rig
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .map(|p| p.money())
+        .unwrap_or(0.0);
     let money_delta = money_now - money_before;
     let tickets = rig.drive.speeding_tickets;
     let fines = rig.drive.ticket_fines_paid;

@@ -389,7 +389,7 @@ impl RestStopState {
 
     fn pay_advance_label(&self, ctx: &GameContext) -> String {
         let p = profile_of(ctx);
-        let grant = pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load);
+        let grant = pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load);
         if grant > 0.0 {
             return format!("Request pay advance: {} dollars", fmt_grouped(grant, 0));
         }
@@ -398,15 +398,19 @@ impl RestStopState {
 
     fn pay_advance_available(&self, ctx: &GameContext) -> bool {
         let p = profile_of(ctx);
-        pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load) > 0.0
+        pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load) > 0.0
     }
 
     fn request_pay_advance(&mut self, ctx: &mut GameContext) {
         let (grant, reason) = {
             let p = profile_of(ctx);
             (
-                pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load),
-                pay_advance_unavailable_reason(p.money, p.pay_advance, p.pay_advance_used_for_load),
+                pay_advance_grant(p.money(), p.pay_advance, p.pay_advance_used_for_load),
+                pay_advance_unavailable_reason(
+                    p.money(),
+                    p.pay_advance,
+                    p.pay_advance_used_for_load,
+                ),
             )
         };
         if grant <= 0.0 {
@@ -419,7 +423,7 @@ impl RestStopState {
             p.earn(grant);
             p.pay_advance = round_py_n(p.pay_advance + grant, 2);
             p.pay_advance_used_for_load = true;
-            (p.money, p.pay_advance)
+            (p.money(), p.pay_advance)
         };
         self.save_here(ctx, true);
         ctx.audio.play("ui/notify");
@@ -606,7 +610,7 @@ impl RestStopState {
     /// Lodging is personal money even for company drivers -- the carrier pays
     /// for the truck, not the room.
     fn motel_sleep(&mut self, ctx: &mut GameContext) {
-        let money = profile_of(ctx).money;
+        let money = profile_of(ctx).money();
         if money < MOTEL_COST {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
@@ -626,7 +630,7 @@ impl RestStopState {
             advance_rest_clock(d, ctx, hos::SLEEP_MIN, None, "");
             hos_mut_of(ctx).sleep();
             profile_mut_of(ctx).fatigue = 0.0;
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             format!(
                 "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
                  is {}. Hours of service reset and you wake fresh. You have {} dollars. {}{}",
@@ -691,7 +695,7 @@ impl RestStopState {
         let carrier = !player_pays_operating_costs(&profile_of(ctx).business_status);
         if !carrier {
             let cost = ff_core::models::economy::Economy::repair_cost(damage);
-            if profile_of(ctx).money < cost {
+            if profile_of(ctx).money() < cost {
                 ctx.audio.play("ui/error");
                 ctx.say(&format!(
                     "Repair costs {} dollars. You cannot afford it.",
@@ -704,7 +708,7 @@ impl RestStopState {
                 d.trip.truck.damage_pct = 0.0;
                 advance_rest_clock(d, ctx, 60.0, None, "");
                 hos_mut_of(ctx).on_duty(60.0);
-                let money = profile_of(ctx).money;
+                let money = profile_of(ctx).money();
                 format!(
                     "Truck repaired for {} dollars. It is {}. You have {} dollars. {}",
                     fmt_grouped(cost, 0),
@@ -881,7 +885,7 @@ impl RestStopState {
         }
         let carrier = !player_pays_operating_costs(&profile_of(ctx).business_status);
         let cost = round_py_n(wear * cost_per_pct, 2);
-        if !carrier && profile_of(ctx).money < cost {
+        if !carrier && profile_of(ctx).money() < cost {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "{} costs {} dollars here. You cannot afford it.",
@@ -910,7 +914,7 @@ impl RestStopState {
                     deadline_text(d, ctx)
                 )
             } else {
-                let money = profile_of(ctx).money;
+                let money = profile_of(ctx).money();
                 format!(
                     "{done_say} {} dollars. It is {}. You have {} dollars. {}",
                     fmt_grouped(cost, 0),
@@ -981,13 +985,13 @@ impl RestStopState {
         let rig_buff = buff.group == "engine" || buff.group == "tire";
         let carrier_pays =
             rig_buff && !player_pays_operating_costs(&profile_of(ctx).business_status);
-        if !carrier_pays && profile_of(ctx).money < price {
+        if !carrier_pays && profile_of(ctx).money() < price {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "The {} costs {} and you have {} dollars.",
                 buff.label.to_lowercase(),
                 Self::format_buff_price_amount(price),
-                fmt_grouped(profile_of(ctx).money, 0)
+                fmt_grouped(profile_of(ctx).money(), 0)
             ));
             return;
         }
@@ -1049,7 +1053,7 @@ impl RestStopState {
                 format!(
                     "{}. You have {} dollars.",
                     Self::format_buff_price_amount(price),
-                    fmt_grouped(profile_of(ctx).money, 0)
+                    fmt_grouped(profile_of(ctx).money(), 0)
                 )
             };
             format!(

@@ -350,7 +350,10 @@ pub fn find_save_path(name: &str) -> Option<PathBuf> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
     pub name: String,
-    pub money: f64,
+    /// Private so every change goes through `earn`, `spend` or `set_money`
+    /// and the money guard sees it; a direct write would wrongly mark an
+    /// honest career as modified. Read it with [`Profile::money`].
+    money: f64,
     pub current_city: String,
     // The release line this career was created on. New careers stamp the
     // current line; a save without the field is judged by its save version
@@ -582,6 +585,11 @@ impl Profile {
         self.integrity_modified = true;
         self.integrity_notice_pending = true;
         false
+    }
+
+    /// The career balance in dollars.
+    pub fn money(&self) -> f64 {
+        self.money
     }
 
     /// Credit `amount` dollars through the money guard.

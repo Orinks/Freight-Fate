@@ -146,7 +146,7 @@ impl ArrivalState {
             let (previous_level, money) = {
                 let p = profile_mut_of(ctx);
                 p.earn(job.pay);
-                (p.career.level(), p.money)
+                (p.career.level(), p.money())
             };
             let standing = enforcement::standing_band(profile_of(ctx));
             announcements = profile_mut_of(ctx).career.record_delivery(
@@ -686,7 +686,7 @@ impl ArrivalState {
         }
 
         let destination_timezone = d.trip.destination_timezone();
-        let money = profile_of(ctx).money;
+        let money = profile_of(ctx).money();
         let receiver_service_hours = (elapsed_hours - hours).max(0.0);
         let receiver_service_clause = if receiver_service_hours >= 0.05 {
             format!(
@@ -953,7 +953,7 @@ impl ArrivalState {
         ));
         lines.push(format!(
             "Money after settlement: {} dollars.",
-            fmt_grouped(profile_of(ctx).money, 0)
+            fmt_grouped(profile_of(ctx).money(), 0)
         ));
         lines.extend(bonus_lines);
         lines.push(format!("Route: {}.", cities.join(" to ")));

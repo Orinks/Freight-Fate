@@ -168,7 +168,7 @@ pub fn perform_shoulder_sleep(
         let money = {
             let p = profile_mut_of(ctx);
             p.spend(fine);
-            p.money
+            p.money()
         };
         ctx.audio.play("ui/error");
         parts.push(format!(
