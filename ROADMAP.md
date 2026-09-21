@@ -88,8 +88,9 @@ bookmarks usable.
 - [x] Moved careers (game side): a career marked only because it was copied
       from another computer tells the backup which earlier backup it arrived
       as, so the site can accept the move without a manual review.
-- [ ] Moved careers (site side): accept a marked career whose arrival matches
-      a backup the site already holds unmarked.
+- [x] Moved careers (site side): a marked career whose arrival matches a
+      backup the site already holds unmarked is accepted without a manual
+      review and listed once in the owner's digest.
 
 ### Release gate -- what stands between here and a public 1.9.0
 
