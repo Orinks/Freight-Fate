@@ -36,7 +36,7 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -44,11 +44,9 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use serde_json::{Map, Value};
-use sha2::{Digest, Sha256};
 
 use crate::meaningful_play::{MeaningfulPlayReason, MeaningfulPlayStamp, MeaningfulPlayTracker};
 use crate::net::{wait_seconds, Event, SharedTransport};
-use crate::online_journal::py_json_dumps;
 use crate::online_presence::{
     default_transport, join_with_timeout, py_str, truthy, OnlineIdentity,
 };
@@ -69,9 +67,7 @@ pub const MAX_UPLOAD_BYTES: usize = 900 * 1024;
 
 const WORKER_TICK_S: f64 = 60.0;
 
-// The profile's integrity-signature fields (models/profile.py). Stripped from
-// cloud content: the signature only verifies on the machine that wrote it.
-pub const SIGNATURE_FIELDS: [&str; 2] = ["_signature", "_signature_version"];
+pub use ff_core::models::profile::origin::{cloud_content, SIGNATURE_FIELDS};
 
 /// Raw ed25519 public keys by key id (the shape
 /// `ff_core::cloud_save_integrity::public_keys()` returns); `None` in the
@@ -97,31 +93,6 @@ pub fn save_slot_name(profile_name: &str) -> String {
     } else {
         safe.to_string()
     }
-}
-
-/// The upload form of a profile snapshot: signature-stripped JSON,
-/// gzipped deterministically, plus its sha256 hex digest.
-pub fn cloud_content(profile_dict: &Value) -> (Vec<u8>, String) {
-    let portable = match profile_dict {
-        Value::Object(map) => {
-            let mut out = Map::new();
-            for (k, v) in map {
-                if !SIGNATURE_FIELDS.contains(&k.as_str()) {
-                    out.insert(k.clone(), v.clone());
-                }
-            }
-            Value::Object(out)
-        }
-        other => other.clone(),
-    };
-    let raw = py_json_dumps(&portable);
-    let mut encoder = flate2::GzBuilder::new()
-        .mtime(0)
-        .write(Vec::new(), flate2::Compression::best());
-    let _ = encoder.write_all(raw.as_bytes());
-    let content = encoder.finish().unwrap_or_default();
-    let digest = hex::encode(Sha256::digest(&content));
-    (content, digest)
 }
 
 /// Decode downloaded content back to a profile dict. Errors when the bytes

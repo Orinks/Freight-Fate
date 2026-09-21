@@ -47,6 +47,7 @@ use crate::sim::hos::{DutyLog, HosClock};
 use crate::sim::vehicle::{TruckSpecs, TruckState};
 
 pub mod condition;
+pub mod origin;
 pub mod paths;
 pub mod plausibility;
 pub mod serialize;
@@ -59,6 +60,8 @@ pub(crate) mod tests;
 mod tests_compat;
 #[cfg(test)]
 mod tests_gate;
+#[cfg(test)]
+mod tests_origin;
 #[cfg(test)]
 mod tests_portable;
 #[cfg(test)]
@@ -584,7 +587,16 @@ impl Profile {
         );
         self.integrity_modified = true;
         self.integrity_notice_pending = true;
+        origin::forget_origin(&self.name);
         false
+    }
+
+    /// Clear the modified mark after the server accepted the career on
+    /// review; where it arrived from no longer matters.
+    pub fn absolve(&mut self) {
+        self.integrity_modified = false;
+        self.integrity_notice_pending = false;
+        origin::forget_origin(&self.name);
     }
 
     /// The career balance in dollars.
@@ -955,6 +967,9 @@ impl Profile {
     /// Write the signed, packed save atomically; returns its path.
     pub fn save(&self) -> std::io::Result<PathBuf> {
         let path = self.path();
+        if !self.money_guard.matches(self.money) {
+            origin::forget_origin(&self.name);
+        }
         let tmp = path.with_extension("ffsave.tmp");
         std::fs::write(&tmp, encode_save_bytes(&self.to_dict()))?;
         std::fs::rename(&tmp, &path)?;
@@ -1029,8 +1044,9 @@ impl Profile {
             tampered = true;
         }
         let mut profile = Profile::from_dict(&data);
-        if !skip && plausibility::money_is_impossible(profile.money, profile.career.total_earnings)
-        {
+        let money_impossible =
+            plausibility::money_is_impossible(profile.money, profile.career.total_earnings);
+        if !skip && money_impossible {
             // Signed or not: a balance rewritten while the game ran is signed
             // by the game itself, so the file looks honest and the number
             // does not.
@@ -1041,6 +1057,22 @@ impl Profile {
                 profile.career.total_earnings
             );
             tampered = true;
+        }
+        if tampered || resign {
+            // Only a copy from another computer (a good file whose signature
+            // this data directory cannot check) records where it came from:
+            // the raw dict, before migration or marking, is what the other
+            // computer backed up. Any other reason forgets an earlier record.
+            let copied = signed
+                && !skip
+                && !money_impossible
+                && !data.get("integrity_modified").is_some_and(py_truthy);
+            if copied {
+                let (_, hash) = origin::cloud_content(&Value::Object(data.clone()));
+                origin::record_origin(&profile.name, &hash);
+            } else {
+                origin::forget_origin(&profile.name);
+            }
         }
         if tampered && !profile.integrity_modified {
             profile.integrity_modified = true;
@@ -1083,6 +1115,7 @@ impl Profile {
     /// Remove this profile's save files (packed and legacy).
     pub fn delete(&self) {
         let path = self.path();
+        origin::forget_origin(&self.name);
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(path.with_extension("json"));
     }

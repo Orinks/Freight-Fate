@@ -57,6 +57,19 @@ fn auth_refused(code: u16, body: &Map<String, Value>) -> bool {
         )
 }
 
+/// The backup a marked snapshot arrived as a copy of: the recorded origin of
+/// its career, sent only while the snapshot still carries the mark and only
+/// in the exact shape of a content hash.
+fn copied_from(profile_dict: &Value) -> Option<String> {
+    if !truthy(profile_dict.get("integrity_modified")) {
+        return None;
+    }
+    let name = profile_dict.get("name")?.as_str()?;
+    ff_core::models::profile::origin::origin_for(name).filter(|hash| {
+        hash.len() == 64 && hash.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+    })
+}
+
 /// One upload attempt. Returns the reply dict on success (`ok`, `revision`,
 /// `contentHash`), or a dict with `ok=false` and a `reason` (`conflict`
 /// carries the server's latest revision details). Network trouble is
@@ -79,7 +92,7 @@ pub fn upload_save(
         return failure("too_large");
     }
     let version = json_int(profile_dict.get("version")).unwrap_or(0);
-    let payload = json!({
+    let mut payload = json!({
         "driverId": identity.driver_id,
         "saveName": save_name,
         "saveVersion": version,
@@ -92,6 +105,9 @@ pub fn upload_save(
         // review, so it answers `review_declined` instead of a legacy reason.
         "reviewAware": true,
     });
+    if let Some(origin) = copied_from(profile_dict) {
+        payload["copiedFrom"] = Value::String(origin);
+    }
     let reply = match transport.call(&saves_url(), Some(&payload), &identity.auth_headers(), None) {
         Ok(reply) => reply,
         Err(e @ NetError::Http { .. }) => {
@@ -451,6 +467,11 @@ pub fn restore_to_disk(
         }
     }
     let path = (hooks.write)(&profile).map_err(RestoreError::Write)?;
+    // The restored career is the cloud's copy now, not the one that arrived
+    // from another computer.
+    if let Some(name) = profile.get("name").and_then(Value::as_str) {
+        ff_core::models::profile::origin::forget_origin(name);
+    }
     if let Some(sync_state) = sync_state {
         if let Some(revision) = json_int(payload.get("revision")) {
             let (_, content_hash) = cloud_content(&profile_dict);
