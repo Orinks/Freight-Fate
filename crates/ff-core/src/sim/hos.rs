@@ -6,9 +6,12 @@
 //! 30-minute break after 8 cumulative hours of driving. The break may be any
 //! 30 consecutive non-driving minutes, including on-duty-not-driving work.
 //!
-//! The model includes 7/3 and 8/2 sleeper split credits but intentionally skips
-//! 60/70-hour cycle limits for now; the save schema records explicit duty
-//! statuses so those rules can be added without changing how drive, facility,
+//! The model includes 7/3 and 8/2 sleeper split credits and the 70-hour/8-day
+//! on-duty cycle (49 CFR 395.3(b)(2)): a rolling ledger of on-duty spans on
+//! `HosClock` ages each span out when its end falls more than 8 days behind,
+//! and 34 consecutive off-duty hours restart the cycle (49 CFR 395.3(c)). The
+//! 60-hour/7-day variant is not modelled; the save schema records explicit
+//! duty statuses so rules can be added without changing how drive, facility,
 //! and POI time is classified.
 //!
 //! Everything here is deterministic and platform-free so the headless tests
@@ -24,7 +27,7 @@ mod pyjson;
 #[cfg(test)]
 mod tests;
 
-pub use clock::{HosClock, HosEvent, HosLimit};
+pub use clock::{CycleEntry, HosClock, HosEvent, HosLimit};
 pub use duty_log::{DutyLog, DutySegment, DutyTotals};
 
 use crate::pyfmt::{fmt_f, pct02, py_int, round_py_int};
@@ -50,6 +53,20 @@ pub const HOS_SPLIT_REST_HISTORY_MAX: usize = 16;
 pub const BREAK_MIN: f64 = 30.0;
 /// a full 10-hour off-duty reset
 pub const SLEEP_MIN: f64 = 600.0;
+
+/// 49 CFR 395.3(b)(2): 70 on-duty hours in any 8 consecutive days.
+pub const CYCLE_LIMIT_MIN: f64 = 70.0 * 60.0;
+pub const CYCLE_WINDOW_MIN: f64 = 8.0 * 24.0 * 60.0;
+/// 49 CFR 395.3(c): 34 consecutive off-duty hours restart the cycle.
+pub const RESTART_MIN: f64 = 34.0 * 60.0;
+/// The ELD status line mentions the cycle once this little is left on it.
+pub const CYCLE_SPEAK_MIN: f64 = 24.0 * 60.0;
+
+/// The cycle limit of a mode; None for modes that enforce nothing. Relaxed
+/// keeps the real 70, same as its daily limits.
+pub fn cycle_limit(mode: &str) -> Option<f64> {
+    limits(mode).map(|_| CYCLE_LIMIT_MIN)
+}
 
 /// (drive limit, duty window, driving allowed before a 30-minute break),
 /// all in game minutes.

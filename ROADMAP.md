@@ -1215,10 +1215,18 @@ The ELD grows from a daily countdown into the system that shapes a
 driver's week, and the home terminal becomes the anchor of that week
 instead of a spawn point.
 
-- [ ] **70-hour/8-day cycle with the 34-hour restart.** A rolling on-duty
-      ledger on `HosClock`, spoken through the existing ELD status line;
-      restarts at the home terminal are free and full, road restarts cost
-      motel money and comfort. The 2.0 centerpiece.
+- [x] **70-hour/8-day cycle with the 34-hour restart (landed 2026-09-21).**
+      A rolling on-duty ledger on `HosClock`, spoken through the ELD status
+      line and the logbook once a day of cycle hours is left; 34 consecutive
+      off-duty hours clear it, a cycle-only violation at a roadside stop is a
+      34-hour out-of-service order, and the ledger rides in the `hos` save
+      payload (old saves start a fresh cycle). The 2.0 centerpiece.
+- [ ] **Restart as a menu action.** No terminal/motel option offers a
+      34-hour restart yet; the ledger only clears when nights add up to 34
+      consecutive off-duty hours.
+- [ ] **Home restarts are free, road restarts cost.** Waits on the
+      persisted home terminal.
+- [ ] **Dispatch lane notes and the logbook per-day recap read the cycle.**
 - [ ] **Home terminal persisted and consequential.** `home_terminal_city`
       on the profile (old saves default to the current city with a
       one-time spoken note), ELD readouts in home-terminal time,
