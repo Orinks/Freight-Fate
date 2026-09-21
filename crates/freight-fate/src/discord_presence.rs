@@ -44,6 +44,15 @@ pub const MAX_FIELD_LEN: usize = 128;
 // push more than one update per this many seconds; identical states are dropped.
 pub const MIN_UPDATE_INTERVAL_S: f64 = 15.0;
 
+// A player who walks away -- most often by pausing mid-drive, but equally by
+// leaving the game parked at a menu -- reports the identical snapshot for hours,
+// and their Discord status keeps telling everyone they are 60% into a run they
+// are not driving. After this long without any snapshot change the presence
+// comes down and stays down; any change -- resuming, rolling again, a new leg --
+// puts it straight back up. Deliberately the drivers board's idle sign-off
+// clock, so a player hidden in one place is hidden in the other.
+pub const IDLE_CLEAR_S: f64 = 30.0 * 60.0;
+
 // How often the worker re-evaluates while idle (also flushes a throttled change).
 const WORKER_TICK_S: f64 = MIN_UPDATE_INTERVAL_S;
 
@@ -252,6 +261,8 @@ pub struct DiscordPresenceOptions {
     /// `None` reads `FREIGHT_FATE_DISCORD_APP_ID`, else [`DEFAULT_CLIENT_ID`].
     pub client_id: Option<String>,
     pub min_interval_s: f64,
+    /// Seconds of an unchanged snapshot before the presence is taken down.
+    pub idle_clear_s: f64,
     pub clock: Clock,
     /// `None` models the dependency being unavailable: the service stays dormant.
     pub rpc_factory: Option<RpcFactory>,
@@ -266,6 +277,7 @@ impl Default for DiscordPresenceOptions {
             enabled: true,
             client_id: None,
             min_interval_s: MIN_UPDATE_INTERVAL_S,
+            idle_clear_s: IDLE_CLEAR_S,
             clock: wall_clock(),
             rpc_factory: Some(default_rpc_factory()),
             session_start: None,
@@ -279,6 +291,10 @@ struct State {
     desired: Option<PresenceState>,
     last_sent: Option<PresenceState>,
     last_send_t: Option<f64>,
+    /// When `desired` last genuinely changed; the idle clock reads from here.
+    desired_changed_t: Option<f64>,
+    /// Whether Discord is currently displaying our activity.
+    showing: bool,
     rpc: Option<Box<dyn RpcClient>>,
     last_connect_attempt: Option<f64>,
 }
@@ -288,6 +304,7 @@ struct Inner {
     enabled: AtomicBool,
     client_id: String,
     min_interval: f64,
+    idle_clear: f64,
     clock: Clock,
     rpc_factory: Option<RpcFactory>,
     session_start: f64,
@@ -337,6 +354,7 @@ impl DiscordPresence {
                 enabled: AtomicBool::new(options.enabled && available),
                 client_id,
                 min_interval: options.min_interval_s.max(0.0),
+                idle_clear: options.idle_clear_s.max(1.0),
                 clock: options.clock,
                 rpc_factory: options.rpc_factory,
                 session_start,
@@ -379,6 +397,18 @@ impl DiscordPresence {
         }
     }
 
+    /// Run one connect-then-maybe-send cycle now, the way the worker thread
+    /// does on its own tick.
+    ///
+    /// The threaded service pumps on a heartbeat whether or not the game has
+    /// reported anything, which is what lets the idle clear fire while a
+    /// paused game repeats the same snapshot. The non-threaded service pumps
+    /// only on a change, so a test turning the clock forward over an
+    /// *unchanged* snapshot has to drive it (the Python tests call `_pump`).
+    pub fn tick(&self) {
+        self.inner.pump();
+    }
+
     /// Report the latest broad activity. Non-blocking and dedup-aware.
     pub fn update(&self, state: Option<PresenceState>) {
         let Some(state) = state else { return };
@@ -391,6 +421,10 @@ impl DiscordPresence {
                 return; // nothing changed; skip even the wakeup
             }
             st.desired = Some(state);
+            // Any genuine change restarts the idle clock; the dedupe above
+            // means a paused or parked game re-reporting the same snapshot
+            // every frame does not.
+            st.desired_changed_t = Some((self.inner.clock)());
         }
         if self.inner.threaded {
             self.inner.wake.set();
@@ -421,10 +455,13 @@ impl DiscordPresence {
         if enabled {
             // Re-show whatever the game last reported, reconnecting at once
             // rather than waiting out the idle backoff (this is a user action).
+            // Throwing the switch is also proof the player is here, so the idle
+            // clock starts over rather than hiding what it just put up.
             {
                 let mut st = self.inner.state.lock().unwrap();
                 st.last_sent = None;
                 st.last_connect_attempt = None;
+                st.desired_changed_t = Some((self.inner.clock)());
             }
             self.start();
         } else {
@@ -524,12 +561,23 @@ impl Inner {
         let (desired, now, mut rpc) = {
             let mut st = self.state.lock().unwrap();
             let Some(desired) = st.desired.clone() else {
-                return;
+                return; // nothing reported yet
             };
+            let now = (self.clock)();
+            let idle_for = st.desired_changed_t.map_or(0.0, |t| now - t);
+            if idle_for >= self.idle_clear {
+                // The same snapshot for this long means the player has walked
+                // away, so take the presence down instead of leaving a stale
+                // "60% there" up all evening. `last_sent` keeps the idle
+                // snapshot so the next real change is still seen as a change
+                // and re-shows it.
+                drop(st);
+                self.hide(now);
+                return;
+            }
             if st.last_sent.as_ref() == Some(&desired) {
                 return; // nothing new to show (de-dupe)
             }
-            let now = (self.clock)();
             if let Some(last) = st.last_send_t {
                 if now - last < self.min_interval {
                     return; // throttled; the worker re-checks after the window closes
@@ -548,6 +596,7 @@ impl Inner {
                 st.rpc = rpc;
                 st.last_sent = Some(desired);
                 st.last_send_t = Some(now);
+                st.showing = true;
             }
             Err(e) => {
                 log::debug!("Discord presence update failed; will reconnect: {e}");
@@ -607,11 +656,48 @@ impl Inner {
         true
     }
 
+    /// Take an idle presence down, once. Leaves `last_sent` alone so the next
+    /// genuine change still reads as a change and puts the activity back up.
+    fn hide(&self, now: f64) {
+        let mut rpc = {
+            let mut st = self.state.lock().unwrap();
+            if !st.showing {
+                return; // already hidden; wait for a change rather than re-clearing
+            }
+            st.rpc.take()
+        };
+        let result = match rpc.as_mut() {
+            Some(rpc) => rpc.clear(),
+            None => Err("not connected".to_string()),
+        };
+        let mut st = self.state.lock().unwrap();
+        match result {
+            Ok(()) => {
+                st.rpc = rpc;
+                st.showing = false;
+                // A clear spends the same rate-limit budget as an update, so it
+                // counts against the throttle a resume will have to wait out.
+                st.last_send_t = Some(now);
+            }
+            Err(e) => {
+                log::debug!("Discord presence clear failed; will reconnect: {e}");
+                st.last_send_t = None;
+                st.last_sent = None;
+                st.showing = false;
+                drop(st);
+                if let Some(rpc) = rpc {
+                    teardown_rpc(rpc, true);
+                }
+            }
+        }
+    }
+
     fn close(&self) {
         let rpc = {
             let mut st = self.state.lock().unwrap();
             st.last_send_t = None;
             st.last_sent = None;
+            st.showing = false;
             st.rpc.take()
         };
         if let Some(rpc) = rpc {

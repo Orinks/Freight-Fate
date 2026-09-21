@@ -16,6 +16,8 @@
 
 ### Changed
 
+- **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.
+
 - **Quiet speaks short updates, including lane openings.** Urgent only keeps essential warnings and directions; suppressed speech stays out of the event buffer.
 
 - **A new install now starts on the Balanced assists.** The truck helps hold your lane and stops for you at the destination gate.

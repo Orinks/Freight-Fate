@@ -14,7 +14,7 @@ use std::time::{Duration, Instant};
 
 use freight_fate::discord_presence::{
     driving_presence, format_activity, ActivityPayload, DiscordPresence, DiscordPresenceOptions,
-    PresenceState, RpcClient, RpcFactory, DEFAULT_CLIENT_ID, MAX_FIELD_LEN,
+    PresenceState, RpcClient, RpcFactory, DEFAULT_CLIENT_ID, IDLE_CLEAR_S, MAX_FIELD_LEN,
 };
 use freight_fate::net::testing::ManualClock;
 
@@ -112,6 +112,7 @@ fn make_presence(
         enabled,
         client_id: Some("test-app-id".to_string()),
         min_interval_s,
+        idle_clear_s: IDLE_CLEAR_S,
         clock: clock.clock(),
         rpc_factory: Some(rpc.factory()),
         session_start: Some(1234.0),
@@ -633,4 +634,88 @@ fn test_presence_names_the_fleet_assignment_not_the_stored_truck() {
         .map(|t| t.label)
         .unwrap();
     assert_eq!(label, expected);
+}
+
+// -- walking away -------------------------------------------------------------
+
+/// A service whose idle clock is short enough to step over in a test.
+fn make_idle_presence(
+    rpc: &FakeRpc,
+    clock: &Arc<ManualClock>,
+    idle_clear_s: f64,
+) -> DiscordPresence {
+    DiscordPresence::new(DiscordPresenceOptions {
+        client_id: Some("test-app-id".to_string()),
+        min_interval_s: 0.0,
+        idle_clear_s,
+        clock: clock.clock(),
+        rpc_factory: Some(rpc.factory()),
+        session_start: Some(1234.0),
+        threaded: false,
+        ..DiscordPresenceOptions::default()
+    })
+}
+
+#[test]
+fn test_an_unchanged_snapshot_takes_the_presence_down_once_and_a_change_puts_it_back() {
+    let rpc = FakeRpc::new();
+    let clock = ManualClock::new();
+    let presence = make_idle_presence(&rpc, &clock, 100.0);
+    presence.start();
+
+    presence.update(Some(PresenceState::activity("Sixty percent there")));
+    assert_eq!(rpc.updates().len(), 1, "the run should be showing");
+    assert_eq!(rpc.cleared(), 0);
+
+    // The player pauses and walks away. The game keeps reporting the identical
+    // snapshot, which must not keep the idle clock alive.
+    clock.advance(60.0);
+    presence.update(Some(PresenceState::activity("Sixty percent there")));
+    presence.tick();
+    assert_eq!(rpc.cleared(), 0, "cleared before the idle window closed");
+
+    clock.advance(60.0); // 120s of the same snapshot, past the 100s window
+    presence.update(Some(PresenceState::activity("Sixty percent there")));
+    presence.tick();
+    assert_eq!(rpc.cleared(), 1, "an idle presence should come down");
+
+    // Still away: it stays down rather than re-clearing every tick.
+    clock.advance(500.0);
+    presence.tick();
+    presence.tick();
+    assert_eq!(rpc.cleared(), 1, "the clear repeated while still idle");
+    assert_eq!(rpc.updates().len(), 1, "a hidden presence re-showed itself");
+
+    // They come back and the truck rolls again.
+    presence.update(Some(PresenceState::activity("Seventy percent there")));
+    assert_eq!(rpc.updates().len(), 2, "the presence did not come back up");
+    assert_eq!(rpc.cleared(), 1);
+    presence.shutdown();
+}
+
+#[test]
+fn test_turning_the_setting_back_on_restarts_the_idle_clock() {
+    let rpc = FakeRpc::new();
+    let clock = ManualClock::new();
+    let presence = make_idle_presence(&rpc, &clock, 100.0);
+    presence.start();
+    presence.update(Some(PresenceState::activity("In the main menu")));
+    assert_eq!(rpc.updates().len(), 1);
+
+    // Off, a long wait, then on: throwing the switch is proof the player is
+    // here, so what it puts back up must not be hidden by the old idle age.
+    presence.set_enabled(false);
+    clock.advance(1_000.0);
+    presence.set_enabled(true);
+    presence.update(Some(PresenceState::activity("In the main menu")));
+    let cleared_by_the_switch = rpc.cleared();
+
+    clock.advance(1.0);
+    presence.tick();
+    assert_eq!(
+        rpc.cleared(),
+        cleared_by_the_switch,
+        "the restored presence was hidden by the old idle age"
+    );
+    presence.shutdown();
 }
