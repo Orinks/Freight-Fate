@@ -89,6 +89,8 @@
 
 ### Fixed
 
+- **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
+
 - **Manage careers lists careers from earlier versions, so you can delete them.** Before, one stayed on the Choose career list for good.
 
 - **Deleting a backed-up career asks about its cloud backups.** Remove them too, or keep them; a new career with the same name no longer writes over kept ones.

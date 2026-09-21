@@ -305,8 +305,16 @@ impl ConfirmCareerActionState {
         let name = self.name.clone();
         let mut fresh = Profile::named_in(&name, &old.current_city);
         apply_start_option(&mut fresh, option_for_profile(old));
-        if let Err(e) = fresh.save() {
-            log::error!("Could not save the profile: {e}");
+        match fresh.save() {
+            // A career loaded from a file named apart from it: the reset went
+            // to the file its name points at, so the old career goes.
+            Ok(written) if written != self.path => {
+                if let Err(e) = std::fs::remove_file(&self.path) {
+                    log::warn!("Could not remove {}: {e}", self.path.display());
+                }
+            }
+            Ok(_) => {}
+            Err(e) => log::error!("Could not save the profile: {e}"),
         }
         // The title menu may still hold the old career from the last drive.
         if ctx.profile.as_ref().is_some_and(|p| p.name == name) {

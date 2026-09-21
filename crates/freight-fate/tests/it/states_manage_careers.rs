@@ -124,3 +124,41 @@ fn deleting_from_this_computer_only_keeps_the_backups_and_frees_the_name() {
         .slot("Doomed")
         .is_empty());
 }
+
+/// Jerry, 2026-09-21: a career said it was deleted and stayed. The save's
+/// file name need not match the career name (a copied or renamed file), and
+/// the delete aimed at the file the name implies instead of the one loaded.
+#[test]
+fn deleting_removes_the_file_the_career_was_loaded_from() {
+    let mut app = TestApp::new();
+    let saved = Profile::named_in("Tiger", "Denver").save().unwrap();
+    let renamed = saved.with_file_name("Tiger backup.ffsave");
+    std::fs::rename(&saved, &renamed).unwrap();
+    app.push_state(MainMenuState::new());
+    select::<MainMenuState>(&mut app, "Manage careers");
+    assert!(labels::<ManageCareersState>(&app)[0].starts_with("Tiger: level 1"));
+    key(&mut app, Key::Return);
+    select::<CareerActionsState>(&mut app, "Delete this career");
+    select::<ConfirmCareerActionState>(&mut app, "Yes, delete Tiger");
+    assert!(!renamed.exists());
+    assert!(!labels::<MainMenuState>(&app)
+        .iter()
+        .any(|l| l == "Manage careers"));
+}
+
+#[test]
+fn resetting_a_career_from_a_renamed_file_leaves_one_career() {
+    let mut app = TestApp::new();
+    let saved = Profile::named_in("Tiger", "Denver").save().unwrap();
+    let renamed = saved.with_file_name("Tiger backup.ffsave");
+    std::fs::rename(&saved, &renamed).unwrap();
+    app.push_state(MainMenuState::new());
+    select::<MainMenuState>(&mut app, "Manage careers");
+    key(&mut app, Key::Return);
+    select::<CareerActionsState>(&mut app, "Reset this career");
+    select::<ConfirmCareerActionState>(&mut app, "Yes, reset Tiger");
+    assert!(!renamed.exists());
+    assert!(saved.exists());
+    select::<MainMenuState>(&mut app, "Manage careers");
+    assert_eq!(labels::<ManageCareersState>(&app).len(), 2); // Tiger, Back
+}
