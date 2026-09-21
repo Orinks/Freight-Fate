@@ -2234,146 +2234,13 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 11: Hand-made pieces, shipped and the player's own
+### Task 11: DROPPED (owner, 2026-09-21)
 
-**Files:**
-- Modify: `crates/freight-fate/src/audio/hand_made.rs` (replace the stub)
-- Create: `crates/freight-fate/assets/hand_made/README.md` (one paragraph: folder per place id, supported formats, credit requirement)
-- Test: `crates/freight-fate/tests/it/synth_music.rs`
-
-**Interfaces:**
-- Produces: `hand_made::extras_for(place: StyleId) -> Vec<String>` (keys like `hand_made/<place>/<file stem>` and `hand_made/any/<stem>`), `hand_made::title_for(key: &str) -> Option<String>`, `hand_made::scan(dir: &Path)` (reads a folder and registers every playable file); `hand_made::player_dir() -> PathBuf` = `<FREIGHT_FATE_DATA_DIR>/music`
-
-Shipped hand-made pieces live in `crates/freight-fate/assets/hand_made/<place id>/` and are compiled in with a table like the classics (empty today; the README says how to add one: drop the file, add one `include_bytes!` line, add a CREDITS row). The player's folder is read at runtime.
-
-- [ ] **Step 1: Write the failing tests**
-
-```rust
-#[test]
-fn a_player_module_joins_its_place_and_a_broken_file_is_skipped() {
-    let dir = tempfile::tempdir().unwrap();
-    std::fs::create_dir_all(dir.path().join("drive_day")).unwrap();
-    std::fs::write(dir.path().join("drive_day").join("Diesel Dawn.mod"), tiny_mod()).unwrap();
-    std::fs::write(dir.path().join("drive_day").join("notes.txt"), b"not music").unwrap();
-    std::fs::write(dir.path().join("Anywhere Tune.mod"), tiny_mod()).unwrap();
-    freight_fate::audio::hand_made::scan(dir.path());
-    let day = freight_fate::audio::hand_made::extras_for(ff_core::music_synth::StyleId::DayDrive);
-    assert!(day.contains(&"hand_made/drive_day/Diesel Dawn".to_string()));
-    assert!(day.contains(&"hand_made/any/Anywhere Tune".to_string()));
-    assert!(!day.iter().any(|k| k.contains("notes")));
-    let night = freight_fate::audio::hand_made::extras_for(ff_core::music_synth::StyleId::NightDrive);
-    assert!(!night.iter().any(|k| k.contains("Diesel Dawn")));
-    assert_eq!(freight_fate::audio::hand_made::title_for("hand_made/drive_day/Diesel Dawn").as_deref(), Some("Diesel Dawn"));
-}
-```
-
-(The module's embedded title is "tiny"; for player files the spoken title is the file name, which is what the player chose. For shipped modules with a composer, use the CREDITS-backed table entry's title and composer: "Diesel Dawn, by Josh".) Run and see FAIL.
-
-- [ ] **Step 2: Implement**
-
-```rust
-//! Hand-made pieces for Synthesized mode: tracker modules (OpenMPT and the
-//! like) or audio files, per place. Shipped ones are compiled in; a player's
-//! own come from <data dir>/music, in a folder named for the place
-//! (drive_day, company_top_hand, ...) or at the top level for any place.
-//! A file that is unreadable or not audio is logged and skipped.
-
-use ff_core::assets_pack::register_generated_sound;
-use ff_core::music_synth::StyleId;
-use parking_lot::Mutex;
-use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
-
-const PLAYABLE: &[&str] = &["it", "xm", "s3m", "mod", "mo3", "ogg", "wav", "opus"];
-
-/// (key, spoken title) per place id, "any" for every place.
-static CATALOG: Mutex<BTreeMap<String, Vec<(String, String)>>> = Mutex::new(BTreeMap::new());
-
-/// Shipped pieces: (place id, file stem, spoken title, bytes, extension).
-/// Empty until someone composes one; see assets/hand_made/README.md.
-const SHIPPED: &[(&str, &str, &str, &[u8], &str)] = &[];
-
-pub fn player_dir() -> PathBuf {
-    ff_core::settings::data_dir().join("music")
-}
-
-fn add(place: &str, stem: &str, title: &str, bytes: Vec<u8>, ext: &str) {
-    let key = format!("hand_made/{place}/{stem}");
-    register_generated_sound(&format!("music/{key}"), bytes, ext);
-    CATALOG.lock().entry(place.to_string()).or_default().push((key, title.to_string()));
-}
-
-fn scan_folder(dir: &Path, place: &str) {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return;
-    };
-    let mut files: Vec<PathBuf> = entries.filter_map(|e| e.ok().map(|e| e.path())).filter(|p| p.is_file()).collect();
-    files.sort();
-    for path in files {
-        let ext = path.extension().and_then(|e| e.to_str()).map(str::to_ascii_lowercase).unwrap_or_default();
-        if !PLAYABLE.contains(&ext.as_str()) {
-            continue;
-        }
-        let Some(stem) = path.file_stem().and_then(|s| s.to_str()) else {
-            continue;
-        };
-        match std::fs::read(&path) {
-            Ok(bytes) => add(place, stem, stem, bytes, &ext),
-            Err(err) => log::warn!("Skipping hand-made music {} ({err})", path.display()),
-        }
-    }
-}
-
-/// Register the shipped pieces and everything playable under `dir`.
-pub fn scan(dir: &Path) {
-    CATALOG.lock().clear();
-    for (place, stem, title, bytes, ext) in SHIPPED {
-        add(place, stem, title, bytes.to_vec(), ext);
-    }
-    scan_folder(dir, "any");
-    for place in StyleId::ALL {
-        scan_folder(&dir.join(place.id()), place.id());
-    }
-}
-
-pub fn extras_for(place: StyleId) -> Vec<String> {
-    let catalog = CATALOG.lock();
-    [place.id(), "any"]
-        .iter()
-        .flat_map(|p| catalog.get(*p).into_iter().flatten().map(|(k, _)| k.clone()))
-        .collect()
-}
-
-pub fn title_for(key: &str) -> Option<String> {
-    CATALOG.lock().values().flatten().find(|(k, _)| k == key).map(|(_, t)| t.clone())
-}
-```
-
-Replace `ff_core::settings::data_dir()` with whatever function resolves `FREIGHT_FATE_DATA_DIR` today (grep `FREIGHT_FATE_DATA_DIR` in `crates/`). Call `hand_made::scan(&hand_made::player_dir())` at startup next to `classic_music::register()`, and again in `restart_music` when `synth_music` is on (so a player who adds files and toggles the setting hears them without restarting the game). The folder read is a handful of small files; if a player's folder is large, reading it at toggle time is a known ceiling -- mark it:
-
-```rust
-// ponytail: reads the player's music folder on the loop at startup and on a
-// Music source toggle; move to the synth worker if players keep big folders.
-```
-
-Durations: modules and player files have no catalog length; `ctx.track_duration_s` falls back to `audio.music_length_s()` (Task 10), which reads the playing stream.
-
-- [ ] **Step 3: Run the tests**
-
-Run: `cargo test -p freight-fate --test it synth_music`
-Expected: PASS.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add crates/freight-fate/src/audio/hand_made.rs crates/freight-fate/assets/hand_made/README.md crates/freight-fate/src/app/context.rs crates/freight-fate/tests/it/synth_music.rs
-git add <the startup file>
-git commit -m "feat(music): hand-made modules and a player music folder in Synthesized mode
-
-[skip changelog]
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
-```
+Hand-made pieces and a player music folder are not built: personal radio
+playlists already cover a player's own music, and Task 10 lets a playlist
+entry be a tracker module (`play_music_file` opens through `make_stream`
+with the file's extension). Task 12 removes the empty `audio::hand_made`
+stub and the `extras` parameters it fed.
 
 ---
 
@@ -2407,6 +2274,7 @@ Owner rulings, 2026-09-21:
 - Changing Music source or streamer-safe mid-drive moves the radio off a station that is no longer allowed onto the Roadhouse (the existing `apply_radio_settings_to_drive` path already moves off a disallowed station to `SAFE_ROUTE_PLAYLIST`; confirm it does for both new rules, with a test), and the settings restart from Task 9 still fires.
 - In Synthesized + streamer-safe, every station-changing command (tune up/down, seek/scan, category tune, select by name or number, favorites, the station browser or radio app, personal playlists) leaves the station unchanged and speaks `STREAMER_SAFE_LOCKED` on the channel that command already uses. Never silent. The radio power key still turns the radio on and off; volume and now playing still work.
 - In Synthesized with streamer-safe off, the plain dial and the category key simply skip Freight Fate's own stations because they are not allowed; the category key cycles only categories that still have an allowed station (it already builds its group list from receivable stations -- confirm the filtered stations drop out of `receivable_stations`).
+- **Also in this task (Task 11 was dropped):** delete `crates/freight-fate/src/audio/hand_made.rs` and its `pub mod hand_made;`; remove the `extras` parameter from `ff_core::music_synth::select_synth_menu_sequence` and `select_synth_drive_sequence` and every caller (app/synth_music.rs, states/driving_updates/radio_synth.rs); drop the `hand_made::title_for` fallback in the Roadhouse now-playing; update the ff-core test `extras_join_the_rotation_and_the_seed_changes_every_piece` to keep only its seed and classic assertions (rename it `the_seed_changes_every_piece`), and the game test's `hand_made/` allowance in the Roadhouse pool assertion. The `hand_made/test/...` keys in the Task 10 module tests are just test asset names; leave them.
 - Settings help strings, exactly:
   - streamer-safe row: `Off plays the full dial, including real public streams and personal playlists. On keeps the radio to built-in safe stations, for streaming or recording. With Music source set to Synthesized, On keeps the radio on the Roadhouse and station keys do nothing.`
   - Music source row: `Synthesized plays menu music and the Roadhouse station made by the game itself, with no AI-made songs or voices, and takes Freight Fate's other stations off the dial. Original plays the full soundtrack.`
@@ -2521,7 +2389,7 @@ Under `### Added`:
 
 - **In Synthesized mode, streamer-safe keeps the radio on the Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
 
-- **Your own tracker modules can play in Synthesized mode.** Put OpenMPT modules or audio files in the music folder in your Freight Fate data folder.
+- **Radio playlists can play tracker modules.** Music made in OpenMPT and similar trackers plays like any other file in your playlist.
 ```
 
 - [ ] **Step 2: Roadmap and manual**

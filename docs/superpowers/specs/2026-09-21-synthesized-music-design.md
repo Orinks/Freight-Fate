@@ -95,26 +95,12 @@ Owner rulings, 2026-09-21:
   still turns the radio on and off; volume and now playing still work.
 - Menus play synthesized music whenever Music source is Synthesized.
 
-### Hand-made pieces (tracker modules)
+### Tracker modules
 
-Music composed by a person in a tracker such as OpenMPT belongs in this
-mode. A module (`.it`, `.xm`, `.s3m`, `.mod`, `.mo3`) placed in
-`assets/sounds/music/synth/<place>/` (place = a style id, e.g. `drive_day`,
-`company_top_hand`) is packed into `sounds.pak` and joins that place's
-Synthesized rotation beside the generated pieces and the classics. OpenMPT's
-WAV or OGG export works the same way. Now playing names a module by its
-title and composer ("Diesel Dawn, by Josh"); `CREDITS.md` gets a row per
-file.
-
-Players can add their own: modules or audio files dropped in a `music/`
-folder under the data directory (`FREIGHT_FATE_DATA_DIR`), in the same
-per-place subfolders or at the top level (any place), play in Synthesized
-mode only. The folder is read when the rotation is built; a file that will
-not load is skipped and logged, never fatal.
-
-Playback: `bass-sys` gains `BASS_MusicLoad`/`BASS_MusicFree` (core BASS, no
-plugin) and the music player accepts module extensions; module length comes
-from BASS (`BASS_ChannelGetLength` on the music handle).
+Dropped as a separate feature (owner, 2026-09-21): personal radio playlists
+already carry a player's own music. The game learns to play tracker modules
+(`.it`, `.xm`, `.s3m`, `.mod`, `.mo3`, as OpenMPT saves them) through
+`BASS_MusicLoad`, so a playlist entry can be one.
 
 ### Vocabulary
 
