@@ -990,8 +990,13 @@ fn test_packaged_logging_writes_info_to_game_log() {
     assert!(text.contains("Speech backend: Speech Dispatcher"), "{text}");
 }
 
+/// The main menu's session update checker is one process-wide static, so the
+/// tests that install into it run one at a time.
+static UPDATE_CHECK_TESTS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 #[test]
 fn test_startup_update_prompt_respects_skipped_version() {
+    let _serial = UPDATE_CHECK_TESTS.lock().unwrap_or_else(|e| e.into_inner());
     use freight_fate::app::testing::TestApp;
     use freight_fate::states::main_menu::MainMenuState;
     use freight_fate::states::update::UpdateChecker;
@@ -1022,6 +1027,7 @@ fn test_terminal_exit_arms_fresh_packaged_update_check() {}
 
 #[test]
 fn test_terminal_exit_does_not_check_for_updates_from_source() {
+    let _serial = UPDATE_CHECK_TESTS.lock().unwrap_or_else(|e| e.into_inner());
     use freight_fate::app::testing::TestApp;
     use freight_fate::states::main_menu::MainMenuState;
 
