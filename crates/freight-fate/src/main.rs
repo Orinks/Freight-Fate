@@ -198,6 +198,7 @@ fn run(args: &[String]) -> i32 {
             has(args, "--reset"),
             launch,
             has(args, "--operator-keys"),
+            has(args, "--online"),
         );
     }
     app::main_with(CliOptions::parse(args.iter().cloned()))
@@ -209,6 +210,7 @@ fn run(args: &[String]) -> i32 {
 const KNOWN_SWITCHES: &[&str] = &[
     "--agent-server",
     "--operator-keys",
+    "--online",
     "--ai",
     "--assists",
     "--at",
@@ -304,7 +306,9 @@ Drive tools:
                                     to boot straight into a staged drive;
                                     --operator-keys keeps the window up and
                                     lets the operator's keyboard in, to play
-                                    alongside the agent)
+                                    alongside the agent; --online uses its
+                                    own directory with the real driver
+                                    identity and cloud backup on)
   --log PATH                        session log for the watcher
 ";
 

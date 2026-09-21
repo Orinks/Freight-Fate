@@ -35,6 +35,17 @@ pub fn default_sandbox() -> PathBuf {
     game_root().join("saves-playtest")
 }
 
+/// `saves-agent-online` beside the game: the online agent session's own
+/// directory, kept apart so its identity never reaches the offline sandbox.
+pub fn online_sandbox() -> PathBuf {
+    game_root().join("saves-agent-online")
+}
+
+/// The settings an online session turns on: the master switch and cloud
+/// backup, the one path it exists to exercise. Presence and Mastodon stay
+/// off -- an agent session is not the owner on duty, and a post is public.
+pub const ONLINE_SETTINGS: [&str; 2] = ["online_services", "cloud_saves"];
+
 /// The real save directory a sandbox is seeded from.
 pub fn real_saves() -> PathBuf {
     game_root().join("saves")
@@ -215,6 +226,53 @@ pub fn prepare(sandbox: &Path, reset: bool, careers: bool, source: &Path) -> std
         seed_careers(sandbox, source);
     }
     std::env::set_var(DATA_DIR_ENV, sandbox);
+    Ok(())
+}
+
+/// Build the online agent directory and point this process's game at it.
+///
+/// Careers are never copied in: a copy of a real career would back itself
+/// up into the same cloud slot as the original. The session starts with no
+/// careers and makes its own. Only `online.json` is copied, and only when
+/// the directory has none, so a session that connected itself from the
+/// Online menu keeps that identity; the token it names is looked up in the
+/// platform keyring by driver ID. The cloud ledger and outboxes are not
+/// copied: this directory keeps its own.
+pub fn prepare_online(dir: &Path, reset: bool, source: &Path) -> Result<(), String> {
+    if dir == source {
+        return Err("the online agent directory is the real save directory".to_string());
+    }
+    if reset && dir.exists() {
+        std::fs::remove_dir_all(dir).map_err(|e| e.to_string())?;
+    }
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    // A session that connected itself keeps that identity across relaunches.
+    if !dir.join("online.json").exists() {
+        std::fs::copy(source.join("online.json"), dir.join("online.json")).map_err(|_| {
+            "no driver identity to go online with: connect this computer in the game first"
+                .to_string()
+        })?;
+    }
+    if !dir.join("settings.json").exists() {
+        seed_settings(dir, source);
+    }
+    force_live_settings(dir);
+    let path = dir.join("settings.json");
+    let mut data = match std::fs::read_to_string(&path)
+        .ok()
+        .and_then(|text| serde_json::from_str::<Value>(&text).ok())
+    {
+        Some(Value::Object(data)) => data,
+        _ => return Err("the online agent settings are unreadable".to_string()),
+    };
+    for key in OFFLINE_SETTINGS {
+        data.insert(key.to_string(), Value::Bool(ONLINE_SETTINGS.contains(&key)));
+    }
+    let sorted: Map<String, Value> = data.into_iter().collect();
+    let rendered =
+        serde_json::to_string_pretty(&Value::Object(sorted)).map_err(|e| e.to_string())?;
+    std::fs::write(&path, rendered).map_err(|e| e.to_string())?;
+    std::env::set_var(DATA_DIR_ENV, dir);
     Ok(())
 }
 
