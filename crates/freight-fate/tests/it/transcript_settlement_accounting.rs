@@ -105,7 +105,7 @@ impl Default for Settle {
 /// gross the settlement was computed from and the spoken summary.
 fn settle(app: &mut TestApp, job: Job, route_cities: &[&str], opts: Settle) -> (f64, String) {
     let mut profile = Profile::named_in("Settlement Audit", &job.origin);
-    profile.money = opts.money;
+    profile.set_money(opts.money);
     profile.business_status = opts.business_status.to_string();
     profile.pay_advance = opts.pay_advance;
     profile.pay_advance_used_for_load = opts.pay_advance_used_for_load;
@@ -160,7 +160,10 @@ fn test_carrier_paid_charges_do_not_increase_player_progression() {
         "{summary}"
     );
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(profile.money, 1000.0 + expected.net_before_advance));
+    assert!(approx(
+        profile.money(),
+        1000.0 + expected.net_before_advance
+    ));
     assert!(approx(
         profile.career.total_earnings,
         expected.net_before_advance
@@ -226,7 +229,7 @@ fn test_a_carried_balance_is_collected_at_a_capped_share_not_all_at_once() {
     let expected = build_business_settlement_basic(COMPANY_DRIVER, &job, gross, true, 0.0);
     let net = expected.net_before_advance;
     let profile = app.ctx.profile.as_ref().expect("a career");
-    let collected = ((1000.0 + net - profile.money) * 100.0).round() / 100.0;
+    let collected = ((1000.0 + net - profile.money()) * 100.0).round() / 100.0;
 
     assert!(
         summary.contains("Carrier-paid or reimbursed charges 215 dollars"),
@@ -235,7 +238,7 @@ fn test_a_carried_balance_is_collected_at_a_capped_share_not_all_at_once() {
     assert!(summary.contains("Balance owed"), "{summary}");
     assert!(collected > 0.0); // it really is being paid down
     assert!(collected <= (net * COLLECTION_SHARE * 100.0).round() / 100.0 + 0.01);
-    assert!(profile.money > 1000.0); // the run still paid the driver
+    assert!(profile.money() > 1000.0); // the run still paid the driver
     assert!((profile.fines_owed - (160.0 - collected)).abs() <= 0.01);
 }
 
@@ -275,7 +278,7 @@ fn test_owner_operator_settlement_deducts_business_costs() {
         "{summary}"
     );
     assert!(approx(
-        profile.money,
+        profile.money(),
         1000.0 + expected.net_before_advance - ledger
     ));
     assert!(approx(
@@ -304,7 +307,10 @@ fn test_company_driver_accessorials_do_not_move_the_wallet() {
     );
     assert!(!summary.contains("you are owed"), "{summary}");
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(profile.money, 1000.0 + expected.net_before_advance));
+    assert!(approx(
+        profile.money(),
+        1000.0 + expected.net_before_advance
+    ));
 }
 
 #[test]
@@ -335,7 +341,7 @@ fn test_pay_advance_is_repaid_from_settlement() {
     assert!(!profile.pay_advance_used_for_load);
     // Net pay is reduced by the repaid advance; the bank reflects it.
     assert!(approx(
-        profile.money,
+        profile.money(),
         -200.0 + expected.net_before_advance - 500.0
     ));
     // Lifetime earnings still book the whole settlement: the advance was
@@ -392,8 +398,11 @@ fn test_pay_advance_repayment_never_drives_net_pay_negative() {
     let repaid = 1500.0f64.min(expected.net_before_advance);
     let profile = app.ctx.profile.as_ref().expect("a career");
     assert!(approx(profile.pay_advance, 1500.0 - repaid));
-    assert!(approx(profile.money, expected.net_before_advance - repaid));
-    assert!(profile.money >= 0.0);
+    assert!(approx(
+        profile.money(),
+        expected.net_before_advance - repaid
+    ));
+    assert!(profile.money() >= 0.0);
     assert!(summary.contains("still outstanding"), "{summary}");
 }
 
@@ -430,7 +439,7 @@ fn test_restored_toll_charges_do_not_duplicate_or_pay_out() {
     let mut app = TestApp::new();
     let job = a_job(JobSpec::default());
     let mut profile = Profile::named_in("Old Toll Save", "New York");
-    profile.money = 1000.0;
+    profile.set_money(1000.0);
     app.ctx.profile = Some(profile);
     let snapshot = serde_json::json!({
         "kind": "delivery",
@@ -460,7 +469,10 @@ fn test_restored_toll_charges_do_not_duplicate_or_pay_out() {
     let expected = build_business_settlement_basic(COMPANY_DRIVER, &job, gross, true, 0.0);
     ArrivalState::new(&mut app.ctx, &mut resumed);
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(profile.money, 1000.0 + expected.net_before_advance));
+    assert!(approx(
+        profile.money(),
+        1000.0 + expected.net_before_advance
+    ));
     assert!(approx(
         profile.career.total_earnings,
         expected.net_before_advance
@@ -495,7 +507,7 @@ fn test_toll_route_does_not_pay_more_than_equal_non_toll_route() {
     );
     let (toll_money, toll_earnings) = {
         let profile = app.ctx.profile.as_ref().expect("a career");
-        (profile.money, profile.career.total_earnings)
+        (profile.money(), profile.career.total_earnings)
     };
     let (non_toll_gross, non_toll_summary) = settle(
         &mut app,
@@ -517,7 +529,7 @@ fn test_toll_route_does_not_pay_more_than_equal_non_toll_route() {
         "{non_toll_summary}"
     );
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(toll_money, profile.money));
+    assert!(approx(toll_money, profile.money()));
     assert!(approx(toll_earnings, profile.career.total_earnings));
 }
 
@@ -562,12 +574,12 @@ fn test_repaid_advance_still_counts_as_lifetime_earnings() {
         "settlement should repay what it can"
     );
     let headroom =
-        (STARTING_MONEY + profile.career.total_earnings + profile.pay_advance) - profile.money;
+        (STARTING_MONEY + profile.career.total_earnings + profile.pay_advance) - profile.money();
     assert!(
         headroom >= -1.0,
         "money {:.0} exceeds what the career can account for by {:.0} dollars; \
          cloud screening would flag this driver",
-        profile.money,
+        profile.money(),
         -headroom
     );
 }

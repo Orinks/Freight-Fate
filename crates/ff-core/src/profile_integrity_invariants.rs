@@ -788,7 +788,7 @@ mod tests {
         let data = current_invariant_data().unwrap();
         assert_eq!(
             data["startingMoney"].as_f64().unwrap(),
-            crate::models::profile::Profile::new().money
+            crate::models::profile::Profile::new().money()
         );
     }
 

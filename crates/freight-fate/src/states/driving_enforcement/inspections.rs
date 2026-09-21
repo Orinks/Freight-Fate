@@ -116,7 +116,7 @@ impl DrivingState {
             self.ticket_fines_paid += fine;
             {
                 let p = profile_mut_of(ctx);
-                p.money -= fine;
+                p.spend(fine);
                 p.career.reputation = (p.career.reputation - hos::HOS_REPUTATION_HIT).max(0.0);
             }
             let reason = format!("roadside inspection: {}", report.spoken_findings());
@@ -193,7 +193,7 @@ impl DrivingState {
             Repair::None => return String::new(),
         };
         if !carrier_paid {
-            profile_mut_of(ctx).money -= cost;
+            profile_mut_of(ctx).spend(cost);
         }
         advance_rest_clock(
             self,

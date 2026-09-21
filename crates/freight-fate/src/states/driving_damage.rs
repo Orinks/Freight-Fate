@@ -459,7 +459,7 @@ impl DrivingState {
     pub fn recovery_cost_text(&self, ctx: &GameContext) -> String {
         if player_pays_operating_costs(&profile_of(ctx).business_status) {
             let cost = self.roadside_service_cost();
-            if !self.maintenance_failures().is_empty() && profile_of(ctx).money < cost {
+            if !self.maintenance_failures().is_empty() && profile_of(ctx).money() < cost {
                 return format!(
                     "The repair will cost about {} dollars and most of {:.0} hours; any unpaid \
                      balance becomes debt",
@@ -613,8 +613,8 @@ impl DrivingState {
         let cost = self.roadside_service_cost();
         let money = {
             let p = profile_mut_of(ctx);
-            p.money -= cost; // can go negative: the truck cannot move otherwise
-            p.money
+            p.spend(cost); // can go negative: the truck cannot move otherwise
+            p.money()
         };
         if damage_failed {
             self.trip

@@ -130,7 +130,7 @@ impl CareerStatsState {
         // the level-up that brought no truck, and nowhere a player could go
         // and ASK -- which is what this screen is for (Brandon, 2026-08-22).
         lines.extend(equipment_status_lines(p));
-        lines.push(format!("Balance: {} dollars", fmt_grouped(p.money, 0)));
+        lines.push(format!("Balance: {} dollars", fmt_grouped(p.money(), 0)));
         if !owed.is_empty() {
             lines.push(owed);
         }

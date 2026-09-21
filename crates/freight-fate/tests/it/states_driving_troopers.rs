@@ -271,7 +271,7 @@ fn test_stopping_issues_an_immediate_ticket() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, Some(1.0));
     speed_for(&mut drive, &mut app, 25.0); // well over -> a ticket, not a warning
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let rep_before = app
         .ctx
         .profile
@@ -291,7 +291,7 @@ fn test_stopping_issues_an_immediate_ticket() {
     let expected = speeding_citation_fine(over, 0, zone);
     assert!(approx(drive.ticket_fines_paid, expected));
     let p = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(p.money, money_before - expected));
+    assert!(approx(p.money(), money_before - expected));
     assert!(p.career.reputation < rep_before);
     // 25 over is a serious traffic violation, and the record says so.
     assert_eq!(p.driving_record.serious_in_window(p.game_hours), 1);
@@ -352,7 +352,7 @@ fn test_first_marginal_stop_is_a_warning() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, Some(1.0));
     speed_for(&mut drive, &mut app, 12.0); // only marginally over, first stop
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
 
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
@@ -360,7 +360,7 @@ fn test_first_marginal_stop_is_a_warning() {
 
     assert_eq!(drive.speeding_tickets, 0); // warning, no charge
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     ));
 }
@@ -377,7 +377,7 @@ fn test_accelerating_away_past_the_final_warning_is_running() {
     let limit = speed_for(&mut drive, &mut app, 25.0);
     assert_eq!(drive.pull_over.as_deref(), Some(PULL_OVER_LIGHTS));
     past_grace(&mut drive);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let rep_before = app
         .ctx
         .profile
@@ -410,7 +410,7 @@ fn test_accelerating_away_past_the_final_warning_is_running() {
     );
     assert!(seconds as f64 > PURSUIT_RUN_S, "{seconds}");
     let p = app.ctx.profile.as_ref().expect("a career");
-    assert!(p.money < money_before);
+    assert!(p.money() < money_before);
     assert!(p.career.reputation < rep_before);
     assert_eq!(p.driving_record.major_count(), 1);
 }
@@ -576,7 +576,7 @@ fn test_weigh_station_blow_past_starts_enforcement_stop() {
     assert_eq!(drive.pull_over.as_deref(), Some(PULL_OVER_LIGHTS));
     assert_eq!(drive.pull_over_kind, "weigh_station_bypass");
 
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let rep_before = app
         .ctx
         .profile
@@ -605,7 +605,7 @@ fn test_weigh_station_blow_past_starts_enforcement_stop() {
     let expected = citation_fine(WEIGH_STATION_BYPASS_FINE, 0, zone, None);
     assert!(approx(drive.ticket_fines_paid, expected));
     let p = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(p.money, money_before - expected));
+    assert!(approx(p.money(), money_before - expected));
     assert!(p.career.reputation < rep_before);
     // Recorded on the driving record like any other citation.
     assert_eq!(p.driving_record.citations, citations_before + 1);
@@ -628,7 +628,7 @@ fn test_weigh_station_bypass_is_not_certain_and_stays_silent_when_missed() {
     let mut drive = a_drive(&mut app, None);
     drive.trip_seed = 11;
     let stop = blow_past_a_scale(&mut drive);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     let citations_before = app
         .ctx
         .profile
@@ -644,7 +644,7 @@ fn test_weigh_station_bypass_is_not_certain_and_stays_silent_when_missed() {
         .enforcement_events
         .contains(&drive.weigh_station_key(&stop)));
     let p = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(p.money, money_before));
+    assert!(approx(p.money(), money_before));
     assert_eq!(p.driving_record.citations, citations_before);
 }
 
@@ -669,14 +669,14 @@ fn test_closed_scale_never_charges_a_bypass() {
     });
     drive.trip.position_mi = 10.1;
     drive.trip.truck.velocity_mps = mph_to_mps(55.0);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
 
     drive.check_weigh_station_enforcement(&mut app.ctx, 9.9);
 
     assert!(drive.pull_over.is_none());
     assert!(drive.enforcement_events.is_empty());
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     ));
 }
@@ -773,7 +773,7 @@ fn test_unsafe_damage_in_patrol_starts_safety_stop() {
 
     assert_eq!(drive.pull_over.as_deref(), Some(PULL_OVER_LIGHTS));
     assert_eq!(drive.pull_over_kind, "unsafe_damage");
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -782,7 +782,7 @@ fn test_unsafe_damage_in_patrol_starts_safety_stop() {
     let expected = citation_fine(UNSAFE_DAMAGE_FINE, 0, zone, None);
     assert!(approx(drive.ticket_fines_paid, expected));
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     ));
 }
@@ -806,7 +806,7 @@ fn test_a_trooper_alongside_sees_bald_tires_and_runs_a_walk_around() {
     drive.begin_observed_stop(&mut app.ctx, &seen);
     assert_eq!(drive.pull_over_kind, "roadside_walkaround");
 
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -821,7 +821,7 @@ fn test_a_trooper_alongside_sees_bald_tires_and_runs_a_walk_around() {
     assert!(text.contains("fitted new tires"), "{text}");
     assert_eq!(drive.trip.truck.tire_wear_pct, 0.0);
     // The report priced the stop: one out-of-service fine, nothing else.
-    let money_after = app.ctx.profile.as_ref().expect("a career").money;
+    let money_after = app.ctx.profile.as_ref().expect("a career").money();
     assert!(approx(
         money_after,
         money_before - ff_core::sim::roadside_inspection::OUT_OF_SERVICE_FINE
@@ -883,7 +883,7 @@ fn test_a_scale_bypass_in_roadwork_costs_double_and_says_so() {
     drive.check_weigh_station_enforcement(&mut app.ctx, 9.9);
     assert!(drive.pull_over_construction_zone);
 
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -892,7 +892,7 @@ fn test_a_scale_bypass_in_roadwork_costs_double_and_says_so() {
     let expected = citation_fine(WEIGH_STATION_BYPASS_FINE, 0, true, None);
     assert!(approx(expected, WEIGH_STATION_BYPASS_FINE * 2.0));
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     ));
     // The driver hears the figure that was actually charged, and why.
@@ -922,7 +922,7 @@ fn test_a_repeat_scale_bypass_in_roadwork_compounds_rather_than_adds() {
     blow_past_a_scale(&mut drive);
 
     drive.check_weigh_station_enforcement(&mut app.ctx, 9.9);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -934,7 +934,7 @@ fn test_a_repeat_scale_bypass_in_roadwork_compounds_rather_than_adds() {
         "the repeat step is compounded, not added"
     );
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     ));
 }
@@ -946,7 +946,7 @@ fn test_a_speeding_ticket_in_roadwork_doubles_and_the_line_says_the_charge() {
     pave_construction(&mut drive);
     speed_for(&mut drive, &mut app, 25.0); // well over -> a ticket, not a warning
     assert!(drive.pull_over_construction_zone);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
 
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
@@ -966,7 +966,7 @@ fn test_a_speeding_ticket_in_roadwork_doubles_and_the_line_says_the_charge() {
     assert!(approx(expected, base * 2.0));
     assert!(approx(drive.ticket_fines_paid, expected));
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     ));
     assert!(
@@ -1016,7 +1016,7 @@ fn test_a_non_speeding_stop_escalates_with_priors() {
     drive.trip.truck.velocity_mps = mph_to_mps(35.0);
 
     drive.check_unsafe_damage_enforcement(&mut app.ctx);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -1025,7 +1025,7 @@ fn test_a_non_speeding_stop_escalates_with_priors() {
     let expected = citation_fine(UNSAFE_DAMAGE_FINE, 2, zone, None);
     assert!(expected > UNSAFE_DAMAGE_FINE);
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before - expected
     ));
 }
@@ -1093,7 +1093,7 @@ fn test_clean_stop_can_waive_a_ticket_to_a_warning() {
     // The leniency roll is a named, position-quantised seed so a reload
     // cannot re-roll it. Stop on a mile where it really does come up.
     drive.trip.position_mi = a_waiver_mile(drive.trip_seed, true, drive.trip.position_mi);
-    let money_before = app.ctx.profile.as_ref().expect("a career").money;
+    let money_before = app.ctx.profile.as_ref().expect("a career").money();
     drive.trip.truck.velocity_mps = 0.0;
     drive.update_pull_over(&mut app.ctx, 1.0, false);
     app.ctx.run_deferred();
@@ -1101,7 +1101,7 @@ fn test_clean_stop_can_waive_a_ticket_to_a_warning() {
     assert!(top_is::<TrafficStopState>(&app));
     assert_eq!(drive.speeding_tickets, 0);
     assert!(approx(
-        app.ctx.profile.as_ref().expect("a career").money,
+        app.ctx.profile.as_ref().expect("a career").money(),
         money_before
     ));
     let text = with_top::<TrafficStopState, _>(&mut app, |stop, _| stop.outcome_text().to_string());
@@ -1212,7 +1212,7 @@ fn test_a_routine_level_three_on_a_legal_driver_costs_the_minutes_and_nothing_el
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, None);
     drive.trip.truck.tire_wear_pct = 100.0; // a Level 3 never looks at the equipment
-    let money_before = app.ctx.profile.as_ref().unwrap().money;
+    let money_before = app.ctx.profile.as_ref().unwrap().money();
     let citations_before = app.ctx.profile.as_ref().unwrap().driving_record.citations;
     let minutes_before = drive.trip.game_minutes;
 
@@ -1238,7 +1238,7 @@ fn test_a_routine_level_three_on_a_legal_driver_costs_the_minutes_and_nothing_el
         with_top::<EnforcementStopState, _>(&mut app, |stop, _| stop.outcome_text().to_string());
     assert!(text.contains("Clean Level 3 driver inspection"), "{text}");
     let p = app.ctx.profile.as_ref().unwrap();
-    assert_eq!(p.money, money_before);
+    assert_eq!(p.money(), money_before);
     assert_eq!(p.driving_record.citations, citations_before);
     assert!(
         (drive.trip.game_minutes - minutes_before - InspectionLevel::DriverOnly.minutes()).abs()

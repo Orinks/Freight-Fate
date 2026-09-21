@@ -767,7 +767,7 @@ fn test_full_parking_offers_drive_on_and_shoulder() {
         let p = harness.app.ctx.profile.as_mut().expect("a career");
         p.hos.drive(700.0);
         p.fatigue = 95.0;
-        p.money
+        p.money()
     };
     let damage_before = harness_damage(&harness);
     let minutes_before = harness.read_drive(|d| d.trip.game_minutes);
@@ -787,7 +787,7 @@ fn test_full_parking_offers_drive_on_and_shoulder() {
         // A clean career parked clear of roadwork pays the base amount; the
         // helper is asked so a rebalance moves one number, not this test.
         let expected = enforcement::citation_fine(hos::SHOULDER_FINE, 0, construction, None);
-        assert!(approx(p.money, money_before - expected), "{}", p.money);
+        assert!(approx(p.money(), money_before - expected), "{}", p.money());
         assert!(p.active_trip.is_some());
     }
     assert!(approx(
@@ -1166,7 +1166,7 @@ fn test_inspection_fines_escalate_and_hit_reputation() {
     let mut harness = a_drive("Inspection Fines");
     let (rep, money) = {
         let p = harness.app.ctx.profile.as_ref().expect("a career");
-        (p.career.reputation, p.money)
+        (p.career.reputation, p.money())
     };
     for key in ["scale:1", "scale:2"] {
         let event = TripEvent {
@@ -1182,9 +1182,9 @@ fn test_inspection_fines_escalate_and_hit_reputation() {
 
     let p = harness.app.ctx.profile.as_ref().expect("a career");
     assert!(
-        approx(p.money, money - hos::HOS_FINES[0] - hos::HOS_FINES[1]),
+        approx(p.money(), money - hos::HOS_FINES[0] - hos::HOS_FINES[1]),
         "{}",
-        p.money
+        p.money()
     );
     assert!(
         approx(p.career.reputation, rep - 2.0 * hos::HOS_REPUTATION_HIT),
@@ -1206,7 +1206,7 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
         .expect("a career")
         .hos
         .drive(481.0);
-    let money = harness.app.ctx.profile.as_ref().expect("a career").money;
+    let money = harness.app.ctx.profile.as_ref().expect("a career").money();
     let minutes = harness.read_drive(|d| d.trip.game_minutes);
     let event = TripEvent {
         kind: TripEventKind::Inspection,
@@ -1230,7 +1230,7 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
         assert_eq!(d.out_of_service_count, 0);
     });
     assert_eq!(
-        harness.app.ctx.profile.as_ref().expect("a career").money,
+        harness.app.ctx.profile.as_ref().expect("a career").money(),
         money
     );
     assert_eq!(harness.read_drive(|d| d.trip.game_minutes), minutes);
@@ -1253,7 +1253,11 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
     });
     {
         let p = harness.app.ctx.profile.as_ref().expect("a career");
-        assert!(approx(p.money, money - hos::HOS_FINES[0]), "{}", p.money);
+        assert!(
+            approx(p.money(), money - hos::HOS_FINES[0]),
+            "{}",
+            p.money()
+        );
         assert_eq!(p.hos.driving_min, 481.0);
         assert_eq!(p.hos.since_break_min, 0.0);
         // The order reaches the career record the safety record scores, not
@@ -1273,7 +1277,7 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
     let staged = event.clone();
     harness.with_drive(move |d, ctx| d.handle_inspection(ctx, &staged));
     assert!(approx(
-        harness.app.ctx.profile.as_ref().expect("a career").money,
+        harness.app.ctx.profile.as_ref().expect("a career").money(),
         money - hos::HOS_FINES[0]
     ));
     assert_eq!(harness.read_drive(|d| d.out_of_service_count), 1);

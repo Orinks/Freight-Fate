@@ -280,7 +280,11 @@ fn test_terse_wall_message_keeps_all_three() {
 fn test_owner_operator_pays_the_whole_bill_and_the_hours() {
     let mut app = TestApp::new();
     let mut drive = a_damage_drive(&mut app, LEASED_OWNER_OPERATOR, 1);
-    app.ctx.profile.as_mut().expect("a profile").money = 100.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a profile")
+        .set_money(100.0);
     rolling(&mut drive, 0.0);
     drive.trip.truck.damage_pct = DAMAGE_OUT_OF_SERVICE_PCT;
     let minutes_before = drive.trip.game_minutes;
@@ -299,7 +303,7 @@ fn test_owner_operator_pays_the_whole_bill_and_the_hours() {
         cost > BREAKDOWN_CALLOUT_FEE + 30.0 * MECHANIC_RATE_PER_PCT,
         "{cost}"
     );
-    let money = profile_of(&app.ctx).money;
+    let money = profile_of(&app.ctx).money();
     assert!(approx(money, 100.0 - cost), "{money}"); // may go negative: not optional
     assert!(money < 0.0, "{money}");
     assert_eq!(drive.trip.truck.damage_pct, BREAKDOWN_REPAIR_DAMAGE_PCT);

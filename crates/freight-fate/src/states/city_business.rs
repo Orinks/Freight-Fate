@@ -177,7 +177,7 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= OWNER_OPERATOR_BUY_IN;
+            p.spend(OWNER_OPERATOR_BUY_IN);
             let assigned = p.active_truck_key();
             p.business_status = LEASED_OWNER_OPERATOR.to_string();
             p.owner_operator_declined = false;
@@ -192,7 +192,7 @@ impl BusinessStatusState {
             }
             p.truck = assigned;
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         save_business_change(ctx);
         ctx.audio.play("ui/cash");
@@ -218,10 +218,10 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= AUTHORITY_READY_RESERVE;
+            p.spend(AUTHORITY_READY_RESERVE);
             p.authority_readiness = true;
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         save_business_change(ctx);
         ctx.audio.play("ui/cash");
@@ -248,9 +248,9 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= WEIGH_STATION_TRANSPONDER_SIGNUP_FEE;
+            p.spend(WEIGH_STATION_TRANSPONDER_SIGNUP_FEE);
             p.weigh_station_transponder = true;
-            p.money
+            p.money()
         };
         save_business_change(ctx);
         ctx.audio.play("ui/cash");
@@ -274,10 +274,10 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= AUTHORITY_ACTIVATION_COST;
+            p.spend(AUTHORITY_ACTIVATION_COST);
             p.business_status = INDEPENDENT_AUTHORITY.to_string();
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         save_business_change(ctx);
         ctx.audio.play("ui/cash");
@@ -562,25 +562,25 @@ impl UpgradeShopState {
             return;
         }
         let price = upgrade.prices[owned.max(0) as usize];
-        if profile(ctx).money < price {
+        if profile(ctx).money() < price {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "Not enough money. {} costs {} dollars \
                  and you have {}.",
                 upgrade.label,
                 fmt_grouped(price, 0),
-                fmt_grouped(profile(ctx).money, 0)
+                fmt_grouped(profile(ctx).money(), 0)
             ));
             return;
         }
         let (money, all_owned) = {
             let p = profile_mut(ctx);
-            p.money -= price;
+            p.spend(price);
             p.upgrades.insert(upgrade.key.to_string(), owned + 1);
             let all_owned = UPGRADE_CATALOG
                 .iter()
                 .all(|item| p.upgrades.get(item.key).copied().unwrap_or(0) >= item.max_tier());
-            (p.money, all_owned)
+            (p.money(), all_owned)
         };
         save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
@@ -617,7 +617,7 @@ impl Menu for UpgradeShopState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let (money, owner) = {
             let p = profile(ctx);
-            (p.money, is_owner_operator(&p.business_status))
+            (p.money(), is_owner_operator(&p.business_status))
         };
         let current = self.current_text(ctx);
         if owner {
@@ -722,20 +722,20 @@ impl TruckShopState {
             return;
         }
         if !profile(ctx).owned_trucks.iter().any(|k| k == model.key) {
-            if profile(ctx).money < model.price {
+            if profile(ctx).money() < model.price {
                 ctx.audio.play("ui/error");
                 ctx.say(&format!(
                     "Not enough money. The {} costs \
                      {} dollars and you have {}.",
                     model.label,
                     fmt_grouped(model.price, 0),
-                    fmt_grouped(profile(ctx).money, 0)
+                    fmt_grouped(profile(ctx).money(), 0)
                 ));
                 return;
             }
             let owned_count = {
                 let p = profile_mut(ctx);
-                p.money -= model.price;
+                p.spend(model.price);
                 p.owned_trucks.push(model.key.to_string());
                 // A truck off the dealer lot is its own rig: fresh wear, full tank.
                 p.provision_truck_condition(model.key, Some(model.specs.fuel_tank_gal));
@@ -743,7 +743,7 @@ impl TruckShopState {
             };
             ctx.audio.play("ui/cash");
             self.switch_to(ctx, model);
-            let money = profile(ctx).money;
+            let money = profile(ctx).money();
             ctx.say(&format!(
                 "You bought the {} for {} dollars, now your tractor. You have {} dollars left.",
                 model.label,
@@ -796,7 +796,7 @@ impl Menu for TruckShopState {
                 }
             }
         }
-        let money = profile(ctx).money;
+        let money = profile(ctx).money();
         let current = self.current_text(ctx);
         ctx.say(&format!(
             "{dealer}Trucks. You have {} dollars. {current}",
@@ -914,7 +914,7 @@ impl TrailerProgramState {
             ));
             return;
         }
-        if profile(ctx).money < trailer.lease_deposit {
+        if profile(ctx).money() < trailer.lease_deposit {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "Not enough money. {} trailer program costs \
@@ -922,18 +922,18 @@ impl TrailerProgramState {
                  {}.",
                 trailer.label,
                 fmt_grouped(trailer.lease_deposit, 0),
-                fmt_grouped(profile(ctx).money, 0)
+                fmt_grouped(profile(ctx).money(), 0)
             ));
             return;
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= trailer.lease_deposit;
+            p.spend(trailer.lease_deposit);
             let mut programs = p.active_trailer_programs();
             programs.push(trailer.key.to_string());
             p.trailer_programs = programs;
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
@@ -961,7 +961,7 @@ impl TrailerProgramState {
             ctx.say(&format!("You already own a {} trailer.", trailer.label));
             return;
         }
-        if profile(ctx).money < trailer.purchase_price {
+        if profile(ctx).money() < trailer.purchase_price {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "Not enough money. The {} trailer costs \
@@ -969,18 +969,18 @@ impl TrailerProgramState {
                  {}.",
                 trailer.label,
                 fmt_grouped(trailer.purchase_price, 0),
-                fmt_grouped(profile(ctx).money, 0)
+                fmt_grouped(profile(ctx).money(), 0)
             ));
             return;
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= trailer.purchase_price;
+            p.spend(trailer.purchase_price);
             let mut owned = p.visible_owned_trailers();
             owned.push(trailer.key.to_string());
             p.owned_trailers = owned;
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
@@ -1007,7 +1007,7 @@ impl Menu for TrailerProgramState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let money = profile(ctx).money;
+        let money = profile(ctx).money();
         let current = self.current_text(ctx);
         ctx.say(&format!(
             "Trailers. You have {} dollars. {current}",
@@ -1100,13 +1100,13 @@ impl EndorsementCourseState {
             ctx.say(&reasons.join(" "));
             return;
         }
-        if profile(ctx).money < cred.course_cost {
+        if profile(ctx).money() < cred.course_cost {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
                 "The {} course costs {} dollars and you have {}.",
                 cred.label,
                 fmt_grouped(cred.course_cost, 0),
-                fmt_grouped(profile(ctx).money, 0)
+                fmt_grouped(profile(ctx).money(), 0)
             ));
             return;
         }
@@ -1114,7 +1114,7 @@ impl EndorsementCourseState {
         // terminal-sleep shape: clock, duty log, market day, then speech.
         let (start, end) = {
             let p = profile_mut(ctx);
-            p.money -= cred.course_cost;
+            p.spend(cred.course_cost);
             let start = p.game_hours;
             p.game_hours += cred.course_hours;
             (start, p.game_hours)
@@ -1150,7 +1150,7 @@ impl EndorsementCourseState {
                 }
             }
             p.dispatch_board_cache = None;
-            p.money
+            p.money()
         };
         ctx.save_profile();
         ctx.audio.play("ui/cash");
@@ -1189,7 +1189,7 @@ impl Menu for EndorsementCourseState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let money = profile(ctx).money;
+        let money = profile(ctx).money();
         let current = self.current_text(ctx);
         ctx.say(&format!(
             "Licenses and training. Certificates are carrier training, free at their listed \

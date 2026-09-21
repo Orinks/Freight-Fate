@@ -51,7 +51,7 @@ fn law_drive(app: &mut TestApp, law: Law) -> SharedState {
     let drive = a_drive(app);
     {
         let p = app.ctx.profile.as_mut().expect("a career");
-        p.money = 1000.0;
+        p.set_money(1000.0);
         p.driving_record.citations = law.priors;
     }
     with_drive(&drive, |d| {
@@ -112,7 +112,7 @@ fn cited_seed() -> i64 {
 }
 
 fn money(app: &TestApp) -> f64 {
-    app.ctx.profile.as_ref().expect("a career").money
+    app.ctx.profile.as_ref().expect("a career").money()
 }
 
 fn citations(app: &TestApp) -> i64 {

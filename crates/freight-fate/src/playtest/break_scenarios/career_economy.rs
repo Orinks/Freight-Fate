@@ -44,14 +44,18 @@ pub fn settlement_spoken_balance() -> Outcome {
     let (owed_before, money_before) = {
         let profile = harness.app.ctx.profile.as_mut().expect("a profile");
         profile.fines_owed = 2_000.0;
-        (profile.fines_owed, profile.money)
+        (profile.fines_owed, profile.money())
     };
     harness.settle_current_delivery();
     harness.read_settlement_lines();
     let text = harness.transcript_text();
     let (money, owed, deliveries) = {
         let profile = harness.app.ctx.profile.as_ref().expect("a profile");
-        (profile.money, profile.fines_owed, profile.career.deliveries)
+        (
+            profile.money(),
+            profile.fines_owed,
+            profile.career.deliveries,
+        )
     };
     if let Some(spoken) = grouped_number_after(&text, "you now have ") {
         if (spoken - money.round()).abs() > 1.0 {
@@ -129,7 +133,7 @@ pub fn abandon_and_advance_cycle() -> Outcome {
     rig.drive.trip.position_mi = rig.drive.trip.total_miles() - 1.0; // one mile from the gate
     let rep_before = {
         let profile = rig.app.ctx.profile.as_mut().expect("a profile");
-        profile.money = 5.0;
+        profile.set_money(5.0);
         profile.career.reputation
     };
     let mut debt = 0.0;
@@ -138,17 +142,17 @@ pub fn abandon_and_advance_cycle() -> Outcome {
         let money_at_abandon = {
             let profile = rig.app.ctx.profile.as_mut().expect("a profile");
             let grant = pay_advance_grant(
-                profile.money,
+                profile.money(),
                 profile.pay_advance,
                 profile.pay_advance_used_for_load,
             );
             if grant > 0.0 {
-                profile.money += grant;
+                profile.earn(grant);
                 profile.pay_advance += grant;
                 profile.pay_advance_used_for_load = true;
                 minted += grant;
             }
-            profile.money
+            profile.money()
         };
         // Python called `AbandonJobConfirmationState._confirm()`; that method
         // is private here, so this presses the row that calls it -- the same
@@ -172,7 +176,7 @@ pub fn abandon_and_advance_cycle() -> Outcome {
         }
         let (money, advance) = {
             let profile = rig.app.ctx.profile.as_ref().expect("a profile");
-            (profile.money, profile.pay_advance)
+            (profile.money(), profile.pay_advance)
         };
         if ((money_at_abandon - money) - 500.0).abs() > 0.01 {
             findings.push(format!(
@@ -194,7 +198,7 @@ pub fn abandon_and_advance_cycle() -> Outcome {
     let (money, advance, used, reputation) = {
         let profile = rig.app.ctx.profile.as_ref().expect("a profile");
         (
-            profile.money,
+            profile.money(),
             profile.pay_advance,
             profile.pay_advance_used_for_load,
             profile.career.reputation,
@@ -248,7 +252,7 @@ pub fn endorsement_wallet_edges() -> Outcome {
             .expect("a course the driver does not hold")
     };
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = cost - 1.0;
+        profile.set_money(cost - 1.0);
     }
     rig.app.ctx.push_state(EndorsementCourseState::new());
     rig.app.ctx.run_deferred();
@@ -271,7 +275,7 @@ pub fn endorsement_wallet_edges() -> Outcome {
     if holds_now(&rig) {
         findings.push("a course sold itself one dollar short".to_string());
     }
-    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if money != cost - 1.0 {
         findings.push("a refused course still took money".to_string());
     }
@@ -282,14 +286,14 @@ pub fn endorsement_wallet_edges() -> Outcome {
         ));
     }
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = cost;
+        profile.set_money(cost);
     }
     let lines_before_purchase = rig.transcript().len();
     rig.select_menu_containing(&row);
     if !holds_now(&rig) {
         findings.push("exact-money purchase was refused".to_string());
     }
-    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if money != 0.0 {
         findings.push(format!(
             "exact-money purchase left {money}, expected exactly 0"
@@ -309,7 +313,7 @@ pub fn endorsement_wallet_edges() -> Outcome {
     }
     // Re-buying a credential already held: the row is now the "earned" one.
     rig.select_menu_containing("earned, self-paid course");
-    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if money != 0.0 {
         findings.push("re-buying an owned endorsement charged money".to_string());
     }
@@ -330,14 +334,14 @@ pub fn credential_ladder_gates() -> Outcome {
     let hazmat = credential("hazmat").expect("hazmat is on the ladder");
     let lcv = credential("lcv").expect("lcv is on the ladder");
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = 50_000.0;
+        profile.set_money(50_000.0);
     }
     rig.app.ctx.push_state(EndorsementCourseState::new());
     rig.app.ctx.run_deferred();
 
     // 1. Level 1 books nothing federal: the refusal must name the level and
     //    charge nothing.
-    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if let Some(row) = course_row(&rig, "hazmat") {
         rig.select_menu_containing(&row);
         let refusal = rig.transcript().last().cloned().unwrap_or_default();
@@ -349,7 +353,7 @@ pub fn credential_ladder_gates() -> Outcome {
     } else {
         findings.push("no hazmat course row on the menu".to_string());
     }
-    if rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money) != money_before {
+    if rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money()) != money_before {
         findings.push("a refused course still took money".to_string());
     }
 
@@ -371,7 +375,7 @@ pub fn credential_ladder_gates() -> Outcome {
     }
 
     // 3. Book hazmat for real: money out, credential NOT on the license yet.
-    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if let Some(row) = course_row(&rig, "hazmat") {
         rig.select_menu_containing(&row);
     }
@@ -383,7 +387,7 @@ pub fn credential_ladder_gates() -> Outcome {
                 .pending_credentials
                 .iter()
                 .any(|pc| pc.key == "hazmat"),
-            p.money,
+            p.money(),
         )
     };
     if holds {
@@ -458,7 +462,7 @@ pub fn money_exact_zero_and_below() -> Outcome {
     let mut findings: Vec<String> = Vec::new();
     let start = JAKE_ZONE_FINES[0] + JAKE_ZONE_FINES[1]; // 450: two fines to zero
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = start;
+        profile.set_money(start);
     }
     rig.drive.trip.position_mi = 2.0;
     rig.drive.truck_mut().engine_on = true;
@@ -480,7 +484,7 @@ pub fn money_exact_zero_and_below() -> Outcome {
             rig.drive.jake_zone_fines
         ));
     }
-    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     let expected_money = 450.0 - JAKE_ZONE_FINES.iter().sum::<f64>();
     if (money - expected_money).abs() > 0.001 {
         findings.push(format!(
@@ -612,7 +616,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
             profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL as usize - 1]; // exactly level 18
             profile.career.deliveries = OWNER_OPERATOR_DELIVERIES;
             profile.career.reputation = OWNER_OPERATOR_REPUTATION;
-            profile.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+            profile.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
             // exact dollar
         }
         let level = app.ctx.profile.as_ref().map_or(0, |p| p.career.level());
@@ -636,7 +640,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
             select_containing(&mut app, "Buy into leased-on");
             let (status, money) = {
                 let profile = app.ctx.profile.as_ref().expect("a profile");
-                (profile.business_status.clone(), profile.money)
+                (profile.business_status.clone(), profile.money())
             };
             if status != LEASED_OWNER_OPERATOR {
                 findings.push("exact-level, exact-capital buy-in was refused".to_string());
@@ -660,8 +664,8 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
         profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL as usize - 2]; // level 17
         profile.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         profile.career.reputation = OWNER_OPERATOR_REPUTATION;
-        profile.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 50_000.0;
-        profile.money
+        profile.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 50_000.0);
+        profile.money()
     };
     let level = app.ctx.profile.as_ref().map_or(0, |p| p.career.level());
     if level != OWNER_OPERATOR_LEVEL - 1 {
@@ -687,7 +691,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
         select_containing(&mut app, "Owner-operator path locked");
         let (status, money) = {
             let profile = app.ctx.profile.as_ref().expect("a profile");
-            (profile.business_status.clone(), profile.money)
+            (profile.business_status.clone(), profile.money())
         };
         if status == LEASED_OWNER_OPERATOR {
             findings.push("level 17 buy-in succeeded despite the level-18 gate".to_string());

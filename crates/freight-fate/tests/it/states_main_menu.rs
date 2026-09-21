@@ -403,7 +403,7 @@ fn test_a_typed_in_fortune_is_heard_about_however_it_got_into_the_save() {
 
     let mut memory_edit = Profile::named("Memory Edit");
     memory_edit.career.total_earnings = 338.36;
-    memory_edit.money = 999_999_999.0;
+    memory_edit.set_money(999_999_999.0);
     let signed_by_the_game = memory_edit.save().unwrap();
 
     let by_hand = Profile::named("By Hand");

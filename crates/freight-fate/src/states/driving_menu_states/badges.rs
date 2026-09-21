@@ -102,7 +102,7 @@ pub(crate) fn award_arrival_achievements(
     if level >= 3 {
         push(&mut ids, "level_three");
     }
-    let money = profile_of(ctx).money;
+    let money = profile_of(ctx).money();
     if money >= 25_000.0 {
         push(&mut ids, "twenty_five_grand");
     }

@@ -26,6 +26,10 @@
 
 - **Radio playlists can play tracker modules.** Music made in OpenMPT and similar trackers plays like any other file in your playlist.
 
+### Security
+
+- **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
+
 ### Changed
 
 - **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.

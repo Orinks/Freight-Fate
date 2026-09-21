@@ -211,9 +211,9 @@ impl PauseMenuState {
             let carrier_paid = !player_pays_operating_costs(&profile_of(ctx).business_status);
             if !carrier_paid {
                 // the rescue is never refused; money can go negative
-                profile_mut_of(ctx).money -= cost;
+                profile_mut_of(ctx).spend(cost);
             }
-            let money = profile_of(ctx).money;
+            let money = profile_of(ctx).money();
             d.trip.truck.damage_pct = FIELD_REPAIR_DAMAGE_PCT;
             advance_rest_clock(d, ctx, MECHANIC_WAIT_MIN, None, "");
             hos_mut_of(ctx).on_duty(MECHANIC_WAIT_MIN);
@@ -736,7 +736,7 @@ impl AbandonJobConfirmationState {
                 (p.career.reputation - ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY).max(0.0);
         } else if !bobtail {
             let p = profile_mut_of(ctx);
-            p.money -= 500.0;
+            p.spend(500.0);
             p.career.reputation = (p.career.reputation - 5.0).max(0.0);
         }
         self.driving.with(ctx, |d, ctx| {

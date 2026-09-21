@@ -61,7 +61,7 @@ fn rest_stop(drive: &SharedState, name: &str, actions: &[&str]) -> RestStopState
 }
 
 fn money(app: &TestApp) -> f64 {
-    app.ctx.profile.as_ref().expect("a career").money
+    app.ctx.profile.as_ref().expect("a career").money()
 }
 
 fn approx(a: f64, b: f64) {
@@ -74,7 +74,7 @@ fn test_energy_drink_lifts_fatigue_and_starts_a_timed_buff() {
     let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
     {
         let p = app.ctx.profile.as_mut().expect("a career");
-        p.money = 1_000.0;
+        p.set_money(1_000.0);
         p.fatigue = 50.0;
     }
     let mut state = rest_stop(&drive, "Cactus Flats Truck Stop", &["fuel", "break"]);
@@ -84,7 +84,7 @@ fn test_energy_drink_lifts_fatigue_and_starts_a_timed_buff() {
     activate(&mut state, &mut app.ctx, "Energy drink");
 
     let p = app.ctx.profile.as_ref().expect("a career");
-    approx(p.money, 994.0);
+    approx(p.money(), 994.0);
     approx(p.fatigue, 47.0);
     assert_eq!(p.active_buffs.len(), 1);
     let entry = &p.active_buffs[0];
@@ -105,7 +105,11 @@ fn test_energy_drink_lifts_fatigue_and_starts_a_timed_buff() {
 fn test_new_fatigue_buff_replaces_the_old_one() {
     let mut app = TestApp::new();
     let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
-    app.ctx.profile.as_mut().expect("a career").money = 1_000.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(1_000.0);
     let mut state = rest_stop(&drive, "Cactus Flats", &["fuel", "food"]);
 
     activate(&mut state, &mut app.ctx, "Energy drink");
@@ -127,7 +131,11 @@ fn test_new_fatigue_buff_replaces_the_old_one() {
 fn test_shower_is_free_after_fueling_at_pilot() {
     let mut app = TestApp::new();
     let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
-    app.ctx.profile.as_mut().expect("a career").money = 5_000.0;
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(5_000.0);
     with_drive(&drive, |d| d.trip.truck.fuel_gal = 40.0);
     let mut state = rest_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
 
@@ -175,7 +183,7 @@ fn test_quick_lube_sets_a_trip_buff_and_carrier_pays_for_company_drivers() {
 fn test_food_stays_personal_money_for_company_drivers() {
     let mut app = TestApp::new();
     let drive = buff_drive(&mut app, COMPANY_DRIVER);
-    app.ctx.profile.as_mut().expect("a career").money = 100.0;
+    app.ctx.profile.as_mut().expect("a career").set_money(100.0);
     let mut state = rest_stop(&drive, "Cactus Flats", &["food"]);
 
     activate(&mut state, &mut app.ctx, "Diner meal");
@@ -209,7 +217,7 @@ fn test_wall_drug_park_only_sells_five_cent_coffee_and_free_ice_water() {
     let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
     {
         let p = app.ctx.profile.as_mut().expect("a career");
-        p.money = 10.0;
+        p.set_money(10.0);
         p.fatigue = 40.0;
     }
     let mut state = rest_stop(&drive, "Wall Drug", &["park", "save", "break", "sleep"]);
@@ -235,7 +243,7 @@ fn test_wall_drug_park_only_sells_five_cent_coffee_and_free_ice_water() {
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Free ice water");
     let p = app.ctx.profile.as_ref().expect("a career");
-    approx(p.money, 10.0);
+    approx(p.money(), 10.0);
     approx(p.fatigue, 39.0);
     assert_eq!(p.active_buffs[0]["id"], "wall_drug_free_ice_water");
     let said = app.main_lines();
@@ -249,7 +257,7 @@ fn test_wall_drug_park_only_sells_five_cent_coffee_and_free_ice_water() {
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Five-cent coffee");
     let p = app.ctx.profile.as_ref().expect("a career");
-    approx(p.money, 9.95);
+    approx(p.money(), 9.95);
     approx(p.fatigue, 37.0); // 39 - 2
     assert_eq!(p.active_buffs[0]["id"], "wall_drug_five_cent_coffee");
     let said = app.main_lines();

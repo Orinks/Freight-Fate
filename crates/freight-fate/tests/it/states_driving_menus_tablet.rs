@@ -237,7 +237,7 @@ fn test_an_empty_favourites_list_says_how_to_fill_it() {
 
 fn a_student(app: &mut TestApp) {
     let mut profile = Profile::named_in("Student", "denver_co_us");
-    profile.money = 12_345.0;
+    profile.set_money(12_345.0);
     app.ctx.profile = Some(profile);
 }
 
@@ -303,7 +303,7 @@ fn test_school_lesson_is_a_sandbox_and_restores_the_real_profile() {
         lesson.on_parking_brake_released(&mut app.ctx)
     });
     // Sandbox spending stays on the copy.
-    app.ctx.profile.as_mut().expect("a career").money -= 500.0;
+    app.ctx.profile.as_mut().expect("a career").spend(500.0);
     let rolling = truck_at(&app, 31.0, false);
     lesson_step(&mut app, |lesson, app| {
         lesson.update(&mut app.ctx, 1.0 / 60.0, &rolling)
@@ -318,7 +318,10 @@ fn test_school_lesson_is_a_sandbox_and_restores_the_real_profile() {
     assert!(top_is::<DrivingSchoolState>(&app));
     assert!(!app.ctx.school_sandbox);
     assert!(app.ctx.school_real_profile.is_none());
-    assert_eq!(app.ctx.profile.as_ref().expect("a career").money, 12_345.0);
+    assert_eq!(
+        app.ctx.profile.as_ref().expect("a career").money(),
+        12_345.0
+    );
 }
 
 #[test]
@@ -361,14 +364,17 @@ fn test_escaping_a_lesson_restores_the_profile_too() {
         activate(school, ctx, "Lesson 1")
     });
     assert!(app.ctx.school_sandbox);
-    app.ctx.profile.as_mut().expect("a career").money = 1.0;
+    app.ctx.profile.as_mut().expect("a career").set_money(1.0);
 
     // Any pop of the practice drive restores, no matter how it happens.
     app.ctx.pop_state();
     app.ctx.run_deferred();
     assert!(top_is::<DrivingSchoolState>(&app));
     assert!(!app.ctx.school_sandbox);
-    assert_eq!(app.ctx.profile.as_ref().expect("a career").money, 12_345.0);
+    assert_eq!(
+        app.ctx.profile.as_ref().expect("a career").money(),
+        12_345.0
+    );
 }
 
 #[test]

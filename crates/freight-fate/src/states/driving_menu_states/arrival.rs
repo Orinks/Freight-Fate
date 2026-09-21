@@ -131,7 +131,7 @@ impl ArrivalState {
             p.current_city = job.destination.clone();
             let driver_charges = p.fines_owed;
             if driver_charges != 0.0 {
-                p.money -= driver_charges;
+                p.spend(driver_charges);
                 p.fines_owed = 0.0;
                 self.summary_parts.push(format!(
                     "Fines carried over from earlier loads: {} dollars, settled.",
@@ -145,8 +145,8 @@ impl ArrivalState {
             let on_time = hours <= job.deadline_game_h;
             let (previous_level, money) = {
                 let p = profile_mut_of(ctx);
-                p.money += job.pay;
-                (p.career.level(), p.money)
+                p.earn(job.pay);
+                (p.career.level(), p.money())
             };
             let standing = enforcement::standing_band(profile_of(ctx));
             announcements = profile_mut_of(ctx).career.record_delivery(
@@ -535,7 +535,7 @@ impl ArrivalState {
         {
             let p = profile_mut_of(ctx);
             p.fines_owed = round_py_n(p.fines_owed + (carried_balance - collected).max(0.0), 2);
-            p.money += net_pay;
+            p.earn(net_pay);
             p.current_city = job.destination.clone();
         }
         let lane = lane_key(ctx.world, &job);
@@ -686,7 +686,7 @@ impl ArrivalState {
         }
 
         let destination_timezone = d.trip.destination_timezone();
-        let money = profile_of(ctx).money;
+        let money = profile_of(ctx).money();
         let receiver_service_hours = (elapsed_hours - hours).max(0.0);
         let receiver_service_clause = if receiver_service_hours >= 0.05 {
             format!(
@@ -953,7 +953,7 @@ impl ArrivalState {
         ));
         lines.push(format!(
             "Money after settlement: {} dollars.",
-            fmt_grouped(profile_of(ctx).money, 0)
+            fmt_grouped(profile_of(ctx).money(), 0)
         ));
         lines.extend(bonus_lines);
         lines.push(format!("Route: {}.", cities.join(" to ")));
