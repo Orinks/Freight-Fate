@@ -31,7 +31,7 @@
   - Synth piece title: `Synthesized: {style title}, number {n}` (n is 1-based track index)
   - Classic titles: `Headlights West, from Freight Fate 1.5`, `Open Road, from Freight Fate 1.5`, `Night Haul, from Freight Fate 1.5`
 - Canonical noun: "synthesized music" (add to `docs/ontology.md`).
-- Commit messages: conventional prefix, `[skip changelog]` on every commit except the one that adds CHANGELOG bullets (Task 12), and the attribution line `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+- Commit messages: conventional prefix, `[skip changelog]` on every commit except the one that adds CHANGELOG bullets (Task 13), and the attribution line `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 - Stage explicit paths only; never `git add -A` (licensed sound overlay).
 
 ## File Structure
@@ -2377,7 +2377,98 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 12: Docs, gates, and a real listen
+### Task 12: Streamer-safe mode is the synthesized Roadhouse only
+
+Owner ruling, 2026-09-21: with streamer-safe mode on, the synthesized Roadhouse is the only station. Station commands do not change the station; the radio is just an on/off switch.
+
+**Files:**
+- Modify: `crates/ff-core/src/radio/state.rs` (`station_allowed` at ~`:956`, `tune` at ~`:642`, `tune_category` at ~`:736`, `select_station` at ~`:772`, `toggle_favorite` at ~`:1045`, and any other public station-changing entry point: read the whole `impl RadioState`)
+- Modify: `crates/freight-fate/src/states/driving_updates/radio.rs` (`station_allowed` at ~`:823`; `synth_roadhouse` from Task 9)
+- Modify: every driving-control handler that changes station or opens the station browser, radio app, favorites or playlists (find them from the controls bindings table: `grep -rn "radio" crates/freight-fate/src/states/driving_controls/` and the keyboard shortcuts table)
+- Modify: `crates/freight-fate/src/states/main_menu/settings_items.rs` (the streamer-safe row's help, ~`:812`)
+- Test: `crates/ff-core/src/radio/tests.rs`, `crates/freight-fate/tests/it/synth_music.rs`
+
+**Interfaces:**
+- Consumes: `DrivingState::synth_roadhouse` (Task 9), `SAFE_ROUTE_PLAYLIST` (the Roadhouse's station id)
+- Produces: `pub const STREAMER_SAFE_LOCKED: &str = "Streamer-safe mode keeps the radio on the Roadhouse.";` in `ff_core::radio`, spoken whenever a station command is refused
+
+**Required behaviour:**
+- With `radio_streamer_safe` on, the only allowed station is `SAFE_ROUTE_PLAYLIST`, in both `station_allowed` gates (ff-core `RadioState` and the driving state's copy). Turning streamer-safe on mid-drive retunes to the Roadhouse; the existing `apply_radio_settings_to_drive` path moves off a disallowed station to `SAFE_ROUTE_PLAYLIST` -- confirm it does, with a test.
+- `DrivingState::synth_roadhouse` returns true when `station.playlist == "route"` and (`ctx.settings.synth_music` OR `ctx.settings.radio_streamer_safe`). In streamer-safe mode the Roadhouse always plays synthesized music with no host breaks, station IDs, jingles or ads, whatever Music source is set to. `station_rotation_pool`, the break suppression and the now-playing title from Task 9 must all use this predicate, not `synth_music` alone. The restart-on-settings-change in `apply_radio_settings_to_drive` must also fire when streamer-safe flips.
+- Every station-changing command (tune up/down, seek/scan, category tune, select by name or number, favorites, the station browser or radio app, personal playlists) leaves the station unchanged in streamer-safe mode and speaks `STREAMER_SAFE_LOCKED` on the channel that command already uses. It never fails silently.
+- The radio power key still turns the radio on and off. Volume and now playing still work.
+- Menus are unchanged by streamer-safe mode (they follow Music source).
+- The streamer-safe settings row's help becomes exactly: `On keeps the radio on the Roadhouse, playing synthesized music with no AI-made songs or voices, for streaming or recording. The radio key turns it on and off; station keys do nothing.`
+
+- [ ] **Step 1: Write the failing tests**
+
+In `crates/ff-core/src/radio/tests.rs`, build a `RadioState` the way the neighbouring streamer-safe tests do (read them first), then:
+
+```rust
+#[test]
+fn streamer_safe_allows_only_the_roadhouse() {
+    let mut radio = safe_radio(); // local helper: as the neighbouring tests build one
+    radio.streamer_safe = true;
+    let allowed: Vec<String> = radio
+        .receivable_stations()
+        .into_iter()
+        .filter(|r| !r.fallback)
+        .map(|r| r.station.id)
+        .collect();
+    assert_eq!(allowed, vec![SAFE_ROUTE_PLAYLIST.to_string()]);
+}
+
+#[test]
+fn streamer_safe_refuses_every_station_command_out_loud() {
+    let mut radio = safe_radio();
+    radio.streamer_safe = true;
+    let before = radio.current_station().id;
+    // One call per station-changing method: tune (both directions),
+    // tune_category, select_station, toggle_favorite, and any other found.
+    // After each: the station is unchanged and the spoken text carries
+    // STREAMER_SAFE_LOCKED.
+    assert_eq!(radio.current_station().id, before);
+}
+```
+
+Use the real method names and return types in `state.rs`; fill in one assertion pair per method. In `synth_music.rs`, using the `a_drive` helper from Task 9: with `synth_music = false` and `radio_streamer_safe = true`, the Roadhouse pool is all `synth_drive_*` keys and classics; no host break is planned over two break intervals; pressing each station-changing driving control (through the same key path the existing radio control tests use) leaves the station on the Roadhouse and puts `Streamer-safe mode keeps the radio on the Roadhouse.` in the transcript; the radio power key turns the radio off and back on.
+
+- [ ] **Step 2: Run to see them fail**
+
+Run: `cargo test -p ff-core radio` and `cargo test -p freight-fate --test it synth_music`
+Expected: the new tests FAIL.
+
+- [ ] **Step 3: Implement**
+
+Add the constant to `ff_core::radio` (re-exported where the other radio constants are). Tighten both `station_allowed` gates, before the existing real-stream check:
+
+```rust
+        if self.streamer_safe && station.id != SAFE_ROUTE_PLAYLIST {
+            return false;
+        }
+```
+
+(driving copy: `self.radio.streamer_safe`). At the top of each station-changing `RadioState` method, when `self.streamer_safe`, return that method's normal "nothing changed" result carrying `STREAMER_SAFE_LOCKED` as its spoken message. Game-side handlers that bypass `RadioState` (station browser, playlists) check `ctx.settings.radio_streamer_safe` and speak the constant instead of opening. Widen `synth_roadhouse` as specified. Update the settings help string. Keep the existing streamer-safe tests passing; where one asserted that other built-in stations stay reachable in streamer-safe mode, that behaviour is intentionally gone -- update it to the new rule and name it in the report.
+
+- [ ] **Step 4: Run the tests**
+
+Run: `cargo test -p ff-core radio`, `cargo test -p freight-fate --test it synth_music`, `cargo test -p freight-fate --test it radio`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add <each file you changed, explicitly>
+git commit -m "feat(radio): streamer-safe mode is the synthesized Roadhouse only
+
+[skip changelog]
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 13: Docs, gates, and a real listen
 
 **Files:**
 - Modify: `CHANGELOG.md` (`## Unreleased`, `### Added`), `ROADMAP.md` (1.9 line), the player manual's audio settings section (find with `grep -rln "Music volume" docs/`)
@@ -2392,6 +2483,8 @@ Under `### Added`:
 - **A music seed changes every synthesized piece.** Settings, Audio, Music seed rolls a new one and says it, so you can share one you like.
 
 - **The original 1.5 soundtrack is back in Synthesized mode.** Headlights West, Open Road and Night Haul return.
+
+- **Streamer-safe mode keeps the radio on the synthesized Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
 
 - **Your own tracker modules can play in Synthesized mode.** Put OpenMPT modules or audio files in the music folder in your Freight Fate data folder.
 ```
