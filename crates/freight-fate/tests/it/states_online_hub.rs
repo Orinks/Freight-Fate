@@ -462,6 +462,12 @@ fn test_a_duty_notice_is_spoken_by_the_game_loop() {
 /// build actually talks to, staged host included.
 #[test]
 fn test_hub_opens_the_driver_setup_page_in_a_browser() {
+    // FREIGHT_FATE_ONLINE_URL is process-global, and these three tests write
+    // it at once. Without the lock they raced, and the race was invisible for
+    // as long as DEFAULT_BASE_URL happened to be the staged host they set --
+    // losing it still read back the expected address. The 1.9 cutover moved
+    // the default to production and the coincidence ended.
+    let _env = freight_fate::app::testing::env_lock();
     let mut app = TestApp::new();
     std::env::set_var("FREIGHT_FATE_ONLINE_URL", "https://dev.orinks.net");
     let browser = install_browser(true);
@@ -484,6 +490,7 @@ fn test_hub_opens_the_driver_setup_page_in_a_browser() {
 /// never opens, and there is no review cursor to read an address out of.
 #[test]
 fn test_hub_setup_page_falls_back_to_the_clipboard() {
+    let _env = freight_fate::app::testing::env_lock();
     let mut app = TestApp::new();
     std::env::set_var("FREIGHT_FATE_ONLINE_URL", "https://dev.orinks.net");
     let _browser = install_browser(false);
@@ -498,6 +505,7 @@ fn test_hub_setup_page_falls_back_to_the_clipboard() {
 /// because it is the only way the player can reach the page at all.
 #[test]
 fn test_hub_setup_page_reads_the_address_out_when_nothing_else_works() {
+    let _env = freight_fate::app::testing::env_lock();
     let mut app = TestApp::new();
     std::env::set_var("FREIGHT_FATE_ONLINE_URL", "https://dev.orinks.net");
     let _browser = install_browser(false);

@@ -118,20 +118,32 @@ These steps remain open even where a related implementation bullet is checked:
       reader, and the native runner boots the packaged app before it
       ships, so the gate could never have been cleared here anyway.
       Revive it only if a Mac tester appears.
-- [ ] Cut the stable notes from the rewritten Unreleased block
-      (2026-09-14: 718 bullets at a median of 85 words became 774 at 27,
-      one heading per section). Before cutting: drop the tester-line
-      bullets that are false at release (the staging orinks.net copy, the
-      1.9 tester snapshots, the Update channel developer-snapshots row,
-      the "1.9 updates look for tester builds" fix), and settle the pairs
-      the rewrite could not from the code: fuel counting toward the
-      truck's weight against the 80,000-pound dispatch cap; curve speed
-      assistance "engine brake first" (Added) against "the engine brake
-      is for hills, not corners" (Fixed). The third, the Learn game sounds
-      collision entry explaining itself by the retired terse mode, is
-      SETTLED (2026-09-20): four entries named terse, and the rung table
-      says a confirmation and a bend advisory only become a sound at
-      Urgent only, so all four say Urgent only now.
+- [x] The Unreleased block is ready to cut stable notes from
+      (2026-09-20). The four tester-line bullets are gone: the staging
+      orinks.net copy, the Update channel developer-snapshots row, and
+      the "1.9 updates look for tester builds" fix were dropped outright,
+      and the "tester snapshots are ready to play" bullet was reworded
+      rather than dropped -- it carried the only statement anywhere in
+      the block that Intel Macs are unsupported. The two Linux bullets
+      say "the release" instead of "each snapshot" for the same reason.
+      * Both pairs settled from the code, not by preference. Curve speed
+        assistance: `driving_updates/lanes.rs` raises the engine brake
+        only where `retarder_warranted()` says the drums cannot hold the
+        hill, so the "engine brake first" Added bullet described
+        behaviour that was later corrected and is now one bullet saying
+        engine brake on a steep downgrade, service brakes elsewhere.
+      * The dispatch cap: nothing in `models/jobs/board.rs` filters on
+        gross weight, cargo reaches 25 tons, and the board's own readout
+        can say "over the gross-weight limit with current fuel" -- so
+        "dispatched loads stay at or under 80,000 pounds" was false. It
+        now says the board weighs each load against the limit and that
+        fuel counts toward it, which agrees with the fuel bullet instead
+        of contradicting it.
+      * The third, the Learn game sounds collision entry explaining
+        itself by the retired terse mode, was SETTLED earlier the same
+        day: four entries named terse, and the rung table says a
+        confirmation and a bend advisory only become a sound at Urgent
+        only, so all four say Urgent only now.
 
 #### Player-impacting release blockers
 
