@@ -36,6 +36,7 @@ mod backend;
 mod bass;
 mod bass_engine;
 mod bass_radio;
+pub mod classic_music;
 mod engine;
 mod null;
 mod sustain;

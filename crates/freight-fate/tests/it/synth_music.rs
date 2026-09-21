@@ -46,3 +46,21 @@ fn music_seed_row_rolls_a_new_seed_in_range() {
     assert!((10_000..=99_999).contains(&seed), "{seed}");
     assert_ne!(seed, 48213);
 }
+
+#[test]
+fn the_three_classics_play_from_the_executable() {
+    freight_fate::audio::classic_music::register();
+    for key in [
+        "classic_menu_theme",
+        "classic_open_road",
+        "classic_night_haul",
+    ] {
+        let (bytes, ext) = freight_fate::audio::assets::asset_bytes(
+            &format!("music/{key}"),
+            freight_fate::audio::assets::MUSIC_EXTENSIONS,
+        )
+        .unwrap_or_else(|| panic!("{key} missing"));
+        assert_eq!(ext, "ogg");
+        assert_eq!(&bytes[..4], b"OggS");
+    }
+}
