@@ -89,6 +89,10 @@
 
 ### Fixed
 
+- **Manage careers lists careers from earlier versions, so you can delete them.** Before, one stayed on the Choose career list for good.
+
+- **Deleting a backed-up career asks about its cloud backups.** Remove them too, or keep them; a new career with the same name no longer writes over kept ones.
+
 - **The truck drives off again after a stop.** Leaving a fuel or rest stop no longer leaves the brakes held, with the truck stuck at 0 miles per hour. (Shane, Jerry and Jessie)
 
 - **A deleted career no longer asks which copy to keep.** The Online menu named a career you no longer have, and nothing could clear it.
