@@ -63,8 +63,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = ROOT / "data" / "radio-cache" / "pr150_stations.json"
-CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
-DEFAULT_OUTPUT = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
+CURATED_PATH = ROOT / "data" / "radio_catalog.json"
+DEFAULT_OUTPUT = ROOT / "data" / "radio_imported.json"
 HEALTH_PATH = ROOT / "data" / "radio_stream_health.json"
 OVERRIDES_PATH = ROOT / "data" / "radio_imported_overrides.json"
 RADIO_BROWSER_PATH = ROOT / "data" / "radio-cache" / "rb_us.json"

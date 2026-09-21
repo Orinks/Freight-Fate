@@ -26,9 +26,7 @@ import soundfile as sf
 from scipy.signal import butter, filtfilt
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LICENSED_ENGINE = os.path.join(
-    REPO, "src", "freight_fate", "assets", "sounds-licensed", "engine"
-)
+LICENSED_ENGINE = os.path.join(REPO, "assets", "sounds-licensed", "engine")
 TARGETS = ("idle.wav", "low.wav", "mid.wav", "midhigh.wav", "high.wav")
 
 DETECT_RATIO = 2.0
@@ -101,7 +99,7 @@ def patch(path: str) -> None:
                 if best is None or worst < best[0]:
                     best = (worst, d_start)
         if best is None or best[0] > DETECT_RATIO:
-            print(f"{os.path.basename(path):14s} NO clean donor for {start/sr:.2f}s -- skipped")
+            print(f"{os.path.basename(path):14s} NO clean donor for {start / sr:.2f}s -- skipped")
             continue
         donor = x[best[1] : best[1] + length].copy()
         ramp = np.linspace(0.0, 1.0, edge)
@@ -115,7 +113,7 @@ def patch(path: str) -> None:
     sf.write(path, out.astype(np.float32), sr, subtype="PCM_16")
     print(
         f"{os.path.basename(path):14s} {len(events)} event(s) patched  "
-        f"worst {np.max(env)/med:.1f}x -> {np.max(after)/np.median(after):.1f}x"
+        f"worst {np.max(env) / med:.1f}x -> {np.max(after) / np.median(after):.1f}x"
     )
 
 

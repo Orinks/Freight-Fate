@@ -566,8 +566,8 @@ def test_check_accepts_single_push_release_sync(tmp_path, monkeypatch, capsys):
     git(repo, "tag", "v1.8.1")
     base = git(repo, "rev-parse", "HEAD")
 
-    (repo / "src").mkdir()
-    (repo / "src" / "game.py").write_text("GAME = True\n", encoding="utf-8")
+    (repo / "data").mkdir()
+    (repo / "data" / "cities.json").write_text("{}\n", encoding="utf-8")
     (repo / "CHANGELOG.md").write_text(
         changelog(
             "",
@@ -897,13 +897,14 @@ def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():
     for path in (
         "crates/freight-fate/src/states/driving_turns.rs",
         "crates/ff-core/src/sim/trip.rs",
-        "src/freight_fate/data/facility_endpoints.json",
+        "data/facility_endpoints.json",
+        "assets/sounds.pak",
         "docs/ontology.md",
         "CHANGELOG.md",
     ):
         assert module.is_user_facing_path(path), path
     # A test or bench is not a player-facing change: under the Python layout
-    # tests/ sat beside src/ and was never gated.
+    # tests/ sat beside the game and was never gated.
     for path in (
         "crates/ff-core/tests/it/sim_trip_cues.rs",
         "crates/freight-fate/benches/frame_time.rs",

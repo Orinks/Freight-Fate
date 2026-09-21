@@ -1,7 +1,7 @@
 """Load and save the editable world source, sharded per state.
 
 The build tools used to read and write a single 60 MB
-``src/freight_fate/data/world.json``. That file (and the runtime
+``data/world.json``. That file (and the runtime
 ``world_data/us/legs.json`` it generates) had grown past GitHub's 50 MB
 warning line and was heading for the 100 MB hard limit, and every data
 sweep committed a 60 MB blob no reviewer could read. The source is now a
@@ -9,7 +9,7 @@ tree of per-state shards:
 
 .. code-block:: text
 
-    src/freight_fate/data/world_source/
+    data/world_source/
       meta.json         # every top-level key that is not cities or legs
       cities.json       # {"cities": {...}} -- small enough to stay whole
       legs/TX.json      # {"legs": [...]} for legs starting in Texas
@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_SOURCE_PATH = ROOT / "src" / "freight_fate" / "data" / "world_source"
+WORLD_SOURCE_PATH = ROOT / "data" / "world_source"
 
 # Legs whose 'from' city has no state (or an unknown city) land here rather
 # than failing the save -- an honest bucket beats a crash mid-sweep.

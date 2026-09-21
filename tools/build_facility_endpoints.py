@@ -70,7 +70,7 @@ from facility_endpoint_screen import screen_endpoint  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_DIR = ROOT / "tools"
-FACILITY_ENDPOINTS_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_endpoints.json"
+FACILITY_ENDPOINTS_PATH = ROOT / "data" / "facility_endpoints.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 EARTH_RADIUS_MI = 3958.7613

@@ -21,7 +21,7 @@ from pathlib import Path
 from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "src" / "freight_fate" / "data"
+DATA = ROOT / "data"
 TOOLS = Path(__file__).resolve().parent
 LAYERS = (
     (DATA / "facility_endpoints.json", "endpoints", "", "build_facility_endpoints"),

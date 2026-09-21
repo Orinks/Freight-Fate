@@ -14,7 +14,7 @@ bake matches ramps to legs by proximity to each leg's route line.
     uv run --group tooling python tools/harvest_escape_ramps.py            # all states
     uv run --group tooling python tools/harvest_escape_ramps.py colorado   # one state
 
-Writes ``src/freight_fate/data/escape_ramps.json`` (a build-time cache, not a
+Writes ``data/escape_ramps.json`` (a build-time cache, not a
 runtime file): a sorted, deterministic list of ramps with a source note.
 """
 
@@ -28,7 +28,7 @@ import osmium
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-OUT = ROOT / "src" / "freight_fate" / "data" / "escape_ramps.json"
+OUT = ROOT / "data" / "escape_ramps.json"
 SOURCE = (
     "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; "
     "development-time. (c) OpenStreetMap contributors, ODbL."
@@ -87,7 +87,9 @@ def main() -> int:
     for pbf in pbfs:
         found = harvest_pbf(pbf)
         all_ramps.extend(found)
-        print(f"  {pbf.stem.replace('-latest.osm', ''):18s} {len(found):4d} escape ramps", flush=True)
+        print(
+            f"  {pbf.stem.replace('-latest.osm', ''):18s} {len(found):4d} escape ramps", flush=True
+        )
 
     # dedupe on rounded centroid (state extracts overlap at borders) + sort for
     # a deterministic, diffable cache.
@@ -95,7 +97,9 @@ def main() -> int:
     for r in all_ramps:
         seen[(r["lat"], r["lon"])] = r
     ramps = sorted(seen.values(), key=lambda r: (r["lat"], r["lon"]))
-    OUT.write_text(json.dumps({"ramps": ramps}, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    OUT.write_text(
+        json.dumps({"ramps": ramps}, indent=2, ensure_ascii=True) + "\n", encoding="utf-8"
+    )
     print(f"\n{len(ramps)} unique escape ramps -> {OUT.relative_to(ROOT)}")
     return 0
 

@@ -27,7 +27,7 @@ import osmium
 from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
+CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 EARTH_RADIUS_MI = 3958.7613
 ACCESSED_DATE = "2026-06-27"

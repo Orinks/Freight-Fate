@@ -36,10 +36,10 @@ from world_source import load_world  # noqa: E402
 scs.CURVE_PAD_M = 150.0
 
 ROOT = Path(__file__).resolve().parents[1]
-CURVES = ROOT / "src/freight_fate/data/world_data/us/gameplay/curves.jsonl"
-SPEED = ROOT / "src/freight_fate/data/world_data/us/gameplay/speed_limits.jsonl"
-RAMPS = ROOT / "src/freight_fate/data/world_data/us/gameplay/ramps.jsonl"
-ENDPOINTS = ROOT / "src/freight_fate/data/facility_endpoints.json"
+CURVES = ROOT / "data/world_data/us/gameplay/curves.jsonl"
+SPEED = ROOT / "data/world_data/us/gameplay/speed_limits.jsonl"
+RAMPS = ROOT / "data/world_data/us/gameplay/ramps.jsonl"
+ENDPOINTS = ROOT / "data/facility_endpoints.json"
 OFFROAD = ROOT / "logs/offroad.json"
 REFUSE_DOC = ROOT / "docs/truck-router-refuse-legs.md"
 
@@ -189,15 +189,15 @@ def inventory_far_approach_pins() -> dict[str, Any]:
         "bands": dict(bands),
         "exactly_35": sum(1 for r in far if abs(float(r["approach_miles"]) - 35.0) < 0.05),
         "write_paths": [
-            "src/freight_fate/data/facility_endpoints.json",
-            "src/freight_fate/data/facility_approaches.json",
+            "data/facility_endpoints.json",
+            "data/facility_approaches.json",
         ],
-        "do_not_touch_jade_stops": "src/freight_fate/data/world_data/us/legs/*.json",
+        "do_not_touch_jade_stops": "data/world_data/us/legs/*.json",
         "entrypoint": (
             "re-geocode flagged pins (OSM name+type within city bounds), then "
             "uv run --group tooling python tools/build_facility_approaches.py "
             "--states ... --write; runtime clamp is SYNTHETIC_APPROACH_CAP_MI=9 "
-            "in src/freight_fate/data/world_services.py"
+            "in ff_core::data::world_services"
         ),
         "legs": far,
     }

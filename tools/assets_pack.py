@@ -25,8 +25,8 @@ from pathlib import Path
 log = logging.getLogger(__name__)
 
 PACK_MAGIC = b"FFPK1\x00"
-# The committed packs. Phase 2 of the Python sunset moves them with the data.
-PACK_DIR = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
+# The committed sounds.pak and the builder-local music.pak.
+PACK_DIR = Path(__file__).resolve().parents[1] / "assets"
 DEFAULT_PACK_PATH = PACK_DIR / "sounds.pak"
 DEFAULT_MUSIC_PACK_PATH = PACK_DIR / "music.pak"
 # Fixed zip timestamp so identical inputs produce identical packs.

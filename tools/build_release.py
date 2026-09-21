@@ -56,10 +56,15 @@ TOOLS = ROOT / "tools"
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 APP_NAME = "FreightFate"
-PACKAGE_DIR = ROOT / "src" / "freight_fate"
+# The checkout root stands in for the installed ``freight_fate/`` package:
+# ``data/`` and ``assets/sounds/`` stage to the same relative paths under it.
+# The packs and add-ons sit under ``assets/`` here but at the package top
+# level (packs) and in ``lib/`` (add-ons) in a release.
+PACKAGE_DIR = ROOT
+SOURCE_ASSETS = "assets"
 # Game-shipped BASS addon plugins (e.g. basshls for HLS radio streams),
 # staged beside the executable with the rest of BASS.
-ADDON_LIB_DIR = PACKAGE_DIR / "lib"
+ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # Production, so a release no longer pulls its music through the staging host.
 #
 # This took two goes. The route is a 307 to FREIGHT_FATE_MUSIC_BLOB_URL, and
@@ -117,8 +122,8 @@ def stage_sound_pack(build_dir: Path, root: Path | None = None) -> None:
     destination = root / "freight_fate" / "sounds.pak"
     music_destination = root / "freight_fate" / "music.pak"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(PACKAGE_DIR / "sounds.pak", destination)
-    shutil.copy2(PACKAGE_DIR / "music.pak", music_destination)
+    shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak", destination)
+    shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "music.pak", music_destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")
@@ -596,7 +601,7 @@ def download_to_path(request: urllib.request.Request, destination: Path) -> None
         shutil.copyfileobj(response, output, length=1024 * 1024)
 
 
-def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
+def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") -> None:
     """Download and verify the public music pack when it is not already present."""
     url, expected_sha256 = music_download_config()
     if path.is_file() and not is_lfs_pointer(path) and file_sha256(path) == expected_sha256:
@@ -977,8 +982,8 @@ def stage_rust_build(
                     else ""
                 )
                 raise RuntimeError(f"Rust build is missing Linux player library {name}.{hint}")
-    require_real_pack(PACKAGE_DIR / "sounds.pak")
-    require_real_pack(PACKAGE_DIR / "music.pak")
+    require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak")
+    require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "music.pak")
     plan = plan_rust_layout(
         profile_dir,
         platform_name=platform_name,

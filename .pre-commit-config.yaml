@@ -27,14 +27,14 @@ repos:
         name: world_data is in sync with world_source
         entry: uv run python tools/index_world.py --check
         language: system
-        files: ^src/freight_fate/data/world_source/.*\.json$
+        files: ^data/world_source/.*\.json$
         pass_filenames: false
         stages: [pre-commit]
       - id: radio-imported-catalog
         name: radio_imported.json matches a rebuild
         entry: uv run python tools/import_radio_catalog.py --check
         language: system
-        files: ^(data/radio_(imported_overrides|stream_health)\.json|tools/import_radio_catalog\.py|src/freight_fate/data/radio_imported\.json)$
+        files: ^(data/radio_(imported_overrides|stream_health)\.json|tools/import_radio_catalog\.py|data/radio_imported\.json)$
         pass_filenames: false
         stages: [pre-commit]
       - id: freight-fate-release-notes

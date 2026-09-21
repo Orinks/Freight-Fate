@@ -51,9 +51,9 @@ from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_DIR = ROOT / "tools"
-FACILITY_ENDPOINTS_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_endpoints.json"
-LOCAL_APPROACHES_PATH = ROOT / "src" / "freight_fate" / "data" / "local_approaches.json"
-FACILITY_APPROACHES_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_approaches.json"
+FACILITY_ENDPOINTS_PATH = ROOT / "data" / "facility_endpoints.json"
+LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
+FACILITY_APPROACHES_PATH = ROOT / "data" / "facility_approaches.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 DEFAULT_STATES = ("Illinois", "Indiana", "Ohio")

@@ -49,8 +49,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
-IMPORTED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
+CURATED_PATH = ROOT / "data" / "radio_catalog.json"
+IMPORTED_PATH = ROOT / "data" / "radio_imported.json"
 # Build input, not game data: the player's build never reads it, so it
 # lives with the other catalog inputs instead of inside the package.
 DEFAULT_OUTPUT = ROOT / "data" / "radio_stream_health.json"

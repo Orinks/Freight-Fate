@@ -11,7 +11,7 @@ import pytest
 from asset_helpers import music_pack_available, needs_audio_assets
 
 ROOT = Path(__file__).resolve().parents[1]
-SOUNDS_DIR = ROOT / "src" / "freight_fate" / "assets" / "sounds"
+SOUNDS_DIR = ROOT / "assets" / "sounds"
 
 # The loose sound tree is builder-local source material (the repo ships only
 # sounds.pak). Fallback-path tests that read it run where it exists and skip

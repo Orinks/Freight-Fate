@@ -92,7 +92,7 @@ def track_everything(root: Path) -> None:
 @pytest.fixture
 def planned(tmp_path, monkeypatch):
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
     # Left on the disk after git was told what the project ships: the 254 MB
@@ -218,7 +218,7 @@ def test_plan_stages_only_top_level_runtime_libraries(planned):
 
 def test_plan_refuses_a_profile_dir_without_the_binary(tmp_path):
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     profile_dir = tmp_path / "target" / "release"
     profile_dir.mkdir(parents=True)
@@ -234,7 +234,7 @@ def test_plan_refuses_a_checkout_missing_a_loose_runtime_data_file(tmp_path, mon
     is what registering a new runtime data file looks like.
     """
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     monkeypatch.setattr(build_release, "RUST_DATA_FILES", ("late_addition.json",))
     profile_dir = tmp_path / "target" / "release"
@@ -248,7 +248,7 @@ def test_plan_refuses_a_checkout_missing_a_loose_runtime_data_file(tmp_path, mon
 
 def test_bake_refuses_a_checkout_without_a_data_tree(tmp_path, monkeypatch):
     build_release = load_build_release_module()
-    monkeypatch.setattr(build_release, "PACKAGE_DIR", tmp_path / "src" / "freight_fate")
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", tmp_path / "repo")
     with pytest.raises(RuntimeError, match="Runtime data tree is missing"):
         build_release.bake_world_data(out=tmp_path / "world.ffdata")
 
@@ -619,11 +619,11 @@ def make_macos_profile(profile_dir: Path) -> None:
 def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     """A bare executable folder cannot be opened like a normal Mac app."""
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
-    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
-    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -687,7 +687,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
 def test_macos_stage_refuses_missing_player_libraries(tmp_path, monkeypatch):
     """A silent or Homebrew-dependent app must never become a release."""
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
     profile_dir = tmp_path / "target" / "release"
@@ -729,11 +729,11 @@ def test_macos_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     fail the build, not bundle the shim ("failed to load sdl3", 2026-08-30).
     """
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
-    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
-    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -777,11 +777,11 @@ def test_linux_stage_ships_bass_and_prism_with_its_renamed_dependencies(tmp_path
     """Prism's Linux build finds glib and speech-dispatcher beside itself, so
     the versioned sonames must be staged even though their suffix is a number."""
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
-    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
-    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -814,7 +814,7 @@ def test_linux_stage_ships_bass_and_prism_with_its_renamed_dependencies(tmp_path
 def test_linux_stage_refuses_missing_player_libraries(tmp_path, monkeypatch, missing_name):
     """A mute or speechless tarball must never become a release."""
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
     profile_dir = tmp_path / "target" / "release"
@@ -863,11 +863,11 @@ def test_linux_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     """Every distribution ships a different libSDL2-2.0.so.0; a tarball
     linked against the builder's would not start on the others."""
     build_release = load_build_release_module()
-    package_dir = tmp_path / "src" / "freight_fate"
+    package_dir = tmp_path / "repo"
     make_package_tree(package_dir, build_release)
     track_everything(tmp_path)
-    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
-    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)

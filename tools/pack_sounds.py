@@ -18,10 +18,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC_DIR = ROOT / "src"
-SOUNDS_DIR = SRC_DIR / "freight_fate" / "assets" / "sounds"
+SOUNDS_DIR = ROOT / "assets" / "sounds"
 # Licensed overlay (gitignored): packed over the committed tree when present.
-LICENSED_DIR = SRC_DIR / "freight_fate" / "assets" / "sounds-licensed"
+LICENSED_DIR = ROOT / "assets" / "sounds-licensed"
 DEFAULT_OUTPUT = ROOT / "build" / "sounds.pak"
 DEFAULT_MUSIC_OUTPUT = ROOT / "build" / "music.pak"
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-DATA_ROOT = Path(__file__).resolve().parents[2] / "src" / "freight_fate" / "data"
+DATA_ROOT = Path(__file__).resolve().parents[2] / "data"
 
 
 def read_data_text(relative: str) -> str | None:

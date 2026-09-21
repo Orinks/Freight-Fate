@@ -26,10 +26,8 @@ import numpy as np
 import soundfile as sf
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LICENSED_ENGINE = os.path.join(
-    REPO, "src", "freight_fate", "assets", "sounds-licensed", "engine"
-)
-COMMITTED_ENGINE = os.path.join(REPO, "src", "freight_fate", "assets", "sounds", "engine")
+LICENSED_ENGINE = os.path.join(REPO, "assets", "sounds-licensed", "engine")
+COMMITTED_ENGINE = os.path.join(REPO, "assets", "sounds", "engine")
 
 SPLICE_S = 0.025  # crossfade window; short enough to leave the character alone
 EDGE_TRIM_S = 0.004  # drop the codec-smeared first/last frames before splicing

@@ -59,7 +59,7 @@ import straw_curve_sample as scs  # noqa: E402  (the ratified matcher primitives
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
+GEOM_DIR = ROOT / "data" / "world_data" / "us" / "geometry"
 
 SOURCE_NOTE = (
     "OpenStreetMap lanes tags on the corridor highway ways (Overpass), "
