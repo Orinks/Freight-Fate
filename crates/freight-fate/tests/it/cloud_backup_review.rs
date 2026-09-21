@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use serde_json::{json, Value};
 
+use ff_core::models::profile::origin::{forget_origin, origin_for, record_origin};
 use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
 use freight_fate::cloud_saves::{
@@ -121,6 +122,8 @@ fn an_accepted_review_clears_the_loaded_careers_mark_silently() {
     career.integrity_modified = true;
     career.integrity_notice_pending = true;
     app.ctx.profile = Some(career);
+    record_origin("Road Star", &"a".repeat(64));
+    assert!(origin_for("Road Star").is_some());
 
     let transport =
         FakeTransport::replying(json!({"ok": true, "revision": 1, "clearIntegrityFlag": true}));
@@ -143,4 +146,47 @@ fn an_accepted_review_clears_the_loaded_careers_mark_silently() {
     assert!(!on_disk.integrity_modified);
     assert!(app.main_lines().is_empty(), "{:?}", app.main_lines());
     assert!(service.take_absolved().is_empty());
+    // Accepted: where it arrived from is no longer vouched for.
+    assert_eq!(origin_for("Road Star"), None);
+}
+
+#[test]
+fn a_marked_copy_names_the_backup_it_arrived_as() {
+    let saves = tempfile::tempdir().unwrap();
+    let previous = ff_core::settings::set_thread_data_dir(Some(saves.path().to_path_buf()));
+    let origin = "0123456789abcdef".repeat(4);
+    let send = |dict: Value| {
+        let transport = FakeTransport::replying(json!({"ok": true, "revision": 4}));
+        upload_save(
+            &identity(),
+            "Road Star",
+            &dict,
+            Some(3),
+            "Road Star",
+            None,
+            &*transport,
+        );
+        transport.posts()[0].get("copiedFrom").cloned()
+    };
+    let mut marked = profile("Road Star", 5000.0);
+    marked["integrity_modified"] = json!(true);
+
+    // No record: nothing to name.
+    assert_eq!(send(marked.clone()), None);
+
+    record_origin("Road Star", &origin);
+    assert_eq!(send(marked.clone()), Some(json!(origin)));
+    // Unmarked snapshots and other careers never carry it.
+    assert_eq!(send(profile("Road Star", 5000.0)), None);
+    let mut other = profile("Other Rig", 5000.0);
+    other["integrity_modified"] = json!(true);
+    assert_eq!(send(other), None);
+
+    // A record that is not a content hash is never sent.
+    record_origin("Road Star", &origin.to_uppercase());
+    assert_eq!(send(marked.clone()), None);
+
+    forget_origin("Road Star");
+    assert_eq!(send(marked), None);
+    ff_core::settings::set_thread_data_dir(previous);
 }

@@ -85,6 +85,11 @@ bookmarks usable.
       while it waits for review; declined, it stops backing up and the driver
       hears so once instead of retrying; accepted, its mark is cleared so
       later backups go up unmarked.
+- [x] Moved careers (game side): a career marked only because it was copied
+      from another computer tells the backup which earlier backup it arrived
+      as, so the site can accept the move without a manual review.
+- [ ] Moved careers (site side): accept a marked career whose arrival matches
+      a backup the site already holds unmarked.
 
 ### Release gate -- what stands between here and a public 1.9.0
 

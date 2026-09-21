@@ -806,8 +806,7 @@ impl App {
                 .as_mut()
                 .filter(|p| crate::cloud_saves::save_slot_name(&p.name) == name)
             {
-                profile.integrity_modified = false;
-                profile.integrity_notice_pending = false;
+                profile.absolve();
                 self.ctx.save_profile();
             }
         }

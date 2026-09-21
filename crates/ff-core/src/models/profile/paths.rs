@@ -388,6 +388,16 @@ pub fn data_dir() -> PathBuf {
     data_dir_in(&roots, &LEGACY_CHECKED)
 }
 
+/// [`data_dir`] for best-effort bookkeeping: `None` where `data_dir` would
+/// refuse, instead of panicking.
+pub fn data_dir_if_allowed() -> Option<PathBuf> {
+    let roots = SaveRoots::current();
+    if roots.override_dir.is_none() && !crate::settings::paths::real_save_dir_allowed() {
+        return None;
+    }
+    Some(data_dir_in(&roots, &LEGACY_CHECKED))
+}
+
 /// `data_dir()/profiles`, created.
 pub fn profiles_dir() -> PathBuf {
     let dir = data_dir().join("profiles");
