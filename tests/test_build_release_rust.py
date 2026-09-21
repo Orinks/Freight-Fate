@@ -276,8 +276,14 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     build_release = load_build_release_module()
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_URL", raising=False)
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_SHA256", raising=False)
+    # Production since the 1.9 cutover (2026-09-20). This named the staging
+    # host through the prerelease, when that was the only one serving the
+    # route; /downloads/music.pak ships on production now, so a release no
+    # longer pulls its music through dev.orinks.net. The sha256 is unchanged
+    # and is what actually gates the download -- both hosts redirect to the
+    # same verified blob.
     assert build_release.music_download_config() == (
-        "https://dev.orinks.net/downloads/music.pak",
+        "https://www.orinks.net/downloads/music.pak",
         "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
     )
 

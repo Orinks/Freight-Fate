@@ -111,6 +111,18 @@ These steps remain open even where a related implementation bullet is checked:
       Convex functions. Fixed in orinks-net `9925714` first.
 - [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
       the place-callouts ladder rides the release merge to dev.
+- [ ] **`build.yml`'s tag trigger still builds the PYTHON game**, so
+      tagging a 1.9 stable (`v1.9.0`) would build the wrong thing: that
+      workflow has no `rustup` step and no `fetch_bass.py`, and
+      `tools/build_release.py` runs its Python mode unless given
+      `--rust`. Its nightly schedule was retired at the cutover
+      (2026-09-20) because it snapshotted `dev`, which is the Rust line
+      now; `build-career-1.9.yml` is the nightly and points at `dev`.
+      The stable-release path is what remains. Either teach `build.yml`
+      the Rust setup its three jobs lack, or let the 1.9 workflow take
+      tags too and retire `build.yml` -- the second is less duplication
+      and is the shape the nightly already moved to. Settle it before a
+      1.9 stable is tagged.
 - [ ] The owner voice pass over seven achievement titles. The
       physical-Mac VoiceOver listening pass was DROPPED as a release
       gate (2026-09-20, owner): there is no physical Mac to test on.

@@ -608,12 +608,34 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert "macos-arm64.zip" not in workflow
 
 
+def test_only_the_rust_workflow_owns_the_nightly():
+    """build.yml must not schedule itself against dev.
+
+    It builds the Python game, and dev has been the Rust 1.9 line since the
+    2026-09-20 cutover, so a schedule here is a nightly that cannot succeed.
+    Both files carried the same 02:37 cron before the cutover; exactly one
+    of them may carry it now.
+    """
+    workflows = Path(__file__).resolve().parents[1] / ".github" / "workflows"
+    build = (workflows / "build.yml").read_text(encoding="utf-8")
+    snapshot = (workflows / "build-career-1.9.yml").read_text(encoding="utf-8")
+
+    assert "schedule:" not in build
+    assert 'cron: "37 2 * * *"' not in build
+    assert "tags: ['v*.*.*']" in build, "the stable-release trigger must survive"
+    assert 'cron: "37 2 * * *"' in snapshot
+
+
 def test_career_19_snapshot_workflow_contract():
     workflow = (
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
     ).read_text(encoding="utf-8")
 
-    assert 'CAREER_BRANCH: "feat/career-1.9"' in workflow
+    # `dev` since the 1.9 cutover (2026-09-20): dev IS the 1.9 line now, and
+    # this is the only workflow that builds the Rust game, so it is the
+    # nightly. build.yml's schedule was retired in the same change because it
+    # builds the Python game, which dev no longer has.
+    assert 'CAREER_BRANCH: "dev"' in workflow
     assert "group: career-19-snapshot\n" in workflow
     assert "career-19-snapshot-${{ github.ref }}" not in workflow
     assert 'cron: "37 2 * * *"' in workflow

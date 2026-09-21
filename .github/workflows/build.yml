@@ -1,10 +1,22 @@
 name: Build
 
+# Stable releases only, since the 1.9 cutover (2026-09-20).
+#
+# This workflow builds the PYTHON game (Nuitka): no rustup step, no
+# fetch_bass.py, and tools/build_release.py runs its Python mode unless
+# given --rust. Its nightly snapshotted `dev`, and dev is the Rust 1.9
+# line now with no Python gameplay left to build, so the schedule is
+# retired rather than left to fail at 02:37 every night. The 1.9 nightly
+# is build-career-1.9.yml, which has the Rust toolchain and BASS steps
+# and now points at dev.
+#
+# KNOWN GAP, deliberately not fixed here: the tag trigger below still
+# runs the Python path, so tagging a 1.9 stable (v1.9.0) would build the
+# wrong thing. No such tag exists yet and reworking the stable-release
+# path is its own change -- recorded in ROADMAP.md under the release
+# gate.
+
 on:
-  schedule:
-    # Nightly at 02:37 UTC. GitHub Actions schedules are UTC-only and can
-    # queue late, so use an off-hour minute instead of the crowded top of hour.
-    - cron: "37 2 * * *"
   push:
     tags: ['v*.*.*']
   workflow_dispatch:
@@ -37,8 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # nightlies snapshot the dev branch; stable releases build the tag
-          ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: Check build conditions
@@ -111,7 +122,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
           lfs: true
 
@@ -205,7 +216,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - uses: actions/download-artifact@v7
