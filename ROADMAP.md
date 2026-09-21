@@ -111,18 +111,29 @@ These steps remain open even where a related implementation bullet is checked:
       Convex functions. Fixed in orinks-net `9925714` first.
 - [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
       the place-callouts ladder rides the release merge to dev.
-- [ ] **`build.yml`'s tag trigger still builds the PYTHON game**, so
-      tagging a 1.9 stable (`v1.9.0`) would build the wrong thing: that
-      workflow has no `rustup` step and no `fetch_bass.py`, and
-      `tools/build_release.py` runs its Python mode unless given
-      `--rust`. Its nightly schedule was retired at the cutover
-      (2026-09-20) because it snapshotted `dev`, which is the Rust line
-      now; `build-career-1.9.yml` is the nightly and points at `dev`.
-      The stable-release path is what remains. Either teach `build.yml`
-      the Rust setup its three jobs lack, or let the 1.9 workflow take
-      tags too and retire `build.yml` -- the second is less duplication
-      and is the shape the nightly already moved to. Settle it before a
-      1.9 stable is tagged.
+- [ ] **The 1.9 stable-release path. Shape DECIDED 2026-09-20 (owner),
+      build deferred until 1.9 is near stable.** `build.yml`'s tag
+      trigger still builds the PYTHON game -- no `rustup` step, no
+      `fetch_bass.py`, and `tools/build_release.py` runs its Python mode
+      unless given `--rust` -- so tagging `v1.9.0` today would build the
+      wrong thing. Its nightly schedule was retired at the cutover
+      because it snapshotted `dev`, which is the Rust line now;
+      `build-career-1.9.yml` is the nightly and points at `dev`.
+      * Agreed shape: the 1.9 workflow takes tags too and `build.yml`
+        retires, rather than duplicating the Rust setup into a second
+        workflow.
+      * **With one correction to that, found after it was agreed:
+        `build.yml`'s tag trigger is also how a 1.8 HOTFIX ships from
+        `main`.** Retiring it outright would take that away. Scope the
+        triggers by version instead -- `v1.8.*` stays with `build.yml`,
+        `v1.9.*` goes to the Rust workflow -- so the two never
+        double-build one tag and `build.yml` retires itself when 1.8
+        stops getting fixes.
+      * Not started on purpose: the 1.9 workflow only knows how to cut
+        prereleases (`--prerelease`, `1.9-tester-*` tags), so a stable
+        path means real changes to version, tag and release-note
+        handling in a workflow nothing can exercise short of tagging a
+        release. Build it when a 1.9 stable is actually close, not now.
 - [ ] The owner voice pass over seven achievement titles. The
       physical-Mac VoiceOver listening pass was DROPPED as a release
       gate (2026-09-20, owner): there is no physical Mac to test on.
