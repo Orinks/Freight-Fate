@@ -801,16 +801,21 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
         "Linux-x86_64",
         "Linux-aarch64",
     }
-    assert all(step["with"]["path"] == "assets" for step in downloads)
+    # Not `assets/`: that is a tracked source folder (sounds.pak, the add-ons)
+    # since the Python sunset, and `gh release create ... <dir>/*` would
+    # publish it next to the archives.
+    assert all(step["with"]["path"] == "release-assets" for step in downloads)
+    create = next(step for step in release["steps"] if step.get("name") == "Create prerelease")
+    assert 'gh release create "$TAG" release-assets/*' in create["run"]
     verify = next(
         step for step in release["steps"] if step.get("name") == "Verify release archives"
     )
-    assert "assets/FreightFate-*-windows-portable.zip" in verify["run"]
-    assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
-    assert "assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
-    assert "assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
-    assert "assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
-    assert "assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
+    assert "release-assets/FreightFate-*-windows-portable.zip" in verify["run"]
+    assert "release-assets/FreightFate-*-macos-arm64.zip" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
     assert verify["run"].count('"${#') == 6
     checksum = next(
         step

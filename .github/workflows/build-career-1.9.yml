@@ -414,53 +414,53 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: Windows
-          path: assets
+          path: release-assets
 
       - uses: actions/download-artifact@v7
         with:
           name: macOS-arm64
-          path: assets
+          path: release-assets
 
       - uses: actions/download-artifact@v7
         with:
           name: Linux-x86_64
-          path: assets
+          path: release-assets
 
       - uses: actions/download-artifact@v7
         with:
           name: Linux-aarch64
-          path: assets
+          path: release-assets
 
       - name: Verify release archives
         shell: bash
         run: |
           shopt -s nullglob
-          windows_archives=(assets/FreightFate-*-windows-portable.zip)
+          windows_archives=(release-assets/FreightFate-*-windows-portable.zip)
           if [ "${#windows_archives[@]}" -ne 1 ]; then
             echo "Expected exactly one Windows portable archive; found ${#windows_archives[@]}." >&2
             exit 1
           fi
-          macos_archives=(assets/FreightFate-*-macos-arm64.zip)
+          macos_archives=(release-assets/FreightFate-*-macos-arm64.zip)
           if [ "${#macos_archives[@]}" -ne 1 ]; then
             echo "Expected exactly one Apple Silicon macOS archive; found ${#macos_archives[@]}." >&2
             exit 1
           fi
-          linux_archives=(assets/FreightFate-*-linux-x64.tar.gz)
+          linux_archives=(release-assets/FreightFate-*-linux-x64.tar.gz)
           if [ "${#linux_archives[@]}" -ne 1 ]; then
             echo "Expected exactly one Linux tarball; found ${#linux_archives[@]}." >&2
             exit 1
           fi
-          linux_appimages=(assets/FreightFate-*-linux-x86_64.AppImage)
+          linux_appimages=(release-assets/FreightFate-*-linux-x86_64.AppImage)
           if [ "${#linux_appimages[@]}" -ne 1 ]; then
             echo "Expected exactly one Linux AppImage; found ${#linux_appimages[@]}." >&2
             exit 1
           fi
-          linux_arm64_archives=(assets/FreightFate-*-linux-arm64.tar.gz)
+          linux_arm64_archives=(release-assets/FreightFate-*-linux-arm64.tar.gz)
           if [ "${#linux_arm64_archives[@]}" -ne 1 ]; then
             echo "Expected exactly one Linux ARM64 tarball; found ${#linux_arm64_archives[@]}." >&2
             exit 1
           fi
-          linux_arm64_appimages=(assets/FreightFate-*-linux-aarch64.AppImage)
+          linux_arm64_appimages=(release-assets/FreightFate-*-linux-aarch64.AppImage)
           if [ "${#linux_arm64_appimages[@]}" -ne 1 ]; then
             echo "Expected exactly one Linux ARM64 AppImage; found ${#linux_arm64_appimages[@]}." >&2
             exit 1
@@ -473,8 +473,8 @@ jobs:
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
-          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
-          (cd assets && sha256sum -c checksums.txt)
+          (cd release-assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
+          (cd release-assets && sha256sum -c checksums.txt)
 
           LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
           if [ -n "$LAST_TAG" ]; then
@@ -488,7 +488,7 @@ jobs:
           fi
           test -s notes.md
           python3 tools/release_notes.py check-size --input notes.md --max-characters 120000
-          test -s assets/checksums.txt
+          test -s release-assets/checksums.txt
 
       - name: Create prerelease
         if: ${{ inputs.dry_run != true }}
@@ -502,6 +502,6 @@ jobs:
           elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
             git push origin ":refs/tags/$TAG"
           fi
-          gh release create "$TAG" assets/* --notes-file notes.md \
+          gh release create "$TAG" release-assets/* --notes-file notes.md \
             --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
             --prerelease --target "$COMMIT_SHA"
