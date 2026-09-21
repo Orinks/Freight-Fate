@@ -11,11 +11,12 @@
 # the Python wheel. Keeping them apart also keeps the Rust matrix free to be
 # Windows-only (see below) without teaching ci.yml's matrix about exceptions.
 #
-# Trigger note: `build.yml` fires only on `schedule`, `v*.*.*` tags and
-# `workflow_dispatch` -- it never sees an ordinary push -- so nothing there
-# will ever run these checks. Anything that must run on a push needs its own
-# push trigger, which is what this file has for main, dev, and the direct-push
-# Rust release lines.
+# Trigger note: the packaging workflow (`build-career-1.9.yml`, and
+# `build.yml` before the 1.9 cutover deleted it) fires only on `schedule`
+# and `workflow_dispatch` -- it never sees an ordinary push -- so nothing
+# there will ever run these checks. Anything that must run on a push needs
+# its own push trigger, which is what this file has for main, dev, and the
+# direct-push Rust release lines.
 #
 # What a push runs, and what it leaves to the nightly (2026-09-02). A push
 # used to take twelve minutes: six of them compiling the workspace crates on

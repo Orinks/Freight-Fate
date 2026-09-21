@@ -595,35 +595,38 @@ def test_check_accepts_single_push_release_sync(tmp_path, monkeypatch, capsys):
     assert release_notes.check_command(args) == 1
 
 
-def test_build_workflow_uses_curated_nightly_decision_and_notes():
-    workflow = (
-        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build.yml"
-    ).read_text(encoding="utf-8")
+def test_one_workflow_builds_the_game_and_it_is_the_rust_one():
+    """`build.yml` is gone and must not come back.
 
-    assert "tools/release_notes.py should-build-nightly" in workflow
-    assert "--exclude-notes previous-notes.md" in workflow
-    assert "--exclude-stable-notes latest-stable-notes.md" in workflow
-    assert "tools/release_notes.py nightly" in workflow
-    assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow
-    assert "macos-arm64.zip" not in workflow
+    It built the Python game (Nuitka) and scheduled itself against `dev`.
+    At the 1.9 cutover (2026-09-20) dev became the Rust line, and the owner
+    ruled the same day that 1.8 gets no further releases of any kind, so the
+    workflow had no job left: its nightly could not succeed and its tag
+    trigger would have built the wrong thing for a `v1.9.0`.
 
-
-def test_only_the_rust_workflow_owns_the_nightly():
-    """build.yml must not schedule itself against dev.
-
-    It builds the Python game, and dev has been the Rust 1.9 line since the
-    2026-09-20 cutover, so a schedule here is a nightly that cannot succeed.
-    Both files carried the same 02:37 cron before the cutover; exactly one
-    of them may carry it now.
+    Restoring it would put two workflows on one cron again, or hand a
+    stable tag to the Nuitka path. If a stable release path is needed, it
+    belongs in `build-career-1.9.yml` alongside the Rust toolchain and BASS
+    steps that only that workflow has.
     """
     workflows = Path(__file__).resolve().parents[1] / ".github" / "workflows"
-    build = (workflows / "build.yml").read_text(encoding="utf-8")
-    snapshot = (workflows / "build-career-1.9.yml").read_text(encoding="utf-8")
 
-    assert "schedule:" not in build
-    assert 'cron: "37 2 * * *"' not in build
-    assert "tags: ['v*.*.*']" in build, "the stable-release trigger must survive"
+    assert not (workflows / "build.yml").exists()
+
+    snapshot = (workflows / "build-career-1.9.yml").read_text(encoding="utf-8")
     assert 'cron: "37 2 * * *"' in snapshot
+    assert "tools/release_notes.py should-build-nightly" in snapshot
+    assert "--exclude-notes previous-notes.md" in snapshot
+    assert "--exclude-stable-notes latest-stable-notes.md" in snapshot
+    assert "tools/release_notes.py nightly" in snapshot
+
+    # The retry watches the one surviving workflow, and dispatches against
+    # the branch it actually builds -- it named feat/career-1.9 until the
+    # cutover moved the nightly to dev.
+    retry = (workflows / "retry-failed-nightly.yml").read_text(encoding="utf-8")
+    assert "workflows: [Career 1.9 snapshot]" in retry
+    assert "feat/career-1.9" not in retry
+    assert 'SNAPSHOT_BRANCH: "dev"' in retry
 
 
 def test_career_19_snapshot_workflow_contract():
@@ -873,21 +876,19 @@ def test_career_19_retry_is_bounded_to_one_delayed_attempt():
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "retry-failed-nightly.yml"
     ).read_text(encoding="utf-8")
 
-    assert "workflows: [Build, Career 1.9 snapshot]" in workflow
+    # One workflow to watch since the cutover deleted build.yml, and the
+    # branch it retries against is dev -- this named feat/career-1.9 while
+    # 1.9 was a side line, which would have dispatched the retry at the
+    # wrong ref the first time the nightly failed.
+    assert "workflows: [Career 1.9 snapshot]" in workflow
+    assert "Build" not in workflow.split("jobs:")[0]
+    assert "feat/career-1.9" not in workflow
     assert "github.event.workflow_run.run_attempt == 1" in workflow
-    assert 'if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then' in workflow
+    assert 'SNAPSHOT_WORKFLOW: "Career 1.9 snapshot"' in workflow
+    assert 'SNAPSHOT_BRANCH: "dev"' in workflow
     assert 'TAG="1.9-tester-$(date -u +%Y%m%d)"' in workflow
-    assert 'TARGET_BRANCH="feat/career-1.9"' in workflow
-    assert 'TAG="nightly-$(date -u +%Y%m%d)"' in workflow
-    assert 'TARGET_BRANCH="dev"' in workflow
-    assert (
-        'gh workflow run "Career 1.9 snapshot" --repo "$GITHUB_REPOSITORY" '
-        '--ref "feat/career-1.9" -f dry_run=false'
-    ) in workflow
-    assert (
-        'gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false'
-    ) in workflow
-    assert '"$TAG already exists; the nightly recovered while waiting."' in workflow
+    assert ('gh workflow run "$SNAPSHOT_WORKFLOW" --repo "$GITHUB_REPOSITORY"') in workflow
+    assert '"$TAG already exists; the snapshot recovered while waiting."' in workflow
 
 
 def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():

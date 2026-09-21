@@ -111,29 +111,28 @@ These steps remain open even where a related implementation bullet is checked:
       Convex functions. Fixed in orinks-net `9925714` first.
 - [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
       the place-callouts ladder rides the release merge to dev.
-- [ ] **The 1.9 stable-release path. Shape DECIDED 2026-09-20 (owner),
-      build deferred until 1.9 is near stable.** `build.yml`'s tag
-      trigger still builds the PYTHON game -- no `rustup` step, no
-      `fetch_bass.py`, and `tools/build_release.py` runs its Python mode
-      unless given `--rust` -- so tagging `v1.9.0` today would build the
-      wrong thing. Its nightly schedule was retired at the cutover
-      because it snapshotted `dev`, which is the Rust line now;
-      `build-career-1.9.yml` is the nightly and points at `dev`.
-      * Agreed shape: the 1.9 workflow takes tags too and `build.yml`
-        retires, rather than duplicating the Rust setup into a second
-        workflow.
-      * **With one correction to that, found after it was agreed:
-        `build.yml`'s tag trigger is also how a 1.8 HOTFIX ships from
-        `main`.** Retiring it outright would take that away. Scope the
-        triggers by version instead -- `v1.8.*` stays with `build.yml`,
-        `v1.9.*` goes to the Rust workflow -- so the two never
-        double-build one tag and `build.yml` retires itself when 1.8
-        stops getting fixes.
-      * Not started on purpose: the 1.9 workflow only knows how to cut
-        prereleases (`--prerelease`, `1.9-tester-*` tags), so a stable
-        path means real changes to version, tag and release-note
-        handling in a workflow nothing can exercise short of tagging a
-        release. Build it when a 1.9 stable is actually close, not now.
+- [ ] **The 1.9 stable-release path.** OWNER RULING 2026-09-20: 1.8 gets
+      no further releases of any kind, and the next stable is 1.9. So
+      `build.yml` was deleted rather than retired in stages -- it built
+      the Python game (no `rustup` step, no `fetch_bass.py`, and
+      `tools/build_release.py` runs its Python mode unless given
+      `--rust`), and with 1.8 closed it had no job on either trigger: its
+      nightly could not succeed against a Rust `dev`, and its tag trigger
+      would have handed a `v1.9.0` to Nuitka. `build-career-1.9.yml` is
+      the only workflow that builds the game now.
+      * What is left to build: that workflow only cuts PRERELEASES today
+        (`--prerelease`, `1.9-tester-*` tags, version from the date). A
+        stable release needs the version and tag to come from a `v*.*.*`
+        push, the prerelease flag dropped, and stable release notes.
+      * Deliberately not written yet. Nothing can exercise it short of
+        tagging a real release, and 1.9 is not close to stable. Write it
+        when it is, against a workflow that has been running nightly by
+        then rather than against guesses now.
+      * Also freed by the ruling, and not yet done: `tools/build_release.py`'s
+        Python/Nuitka mode, `tools/build_appimage.py`'s Python path, and
+        their tests now have no caller. Deleting them is a separate sweep
+        -- they are dead weight, not a trap, so it can wait for a quiet
+        change rather than riding the cutover.
 - [ ] The owner voice pass over seven achievement titles. The
       physical-Mac VoiceOver listening pass was DROPPED as a release
       gate (2026-09-20, owner): there is no physical Mac to test on.

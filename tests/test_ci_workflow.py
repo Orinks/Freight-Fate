@@ -4,7 +4,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
-BUILD_WORKFLOW = ROOT / ".github" / "workflows" / "build.yml"
+# The packaging workflow, which is where an LFS fetch would do the damage.
+# This was build.yml until the 1.9 cutover deleted it with the 1.8 line.
+BUILD_WORKFLOW = ROOT / ".github" / "workflows" / "build-career-1.9.yml"
 GITATTRIBUTES = ROOT / ".gitattributes"
 
 

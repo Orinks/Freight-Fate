@@ -30,8 +30,10 @@ env:
   # `dev` since the 1.9 cutover (2026-09-20). This built feat/career-1.9
   # while 1.9 was a side line; dev IS the 1.9 line now, and this is the
   # only workflow that knows how to build the Rust game, so it is the
-  # nightly. build.yml's schedule was retired in the same change: it ran
-  # the Python path, which dev no longer has anything to feed.
+  # nightly -- and now the only one that builds the game at all. build.yml
+  # ran the Python/Nuitka path and was deleted with the 1.8 line: dev has
+  # no Python gameplay left to feed it, and the owner ruled on 2026-09-20
+  # that 1.8 gets no further releases, so it had no job on either trigger.
   #
   # The `1.9-tester-*` tag scheme deliberately does NOT change. The
   # in-game updater's developer-snapshot channel finds builds by that
