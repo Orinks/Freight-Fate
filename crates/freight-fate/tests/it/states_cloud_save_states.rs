@@ -408,3 +408,27 @@ fn test_the_restore_cancel_points_back_at_the_upload_choice() {
         .unwrap();
     assert!(help.contains("Keep this computer's save and back it up"));
 }
+
+/// Restoring a career deleted from this computer replaces nothing, so the
+/// result must not promise a fallback copy of a save that never existed.
+#[test]
+fn test_restoring_a_career_this_computer_no_longer_has_claims_no_fallback() {
+    let mut app = TestApp::new();
+    let _guard = install_identity(&app, Some(&identity()));
+    install_cloud(&mut app, FakeTransport::revisions(), true);
+    let mut state = CloudSlotState::new(&mut app.ctx, "Gone Local", vec![a_revision()], None, None);
+    state.threaded = false;
+    let slot = push(&mut app, state);
+    app.clear_speech();
+    with_state::<CloudSlotState, _>(&slot, |s| {
+        s.busy = true;
+        s.outcome.post("restored".to_string());
+        s.update(&mut app.ctx, 0.0);
+    });
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains("Gone Local is back on this computer"),
+        "{said}"
+    );
+    assert!(!said.contains("fallback"), "{said}");
+}
