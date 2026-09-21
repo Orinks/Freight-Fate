@@ -5,10 +5,12 @@ pub mod compose;
 pub mod render;
 pub mod rng;
 pub mod style;
+pub mod worker;
 
 pub use compose::{compose, Note, Score, Voice};
 pub use render::{render, SAMPLE_RATE};
 pub use style::{menu_rung, menu_style, style, StyleId};
+pub use worker::SynthWorker;
 
 use crate::music::{crc32, MenuMusicProfile};
 

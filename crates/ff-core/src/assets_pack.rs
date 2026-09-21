@@ -595,6 +595,18 @@ pub fn register_generated_sound(key: &str, data: Vec<u8>, ext: &str) {
     GENERATED_VERSION.fetch_add(1, Ordering::SeqCst);
 }
 
+/// Drop a generated sound, e.g. a synthesized piece that has played.
+pub fn unregister_generated_sound(key: &str) {
+    let removed = GENERATED
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(key)
+        .is_some();
+    if removed {
+        GENERATED_VERSION.fetch_add(1, Ordering::SeqCst);
+    }
+}
+
 /// The bytes and extension published under `key`, if any.
 pub fn generated_sound(key: &str) -> Option<(Arc<Vec<u8>>, String)> {
     GENERATED
