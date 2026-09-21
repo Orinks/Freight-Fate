@@ -231,19 +231,23 @@ These items are part of the release-gate sweep:
       warehouses first. Recommended: yes for the warehouse and
       manufacturing families, with the floor reported and the row labelled
       unnamed. Not built.
-- [ ] Facility types the endpoint sweep has no rule for: 261 grain
-      elevators, 144 quarries, 94 construction materials yards, 63 lumber
-      and paper sites. Each needs a rule in the matcher and an accepted
-      site tag in the screen (man_made=silo, landuse=quarry). The long
-      synthetic approach tests use Payson Quarry because it has no sourced
-      endpoint; re-point them in the same change.
-- [ ] Route the sibling types the approach builder still skips:
-      intermodal, rail, manufacturing, air cargo, food terminal and
-      industrial park, 36 facilities, 26 of them with a screened endpoint
-      now. Nothing about the endpoints argues against it. A dozen core and
-      game tests use Chicago's first facility (Cicero Rail Hub, an
-      intermodal) as the stock single-leg approach and need re-pointing in
-      the same change.
+- [x] Facility types the endpoint sweep had no rule for: grain elevators,
+      quarries, construction materials yards, lumber and paper. DONE
+      2026-09-20. Each family's site tag is scoped to its own family, the way
+      a rail yard serves the intermodal types: a silo for elevators, quarry
+      land for quarries and aggregate yards, craft=sawmill for sawmills. A
+      silo is a STRUCTURE every farmyard has, so it opens the gate but must
+      be NAMED as grain to count; bare "pit" is a barbecue and bare "paper" a
+      stationer, so each carries its trade word. All 419 of these rows were
+      fallbacks, so no row could be demoted by trying: 129 gained a sourced
+      endpoint and every one passes the screen. The long synthetic approach
+      test had already moved off Payson Quarry in the 2026-09-20 stand-in cut.
+- [x] Route the sibling types the approach builder skipped: intermodal,
+      rail, manufacturing, air cargo, food terminal and industrial park.
+      DONE 2026-09-20. The stated blocker was a dozen tests pinning Chicago's
+      first facility (Cicero Rail Hub) as the stock single-leg approach; read
+      back, three tests reach it and each already branches on whether the
+      facility has a chain, so nothing needed re-pointing.
 - [x] Departure chains behind private yard roads. DONE 2026-09-17 on the
       owner's ruling: a truck leaves a yard over the yard's own road, so a
       chain may use access=private ways as one stretch at the facility end,
@@ -265,10 +269,25 @@ These items are part of the release-gate sweep:
       is a motorway there, so the graph's only join is 7.69 miles of
       private road). Both want an endpoint fix, not a routing one. San Diego cross-dock (2.06 miles of port road)
       also sits past the cut, unruled.
-- [ ] The public road graph still ignores barrier nodes and ways signed
-      motor_vehicle=no or hgv=no; only the yard-road fallback honours them.
-      Noted 2026-09-17; measure how many existing chains cross one before
-      changing the public search.
+- [x] The public road graph honours barrier nodes and ways signed
+      motor_vehicle=no or hgv=no (2026-09-20, owner ruling the same day).
+      MEASURED FIRST, as this item asked: not one of the 2,314 existing
+      chains needed a way signed against trucks, so nothing was demoted.
+      The rule is two rules, judged apart. A truck sign is a FACT about the
+      road -- there is no reading in which a loaded truck may drive up one --
+      so it refuses a new chain AND drops an existing one, the only case
+      where the merge lowers the chain count. An untagged barrier=gate is a
+      GUESS: as often a farm gate standing open as a locked one, and at an
+      industrial site usually the facility's own gate, which the 2026-09-17
+      yard-road ruling already lets a loaded truck pass -- so it refuses a new
+      chain and never takes an existing one away. The builder records WHICH
+      rule closed a route (`truck_banned`, `gated`, `disconnected`) by asking
+      connectivity three times with each rule opened in turn, so the split is
+      in the data and re-judgeable without a sweep;
+      `--no-truck-legal-public` restores the old search so the cost stays
+      measurable. A gate AT the dock is still arrived at.
+      Chains stand at 2,456 of 4,271 rows (2,314 before), sourced endpoints
+      at 2,874, and 2,049 of them are freight sites.
 
 #### World data and sound licensing blockers
 

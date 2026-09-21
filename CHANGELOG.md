@@ -69,6 +69,12 @@
 
 ### Fixed
 
+- **Grain elevators, quarries, lumber yards and materials yards now start with street directions.** Those four kinds of stop never had them.
+
+- **Rail ramps, air cargo docks, food terminals and industrial parks start with street directions too.**
+
+- **A way in to a facility never runs through a locked gate or up a street signed against trucks.**
+
 - **Two badges can finally be earned.** One is for a whole run at better than eight miles to the gallon, the other for twenty-five proper breaks; neither had any way to be awarded.
 
 - **The dispatch board recommends a load again.** It had stopped naming one for every driver except a company trainee.

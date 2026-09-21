@@ -34,11 +34,18 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     # every sourced row is in the row: 1,939 are freight sites, 995 still are
     # not (nothing better within 6.4 miles), and 175 of the sites state no
     # trade, so the match to this facility's trade is assumed and says so.
-    assert coverage["source_backed"] == 2745
-    assert coverage["fallback"] == 1526
+    # The 2026-09-20 sweep added the four families that had no matcher rule at
+    # all -- grain elevators, quarries, construction materials yards, lumber
+    # and paper. All 419 of their rows were fallbacks; 129 now have a sourced
+    # endpoint and every one passes the screen, which is the whole of the +129.
+    # `passed` rose by only 110 because 19 rows correctly STOPPED passing: a
+    # lumber mill, a quarry and a grain company had been standing in as assumed
+    # cross-docks, and the matcher now knows what they are.
+    assert coverage["source_backed"] == 2874
+    assert coverage["fallback"] == 1397
     assert coverage["screen"] == {
-        "passed": 1939,
-        "refused": 806,
+        "passed": 2049,
+        "refused": 825,
         "not_screened": 0,
         "trade_assumed": 173,
     }

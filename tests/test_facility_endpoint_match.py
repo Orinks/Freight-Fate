@@ -101,6 +101,47 @@ def test_matcher_keeps_the_rail_and_port_exceptions(tool):
     assert "port_terminal" in port.roles
 
 
+def test_matcher_reads_the_four_families_that_had_no_rule(tool):
+    # Grain elevators, quarries, construction materials and lumber/paper had
+    # no rule at all until 2026-09-20: all 419 of their rows were fallbacks.
+    for name, tags, role in [
+        ("Farmers Cooperative Elevator", {"man_made": "silo"}, "farm_elevator"),
+        ("Cargill Grain Terminal", {"landuse": "industrial"}, "farm_elevator"),
+        ("Vulcan Materials Quarry", {"landuse": "quarry"}, "mine_quarry"),
+        (
+            "Ready Mix Concrete Co",
+            {"industrial": "concrete_plant"},
+            "construction_materials_yard",
+        ),
+        ("Martin Marietta Sand and Gravel", {"landuse": "quarry"}, "construction_materials_yard"),
+        ("Pine Ridge Sawmill", {"craft": "sawmill"}, "lumber_paper"),
+        ("Georgia-Pacific Paper Mill", {"man_made": "works"}, "lumber_paper"),
+    ]:
+        roles, _, _ = tool.classify({"name": name, **tags}, name)
+        assert role in roles, (name, roles)
+    for name, tags, role in [
+        # A silo is a structure every farmyard has, so the tag alone is not a
+        # grain elevator; "elevator" alone is a lift company; "pit" a barbecue
+        # and "paper" a stationer.
+        ("Hillside Farm", {"man_made": "silo"}, "farm_elevator"),
+        ("Otis Elevator Company", {"building": "warehouse"}, "farm_elevator"),
+        ("The Pit BBQ", {"landuse": "industrial"}, "mine_quarry"),
+        ("The Paper Store", {"building": "warehouse"}, "lumber_paper"),
+    ]:
+        roles, _, _ = tool.classify({"name": name, **tags}, name)
+        assert role not in roles, (name, roles)
+    # Each family's site tag serves that family alone.
+    silo, _, _ = tool.classify(
+        {"name": "Farmers Cooperative Elevator", "man_made": "silo"},
+        "Farmers Cooperative Elevator",
+    )
+    quarry, _, _ = tool.classify(
+        {"name": "Vulcan Materials Quarry", "landuse": "quarry"}, "Vulcan Materials Quarry"
+    )
+    assert not silo & {"cross_dock", "dry_warehouse", "company_yard"}
+    assert not quarry & {"dry_warehouse", "manufacturing_plant"}
+
+
 def test_matcher_vetoes_utilities_and_converted_buildings(tool):
     for name, tags in [
         ("City Water Treatment Plant", {"man_made": "works", "landuse": "industrial"}),

@@ -37,7 +37,12 @@ def _osm(nodes: dict[int, tuple[float, float]], ways: list[tuple[list[int], dict
     return "\n".join(lines)
 
 
-def _route(tmp_path, monkeypatch, nodes, ways, *, end: int):
+def _payload(tmp_path, monkeypatch, nodes, ways, *, end: int):
+    """The whole payload the builder wrote, for merge cases."""
+    return _route(tmp_path, monkeypatch, nodes, ways, end=end, whole=True)
+
+
+def _route(tmp_path, monkeypatch, nodes, ways, *, end: int, whole: bool = False):
     """Run the real builder over the fixture; return the facility's row."""
     tool = _load_tool()
     osm_path = tmp_path / "yard.osm"
@@ -66,7 +71,7 @@ def _route(tmp_path, monkeypatch, nodes, ways, *, end: int):
     payload = tool.build_facility_approaches(
         tmp_path, states=("Illinois",), endpoint_screen=False, accessed="2026-09-17"
     )
-    return payload["approaches"]["fixture:warehouse"]
+    return payload if whole else payload["approaches"]["fixture:warehouse"]
 
 
 # Main Street runs east from the city context (1) to the plant entrance (4),
@@ -213,6 +218,97 @@ def test_a_gate_on_a_public_way_is_not_routed_through(tmp_path, monkeypatch):
         end=7,
     )
     assert not row["turn_level"]
+
+
+def test_a_public_chain_honours_gates_and_truck_signs_too(tmp_path, monkeypatch):
+    # Until 2026-09-20 only the private-road fallback read these. A wholly
+    # PUBLIC path through a locked gate, or up a street signed against
+    # trucks, was chained and spoken as the way in.
+    public_plant = ([4, 5, 6], {"highway": "service", "name": "Plant Road"})
+    open_row = _route(
+        tmp_path, monkeypatch, {**MAIN, **PLANT}, [MAIN_STREET, public_plant, DOCK_LANE], end=7
+    )
+    assert open_row["turn_level"], "the same roads, with nothing shut, still chain"
+
+    gated = _route(
+        tmp_path,
+        monkeypatch,
+        {**MAIN, **PLANT, 5: (41.0, -86.966, {"barrier": "gate"})},
+        [MAIN_STREET, public_plant, DOCK_LANE],
+        end=7,
+    )
+    assert not gated["turn_level"]
+
+    signed = _route(
+        tmp_path,
+        monkeypatch,
+        {**MAIN, **PLANT},
+        [
+            MAIN_STREET,
+            ([4, 5, 6], {"highway": "service", "name": "Plant Road", "hgv": "no"}),
+            DOCK_LANE,
+        ],
+        end=7,
+    )
+    assert not signed["turn_level"]
+
+
+def test_a_sign_takes_a_chain_away_and_a_gate_does_not(tmp_path, monkeypatch):
+    # Owner ruling 2026-09-20. A way signed against trucks is a FACT about the
+    # road, so a chain that needs one is dropped. An untagged gate is a GUESS
+    # -- as often a farm gate standing open as a locked one, and at a yard it
+    # is usually the facility's own -- so it refuses a new chain and never
+    # takes an existing one away.
+    tool = _load_tool()
+    public_plant = ([4, 5, 6], {"highway": "service", "name": "Plant Road"})
+
+    signed = _route(
+        tmp_path,
+        monkeypatch,
+        {**MAIN, **PLANT},
+        [
+            MAIN_STREET,
+            ([4, 5, 6], {"highway": "service", "name": "Plant Road", "hgv": "no"}),
+            DOCK_LANE,
+        ],
+        end=7,
+    )
+    assert signed["route_failure"] == "truck_banned"
+
+    gated = _route(
+        tmp_path,
+        monkeypatch,
+        {**MAIN, **PLANT, 5: (41.0, -86.966, {"barrier": "gate"})},
+        [MAIN_STREET, public_plant, DOCK_LANE],
+        end=7,
+    )
+    assert gated["route_failure"] == "gated"
+
+    # The merge acts on the code, not on the sentence. Both sides here are
+    # records the builder really wrote, so the merge is tested against the
+    # row shape it actually meets.
+    chained = _payload(
+        tmp_path, monkeypatch, {**MAIN, **PLANT}, [MAIN_STREET, public_plant, DOCK_LANE], end=7
+    )
+    assert chained["approaches"]["fixture:warehouse"]["turn_level"]
+    for refused, expected in ((signed, False), (gated, True)):
+        fresh = {**chained, "approaches": {"fixture:warehouse": refused}}
+        merged = tool.merge_existing(chained, fresh, {"fixture:warehouse"})
+        kept = merged["approaches"]["fixture:warehouse"]["turn_level"]
+        assert kept is expected, refused["route_failure"]
+
+
+def test_a_gate_at_the_dock_is_still_arrived_at(tmp_path, monkeypatch):
+    # Every yard has a gate at its own door. Refusing to ARRIVE at one would
+    # cost the chain the rule is meant to protect.
+    row = _route(
+        tmp_path,
+        monkeypatch,
+        {**MAIN, **PLANT, 7: (41.0, -86.961, {"barrier": "gate"})},
+        [MAIN_STREET, ([4, 5, 6], {"highway": "service", "name": "Plant Road"}), DOCK_LANE],
+        end=7,
+    )
+    assert row["turn_level"]
 
 
 def test_the_rule_reads_tags_and_nothing_else():

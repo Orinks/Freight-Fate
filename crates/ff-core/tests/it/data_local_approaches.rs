@@ -129,16 +129,34 @@ fn test_facility_routes_use_local_approach_layer() {
         .unwrap()
         .expect("Chicago's first facility has a local approach");
     let facility_endpoint = world.facility_endpoint("Chicago", &facility.name).unwrap();
-    match facility_endpoint {
-        Some(endpoint) if endpoint.source_backed => {
-            assert_eq!(facility_route.miles(), endpoint.approach_miles);
+    // A facility with its own street chain is measured by the chain, not by
+    // either estimate: Cicero Rail Hub gained one on 2026-09-20 when the
+    // approach builder started routing the intermodal family, and its routed
+    // 2.14 miles is a shorter and truer number than the endpoint sweep's 3.6.
+    if facility_route
+        .legs
+        .iter()
+        .any(|leg| leg.local_speed_mph > 0.0)
+    {
+        // A chain names every street it uses, and ends on the facility's own
+        // ground, which is why the last road is the service road the local
+        // approach layer had been standing in for all along.
+        assert!(facility_route.miles() > 0.0);
+        let streets = facility_route.highways();
+        assert!(streets.len() > 1, "{streets:?}");
+        assert_eq!(streets.last(), Some(&facility_approach.road));
+    } else {
+        match facility_endpoint {
+            Some(endpoint) if endpoint.source_backed => {
+                assert_eq!(facility_route.miles(), endpoint.approach_miles);
+            }
+            _ => assert_eq!(facility_route.miles(), facility_approach.approach_miles),
         }
-        _ => assert_eq!(facility_route.miles(), facility_approach.approach_miles),
+        assert_eq!(
+            facility_route.highways(),
+            vec![facility_approach.road.clone()]
+        );
     }
-    assert_eq!(
-        facility_route.highways(),
-        vec![facility_approach.road.clone()]
-    );
 }
 
 #[test]

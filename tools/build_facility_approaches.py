@@ -87,19 +87,29 @@ YARD_STRETCH_TOO_LONG_REASON = (
 )
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "relation/")
 HIGH_CONFIDENCE_TYPES = {
+    "air_cargo",
     "cold_storage",
     "company_yard",
+    "construction_materials_yard",
     "cross_dock",
     "distribution",
     "dry_warehouse",
     "farm_elevator",
     "food_processor",
+    "food_terminal",
     "grocery_retail_dc",
+    "industrial_park",
+    "intermodal",
     "intermodal_ramp",
+    "lumber_paper",
+    "manufacturing",
     "manufacturing_plant",
+    "mine_quarry",
     "parcel_hub",
     "port",
     "port_terminal",
+    "rail",
+    "retail_distribution",
     "terminal",
     "warehouse",
 }
@@ -119,12 +129,18 @@ HIGH_CONFIDENCE_TYPES = {
 # whole word in the name. 45 of their 193 sourced endpoints pass. With
 # `--no-endpoint-screen` they stay out, as before.
 #
-# Still out after the 2026-09-17 endpoint re-sweep: intermodal, rail,
-# manufacturing, air_cargo, food_terminal and industrial_park, 36 facilities
-# of which 26 now have a screened endpoint. Nothing about their endpoints
-# argues against routing them any more; what does is that Chicago's first
-# facility (Cicero Rail Hub, an "intermodal") is the stock single-leg approach
-# of a dozen game tests. Widen in a change that re-points those tests.
+# 2026-09-20: the last six sibling types are in -- intermodal, rail,
+# manufacturing, air_cargo, food_terminal and industrial_park, 36 facilities.
+# Their endpoints pass the same screen as everything else; what had held them
+# back was a belief that a dozen tests pinned Chicago's first facility (Cicero
+# Rail Hub, an "intermodal") as the stock single-leg approach. Read back, the
+# three that reach it branch on whether the facility has a chain already, so
+# nothing needed re-pointing.
+#
+# In the same change, the four families that had no matcher rule at all --
+# grain elevators, quarries, construction materials yards, lumber and paper --
+# gained one, so they route too. Every one of their rows was a fallback
+# before, which is why none of them could be demoted by the attempt.
 SCREEN_REFUSAL_PREFIX = "Sourced endpoint failed the freight-site screen: "
 
 
@@ -168,6 +184,7 @@ def build_facility_approaches(
     existing: dict[str, Any] | None = None,
     accessed: str = ACCESSED_DATE,
     endpoint_screen: bool = True,
+    truck_legal: bool = True,
     only_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """Route the batch and return the payload to write.
@@ -243,7 +260,11 @@ def build_facility_approaches(
             attempted.update(target.target_id for target in state_targets)
             routed.update(
                 local_geometry.route_state_targets(
-                    extract, state_targets, failures, yard_roads=True
+                    extract,
+                    state_targets,
+                    failures,
+                    yard_roads=True,
+                    truck_legal=truck_legal,
                 )
             )
             for target in state_targets:
@@ -302,7 +323,10 @@ def merge_existing(
     """Fold a batch payload into the checked-in one without losing chains.
 
     Per facility, in order: a facility the batch routed to turn level takes
-    the fresh record, which is also how a chain whose endpoint the re-sweep
+    the fresh record; a prior chain whose only way in is now known to be
+    signed against trucks is DROPPED, the one case where this merge lowers
+    ``turn_level`` (a gate does not do it -- ``ROUTE_FAILURE_GATED`` says
+    why); which is also how a chain whose endpoint the re-sweep
     replaced gets rebuilt; a prior turn-level chain the batch could not better
     is kept (so ``turn_level`` never falls below the base file), and when its
     endpoint has been replaced and the batch tried and failed to reach the new
@@ -319,7 +343,7 @@ def merge_existing(
     prior = existing.get("approaches") or {}
     batch_state_set = set(fresh["generated"]["states"])
     summary = {"new_geometry": 0, "kept_turn_level": 0, "refreshed": 0, "kept": 0, "added": 0}
-    rebuilt = stale = 0
+    rebuilt = stale = demoted = 0
     approaches: dict[str, Any] = {}
     for facility_id, record in fresh["approaches"].items():
         old = prior.get(facility_id)
@@ -331,6 +355,15 @@ def merge_existing(
             summary["new_geometry"] += 1
             if old.get("turn_level") and not chain_is_current(old, record):
                 rebuilt += 1
+        elif old.get("turn_level") and record.get("route_failure") == "truck_banned":
+            # The one case where a prior chain is taken away. A way signed
+            # against trucks is a fact about the road, not a guess about it:
+            # there is no reading in which a loaded truck may drive up one, so
+            # a chain that needs it was telling the driver to break the law.
+            # A GATE does not do this -- see ROUTE_FAILURE_GATED in
+            # build_local_geometry for why that one is a guess.
+            approaches[facility_id] = record
+            demoted += 1
         elif old.get("turn_level"):
             if facility_id in attempted and not chain_is_current(old, record):
                 old = {
@@ -368,6 +401,8 @@ def merge_existing(
         # Only a batch that met a re-swept endpoint reports these.
         generated["merge"]["rebuilt_to_new_endpoint"] = rebuilt
         generated["merge"]["stale_chain_kept"] = stale
+    if demoted:
+        generated["merge"]["chain_dropped_truck_banned"] = demoted
 
     sources = [
         source
@@ -614,6 +649,9 @@ def approach_record(
         "estimated": not turn_level,
         "fallback": not turn_level,
         "fallback_reason": reason,
+        # The machine-readable half of `fallback_reason`, so a merge can act
+        # on WHY a route failed instead of matching on a sentence.
+        "route_failure": route_failure,
         "nearest_road_context": geometry is not None,
         "representative_fallback": target.endpoint_fallback,
         "gate_hint": False,
@@ -641,6 +679,14 @@ def approach_record(
 # One sentence per way the path search can come back empty (the codes are
 # `build_local_geometry.ROUTE_FAILURE_*`). Read from the search, not assumed.
 ROUTE_FAILURE_REASONS = {
+    "truck_banned": (
+        "Every public-road way in to the sourced endpoint is signed against trucks, so "
+        "no street chain is claimed."
+    ),
+    "gated": (
+        "The only public-road way in to the sourced endpoint passes a gate or barrier on "
+        "a public street."
+    ),
     "no_start_road": "No public road was found near the city context in the local extract.",
     "no_target_road": (
         "No public surface road was found within the snap distance of the sourced endpoint."
@@ -809,6 +855,16 @@ def main() -> int:
         default=None,
         help="The same, one facility id per line",
     )
+    parser.add_argument(
+        "--truck-legal-public",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Honour barrier nodes and ways signed against trucks in the PUBLIC "
+            "road search (default on). Off restores the search as it stood "
+            "before 2026-09-20, so the rule's cost can be measured."
+        ),
+    )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
 
@@ -831,6 +887,7 @@ def main() -> int:
         existing=existing,
         accessed=args.accessed,
         endpoint_screen=args.endpoint_screen,
+        truck_legal=args.truck_legal_public,
     )
     if existing is not None:
         print("Merge:", json.dumps(payload["generated"]["merge"], sort_keys=True), flush=True)

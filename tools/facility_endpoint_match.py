@@ -23,9 +23,11 @@ happens to contain a trade word, and nothing is guessed from position.
    former site) and of what is a freight site (``building`` = warehouse,
    industrial, factory, manufacture; ``landuse=industrial``;
    ``man_made=works``; any ``industrial=*``; a logistics office; a post
-   depot). Its two stated exceptions are the ones this matcher relies on:
+   depot). Its stated exceptions are the ones this matcher relies on:
    rail yards and railway land serve the intermodal types, harbour and port
-   land the port types. The rules are not forked here, so an endpoint this
+   land the port types, a silo the grain elevators, quarry land the quarries
+   and aggregate yards, and a sawmill craft the lumber and paper sites. The
+   rules are not forked here, so an endpoint this
    matcher writes is one the approaches builder will route to. Residential
    and retail land never reaches a rule: it carries none of the site tags.
 2. THE TRADE (read). On top of the gate the object must say what it is, by a
@@ -73,6 +75,31 @@ happens to contain a trade word, and nothing is guessed from position.
      (an ``industrial`` or ``product`` value of the right kind, or the trade
      word in the name). A scrap yard or auto wrecker named "... Auto Parts"
      is not an automotive plant.
+   * grain elevator: ``industrial`` = grain, agriculture, feed or flour
+     mill; or grain, silo, agronomy, co-op, seed and their kin. A silo is a
+     STRUCTURE and not a business -- every farmyard has one -- so
+     ``man_made=silo`` opens the gate but must be NAMED as grain to count.
+     "Elevator" alone is a lift company, so the bare word counts only beside
+     a farm word or a company suffix, and Otis, Schindler and an elevator
+     repair shop are left out by name.
+   * quarry and mine: ``landuse=quarry``, ``man_made=mineshaft``, or an
+     ``industrial`` mining value; or quarry, mining, aggregates, crushed
+     stone, a named pit (sand, gravel, rock, stone) and the stones
+     themselves. Bare "pit" is a barbecue and bare "mine" a street name, so
+     each needs its trade word beside it.
+   * construction materials yard: an ``industrial`` concrete, asphalt,
+     brickyard or cement value; or ready-mix, asphalt, aggregates, masonry,
+     precast, building materials and their kin. The quarry tags serve this
+     family too, because an aggregate yard is usually the pit it digs from.
+   * lumber and paper: ``craft=sawmill`` or an ``industrial`` wood, timber,
+     pulp or paper value; or lumber, sawmill, timber, plywood, veneer, pulp,
+     a paper MILL or paperboard, forest products, millwork and pallets.
+     "Paper" alone is a stationer and "mill" a Miller, so both carry their
+     trade with them.
+
+   The last four families had no rule at all until 2026-09-20: every one of
+   their 419 rows was a representative fallback, so a rule can only find
+   ground, never demote a row.
 
    Two name vetoes, both read from the name. A UTILITY name (water, sewage,
    treatment, power, heating plant, landfill, recycling), a "former ..."
@@ -108,6 +135,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from facility_endpoint_screen import (  # noqa: E402
+    ELEVATOR_TYPES,
+    FOREST_TYPES,
+    MATERIALS_TYPES,
+    QUARRY_TYPES,
     SITE_BUILDINGS,
     TRADE_RULES,
     screen_endpoint,
@@ -148,6 +179,37 @@ FOOD_INDUSTRIAL = frozenset(
     }
 )
 NOT_AUTOMOTIVE_INDUSTRIAL = frozenset({"scrap_yard", "auto_wrecker"})
+ELEVATOR_INDUSTRIAL = frozenset(
+    {"grain", "grain_elevator", "agriculture", "agricultural", "feed", "flour_mill", "silo"}
+)
+QUARRY_INDUSTRIAL = frozenset(
+    {"mine", "mining", "quarry", "gravel_pit", "sand_pit", "aggregate", "cement"}
+)
+MATERIALS_INDUSTRIAL = frozenset(
+    {
+        "concrete_plant",
+        "concrete",
+        "asphalt_plant",
+        "asphalt",
+        "brickyard",
+        "cement",
+        "building_materials",
+        "aggregate",
+    }
+)
+FOREST_INDUSTRIAL = frozenset(
+    {
+        "sawmill",
+        "wood",
+        "wood_processing",
+        "timber",
+        "lumber",
+        "paper_mill",
+        "paper",
+        "pulp_mill",
+        "furniture",
+    }
+)
 LOGISTICS_OFFICES = frozenset({"logistics", "freight_forwarder"})
 
 
@@ -252,6 +314,43 @@ NOT_ASSUMED_NAME = _words(
     r"construction|contractors?|contracting|builders?|paving|excavating|excavation|roofing|"
     r"plumbing|landscap\w*|nursery|farms?|ranch|realty|properties|storage|rentals?|"
     r"parque|s\.?a\.? de c\.?v\.?"
+)
+# Grain elevators. "Elevator" alone is a lift company, so the bare word only
+# counts beside a farm word; grain, co-op and agronomy stand on their own.
+ELEVATOR_NAME = _words(
+    r"grains?|silos?|agronomy|agri\w*|soybeans?|wheat|milo|sorghum|"
+    r"(?:farmers|country|co-?op|cooperative|grain)(?: \w+)? elevators?|"
+    r"co-?op|cooperative|feed (?:mill|and grain)|seed (?:company|co|house)|"
+    r"elevator (?:company|co|inc|llc)"
+)
+NOT_ELEVATOR_NAME = _words(
+    r"otis|schindler|thyssen\w*|kone|escalators?|"
+    r"elevator (?:inspection|repair|service|maintenance|consultants?)|"
+    r"credit union|food co-?op|grocery|market"
+)
+# Quarries and mines. Bare "pit" and "mine" are a barbecue and a street name,
+# so both need their trade word beside them.
+QUARRY_NAME = _words(
+    r"quarry|quarries|mining|aggregates?|crushed stone|"
+    r"(?:sand|gravel|rock|stone|borrow)(?: (?:&|and) \w+)? pit|sand (?:&|and) gravel|"
+    r"limestone|granite|basalt|dolomite|marble|gypsum|"
+    r"(?:coal|copper|iron|gold|salt|potash) mine"
+)
+# Construction materials: the ready-mix plant, the asphalt plant, the
+# aggregate yard a dump truck is loaded at.
+MATERIALS_NAME = _words(
+    r"concrete|ready[- ]?mix|redi[- ]?mix|asphalt|aggregates?|cement|masonry|"
+    r"brick (?:&|and) block|brickyard|block (?:plant|company|co)|precast|"
+    r"building (?:materials|supply|products)|builders (?:supply|warehouse)|"
+    r"sand (?:&|and) gravel|crushed stone|quarry"
+)
+# Lumber and paper. "Paper" alone is a stationer and "mill" a Miller, so both
+# carry their trade with them.
+FOREST_NAME = _words(
+    r"lumber|sawmills?|saw mills?|timber|hardwoods?|softwoods?|plywood|veneer|pulp|"
+    r"paper ?(?:mill|board|products|company|co)|containerboard|corrugated|"
+    r"wood (?:products|preserving|treating)|forest products|millwork|particle ?board|"
+    r"cellulose|pallets?|logging"
 )
 
 
@@ -389,6 +488,53 @@ def match_roles(tags: dict[str, str], name: str) -> dict[str, RoleMatch]:
             "parcel carrier words in the name" if PARCEL_NAME.search(text) else "",
         )
     offer({"air_cargo"}, "", "air cargo words in the name" if AIR_CARGO_NAME.search(text) else "")
+
+    # Grain elevators, quarries, construction materials, lumber and paper.
+    # Each family had no rule until 2026-09-20, so every one of its rows was
+    # a fallback; none of them can be demoted by adding one.
+    if not utility:
+        # A silo is a STRUCTURE, not a business: every farmyard has one, so
+        # the tag alone is not a grain elevator and must be named as one.
+        elevator_trade = f"industrial={industrial} tag" if industrial in ELEVATOR_INDUSTRIAL else ""
+        elevator_silo = (
+            "man_made=silo tag"
+            if tags.get("man_made") == "silo" or tags.get("building") == "silo"
+            else ""
+        )
+        elevator_name = (
+            "grain elevator words in the name"
+            if ELEVATOR_NAME.search(text) and not NOT_ELEVATOR_NAME.search(text)
+            else ""
+        )
+        if elevator_trade or elevator_name:
+            # The silo only rides along for the rank; it never carries a match.
+            offer(ELEVATOR_TYPES, elevator_trade or elevator_silo, elevator_name, both=civic)
+        offer(
+            QUARRY_TYPES,
+            "landuse=quarry tag"
+            if tags.get("landuse") == "quarry"
+            else f"industrial={industrial} tag"
+            if industrial in QUARRY_INDUSTRIAL
+            else "",
+            "quarry or mine words in the name" if QUARRY_NAME.search(text) else "",
+            both=civic,
+        )
+        offer(
+            MATERIALS_TYPES,
+            f"industrial={industrial} tag" if industrial in MATERIALS_INDUSTRIAL else "",
+            "construction materials words in the name" if MATERIALS_NAME.search(text) else "",
+            both=civic,
+        )
+        offer(
+            FOREST_TYPES,
+            "craft=sawmill tag"
+            if tags.get("craft") == "sawmill"
+            else f"industrial={industrial} tag"
+            if industrial in FOREST_INDUSTRIAL
+            else "",
+            "lumber or paper words in the name" if FOREST_NAME.search(text) else "",
+            both=civic,
+        )
 
     # Steel, automotive, chemical: the screen's trade rule IS the match.
     for role, (industrial_values, _product_words, name_words) in TRADE_RULES.items():

@@ -224,5 +224,9 @@ fn test_a_chain_that_begins_on_the_yards_own_road_speaks_it_as_a_service_road() 
             "{facility_id}"
         );
     }
-    assert_eq!(yard_chains, 89, "the 2026-09-17 yard-road re-route");
+    // 89 after the 2026-09-17 yard-road re-route; 121 after the 2026-09-20
+    // sweep, which gave the four unruled families and the six sibling types
+    // their first sourced endpoints -- a yard reached only over its own road
+    // is exactly the kind of site those families are.
+    assert_eq!(yard_chains, 121, "the 2026-09-20 family and sibling sweep");
 }

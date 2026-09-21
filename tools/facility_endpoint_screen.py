@@ -32,7 +32,11 @@ substring of the tag dump:
    or manufacture; ``landuse=industrial``; ``man_made=works``; any
    ``industrial=*``; ``office`` = logistics or freight_forwarder;
    ``amenity=post_depot``. A rail yard or railway land also serves the
-   intermodal types, and a harbour or port area the port types.
+   intermodal types, a harbour or port area the port types, a silo the grain
+   elevators, quarry land the quarries and aggregate yards, and
+   ``craft=sawmill`` the lumber and paper sites (2026-09-20: those four
+   families had no rule at all, so every one of their 419 rows was a
+   fallback).
 3. Steel, automotive and chemical facilities were matched by name substring,
    so they must ALSO say what they make: an ``industrial`` or ``product`` tag
    of the right kind, or the type's word in the NAME on a word boundary
@@ -65,6 +69,15 @@ SITE_BUILDINGS = frozenset({"warehouse", "industrial", "factory", "manufacture"}
 LOGISTICS_OFFICES = frozenset({"logistics", "freight_forwarder"})
 INTERMODAL_TYPES = frozenset({"intermodal_ramp", "intermodal", "rail"})
 PORT_TYPES = frozenset({"port", "port_terminal"})
+# Four families whose sites state their trade with a tag the general list
+# cannot hold: a grain elevator is a silo, a quarry is quarry land, an
+# aggregate yard is often the pit it digs from, and a sawmill can carry only
+# its craft. Each tag is scoped to its own family, the way a rail yard serves
+# the intermodal types, so a farm silo never becomes a cross-dock.
+ELEVATOR_TYPES = frozenset({"farm_elevator"})
+QUARRY_TYPES = frozenset({"mine_quarry"})
+MATERIALS_TYPES = frozenset({"construction_materials_yard"})
+FOREST_TYPES = frozenset({"lumber_paper"})
 
 # Types whose endpoint was matched by name substring: each must also state
 # its trade, by tag value or by a whole word in the name.
@@ -122,6 +135,12 @@ def screen_endpoint(facility_type: str, name: str, tags: dict[str, str] | None) 
         site = site or railway == "yard" or tags.get("landuse") == "railway"
     if facility_type in PORT_TYPES:
         site = site or tags.get("landuse") in {"port", "harbour"} or "harbour" in tags
+    if facility_type in ELEVATOR_TYPES:
+        site = site or tags.get("man_made") == "silo" or tags.get("building") == "silo"
+    if facility_type in QUARRY_TYPES | MATERIALS_TYPES:
+        site = site or tags.get("landuse") == "quarry" or tags.get("man_made") == "mineshaft"
+    if facility_type in FOREST_TYPES:
+        site = site or tags.get("craft") == "sawmill"
     if not site:
         return False, "The sourced endpoint carries no warehouse, industrial or works tag."
 

@@ -31,13 +31,25 @@ fn test_facility_endpoint_data_covers_supported_facilities() {
     // every sourced row is in the row: 1,939 are freight sites, 995 still are
     // not (nothing better within 6.4 miles), and 175 of the sites state no
     // trade, so the match to this facility's trade is assumed and says so.
-    assert_eq!(coverage["source_backed"], 2745);
-    assert_eq!(coverage["fallback"], 1526);
-    assert_eq!(coverage["screen"]["passed"], 1939);
+    // The 2026-09-20 sweep added the four families that had no matcher rule
+    // at all -- grain elevators, quarries, construction materials yards,
+    // lumber and paper. All 419 of their rows were fallbacks; 129 now have a
+    // sourced endpoint and every one of those passes the screen, which is the
+    // whole of the +129 source_backed.
+    // `passed` rose by only 110 because 19 rows correctly STOPPED passing: a
+    // lumber mill, a quarry and a grain company had been standing in as
+    // assumed cross-docks and company yards, and now that the matcher knows
+    // what they are they no longer answer for a trade they do not state.
+    // Four of the 19 are the same object re-homed to the right facility in
+    // its own town (Columbia Forest Products to Klamath Falls lumber and
+    // paper; Scoular Grain Co to the Salina grain elevator).
+    assert_eq!(coverage["source_backed"], 2874);
+    assert_eq!(coverage["fallback"], 1397);
+    assert_eq!(coverage["screen"]["passed"], 2049);
     // Retiring 766 generated facilities from the 137 stand-in markets took only
     // refused and fallback rows with it: `passed` did not move, which is the
     // point -- not one of those towns had a surveyed endpoint to lose.
-    assert_eq!(coverage["screen"]["refused"], 806);
+    assert_eq!(coverage["screen"]["refused"], 825);
     assert_eq!(coverage["screen"]["not_screened"], 0);
     assert_eq!(coverage["screen"]["trade_assumed"], 173);
     assert_eq!(coverage["nearest_road_context"], 0);

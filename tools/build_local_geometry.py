@@ -238,11 +238,14 @@ class RouteGraph:
     yard_edges: dict[int, list[tuple[int, float]]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    # Public edges signed against trucks, both directions; only the yard-road
-    # fallback honours them (the public search predates the rule).
+    # Public edges signed against trucks, both directions.
     no_truck: set[tuple[int, int]] = field(default_factory=set)
     # Blocking barrier nodes (gates, bollards), shared by every graph of a run.
     barriers: set[int] = field(default_factory=set)
+    # Whether the PUBLIC search honours the two above. The yard-road fallback
+    # always does. Off restores the search as it stood before 2026-09-20, so
+    # the rule's cost can be measured rather than argued.
+    truck_legal: bool = True
 
     def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
         self.edges[a].append((b, miles, road, mph))
@@ -442,6 +445,7 @@ def route_state_targets(
     failures: dict[str, str] | None = None,
     *,
     yard_roads: bool = False,
+    truck_legal: bool = True,
 ) -> dict[str, GeometryPath]:
     """Route every target over its own clipped graph.
 
@@ -453,7 +457,10 @@ def route_state_targets(
     target the public roads do not reach may be reached over its own private
     road (``yard_roads.py`` holds the rule). Off, nothing changes."""
     barriers: set[int] = set()
-    graphs = {target.target_id: RouteGraph(barriers=barriers) for target in targets}
+    graphs = {
+        target.target_id: RouteGraph(barriers=barriers, truck_legal=truck_legal)
+        for target in targets
+    }
     boxes = {target.target_id: target_bounds(target) for target in targets}
     grid = target_grid(targets, boxes)
     entities = osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY
@@ -520,21 +527,63 @@ ROUTE_FAILURE_NO_START_ROAD = "no_start_road"
 ROUTE_FAILURE_NO_TARGET_ROAD = "no_target_road"
 ROUTE_FAILURE_OVER_BUDGET = "over_budget"
 ROUTE_FAILURE_DISCONNECTED = "disconnected"
+# Split out of `disconnected` on 2026-09-20 so the two can be judged apart.
+# A way signed against trucks is a SIGN: there is no reading in which a
+# loaded truck may drive up it, so a chain that needs one is wrong and a
+# prior chain that needed one is demoted. An untagged `barrier=gate` is a
+# GUESS -- as often a farm gate standing open as a locked one, and at an
+# industrial site it is usually the facility's own gate, which the owner's
+# 2026-09-17 yard-road ruling already lets a truck with a load for that dock
+# pass. So a gate refuses a NEW chain and never takes an existing one away.
+ROUTE_FAILURE_TRUCK_BANNED = "truck_banned"
+ROUTE_FAILURE_GATED = "gated"
 
 
-def _connected(graph: RouteGraph, start_ref: int, end_ref: int) -> bool:
-    """Is there any path at all, however long? Only asked after a failure."""
+def _connected(
+    graph: RouteGraph,
+    start_ref: int,
+    end_ref: int,
+    *,
+    barriers: bool = True,
+    no_truck: bool = True,
+) -> bool:
+    """Is there any path at all, however long? Asked after a failure, to tell
+    a search that ran out of budget from a town with no way through.
+
+    ``barriers`` and ``no_truck`` say which of the two rules to honour, so a
+    caller can ask the same question three ways and learn WHICH rule closed
+    the route (:func:`why_disconnected`)."""
+    honour_barriers = barriers and graph.truck_legal
+    honour_no_truck = no_truck and graph.truck_legal
     seen = {start_ref}
     stack = [start_ref]
     while stack:
         node = stack.pop()
         if node == end_ref:
-            return True
+            return True  # arriving at a gate is fine; driving through is not
+        if honour_barriers and node in graph.barriers:
+            continue
         for nxt, _miles, _road, _mph in graph.edges.get(node, ()):
-            if nxt not in seen:
+            if nxt not in seen and not (honour_no_truck and (node, nxt) in graph.no_truck):
                 seen.add(nxt)
                 stack.append(nxt)
     return False
+
+
+def why_disconnected(graph: RouteGraph, start_ref: int, end_ref: int) -> str:
+    """Which rule closed the route: the truck sign, the gate, or neither.
+
+    Asked only when the truck-legal search found nothing. Opening the rules
+    one at a time is what separates "a sign says no trucks" -- a fact -- from
+    "there is a gate drawn here" -- a guess -- from "there is simply no road".
+    The sign is reported first: where both apply, the sign is the one that
+    settles it.
+    """
+    if _connected(graph, start_ref, end_ref, no_truck=False):
+        return ROUTE_FAILURE_TRUCK_BANNED
+    if _connected(graph, start_ref, end_ref, barriers=False):
+        return ROUTE_FAILURE_GATED
+    return ROUTE_FAILURE_DISCONNECTED
 
 
 def shortest_geometry(
@@ -569,7 +618,17 @@ def shortest_geometry(
             continue
         if miles > max(target.approach_miles * 1.8, 3.0):
             continue
+        # A gate is reached and never driven through, so a barrier ON the
+        # facility's own snap node still lets the chain arrive there. Both
+        # rules are the yard search's, applied to the public roads at last:
+        # until 2026-09-20 only the private-road fallback honoured them, and a
+        # public chain could be spoken straight through a locked gate or up a
+        # street signed against trucks.
+        if graph.truck_legal and node in graph.barriers:
+            continue
         for nxt, edge_miles, road, mph in graph.edges.get(node, ()):
+            if graph.truck_legal and (node, nxt) in graph.no_truck:
+                continue
             nd = miles + edge_miles
             if nd < dist.get(nxt, float("inf")):
                 dist[nxt] = nd
@@ -580,7 +639,7 @@ def shortest_geometry(
             return fail(ROUTE_FAILURE_OVER_BUDGET)
         if graph.yard_edges:
             return yard_road_geometry(target, graph, start_ref, fail)
-        return fail(ROUTE_FAILURE_DISCONNECTED)
+        return fail(why_disconnected(graph, start_ref, end_ref))
     node = end_ref
     path_nodes = [node]
     reversed_roads: list[str] = []

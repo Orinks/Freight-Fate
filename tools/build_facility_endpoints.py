@@ -93,17 +93,21 @@ TARGET_FACILITY_TYPES = {
     "chemical_petroleum_terminal",
     "cold_storage",
     "company_yard",
+    "construction_materials_yard",
     "cross_dock",
     "distribution",
     "dry_warehouse",
+    "farm_elevator",
     "food_processor",
     "food_terminal",
     "grocery_retail_dc",
     "industrial_park",
     "intermodal",
     "intermodal_ramp",
+    "lumber_paper",
     "manufacturing",
     "manufacturing_plant",
+    "mine_quarry",
     "parcel_hub",
     "port",
     "port_terminal",
@@ -124,6 +128,8 @@ SITE_KEYS = (
     "amenity",
     "railway",
     "harbour",
+    # A sawmill can carry its craft and nothing else.
+    "craft",
 )
 BORDER_REFUSAL = "The sourced endpoint lies across the national border from its city."
 MATCHER_REFUSAL = (
