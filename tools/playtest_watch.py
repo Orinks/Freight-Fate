@@ -20,7 +20,8 @@ Three duties, deliberately different in cadence:
   spoken, what went wrong, and whether the sandbox really did stay off the
   network.
 
-Run it against a session started by ``tools/playtest_sandbox.py --launch``::
+Run it against a session started by the game's sandbox launcher
+(``freightfate --playtest-sandbox --launch``, or ``--playtest-road``)::
 
     uv run python tools/playtest_watch.py
 
@@ -354,17 +355,57 @@ class Watcher:
         return out
 
 
+# What ``freight_fate::playtest::sandbox`` counts as the driver identity and
+# as the settings that publish. Mirrored here, not imported: the watcher is a
+# plain script and the sandbox is Rust. Change one, change both.
+IDENTITY_NAMES = frozenset(
+    {
+        "online.json",
+        "online.token",
+        "cloud_saves.json",
+        "meaningful_play.json",
+        "online-outbox.json",
+        "online-mastodon-outbox.json",
+    }
+)
+OFFLINE_SETTINGS = ("cloud_saves", "online_presence", "online_services", "mastodon_sharing")
+
+
+def _is_identity(path: Path) -> bool:
+    """True for a file that would carry the real account into a sandbox,
+    backup spellings included (``online.json.pre-clerk.bak``)."""
+    name = path.name
+    return (
+        name in IDENTITY_NAMES or name.startswith("online.json") or name.startswith("online.token")
+    )
+
+
+def audit(sandbox: Path) -> list[str]:
+    """Every reason this sandbox could still reach the real account."""
+    problems = [
+        f"identity file in the sandbox: {path.relative_to(sandbox)}"
+        for path in sorted(sandbox.rglob("*"))
+        if path.is_file() and _is_identity(path)
+    ]
+    settings = sandbox / "settings.json"
+    if settings.is_file():
+        try:
+            data = json.loads(settings.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return [*problems, "settings.json is unreadable; cannot confirm publishing is off"]
+        data = data if isinstance(data, dict) else {}
+        problems += [
+            f"settings.json still has {key} on" for key in OFFLINE_SETTINGS if data.get(key)
+        ]
+    return problems
+
+
 def _sandbox_verdict(sandbox: Path) -> list[str]:
     """Re-audit the sandbox after the session, not before it.
 
     A drive can create files -- this is the check that the session did not
     write an identity into a directory that started clean.
     """
-    try:
-        sys.path.insert(0, str(ROOT / "tools"))
-        from playtest_sandbox import audit
-    except ImportError:  # pragma: no cover - the tool is beside this one
-        return []
     problems = audit(sandbox)
     if not problems:
         return ["  sandbox: still has no driver identity"]
@@ -417,7 +458,9 @@ def main(argv: list[str] | None = None) -> int:
     while not session.alive() and time.monotonic() < deadline:
         time.sleep(POLL_S)
     if not session.alive() and args.log is None:
-        emit("No playtest session is running (start one with tools/playtest_sandbox.py --launch).")
+        emit(
+            "No playtest session is running (start one with: cargo run --release -p freight-fate --bin freightfate -- --playtest-sandbox --launch)."
+        )
         return 1
 
     log_path = args.log or session.log or DEFAULT_LOG
