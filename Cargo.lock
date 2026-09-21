@@ -1361,16 +1361,16 @@ dependencies = [
 
 [[package]]
 name = "prism-sys"
-version = "0.1.1"
-source = "git+https://github.com/trypsynth/prismer?rev=3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b#3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b"
+version = "0.1.2"
+source = "git+https://github.com/Orinks/prismer?rev=f16094d#f16094d992df5cc6cce621404ab0203342eb7551"
 dependencies = [
  "cmake",
 ]
 
 [[package]]
 name = "prismer"
-version = "0.1.1"
-source = "git+https://github.com/trypsynth/prismer?rev=3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b#3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b"
+version = "0.1.2"
+source = "git+https://github.com/Orinks/prismer?rev=f16094d#f16094d992df5cc6cce621404ab0203342eb7551"
 dependencies = [
  "prism-sys",
 ]
