@@ -74,6 +74,7 @@ impl StandingProfile for Profile {
 impl SolvencyProfile for Profile {
     fn set_money(&mut self, money: f64) {
         self.money = money;
+        self.money_guard.resync(money);
     }
     fn set_fines_owed(&mut self, fines_owed: f64) {
         self.fines_owed = fines_owed;
@@ -226,6 +227,7 @@ impl StartProfile for Profile {
     }
     fn set_money(&mut self, money: f64) {
         self.money = money;
+        self.money_guard.resync(money);
     }
     fn set_business_status(&mut self, status: &str) {
         self.business_status = status.to_string();

@@ -75,6 +75,12 @@ bookmarks usable.
       - [ ] Typed-in music seeds.
       - [ ] More synth voices per style.
 
+- [x] Career balance integrity: a `MoneyGuard` shadow (balance bits XORed
+      with a per-instance key) resyncs on every legitimate earn, spend, or
+      load; a balance changed outside a transaction marks the career
+      `integrity_modified` at the next audit and folds into the signed
+      save, so a memory-edited total arrives as evidence instead of clean.
+
 ### Release gate -- what stands between here and a public 1.9.0
 
 The checklist below retains the recorded open release gates. Verification here

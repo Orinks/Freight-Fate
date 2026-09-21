@@ -131,7 +131,7 @@ impl ArrivalState {
             p.current_city = job.destination.clone();
             let driver_charges = p.fines_owed;
             if driver_charges != 0.0 {
-                p.money -= driver_charges;
+                p.spend(driver_charges);
                 p.fines_owed = 0.0;
                 self.summary_parts.push(format!(
                     "Fines carried over from earlier loads: {} dollars, settled.",
@@ -145,7 +145,7 @@ impl ArrivalState {
             let on_time = hours <= job.deadline_game_h;
             let (previous_level, money) = {
                 let p = profile_mut_of(ctx);
-                p.money += job.pay;
+                p.earn(job.pay);
                 (p.career.level(), p.money)
             };
             let standing = enforcement::standing_band(profile_of(ctx));
@@ -535,7 +535,7 @@ impl ArrivalState {
         {
             let p = profile_mut_of(ctx);
             p.fines_owed = round_py_n(p.fines_owed + (carried_balance - collected).max(0.0), 2);
-            p.money += net_pay;
+            p.earn(net_pay);
             p.current_city = job.destination.clone();
         }
         let lane = lane_key(ctx.world, &job);

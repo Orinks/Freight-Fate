@@ -613,7 +613,7 @@ impl DrivingState {
         let cost = self.roadside_service_cost();
         let money = {
             let p = profile_mut_of(ctx);
-            p.money -= cost; // can go negative: the truck cannot move otherwise
+            p.spend(cost); // can go negative: the truck cannot move otherwise
             p.money
         };
         if damage_failed {

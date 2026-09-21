@@ -449,6 +449,9 @@ fn test_balance_no_career_could_hold_is_marked_even_when_the_game_signed_it() {
     with_data_dir(|_| {
         let mut p = Profile::named("Memory Edit");
         p.career.total_earnings = 338.36;
+        // Written straight at the field, the way a memory editor does: the
+        // money guard's shadow still holds the old balance, so the save
+        // itself carries the mark.
         p.money = 999_999_999_999_717_400.0;
         let path = p.save().unwrap();
 
@@ -467,7 +470,7 @@ fn test_a_balance_the_career_earned_is_never_marked() {
         // A long career that kept nearly all of it.
         let mut rich = Profile::named("Earned It");
         rich.career.total_earnings = 4_000_000.0;
-        rich.money = 3_900_000.0;
+        rich.set_money(3_900_000.0);
         let path = rich.save().unwrap();
         assert!(!load(&path).integrity_modified);
 
@@ -475,13 +478,13 @@ fn test_a_balance_the_career_earned_is_never_marked() {
         // back to the carrier at once on top of the richest start: the most a
         // career with no earnings can hold.
         let mut returned = Profile::named("Handed Back");
-        returned.money = plausibility::money_ceiling(0.0) - 2.0;
+        returned.set_money(plausibility::money_ceiling(0.0) - 2.0);
         let path = returned.save().unwrap();
         assert!(!load(&path).integrity_modified);
 
         // A debt career carries negative money by design.
         let mut broke = Profile::named("In The Red");
-        broke.money = -40_000.0;
+        broke.set_money(-40_000.0);
         let path = broke.save().unwrap();
         assert!(!load(&path).integrity_modified);
     });

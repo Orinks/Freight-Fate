@@ -194,7 +194,7 @@ impl GarageState {
         }
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_fuel_gal(tank);
             let start = p.game_hours;
             p.game_hours += TERMINAL_FUEL_MIN / 60.0;
@@ -229,7 +229,7 @@ impl GarageState {
         let cost = ctx.economy.fuel_cost(&region, gallons);
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             let fuel = tank.min(p.truck_fuel_gal() + gallons);
             p.set_truck_fuel_gal(fuel);
             let start = p.game_hours;
@@ -288,7 +288,7 @@ impl GarageState {
         }
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_damage_pct(0.0);
             let start = p.game_hours;
             p.game_hours += TERMINAL_REPAIR_MIN / 60.0;
@@ -332,7 +332,7 @@ impl GarageState {
         ));
         let (start, end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_truck_damage_pct((damage - repairable).max(0.0));
             let start = p.game_hours;
             p.game_hours += TERMINAL_REPAIR_MIN / 60.0;
@@ -490,7 +490,7 @@ impl GarageState {
             cost = round_py_n(serviceable * per_pct, 2);
             let (end, money) = {
                 let p = profile_mut(ctx);
-                p.money -= cost;
+                p.spend(cost);
                 p.set_tire_wear_pct((p.tire_wear_pct() - serviceable).max(0.0));
                 p.game_hours += TERMINAL_TIRE_MIN / 60.0;
                 (p.game_hours, p.money)
@@ -512,7 +512,7 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             p.set_tire_wear_pct(0.0);
             p.game_hours += TERMINAL_TIRE_MIN / 60.0;
             (p.game_hours, p.money)
@@ -569,7 +569,7 @@ impl GarageState {
         let (start, end, money) = {
             let p = profile_mut(ctx);
             let start = p.game_hours;
-            p.money -= cost;
+            p.spend(cost);
             p.set_tire_type(if to_winter { "winter" } else { "all_season" });
             p.set_tire_wear_pct(0.0);
             p.game_hours += TERMINAL_TIRE_MIN / 60.0;
@@ -660,7 +660,7 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= CHAIN_SET_COST;
+            p.spend(CHAIN_SET_COST);
             p.set_chains_owned(true);
             p.set_chain_wear_pct(0.0);
             p.game_hours += TERMINAL_CHAINS_MIN / 60.0;
@@ -757,7 +757,7 @@ impl GarageState {
             cost = round_py_n(serviceable * service.cost_per_pct, 2);
             let (end, money) = {
                 let p = profile_mut(ctx);
-                p.money -= cost;
+                p.spend(cost);
                 service.meter.write(p, (wear - serviceable).max(0.0));
                 p.game_hours += service.minutes / 60.0;
                 (p.game_hours, p.money)
@@ -780,7 +780,7 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= cost;
+            p.spend(cost);
             service.meter.write(p, 0.0);
             p.game_hours += service.minutes / 60.0;
             (p.game_hours, p.money)
@@ -833,7 +833,7 @@ impl GarageState {
         }
         let (end, money) = {
             let p = profile_mut(ctx);
-            p.money -= TRUCK_WASH_COST;
+            p.spend(TRUCK_WASH_COST);
             p.set_road_grime_pct(0.0);
             p.game_hours += TERMINAL_WASH_MIN / 60.0;
             (p.game_hours, p.money)

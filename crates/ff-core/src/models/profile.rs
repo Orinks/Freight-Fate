@@ -37,6 +37,7 @@ use crate::models::enforcement::DrivingRecord;
 use crate::models::jobs::{py_str, py_truthy, Job};
 use crate::models::loyalty::LoyaltyAccount;
 use crate::models::market::Market;
+use crate::models::money_guard::MoneyGuard;
 use crate::models::safety_record::SAFETY_RECORD_BASELINE;
 use crate::models::save_migration::json_f64;
 use crate::models::start_options::{DEFAULT_START_KEY, START_MODE_COMPANY};
@@ -462,6 +463,12 @@ pub struct Profile {
     // Set by from_dict when the raw dict needed a format migration, so load()
     // can rewrite the converted save to disk. Never serialized.
     pub needs_migration_resave: bool,
+
+    // Runtime shadow of `money`, held obfuscated so an editor writing the
+    // field directly leaves the two disagreeing. Never serialized; see
+    // models/money_guard.rs. Seeded at creation and at load, moved by
+    // earn/spend, resynced by set_money.
+    pub money_guard: MoneyGuard,
 }
 
 impl Default for Profile {
@@ -512,6 +519,7 @@ impl Default for Profile {
             radio_favorites: Vec::new(),
             recent_lanes: Vec::new(),
             needs_migration_resave: false,
+            money_guard: MoneyGuard::seeded(STARTING_MONEY),
         }
     }
 }
@@ -553,6 +561,49 @@ impl Profile {
             current_city: current_city.to_string(),
             ..Self::default()
         }
+    }
+
+    // -- money -----------------------------------------------------------------
+
+    /// Verify the live `money` field against the shadow the money guard
+    /// keeps. A balance rewritten outside the game's own paths (a memory
+    /// editor mid-session) leaves the two disagreeing; the first legitimate
+    /// transaction or save then marks the career the same way an edited save
+    /// file is marked. Legitimate bulk writes go through `set_money`, which
+    /// resyncs the shadow instead. Returns false when a divergence was seen.
+    pub fn audit_money(&mut self) -> bool {
+        if self.money_guard.check(self.money) {
+            return true;
+        }
+        log::warn!(
+            "{}: balance changed outside a game transaction; marking career modified",
+            self.name
+        );
+        self.integrity_modified = true;
+        self.integrity_notice_pending = true;
+        false
+    }
+
+    /// Credit `amount` dollars through the money guard.
+    pub fn earn(&mut self, amount: f64) {
+        self.audit_money();
+        self.money += amount;
+        self.money_guard.apply(amount);
+    }
+
+    /// Debit `amount` dollars through the money guard.
+    pub fn spend(&mut self, amount: f64) {
+        self.audit_money();
+        self.money -= amount;
+        self.money_guard.apply(-amount);
+    }
+
+    /// Set the balance outright (start options, scenario levers, settlement
+    /// corrections): the guard adopts the new number rather than flagging
+    /// it. Shadows the `set_money` trait methods, which resync the same way.
+    pub fn set_money(&mut self, money: f64) {
+        self.money = money;
+        self.money_guard.resync(money);
     }
 
     // -- truck -----------------------------------------------------------------

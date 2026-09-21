@@ -92,7 +92,7 @@ pub fn fuel_rescue_farming() -> Outcome {
         ..RigOptions::default()
     });
     if let Some(profile) = rig2.app.ctx.profile.as_mut() {
-        profile.money = 100.0;
+        profile.set_money(100.0);
     }
     rig2.drive.trip.position_mi = 12.0;
     rig2.prepare(0.0, None);
@@ -350,7 +350,7 @@ pub fn motel_rest_deadline_crunch() -> Outcome {
     let mut rig = Rig::new(RigOptions::default());
     let mut findings: Vec<String> = Vec::new();
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = 500.0;
+        profile.set_money(500.0);
         profile.fatigue = 90.0;
     }
     rig.drive.trip.position_mi = 12.0;

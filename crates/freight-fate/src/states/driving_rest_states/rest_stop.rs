@@ -416,7 +416,7 @@ impl RestStopState {
         }
         let (money, advance) = {
             let p = profile_mut_of(ctx);
-            p.money += grant;
+            p.earn(grant);
             p.pay_advance = round_py_n(p.pay_advance + grant, 2);
             p.pay_advance_used_for_load = true;
             (p.money, p.pay_advance)
@@ -616,7 +616,7 @@ impl RestStopState {
             ));
             return;
         }
-        profile_mut_of(ctx).money -= MOTEL_COST;
+        profile_mut_of(ctx).spend(MOTEL_COST);
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             // A motel bed is still a real sleep: no truck idles all night
             // just because the driver is not in it. Every other sleep option
@@ -699,7 +699,7 @@ impl RestStopState {
                 ));
                 return;
             }
-            profile_mut_of(ctx).money -= cost;
+            profile_mut_of(ctx).spend(cost);
             let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
                 d.trip.truck.damage_pct = 0.0;
                 advance_rest_clock(d, ctx, 60.0, None, "");
@@ -754,7 +754,7 @@ impl RestStopState {
         let cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE);
         let carrier_paid = !player_pays_operating_costs(&profile_of(ctx).business_status);
         if !carrier_paid {
-            profile_mut_of(ctx).money -= cost;
+            profile_mut_of(ctx).spend(cost);
         }
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             d.trip.truck.damage_pct = damage.min(FIELD_REPAIR_DAMAGE_PCT);
@@ -891,7 +891,7 @@ impl RestStopState {
             return;
         }
         if !carrier {
-            profile_mut_of(ctx).money -= cost;
+            profile_mut_of(ctx).spend(cost);
         }
         let duty_note = duty_note.to_string();
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
@@ -992,7 +992,7 @@ impl RestStopState {
             return;
         }
         if !carrier_pays {
-            profile_mut_of(ctx).money -= price;
+            profile_mut_of(ctx).spend(price);
         }
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             if rig_buff {

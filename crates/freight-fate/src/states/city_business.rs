@@ -177,7 +177,7 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= OWNER_OPERATOR_BUY_IN;
+            p.spend(OWNER_OPERATOR_BUY_IN);
             let assigned = p.active_truck_key();
             p.business_status = LEASED_OWNER_OPERATOR.to_string();
             p.owner_operator_declined = false;
@@ -218,7 +218,7 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= AUTHORITY_READY_RESERVE;
+            p.spend(AUTHORITY_READY_RESERVE);
             p.authority_readiness = true;
             p.dispatch_board_cache = None;
             p.money
@@ -248,7 +248,7 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= WEIGH_STATION_TRANSPONDER_SIGNUP_FEE;
+            p.spend(WEIGH_STATION_TRANSPONDER_SIGNUP_FEE);
             p.weigh_station_transponder = true;
             p.money
         };
@@ -274,7 +274,7 @@ impl BusinessStatusState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= AUTHORITY_ACTIVATION_COST;
+            p.spend(AUTHORITY_ACTIVATION_COST);
             p.business_status = INDEPENDENT_AUTHORITY.to_string();
             p.dispatch_board_cache = None;
             p.money
@@ -575,7 +575,7 @@ impl UpgradeShopState {
         }
         let (money, all_owned) = {
             let p = profile_mut(ctx);
-            p.money -= price;
+            p.spend(price);
             p.upgrades.insert(upgrade.key.to_string(), owned + 1);
             let all_owned = UPGRADE_CATALOG
                 .iter()
@@ -735,7 +735,7 @@ impl TruckShopState {
             }
             let owned_count = {
                 let p = profile_mut(ctx);
-                p.money -= model.price;
+                p.spend(model.price);
                 p.owned_trucks.push(model.key.to_string());
                 // A truck off the dealer lot is its own rig: fresh wear, full tank.
                 p.provision_truck_condition(model.key, Some(model.specs.fuel_tank_gal));
@@ -928,7 +928,7 @@ impl TrailerProgramState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= trailer.lease_deposit;
+            p.spend(trailer.lease_deposit);
             let mut programs = p.active_trailer_programs();
             programs.push(trailer.key.to_string());
             p.trailer_programs = programs;
@@ -975,7 +975,7 @@ impl TrailerProgramState {
         }
         let money = {
             let p = profile_mut(ctx);
-            p.money -= trailer.purchase_price;
+            p.spend(trailer.purchase_price);
             let mut owned = p.visible_owned_trailers();
             owned.push(trailer.key.to_string());
             p.owned_trailers = owned;
@@ -1114,7 +1114,7 @@ impl EndorsementCourseState {
         // terminal-sleep shape: clock, duty log, market day, then speech.
         let (start, end) = {
             let p = profile_mut(ctx);
-            p.money -= cred.course_cost;
+            p.spend(cred.course_cost);
             let start = p.game_hours;
             p.game_hours += cred.course_hours;
             (start, p.game_hours)

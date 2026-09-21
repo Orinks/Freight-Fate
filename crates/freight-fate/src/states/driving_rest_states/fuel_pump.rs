@@ -97,7 +97,7 @@ pub trait FuelPump: Menu {
                 need = partial_gal;
                 cost = ctx.economy.fuel_cost(&region, need) + 35.0;
             }
-            profile_mut_of(ctx).money -= cost;
+            profile_mut_of(ctx).spend(cost);
         }
         let margin_kg = self.drive().clone().with(ctx, |d, ctx| {
             d.trip.truck.refuel(Some(need));

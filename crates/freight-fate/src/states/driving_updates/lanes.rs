@@ -807,7 +807,7 @@ impl DrivingState {
         );
         let money = {
             let p = profile_mut_of(ctx);
-            p.money -= fine;
+            p.spend(fine);
             p.money
         };
         self.ticket_fines_paid += fine;

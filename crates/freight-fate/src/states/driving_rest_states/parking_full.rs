@@ -147,7 +147,7 @@ impl ParkingFullState {
             ));
             return;
         }
-        profile_mut_of(ctx).money -= MOTEL_COST;
+        profile_mut_of(ctx).spend(MOTEL_COST);
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             // Same as every other sleep option: no truck idles all night just
             // because the driver bedded down in a motel instead of the

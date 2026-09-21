@@ -129,7 +129,7 @@ pub fn abandon_and_advance_cycle() -> Outcome {
     rig.drive.trip.position_mi = rig.drive.trip.total_miles() - 1.0; // one mile from the gate
     let rep_before = {
         let profile = rig.app.ctx.profile.as_mut().expect("a profile");
-        profile.money = 5.0;
+        profile.set_money(5.0);
         profile.career.reputation
     };
     let mut debt = 0.0;
@@ -143,7 +143,7 @@ pub fn abandon_and_advance_cycle() -> Outcome {
                 profile.pay_advance_used_for_load,
             );
             if grant > 0.0 {
-                profile.money += grant;
+                profile.earn(grant);
                 profile.pay_advance += grant;
                 profile.pay_advance_used_for_load = true;
                 minted += grant;
@@ -248,7 +248,7 @@ pub fn endorsement_wallet_edges() -> Outcome {
             .expect("a course the driver does not hold")
     };
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = cost - 1.0;
+        profile.set_money(cost - 1.0);
     }
     rig.app.ctx.push_state(EndorsementCourseState::new());
     rig.app.ctx.run_deferred();
@@ -282,7 +282,7 @@ pub fn endorsement_wallet_edges() -> Outcome {
         ));
     }
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = cost;
+        profile.set_money(cost);
     }
     let lines_before_purchase = rig.transcript().len();
     rig.select_menu_containing(&row);
@@ -330,7 +330,7 @@ pub fn credential_ladder_gates() -> Outcome {
     let hazmat = credential("hazmat").expect("hazmat is on the ladder");
     let lcv = credential("lcv").expect("lcv is on the ladder");
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = 50_000.0;
+        profile.set_money(50_000.0);
     }
     rig.app.ctx.push_state(EndorsementCourseState::new());
     rig.app.ctx.run_deferred();
@@ -458,7 +458,7 @@ pub fn money_exact_zero_and_below() -> Outcome {
     let mut findings: Vec<String> = Vec::new();
     let start = JAKE_ZONE_FINES[0] + JAKE_ZONE_FINES[1]; // 450: two fines to zero
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
-        profile.money = start;
+        profile.set_money(start);
     }
     rig.drive.trip.position_mi = 2.0;
     rig.drive.truck_mut().engine_on = true;
@@ -612,7 +612,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
             profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL as usize - 1]; // exactly level 18
             profile.career.deliveries = OWNER_OPERATOR_DELIVERIES;
             profile.career.reputation = OWNER_OPERATOR_REPUTATION;
-            profile.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+            profile.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL);
             // exact dollar
         }
         let level = app.ctx.profile.as_ref().map_or(0, |p| p.career.level());
@@ -660,7 +660,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
         profile.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL as usize - 2]; // level 17
         profile.career.deliveries = OWNER_OPERATOR_DELIVERIES;
         profile.career.reputation = OWNER_OPERATOR_REPUTATION;
-        profile.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 50_000.0;
+        profile.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 50_000.0);
         profile.money
     };
     let level = app.ctx.profile.as_ref().map_or(0, |p| p.career.level());

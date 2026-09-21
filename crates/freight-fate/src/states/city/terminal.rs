@@ -226,7 +226,7 @@ impl CityMenuState {
         }
         let (money, advance) = {
             let p = profile_mut(ctx);
-            p.money += grant;
+            p.earn(grant);
             p.pay_advance = round_py_n(p.pay_advance + grant, 2);
             p.pay_advance_used_for_load = true;
             (p.money, p.pay_advance)
