@@ -4,12 +4,12 @@
 //! instead of a browsable folder: `freight_fate/music.pak` carries every entry
 //! under `music/`, `freight_fate/sounds.pak` carries everything else. The
 //! split keeps the small (tens-of-MB) gameplay SFX library out of the much
-//! larger (several-hundred-MB) music payload, so an LFS pull for a sound-only
-//! change does not drag the whole music library with it. Each pack is a
+//! larger (several-hundred-MB) music payload, so a sound-only change does not
+//! drag the whole music library with it. Each pack is a
 //! deflated zip XOR-masked with a fixed key, so renaming one does not turn it
 //! back into an openable archive; this deters casual editing, nothing more.
-//! Career 1.9 source checkouts receive the encrypted packs through Git LFS.
-//! Tests can explicitly disable the default packs and exercise the loose-file
+//! In a source checkout `assets/sounds.pak` is an ordinary committed file and
+//! `assets/music.pak` is downloaded by `tools/build_release.py`. Tests can explicitly disable the default packs and exercise the loose-file
 //! fallback.
 //!
 //! `tools/pack_sounds.py` writes both packs; the audio engine reads them
@@ -45,10 +45,9 @@ pub const DEFAULT_MUSIC_PACK_NAME: &str = "music.pak";
 /// unmaterialised pack as present, so a test guarded with "if the file is not
 /// there, skip" never skips and asserts against 130 bytes of text instead.
 ///
-/// CI checks out without LFS deliberately: music.pak is 250 MB and sounds.pak
-/// 7.5 MB, and fetching both on every push exhausted the repository's LFS
-/// budget (see `.github/workflows/rust.yml`, and `ci.yml` for the Python
-/// side). A pointer here is the ordinary case on a runner, not a fault.
+/// The packs no longer live in Git LFS, but a checkout made while they did
+/// can still hold a pointer where `assets/sounds.pak` should be, so the
+/// guard stays.
 pub const LFS_POINTER_MAGIC: &[u8] = b"version https://git-lfs";
 
 /// Whether `path` is a Git LFS pointer standing in for the real file.
@@ -920,9 +919,9 @@ mod tests {
         // The trap this guard exists for: a pointer is a file that EXISTS,
         // so `Path::exists` alone reads an unmaterialised pack as present.
         //
-        // Written into a temp directory, never over the shipped packs: those
-        // are Git LFS objects (music.pak is 250 MB) and the working tree
-        // holds the only copy.
+        // Written into a temp directory, never over the shipped packs: the
+        // working tree holds the only local copy (music.pak is a 250 MB
+        // download).
         let tmp = tempfile::tempdir().unwrap();
         let pointer = tmp.path().join(DEFAULT_PACK_NAME);
         write_lfs_pointer(&pointer, &"a".repeat(64), 7_781_859);

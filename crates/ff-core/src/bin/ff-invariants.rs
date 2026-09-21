@@ -6,11 +6,11 @@
 //! ff-invariants <output> --check
 //! ```
 //!
-//! The Rust half of `tools/export_profile_integrity_invariants.py`, argument
-//! for argument: a positional output path and `--check`, so whatever runs the
-//! Python exporter today can run this instead with nothing else changed. The
-//! bytes are identical -- `crates/ff-core/tests/profile_integrity_export.rs`
-//! holds them against a committed fixture rendered by the Python side.
+//! The only exporter now. It replaced the Python
+//! `export_profile_integrity_invariants.py` (deleted with the Python game)
+//! argument for argument and byte for byte:
+//! `crates/ff-core/tests/it/profile_integrity_export.rs` holds the output
+//! against a committed fixture that exporter rendered.
 //!
 //! Why this is a binary at all: the validator decides whether a submitted
 //! career is arithmetically possible. If the shipped export ever drifts from

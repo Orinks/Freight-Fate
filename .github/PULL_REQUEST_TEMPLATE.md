@@ -17,7 +17,8 @@
 
 ## Tests and checks run
 
-<!-- e.g. uv run pytest, uv run ruff check src tests tools,
+<!-- e.g. cargo test -p ff-core -p freight-fate, the adversarial battery,
+     uv run pytest, uv run ruff check tests tools,
      plus any manual spoken-text or keyboard checks. -->
 
 ## Accessibility impact

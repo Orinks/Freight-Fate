@@ -24,25 +24,6 @@ use super::world_models::DataError;
 /// a portable install that keeps its data elsewhere).
 pub const DATA_ROOT_ENV: &str = "FREIGHT_FATE_DATA_ROOT";
 
-/// Every file `tools/bake_data.py` compiles into the *Python* frozen build.
-/// Reference only; nothing in the Rust runtime reads it.
-///
-/// Not the Rust release's list, despite the name: that release ships the
-/// baked container, and the loose JSON texts it carries are
-/// [`crate::data::baked::TEXT_FILES`].
-pub const BAKED_DATA_FILES: &[&str] = &[
-    "buffs.json",
-    "city_services.json",
-    "facility_approaches.json",
-    "facility_endpoints.json",
-    "local_approaches.json",
-    "local_geometry.json",
-    "radio_catalog.json",
-    "radio_imported.json",
-    "world_data/us/gameplay/curves.jsonl",
-    "world_data/us/gameplay/curve_artifacts.jsonl",
-];
-
 static DATA_ROOT: OnceCell<PathBuf> = OnceCell::new();
 
 /// Folder holding packaged data and sound packs for one executable.

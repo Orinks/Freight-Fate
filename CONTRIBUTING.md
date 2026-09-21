@@ -30,13 +30,12 @@ each release.
   `cargo test -p freight-fate` for anything the player can hear or do. That
   local run is the full suite; the per-push CI skips the whole-map sweeps
   (`#[cfg_attr(ci_quick, ignore = ...)]`) and the nightly snapshot runs them.
-- `uv run pytest` covers only the Python that still ships -- the build, bake,
+- `uv run pytest` covers only the Python tooling -- the build, bake,
   indexing and release tooling under `tools/`, plus the workflow and
-  sound-pack guards. It takes a few seconds, so just run all of it. The
-  gameplay tests that used to live there were retired on 2026-08-29; a new
-  gameplay test belongs in `cargo test`.
-- Run `uv run ruff check src tests tools` and
-  `uv run python -m compileall src tests tools`.
+  sound-pack guards. It takes a few seconds, so just run all of it. There is
+  no Python game any more; a new gameplay test belongs in `cargo test`.
+- Run `uv run ruff check tests tools` and
+  `uv run python -m compileall tests tools`.
 - For user-facing changes, include how you checked the spoken text, keyboard
   flow, or other accessibility impact.
 - Include a sandboxed agent-server session when live gameplay testing is
@@ -74,7 +73,7 @@ World data changes are welcome. Please keep them deterministic and offline:
   and the tooling that builds the data:
 
   ```powershell
-  uv run pytest tests/test_index_world.py tests/test_baked_data.py
+  uv run pytest tests/test_index_world.py
   ```
 
 ## Changelog entries
@@ -82,8 +81,10 @@ World data changes are welcome. Please keep them deterministic and offline:
 Nightly and stable release notes are built only from the curated entries in
 `CHANGELOG.md` -- never from commit subjects -- so a player-facing change
 without an entry ships silently. CI fails a pull request that changes
-user-facing paths (`src/`, `docs/`, `CHANGELOG.md`, `README.md`, and the
-release tooling) without adding one.
+user-facing paths without adding one: anything under `data/` (except
+`data/spider/`), `assets/`, `docs/` or `crates/` (except a crate's `tests/`
+and `benches/`), plus `CHANGELOG.md`, `README.md`, `pyproject.toml`,
+`tools/build_release.py` and `tools/release_notes.py`.
 
 - Add a bullet under `## Unreleased` in the fitting section (`Added`,
   `Changed`, `Fixed`, and so on).

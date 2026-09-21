@@ -138,11 +138,11 @@ These steps remain open even where a related implementation bullet is checked:
         tagging a real release, and 1.9 is not close to stable. Write it
         when it is, against a workflow that has been running nightly by
         then rather than against guesses now.
-      * Also freed by the ruling, and not yet done: `tools/build_release.py`'s
-        Python/Nuitka mode, `tools/build_appimage.py`'s Python path, and
-        their tests now have no caller. Deleting them is a separate sweep
-        -- they are dead weight, not a trap, so it can wait for a quiet
-        change rather than riding the cutover.
+      * [x] Also freed by the ruling, and DONE in the Python sunset
+        (2026-09-21): `tools/build_release.py`'s Python/Nuitka mode,
+        `tools/build_appimage.py`'s Python path and their tests are
+        deleted. The Rust build is the only one; `--rust` is still
+        accepted and does nothing.
 - [ ] The owner voice pass over seven achievement titles. The
       physical-Mac VoiceOver listening pass was DROPPED as a release
       gate (2026-09-20, owner): there is no physical Mac to test on.
@@ -413,6 +413,32 @@ career (Shane's design ask).
 The detailed backlog retains the remaining work and its recorded release scope.
 Update each item where it is recorded; this reorganization does not change
 its status or release decision.
+
+### September 21 the Python sunset
+
+- [x] The Python game is deleted (2026-09-21). The Rust workspace in
+      `crates/` is the only game; the Python survives in git history
+      (`v1.8.8.1` is its last release). The world data tree moved from
+      `src/freight_fate/data/` to `data/`, sounds, packs and the BASS
+      add-ons to `assets/`, and `src/` is gone. `tools/` stays Python, with
+      the world loader as the `tools/ffworld/` package, and `pyproject.toml`
+      is tooling only (`uv sync --group dev`). The installed game's layout
+      did not change. The playtest launchers are game flags now:
+      `freightfate --playtest-road --find <feature>` and
+      `freightfate --playtest-sandbox --launch`; `tools/playtest_watch.py`
+      still follows their logs.
+- [ ] `av` and `scipy` are imported by `tools/encode_music_opus.py`,
+      `tools/patch_loop_transients.py` and the `sound-test/` scripts but
+      declared nowhere in `pyproject.toml`. Add them to a group (`tooling`
+      fits) so a fresh checkout can run those tools.
+- [ ] `sound-test/` carries old ruff lint and format debt, so the
+      pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
+      Clean it up and drop the exclude.
+- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
+      test that failed on the word outside a CB clause in any player-facing
+      string; the Rust
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
+      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
 
 ### September 11 trucking corrections
 

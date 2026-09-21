@@ -108,9 +108,9 @@ Want to help with code, docs, or world data? Start with
 
 ## Run from source
 
-Career 1.9 is a native Rust game. Python is not part of the gameplay runtime;
-it remains in this repository only for build, packaging, data-generation, and
-other maintainer tools.
+Career 1.9 is a native Rust game. Python is not part of the game; it remains
+in this repository only for build, packaging, data-generation, and other
+maintainer tools under `tools/`.
 
 Install these prerequisites first:
 
@@ -121,7 +121,7 @@ Install these prerequisites first:
 Then clone Career 1.9 and run the game:
 
 ```powershell
-git clone --branch feat/career-1.9 https://github.com/Orinks/Freight-Fate.git
+git clone https://github.com/Orinks/Freight-Fate.git
 cd Freight-Fate
 uv sync --group dev
 uv run python tools/fetch_bass.py
@@ -378,14 +378,13 @@ world-data generation, release notes, or another Python tool, set up its
 environment and run focused Python checks for that tool:
 
 ```bash
-uv sync --group dev --group build
-uv run pytest tests/test_build_release.py
-uv run ruff check tools tests
+uv sync --group dev
+uv run pytest tests/test_build_release_rust.py
+uv run ruff check tests tools
 ```
 
-Do not add Python gameplay implementations or Python gameplay regressions to
-Career 1.9. The older Python package remains temporarily as migration
-reference material and for tool compatibility, not as the 1.9 runtime.
+Do not add Python gameplay code or Python gameplay tests. The Python game was
+removed after its last release, `v1.8.8.1`; it survives only in git history.
 
 The pre-push hook runs the release-note gate before publishing commits.
 User-facing changes need a player-facing `CHANGELOG.md` entry unless the
@@ -394,8 +393,8 @@ entire change set is non-player-facing and uses `changelog: none` or
 
 ### World data
 
-The route tools edit `src/freight_fate/data/world_source/`, but the game loads
-the indexed `src/freight_fate/data/world_data/` tree. After changing world data,
+The route tools edit `data/world_source/`, but the game loads the indexed
+`data/world_data/` tree. After changing world data,
 regenerate the index so the two stay in sync:
 
 ```bash
@@ -424,9 +423,11 @@ cargo test -p freight-fate --test it transcript_shane_deadline -- --nocapture
 cargo test -p freight-fate
 ```
 
-The maintained Python scripts under `tools/` may still prepare data, launch a
-manual test scenario, or watch its log. They are helpers around the Rust game;
-they are not a second gameplay implementation or substitute test suite.
+A manual test scenario starts from the game binary itself:
+`cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find <feature>`
+drops you at a road feature, and `-- --playtest-sandbox --launch` opens the full
+game in a throwaway save directory. `tools/playtest_watch.py` follows either
+session's log.
 
 ### Changelog and snapshots
 
@@ -447,7 +448,7 @@ to use, modify, and share for any noncommercial purpose, but only the copyright
 holder may sell it or put it to commercial use. This is a source-available
 license, not an OSI-approved open-source license. Bundled audio credits and
 provenance are tracked in
-[the Freight Fate audio credits](src/freight_fate/assets/sounds/CREDITS.md).
+[the Freight Fate audio credits](assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the
 [BASS](https://www.un4seen.com/) library through Freight Fate's Rust bindings.
@@ -457,5 +458,4 @@ so on), a paid license must be purchased from
 [un4seen developments](https://www.un4seen.com/bass.html#license) first.
 The same terms cover the bundled BASSHLS addon
 (`basshls.dll`), which lets the radio play HLS streams; its license text ships
-alongside it. When BASS is unavailable, the Rust game uses a silent backend
-instead of pygame.
+alongside it. When BASS is unavailable, the Rust game runs without sound.
