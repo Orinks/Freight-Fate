@@ -446,9 +446,10 @@ its status or release decision.
       links the archive whole on Linux and macOS, and the nightly now fails
       when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
       missing from `--list-speech-backends`.
-- [ ] Prism's backend anchors cover MSVC only; a GCC or Clang static link
-      drops every backend unless linked whole. Hand-off for the owner, not
-      an upstream issue from this side.
+- [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
+      every backend unless linked whole. Reported with a standalone
+      reproduction as ethindp/prism#130; drop the whole-archive link in
+      `crates/freight-fate/build.rs` once a fix ships.
 
 ### September 21 the Python sunset
 
