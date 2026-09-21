@@ -55,10 +55,14 @@ VENDOR = REPO_ROOT / "crates" / "bass-sys" / "vendor"
 # byte-identical to the current downloads; `bassflac.dll` and `bassopus.dll`
 # are NOT -- upstream has moved on -- and the AAC add-on is no longer at a
 # guessable URL at all (every candidate 404s; it is behind the add-ons page).
-# So the local copy is the primary source and the network is a fallback that
-# only succeeds where the pin still matches. Re-pinning to current upstream
-# builds is a deliberate job: fetch them, listen to the engine ring and a
-# radio stream, then update these hashes.
+# So those three come as plain files from sound_lib's own repository, at a
+# pinned commit (an empty member means the URL is the file, not a zip).
+# Re-pinning to current upstream builds is a deliberate job: fetch them,
+# listen to the engine ring and a radio stream, then update these hashes.
+SOUND_LIB_X64 = (
+    "https://raw.githubusercontent.com/samtupy/sound_lib_macos_fixes/"
+    "2b4f6ee2036928f9b4e9e87df7424014734ab4d3/sound_lib/lib/windows_x64/"
+)
 WINDOWS_X64 = {
     "bass.dll": (
         "https://www.un4seen.com/files/bass24.zip",
@@ -66,20 +70,18 @@ WINDOWS_X64 = {
         "febb2cf1882d554c3a958280777da0b69f07de6e262df271de11c56e4a54afd4",
     ),
     "bass_aac.dll": (
-        # No stable direct URL: un4seen serve the AAC add-on from the add-ons
-        # page, not /files. Fetched from sound_lib, or by hand.
+        SOUND_LIB_X64 + "bass_aac.dll",
         "",
-        "x64/bass_aac.dll",
         "9832f4e2d3716c7453b40b9e20284977f20f264c7c7b87381d63aa5c572be97c",
     ),
     "bassflac.dll": (
-        "https://www.un4seen.com/files/bassflac24.zip",
-        "x64/bassflac.dll",
+        SOUND_LIB_X64 + "bassflac.dll",
+        "",
         "ee6b3898275a42ee502cb73fce5a347ffed7b385190d6e11b11d413fe63625d5",
     ),
     "bassopus.dll": (
-        "https://www.un4seen.com/files/bassopus24.zip",
-        "x64/bassopus.dll",
+        SOUND_LIB_X64 + "bassopus.dll",
+        "",
         "eec4507ee7d8098b0fa5e90832e2d15eaaeadb6fac781997d3e0d8c0256186e2",
     ),
     "basshls.dll": (
@@ -190,19 +192,6 @@ TARGETS = {
 }
 
 
-# The same libraries ship inside the Python game's own dependency, so a
-# checkout that has already run `uv sync` can be served without reaching the
-# network at all. Offline machines and CI runners behind a proxy both land
-# here. Windows venvs put site-packages under `Lib/`; every other platform
-# puts it under `lib/pythonX.Y/`.
-def local_fallback_dirs() -> list[Path]:
-    venv = REPO_ROOT / ".venv"
-    return [
-        venv / "Lib" / "site-packages" / "sound_lib" / "lib",
-        *sorted(venv.glob("lib/python*/site-packages/sound_lib/lib")),
-    ]
-
-
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -232,26 +221,16 @@ def target_keys() -> list[str]:
     )
 
 
-def from_local(name: str, want: str) -> bytes | None:
-    for directory in local_fallback_dirs():
-        candidate = directory / name
-        if not candidate.is_file():
-            continue
-        data = candidate.read_bytes()
-        if digest(data) == want:
-            return data
-    return None
-
-
 def from_network(url: str, member: str, want: str) -> bytes:
     with urllib.request.urlopen(url, timeout=30) as response:
-        archive = response.read()
-    with zipfile.ZipFile(io.BytesIO(archive)) as zf:
-        names = {n.lower(): n for n in zf.namelist()}
-        actual = names.get(member.lower())
-        if actual is None:
-            raise SystemExit(f"fetch_bass: {url} has no {member}")
-        data = zf.read(actual)
+        data = response.read()
+    if member:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            names = {n.lower(): n for n in zf.namelist()}
+            actual = names.get(member.lower())
+            if actual is None:
+                raise SystemExit(f"fetch_bass: {url} has no {member}")
+            data = zf.read(actual)
     got = digest(data)
     if got != want:
         raise SystemExit(
@@ -298,25 +277,13 @@ def main() -> int:
             data = fetched.get(want)
             source = "already fetched"
             if data is None:
-                data = from_local(name, want)
-                source = "sound_lib"
-            if data is None and not url:
-                where = ", ".join(str(d) for d in local_fallback_dirs())
-                raise SystemExit(
-                    f"fetch_bass: {name} has no download URL and is not in "
-                    f"{where}. Run `uv sync` to install sound_lib, or "
-                    "download the BASS AAC add-on from un4seen.com by hand and put "
-                    f"it in {out_dir}."
-                )
-            if data is None:
                 try:
                     data = from_network(url, member, want)
                     source = url
                 except (urllib.error.URLError, TimeoutError) as err:
                     raise SystemExit(
                         f"fetch_bass: could not reach {url} ({err}).\n"
-                        "Download it by hand, or run `uv sync` so the copy inside "
-                        "sound_lib can be used instead."
+                        f"Download it by hand and put it in {out_dir}."
                     ) from err
             fetched[want] = data
             path.write_bytes(data)
