@@ -36,11 +36,6 @@ desktop.ini
 *.log
 live_*.txt
 
-# Release packaging
-tools/_entry.py
-src/freight_fate/data/_baked_world.py
-src/freight_fate/data/_baked_data.py
-
 # Licensed sound-library material. NEVER COMMIT THESE.
 #
 # Purchased SFX libraries (Big Fish Audio / Pro Sound Effects and similar)

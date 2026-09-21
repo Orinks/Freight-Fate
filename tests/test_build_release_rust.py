@@ -521,7 +521,8 @@ def test_windows_release_wrapper_is_the_complete_beginner_command():
     assert readme_heading.removeprefix("## ") in script
     assert "Get-Command rustc" in script
     assert "Get-Command uv" in script
-    assert "uv sync --group dev --group build" in script
+    assert "uv sync --group dev" in script
+    assert "--group build" not in script
     assert "uv run python tools/build_release.py --rust --smoke" in script
     assert "Start-Process" not in script
 
@@ -998,23 +999,6 @@ def test_appimage_tooling_refuses_an_architecture_it_has_no_tools_for():
         build_appimage.appimage_architecture("riscv64")
 
 
-def test_linux_archive_verifier_leaves_the_nuitka_tarball_alone(tmp_path):
-    """The Python build's tarball has no baked container and no flat BASS;
-    the Rust library list must not be demanded of it."""
-    build_release = load_build_release_module()
-    names = [
-        "FreightFate",
-        "build_info.json",
-        "LICENSE.txt",
-        "USER_MANUAL.md",
-        "freight_fate/sounds.pak",
-        "freight_fate/music.pak",
-    ]
-    out = tmp_path / "FreightFate-nightly-20260902-linux-x64.tar.gz"
-    write_linux_tarball(out, names, build_release)
-    build_release.verify_archive(out)
-
-
 def test_macos_linked_libraries_ignores_fat_macho_slice_headers(tmp_path, monkeypatch):
     """Every fat-binary architecture header names the file, not a dependency."""
     build_release = load_build_release_module()
@@ -1311,6 +1295,7 @@ def write_macos_archive(
         f"{payload_root}/USER_MANUAL.md": b"manual",
         f"{payload_root}/freight_fate/sounds.pak": b"sounds",
         f"{payload_root}/freight_fate/music.pak": b"music",
+        f"{payload_root}/freight_fate/data/world.ffdata": b"FFDATA",
     }
     if include_icon:
         entries["FreightFate.app/Contents/Resources/FreightFate.icns"] = b"icon"
@@ -1321,15 +1306,6 @@ def write_macos_archive(
             info = zipfile.ZipInfo(name)
             info.external_attr = (0o755 if name.endswith("/FreightFate") else 0o644) << 16
             archive.writestr(info, content)
-
-
-def test_archive_verifier_keeps_legacy_macos_payload_in_macos_when_resources_has_only_icon(
-    tmp_path,
-):
-    build_release = load_build_release_module()
-    archive = tmp_path / "FreightFate-1.8.8-macos.zip"
-    write_macos_archive(archive, "FreightFate.app/Contents/MacOS")
-    build_release.verify_archive(archive)
 
 
 def test_archive_verifier_detects_new_rust_payload_by_resources_build_info(tmp_path):

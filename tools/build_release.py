@@ -1,7 +1,6 @@
 """Build a standalone Freight Fate distribution.
 
-Produces a standalone build (fast startup, antivirus-friendly) and
-archives it for release:
+Packages the Rust game and archives it for release:
 
 * Windows: ``dist/FreightFate-<label>-windows-portable.zip``
 * Linux:   ``dist/FreightFate-<label>-linux-x64.tar.gz`` on x86_64, and
@@ -11,21 +10,20 @@ archives it for release:
 * macOS Intel: ``dist/FreightFate-<label>-macos.zip``
 
 ``<label>`` is the project version from pyproject.toml, or the value of
-``--tag`` (used for nightly developer snapshots). Builds use Nuitka on all
-platforms. macOS uses Nuitka's app mode with ad-hoc signing but no Apple
-Developer ID or notarization, so downloaded apps can require the documented
-first-launch Open Anyway step in System Settings.
+``--tag`` (used for nightly developer snapshots).
 
 Run from the repository root: ``uv run python tools/build_release.py``
 
-``--rust`` packages the Rust port instead: ``cargo build --release -p
-freight-fate`` (``--cargo-target-dir`` picks the Cargo target directory),
-then ``ff-bake`` to turn the JSON data tree into ``world.ffdata``, then the
-same ``FreightFate/`` folder layout -- executable renamed to ``FreightFate``,
-On macOS it creates ``FreightFate.app`` with the executable under
-``Contents/MacOS``, native libraries under ``Contents/Frameworks``, and data,
-packs, build metadata, and documents under ``Contents/Resources``. Other
-platforms retain the portable folder layout. The Python mode stays the default.
+The pipeline is ``cargo build --release -p freight-fate``
+(``--cargo-target-dir`` picks the Cargo target directory), then ``ff-bake``
+to turn the JSON data tree into ``world.ffdata``, then a ``FreightFate/``
+folder with the executable renamed to ``FreightFate``. On macOS it creates
+``FreightFate.app`` with the executable under ``Contents/MacOS``, native
+libraries under ``Contents/Frameworks``, and data, packs, build metadata, and
+documents under ``Contents/Resources``; macOS builds are ad-hoc signed, with no
+Apple Developer ID or notarization, so a downloaded app can need the
+documented first-launch Open Anyway step. ``--rust`` is accepted for the
+callers that still pass it; it is the only mode.
 """
 
 from __future__ import annotations
@@ -58,15 +56,10 @@ TOOLS = ROOT / "tools"
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 APP_NAME = "FreightFate"
-SRC_DIR = ROOT / "src"
-PACKAGE_DIR = SRC_DIR / "freight_fate"
-SOUND_LIB_NATIVE_EXTS = {".dll", ".dylib", ".so"}
-SOUND_LIB_ARCH_DIR = "x64"
-# Game-shipped BASS addon plugins (e.g. basshls for HLS radio streams);
-# staged next to sound_lib's own libraries so one directory holds all of BASS.
+PACKAGE_DIR = ROOT / "src" / "freight_fate"
+# Game-shipped BASS addon plugins (e.g. basshls for HLS radio streams),
+# staged beside the executable with the rest of BASS.
 ADDON_LIB_DIR = PACKAGE_DIR / "lib"
-PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
-PRISM_DEPENDENCY_DIR = "prismatoid.libs"
 # Production, so a release no longer pulls its music through the staging host.
 #
 # This took two goes. The route is a 307 to FREIGHT_FATE_MUSIC_BLOB_URL, and
@@ -97,215 +90,15 @@ def project_version() -> str:
         return tomllib.load(f)["project"]["version"]
 
 
-def nuitka_version(version: str) -> str:
-    """Convert the project version into Nuitka's numeric metadata format."""
-    base = version.split("+", 1)[0].split(".dev", 1)[0].split("a", 1)[0].split("b", 1)[0]
-    parts = [part for part in base.split(".") if part.isdigit()]
-    return ".".join((parts + ["0", "0", "0", "0"])[:4])
-
-
-def repo_path(path: Path) -> str:
-    """Return a POSIX path relative to the repository root."""
-    return path.relative_to(ROOT).as_posix()
-
-
-def write_entrypoint() -> Path:
-    entry = ROOT / "tools" / "_entry.py"
-    entry.write_text(
-        "import sys\n\n"
-        "from freight_fate.app import main\n\n"
-        'if __name__ == "__main__":\n'
-        "    sys.exit(main())\n",
-        encoding="utf-8",
-    )
-    return entry
-
-
-def sound_lib_lib_dir() -> Path:
-    """Locate sound_lib's native BASS library directory."""
-    spec = importlib.util.find_spec("sound_lib")
-    if not spec or not spec.submodule_search_locations:
-        raise RuntimeError("sound_lib is not installed; cannot build packaged audio support")
-    lib_dir = Path(next(iter(spec.submodule_search_locations))) / "lib"
-    if not lib_dir.exists():
-        raise RuntimeError(f"sound_lib native library directory was not found: {lib_dir}")
-    return lib_dir
-
-
-def sound_lib_target_dir(build_dir: Path) -> Path:
-    if build_dir.suffix == ".app":
-        return build_dir / "Contents" / "MacOS" / "sound_lib" / "lib"
-    return build_dir / "sound_lib" / "lib"
-
-
-def package_dir(package_name: str) -> Path:
-    spec = importlib.util.find_spec(package_name)
-    if not spec or not spec.submodule_search_locations:
-        raise RuntimeError(f"{package_name} is not installed; cannot package it")
-    return Path(next(iter(spec.submodule_search_locations)))
-
-
 def runtime_root(build_dir: Path) -> Path:
     if build_dir.suffix == ".app":
         return build_dir / "Contents" / "MacOS"
     return build_dir
 
 
-def mirror_sound_lib_flat_files_to_arch_dir(target_dir: Path) -> None:
-    """Support sound_lib loaders that still search sound_lib/lib/x64."""
-    flat_files = [path for path in target_dir.iterdir() if path.is_file()]
-    if not flat_files:
-        return
-    arch_dir = target_dir / SOUND_LIB_ARCH_DIR
-    arch_dir.mkdir(exist_ok=True)
-    for path in flat_files:
-        shutil.copy2(path, arch_dir / path.name)
-
-
-def add_macos_dylib_aliases(target_dir: Path) -> None:
-    """Provide lib*.dylib names for sound_lib's macOS library finder."""
-    if sys.platform != "darwin":
-        return
-    for path in target_dir.rglob("*.dylib"):
-        if path.name.startswith("lib"):
-            continue
-        alias = path.with_name(f"lib{path.name}")
-        if not alias.exists():
-            shutil.copy2(path, alias)
-
-
-def stage_sound_lib_runtime_files(build_dir: Path) -> None:
-    source_dir = sound_lib_lib_dir()
-    target_dir = sound_lib_target_dir(build_dir)
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-    target_dir.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_dir, target_dir)
-    if ADDON_LIB_DIR.exists():
-        for path in ADDON_LIB_DIR.iterdir():
-            if path.is_file() and path.suffix.lower() in SOUND_LIB_NATIVE_EXTS:
-                shutil.copy2(path, target_dir / path.name)
-    mirror_sound_lib_flat_files_to_arch_dir(target_dir)
-    add_macos_dylib_aliases(target_dir)
-
-    native_files = [
-        path
-        for path in target_dir.rglob("*")
-        if path.is_file() and path.suffix.lower() in SOUND_LIB_NATIVE_EXTS
-    ]
-    if not native_files:
-        raise RuntimeError(f"No sound_lib native libraries were staged under {target_dir}")
-
-
-def prism_native_dir() -> Path:
-    """Locate Prism's native screen reader bridge library directory."""
-    native_dir = package_dir("prism") / "_native"
-    if not native_dir.exists():
-        raise RuntimeError(f"Prism native library directory was not found: {native_dir}")
-    return native_dir
-
-
-def prism_dependency_dir() -> Path | None:
-    """Locate auditwheel-bundled Prism shared library dependencies."""
-    dependency_dir = package_dir("prism").parent / PRISM_DEPENDENCY_DIR
-    return dependency_dir if dependency_dir.exists() else None
-
-
 def native_files(root: Path, exts: set[str] | None = None) -> list[Path]:
     suffixes = exts or platform_native_exts()
     return [path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in suffixes]
-
-
-def linux_shared_library_files(root: Path) -> list[Path]:
-    return [path for path in root.rglob("*") if path.is_file() and ".so" in path.name]
-
-
-def verify_release_dependencies() -> None:
-    """Fail early when a platform build lacks runtime dependencies."""
-    importlib.import_module("pygame")
-    importlib.import_module("numpy")
-    importlib.import_module("certifi")
-    importlib.import_module("prism")
-    importlib.import_module("sound_lib")
-
-    sound_lib_dir = sound_lib_lib_dir()
-    if not native_files(sound_lib_dir):
-        raise RuntimeError(
-            f"sound_lib native audio libraries are missing for this platform: {sound_lib_dir}"
-        )
-
-    native_dir = prism_native_dir()
-    if not native_files(native_dir):
-        expected = ", ".join(sorted(platform_native_exts()))
-        raise RuntimeError(
-            "Prism native speech libraries are missing for this platform "
-            f"({expected}) under {native_dir}"
-        )
-    verify_prism_native_linkage(native_dir, prism_dependency_dir())
-
-
-def prism_target_dir(build_dir: Path) -> Path:
-    return runtime_root(build_dir) / "prism" / "_native"
-
-
-def prism_dependency_target_dir(build_dir: Path) -> Path:
-    return runtime_root(build_dir) / PRISM_DEPENDENCY_DIR
-
-
-def stage_prism_runtime_files(build_dir: Path) -> None:
-    source_dir = prism_native_dir()
-    target_dir = prism_target_dir(build_dir)
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-    target_dir.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_dir, target_dir)
-
-    native_files = [
-        path
-        for path in target_dir.rglob("*")
-        if path.is_file() and path.suffix.lower() in PRISM_NATIVE_EXTS
-    ]
-    if not native_files:
-        raise RuntimeError(f"No Prism native libraries were staged under {target_dir}")
-
-    dependency_dir = prism_dependency_dir()
-    if dependency_dir is not None:
-        dependency_target = prism_dependency_target_dir(build_dir)
-        if dependency_target.exists():
-            shutil.rmtree(dependency_target)
-        shutil.copytree(dependency_dir, dependency_target)
-
-
-def verify_prism_native_linkage(native_dir: Path, dependency_dir: Path | None = None) -> None:
-    """On Linux, prove Prism's bundled shared libraries can be resolved."""
-    if not sys.platform.startswith("linux"):
-        return
-    prism_libs = [
-        path for path in native_files(native_dir, {".so"}) if path.name.startswith("libprism")
-    ]
-    if not prism_libs:
-        return
-    if dependency_dir is None or not linux_shared_library_files(dependency_dir):
-        raise RuntimeError(
-            "Prism Linux shared library dependencies are missing from the package: "
-            f"{PRISM_DEPENDENCY_DIR}"
-        )
-
-    search_paths = os.pathsep.join(str(path) for path in (native_dir, dependency_dir))
-    env = {**os.environ, "LD_LIBRARY_PATH": search_paths}
-    for prism_lib in prism_libs:
-        result = subprocess.run(
-            ["ldd", str(prism_lib)],
-            check=False,
-            capture_output=True,
-            text=True,
-            env=env,
-        )
-        output = f"{result.stdout}\n{result.stderr}".strip()
-        if result.returncode != 0 or "not found" in output:
-            raise RuntimeError(
-                f"Prism native library has unresolved Linux dependencies: {prism_lib}\n{output}"
-            )
 
 
 def _load_tool(name: str):
@@ -323,19 +116,9 @@ def stage_sound_pack(build_dir: Path, root: Path | None = None) -> None:
     root = root or runtime_root(build_dir)
     destination = root / "freight_fate" / "sounds.pak"
     music_destination = root / "freight_fate" / "music.pak"
-    committed_pack = PACKAGE_DIR / "sounds.pak"
-    committed_music_pack = PACKAGE_DIR / "music.pak"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    pack_sounds = _load_tool("pack_sounds")
-    if committed_pack.exists():
-        shutil.copy2(committed_pack, destination)
-    else:
-        # Retain the loose-asset fallback for branches that do not carry a pack.
-        pack_sounds.pack_sounds_only(output=destination)
-    if committed_music_pack.exists():
-        shutil.copy2(committed_music_pack, music_destination)
-    else:
-        pack_sounds.pack_music_only(output=music_destination)
+    shutil.copy2(PACKAGE_DIR / "sounds.pak", destination)
+    shutil.copy2(PACKAGE_DIR / "music.pak", music_destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")
@@ -379,184 +162,6 @@ def stage_release_docs(build_dir: Path, root: Path | None = None) -> None:
     (root / "ALPHA_TEST_BOOK.html").write_text(test_book_html, encoding="utf-8")
 
 
-# keyring locates its platform backends through entry points rather than
-# imports, so a build that loses either the backend modules or the metadata
-# naming them keeps the online driver token in the fallback file instead -- on
-# every platform, and with no visible symptom. Nuitka 4.1 was measured to
-# include both on its own, so these are belt and braces, not a fix for a known
-# break: they state the requirement so a future Nuitka cannot quietly drop it.
-# What actually proves the outcome is tools/check_keyring_packaging.py, which
-# CI compiles with these same flags on all three platforms -- so read them
-# from here rather than repeating them in the workflow.
-KEYRING_NUITKA_ARGS = [
-    "--include-package=keyring.backends",
-    "--include-distribution-metadata=keyring",
-]
-
-
-# Nuitka compiles one C file per CPU core in parallel. On a Windows machine
-# without Visual Studio's C++ toolchain it silently falls back to a downloaded
-# MinGW64 GCC whose processes each peak at over half a gigabyte, so one per
-# core exhausts memory midway through the ~360-module compile on typical
-# 8-16 GB machines -- the failure surfaces as GCC dying partway, and elevation
-# does not help. One job per this many bytes keeps the compile inside physical
-# memory; MSVC machines (CI, dev boxes) keep Nuitka's default.
-MINGW_JOB_MEMORY_BYTES = 2 * 1024**3
-
-
-def mingw_safe_job_count(cpu_count: int, memory_bytes: int | None) -> int:
-    """Parallel compile jobs the MinGW64 fallback can afford on this machine."""
-    if not memory_bytes:
-        return cpu_count
-    return max(1, min(cpu_count, memory_bytes // MINGW_JOB_MEMORY_BYTES))
-
-
-def windows_total_memory_bytes() -> int | None:
-    """Total physical RAM on Windows, or None when the query fails."""
-    import ctypes
-
-    class MemoryStatusEx(ctypes.Structure):
-        _fields_ = [
-            ("dwLength", ctypes.c_uint32),
-            ("dwMemoryLoad", ctypes.c_uint32),
-            ("ullTotalPhys", ctypes.c_uint64),
-            ("ullAvailPhys", ctypes.c_uint64),
-            ("ullTotalPageFile", ctypes.c_uint64),
-            ("ullAvailPageFile", ctypes.c_uint64),
-            ("ullTotalVirtual", ctypes.c_uint64),
-            ("ullAvailVirtual", ctypes.c_uint64),
-            ("ullAvailExtendedVirtual", ctypes.c_uint64),
-        ]
-
-    status = MemoryStatusEx()
-    status.dwLength = ctypes.sizeof(MemoryStatusEx)
-    if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
-        return None
-    return int(status.ullTotalPhys)
-
-
-def windows_msvc_available() -> bool:
-    """Whether Nuitka will find Visual Studio's C++ toolchain."""
-    vswhere = (
-        Path(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"))
-        / "Microsoft Visual Studio"
-        / "Installer"
-        / "vswhere.exe"
-    )
-    if not vswhere.exists():
-        return False
-    result = subprocess.run(
-        [
-            str(vswhere),
-            "-products",
-            "*",
-            "-latest",
-            "-requires",
-            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-            "-property",
-            "installationPath",
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0 and bool(result.stdout.strip())
-
-
-def build_nuitka_command(entry: Path) -> list[str]:
-    """Build the Nuitka command for the current platform."""
-    system = platform.system()
-    output_dir = BUILD / "nuitka"
-    numeric_version = nuitka_version(project_version())
-    mode = "--mode=app" if system == "Darwin" else "--mode=standalone"
-    cmd = [
-        sys.executable,
-        "-m",
-        "nuitka",
-        mode,
-        "--assume-yes-for-downloads",
-        "--noinclude-pytest-mode=nofollow",
-        "--include-package-data=prism:_native/*",
-        "--include-package-data=sound_lib",
-        # World data ships baked into the executable (tools/bake_world.py),
-        # the loose runtime data files ship baked too (tools/bake_data.py),
-        # and sounds ship as a masked pack (tools/pack_sounds.py), never as
-        # editable files next to it.
-        "--include-module=freight_fate.data._baked_world",
-        "--include-module=freight_fate.data._baked_data",
-        *KEYRING_NUITKA_ARGS,
-        f"--output-dir={output_dir.as_posix()}",
-        f"--output-filename={APP_NAME}",
-        f"--product-name={APP_NAME}",
-        f"--file-description={APP_NAME}",
-        f"--product-version={numeric_version}",
-        f"--file-version={numeric_version}",
-        "--company-name=Orinks",
-    ]
-
-    if system == "Windows":
-        cmd.append("--windows-console-mode=disable")
-        if not windows_msvc_available():
-            jobs = mingw_safe_job_count(os.cpu_count() or 1, windows_total_memory_bytes())
-            cmd.append(f"--jobs={jobs}")
-            print(
-                "No Visual Studio C++ toolchain found; Nuitka will compile with its "
-                f"downloaded MinGW64 GCC, capped at {jobs} parallel job(s) to fit "
-                "this machine's memory."
-            )
-    elif system == "Darwin":
-        cmd.append(f"--macos-app-name={APP_NAME}")
-
-    cmd.append(repo_path(entry))
-    return cmd
-
-
-def find_nuitka_output(output_dir: Path) -> tuple[Path, str]:
-    app_candidates = sorted(
-        output_dir.glob("*.app"), key=lambda path: path.stat().st_mtime, reverse=True
-    )
-    for candidate in app_candidates:
-        if (candidate / "Contents" / "MacOS" / APP_NAME).exists():
-            return candidate, "app"
-
-    dist_candidates = sorted(
-        output_dir.glob("*.dist"), key=lambda path: path.stat().st_mtime, reverse=True
-    )
-    for candidate in dist_candidates:
-        exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
-        if (candidate / exe).exists():
-            return candidate, "dist"
-
-    raise FileNotFoundError(f"Nuitka output was not found under {output_dir}")
-
-
-def run_nuitka() -> Path:
-    """Build and stage a standalone Nuitka distribution."""
-    entry = write_entrypoint()
-    output_dir = BUILD / "nuitka"
-    baked = _load_tool("bake_world").bake()
-    baked_data = _load_tool("bake_data").bake()
-    try:
-        subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
-    finally:
-        # A leftover baked module would shadow later edits to world_data/
-        # (or the runtime data files) in this source checkout, so neither
-        # must outlive the compile.
-        baked.unlink(missing_ok=True)
-        baked_data.unlink(missing_ok=True)
-
-    source_dir, output_kind = find_nuitka_output(output_dir)
-    build_dir = DIST / (f"{APP_NAME}.app" if output_kind == "app" else APP_NAME)
-    if build_dir.exists():
-        shutil.rmtree(build_dir)
-    DIST.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_dir, build_dir)
-    stage_sound_lib_runtime_files(build_dir)
-    stage_prism_runtime_files(build_dir)
-    stage_sound_pack(build_dir)
-    return build_dir
-
-
 def verify_sound_packs(root: Path) -> None:
     """Open the staged packs and prove they carry what the game reads."""
     if root.suffix == ".app":
@@ -579,75 +184,6 @@ def verify_sound_packs(root: Path) -> None:
         raise RuntimeError("Packaged music pack contains no music files")
 
 
-def verify_packaged_payload(build_dir: Path) -> None:
-    root = runtime_root(build_dir)
-    exe = root / (APP_NAME + (".exe" if sys.platform == "win32" else ""))
-
-    required = [
-        exe,
-        root / "build_info.json",
-        root / "LICENSE.txt",
-        root / "CHANGELOG.md",
-        root / "USER_MANUAL.md",
-        root / "USER_MANUAL.html",
-        root / "ALPHA_TEST_BOOK.md",
-        root / "ALPHA_TEST_BOOK.html",
-        root / "freight_fate" / "sounds.pak",
-        root / "freight_fate" / "music.pak",
-        root / "SOUND_CREDITS.md",
-        root / "sound_lib" / "lib",
-        root / "prism" / "_native",
-    ]
-    if sys.platform.startswith("linux"):
-        required.append(root / PRISM_DEPENDENCY_DIR)
-    missing = [path for path in required if not path.exists()]
-    if missing:
-        raise RuntimeError(
-            "Packaged payload is incomplete: "
-            + ", ".join(str(path.relative_to(root)) for path in missing)
-        )
-
-    exposed_data = root / "freight_fate" / "data"
-    if exposed_data.exists():
-        raise RuntimeError(
-            "Packaged payload exposes editable world data files; they must "
-            f"stay baked into the executable: {exposed_data.relative_to(root)}"
-        )
-
-    exposed_assets = root / "freight_fate" / "assets"
-    if exposed_assets.exists():
-        raise RuntimeError(
-            "Packaged payload exposes editable sound files; they must stay "
-            f"packed in sounds.pak: {exposed_assets.relative_to(root)}"
-        )
-
-    verify_sound_packs(root)
-
-    if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
-        raise RuntimeError(
-            f"Packaged executable is not runnable, so updates cannot restart: "
-            f"{exe.relative_to(root)}"
-        )
-
-    if not native_files(root / "prism" / "_native"):
-        expected = ", ".join(sorted(platform_native_exts()))
-        raise RuntimeError(
-            "Prism native speech libraries are missing from the package "
-            f"for this platform ({expected})"
-        )
-    verify_prism_native_linkage(
-        root / "prism" / "_native",
-        root / PRISM_DEPENDENCY_DIR if (root / PRISM_DEPENDENCY_DIR).exists() else None,
-    )
-
-    if not native_files(root / "sound_lib" / "lib"):
-        expected = ", ".join(sorted(platform_native_exts()))
-        raise RuntimeError(
-            "sound_lib native audio libraries are missing from the package "
-            f"for this platform ({expected})"
-        )
-
-
 def _is_snapshot_label(label: str) -> bool:
     """True for public 1.8 nightlies and Career 1.9 tester prereleases."""
     if label.startswith("nightly-"):
@@ -666,10 +202,7 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
 
     ``package_version`` is the exact ``pyproject.toml`` project version --
     not ``label``, which for a snapshot is a date-stamped tag, not a package
-    version. freight_fate.__init__ reads it back to skip the
-    importlib.metadata lookup that costs real time on every launch (the
-    metadata a frozen build would otherwise scan for is not even installed
-    the normal way in a Nuitka standalone build).
+    version.
     """
     snapshot = _is_snapshot_label(label)
     info = {
@@ -714,8 +247,8 @@ def smoke_check(build_dir: Path) -> None:
     }
     command = [str(exe), "--smoke"]
     if build_dir.suffix == ".app":
-        # Stable Nuitka builds still use the generic packaged smoke. Career's
-        # GitHub-hosted Rust job selects the explicit non-launch mode instead.
+        # A Mac app smokes headless; the GitHub-hosted macOS job selects the
+        # explicit non-launch mode instead.
         command.append("--headless")
     with tempfile.TemporaryDirectory(prefix="freight-fate-smoke-") as temp_dir:
         smoke_root = Path(temp_dir)
@@ -789,7 +322,7 @@ def linux_archive_suffix(machine: str | None = None) -> str:
 def verify_archive(out: Path) -> None:
     """Re-open the finished archive and prove the payload survived archiving.
 
-    ``verify_packaged_payload`` checks the staged build folder, but the
+    ``verify_rust_payload`` checks the staged build folder, but the
     archiving step after it is what players actually download. A bad glob,
     archiver quirk, or dropped permission bit here would ship a download with
     no runnable game inside (for example a Linux snapshot missing its
@@ -822,33 +355,31 @@ def verify_archive(out: Path) -> None:
             f"Release archive executable lost its executable permission: {exe_entry} in {out.name}"
         )
 
-    payload_root = root
-    resources_root = f"{APP_NAME}.app/Contents/Resources"
-    if macos_archive and f"{resources_root}/build_info.json" in entries:
-        payload_root = resources_root
+    # A Mac bundle keeps its payload under Resources; the others beside the exe.
+    payload_root = f"{APP_NAME}.app/Contents/Resources" if macos_archive else root
     required = (
         "build_info.json",
         "LICENSE.txt",
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        RUST_BAKED_FILE_ENTRY,
     )
     missing = [name for name in required if f"{payload_root}/{name}" not in entries]
-    if macos_archive and payload_root == resources_root:
+    if macos_archive:
         bundle_required = (
             f"{APP_NAME}.app/Contents/Info.plist",
             *(f"{APP_NAME}.app/Contents/Frameworks/{name}" for name in MACOS_REQUIRED_LIBRARIES),
         )
         missing.extend(name for name in bundle_required if name not in entries)
         # No libSDL2 requirement: SDL2 ships compiled into the executable.
-    elif out.name.endswith(LINUX_TARBALL_SUFFIXES) and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
-        # A Rust tarball (the Nuitka one has no baked container). Same
-        # libraries as the Mac bundle, flat beside the executable.
+    elif out.name.endswith(LINUX_TARBALL_SUFFIXES):
+        # Same libraries as the Mac bundle, flat beside the executable.
         missing.extend(
             f"{root}/{name}" for name in LINUX_REQUIRED_LIBRARIES if f"{root}/{name}" not in entries
         )
-    if out.name.endswith("-windows-portable.zip") and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
-        # The delivered Rust ZIP, not only the build runner, must carry the CRT.
+    else:
+        # The delivered ZIP, not only the build runner, must carry the CRT.
         folded = {name.lower(): metadata for name, metadata in entries.items()}
         missing.extend(
             f"{root}/{name}"
@@ -880,19 +411,16 @@ def archive(build_dir: Path, label: str) -> Path:
     return out
 
 
-# -- Rust mode ----------------------------------------------------------------
+# -- The Rust payload ---------------------------------------------------------
 #
-# ``--rust`` packages the Rust port (``crates/freight-fate``) instead of the
-# Nuitka build. The staged folder keeps the Python layout the in-game updater
-# and ``verify_archive`` already expect -- a top-level ``FreightFate`` folder
-# holding ``FreightFate(.exe)``, ``build_info.json``, the docs, and a
-# ``freight_fate/`` package folder with the packs -- with two differences the
-# Rust binary dictates: the runtime data tree ships on disk under
-# ``freight_fate/data`` (``ff_core::data::data_resources::data_root`` looks
-# for ``<exe dir>/freight_fate/data``; there is no baked module), and the
-# native libraries (SDL2, BASS and its plugins, Prism) sit flat beside the
-# executable, which is where the crates' build scripts stage them and where
-# their loaders look first.
+# The staged folder keeps the layout the in-game updater and
+# ``verify_archive`` expect -- a top-level ``FreightFate`` folder holding
+# ``FreightFate(.exe)``, ``build_info.json``, the docs, and a ``freight_fate/``
+# folder with the packs and the baked data container
+# (``ff_core::data::data_resources::data_root`` looks for
+# ``<exe dir>/freight_fate/data``). The native libraries (SDL2, BASS and its
+# plugins, Prism) sit flat beside the executable, which is where the crates'
+# build scripts stage them and where their loaders look first.
 
 # ``[[bin]] name`` in crates/freight-fate/Cargo.toml. The staged copy is
 # renamed to APP_NAME: ``updater::is_frozen`` (both ports) accepts the stem
@@ -1755,39 +1283,37 @@ def main() -> int:
     parser.add_argument(
         "--tag", default="", help="release label override, e.g. 1.9-tester-20260828"
     )
-    parser.add_argument("--skip-smoke", action="store_true", help="skip booting the frozen build")
+    parser.add_argument("--skip-smoke", action="store_true", help="skip booting the staged build")
     parser.add_argument(
         "--check-dependencies",
         action="store_true",
-        help="only verify release-critical runtime dependencies",
+        help="accepted for old callers; there is nothing to check before cargo runs",
     )
     parser.add_argument(
         "--rust",
         action="store_true",
-        help="package the Rust port (cargo build --release -p freight-fate) instead of Nuitka",
+        help="accepted for old callers; the Rust game is the only build",
     )
     parser.add_argument(
         "--cargo-target-dir",
         default="",
-        help="--rust only: Cargo target directory (default: target/)",
+        help="Cargo target directory (default: target/)",
     )
     parser.add_argument(
         "--smoke",
         action="store_true",
-        help="--rust only: boot the staged Rust build headless (off until the binary supports --smoke)",
+        help="boot the staged build headless before archiving it",
     )
     parser.add_argument(
         "--macos-non-launch-verify",
         action="store_true",
         help=(
-            "--rust only: verify a macOS app's payload, native dependencies, signature, "
+            "verify a macOS app's payload, native dependencies, signature, "
             "and archive without launching it"
         ),
     )
     args = parser.parse_args()
 
-    if args.macos_non_launch_verify and not args.rust:
-        parser.error("--macos-non-launch-verify requires --rust")
     if args.macos_non_launch_verify and args.smoke:
         parser.error("--macos-non-launch-verify cannot be combined with --smoke")
     if args.macos_non_launch_verify and args.skip_smoke:
@@ -1796,36 +1322,17 @@ def main() -> int:
         parser.error("--macos-non-launch-verify requires macOS")
 
     if args.check_dependencies:
-        verify_release_dependencies()
-        print("Release dependency check passed.")
+        print("Release dependency check passed: the Rust build fetches its own.")
         return 0
 
     label = args.tag or project_version()
-
-    if args.rust:
-        target_dir = Path(args.cargo_target_dir).resolve() if args.cargo_target_dir else None
-        out = build_rust(
-            label,
-            target_dir,
-            run_smoke=args.smoke and not args.skip_smoke,
-            macos_non_launch_verify=args.macos_non_launch_verify,
-        )
-        print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
-        return 0
-
-    verify_release_dependencies()
-    if BUILD.exists():
-        shutil.rmtree(BUILD)
-    build_dir = run_nuitka()
-    stamp_build_info(build_dir, label)
-    stage_release_docs(build_dir)
-    verify_packaged_payload(build_dir)
-    sign_distribution(build_dir)
-    if not args.skip_smoke:
-        smoke_check(build_dir)
-    strip_user_data(build_dir)  # smoke check leaves a saves/ folder; never ship it
-    out = archive(build_dir, label)
-    verify_archive(out)
+    target_dir = Path(args.cargo_target_dir).resolve() if args.cargo_target_dir else None
+    out = build_rust(
+        label,
+        target_dir,
+        run_smoke=args.smoke and not args.skip_smoke,
+        macos_non_launch_verify=args.macos_non_launch_verify,
+    )
     print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
     return 0
 
