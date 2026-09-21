@@ -276,13 +276,13 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     build_release = load_build_release_module()
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_URL", raising=False)
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_SHA256", raising=False)
-    # Staging, and this pin is load-bearing: production's /downloads/music.pak
-    # 503s because FREIGHT_FATE_MUSIC_BLOB_URL is scoped to Preview (dev) only.
-    # Moving this to www.orinks.net on 2026-09-20 failed every platform of the
-    # snapshot build. Change it when that variable exists on Production, not
-    # before.
+    # Production, once FREIGHT_FATE_MUSIC_BLOB_URL existed on that scope and
+    # the route was seen answering 307 (2026-09-20). An earlier move to this
+    # host, made while the variable was Preview-only, 503d every platform of
+    # the snapshot build -- so if this pin ever has to move back, check the
+    # route with curl rather than checking that its file deployed.
     assert build_release.music_download_config() == (
-        "https://dev.orinks.net/downloads/music.pak",
+        "https://www.orinks.net/downloads/music.pak",
         "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
     )
 

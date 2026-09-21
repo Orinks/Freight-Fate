@@ -67,19 +67,20 @@ SOUND_LIB_ARCH_DIR = "x64"
 ADDON_LIB_DIR = PACKAGE_DIR / "lib"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 PRISM_DEPENDENCY_DIR = "prismatoid.libs"
-# Staging, deliberately, and NOT www.orinks.net.
+# Production, so a release no longer pulls its music through the staging host.
 #
-# The /downloads/music.pak route exists in the production deployment but has
-# never worked there: it 307s to FREIGHT_FATE_MUSIC_BLOB_URL, and that Vercel
-# variable is scoped to Preview (dev) only, so production answers 503. Pointing
-# the release builder at production on 2026-09-20 failed every platform of the
-# snapshot with "Music-pack download failed with HTTP status 503" -- the route
-# file shipping is not the same as the route answering.
+# This took two goes. The route is a 307 to FREIGHT_FATE_MUSIC_BLOB_URL, and
+# that Vercel variable was scoped to Preview (dev) only, so production answered
+# 503 and the first attempt at this line failed every platform of the snapshot
+# build with "Music-pack download failed with HTTP status 503". The route's
+# file being in the deployment was never the same as the route answering.
 #
-# Move this to www.orinks.net once FREIGHT_FATE_MUSIC_BLOB_URL is set on the
-# Production scope; until then a release genuinely depends on the staging host
-# for its music, which is worth fixing but not by breaking the build.
-DEFAULT_MUSIC_URL = "https://dev.orinks.net/downloads/music.pak"
+# The variable is on the Production scope as of 2026-09-20 and the route was
+# checked answering 307 to the blob before this moved. If it ever 503s again,
+# that variable is the first thing to look at -- and note Vercel bakes the
+# environment at deploy time, so setting it takes a redeploy to have any
+# effect. The sha256 below is what actually gates the download either way.
+DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
 DEFAULT_MUSIC_SHA256 = "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
 
 
