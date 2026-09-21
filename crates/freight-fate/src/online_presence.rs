@@ -44,12 +44,20 @@ pub const PACKAGE_VERSION: &str = env!("CARGO_PKG_VERSION");
 // redirect -- so heartbeats against the apex fail with HTTPError 307.
 pub const PRODUCTION_BASE_URL: &str = "https://www.orinks.net";
 
-// The 1.9 test line talks to the staged orinks-net deployment (the dev
-// branch on its own backend) so testers exercise the 1.9 validator and
-// profile fields without touching production accounts or the live board.
-// MUST flip back to PRODUCTION_BASE_URL before the 1.9 release -- there
-// is a release-checklist bullet for this in ROADMAP.md.
-pub const DEFAULT_BASE_URL: &str = "https://dev.orinks.net";
+// Production, as of the 1.9 cutover (2026-09-20). The 1.9 test line spent
+// the prerelease pointed at the staged orinks-net deployment
+// (dev.orinks.net, its own backend) so testers could exercise the 1.9
+// validator and profile fields without touching production accounts or the
+// live board. That backend went to production with the server stack, so the
+// game reads the real site again.
+//
+// Staging is deliberately still up. Builds already in players' hands carry
+// the old value and keep talking to it; nothing they have is cut off by this
+// flip. What does NOT follow them here is their staging career: driver
+// identities, cloud backups and public profiles live on the staging
+// deployment and do not exist on production, so a staging player who takes a
+// post-cutover build starts fresh.
+pub const DEFAULT_BASE_URL: &str = PRODUCTION_BASE_URL;
 
 // Presence is by far the biggest source of backend reads and writes -- a
 // driver on a long haul beats for hours, and it is the single largest line in

@@ -50,12 +50,12 @@ log = logging.getLogger(__name__)
 # redirect -- so heartbeats against the apex fail with HTTPError 307.
 PRODUCTION_BASE_URL = "https://www.orinks.net"
 
-# The 1.9 test line talks to the staged orinks-net deployment (the dev
-# branch on its own backend) so testers exercise the 1.9 validator and
-# profile fields without touching production accounts or the live board.
-# MUST flip back to PRODUCTION_BASE_URL before the 1.9 release -- there
-# is a release-checklist bullet for this in ROADMAP.md.
-DEFAULT_BASE_URL = "https://dev.orinks.net"
+# Production, as of the 1.9 cutover (2026-09-20). Through the prerelease this
+# pointed at the staged orinks-net deployment (dev.orinks.net) so testers
+# exercised the 1.9 validator and profile fields without touching production
+# accounts or the live board. Kept in step with the Rust
+# `online_presence::DEFAULT_BASE_URL`, which is what the game actually reads.
+DEFAULT_BASE_URL = PRODUCTION_BASE_URL
 
 # Presence is by far the biggest source of backend reads and writes -- a
 # driver on a long haul beats for hours, and it is the single largest line in

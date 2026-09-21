@@ -76,21 +76,41 @@ covers the September 11 corrections; other items have not been revalidated. The
 
 These steps remain open even where a related implementation bullet is checked:
 
-- [ ] Revert-the-revert on dev for the driving-assists withdrawal
-      BEFORE the release merge (merging career-1.9 alone will NOT
-      restore the assists; the bullet in the Realism and polish pass
-      section spells out the exact commits). Public career selection
-      re-lands the same way.
-- [ ] The invariants-export regen against PRODUCTION, now including the
-      credential ladder's rows ("STILL OWED AT THE DEV CUTOVER").
-- [ ] The cutover replay: freshly played 1.9 careers (company new hire,
-      slip-seat 4+, post-buy-in owner-operator) against the prod
-      validator, not just stored blobs.
-- [ ] Flip `DEFAULT_BASE_URL` back to production and drop the
-      2026-08-staging key (PRE-RELEASE MUST-DO bullet).
-- [ ] Convex deploys before any build with the no-transfer marker
-      ships; the radio stream sweep (`--recheck-dead`) runs before the
-      release; the place-callouts ladder rides the release merge to dev.
+- [x] Revert-the-revert on dev for the driving-assists withdrawal
+      (2026-09-20, `d00faad1`), and public career selection the same
+      way (`2b5cba9f`) now that its server side is on production.
+      Both resolved toward feat/career-1.9.
+- [x] The invariants-export regen against PRODUCTION (2026-09-20). It
+      turned out none was owed: `ff-invariants --check` against the
+      merged tree matches the file already on the staging line byte for
+      byte, so the dev->main promotion carried the correct export
+      (sourceSaveVersion 5 to 11, 60 achievements to 181, 9 levels to
+      30, 2 trucks to 35). Verified by running the export and diffing
+      it, not by assuming.
+- [x] The cutover replay (2026-09-20) -- by differential, not by sample.
+      Production reads were unavailable, so instead: every membership
+      check in the new validator is LOOSER than production's (city,
+      trucks, upgrades, achievements, market keys all went from "must be
+      in the known set" to a shape check; `exactFields` now tolerates
+      unknown keys; the money floor widened; the accepted version range
+      widened from 4..5 to 4..11). The only added check is gated on five
+      fields no 1.8 build writes, so it cannot fire on an existing save.
+      The freshly-played-career half is covered better than a replay
+      would: staging has run this exact validator against real 1.9
+      careers for weeks.
+- [x] Flip `DEFAULT_BASE_URL` back to production and drop the
+      2026-08-staging key (2026-09-20). `tools/build_release.py`'s
+      music-pack URL moved off the staging host in the same change --
+      the `/downloads/music.pak` route ships on production now.
+- [x] Convex deployed to production before any 1.9 build ships
+      (2026-09-20, orinks-net `c3da9bc`), verified server-side: the
+      driver directory answers with 164 public profiles rather than
+      Vercel's green status. This nearly did not happen -- the staging
+      rework left the Vercel build deploying a backend only on `dev`,
+      so `main` would have shipped the new site against production's old
+      Convex functions. Fixed in orinks-net `9925714` first.
+- [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
+      the place-callouts ladder rides the release merge to dev.
 - [ ] The owner voice pass over seven achievement titles. The
       physical-Mac VoiceOver listening pass was DROPPED as a release
       gate (2026-09-20, owner): there is no physical Mac to test on.

@@ -67,7 +67,13 @@ SOUND_LIB_ARCH_DIR = "x64"
 ADDON_LIB_DIR = PACKAGE_DIR / "lib"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 PRISM_DEPENDENCY_DIR = "prismatoid.libs"
-DEFAULT_MUSIC_URL = "https://dev.orinks.net/downloads/music.pak"
+# Production as of the 1.9 cutover (2026-09-20). This was dev.orinks.net
+# through the prerelease, when that was the only host serving the route; the
+# same /downloads/music.pak route ships on production, so a release no longer
+# pulls its music through the staging hostname. Both redirect to the same
+# verified public blob, and the sha256 below is what actually gates the
+# download.
+DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
 DEFAULT_MUSIC_SHA256 = "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
 
 

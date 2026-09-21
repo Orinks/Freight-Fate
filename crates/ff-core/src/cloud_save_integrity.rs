@@ -17,21 +17,16 @@ use crate::profile_invariants::{check_profile_invariants, spoken_rejection};
 /// Signing keys by key id, raw 32-byte ed25519 public keys (base64 here,
 /// decoded by [`public_keys`]).
 ///
-/// `2026-08-staging` is the staging-only key: the 1.9 test line signs
-/// against the staged orinks-net deployment (see `DEFAULT_BASE_URL` in
-/// `online_presence`). Remove alongside the base-URL flip in the
-/// pre-release checklist. Rotated 2026-08-11: the original half lived only
-/// in a Convex preview deployment, which Convex deleted at its five-day
-/// mark, taking the private key with it. Staging now runs on a permanent
-/// deployment. (Kept in the table exactly like the Python module; whether
-/// it moves behind a feature flag is the lead's call.)
-pub const PUBLIC_KEYS_B64: &[(&str, &str)] = &[
-    ("2026-07", "RJ1PR6fVDk98eb3uMysfmvzfURO/wPkLX5O52OapNoY="),
-    (
-        "2026-08-staging",
-        "wFlZNTcOB8fNsc9a6oDcjJu8OER5/vZZCdL8wahdPNw=",
-    ),
-];
+/// The `2026-08-staging` key was dropped at the 1.9 cutover (2026-09-20)
+/// alongside the base-URL flip in `online_presence`. It signed against the
+/// staged orinks-net deployment while the 1.9 test line pointed there, and
+/// leaving it in a production build would mean a payload signed by the
+/// staging key still verifying on a player's machine -- which is the whole
+/// reason the checklist pairs its removal with the flip. Builds already
+/// issued to staging testers still carry it and still reach staging, so
+/// nothing in their hands stops working.
+pub const PUBLIC_KEYS_B64: &[(&str, &str)] =
+    &[("2026-07", "RJ1PR6fVDk98eb3uMysfmvzfURO/wPkLX5O52OapNoY=")];
 
 pub const SUPPORTED_VALIDATOR_VERSION: i64 = 1;
 
@@ -567,11 +562,13 @@ mod tests {
     #[test]
     fn the_built_in_key_table_decodes_to_raw_ed25519_keys() {
         let keys = public_keys();
-        assert_eq!(keys.len(), 2);
+        assert_eq!(keys.len(), 1);
         for (id, raw) in &keys {
             assert_eq!(raw.len(), 32, "{id}");
         }
         assert!(keys.contains_key("2026-07"));
-        assert!(keys.contains_key("2026-08-staging"));
+        // Dropped at the 1.9 cutover with the base-URL flip: a shipped build
+        // must not verify a revision signed by the staging deployment.
+        assert!(!keys.contains_key("2026-08-staging"));
     }
 }
