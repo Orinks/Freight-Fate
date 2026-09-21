@@ -617,6 +617,11 @@ impl GameContext {
         }
     }
 
+    /// Restart whatever music is playing so a music setting is heard at once.
+    pub fn restart_music(&mut self) {
+        self.apply_active_radio_settings();
+    }
+
     /// Whether a drive under the menus has its radio on (the main menu's
     /// `_driving_radio_active`).
     pub fn driving_radio_active(&self) -> bool {

@@ -138,6 +138,7 @@ mod states_online_hub;
 mod states_online_offer;
 mod states_online_setup;
 mod states_online_states;
+mod synth_music;
 mod transcript_announcements;
 mod transcript_career_arc_playtest;
 mod transcript_career_stats;

@@ -491,6 +491,14 @@ settings_fields! {
     master_volume: f64 = 1.0 => level,
     sfx_volume: f64 = 0.8 => level,
     music_volume: f64 = 0.5 => level,
+    /// Music source: false plays the full soundtrack; true swaps menu music
+    /// and the Roadhouse for synthesized music -- pieces the game composes
+    /// from `music_seed`, the restored 1.5 tracks and hand-made modules --
+    /// for players who want no AI-made music (owner, 2026-09-21).
+    synth_music: bool = false => bool_truthy,
+    /// Seeds every synthesized piece. Global, not per career, so a seed a
+    /// player likes sounds the same on any career and can be shared.
+    music_seed: i64 = 48213 => int_lenient,
     radio_volume: f64 = 0.25 => level,
     radio_enabled: bool = true => bool_truthy,
     radio_station_id: String = "route_playlist" => str_checked,
