@@ -168,6 +168,15 @@ jobs:
       - name: Build the portable release
         run: ./build-release.ps1 --tag "${{ needs.prepare.outputs.tag }}"
 
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate.exe --list-speech-backends | tee speech-backends.txt
+          grep -q "^SAPI " speech-backends.txt
+
       - uses: actions/upload-artifact@v7
         with:
           name: Windows
@@ -242,6 +251,15 @@ jobs:
         # inside the builder, which dumps the game log on failure.
         run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
 
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^AVSpeech " speech-backends.txt
+
       - uses: actions/upload-artifact@v7
         with:
           name: macOS-arm64
@@ -255,8 +273,8 @@ jobs:
     # 22.04, not latest: the executable carries its build host's glibc as a
     # floor (2.35 here), and one built on 24.04 would refuse to start on any
     # distribution still shipping an older release, with no useful error.
-    # SDL2 is compiled in, so nothing else of the host is linked; Prism's
-    # own floor is 2.34 (a manylinux_2_34 wheel).
+    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; what else is
+    # linked is the host's speech-dispatcher client.
     #
     # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
     # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
@@ -369,9 +387,18 @@ jobs:
       - name: Build the Linux release
         # --smoke boots the staged tarball payload for five frames with dummy
         # drivers, the same proof the Mac job gets. Staging refuses an
-        # executable that links SDL2 dynamically and a payload missing BASS,
-        # its decoders, or Prism with its bundled speech-dispatcher.
+        # executable that links SDL2 dynamically and a payload missing BASS
+        # or its decoders.
         run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Check Prism registered its backends
+        # Every job here runs muted, so a Prism linked without its backends
+        # would still pass every test and boot. The listing does not speak;
+        # it names each backend Prism registered, reachable or not.
+        shell: bash
+        run: |
+          ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
+          grep -q "^Speech Dispatcher " speech-backends.txt
 
       - name: Package the AppImage
         timeout-minutes: 15
