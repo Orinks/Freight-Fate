@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from pulse_synth import SR, body_ir, convolve, grain  # noqa: E402
 
-OUT = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+OUT = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 SPEED_MS = 22.0  # ~50 mph approach: the design speed the bar spacing assumes
 # Tractor axle geometry, metres behind the steer axle, with load weights.

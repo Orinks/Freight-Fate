@@ -51,7 +51,7 @@ determinism contract). Read those first if you have not.
   failure is silent: the map serves the car number and the game confidently
   speaks a limit no legal rig may drive.
 - **Go through `tools/world_source.py`.** The source is per-state shards under
-  `src/freight_fate/data/world_source/`, not one file. `load_world()` hands you
+  `data/world_source/`, not one file. `load_world()` hands you
   the whole world as one dict and `save_world(data)` writes it back, so the
   tools in this recipe work exactly as they always have — but never open a
   shard directly, and never hand-edit one you have not read in full.
@@ -81,7 +81,8 @@ determinism contract). Read those first if you have not.
 Sparse legs are flagged by real-place checkpoint density:
 
 ```python
-from freight_fate.data.world import World
+# run from tools/ (or with tools/ on sys.path)
+from ffworld import World
 w = World.load()
 def density(leg):
     n = sum(1 for c in leg.checkpoints if c.type == "place"
@@ -244,9 +245,9 @@ showed 1.37% max on a 4,000 ft climb), so run this for every touched leg.
 
 ```sh
 uv run python tools/index_world.py && uv run python tools/index_world.py --check
-uv run pytest tests/test_world.py tests/test_world_overlay.py \
-    tests/test_route_coverage_tool.py tests/test_place_checkpoints.py
-uv run ruff check src tests tools
+cargo test -p ff-core data_world
+uv run pytest tests/test_index_world.py tests/test_curate_route_pois.py
+uv run ruff check tests tools
 ```
 
 Then re-run the density snippet: the leg should now clear 0.5 real places
@@ -266,7 +267,7 @@ A rig's limit therefore reaches the player by two independent routes, and
    it with `hgv: true` and it is already truck-correct.
 2. **Statutory.** OSM carries only the general `maxspeed`. Nothing in the data
    says trucks are held lower, so `STATE_TRUCK_MAX_MPH`
-   (`src/freight_fate/sim/trip_models.py`) pulls it down at runtime.
+   (`crates/ff-core/src/sim/trip_models.rs`) pulls it down at runtime.
 
 Route 2 exists because **OSM tagging coverage is not a fact about the law.**
 California I-80 alternates mile by mile between tagged and untagged; the
@@ -277,7 +278,7 @@ Never conclude "this road has no truck limit" from missing tags.
 truck-specific limit whichever way it arose, so S says "Truck limit 55.
 California holds trucks to this." on tagged and untagged miles alike. Keying
 off the cap alone silences the tagged roads — that regression shipped and was
-caught by a player on US-395 (2026-07-19); `tests/test_maxspeed.py` locks it.
+caught by a player on US-395 (2026-07-19); `crates/ff-core/tests/it/sim_maxspeed.rs` locks it.
 
 **Source the number, don't infer it.** Cite the statute or the DOT table, with
 the access date, in the comment above the entry. These laws move — several US
@@ -287,20 +288,21 @@ than none now that the game names the jurisdiction out loud.
 **Verify in-engine, never from the baked file.** The file holds the car
 number on untagged stretches by design; reading it and concluding the limit is
 wrong is a mistake that has been made twice. Build a `Trip` and call
-`speed_limit_at()`:
+`speed_limit_at()`: a throwaway test in
+`crates/ff-core/tests/it/sim_maxspeed.rs` can use that file's helpers.
 
-```sh
-uv run python - <<'PY'
-from freight_fate.data.world import get_world
-from freight_fate.sim.trip import Trip
-from freight_fate.sim.vehicle import TruckState
-from freight_fate.sim.weather import WeatherSystem
-route = get_world().route_options("Sacramento", "Reno")[0]
-trip = Trip(route, TruckState(), WeatherSystem("california", seed=1), seed=2)
-for m in (5, 20, 50, 90, 110, 125):
-    print(m, trip.speed_limit_at(m)[0], trip.truck_limit_at(m))
-PY
+```rust
+#[test]
+fn probe_sacramento_reno() {
+    let mut trip = trip_for(first_route_option(world(), "Sacramento", "Reno"), "california");
+    for m in [5.0, 20.0, 50.0, 90.0, 110.0, 125.0] {
+        println!("{m} {:?} {:?}", trip.speed_limit_at(m), trip.truck_limit_at(m));
+    }
+}
 ```
+
+Run it with `cargo test -p ff-core --test it probe_sacramento_reno --
+--nocapture`, read the numbers, and delete the probe.
 
 ### Taking this off the US grid
 

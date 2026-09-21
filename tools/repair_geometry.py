@@ -45,7 +45,7 @@ import reroute_leg as rr  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world  # noqa: E402
 
-GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
+GEOM_DIR = ROOT / "data" / "world_data" / "us" / "geometry"
 VALHALLA = os.environ.get("FF_VALHALLA_URL", "http://localhost:8002").rstrip("/")
 
 # How far the new shape's own length may sit from the leg's adopted mileage
@@ -146,9 +146,7 @@ def _write_shard(path: Path, meta: dict, records: list[dict]) -> None:
     meta.setdefault("meta", {})["data_version"] = (
         "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
     )
-    path.write_text(
-        json.dumps(meta, sort_keys=True) + "\n" + payload + "\n", encoding="utf-8"
-    )
+    path.write_text(json.dumps(meta, sort_keys=True) + "\n" + payload + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -202,8 +200,7 @@ def main() -> int:
         if before is not None and after >= before:
             refused.append((key, f"no better: {before:.0f} m -> {after:.0f} m"))
             print(
-                f"[{n}/{len(targets)}] {key}: REFUSED, no better "
-                f"({before:.0f} m -> {after:.0f} m)",
+                f"[{n}/{len(targets)}] {key}: REFUSED, no better ({before:.0f} m -> {after:.0f} m)",
                 flush=True,
             )
             continue

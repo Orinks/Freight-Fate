@@ -21,8 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import osmium
-
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
@@ -34,9 +33,9 @@ from yard_roads import (  # noqa: E402
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
-LOCAL_APPROACHES_PATH = ROOT / "src" / "freight_fate" / "data" / "local_approaches.json"
-LOCAL_GEOMETRY_PATH = ROOT / "src" / "freight_fate" / "data" / "local_geometry.json"
+CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
+LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
+LOCAL_GEOMETRY_PATH = ROOT / "data" / "local_geometry.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 EARTH_RADIUS_MI = 3958.7613

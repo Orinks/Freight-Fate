@@ -82,7 +82,7 @@ from bake_divided import load_geometry_by_code  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-WORLD_DATA = ROOT / "src" / "freight_fate" / "data" / "world_data"
+WORLD_DATA = ROOT / "data" / "world_data"
 GEOM_DIR = WORLD_DATA / "us" / "geometry"
 GAMEPLAY = WORLD_DATA / "us" / "gameplay"
 

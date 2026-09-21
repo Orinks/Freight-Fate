@@ -200,7 +200,7 @@ context. Do not expose OSM IDs, tags, source refs, ORS keys, or raw source text.
 
 ## Source-Backed Endpoint Layer
 
-`src/freight_fate/data/facility_endpoints.json` is the checked-in offline
+`data/facility_endpoints.json` is the checked-in offline
 endpoint layer for freight facilities. It was generated from the local
 Geofabrik cache at `C:\Users\joshu\.cache\freight-fate-osm\regions\` and covers
 all 1,819 supported facilities: 1,462 have source-backed OSM freight/industrial
@@ -214,7 +214,7 @@ existing local approach and turn-geometry layers for road cues.
 
 ## Facility Approach Geometry
 
-`src/freight_fate/data/facility_approaches.json` is the first source-backed
+`data/facility_approaches.json` is the first source-backed
 facility road-snap layer. `tools/build_facility_approaches.py` reads
 `facility_endpoints.json`, `local_approaches.json`, and the local PBF cache at
 `C:\Users\joshu\.cache\freight-fate-osm\regions\`. The current bounded bake
@@ -277,6 +277,9 @@ keep it short and optional.
 6. Run focused tests:
 
 ```powershell
-uv run pytest tests/test_world.py tests/test_job_progression.py tests/test_market.py tests/test_pickup_loading.py tests/test_trip_resume.py
+cargo test -p ff-core data_world
+cargo test -p ff-core models::jobs
+cargo test -p ff-core models::market
+cargo test -p freight-fate --test it states_city_pickup
 ```
 

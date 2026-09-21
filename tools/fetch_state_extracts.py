@@ -34,7 +34,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
@@ -118,7 +118,12 @@ def fetch_state(
         if expected is not None and written != expected:
             part.unlink(missing_ok=True)
             return FetchResult(
-                state, slug, target, "failed", written, resolved,
+                state,
+                slug,
+                target,
+                "failed",
+                written,
+                resolved,
                 f"short read: got {written} of {expected} bytes",
             )
         if not _looks_like_pbf(part):

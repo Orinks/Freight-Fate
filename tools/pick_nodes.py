@@ -167,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
         dedupe_mi=args.dedupe_mi,
     )
 
-    from freight_fate.data.regions import classify_region
+    from ffworld.regions import classify_region
 
     for candidate in candidates:
         candidate["region"] = classify_region(

@@ -23,7 +23,7 @@ class SongPlan:
 
 # Song batches, MUSIC_SPECS prompt style: concrete genre, subject, vocal
 # and instrumentation notes, a mix/feel tag. Keys extend the shipped
-# catalog stems; titles must never collide with music.py.
+# catalog stems; titles must never collide with the Rust music catalog.
 SONG_PLAN: dict[str, tuple[SongPlan, ...]] = {
     "oldies": (
         SongPlan(

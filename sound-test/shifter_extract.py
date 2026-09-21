@@ -35,11 +35,13 @@ import soundfile as sf
 from pulse_synth import SR, write_wav
 
 pulse_synth.OUT = Path(r"C:\temp\fftest")
-SRC = Path("//romeyserv/share/sounds/high quality/Sony/Volume 5/Vehicles/Cars & Trucks/18 Wheeler In Idle Stop.flac")
+SRC = Path(
+    "//romeyserv/share/sounds/high quality/Sony/Volume 5/Vehicles/Cars & Trucks/18 Wheeler In Idle Stop.flac"
+)
 
-PRE_ROLL_S = 0.06   # a little air before the strike
-TAIL_S = 0.55       # enough for the clunk to ring out
-MIN_GAP_S = 0.25    # two hits closer than this are one event
+PRE_ROLL_S = 0.06  # a little air before the strike
+TAIL_S = 0.55  # enough for the clunk to ring out
+MIN_GAP_S = 0.25  # two hits closer than this are one event
 
 
 def load(path: Path) -> tuple[np.ndarray, np.ndarray]:
@@ -47,8 +49,9 @@ def load(path: Path) -> tuple[np.ndarray, np.ndarray]:
     data, sr = sf.read(str(path), always_2d=True)
     if sr != SR:
         idx = np.linspace(0, len(data) - 1, int(len(data) * SR / sr))
-        data = np.stack([np.interp(idx, np.arange(len(data)), data[:, c])
-                         for c in range(data.shape[1])], axis=1)
+        data = np.stack(
+            [np.interp(idx, np.arange(len(data)), data[:, c]) for c in range(data.shape[1])], axis=1
+        )
     return data.mean(axis=1), data
 
 
@@ -81,8 +84,9 @@ def find_hits(env: np.ndarray, thresh: float = 3.2, med_s: float = 1.5) -> list[
     # samples and this only sets a floor.
     step = w // 4
     centres = np.arange(0, len(env), step)
+
     def med_at(c: int) -> float:
-        seg = env[max(0, c - w // 2):c + w // 2]
+        seg = env[max(0, c - w // 2) : c + w // 2]
         return float(np.median(seg)) if seg.size else 0.0
 
     meds = np.array([med_at(c) for c in centres])
@@ -158,7 +162,7 @@ def main() -> None:
         write_wav(f"shift_{tag}_{n:02d}_{h / SR:06.2f}s.wav", stereo[a:b].mean(axis=1))
 
     print("\nreference: the shipped cue, for A/B")
-    ship = Path(__file__).resolve().parents[1] / "src/freight_fate/assets/sounds/vehicle/gear_shift.ogg"
+    ship = Path(__file__).resolve().parents[1] / "assets/sounds/vehicle/gear_shift.ogg"
     try:
         d, sr = sf.read(str(ship), always_2d=True)
         m = d.mean(axis=1)

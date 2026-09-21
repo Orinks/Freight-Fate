@@ -3,10 +3,10 @@
 //!
 //! Deliberately `#[ignore]`d: it is a measurement, not an assertion, and a
 //! benchmark run in a normal `cargo test` would only add seconds to the
-//! suite. The Python counterpart is `tools/bench_drive.py`; the two build the
-//! same drive (Denver -> Cheyenne, `trip_seed = 0`, start hour 12, engine
-//! running, parking brake off, accelerator held) and tick the same number of
-//! frames at the same fixed dt, so the two numbers are comparable. The method
+//! suite. The Python counterpart was `tools/bench_drive.py` (deleted with the
+//! Python game); the two built the same drive (Denver -> Cheyenne, `trip_seed = 0`, start hour 12, engine
+//! running, parking brake off, accelerator held) and ticked the same number
+//! of frames at the same fixed dt, so the two numbers were comparable. The method
 //! and every asymmetry that could not be removed are written up in
 //! `docs/superpowers/rust-port-benchmarks.md`.
 //!

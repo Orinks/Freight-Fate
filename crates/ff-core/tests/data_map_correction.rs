@@ -46,7 +46,7 @@ fn repo_root() -> PathBuf {
 }
 
 fn json_dir() -> PathBuf {
-    repo_root().join("src").join("freight_fate").join("data")
+    repo_root().join("data")
 }
 
 /// Bake the shipped tree once and point the process at the container, so

@@ -37,11 +37,15 @@ pub const MUSIC_EXTENSIONS: &[&str] = &[
 /// Tracker modules (as made in OpenMPT): played as BASS music, not streams.
 pub const MODULE_EXTENSIONS: &[&str] = &["it", "xm", "s3m", "mod", "mo3"];
 
-/// The directory standing in for the Python package (`src/freight_fate/`
-/// in a checkout, `<exe dir>/freight_fate/` when packaged): the parent of
-/// the data tree.
+/// The parent of the data tree: the repo root in a checkout (`data/`,
+/// `assets/sounds/`, `assets/lib/`), `<exe dir>/freight_fate/` when packaged
+/// (`data/`, `assets/sounds/`, `lib/`).
 pub fn package_root() -> PathBuf {
-    data_root()
+    package_root_for(data_root())
+}
+
+fn package_root_for(data_root: &Path) -> PathBuf {
+    data_root
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("freight_fate"))
@@ -66,7 +70,17 @@ pub fn assets_licensed_dir() -> PathBuf {
 /// channels); core BASS already handles plain Shoutcast/Icecast streams on
 /// its own.
 pub fn plugin_lib_dir() -> PathBuf {
-    package_root().join("lib")
+    plugin_lib_dir_in(&package_root())
+}
+
+/// `assets/lib` in a checkout, `lib` in a packaged build.
+fn plugin_lib_dir_in(package_root: &Path) -> PathBuf {
+    let checkout = package_root.join("assets").join("lib");
+    if checkout.is_dir() {
+        checkout
+    } else {
+        package_root.join("lib")
+    }
 }
 
 /// The loose-file roots in lookup order: the licensed overlay, then the
@@ -476,5 +490,29 @@ mod tests {
         assert!(committed.ends_with(Path::new("assets").join("sounds")));
         assert!(licensed.ends_with(Path::new("assets").join("sounds-licensed")));
         assert!(plugin_lib_dir().ends_with("lib"));
+    }
+
+    #[test]
+    fn a_checkout_finds_its_sounds_and_addons_under_assets() {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(Path::parent)
+            .expect("the game crate sits two levels under the repo root");
+        assert_eq!(package_root(), repo);
+        assert_eq!(assets_dir(), repo.join("assets").join("sounds"));
+        assert!(assets_dir().join("CREDITS.md").is_file());
+        assert_eq!(plugin_lib_dir(), repo.join("assets").join("lib"));
+        assert!(plugin_lib_dir().join("basshls.txt").is_file());
+    }
+
+    #[test]
+    fn an_installed_layout_resolves_beside_its_data_folder() {
+        let tmp = tempfile::tempdir().unwrap();
+        let package = tmp.path().join("freight_fate");
+        std::fs::create_dir_all(package.join("data")).unwrap();
+        std::fs::create_dir_all(package.join("lib")).unwrap();
+        let root = package_root_for(&package.join("data"));
+        assert_eq!(root, package);
+        assert_eq!(plugin_lib_dir_in(&root), package.join("lib"));
     }
 }

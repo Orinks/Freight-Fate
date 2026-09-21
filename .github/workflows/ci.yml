@@ -14,9 +14,9 @@ on:
 
 jobs:
   # The Python that still SHIPS: the build, bake, indexing and release tooling
-  # under tools/, plus the workflow and sound-pack guards. Gameplay is Rust on
-  # Career 1.9 and rust.yml proves it; the ~220 files mirroring gameplay in
-  # src/freight_fate/ were retired 2026-08-29 rather than kept green twice.
+  # under tools/, plus the workflow and sound-pack guards. The game is Rust and
+  # rust.yml proves it; the Python game itself was deleted in the 2026-09-21
+  # sunset.
   test:
     strategy:
       fail-fast: false
@@ -51,7 +51,7 @@ jobs:
         run: uv sync --dev
 
       - name: Lint
-        run: uv run ruff check src tests tools
+        run: uv run ruff check tests tools
 
       - name: Run tests
         run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml
@@ -61,14 +61,6 @@ jobs:
         with:
           name: coverage-${{ matrix.os }}
           path: coverage.xml
-
-  # The secret-store packaging probe was removed at the 1.9 cutover
-  # (2026-09-20). It compiled a Nuitka one-file probe with
-  # KEYRING_NUITKA_ARGS to prove keyring's entry-point backends survived
-  # Python packaging -- a build that lost them would have kept every
-  # driver token in the fallback file with no visible symptom. The Rust
-  # game links the keyring crate directly and is not packaged with
-  # Nuitka, so there is nothing left for the probe to protect.
 
   changelog:
     # The changelog gate runs locally as a pre-push hook, which not every
@@ -100,23 +92,6 @@ jobs:
     needs: [test, changelog]
     if: ${{ !cancelled() && needs.test.result == 'success' }}
     steps:
-      # Nothing is tracked by Git LFS any more; a plain checkout has the pack.
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Build wheel and sdist
-        run: uv build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-
       - name: Retry today's failed snapshot
         if: >-
           ${{ !cancelled() &&

@@ -92,10 +92,10 @@ from world_source import load_world, save_world  # noqa: E402
 scs.CURVE_PAD_M = 150.0
 
 ROOT = Path(__file__).resolve().parent.parent
-WORLD_DATA = ROOT / "src" / "freight_fate" / "data" / "world_data"
+WORLD_DATA = ROOT / "data" / "world_data"
 GEOM_DIR = WORLD_DATA / "us" / "geometry"
 GAMEPLAY_DIR = WORLD_DATA / "us" / "gameplay"
-ESCAPE_CACHE = ROOT / "src" / "freight_fate" / "data" / "escape_ramps.json"
+ESCAPE_CACHE = ROOT / "data" / "escape_ramps.json"
 
 SCHEMA_VERSION = 1
 SOURCE_NOTE = (

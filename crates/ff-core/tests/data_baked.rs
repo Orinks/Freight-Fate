@@ -1,6 +1,6 @@
 //! The baked container against the JSON tree it was baked from.
 //!
-//! One process, two worlds: the shipped `src/freight_fate/data` read as JSON
+//! One process, two worlds: the shipped `data/` tree read as JSON
 //! through the loaders, and the same tree baked into a `world.ffdata` that
 //! `FREIGHT_FATE_DATA_ROOT` then points the whole runtime at. Every loader
 //! that has a baked path is asked the same question twice and has to answer
@@ -73,7 +73,7 @@ fn repo_root() -> PathBuf {
 /// container" for its whole life.
 fn fixture() -> &'static Fixture {
     FIXTURE.get_or_init(|| {
-        let json_dir = repo_root().join("src").join("freight_fate").join("data");
+        let json_dir = repo_root().join("data");
         assert!(
             json_dir.join("world_data").join("index.json").is_file(),
             "the shipped data tree is missing at {}",

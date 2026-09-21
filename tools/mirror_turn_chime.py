@@ -21,7 +21,7 @@ import numpy as np
 import soundfile as sf
 
 ROOT = Path(__file__).resolve().parents[1]
-EVENTS = ROOT / "src" / "freight_fate" / "assets" / "sounds" / "events"
+EVENTS = ROOT / "assets" / "sounds" / "events"
 SOURCE = EVENTS / "turn_left.ogg"
 TARGET = EVENTS / "turn_right.ogg"
 

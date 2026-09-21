@@ -13,9 +13,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-WORLD_DATA_PATH = (
-    Path(__file__).resolve().parent.parent / "src" / "freight_fate" / "data" / "world_data"
-)
+WORLD_DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "world_data"
 LEGS_PATH = WORLD_DATA_PATH / "us" / "legs.json"
 CITIES_PATH = WORLD_DATA_PATH / "us" / "cities.json"
 

@@ -13,7 +13,7 @@ constant level, no crossfade, no seam. A faint compressor-pump wobble is added
 as amplitude modulation with an integer number of cycles per loop, so the
 seam stays exact. Deterministic (seeded), so it regenerates byte-identical.
 
-Writes src/freight_fate/assets/sounds/vehicle/air_pressurize.ogg (COMMITTED).
+Writes assets/sounds/vehicle/air_pressurize.ogg (COMMITTED).
 
 Usage: uv run --with scipy python sound-test/air_fallback.py
 """
@@ -29,7 +29,10 @@ LOOP_S = 6.0
 N = int(SR * LOOP_S)
 OUT = (
     Path(__file__).resolve().parents[1]
-    / "src" / "freight_fate" / "assets" / "sounds" / "vehicle" / "air_pressurize.ogg"
+    / "assets"
+    / "sounds"
+    / "vehicle"
+    / "air_pressurize.ogg"
 )
 
 # Pump wobble: ~2.2 Hz compressor rhythm, snapped to whole cycles per loop.

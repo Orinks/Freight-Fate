@@ -69,7 +69,7 @@ def _conv(sig: np.ndarray, ir: np.ndarray) -> np.ndarray:
     """Linear convolution truncated to length. These are one-shots, not loops,
     so the circular version the loop renderer needs would be wrong here."""
     n = 1 << int(np.ceil(np.log2(len(sig) + len(ir))))
-    return np.fft.irfft(np.fft.rfft(sig, n) * np.fft.rfft(ir, n), n)[:len(sig)]
+    return np.fft.irfft(np.fft.rfft(sig, n) * np.fft.rfft(ir, n), n)[: len(sig)]
 
 
 def engine_curve(
@@ -108,8 +108,9 @@ def engine_curve(
         # appearing.
         gate = 1.0 if cyl_onset is None else smoothstep((t - cyl_onset.get(cyl, 0.0)) / 0.12)
         torque += _conv(fire * gate, press) * trim
-        knock += _conv(_conv(fire * gate, grain(0.0035)),
-                       bank_ir([(f * skew, d, g) for f, d, g in KNOCK]))
+        knock += _conv(
+            _conv(fire * gate, grain(0.0035)), bank_ir([(f * skew, d, g) for f, d, g in KNOCK])
+        )
 
     air = RNG.standard_normal(n) * 0.10 * np.sqrt(np.maximum(rpm, 1.0) / 1500.0)
     body = ring * ring_gain + torque * torque_gain + knock * knock_gain
@@ -168,8 +169,9 @@ def startup(seconds: float = 4.2, cold: bool = False) -> np.ndarray:
     step = 0.055 if not cold else 0.095
     onsets = {cyl: catch_t + i * step for i, cyl in enumerate(FIRING_ORDER)}
 
-    sig = engine_curve(rpm, combustion, combustion * 1.1, ring_gain,
-                       cyl_onset=onsets, env_rpm=settle)
+    sig = engine_curve(
+        rpm, combustion, combustion * 1.1, ring_gain, cyl_onset=onsets, env_rpm=settle
+    )
 
     # Starter: on through cranking, drops out just after catch.
     st_gain = (1.0 - smoothstep((t - (catch_t + 0.18)) / 0.09)) * np.minimum(1.0, t / 0.04)
@@ -182,7 +184,7 @@ def startup(seconds: float = 4.2, cold: bool = False) -> np.ndarray:
     ):
         i = int(onset * SR)
         ir = bank_ir(modes)
-        sig[i:i + len(ir)] += gain * ir[:max(0, n - i)]
+        sig[i : i + len(ir)] += gain * ir[: max(0, n - i)]
 
     sig += turbo(n, 900.0, 0.3) * np.clip((rpm - 500.0) / 800.0, 0.0, 1.0)
     return sig
@@ -196,7 +198,7 @@ def shutdown(seconds: float = 2.6) -> np.ndarray:
     # Coast-down: friction plus pumping losses, dropping away faster at the
     # end as compression dominates. Not linear, and the difference is audible.
     decay = np.clip((t - cut) / 1.5, 0.0, 1.0)
-    rpm = np.maximum(idle * (1.0 - decay ** 1.7), 8.0)
+    rpm = np.maximum(idle * (1.0 - decay**1.7), 8.0)
     rpm[t < cut] = idle
 
     # Fuel cut is abrupt -- combustion stops within a cycle. That suddenness
@@ -211,7 +213,7 @@ def shutdown(seconds: float = 2.6) -> np.ndarray:
     for off, g in ((0.0, 1.0), (0.115, -0.45), (0.210, 0.16)):
         i = stop_i + int(off * SR)
         if i < n:
-            sig[i:i + len(ir)] += g * 0.5 * ir[:max(0, n - i)]
+            sig[i : i + len(ir)] += g * 0.5 * ir[: max(0, n - i)]
     return sig
 
 
@@ -226,10 +228,10 @@ def main() -> None:
     n = int(1.4 * SR)
     t = np.arange(n) / SR
     rpm = crank_rpm(t)
-    write_wav("engine_start_cranking_only.wav",
-              engine_curve(rpm, np.zeros(n), np.zeros(n), np.ones(n)))
-    write_wav("engine_start_starter_only.wav",
-              starter(rpm, np.minimum(1.0, t / 0.04)))
+    write_wav(
+        "engine_start_cranking_only.wav", engine_curve(rpm, np.zeros(n), np.zeros(n), np.ones(n))
+    )
+    write_wav("engine_start_starter_only.wav", starter(rpm, np.minimum(1.0, t / 0.04)))
     print(f"  cranking (no combustion, no starter)   {n / SR:.2f}s")
     print(f"  starter whine alone, mesh {rpm.mean() / 60 * RING_GEAR_TEETH:.0f} Hz")
 
@@ -239,9 +241,10 @@ def main() -> None:
     print(f"  {len(sig) / SR:.2f}s")
 
     print("\nSHIPPED, for A/B:")
-    assets = Path(__file__).resolve().parents[1] / "src/freight_fate/assets/sounds/engine"
+    assets = Path(__file__).resolve().parents[1] / "assets/sounds/engine"
     try:
         import soundfile as sf
+
         for name in ("start", "shutdown"):
             d, sr = sf.read(str(assets / f"{name}.ogg"), always_2d=True)
             print(f"  engine/{name}.ogg  {len(d) / sr:.2f}s")
