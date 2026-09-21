@@ -1739,8 +1739,10 @@ quiets it, and settling back under the limit disarms it.
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
 | Music volume | Menu and facility background music volume. |
+| Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |
+| Music seed | Only shown with Music source set to Synthesized. Rolls a new seed and reads it aloud, so you can share a favorite with someone else. Every synthesized piece changes, and the current music restarts at once. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
-| Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. |
+| Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. With Music source set to Synthesized, this locks the radio to the synthesized Roadhouse alone; every other station control says so instead of changing the station, though the radio key, volume, and now playing still work. |
 | Shuffle personal playlists | Off by default: each of your playlists plays top to bottom and resumes where it left off. On plays it in a random order, every track once before any repeats, with a new order each time through. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
@@ -1855,6 +1857,13 @@ names it. Only when nothing else is on the air does it fall back to the
 Roadhouse, which is receivable everywhere along with the Night Line and the
 satellite fallback.
 
+With Settings, Audio, Music source set to Synthesized, the Roadhouse plays
+music the game composes itself instead, with no host breaks, station IDs,
+or jingles. Freight Fate's own fictional regional stations leave the dial
+entirely; the terrestrial, web, and personal-playlist stations are
+unaffected. With Music source Original, the dial plays exactly as described
+above.
+
 Real public stream stations, including AFN choices, play out of the box; turning
 streamer-safe mode on hides them, for anyone streaming or recording their
 drive. When the BASS audio backend is available, those stations play from
@@ -1866,7 +1875,8 @@ into the Playlists folder next to your saves (the game creates it on first run)
 and each file becomes a station under Your playlists, named from the playlist.
 The entries can point at files anywhere your computer can read, including
 network drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and
-wma. Entries can also be internet stations: a playlist exported from an
+wma, plus tracker module files such as .it, .xm, .s3m, .mod, and .mo3, the
+kind OpenMPT and similar trackers save. Entries can also be internet stations: a playlist exported from an
 internet radio app is nothing but stream addresses, and those play too, in the
 order the playlist lists them alongside any music files. The station remembers
 its place while you tune away during a drive, and an entry that will not open

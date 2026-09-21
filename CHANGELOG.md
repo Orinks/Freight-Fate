@@ -14,6 +14,18 @@
 
 - **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
 
+- **Music source can be set to Synthesized, music the game makes with no AI.** Menus and the Roadhouse play it, with no voiced breaks.
+
+- **A music seed changes every synthesized piece.** Settings, Audio, Music seed rolls a new one and says it, so you can share one you like.
+
+- **The original 1.5 soundtrack is back in Synthesized mode.** Headlights West, Open Road and Night Haul return.
+
+- **Synthesized mode takes Freight Fate's own stations off the radio.** The dial keeps the synthesized Roadhouse, local and web stations, and your playlists.
+
+- **In Synthesized mode, streamer-safe keeps the radio on the Roadhouse.** Station keys stay put and say so; the radio key turns it on and off.
+
+- **Radio playlists can play tracker modules.** Music made in OpenMPT and similar trackers plays like any other file in your playlist.
+
 ### Changed
 
 - **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.

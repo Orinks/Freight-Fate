@@ -65,6 +65,17 @@ bookmarks usable.
       DELAY imports and stay exempt: without that reader installed the bridge
       does not resolve, which costs the bridge and never the launch.
 
+- [x] Synthesized music source (no AI): a seeded composer with 14 styles on
+      a career-path ladder, the restored 1.5 tracks, a Synthesized Roadhouse
+      with no voiced breaks, the Synthesized dial rules and the
+      streamer-safe lock, and tracker modules playable in radio playlists.
+      - [ ] Typed-in music seeds.
+      - [ ] More synth voices per style.
+      - [ ] A looping tracker module may need `BASS_MUSIC_STOPBACK` set so
+            its loop point stays gapless.
+      - [ ] The Tab radio screen does not yet say why Freight Fate's own
+            stations are gone when streamer-safe is off.
+
 ### Release gate -- what stands between here and a public 1.9.0
 
 The checklist below retains the recorded open release gates. Verification here
