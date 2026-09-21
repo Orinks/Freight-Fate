@@ -84,13 +84,14 @@ fn the_struct_carries_the_eighty_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12), the two shortcut tables (2026-09-14),
-    // radio_shuffle_playlists and steering_guide_inverted (2026-09-18) were
-    // added on the Rust side; lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 80);
+    // radio_shuffle_playlists and steering_guide_inverted (2026-09-18), and
+    // synth_music and music_seed (2026-09-21) were added on the Rust side;
+    // lane_centering_assist was retired for 1.9.
+    assert_eq!(Settings::FIELD_NAMES.len(), 82);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[76], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[78], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 80);
+    assert_eq!(pairs.len(), 82);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -121,7 +122,8 @@ fn the_defaults_match_the_python_dataclass() {
         "selected_stop_assist": false, "curve_speed_assist": true,
         "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
         "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
-        "sfx_volume": 0.8, "music_volume": 0.5, "radio_volume": 0.25, "radio_enabled": true,
+        "sfx_volume": 0.8, "music_volume": 0.5, "synth_music": false, "music_seed": 48213,
+        "radio_volume": 0.25, "radio_enabled": true,
         "radio_station_id": "route_playlist", "radio_streamer_safe": false,
         "radio_shuffle_playlists": false,
         "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
@@ -145,7 +147,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 80);
+    assert_eq!(expected.len(), 82);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }

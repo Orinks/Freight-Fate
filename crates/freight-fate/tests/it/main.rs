@@ -4,7 +4,8 @@
 //! and one process, with the tests running as parallel threads inside it.
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
-//! them. A new test file needs a line here.
+//! them. A new test file needs a line here. The one exception,
+//! `tests/classic_startup.rs`, needs a process nothing has touched yet.
 
 mod account_achievements;
 mod audio_support;
@@ -138,6 +139,7 @@ mod states_online_hub;
 mod states_online_offer;
 mod states_online_setup;
 mod states_online_states;
+mod synth_music;
 mod transcript_announcements;
 mod transcript_career_arc_playtest;
 mod transcript_career_stats;

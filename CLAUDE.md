@@ -162,9 +162,10 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   build is shared). Integration tests live in `crates/<crate>/tests/it/*.rs`,
   wired in through that directory's `main.rs` -- one test binary named `it`
   per crate, deliberately, so add a `mod` line there rather than a new
-  top-level file. The two exceptions, `crates/ff-core/tests/data_baked.rs`
-  and `data_map_correction.rs`, each point the process at a different data
-  root and so keep their own binary.
+  top-level file. The three exceptions: `crates/ff-core/tests/data_baked.rs`
+  and `data_map_correction.rs` each point the process at a different data
+  root, and `crates/freight-fate/tests/classic_startup.rs` needs a process
+  where the 1.5 classics are not yet registered, so each keeps its own binary.
 - One test: `cargo test -p freight-fate --test it <name_filter> -- --nocapture`
   (`--test it` skips the unit-test and doc-test binaries; the filter is a
   substring of the test path).
@@ -277,6 +278,14 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 ## Accessibility expectations
 
 - Every gameplay path must stay usable by keyboard and screen reader.
+- **Silence over redundant speech** (owner rule, 2026-09-21). Speak only what
+  the player needs and does not already know. A control that a mode
+  deliberately disables does nothing and says nothing: no refusal line, no
+  error tick, no explanation of the intentional no-op. Do not add lines that
+  restate a setting the player chose, confirm the obvious, or describe what
+  the screen already does. The information lives where the player goes to
+  look for it (the settings help, the Tab screens, the manual), not in a
+  reply to every key press.
 - Spoken text is player-facing: no maintainer or CI jargon, and never replace
   spoken information with visual-only cues.
 - If you touch menu items, prompts, warnings, settings, or status text, test

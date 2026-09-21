@@ -34,7 +34,6 @@
 use std::f64::consts::PI;
 
 use crate::assets_pack::register_generated_sound;
-use crate::cab_filter::wav::write_wav_pcm16;
 
 pub const CONFIRMATION_NOTE_KEY: &str = "ladder/confirmation_note";
 pub const ROAD_AHEAD_NOTE_KEY: &str = "ladder/road_ahead_note";
@@ -75,17 +74,13 @@ fn tone_samples(freq_hz: f64, dur_s: f64, peak: f64) -> Vec<i16> {
     samples
 }
 
-fn wav_bytes(samples: &[i16]) -> Vec<u8> {
-    write_wav_pcm16(RATE, 2, samples)
-}
-
 /// One short, clear high note: the thing you asked for happened.
 ///
 /// A single note like the status tock, an octave above it, so "something
 /// changed, look later" and "that worked" are told apart by pitch alone
 /// without either becoming a two-note phrase like the other two.
 pub fn confirmation_note_wav() -> Vec<u8> {
-    wav_bytes(&tone_samples(784.0, 0.06, 0.32))
+    crate::wav::pcm16_wav(&tone_samples(784.0, 0.06, 0.32), 2, RATE)
 }
 
 /// Two short notes falling: the road is about to do something.
@@ -97,19 +92,19 @@ pub fn confirmation_note_wav() -> Vec<u8> {
 pub fn road_ahead_note_wav() -> Vec<u8> {
     let mut samples = tone_samples(587.33, 0.07, 0.38);
     samples.extend(tone_samples(466.16, 0.07, 0.38));
-    wav_bytes(&samples)
+    crate::wav::pcm16_wav(&samples, 2, RATE)
 }
 
 /// A soft two-note rising chime: a tip offered, not an alarm.
 pub fn coaching_note_wav() -> Vec<u8> {
     let mut samples = tone_samples(523.25, 0.09, 0.4);
     samples.extend(tone_samples(659.25, 0.09, 0.4));
-    wav_bytes(&samples)
+    crate::wav::pcm16_wav(&samples, 2, RATE)
 }
 
 /// A single short, low tock: a state changed, nothing to act on now.
 pub fn status_note_wav() -> Vec<u8> {
-    wav_bytes(&tone_samples(392.0, 0.08, 0.35))
+    crate::wav::pcm16_wav(&tone_samples(392.0, 0.08, 0.35), 2, RATE)
 }
 
 static REGISTERED: std::sync::Once = std::sync::Once::new();

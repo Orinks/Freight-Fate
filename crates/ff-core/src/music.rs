@@ -80,6 +80,9 @@ pub trait MenuMusicProfile {
     fn active_truck_key(&self) -> String;
     fn name(&self) -> String;
     fn current_city(&self) -> String;
+    /// `profile.business_status`: company driver, leased owner-operator or
+    /// independent authority. The synthesized ladder splits on it.
+    fn business_status(&self) -> String;
 }
 
 /// True when the loaded career's clock currently reads night.
@@ -231,12 +234,19 @@ pub fn select_drive_music(
         .expect("the drive pools are never empty")
 }
 
+/// The length of `key` if it can be known without audio: the shipped
+/// catalog or a synthesized piece (composed, not rendered). Anything else,
+/// such as a player file, is measured by the playing stream instead.
+pub fn known_track_duration_s(key: &str) -> Option<f64> {
+    if let Some(info) = TRACKS_BY_KEY.get(key) {
+        return Some(info.duration_s);
+    }
+    crate::music_synth::duration_s(key)
+}
+
 /// Best-known duration for slow playlist rotation.
 pub fn music_track_duration_s(track: &str) -> f64 {
-    TRACKS_BY_KEY
-        .get(track)
-        .map(|info| info.duration_s)
-        .unwrap_or(60.0)
+    known_track_duration_s(track).unwrap_or(60.0)
 }
 
 /// A stable shuffled track order for one station on one trip.
@@ -275,6 +285,7 @@ mod tests {
         total_miles: f64,
         owned_trucks: Vec<String>,
         truck: String,
+        business_status: String,
     }
 
     impl FakeProfile {
@@ -287,6 +298,7 @@ mod tests {
                 level: 1,
                 owned_trucks: vec!["rig".to_string()],
                 truck: "rig".to_string(),
+                business_status: crate::models::business_constants::COMPANY_DRIVER.to_string(),
                 ..Default::default()
             }
         }
@@ -316,6 +328,9 @@ mod tests {
         }
         fn current_city(&self) -> String {
             self.current_city.clone()
+        }
+        fn business_status(&self) -> String {
+            self.business_status.clone()
         }
     }
 

@@ -10,6 +10,7 @@ use ff_core::settings::Settings;
 use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::{GameContext, Say};
+use crate::bindings::Action;
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::driving_core::{
@@ -391,22 +392,47 @@ impl DrivingStatusScreenState {
                 if engine_on && radio_enabled {
                     lines.push(d.radio_now_playing_text(ctx));
                 }
-                lines.push(if !ctx.settings.radio_streamer_safe {
-                    "Streamer-safe mode off. Real public streams and personal playlists are on \
-                     the dial."
-                        .to_string()
+                let locked = d.radio.station_locked();
+                if locked {
+                    // Synthesized with streamer-safe mode on: the station keys
+                    // do nothing, so the screen names only what still works.
+                    // This is an information screen the player asked for, not
+                    // a key response, so it still reports the lock in words --
+                    // it just no longer claims the keys "say so".
+                    lines.push(
+                        "Streamer-safe mode on, with Music source set to Synthesized.".to_string(),
+                    );
+                    lines.push(format!(
+                        "Streamer-safe mode keeps the radio on the Roadhouse. Station keys do \
+                         nothing. {} turns the radio on or off. Shift with Page Down and Page \
+                         Up, or semicolon and apostrophe, changes radio volume by 10 percent.",
+                        ctx.bindings.spoken(Action::Radio)
+                    ));
                 } else {
-                    "Streamer-safe mode on. Real public streams and personal playlists are \
-                     hidden."
-                        .to_string()
-                });
-                lines.push(
-                    "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
-                     Control they jump categories. With Shift they change radio volume by 10 \
-                     percent. O saves the station as a favorite. M toggles the radio."
-                        .to_string(),
-                );
-                if !d.radio.favorite_ids.is_empty() {
+                    lines.push(if !ctx.settings.radio_streamer_safe {
+                        "Streamer-safe mode off. Real public streams and personal playlists are \
+                         on the dial."
+                            .to_string()
+                    } else {
+                        "Streamer-safe mode on. Real public streams and personal playlists are \
+                         hidden."
+                            .to_string()
+                    });
+                    if ctx.settings.synth_music && !ctx.settings.radio_streamer_safe {
+                        lines.push(
+                            "Music source Synthesized: Freight Fate's own stations are off \
+                             the dial."
+                                .to_string(),
+                        );
+                    }
+                    lines.push(
+                        "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
+                         Control they jump categories. With Shift they change radio volume by \
+                         10 percent. O saves the station as a favorite. M toggles the radio."
+                            .to_string(),
+                    );
+                }
+                if !locked && !d.radio.favorite_ids.is_empty() {
                     lines.push(format!("Favorites saved: {}.", d.radio.favorite_ids.len()));
                 }
                 if let Some((lat, lon)) = position {

@@ -1,6 +1,7 @@
 //! The BASS backend's music channel: shipped tracks, personal playlist
 //! files, and live radio streams opened off the game thread.
 
+use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
@@ -103,7 +104,7 @@ impl BassBackend {
     /// already being the one loaded: the point of the call is the position.
     pub(super) fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
         self.cancel_radio_connect();
-        let Some((data, _ext)) = asset_bytes(&format!("music/{track}"), MUSIC_EXTENSIONS) else {
+        let Some((data, ext)) = asset_bytes(&format!("music/{track}"), MUSIC_EXTENSIONS) else {
             log::warn!("Missing music track: {track}");
             return;
         };
@@ -111,7 +112,7 @@ impl BassBackend {
             self.fade_out(stream, 800);
             self.music_track = None;
         }
-        let Some(stream) = self.make_stream(data, track, false) else {
+        let Some(stream) = self.make_stream(data, &ext, track, false) else {
             return;
         };
         let handle = stream.handle();
@@ -304,7 +305,11 @@ impl BassBackend {
             self.fade_out(stream, 800);
             self.music_track = None;
         }
-        let Some(stream) = self.make_stream(data, &key, false) else {
+        let ext = Path::new(path)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("");
+        let Some(stream) = self.make_stream(data, ext, &key, false) else {
             return Err(AudioError::new(format!("could not decode {path}")));
         };
         let handle = stream.handle();
@@ -326,6 +331,16 @@ impl BassBackend {
             .as_ref()
             .map(|stream| is_playing(stream.handle()))
             .unwrap_or(false)
+    }
+
+    /// The current music stream's length. Read from `music_stream`, which a
+    /// play call has already swapped to the new track while the old one
+    /// fades on the retain list, so the answer is never the outgoing one's.
+    pub(super) fn music_length_s(&self) -> Option<f64> {
+        let stream = self.music_stream.as_ref()?;
+        safe::channel_length_seconds(stream.handle())
+            .ok()
+            .filter(|s| *s > 0.0)
     }
 
     /// The song title the playing stream reports, wherever its kind of

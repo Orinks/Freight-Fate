@@ -828,6 +828,10 @@ impl Audio for AudioEngine {
         self.backend.music_playing()
     }
 
+    fn music_length_s(&self) -> Option<f64> {
+        self.backend.music_length_s()
+    }
+
     fn radio_now_playing(&self) -> Option<String> {
         self.backend.radio_now_playing()
     }

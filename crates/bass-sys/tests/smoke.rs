@@ -296,6 +296,90 @@ fn autofree_stream_goes_away_when_it_ends() {
     drop(stream);
 }
 
+/// The smallest ProTracker MOD BASS will load: one 64-row pattern playing a
+/// 32-sample square wave on channel 1, row 0. 1084 + 1024 + 32 bytes.
+fn tiny_mod() -> Vec<u8> {
+    let mut m = vec![0u8; 1084];
+    m[..4].copy_from_slice(b"tiny");
+    m[42..44].copy_from_slice(&16u16.to_be_bytes()); // sample 1: 16 words
+    m[45] = 64; // volume
+    m[48..50].copy_from_slice(&1u16.to_be_bytes()); // repeat 1 word: no loop
+    m[950] = 1; // song length: 1 position
+    m[951] = 127;
+    m[1080..1084].copy_from_slice(b"M.K.");
+    let mut pattern = vec![0u8; 1024];
+    pattern[..3].copy_from_slice(&[0x01, 0xAC, 0x10]); // sample 1, C-2
+    m.extend_from_slice(&pattern);
+    m.extend((0..32).map(|i| if i < 16 { 0x40u8 } else { 0xC0 }));
+    m
+}
+
+#[test]
+fn a_tracker_module_loads_reports_its_length_and_frees_as_music() {
+    let Some(_g) = bass() else { return };
+    let flags = BASS_MUSIC_RAMPS | BASS_MUSIC_SINCINTER | BASS_MUSIC_PRESCAN;
+    let music = music_load_mem_shared(tiny_mod().into(), flags).expect("tiny MOD loads");
+    let h = music.handle();
+    // 64 rows at the default speed 6 and 125 BPM: 64 * 6 * 0.02 s.
+    let secs = channel_length_seconds(h).unwrap();
+    assert!((secs - 7.68).abs() < 0.05, "{secs}");
+    // A music handle is not a stream: freeing it takes BASS_MusicFree.
+    music.free().expect("MusicFree accepts the handle");
+    assert_eq!(channel_length_bytes(h).unwrap_err().code, BASS_ERROR_HANDLE);
+
+    let dropped = music_load_mem_shared(tiny_mod().into(), flags).unwrap();
+    let h = dropped.handle();
+    drop(dropped);
+    assert_eq!(channel_length_bytes(h).unwrap_err().code, BASS_ERROR_HANDLE);
+}
+
+/// A two-position MOD that loops forever: position 0 plays a note at speed 1
+/// and 255 BPM then breaks to position 1, whose first row jumps back to
+/// order 0 with `B00`. One pass is two ticks, about 20 ms.
+fn looping_mod() -> Vec<u8> {
+    let mut m = tiny_mod();
+    m.truncate(1084);
+    m[950] = 2; // song length: 2 positions
+    m[952] = 0; // order 0 -> pattern 0
+    m[953] = 1; // order 1 -> pattern 1
+    let mut p0 = vec![0u8; 1024];
+    p0[..4].copy_from_slice(&[0x01, 0xAC, 0x1F, 0x01]); // C-2, speed 1
+    p0[4..8].copy_from_slice(&[0, 0, 0x0F, 0xFF]); // 255 BPM
+    p0[8..12].copy_from_slice(&[0, 0, 0x0D, 0x00]); // break to position 1
+    let mut p1 = vec![0u8; 1024];
+    p1[..4].copy_from_slice(&[0, 0, 0x0B, 0x00]); // jump back to order 0
+    m.extend_from_slice(&p0);
+    m.extend_from_slice(&p1);
+    m.extend((0..32).map(|i| if i < 16 { 0x40u8 } else { 0xC0 }));
+    m
+}
+
+#[test]
+fn stopback_ends_a_module_that_jumps_back_to_the_start() {
+    let Some(_g) = bass() else { return };
+    let flags = BASS_MUSIC_RAMPS | BASS_MUSIC_SINCINTER | BASS_MUSIC_PRESCAN;
+
+    // Control: without STOPBACK the backward jump loops forever.
+    let endless = music_load_mem_shared(looping_mod().into(), flags).expect("looping MOD loads");
+    channel_play(endless.handle(), false).unwrap();
+    std::thread::sleep(Duration::from_millis(500));
+    assert_eq!(
+        channel_is_active(endless.handle()),
+        BASS_ACTIVE_PLAYING,
+        "the control module should still be looping"
+    );
+    channel_stop(endless.handle()).unwrap();
+
+    let once = music_load_mem_shared(looping_mod().into(), flags | BASS_MUSIC_STOPBACK)
+        .expect("looping MOD loads with STOPBACK");
+    channel_play(once.handle(), false).unwrap();
+    assert!(
+        wait_for(Duration::from_secs(3), || channel_is_active(once.handle())
+            == BASS_ACTIVE_STOPPED),
+        "STOPBACK did not end the module at its backward jump"
+    );
+}
+
 #[test]
 fn plugins_load_from_the_library_directory() {
     let Some(_g) = bass() else { return };

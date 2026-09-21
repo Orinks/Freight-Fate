@@ -293,6 +293,8 @@ impl DrivingState {
             radio_break_pos: 0,
             radio_break_count: 0,
             radio_tracks_since_break: 0,
+            synth_music_applied: None,
+            radio_track_len: None,
             // The stations were already on the air before this drive began.
             radio_airtime_s: initial_airtime_s(trip_seed),
             playlist_positions: HashMap::new(),

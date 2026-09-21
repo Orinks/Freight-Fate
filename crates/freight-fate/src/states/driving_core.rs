@@ -885,6 +885,9 @@ impl RadioSettingsAccess for RadioSettingsView<'_> {
     fn radio_streamer_safe(&self) -> bool {
         self.0.radio_streamer_safe
     }
+    fn synth_music(&self) -> bool {
+        self.0.synth_music
+    }
     fn set_radio_enabled(&mut self, _enabled: bool) {}
     fn set_radio_station_id(&mut self, _station_id: &str) {}
 }
@@ -904,6 +907,9 @@ impl RadioSettingsAccess for RadioSettingsMut<'_> {
     }
     fn radio_streamer_safe(&self) -> bool {
         self.0.radio_streamer_safe
+    }
+    fn synth_music(&self) -> bool {
+        self.0.synth_music
     }
     fn set_radio_enabled(&mut self, enabled: bool) {
         self.0.radio_enabled = enabled;

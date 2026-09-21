@@ -25,13 +25,14 @@ use bass_sys::{
     BASS_ACTIVE_PLAYING, BASS_ATTRIB_FREQ, BASS_ATTRIB_PAN, BASS_ATTRIB_VOL,
     BASS_CONFIG_DEV_DEFAULT, BASS_CONFIG_NET_BUFFER, BASS_CONFIG_NET_PREBUF,
     BASS_CONFIG_NET_READTIMEOUT, BASS_CONFIG_NET_TIMEOUT, BASS_DEFAULT_DEVICE, BASS_ERROR_ALREADY,
+    BASS_MUSIC_PRESCAN, BASS_MUSIC_RAMPS, BASS_MUSIC_SINCINTER, BASS_MUSIC_STOPBACK,
     BASS_STREAM_AUTOFREE,
 };
 use ff_core::audio_fades::FadeScheduler;
 use ff_core::audio_loops::SustainLoopSpec;
 use ff_core::pyrandom::PyRandom;
 
-use super::assets::{playback_bytes, plugin_lib_dir, SFX_EXTENSIONS};
+use super::assets::{playback_bytes, plugin_lib_dir, MODULE_EXTENSIONS, SFX_EXTENSIONS};
 use super::backend::{loop_category, one_shot_category, AudioBackend, Buses, VolumeUpdate};
 use super::bass_radio::{PendingRadioStart, RadioShared};
 use super::sustain::SustainLoop;
@@ -352,14 +353,30 @@ impl BassBackend {
     /// Memory streams sidestep BASS filename-encoding quirks entirely and
     /// work identically for packed and loose assets. BASS reads the buffer
     /// during playback; the `Stream` pins it for exactly as long as the
-    /// stream lives.
+    /// stream lives. A tracker module (`ext` in [`MODULE_EXTENSIONS`]) loads
+    /// as BASS music instead; `BASS_MUSIC_AUTOFREE` is the same bit.
     pub(super) fn make_stream(
         &self,
         data: Arc<[u8]>,
+        ext: &str,
         label: &str,
         looping: bool,
     ) -> Option<Stream> {
-        let stream = match safe::stream_create_mem_shared(data, BASS_STREAM_AUTOFREE) {
+        let opened = if MODULE_EXTENSIONS
+            .iter()
+            .any(|m| m.eq_ignore_ascii_case(ext))
+        {
+            let mut flags = BASS_MUSIC_RAMPS | BASS_MUSIC_SINCINTER | BASS_MUSIC_PRESCAN;
+            // A one-shot module must end so a playlist can advance: many
+            // modules loop back to the start with a `Bxx` jump forever.
+            if !looping {
+                flags |= BASS_MUSIC_STOPBACK;
+            }
+            safe::music_load_mem_shared(data, flags | BASS_STREAM_AUTOFREE)
+        } else {
+            safe::stream_create_mem_shared(data, BASS_STREAM_AUTOFREE)
+        };
+        let stream = match opened {
             Ok(stream) => stream,
             Err(err) => {
                 log::warn!("Could not open stream: {label} ({err})");
@@ -381,11 +398,11 @@ impl BassBackend {
                 return None;
             }
         }
-        let Some((data, _ext)) = playback_bytes(key, SFX_EXTENSIONS) else {
+        let Some((data, ext)) = playback_bytes(key, SFX_EXTENSIONS) else {
             log::warn!("Missing sound: {key}");
             return None;
         };
-        self.make_stream(data, key, looping)
+        self.make_stream(data, &ext, key, looping)
     }
 
     /// Keep a stream alive until BASS finishes with it.

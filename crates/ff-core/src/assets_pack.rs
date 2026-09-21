@@ -580,19 +580,43 @@ type Generated = HashMap<String, (Arc<Vec<u8>>, String)>;
 
 static GENERATED: Lazy<Mutex<Generated>> = Lazy::new(|| Mutex::new(HashMap::new()));
 static GENERATED_VERSION: AtomicU64 = AtomicU64::new(0);
+/// Per key, the [`GENERATED_VERSION`] at which it last changed. Entries are
+/// kept after an unregister so a stamp never repeats for a key.
+static KEY_VERSIONS: Lazy<Mutex<HashMap<String, u64>>> = Lazy::new(|| Mutex::new(HashMap::new()));
+
+fn stamp(key: &str) {
+    let version = GENERATED_VERSION.fetch_add(1, Ordering::SeqCst) + 1;
+    KEY_VERSIONS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .insert(key.to_string(), version);
+}
 
 /// Publish synthesized audio under `key` for every backend.
 ///
-/// Bumps [`generated_sound_version`]: anything measured or rendered from the
-/// old bytes (the audio engine's clip-length and cab-sealed caches) was
-/// measuring nothing and must be dropped, which the game crate does by
-/// checking the version.
+/// Moves [`generated_sound_version`] for `key` alone: anything measured or
+/// rendered from its old bytes (the audio engine's clip-length and
+/// cab-sealed caches) was measuring nothing and must be dropped, which the
+/// game crate does by checking that key's version. Other keys' cached
+/// entries stand.
 pub fn register_generated_sound(key: &str, data: Vec<u8>, ext: &str) {
     GENERATED
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .insert(key.to_string(), (Arc::new(data), ext.to_string()));
-    GENERATED_VERSION.fetch_add(1, Ordering::SeqCst);
+    stamp(key);
+}
+
+/// Drop a generated sound, e.g. a synthesized piece that has played.
+pub fn unregister_generated_sound(key: &str) {
+    let removed = GENERATED
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(key)
+        .is_some();
+    if removed {
+        stamp(key);
+    }
 }
 
 /// The bytes and extension published under `key`, if any.
@@ -616,10 +640,15 @@ pub fn generated_sound_keys() -> Vec<String> {
     keys
 }
 
-/// A counter that moves on every registration, for caches keyed on the
-/// generated set.
-pub fn generated_sound_version() -> u64 {
-    GENERATED_VERSION.load(Ordering::SeqCst)
+/// A stamp that moves whenever `key` is registered or unregistered (0 if it
+/// never was), for caches of anything derived from that key's sound.
+pub fn generated_sound_version(key: &str) -> u64 {
+    KEY_VERSIONS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .get(key)
+        .copied()
+        .unwrap_or(0)
 }
 
 #[cfg(test)]
@@ -1178,7 +1207,8 @@ mod tests {
 
     #[test]
     fn test_generated_sounds_registry_wins_and_lists_sorted() {
-        let before = generated_sound_version();
+        let before = generated_sound_version("test_registry/alpha");
+        let other = generated_sound_version("test_registry/untouched");
         register_generated_sound("test_registry/zeta", b"zz".to_vec(), "wav");
         register_generated_sound("test_registry/alpha", b"aa".to_vec(), "wav");
         let (data, ext) = generated_sound("test_registry/alpha").unwrap();
@@ -1192,6 +1222,8 @@ mod tests {
             .unwrap();
         let z = keys.iter().position(|k| k == "test_registry/zeta").unwrap();
         assert!(a < z);
-        assert!(generated_sound_version() >= before + 2);
+        assert!(generated_sound_version("test_registry/alpha") > before);
+        // Only the registered key moves; a cache of any other stays valid.
+        assert_eq!(generated_sound_version("test_registry/untouched"), other);
     }
 }

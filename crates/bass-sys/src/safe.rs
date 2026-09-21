@@ -393,6 +393,8 @@ pub fn load_plugins_from(dir: &Path) -> Vec<(String, Result<HPLUGIN, BassError>)
 pub struct Stream {
     handle: HSTREAM,
     _buffer: Option<Arc<[u8]>>,
+    /// A MOD music handle (`BASS_MusicLoad`), freed with `BASS_MusicFree`.
+    music: bool,
 }
 
 // A handle is a number and BASS is thread-safe; the buffer is immutable.
@@ -412,9 +414,7 @@ impl Stream {
 
     /// Free the stream now and report whether BASS still knew it.
     pub fn free(mut self) -> Result<(), BassError> {
-        let a = lib()?;
-        // SAFETY: plain integer; BASS validates the handle.
-        let result = check(unsafe { (a.stream_free)(self.handle) });
+        let result = check(self.free_handle(lib()?));
         // Drop skips a zero handle, and releases the buffer only then -- after
         // StreamFree has returned, which is the ordering that matters.
         self.handle = 0;
@@ -429,6 +429,19 @@ impl Stream {
         std::mem::forget(self);
         handle
     }
+
+    /// `BASS_MusicFree` for a music handle, `BASS_StreamFree` otherwise.
+    fn free_handle(&self, a: &Api) -> BOOL {
+        // SAFETY: plain integer; BASS validates the handle. One that
+        // autofreed already answers BASS_ERROR_HANDLE, which is fine.
+        unsafe {
+            if self.music {
+                (a.music_free)(self.handle)
+            } else {
+                (a.stream_free)(self.handle)
+            }
+        }
+    }
 }
 
 impl Drop for Stream {
@@ -437,11 +450,7 @@ impl Drop for Stream {
             return;
         }
         if let Ok(a) = lib() {
-            // SAFETY: plain integer; BASS validates the handle. A stream that
-            // autofreed already answers BASS_ERROR_HANDLE, which is fine.
-            unsafe {
-                (a.stream_free)(self.handle);
-            }
+            self.free_handle(a);
         }
         // `_buffer` drops after this, i.e. after StreamFree has returned.
     }
@@ -469,6 +478,28 @@ pub fn stream_create_mem_shared(data: Arc<[u8]>, flags: u32) -> Result<Stream, B
     Ok(Stream {
         handle,
         _buffer: Some(data),
+        music: false,
+    })
+}
+
+/// `BASS_MusicLoad(TRUE, ..)` over a shared buffer: a tracker module (IT,
+/// XM, S3M, MOD, MO3) as a playable channel. BASS copies module data on
+/// load, but the buffer is pinned like a stream's for one ownership rule.
+pub fn music_load_mem_shared(data: Arc<[u8]>, flags: u32) -> Result<Stream, BassError> {
+    let a = lib()?;
+    let len = DWORD::try_from(data.len()).map_err(|_| BassError {
+        code: BASS_ERROR_FILEFORM,
+    })?;
+    // SAFETY: `data` is a valid buffer of `len` bytes, alive for the call
+    // and pinned in the returned Stream until after MusicFree.
+    let handle = unsafe { (a.music_load)(1, data.as_ptr().cast(), 0, len, flags, 0) };
+    if handle == 0 {
+        return Err(BassError::last());
+    }
+    Ok(Stream {
+        handle,
+        _buffer: Some(data),
+        music: true,
     })
 }
 
@@ -493,6 +524,7 @@ pub fn stream_create_url(url: &str, flags: u32) -> Result<Stream, BassError> {
     Ok(Stream {
         handle,
         _buffer: None,
+        music: false,
     })
 }
 

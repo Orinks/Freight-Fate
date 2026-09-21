@@ -16,6 +16,7 @@
 
 pub mod playlists;
 pub mod state;
+mod synth_dial;
 #[cfg(test)]
 mod tests;
 

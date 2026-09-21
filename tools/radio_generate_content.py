@@ -69,7 +69,7 @@ VOICE_SETTINGS = TTS_VOICE_SETTINGS
 # Every container the game's music loader accepts, in its own preference
 # order (audio/assets.rs MUSIC_EXTENSIONS). The resume check has to look for
 # all of them: the shipped tree is Opus, the runners write Vorbis.
-MUSIC_EXTENSIONS = ("opus", "ogg", "wav")
+MUSIC_EXTENSIONS = ("opus", "ogg", "wav", "mp3", "flac", "it", "xm", "s3m", "mod", "mo3")
 
 # mix_id_bed's two SFX layer names -> the SFX_PROMPTS key that fills each.
 ID_SFX_LAYERS = {"whoosh": "radio_imaging_whoosh_short", "riser": "radio_imaging_riser"}

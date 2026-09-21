@@ -320,6 +320,9 @@ impl MenuMusicProfile for Profile {
     fn current_city(&self) -> String {
         self.current_city.clone()
     }
+    fn business_status(&self) -> String {
+        self.business_status.clone()
+    }
 }
 
 impl Profile {

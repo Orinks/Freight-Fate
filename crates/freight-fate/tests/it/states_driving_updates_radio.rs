@@ -741,8 +741,8 @@ fn test_the_route_station_swaps_its_pool_at_nightfall() {
         playlist: "route".to_string(),
         ..RadioStation::new("route-fixture", "Route", "", "mixed", "test fixture")
     };
-    let day = d.station_rotation_pool(&route_station, false);
-    let night = d.station_rotation_pool(&route_station, true);
+    let day = d.station_rotation_pool(&app.ctx, &route_station, false);
+    let night = d.station_rotation_pool(&app.ctx, &route_station, true);
     assert_eq!(day, d.day_music_sequence);
     assert_eq!(night, d.night_music_sequence);
     assert_ne!(day, night);

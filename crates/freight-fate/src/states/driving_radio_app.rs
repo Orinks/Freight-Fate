@@ -95,7 +95,17 @@ impl RadioAppState {
         self.refresh(ctx, true);
     }
 
+    /// Synthesized with streamer-safe mode on: the Roadhouse is the only
+    /// station, so there is no list to open or search. Does nothing and
+    /// says nothing (owner ruling, 2026-09-21).
+    fn dial_locked(ctx: &mut GameContext) -> bool {
+        ctx.settings.synth_music && ctx.settings.radio_streamer_safe
+    }
+
     fn open_list(&mut self, ctx: &mut GameContext, kind: &str) {
+        if Self::dial_locked(ctx) {
+            return;
+        }
         let state = RadioStationListState::new(self.driving.clone(), kind);
         ctx.push_state(state);
     }
@@ -171,6 +181,9 @@ impl Menu for RadioAppState {
             )
             .help("Your saved stations. Enter on one tunes it."),
             MenuItem::new("Search stations", |s: &mut Self, ctx| {
+                if Self::dial_locked(ctx) {
+                    return;
+                }
                 let state = RadioSearchEntryState::new(s.driving.clone());
                 ctx.push_state(state);
             })
@@ -270,7 +283,12 @@ impl RadioStationListState {
             .driving
             .with(ctx, |d, ctx| d.tune_radio_to(ctx, &station_id))
             .unwrap_or_default();
-        ctx.say(&message);
+        // Defensive: a locked dial answers with an empty message (the list
+        // that reaches this row is never open while locked, but a command
+        // that returns nothing must never be spoken as nothing).
+        if !message.is_empty() {
+            ctx.say(&message);
+        }
         self.refresh(ctx, true);
     }
 }

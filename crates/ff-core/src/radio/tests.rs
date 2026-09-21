@@ -201,6 +201,9 @@ impl RadioSettingsAccess for FakeSettings {
     fn radio_streamer_safe(&self) -> bool {
         self.radio_streamer_safe
     }
+    fn synth_music(&self) -> bool {
+        false
+    }
     fn set_radio_enabled(&mut self, enabled: bool) {
         self.radio_enabled = enabled;
     }

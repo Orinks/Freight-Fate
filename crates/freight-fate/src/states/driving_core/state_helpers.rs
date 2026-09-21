@@ -57,6 +57,16 @@ pub fn secure_truck_for_stopped_menu_at(
     truck.brake = 1.0;
     truck.set_parking_brake();
     driving.cancel_cruise(ctx, false);
+    // The parking brake holds the truck now, so every assist lets go of the
+    // service brake. The brake ramp keeps whatever pedal an assist is
+    // holding, so a hold left latched under the menu kept the brakes on
+    // after the driver drove off: 0 mph at full revs with the parking brake
+    // released (Shane, Jerry and Jessie, 2026-09-21).
+    driving.destination_arrival_active = false;
+    driving.destination_assist_brake = 0.0;
+    driving.keeper_snub = 0.0;
+    driving.aeb_brake = 0.0;
+    driving.curve_servo = None;
     true
 }
 

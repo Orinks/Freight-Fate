@@ -375,6 +375,8 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.toggle_engine_voice(ctx, d)),
                 adjust(|s, ctx, d| s.toggle_jake_voice(ctx, d)),
                 adjust(|s, ctx, d| s.volume(ctx, "music_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.toggle_music_source(ctx, d)),
+                adjust(|s, ctx, d| s.roll_music_seed(ctx, d)),
                 adjust(|s, ctx, d| s.volume(ctx, "radio_volume", 0.1 * d as f64)),
                 adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
                 adjust(|s, ctx, d| s.toggle_radio_shuffle_playlists(ctx, d)),
@@ -784,6 +786,24 @@ impl SettingsCategoryState {
                 "Menu and facility background music volume.",
             ),
             row(
+                dyn_label(|s| {
+                    format!(
+                        "Music source: {}",
+                        if s.synth_music { "Synthesized" } else { "Original" }
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_music_source(ctx, d)),
+                "Synthesized plays menu music and the Roadhouse station made by the \
+                 game itself, with no AI-made songs or voices, and takes Freight \
+                 Fate's other stations off the dial. Original plays the full \
+                 soundtrack.",
+            ),
+            row(
+                dyn_label(|s| format!("Music seed: {}", s.music_seed)),
+                adjust(|s, ctx, d| s.roll_music_seed(ctx, d)),
+                "Enter rolls a new seed. Every synthesized piece changes with it.",
+            ),
+            row(
                 dyn_label(|s| format!("In-cab radio volume: {} percent", pct(s.radio_volume))),
                 adjust(|s, ctx, d| s.volume(ctx, "radio_volume", 0.1 * d as f64)),
                 "Radio volume while driving. Low by default so speech, engine, and safety cues stay clear.",
@@ -795,7 +815,9 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
                 "Off plays the full dial, including real public streams and \
                  personal playlists. On keeps the radio to built-in safe \
-                 stations, for streaming or recording.",
+                 stations, for streaming or recording. With Music source set to \
+                 Synthesized, On keeps the radio on the Roadhouse and station \
+                 keys do nothing.",
             ),
             row(
                 dyn_label(|s| {
