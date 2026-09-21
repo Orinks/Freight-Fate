@@ -118,11 +118,12 @@ No audio device, no threads; testable with `cargo test -p ff-core`.
   chord per bar from the style's progressions, a bass line, a melody drawn
   from the scale over the chords, and drums where the style has them. Its
   own seeded RNG, independent of `pyrandom`, so a piece never changes once
-  shipped. Length 2 to 3 minutes.
+  shipped. Length varies piece to piece, 90 seconds to 5 minutes;
+  the classics keep their own lengths.
 - `render(&Score, sample_rate) -> Vec<i16>`: the 1.5 voice set (soft pad,
   plucked lead, sine bass, brushed-noise percussion), a light reverb, fade
-  in and out, peak-normalised with headroom. 22,050 Hz stereo, about 10 to
-  15 MB per piece.
+  in and out, peak-normalised with headroom. 22,050 Hz stereo, about 8 to 26 MB
+  per piece.
 - Piece seed = hash(style id, music seed, track index).
 
 ### `freight-fate::audio::synth_music` (worker)
