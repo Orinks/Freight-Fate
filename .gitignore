@@ -36,11 +36,6 @@ desktop.ini
 *.log
 live_*.txt
 
-# Release packaging
-tools/_entry.py
-src/freight_fate/data/_baked_world.py
-src/freight_fate/data/_baked_data.py
-
 # Licensed sound-library material. NEVER COMMIT THESE.
 #
 # Purchased SFX libraries (Big Fish Audio / Pro Sound Effects and similar)
@@ -54,7 +49,10 @@ src/freight_fate/data/_baked_data.py
 # release packer overlays it on top of assets/sounds/, so a build made on a
 # machine that owns the library gets the licensed audio while a clean clone
 # still builds and runs on the synthesized fallbacks.
-src/freight_fate/assets/sounds-licensed/
+assets/sounds-licensed/
+# The old src/ tree (overlay, loose sounds, music.pak, caches): nothing under
+# src/ is ever committed again, so a checkout that still has it stays safe.
+/src/
 sound-source/
 *.wav
 # ...except the cab-filter test fixtures. They are inputs to `include_bytes!`,
@@ -63,21 +61,21 @@ sound-source/
 # causing. 124 KB of generated tone, and the code that reads them is the only
 # thing that ever will.
 !crates/ff-core/src/cab_filter/fixtures/*.wav
-# The shipped audio is src/freight_fate/sounds.pak (tools/pack_sounds.py).
+# The shipped audio is assets/sounds.pak (tools/pack_sounds.py).
 # music.pak is a private builder-local release asset downloaded when needed.
-src/freight_fate/music.pak
+assets/music.pak
 # The loose assets/sounds tree is builder-local source material and never
 # ships through the repo (owner, 2026-08-08); only the credits ride along
 # so licensing stays reviewable in a clean clone.
-src/freight_fate/assets/sounds/**
-!src/freight_fate/assets/sounds/CREDITS.md
+assets/sounds/**
+!assets/sounds/CREDITS.md
 # The classic engine voice (donated 1.8.x recording) is player-selectable in
 # Settings, not builder-local material, so it ships through the repo where
 # the licensed overlay can never shadow it. Only the one shipped file is
 # un-ignored -- anything else dropped in that directory stays uncommittable.
-!src/freight_fate/assets/sounds/engine_classic/
-src/freight_fate/assets/sounds/engine_classic/**
-!src/freight_fate/assets/sounds/engine_classic/idle.ogg
+!assets/sounds/engine_classic/
+assets/sounds/engine_classic/**
+!assets/sounds/engine_classic/idle.ogg
 
 # Prototype/audition renders (regenerate from sound-test/*.py, all deterministic)
 sound-test/*.wav
@@ -127,9 +125,12 @@ data/radio-cache/
 # ElevenLabs voice-provisioning cache (name -> voice_id on the owner's account)
 tools/.radio_voices.json
 
-# Manual-playtest sandbox data dir (tools/playtest_sandbox.py). Throwaway
+# Manual-playtest sandbox data dir (freightfate --playtest-sandbox). Throwaway
 # careers, no driver identity, never for commit.
 saves-playtest/
+# Online agent-server data dir (freightfate --agent-server --online). Holds a
+# real driver identity and signing key -- never for commit.
+saves-agent-online/
 
 # Rust
 target/
@@ -146,7 +147,7 @@ crates/bass-sys/vendor/*/libbass*.dylib
 # Geofabrik extracts, regenerated with `--all` whenever the rule is re-judged.
 # The decision it feeds IS committed -- every connector row in curves.jsonl
 # carries the connector_source that flagged it.
-src/freight_fate/data/world_data/us/gameplay/curve_osm.jsonl
+data/world_data/us/gameplay/curve_osm.jsonl
 # Local linked worktrees used by agentic implementation plans.
 .worktrees/
 

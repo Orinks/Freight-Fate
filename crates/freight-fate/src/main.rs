@@ -19,7 +19,7 @@
 //! Tool switches, parsed here:
 //!
 //! * `--list-break-scenarios` -- name and one-line summary of every
-//!   adversarial scenario (`tools/playtest_break.py --list`).
+//!   adversarial scenario (formerly `tools/playtest_break.py --list`).
 //! * `--list-speech-backends` -- every screen reader and voice Prism knows
 //!   on THIS machine, which of them can speak right now, and which one the
 //!   game would choose. There is no allowlist in the game, so a reader the
@@ -28,10 +28,10 @@
 //!   scenario, or all of them, and print the verdict table.
 //! * `--playtest-sandbox` -- prepare (and with `--launch`, run the real game
 //!   in) a data directory that cannot reach the owner's account
-//!   (`tools/playtest_sandbox.py`).
+//!   (formerly `tools/playtest_sandbox.py`).
 //! * `--playtest-road --find FEATURE` -- start the real game at a named road
 //!   feature, or at the loaded facility gate for `departure`
-//!   (`tools/playtest_road.py`).
+//!   (formerly `tools/playtest_road.py`).
 //!
 //! # Why the tool parsing is here and not in `app::CliOptions`
 //!
@@ -198,6 +198,7 @@ fn run(args: &[String]) -> i32 {
             has(args, "--reset"),
             launch,
             has(args, "--operator-keys"),
+            has(args, "--online"),
         );
     }
     app::main_with(CliOptions::parse(args.iter().cloned()))
@@ -209,6 +210,7 @@ fn run(args: &[String]) -> i32 {
 const KNOWN_SWITCHES: &[&str] = &[
     "--agent-server",
     "--operator-keys",
+    "--online",
     "--ai",
     "--assists",
     "--at",
@@ -304,7 +306,9 @@ Drive tools:
                                     to boot straight into a staged drive;
                                     --operator-keys keeps the window up and
                                     lets the operator's keyboard in, to play
-                                    alongside the agent)
+                                    alongside the agent; --online uses its
+                                    own directory with the real driver
+                                    identity and cloud backup on)
   --log PATH                        session log for the watcher
 ";
 

@@ -34,7 +34,7 @@ Fields per state:
   notes           what a later reader needs -- local authority to set a
                   different limit, a recent amendment, a source conflict
 
-Run this module to rebuild `src/freight_fate/data/street_limits.json`, which
+Run this module to rebuild `data/street_limits.json`, which
 is what the game loads.
 """
 
@@ -43,9 +43,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-OUT_PATH = (
-    Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "data" / "street_limits.json"
-)
+OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "street_limits.json"
 
 # Filled from the 2026-08-21 research pass; see the module docstring for what
 # each field means and what `verified` gates.

@@ -85,7 +85,7 @@ import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
+GEOM_DIR = ROOT / "data" / "world_data" / "us" / "geometry"
 
 # The public FOSSGIS instance by default; point FF_VALHALLA_URL at a local
 # build to lose the rate limit, the politeness delay, and the outage window

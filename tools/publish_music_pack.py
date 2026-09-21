@@ -14,7 +14,7 @@ pack to the presigned upload URL, POST finalize. The API key is read from
 
 Usage: uv run python tools/publish_music_pack.py --login <email>          # emails a code
        uv run python tools/publish_music_pack.py --verify <email> <code>  # stores the key
-       uv run python tools/publish_music_pack.py crisp-crystal-9a9y src/freight_fate/music.pak [--dry-run]
+       uv run python tools/publish_music_pack.py crisp-crystal-9a9y assets/music.pak [--dry-run]
 """
 
 from __future__ import annotations

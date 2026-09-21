@@ -5,7 +5,7 @@ game's existing assets are OGG VORBIS at 44.1 kHz (measured), and the loader
 (pygame/BASS) decodes Vorbis natively -- Opus would need a plugin, so Vorbis is
 the safe drop-in. This converts the WAV renders to Vorbis .ogg at 44.1 kHz and
 stages them under a mirror of the in-game sounds tree, so a finalized set can be
-dropped into src/freight_fate/assets/sounds-licensed/ (the gitignored overlay).
+dropped into assets/sounds-licensed/ (the gitignored overlay).
 
 Cull first, then run: whatever WAVs are present for the round-robin banks
 (clunks, shifts) get encoded, so delete the ones the ear rejected before
@@ -28,16 +28,16 @@ from scipy.signal import resample_poly
 
 FF = Path(r"C:\temp\ffsound")
 OUT = FF / "pack"
-TARGET_SR = 44100   # match the existing pack (engine/idle.ogg is 44.1 kHz Vorbis)
+TARGET_SR = 44100  # match the existing pack (engine/idle.ogg is 44.1 kHz Vorbis)
 
 # render (under C:\temp\ffsound) -> asset key (path under sounds-licensed/).
 # Single files map one-to-one; RR banks map a glob to a numbered key family.
 SINGLES: list[tuple[str, str]] = [
-    ("896/idle_680.wav", "engine/idle"),            # band idle  (~680 rpm)
+    ("896/idle_680.wav", "engine/idle"),  # band idle  (~680 rpm)
     # low = the 896 mid cut pitched to 950 (engine_low_950.py). The 60624
     # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
     # 30 rpm under the mid cut) and is likely a different truck.
-    ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
+    ("896/engine_low_950.wav", "engine/low"),  # band low   (950 rpm)
     # The whole ring above idle builds from ONE clean anchor via the formant
     # model (engine_ring_formant.py, owner's call): the flattened mid's
     # hiss-free span re-looped -- the raw 7-14s window carries the real air-
@@ -55,8 +55,8 @@ SINGLES: list[tuple[str, str]] = [
     # correction filter restoring the cab's formants -- fixed formants,
     # moving rate, same donor. HPS-verified at 1894 rpm.
     ("896/engine_high_1900_formant.wav", "engine/high"),  # band high (1900 rpm)
-    ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop
-    ("896/rev_load.wav", "engine/rev_load"),        # long pull: digging in under load
+    ("896/rev_launch.wav", "engine/rev_launch"),  # short pull: launch from a stop
+    ("896/rev_load.wav", "engine/rev_load"),  # long pull: digging in under load
     ("brakes/brake_hiss_bed.wav", "vehicle/brake_hiss_bed"),
     ("brakes/ebrake_full.wav", "vehicle/ebrake"),
     ("air/pressurize_hiss.wav", "vehicle/air_pressurize"),
@@ -88,7 +88,7 @@ def encode(src: Path, key: str) -> tuple[int, int]:
 def main() -> None:
     if OUT.exists():
         for f in OUT.rglob("*.ogg"):
-            f.unlink()                                   # rebuild the staging clean
+            f.unlink()  # rebuild the staging clean
     OUT.mkdir(parents=True, exist_ok=True)
     total_wav = total_ogg = 0
     rows: list[tuple[str, int, int]] = []
@@ -96,12 +96,16 @@ def main() -> None:
     for rel, key in SINGLES:
         src = FF / rel
         if not src.exists():
-            print(f"  MISSING {rel}"); continue
+            print(f"  MISSING {rel}")
+            continue
         try:
             w, o = encode(src, key)
         except Exception as e:
-            print(f"  SKIP {rel}: {e}"); continue
-        total_wav += w; total_ogg += o; rows.append((key, w, o))
+            print(f"  SKIP {rel}: {e}")
+            continue
+        total_wav += w
+        total_ogg += o
+        rows.append((key, w, o))
 
     for pattern, key_base in BANKS:
         # Skip the *_demo.wav audition aids -- they are not game assets.
@@ -111,22 +115,27 @@ def main() -> None:
             key = f"{key_base}_{kept + 1:02d}"
             try:
                 w, o = encode(src, key)
-            except Exception as e:                       # one bad file must not kill the run
-                print(f"  SKIP {src.name}: {e}"); continue
+            except Exception as e:  # one bad file must not kill the run
+                print(f"  SKIP {src.name}: {e}")
+                continue
             kept += 1
-            total_wav += w; total_ogg += o; rows.append((key, w, o))
+            total_wav += w
+            total_ogg += o
+            rows.append((key, w, o))
         if kept:
             rows.append((f"  ({kept} in {key_base}_NN)", 0, 0))
 
     print(f"  {'asset key':32s} {'wav KB':>8s} {'ogg KB':>8s}")
     for key, w, o in rows:
         if w:
-            print(f"  {key:32s} {w/1024:8.0f} {o/1024:8.0f}")
+            print(f"  {key:32s} {w / 1024:8.0f} {o / 1024:8.0f}")
         else:
             print(f"  {key}")
     if total_wav:
-        print(f"\n  total {total_wav/1024/1024:.1f} MB WAV -> {total_ogg/1024/1024:.1f} MB "
-              f"OGG Vorbis  ({total_ogg/total_wav:.0%} of original)")
+        print(
+            f"\n  total {total_wav / 1024 / 1024:.1f} MB WAV -> {total_ogg / 1024 / 1024:.1f} MB "
+            f"OGG Vorbis  ({total_ogg / total_wav:.0%} of original)"
+        )
     print(f"  staged under {OUT}  (mirror of sounds-licensed/)")
     if PENDING:
         print("  PENDING (still to cut): " + "; ".join(PENDING))

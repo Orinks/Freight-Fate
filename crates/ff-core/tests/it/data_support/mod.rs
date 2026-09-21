@@ -1,5 +1,5 @@
 //! Shared helpers for the `data_*` integration tests: the session world and
-//! the real data tree (`src/freight_fate/data`, resolved by walking up from
+//! the real data tree (`data/`, resolved by walking up from
 //! this crate's manifest directory, as the Python conftest did from the repo
 //! root).
 #![allow(dead_code)]
@@ -9,15 +9,10 @@ use std::path::{Path, PathBuf};
 use ff_core::data::world::{get_world, World};
 use ff_core::data::world_models::Route;
 
-/// The Python package's `data/` folder in the source tree.
+/// The checkout's world data tree (`data/`).
 pub fn data_dir() -> PathBuf {
     let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let dir = manifest
-        .join("..")
-        .join("..")
-        .join("src")
-        .join("freight_fate")
-        .join("data");
+    let dir = manifest.join("..").join("..").join("data");
     dir.canonicalize().unwrap_or(dir)
 }
 

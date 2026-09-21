@@ -18,10 +18,10 @@ import json
 import sys
 from pathlib import Path
 
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "src" / "freight_fate" / "data"
+DATA = ROOT / "data"
 TOOLS = Path(__file__).resolve().parent
 LAYERS = (
     (DATA / "facility_endpoints.json", "endpoints", "", "build_facility_endpoints"),

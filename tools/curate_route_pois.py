@@ -20,9 +20,8 @@ from pathlib import Path
 from typing import Any
 
 import ntad
+from ffworld.world import minimum_curated_pois
 from world_source import WORLD_SOURCE_PATH, load_world, save_world
-
-from freight_fate.data.world import minimum_curated_pois
 
 LOVES_ENDPOINT = "https://www.loves.com/api/fetch_stores"
 PILOT_ENDPOINT = "https://locations.pilotflyingj.com/search"

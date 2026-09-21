@@ -125,10 +125,9 @@ fn shipped_pack(name: &str, what: &str) -> bool {
     }
     if assets_pack::is_lfs_pointer(&path) {
         eprintln!(
-            "SKIPPING: no shipped {what}. {} is a Git LFS pointer, not the pack. \
-             CI checks out without LFS on purpose (fetching the packs on every push \
-             exhausted the repository's LFS budget); run \
-             `git lfs pull --include=\"src/freight_fate/{name}\"` to check this locally.",
+            "SKIPPING: no shipped {what}. {} is a leftover Git LFS pointer, not the \
+             pack. The packs are plain files now: `git checkout -- assets/{name}` \
+             restores sounds.pak, and tools/build_release.py downloads music.pak.",
             path.display()
         );
     } else {

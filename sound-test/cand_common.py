@@ -58,8 +58,7 @@ LICENSED = {
 }
 # UNLICENSED shipped idle -- Duff's real in-cab idle (~800 rpm). For COMPARISON
 # of character only; it is being removed and must never be a source or shipped.
-COMPARE_IDLE = (Path(__file__).resolve().parents[1] / "src" / "freight_fate"
-                / "assets" / "sounds" / "engine" / "idle.ogg")
+COMPARE_IDLE = (Path(__file__).resolve().parents[1] / "assets" / "sounds" / "engine" / "idle.ogg")
 
 IDLE_RPM = 647.0
 FIRING_HZ = IDLE_RPM / 20.0          # 32.35 Hz -- the engine firing rate at idle

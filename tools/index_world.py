@@ -2,10 +2,10 @@
 editable ``world_source/`` tree the build tools edit.
 
 The build-time route tools (``enrich_routes.py``, ``build_interchanges.py``)
-read and write ``src/freight_fate/data/world_source/`` through
+read and write ``data/world_source/`` through
 ``tools/world_source.py``. The game loads
-``src/freight_fate/data/world_data/`` via
-``freight_fate.data.world_loader`` -- an index plus per-country
+``data/world_data/`` via
+``ffworld.world_loader`` -- an index plus per-country
 ``cities.json``, per-state leg shards, and ``metadata.json``. This script
 regenerates that tree from the source so the two never drift.
 
@@ -39,7 +39,7 @@ from typing import Any
 from world_source import load_world, shard_key
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_DATA_PATH = ROOT / "src" / "freight_fate" / "data" / "world_data"
+WORLD_DATA_PATH = ROOT / "data" / "world_data"
 
 
 def _dumps(payload: Any) -> str:

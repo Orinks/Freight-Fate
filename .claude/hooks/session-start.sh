@@ -35,13 +35,6 @@ if ! command -v uv > /dev/null 2>&1; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# sound_lib resolves from a git URL, so a missing git surfaces here as a
-# resolution failure rather than anything obviously git-shaped.
-if ! command -v git > /dev/null 2>&1; then
-  echo "git is required: the sound_lib dependency installs from a git repository." >&2
-  exit 1
-fi
-
 uv python install
 uv sync --group dev
 

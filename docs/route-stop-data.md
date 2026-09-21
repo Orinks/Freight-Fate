@@ -26,7 +26,7 @@ transponder/settlement accounting, not as a manual stop at every gantry.
 ## Schema
 
 Route stops and corridor details live on a leg in the world source
-(`src/freight_fate/data/world_source/legs/<STATE>.json`, reached through
+(`data/world_source/legs/<STATE>.json`, reached through
 `tools/world_source.py`):
 
 ```json
@@ -554,9 +554,8 @@ spoken before the player commits.
 7. Add `source` notes that are specific enough for another developer to verify
    the stop later.
 8. Run `uv run python tools/enrich_routes.py --coverage-report --json`.
-9. Run `uv run pytest tests/test_world.py tests/test_route_coverage_tool.py
-   tests/test_weather_trip.py tests/test_job_progression.py` and focused
-   driving/POI tests.
+9. Run `cargo test -p ff-core data_world`, `cargo test -p ff-core
+   models::jobs`, and focused driving/POI tests.
 10. For toll corridors, add or verify route-positioned `toll_events`, source
     notes, method labels, estimated commercial vehicle costs, and settlement
     behavior tests. Do not invent toll amounts without a named authority or

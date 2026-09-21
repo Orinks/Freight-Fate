@@ -58,7 +58,8 @@ fn test_data_dir_is_saves_inside_game_root() {
 #[test]
 fn test_game_root_from_source_is_project_root() {
     let root = game_root();
-    assert!(root.join("src").join("freight_fate").is_dir());
+    assert!(root.join("crates").join("ff-core").is_dir());
+    assert!(root.join("data").join("world_data").is_dir());
 }
 
 /// The mkdir+write+unlink probe must run once per path per process, not

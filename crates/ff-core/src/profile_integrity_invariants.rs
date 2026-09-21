@@ -633,9 +633,8 @@ pub fn current_invariant_data() -> Result<Value, String> {
     invariant_data(&world_data_root(), &CatalogInputs::current())
 }
 
-/// `rendered_invariants()` with no arguments: the exact bytes
-/// `tools/export_profile_integrity_invariants.py` writes, and the exact bytes
-/// the orinks.net validator is built from.
+/// `rendered_invariants()` with no arguments: the exact bytes `ff-invariants`
+/// writes, and the exact bytes the orinks.net validator is built from.
 pub fn current_rendered_invariants() -> Result<String, String> {
     rendered_invariants(&world_data_root(), &CatalogInputs::current())
 }

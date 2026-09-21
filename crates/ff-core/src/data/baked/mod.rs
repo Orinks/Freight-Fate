@@ -55,7 +55,7 @@
 //!
 //! ```text
 //! cargo run -p ff-core --bin ff-bake -- \
-//!     --data-dir src/freight_fate/data --out <dir>/world.ffdata
+//!     --data-dir data --out <dir>/world.ffdata
 //! ```
 
 use std::collections::HashMap;
@@ -238,7 +238,7 @@ impl BakedData {
             return Err(DataError::io(format!(
                 "{} is baked data format {version}, this build reads format \
                  {FORMAT_VERSION}. Re-bake it: cargo run -p ff-core --bin \
-                 ff-bake -- --data-dir src/freight_fate/data --out {}",
+                 ff-bake -- --data-dir data --out {}",
                 path.display(),
                 path.display()
             )));

@@ -15,9 +15,6 @@ import time
 import urllib.request
 from pathlib import Path
 
-SRC = Path(__file__).resolve().parent.parent / "src"
-sys.path.insert(0, str(SRC))
-
 TIMEOUT_S = 6.0
 USER_AGENT = "FreightFate/1.1 (connectivity probe; https://orinks.net)"
 

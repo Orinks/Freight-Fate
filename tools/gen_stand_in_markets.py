@@ -23,9 +23,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ENDPOINTS = ROOT / "src" / "freight_fate" / "data" / "facility_endpoints.json"
+ENDPOINTS = ROOT / "data" / "facility_endpoints.json"
 OUT_RS = ROOT / "crates" / "ff-core" / "src" / "data" / "world_constants" / "stand_in_markets.rs"
-OUT_PY = ROOT / "src" / "freight_fate" / "data" / "stand_in_markets.py"
+OUT_PY = ROOT / "tools" / "ffworld" / "stand_in_markets.py"
 
 WHY = (
     "Not one of these cities has a single facility whose endpoint the",

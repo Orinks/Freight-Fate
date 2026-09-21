@@ -19,7 +19,6 @@ ROOT = Path(__file__).resolve().parents[1]
 def _load_tool():
     """Import tools/screen_grades_3dep.py by path (tools is not a package)."""
     sys.path.insert(0, str(ROOT / "tools"))
-    sys.path.insert(0, str(ROOT / "src"))
     spec = importlib.util.spec_from_file_location(
         "screen_grades_3dep", ROOT / "tools" / "screen_grades_3dep.py"
     )

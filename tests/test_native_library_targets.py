@@ -65,9 +65,11 @@ def test_every_fetch_bass_target_has_a_pinned_table():
     }
     for key, files in fetch_bass.TARGETS.items():
         assert files, f"{key} has no pinned files"
-        for name, (_url, member, want) in files.items():
+        for name, (url, member, want) in files.items():
             assert len(want) == 64, f"{key}/{name} is not a sha256"
-            assert member, f"{key}/{name} names no archive member"
+            assert url.startswith("https://"), f"{key}/{name} has no download URL"
+            # No member means the URL is the library itself, not a zip.
+            assert member or url.endswith("/" + name), f"{key}/{name} names no file"
 
 
 @pytest.mark.parametrize(

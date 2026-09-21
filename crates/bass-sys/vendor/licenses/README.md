@@ -24,9 +24,9 @@ The pins name the builds the game has actually been played against: the ones
 `sound_lib` ships and the Python release has always bundled. Checked against
 un4seen on 2026-08-23, `bass.dll` and `basshls.dll` are byte-identical to the
 current downloads; `bassflac.dll` and `bassopus.dll` are not, because upstream
-has moved on, and the AAC add-on no longer sits at a guessable URL. So the
-fetch prefers the local `sound_lib` copy and reaches the network only where
-the pin still matches. Re-pinning is a deliberate job, not a bump: fetch,
+has moved on, and the AAC add-on no longer sits at a guessable URL. So those
+three are fetched as plain files from `sound_lib`'s own repository at a pinned
+commit, and the other two from un4seen. Re-pinning is a deliberate job, not a bump: fetch,
 listen to the engine ring and a live radio stream, then update the hashes.
 
 What the fetch provides, and where each pinned build came from:
@@ -37,7 +37,7 @@ What the fetch provides, and where each pinned build came from:
 | `bassopus.dll` | BASSOPUS add-on, same wheel |
 | `bassflac.dll` | BASSFLAC add-on, same wheel |
 | `bass_aac.dll` | BASS_AAC add-on, same wheel |
-| `basshls.dll` | BASSHLS 2.4 add-on, from the Freight Fate Python tree (`src/freight_fate/lib/`), with its `basshls.txt` release note |
+| `basshls.dll` | BASSHLS 2.4 add-on, from the Freight Fate source tree (`assets/lib/`), with its `basshls.txt` release note |
 
 BASS and its add-ons are copyright Un4seen Developments Ltd. They are not
 open source. The `sound_lib` wrapper around them is MIT-licensed (Christopher
@@ -51,7 +51,7 @@ licence; see <https://www.un4seen.com/bass.html#license>). The add-ons
 (BASSOPUS, BASSFLAC, BASS_AAC, BASSHLS) are "free to use with BASS", i.e.
 they inherit the BASS licence terms. The Rust port takes exactly the same
 licence position as the Python game it replaces, which ships these same
-files through `sound_lib` and `src/freight_fate/lib/` today.
+files through `sound_lib` and its `lib/` folder.
 
 The BASSHLS release note reproduced in `windows-x86_64/basshls.txt` carries
 Un4seen's own warranty disclaimer:

@@ -6,8 +6,10 @@ the spoken-text rules so a content edit cannot silently break the asset
 contract or the player-facing register.
 """
 
+import re
 import sys
 from collections import Counter
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,28 +221,83 @@ def test_song_plan_keys_lengths_and_prompts_are_sound():
             assert isinstance(song.instrumental, bool), song.key
 
 
+# One shipped track as the Rust catalog spells it: a table row
+# ``("key", "Title", "description", 123.4)`` or the same four arguments to
+# ``MusicTrack::new(...)``. Host breaks build their keys with format! and are
+# deliberately not matched: they are not songs and no plan entry is one.
+_RUST_STR = r'"((?:[^"\\]|\\.)*)"'
+_RUST_TRACK = re.compile(
+    r"\(\s*"
+    + _RUST_STR
+    + r",\s*"
+    + _RUST_STR
+    + r",\s*"
+    + _RUST_STR
+    + r",\s*[0-9][0-9_.]*\s*,?\s*\)"
+)
+MUSIC_SOURCES = [ROOT / "crates" / "ff-core" / "src" / "music.rs"] + sorted(
+    (ROOT / "crates" / "ff-core" / "src" / "music").glob("*.rs")
+)
+
+
+def shipped_titles_by_key(sources=MUSIC_SOURCES) -> dict[str, str]:
+    """Every literal track in the Rust music catalog, key -> title."""
+    shipped: dict[str, str] = {}
+    for path in sources:
+        for key, title, _description in _RUST_TRACK.findall(path.read_text(encoding="utf-8")):
+            shipped[key] = title.replace('\\"', '"')
+    return shipped
+
+
+def plan_collisions(plan, shipped_title_by_key) -> list[str]:
+    """Plan entries that reuse a shipped key under another title, or a shipped title."""
+    shipped_titles = set(shipped_title_by_key.values())
+    problems = []
+    for songs in plan.values():
+        for song in songs:
+            if song.key in shipped_title_by_key:
+                if shipped_title_by_key[song.key] != song.title:
+                    problems.append(f"{song.key}: key already ships as another title")
+                continue
+            if song.title in shipped_titles:
+                problems.append(f"{song.key}: title {song.title!r} already ships")
+    return problems
+
+
+def test_the_rust_catalog_parse_finds_the_shipped_songs():
+    shipped = shipped_titles_by_key()
+    assert len(shipped) > 100, len(shipped)
+    assert shipped["menu_theme"] == "Headlights West"
+    assert shipped["menu_theme_night"] == "Midnight Keys"
+    # A song --plan-songs generated: the plan and the catalog share it on purpose.
+    assert shipped["radio_oldies_jukebox_in_the_corner"] == "Jukebox in the Corner"
+
+
 def test_song_plan_never_collides_with_the_shipped_catalog():
     """A plan entry may only match the catalog by being generation's own work.
 
     Once tools/generate_radio.py --plan-songs writes a pool song and a later
-    task wires its key into music.py, the plan entry and the catalog track
-    are the same song by design -- key and title both match on purpose, and
-    that song stays in SONG_PLAN so a re-run of the generation pass still
-    resumes cleanly (it skips anything already on disk). What this guards
-    against is a *different* key or title accidentally landing on something
-    already shipped, which the generation pass would silently overwrite or
-    the catalog would silently duplicate.
+    task wires its key into the Rust catalog (crates/ff-core/src/music), the
+    plan entry and the catalog track are the same song by design -- key and
+    title both match on purpose, and that song stays in SONG_PLAN so a re-run
+    of the generation pass still resumes cleanly (it skips anything already
+    on disk; the gospel, tejano and synthwave pools are still partial). What
+    this guards against is a *different* key or title accidentally landing on
+    something already shipped, which the generation pass would silently
+    overwrite or the catalog would silently duplicate.
     """
-    from freight_fate.music import ALL_MUSIC_TRACKS
+    assert plan_collisions(SONG_PLAN, shipped_titles_by_key()) == []
 
-    shipped_title_by_key = {track.key: track.title for track in ALL_MUSIC_TRACKS}
-    shipped_titles = set(shipped_title_by_key.values())
-    for songs in SONG_PLAN.values():
-        for song in songs:
-            if song.key in shipped_title_by_key:
-                assert shipped_title_by_key[song.key] == song.title, song.key
-                continue
-            assert song.title not in shipped_titles, song.title
+
+def test_the_collision_check_catches_a_reused_key_or_title():
+    shipped = shipped_titles_by_key()
+    template = next(song for songs in SONG_PLAN.values() for song in songs)
+    reused_title = replace(template, key="radio_new_key", title="Headlights West")
+    reused_key = replace(template, key="menu_theme", title="A New Song")
+    plan = {**SONG_PLAN, "probe": [reused_title, reused_key]}
+    problems = plan_collisions(plan, shipped)
+    assert any("radio_new_key" in p for p in problems)
+    assert any("menu_theme" in p for p in problems)
 
 
 def test_sfx_prompts_cover_the_imaging_bed():

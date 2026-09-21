@@ -25,11 +25,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from freight_fate.data.world import get_world
+from ffworld.world import get_world
 
 ROOT = Path(__file__).resolve().parents[1]
-ENDPOINTS_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_endpoints.json"
-APPROACHES_PATH = ROOT / "src" / "freight_fate" / "data" / "facility_approaches.json"
+ENDPOINTS_PATH = ROOT / "data" / "facility_endpoints.json"
+APPROACHES_PATH = ROOT / "data" / "facility_approaches.json"
 ACCESSED_DATE = "2026-09-16"
 # Inventory flags >8; Josh band is ~1-9. Match straight-line so approach_miles
 # (= max(2.1, min(35, d*1.25))) stays <= 8.0 to clear the blocker.

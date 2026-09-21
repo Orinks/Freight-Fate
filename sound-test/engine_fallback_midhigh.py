@@ -10,7 +10,7 @@ component on an exact bin of the loop length, zero seam), seeded and
 deterministic. Loudness is matched to the committed engine/mid.ogg so the
 fallback ring stays level across bands.
 
-Writes src/freight_fate/assets/sounds/engine/midhigh.ogg (COMMITTED).
+Writes assets/sounds/engine/midhigh.ogg (COMMITTED).
 
 Usage: uv run --with scipy python sound-test/engine_fallback_midhigh.py
 """
@@ -26,7 +26,7 @@ RPM = 1425.0
 F0 = RPM / 20.0  # 6-cyl four-stroke firing fundamental
 LOOP_S = 4.0  # 71.25 Hz * 4 s = 285 cycles, exactly periodic
 N = int(SR * LOOP_S)
-ASSETS = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 OUT = ASSETS / "engine" / "midhigh.ogg"
 REF = ASSETS / "engine" / "mid.ogg"  # loudness reference
 

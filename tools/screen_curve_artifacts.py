@@ -108,19 +108,8 @@ from reclassify_terrain import (  # noqa: E402  (path shim above must run first)
 from world_source import load_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-CURVES_PATH = (
-    ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
-)
-OUTPUT_PATH = (
-    ROOT
-    / "src"
-    / "freight_fate"
-    / "data"
-    / "world_data"
-    / "us"
-    / "gameplay"
-    / "curve_artifacts.jsonl"
-)
+CURVES_PATH = ROOT / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
+OUTPUT_PATH = ROOT / "data" / "world_data" / "us" / "gameplay" / "curve_artifacts.jsonl"
 
 # Same definition data/curves.py's RouteCurve.severity uses for "hairpin" --
 # import-free copy so this tool has no runtime dependency on the baked data

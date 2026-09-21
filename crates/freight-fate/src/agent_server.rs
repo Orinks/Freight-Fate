@@ -776,7 +776,7 @@ pub fn policy(
 /// stays up and the operator's keyboard reaches the game, so a human can
 /// take the wheel alongside the agent; off, the keys are dropped at the
 /// door (see [`run_with_staged`]).
-pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool) -> i32 {
+pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, online: bool) -> i32 {
     // Discover BEFORE the window opens: pure world data, and a failed
     // search should refuse cleanly rather than boot a game.
     let staged = match launch {
@@ -792,7 +792,7 @@ pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool) -> i32 {
             }
         },
     };
-    run_with_staged(reset, staged, operator_keys)
+    run_with_staged(reset, staged, operator_keys, online)
 }
 
 fn run_with_staged(
@@ -802,6 +802,7 @@ fn run_with_staged(
         crate::playtest::road::RoadOptions,
     )>,
     operator_keys: bool,
+    online: bool,
 ) -> i32 {
     use crate::playtest::sandbox;
     let (requests, rx) = mpsc::channel();
@@ -814,7 +815,7 @@ fn run_with_staged(
         let Some(first) = await_play_request(&rx) else {
             return 0;
         };
-        let (mut app, mut guard) = match boot(reset) {
+        let (mut app, mut guard) = match boot(reset, online) {
             Ok(booted) => booted,
             Err(text) => {
                 // Answered, not fatal: "already running" clears when the
@@ -860,13 +861,30 @@ fn run_with_staged(
 /// the sandbox prepared and audited, the one-game-at-a-time lock, the
 /// session file for the watcher, then the real window, audio and speech.
 /// An error leaves nothing held, so the next play request can try again.
-fn boot(reset: bool) -> Result<(App, crate::single_instance::SingleInstanceGuard), String> {
+fn boot(
+    reset: bool,
+    online: bool,
+) -> Result<(App, crate::single_instance::SingleInstanceGuard), String> {
     use crate::playtest::sandbox;
-    let dir = sandbox::default_sandbox();
     let source = sandbox::real_saves();
-    sandbox::prepare(&dir, reset, true, &source)
-        .map_err(|e| format!("Could not prepare the agent sandbox: {e}"))?;
-    let problems = sandbox::audit(&dir);
+    let dir = if online {
+        sandbox::online_sandbox()
+    } else {
+        sandbox::default_sandbox()
+    };
+    if online {
+        sandbox::prepare_online(&dir, reset, &source)
+            .map_err(|e| format!("Could not prepare the online agent session: {e}"))?;
+        eprintln!("ONLINE: cloud backups reach the site as the real driver.");
+    } else {
+        sandbox::prepare(&dir, reset, true, &source)
+            .map_err(|e| format!("Could not prepare the agent sandbox: {e}"))?;
+    }
+    let problems = if online {
+        Vec::new()
+    } else {
+        sandbox::audit(&dir)
+    };
     if !problems.is_empty() {
         return Err(format!(
             "{}\nRefusing to boot: an agent must never reach the real account. \

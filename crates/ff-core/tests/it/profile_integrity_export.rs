@@ -1,10 +1,8 @@
 //! Cross-language parity for the file the orinks.net validator is built from.
 //!
-//! `profile_integrity_invariants.json` beside this test is the output of the
-//! reference implementation, `tools/export_profile_integrity_invariants.py`,
-//! stored with LF endings (the Python exporter writes CRLF when it runs on
-//! Windows; the JSON is the same either way, and the Rust exporter always
-//! writes LF so the artifact does not depend on who produced it).
+//! `profile_integrity_invariants.json` in `crates/ff-core/tests/` was first
+//! rendered by the since-deleted Python exporter and is stored with LF
+//! endings; the Rust exporter always writes LF.
 //!
 //! This surface decides whether a submitted career is arithmetically
 //! possible. An export that drifts from what the game awards makes the
@@ -12,11 +10,9 @@
 //! the bytes are pinned rather than the shape: any change at all has to be a
 //! change someone chose.
 //!
-//! When this test fails, that is the finding. Re-run one of
+//! When this test fails, that is the finding. Re-run
 //!
 //! ```text
-//! uv run python tools/export_profile_integrity_invariants.py \
-//!     crates/ff-core/tests/profile_integrity_invariants.json
 //! cargo run -p ff-core --bin ff-invariants -- \
 //!     crates/ff-core/tests/profile_integrity_invariants.json
 //! ```
@@ -32,7 +28,7 @@ use ff_core::profile_integrity_invariants::{
 };
 use serde_json::Value;
 
-/// The Python exporter's output, committed beside this file.
+/// The committed export (first rendered by the Python exporter).
 const PYTHON_EXPORT: &str = include_str!("../profile_integrity_invariants.json");
 
 /// `include_str!` keeps whatever the checkout has; a repo cloned with
@@ -201,7 +197,7 @@ fn the_public_profile_catalogs_are_derived_from_live_game_catalogs() {
 fn ff_invariants_writes_and_checks_the_export() {
     let dir = tempfile::tempdir().expect("a temp dir");
     let out = dir.path().join("profile_integrity_invariants.json");
-    let data_dir = repo_root().join("src/freight_fate/data");
+    let data_dir = repo_root().join("data");
 
     let exporter = || {
         let mut command = Command::new(env!("CARGO_BIN_EXE_ff-invariants"));

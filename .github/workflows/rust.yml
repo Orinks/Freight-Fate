@@ -56,6 +56,8 @@ on:
     branches: [main, dev, feat/career-1.9]
     paths:
       - "crates/**"
+      - "data/**"
+      - "assets/**"
       - "vendor/**"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -66,7 +68,7 @@ on:
   workflow_dispatch:
 
 # The pull-request path filter keeps the Windows build off PRs that only
-# touch Python, docs or world data. A *required* check that is path filtered
+# touch Python or docs. A *required* check that is path filtered
 # stays "expected -- waiting for status" forever on a skipped PR, so do not
 # make it required unless the filter is dropped.
 

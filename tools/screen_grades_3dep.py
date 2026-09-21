@@ -1,7 +1,7 @@
 """Check the steepest baked grades against USGS 3DEP, and report. Never edit.
 
 The world's 146,496 grade segments all come from one OpenRouteService
-elevation profile over SRTM, and `freight_fate.data.grades` already screens
+elevation profile over SRTM, and `ffworld.grades` already screens
 them at load -- but it screens for SELF-CONTRADICTION, capping any slope
 steeper than the road's class and terrain can hold. That is the right rule
 with no second opinion available. This tool is the second opinion.
@@ -61,13 +61,12 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import leg_geometry as lg  # noqa: E402
-from world_source import load_world, save_world  # noqa: E402
-
-from freight_fate.data.grades import (  # noqa: E402
+from ffworld.grades import (  # noqa: E402
     CLASS_CEILING_PCT,
     grade_ceiling_pct,
     road_class,
 )
+from world_source import load_world, save_world  # noqa: E402
 
 SAMPLES_URL = (
     "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples"

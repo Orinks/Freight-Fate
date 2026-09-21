@@ -7,8 +7,6 @@ from pathlib import Path
 
 import yaml
 
-from freight_fate.updater import flatten_markdown
-
 
 def load_release_notes_module():
     path = Path(__file__).resolve().parents[1] / "tools" / "release_notes.py"
@@ -550,7 +548,7 @@ def test_generated_notes_flatten_to_speakable_lines(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(release_notes, "ROOT", repo)
 
-    spoken = flatten_markdown(release_notes.nightly_notes())
+    spoken = release_notes.flatten_markdown(release_notes.nightly_notes())
 
     assert "Added" in spoken
     assert "Cruise control. See manual before setting speed." in spoken
@@ -568,8 +566,8 @@ def test_check_accepts_single_push_release_sync(tmp_path, monkeypatch, capsys):
     git(repo, "tag", "v1.8.1")
     base = git(repo, "rev-parse", "HEAD")
 
-    (repo / "src").mkdir()
-    (repo / "src" / "game.py").write_text("GAME = True\n", encoding="utf-8")
+    (repo / "data").mkdir()
+    (repo / "data" / "cities.json").write_text("{}\n", encoding="utf-8")
     (repo / "CHANGELOG.md").write_text(
         changelog(
             "",
@@ -803,16 +801,21 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
         "Linux-x86_64",
         "Linux-aarch64",
     }
-    assert all(step["with"]["path"] == "assets" for step in downloads)
+    # Not `assets/`: that is a tracked source folder (sounds.pak, the add-ons)
+    # since the Python sunset, and `gh release create ... <dir>/*` would
+    # publish it next to the archives.
+    assert all(step["with"]["path"] == "release-assets" for step in downloads)
+    create = next(step for step in release["steps"] if step.get("name") == "Create prerelease")
+    assert 'gh release create "$TAG" release-assets/*' in create["run"]
     verify = next(
         step for step in release["steps"] if step.get("name") == "Verify release archives"
     )
-    assert "assets/FreightFate-*-windows-portable.zip" in verify["run"]
-    assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
-    assert "assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
-    assert "assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
-    assert "assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
-    assert "assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
+    assert "release-assets/FreightFate-*-windows-portable.zip" in verify["run"]
+    assert "release-assets/FreightFate-*-macos-arm64.zip" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
+    assert "release-assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
     assert verify["run"].count('"${#') == 6
     checksum = next(
         step
@@ -899,17 +902,19 @@ def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():
     for path in (
         "crates/freight-fate/src/states/driving_turns.rs",
         "crates/ff-core/src/sim/trip.rs",
-        "src/freight_fate/data/facility_endpoints.json",
+        "data/facility_endpoints.json",
+        "assets/sounds.pak",
         "docs/ontology.md",
         "CHANGELOG.md",
     ):
         assert module.is_user_facing_path(path), path
     # A test or bench is not a player-facing change: under the Python layout
-    # tests/ sat beside src/ and was never gated.
+    # tests/ sat beside the game and was never gated.
     for path in (
         "crates/ff-core/tests/it/sim_trip_cues.rs",
         "crates/freight-fate/benches/frame_time.rs",
         "tools/build_facility_endpoints.py",
+        "data/spider/gap-fill/gap_scan_nn.py",
         ".github/workflows/rust.yml",
     ):
         assert not module.is_user_facing_path(path), path

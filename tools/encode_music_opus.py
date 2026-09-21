@@ -45,8 +45,7 @@ from pathlib import Path
 import av
 
 ROOT = Path(__file__).resolve().parents[1]
-MUSIC = ROOT / "src" / "freight_fate" / "data" / ".." / "assets" / "sounds" / "music"
-MUSIC = (ROOT / "src" / "freight_fate" / "assets" / "sounds" / "music").resolve()
+MUSIC = (ROOT / "assets" / "sounds" / "music").resolve()
 WAV_ZIP = Path(
     os.environ.get(
         "FREIGHT_FATE_WAV_MASTERS", r"C:/Users/nrome/Downloads/freight-fate-raw-wavs.zip"
