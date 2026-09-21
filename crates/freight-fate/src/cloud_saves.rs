@@ -280,6 +280,10 @@ struct State {
     // been spoken this session (the "once" tier's memory).
     backup_announcements: BackupAnnouncements,
     all_clear_spoken: HashSet<String>,
+    // Careers the server accepted after the owner reviewed them: the main
+    // loop drains these through take_absolved and clears the loaded
+    // career's "changed outside the game" mark.
+    absolved: Vec<String>,
     status: String,
 }
 
@@ -539,6 +543,15 @@ impl CloudSaves {
         std::mem::take(&mut st.announcements)
     }
 
+    /// Slot names whose upload came back with `clearIntegrityFlag`: the
+    /// owner reviewed the career and accepted it. Drained by the main loop,
+    /// which clears the mark on the loaded career so its next backup goes up
+    /// unmarked. Same polled pattern as [`take_announcements`](Self::take_announcements).
+    pub fn take_absolved(&self) -> Vec<String> {
+        let mut st = self.inner.state.lock().unwrap();
+        std::mem::take(&mut st.absolved)
+    }
+
     /// Flush the pending upload briefly and stop the worker. Never raises.
     pub fn shutdown(&self) {
         self.inner.stop_worker();
@@ -635,6 +648,7 @@ impl CloudSaves {
                     .unwrap_or(""),
             );
             self.inner.sync_state.clear_conflict(name);
+            self.inner.note_absolved(name, &result);
             if let Some(stamp) = &meaningful_play {
                 self.inner
                     .meaningful_play
@@ -923,6 +937,12 @@ revision {} is waiting in the Cloud backup menu",
             .push(eviction_status(name));
     }
 
+    fn note_absolved(&self, name: &str, result: &Map<String, Value>) {
+        if truthy(result.get("clearIntegrityFlag")) {
+            self.state.lock().unwrap().absolved.push(name.to_string());
+        }
+    }
+
     fn set_status(&self, message: &str) {
         self.state.lock().unwrap().status = message.to_string();
     }
@@ -1001,6 +1021,7 @@ copy no longer exists; restarting the slot fresh"
                     .unwrap_or(""),
             );
             self.done_with(name, &snapshot);
+            self.note_absolved(name, &result);
             if let Some(stamp) = &meaningful_play {
                 self.meaningful_play
                     .clear_if_accepted(name, &stamp.operation_id);

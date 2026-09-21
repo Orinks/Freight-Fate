@@ -32,6 +32,8 @@
 
 ### Changed
 
+- **A career changed outside the game now waits for review before it backs up.** You hear once that its backup is waiting.
+
 - **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.
 
 - **Quiet speaks short updates, including lane openings.** Urgent only keeps essential warnings and directions; suppressed speech stays out of the event buffer.

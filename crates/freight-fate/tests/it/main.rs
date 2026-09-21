@@ -47,6 +47,7 @@ mod audio_speech_audio;
 mod audio_speech_ducking;
 mod bench_drive;
 mod browser_guard;
+mod cloud_backup_review;
 mod cloud_saves;
 mod discord_presence;
 mod duty_watch;
