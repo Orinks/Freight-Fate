@@ -14,9 +14,9 @@ on:
 
 jobs:
   # The Python that still SHIPS: the build, bake, indexing and release tooling
-  # under tools/, plus the workflow and sound-pack guards. Gameplay is Rust on
-  # Career 1.9 and rust.yml proves it; the ~220 files mirroring gameplay in
-  # src/freight_fate/ were retired 2026-08-29 rather than kept green twice.
+  # under tools/, plus the workflow and sound-pack guards. The game is Rust and
+  # rust.yml proves it; the Python game itself was deleted in the 2026-09-21
+  # sunset.
   test:
     strategy:
       fail-fast: false
@@ -51,7 +51,7 @@ jobs:
         run: uv sync --dev
 
       - name: Lint
-        run: uv run ruff check src tests tools
+        run: uv run ruff check tests tools
 
       - name: Run tests
         run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml
@@ -61,61 +61,6 @@ jobs:
         with:
           name: coverage-${{ matrix.os }}
           path: coverage.xml
-
-  secret-store-packaging:
-    # The online driver token goes to Windows Credential Manager, the macOS
-    # Keychain, or Secret Service on Linux. keyring finds those backends
-    # through entry points, which Nuitka cannot see by following imports, so a
-    # build that lost them would keep every token in the fallback file instead
-    # -- on every platform, and without any visible symptom. Compiling the
-    # whole game on each pull request is far too slow, so this compiles a
-    # one-file probe with the same packaging flags the release build uses.
-    # macOS is here and not in the test matrix above for the same reason: this
-    # is the one check whose answer differs per platform toolchain.
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-15]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync --group dev --group build
-
-      - name: Check the secret store from a source checkout
-        run: uv run python tools/check_keyring_packaging.py
-
-      - name: Compile the probe with the release packaging flags
-        shell: bash
-        run: |
-          args=$(uv run python -c "from tools.build_release import KEYRING_NUITKA_ARGS; print(' '.join(KEYRING_NUITKA_ARGS))")
-          echo "packaging flags: $args"
-          # shellcheck disable=SC2086
-          uv run --group build python -m nuitka --mode=standalone \
-            --assume-yes-for-downloads --output-dir=build/probe $args \
-            tools/check_keyring_packaging.py
-
-      - name: Check the secret store from the compiled probe
-        shell: bash
-        run: |
-          # Nuitka names the binary .exe on Windows and .bin elsewhere, so
-          # find it rather than guessing the suffix per runner.
-          dist=build/probe/check_keyring_packaging.dist
-          probe=$(find "$dist" -maxdepth 1 -type f -name 'check_keyring_packaging*' -perm -u+x | head -1)
-          if [ -z "$probe" ]; then
-            echo "no compiled probe found in $dist:"
-            ls -l "$dist"
-            exit 1
-          fi
-          echo "running $probe"
-          "$probe"
 
   changelog:
     # The changelog gate runs locally as a pre-push hook, which not every
@@ -147,23 +92,6 @@ jobs:
     needs: [test, changelog]
     if: ${{ !cancelled() && needs.test.result == 'success' }}
     steps:
-      # Nothing is tracked by Git LFS any more; a plain checkout has the pack.
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Build wheel and sdist
-        run: uv build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-
       - name: Retry today's failed snapshot
         if: >-
           ${{ !cancelled() &&

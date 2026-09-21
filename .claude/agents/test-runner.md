@@ -65,8 +65,8 @@ When asked to verify a change end to end, run all three and report each:
 
 ```
 uv run pytest <focused files> -n 0 -q -p no:cacheprovider
-uv run ruff check src tests tools
-uv run python -m compileall src tests tools
+uv run ruff check tests tools
+uv run python -m compileall tests tools
 ```
 
 ## What to report
