@@ -1218,7 +1218,7 @@ instead of a spawn point.
 - [ ] **70-hour/8-day cycle with the 34-hour restart.** A rolling on-duty
       ledger on `HosClock`, spoken through the existing ELD status line;
       restarts at the home terminal are free and full, road restarts cost
-      motel money and comfort. The 1.10 centerpiece.
+      motel money and comfort. The 2.0 centerpiece.
 - [ ] **Home terminal persisted and consequential.** `home_terminal_city`
       on the profile (old saves default to the current city with a
       one-time spoken note), ELD readouts in home-terminal time,
