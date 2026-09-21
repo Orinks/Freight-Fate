@@ -84,6 +84,7 @@ fn link_prism_system_libraries() {
             println!("cargo:rustc-link-lib=objc");
         }
         Ok("linux") => {
+            link_libstdcxx_statically();
             for module in ["speech-dispatcher", "glibmm-2.68", "giomm-2.68"] {
                 let Ok(out) = std::process::Command::new("pkg-config")
                     .args(["--libs", module])
@@ -104,5 +105,35 @@ fn link_prism_system_libraries() {
             }
         }
         _ => {}
+    }
+}
+
+/// Make prism-sys's `-lstdc++` resolve to the compiler's static archive.
+///
+/// Prism needs a newer libstdc++ than the oldest distribution the Linux
+/// build supports ships, so it is linked in rather than required of the
+/// player's system. prism-sys asks for plain `stdc++`; the linker takes the
+/// first search directory holding any libstdc++, and this one holds only the
+/// archive.
+fn link_libstdcxx_statically() {
+    println!("cargo:rerun-if-env-changed=CXX");
+    let cxx = env::var("CXX").unwrap_or_else(|_| "c++".to_string());
+    let Ok(out) = std::process::Command::new(&cxx)
+        .arg("-print-file-name=libstdc++.a")
+        .output()
+    else {
+        return;
+    };
+    // gcc echoes the bare name back when it has no such file.
+    let archive = PathBuf::from(String::from_utf8_lossy(&out.stdout).trim());
+    if !archive.is_absolute() {
+        println!(
+            "cargo:warning=freight-fate: {cxx} has no libstdc++.a; linking libstdc++ dynamically"
+        );
+        return;
+    }
+    let dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("static-libstdcxx");
+    if fs::create_dir_all(&dir).is_ok() && fs::copy(&archive, dir.join("libstdc++.a")).is_ok() {
+        println!("cargo:rustc-link-search=native={}", dir.display());
     }
 }

@@ -327,17 +327,22 @@ jobs:
             file desktop-file-utils
 
       # Prism is compiled from source and linked into the executable. It
-      # needs C++23 (<expected>, so gcc 12; 22.04 defaults to 11) and builds
-      # its speech-dispatcher backend only when the development package is
-      # here -- without it Linux players would get no speech. Its Orca
-      # backend needs glibmm 2.68, which 22.04 does not carry, so it is left
-      # out; Orca users hear the game through Speech Dispatcher instead.
+      # needs gcc 13's standard library (std::atomic_unsigned_lock_free);
+      # 22.04 stops at 12, so gcc 13 comes from Ubuntu's toolchain PPA and
+      # crates/freight-fate/build.rs links its libstdc++ statically -- the
+      # player's system libstdc++ can be as old as 22.04's. Prism builds its
+      # speech-dispatcher backend only when the development package is here;
+      # without it Linux players would get no speech. Its Orca backend needs
+      # glibmm 2.68, which 22.04 does not carry, so it is left out; Orca
+      # users hear the game through Speech Dispatcher instead.
       - name: Install Prism build dependencies
         run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            gcc-12 g++-12 libspeechd-dev
-          echo "CC=gcc-12" >> "$GITHUB_ENV"
-          echo "CXX=g++-12" >> "$GITHUB_ENV"
+            gcc-13 g++-13 libspeechd-dev
+          echo "CC=gcc-13" >> "$GITHUB_ENV"
+          echo "CXX=g++-13" >> "$GITHUB_ENV"
 
       - name: Check Rust formatting
         run: cargo fmt --all --check
