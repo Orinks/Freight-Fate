@@ -78,28 +78,20 @@ fn upload_carries_the_clear_flag_only_when_the_server_sets_it() {
 }
 
 #[test]
-fn held_and_declined_are_refusals_with_their_own_lines() {
-    for reason in ["held_for_review", "review_declined"] {
-        assert_eq!(classify_upload_failure(Some(reason)), "rejected");
-    }
-    assert_eq!(
-        rejection_status("Road Star", Some("held_for_review")),
-        "Road Star: backup waiting for review. This career was changed outside the game or \
-copied from another computer, so it is checked by hand before it backs up. Your local \
-career is safe."
-    );
+fn a_declined_career_is_a_refusal_with_its_own_line() {
+    assert_eq!(classify_upload_failure(Some("review_declined")), "rejected");
     assert_eq!(
         rejection_status("Road Star", Some("review_declined")),
-        "Road Star: backup declined after review. Your local career is safe. Restoring your \
-last cloud backup of it from the Online menu starts it backing up again."
+        "Road Star: backup declined after review. This career no longer backs up to your \
+orinks.net account. Your local career is safe."
     );
 }
 
 #[test]
-fn a_held_career_speaks_once_and_is_not_retried() {
+fn a_declined_career_speaks_once_and_is_not_retried() {
     let transport = FakeTransport::failing(NetError::http_json(
-        423,
-        &json!({"error": "held_for_review"}),
+        403,
+        &json!({"error": "review_declined"}),
     ));
     let clock = ManualClock::new();
     let (service, _dir) = service(&transport, &clock);
@@ -108,14 +100,14 @@ fn a_held_career_speaks_once_and_is_not_retried() {
     drain(&service, &clock);
     let lines = service.take_announcements();
     assert_eq!(lines.len(), 1);
-    assert!(lines[0].starts_with("Road Star: backup waiting for review."));
+    assert!(lines[0].starts_with("Road Star: backup declined after review."));
 
     // No backoff retry: the snapshot was dropped, not kept for later.
     clock.advance(RETRY_INTERVAL_S * 3.0);
     service.pump(false);
     assert_eq!(transport.request_count(), 1);
 
-    // A second held save in the same session says nothing.
+    // A second declined save in the same session says nothing.
     service.queue_backup("Road Star", profile("Road Star", 5001.0));
     drain(&service, &clock);
     assert_eq!(transport.request_count(), 2);
