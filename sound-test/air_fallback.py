@@ -29,8 +29,6 @@ LOOP_S = 6.0
 N = int(SR * LOOP_S)
 OUT = (
     Path(__file__).resolve().parents[1]
-    / "src"
-    / "freight_fate"
     / "assets"
     / "sounds"
     / "vehicle"

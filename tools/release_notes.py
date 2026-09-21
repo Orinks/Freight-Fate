@@ -63,7 +63,8 @@ USER_FACING_PATH_PREFIXES = ("data/", "assets/", "docs/", "crates/")
 # ... but not a crate's test or bench binaries. Under the Python layout
 # `tests/` sat beside the game and was never gated; a Rust test is the same
 # kind of change, and the point is to restore the old rule, not tighten it.
-NOT_USER_FACING = re.compile(r"^crates/[^/]+/(?:tests|benches)/")
+# `data/spider/` is the map crawl's tooling scripts and notes, never loaded.
+NOT_USER_FACING = re.compile(r"^(?:crates/[^/]+/(?:tests|benches)/|data/spider/)")
 USER_FACING_PATHS = {
     "CHANGELOG.md",
     "README.md",

@@ -347,6 +347,12 @@ impl CombinedPack {
 /// Read-and-unmask one pack file, or None when it is absent/unreadable.
 fn load_one_pack(path: &Path, label: &str) -> Option<Arc<SoundPack>> {
     if !path.exists() {
+        // Once per process: the loader reads the packs a single time. A
+        // source run without music.pak (it is builder-local) says so here.
+        log::info!(
+            "No {label} pack at {}; its sounds come from loose files, if any",
+            path.display()
+        );
         return None;
     }
     match SoundPack::open(path) {
@@ -1193,6 +1199,7 @@ mod tests {
         // The music side of the combined pack answers nothing when music.pak
         // itself is missing, while the sounds side is untouched -- the audio
         // engine takes it from there to the loose tree.
+        captured_logs(); // install the capture before the load
         let tmp = tempfile::tempdir().unwrap();
         let (sounds_out, _music_out) = write_split_fixture_packs(tmp.path());
         let loader = PackLoader::new(&sounds_out, tmp.path().join("no_music_here.pak"));
@@ -1203,6 +1210,40 @@ mod tests {
         );
         assert!(combined.read("music/x.ogg").is_none());
         assert!(!combined.has("music/x.ogg"));
+        loader.open();
+        // The session log says the music pack is missing, once.
+        let missing = tmp.path().join("no_music_here.pak").display().to_string();
+        let said: Vec<String> = captured_logs()
+            .into_iter()
+            .filter(|line| line.contains(&missing))
+            .collect();
+        assert_eq!(said.len(), 1, "{said:?}");
+        assert!(said[0].starts_with("INFO No music pack at "), "{said:?}");
+    }
+
+    /// Every log record this test binary has emitted since the capture was
+    /// installed (on first call), as "LEVEL message". No other ff-core unit
+    /// test installs a logger.
+    fn captured_logs() -> Vec<String> {
+        struct Capture;
+        static LINES: Lazy<Mutex<Vec<String>>> = Lazy::new(|| Mutex::new(Vec::new()));
+        impl log::Log for Capture {
+            fn enabled(&self, _: &log::Metadata) -> bool {
+                true
+            }
+            fn log(&self, record: &log::Record) {
+                LINES
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .push(format!("{} {}", record.level(), record.args()));
+            }
+            fn flush(&self) {}
+        }
+        static CAPTURE: Capture = Capture;
+        if log::set_logger(&CAPTURE).is_ok() {
+            log::set_max_level(log::LevelFilter::Info);
+        }
+        LINES.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     #[test]

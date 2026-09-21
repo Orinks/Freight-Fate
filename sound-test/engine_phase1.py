@@ -44,7 +44,7 @@ from pulse_synth import RNG, SR, bank_ir, convolve, grain, pulse_train
 
 REF_DIR = Path(r"C:\temp\ffsound\reference")
 OUT_DIR = Path(r"C:\temp\ffsound\phase1")
-ASSETS = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 REF_IDLE = REF_DIR / "idle_647_REAL_interiorized.wav"
 ROAD = ASSETS / "vehicle" / "road.ogg"
 WIND = ASSETS / "weather" / "wind.ogg"

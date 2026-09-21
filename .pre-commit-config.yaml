@@ -16,12 +16,16 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [python, pyi]
+        # sound-test/ holds audition scratch scripts outside CI's lint scope
+        # (`ruff check tests tools`); a path fix there must not reformat them.
+        exclude: ^sound-test/
         stages: [pre-commit]
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
+        exclude: ^sound-test/
         stages: [pre-commit]
       - id: world-data-index
         name: world_data is in sync with world_source

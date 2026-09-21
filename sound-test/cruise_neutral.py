@@ -25,7 +25,7 @@ import cand_common as C  # noqa: E402
 from engine_896 import OUT, cycle_loop, write  # noqa: E402
 
 SRC = C.LICENSED["int_high"]        # SemiTruckEngine_BW.60624 -- the neutral-rev take
-ROAD = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds" / "vehicle" / "road.ogg"
+ROAD = Path(__file__).resolve().parents[1] / "assets" / "sounds" / "vehicle" / "road.ogg"
 
 
 def find_hold(x: np.ndarray) -> tuple[float, float, float]:

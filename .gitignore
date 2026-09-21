@@ -50,9 +50,9 @@ live_*.txt
 # machine that owns the library gets the licensed audio while a clean clone
 # still builds and runs on the synthesized fallbacks.
 assets/sounds-licensed/
-# Old location, kept so a checkout that still has the overlay under src/
-# can never commit it.
-src/freight_fate/assets/sounds-licensed/
+# The old src/ tree (overlay, loose sounds, music.pak, caches): nothing under
+# src/ is ever committed again, so a checkout that still has it stays safe.
+/src/
 sound-source/
 *.wav
 # ...except the cab-filter test fixtures. They are inputs to `include_bytes!`,
@@ -64,7 +64,6 @@ sound-source/
 # The shipped audio is assets/sounds.pak (tools/pack_sounds.py).
 # music.pak is a private builder-local release asset downloaded when needed.
 assets/music.pak
-src/freight_fate/music.pak
 # The loose assets/sounds tree is builder-local source material and never
 # ships through the repo (owner, 2026-08-08); only the credits ride along
 # so licensing stays reviewable in a clean clone.

@@ -46,7 +46,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-ENGINE_DIR = ROOT / "src" / "freight_fate" / "assets" / "sounds-licensed" / "engine"
+ENGINE_DIR = ROOT / "assets" / "sounds-licensed" / "engine"
 OUT_DIR = Path(__file__).resolve().parent / "render-cab"
 
 BANDS = ("idle", "low", "mid", "midhigh", "high")

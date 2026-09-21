@@ -10,6 +10,14 @@ tools/appimage/*.desktop text eol=lf
 # detection already spares it, this just refuses to depend on that.
 assets/sounds.pak -text
 
+# ff-bake copies these data files into world.ffdata byte for byte (the
+# baked TEXT_FILES), so a checkout's line endings would reach the container
+# and a Windows release would bake different bytes from a Linux or macOS one.
+data/street_limits.json text eol=lf
+data/buffs.json text eol=lf
+data/radio_catalog.json text eol=lf
+data/radio_imported.json text eol=lf
+
 # The cloud-validator invariants export is pinned byte for byte against the
 # Rust exporter's output, which is LF on every platform. A CRLF checkout
 # would make the fixture disagree with the file it is pinning.

@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 
 SR = 48000
-OUT = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+OUT = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 
 def build() -> np.ndarray:

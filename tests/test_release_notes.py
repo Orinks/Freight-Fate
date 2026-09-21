@@ -914,6 +914,7 @@ def test_the_gate_covers_the_shipping_runtime_but_not_its_tests():
         "crates/ff-core/tests/it/sim_trip_cues.rs",
         "crates/freight-fate/benches/frame_time.rs",
         "tools/build_facility_endpoints.py",
+        "data/spider/gap-fill/gap_scan_nn.py",
         ".github/workflows/rust.yml",
     ):
         assert not module.is_user_facing_path(path), path
