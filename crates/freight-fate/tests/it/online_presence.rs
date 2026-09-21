@@ -749,7 +749,10 @@ fn test_missing_or_malformed_identity_loads_as_none() {
 #[test]
 fn test_base_url_env_override() {
     // `base_url()` reads the environment on every call, so the override
-    // is checked through the same path the dev workflow uses.
+    // is checked through the same path the dev workflow uses. The lock is
+    // what keeps this out of the online-hub tests' variable: it is one
+    // process-global environment and four tests write this name.
+    let _env = freight_fate::app::testing::env_lock();
     std::env::set_var("FREIGHT_FATE_ONLINE_URL", "http://localhost:3000/");
     let url = base_url();
     std::env::remove_var("FREIGHT_FATE_ONLINE_URL");

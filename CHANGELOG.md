@@ -503,10 +503,8 @@
   through the bottom gears take about half the time, and the launch rhythm
   matches a real truck.
 
-- **Curve speed assistance drives like a trucker now: engine brake first,
-  brakes to trim.** It slows you on the engine brake, touches the service
-  brakes only when still well over the advisory, and on ice just brakes
-  gently.
+- **Curve speed assistance slows you for a bend.** Engine brake on a steep
+  downgrade, service brakes anywhere else, gentle braking on ice.
 
 - **Brakes and gear changes sound like the real mechanisms now.** The brake
   valve clunks and releases its air, louder the harder you press, and
@@ -696,11 +694,11 @@
   in Settings, Speech, offers speech and braille or braille only; braille
   only works with NVDA and JAWS. (asked for on AppleVis)
 
-- **Career 1.9 now has a Linux download.** Each tester snapshot ships a
-  Linux tarball and an AppImage; speech comes through Speech Dispatcher.
+- **Career 1.9 now has a Linux download.** The release ships a Linux
+  tarball and an AppImage; speech comes through Speech Dispatcher.
 
 - **Career 1.9 runs on the Blazie BT Speak and BT Braille, and other ARM
-  Linux computers.** Each snapshot ships 64-bit ARM Linux builds, and the
+  Linux computers.** Career 1.9 has 64-bit ARM Linux builds, and the
   manual's download table says which file to pick.
 
 - **The game can say when other drivers go on or off duty.** Turn on Say
@@ -720,12 +718,9 @@
 - **When the cloud limit removes your least recently played backup, the
   game names it and says the local career stays.**
 
-- **Career 1.9 tester snapshots are ready to play.** The Windows zip and
-  Apple Silicon Mac app include the music and audio libraries; Intel Macs
-  are not supported.
-
-- **Choose developer snapshots on the Update channel row to move to newer
-  prerelease builds.**
+- **Career 1.9 runs on Windows and Apple Silicon Macs.** The Windows zip
+  and the Mac app include the music and audio libraries; Intel Macs are
+  not supported.
 
 - **Licenses and training replaces the endorsement menu at every terminal.**
   Carrier certificates come first, then the CDL endorsements by written
@@ -1006,16 +1001,13 @@
 - **"Drivers board" is now "Drivers on duty".** The Online menu, the pause
   menu, the screen itself and the website all use the one name.
 
-- **Career 1.9 updates now look for 1.9 tester builds.** With Update channel
-  set to developer snapshots, a 1.9 copy downloads the tester builds and
-  ignores 1.8 snapshots.
-
 - **Detention, lumpers, washouts, and tolls now come out of an owner-
   operator's settlement.** Detention pays you and the rest charge you; a
   company driver's are billed to the carrier.
 
-- **Dispatched loads stay at or under 80,000 pounds.** An overweight truck
-  gets a Scale red light at a transponder scale.
+- **The dispatch board weighs each load against the 80,000-pound limit.**
+  Your fuel counts toward it, and an overweight truck draws a Scale red
+  light at a transponder scale.
 
 - **Relaxed hours of service keep the same 11-hour driving time, 14-hour duty
   window, and 30-minute break as Realistic.** Fines and inspection odds are
@@ -1337,10 +1329,6 @@
 - **The radio dial moved to Page Down and Page Up.** Page Down tunes the
   next station, Page Up the previous, Control still jumps a category, and
   semicolon and apostrophe keep working.
-
-- **Test builds use a staging copy of orinks.net for online services.**
-  Connect a fresh account there; staging careers and backups will not
-  carry over when 1.9 releases.
 
 - **Careers from earlier versions stay in their own era.** A career from
   Freight Fate 1.8 or earlier still shows in your list, labeled, and picking
@@ -2638,10 +2626,6 @@
 
 - **The speed keeper now slows down before a street corner instead of at
   it.** The corner call tells you when the keeper is taking it.
-
-- **The engine brake now stays out of corners.** Curve speed assistance,
-  adaptive cruise and the automatic gearbox all slow for a bend on level
-  road on the service brakes.
 
 - **A construction zone can no longer close the only lane you have.** Work
   zones only close a lane where the road has another to give you.
