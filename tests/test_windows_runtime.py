@@ -54,14 +54,14 @@ class WindowsRuntimeTests(unittest.TestCase):
     def make_redist(self, version="14.44.0", machine=0x8664):
         redist = self.root / "VC" / "Redist" / "MSVC" / version
         crt = redist / "x64" / "Microsoft.VC143.CRT"
-        for name in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll"):
+        for name in windows_runtime.REQUIRED_CRT:
             pe_file(crt / name, machine=machine)
         return redist, crt
 
     def make_payload(self):
         payload = self.root / "payload"
         pe_file(payload / "FreightFate.exe", ["VCRUNTIME140.dll", "KERNEL32.dll"])
-        for name in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll"):
+        for name in windows_runtime.REQUIRED_CRT:
             pe_file(payload / name)
         return payload
 
@@ -187,7 +187,7 @@ class WindowsRuntimeTests(unittest.TestCase):
                 for name in names:
                     output.writestr("FreightFate/" + name, b"payload")
                 if not missing:
-                    for name in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll"):
+                    for name in windows_runtime.REQUIRED_CRT:
                         output.writestr("FreightFate/" + name, b"runtime")
             if missing:
                 with self.assertRaisesRegex(RuntimeError, "vcruntime140.dll"):
@@ -227,7 +227,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             profile, stage = root / "release", root / "stage"
             exe = pe_file(profile / "freightfate.exe", ["VCRUNTIME140.dll"])
             redist = root / "Redist" / "14.44.0" / "x64" / "Microsoft.VC143.CRT"
-            for name in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll"):
+            for name in windows_runtime.REQUIRED_CRT:
                 pe_file(redist / name)
             with (
                 patch.dict(os.environ, {"VCToolsRedistDir": str(redist.parents[1])}),

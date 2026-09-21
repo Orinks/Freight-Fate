@@ -424,7 +424,7 @@ def archive(build_dir: Path, label: str) -> Path:
 # folder with the packs and the baked data container
 # (``ff_core::data::data_resources::data_root`` looks for
 # ``<exe dir>/freight_fate/data``). The native libraries (SDL2, BASS and its
-# plugins, Prism) sit flat beside the executable, which is where the crates'
+# plugins) sit flat beside the executable; Prism is linked into it, which is where the crates'
 # build scripts stage them and where their loaders look first.
 
 # ``[[bin]] name`` in crates/freight-fate/Cargo.toml. The staged copy is
@@ -487,18 +487,13 @@ MACOS_REQUIRED_LIBRARIES = (
     "libbassopus.dylib",
     "libbasshls.dylib",
     "libbassflac.dylib",
-    "libprism.dylib",
 )
-# The Linux tarball's equivalents, flat beside the executable. Prism's
-# renamed glib and speech-dispatcher copies travel with it (see
-# ``rust_native_libraries``) but are not listed: their names carry a hash
-# that changes with every prismatoid release.
+# The Linux tarball's equivalents, flat beside the executable.
 LINUX_REQUIRED_LIBRARIES = (
     "libbass.so",
     "libbassopus.so",
     "libbasshls.so",
     "libbassflac.so",
-    "libprism.so",
 )
 
 
@@ -709,13 +704,7 @@ def rust_native_libraries(profile_dir: Path, exts: set[str] | None = None) -> li
         suffix = path.suffix.lower()
         if suffix in CARGO_NON_RUNTIME_SUFFIXES:
             return False
-        if suffix in suffixes:
-            return True
-        # Prism's Linux dependencies are versioned sonames
-        # (``libglib-2-<hash>.so.0.8800.1``), so their suffix is a number.
-        # They are shared libraries all the same, and libprism.so does not
-        # load without them.
-        return ".so" in suffixes and ".so." in path.name
+        return suffix in suffixes
 
     return sorted(
         path for path in profile_dir.iterdir() if path.is_file() and is_runtime_library(path)
@@ -1188,7 +1177,7 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
 
     if platform_name == "win32":
         verify_windows_runtime(executable_root)
-        for name in ("SDL2.dll", "bass.dll", "prism.dll"):
+        for name in ("SDL2.dll", "bass.dll"):
             if not (root / name).exists():
                 # BASS is fetched rather than committed, so a checkout that
                 # skipped the fetch would otherwise build a silent release and
@@ -1211,22 +1200,17 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
                 "Rust macOS payload is missing native libraries: " + ", ".join(missing_macos)
             )
     elif platform_name == "linux":
-        # SDL2 is compiled in here too; what must be beside the executable is
-        # BASS with its decoders and Prism with its bundled dependencies.
+        # SDL2 and Prism are compiled in here too; what must be beside the
+        # executable is BASS with its decoders.
         missing_linux = [name for name in LINUX_REQUIRED_LIBRARIES if not (root / name).exists()]
         if missing_linux:
             raise RuntimeError(
                 "Rust Linux payload is missing native libraries: " + ", ".join(missing_linux)
             )
-        if not [path for path in root.iterdir() if path.name.startswith("libspeechd-")]:
-            raise RuntimeError(
-                "Rust Linux payload ships libprism.so without its bundled "
-                "speech-dispatcher library; the game would start without speech"
-            )
     elif not native_files(root):
         print(
             "Warning: no native libraries staged beside the executable; the game "
-            "will need system SDL2/BASS/Prism on this platform."
+            "will need system SDL2/BASS on this platform."
         )
 
     verify_sound_packs(build_dir)

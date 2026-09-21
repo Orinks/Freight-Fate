@@ -431,6 +431,25 @@ The detailed backlog retains the remaining work and its recorded release scope.
 Update each item where it is recorded; this reorganization does not change
 its status or release decision.
 
+### September 21 Prism from the prismer crate
+
+- [x] Prism comes from the `prismer` crate (0.1.3 or later), compiled from
+      source and linked into the executable, instead of the in-tree
+      `prism`/`prism-sys` crates loading a vendored library at run time.
+      The screen-reader client DLLs stay delay-loaded on Windows; Linux
+      links the system's speech-dispatcher, so a Linux install needs it to
+      start, and loses Prism's Orca backend (Ubuntu 22.04, the build host,
+      has no glibmm 2.68). Found on the way and fixed upstream as
+      trypsynth/prismer#2: the binding described version 3 of `PrismConfig`
+      while Prism wrote version 4, overrunning the caller's stack. Prism's
+      static backend anchors are MSVC-only, so `crates/freight-fate/build.rs`
+      links the archive whole on Linux and macOS, and the nightly now fails
+      when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
+      missing from `--list-speech-backends`.
+- [ ] Prism's backend anchors cover MSVC only; a GCC or Clang static link
+      drops every backend unless linked whole. Hand-off for the owner, not
+      an upstream issue from this side.
+
 ### September 21 the Python sunset
 
 - [x] The Python game is deleted (2026-09-21). The Rust workspace in
@@ -1102,7 +1121,9 @@ its status or release decision.
       enumerated outside the settings menu.
 - [ ] Owner verifies the OneCore leak with Prism's author before anything
       goes upstream; no issue or PR from this side (owner rule 2026-09-12).
-      Hand-off is the probe. Pinned 2026-09-12: the leak is in FREEING an
+      Hand-off is the probe, which left the tree with the in-tree Prism
+      crates on 2026-09-21: `git show f9c06a7f:crates/prism/examples/handle_leak_probe.rs`.
+      Pinned 2026-09-12: the leak is in FREEING an
       acquired (registry-cached) OneCore instance, not in acquiring it
       (acquire-and-never-free is flat); prismatoid 0.16.7, which 1.8 runs,
       frees the same way and is clean, while 0.17.3 and 0.18.2 both leak

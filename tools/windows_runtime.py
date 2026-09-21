@@ -15,7 +15,14 @@ import struct
 import subprocess
 from pathlib import Path
 
-REQUIRED_CRT = ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll")
+# msvcp140_atomic_wait.dll: Prism, linked into the executable, uses C++20
+# atomic waits.
+REQUIRED_CRT = (
+    "vcruntime140.dll",
+    "vcruntime140_1.dll",
+    "msvcp140.dll",
+    "msvcp140_atomic_wait.dll",
+)
 # What a clean Windows already has. An API set (``api-ms-win-``,
 # ``ext-ms-win-``) is resolved by the loader from the OS schema, never from a
 # file on disk, and the classic DLLs below all ship in System32 on every

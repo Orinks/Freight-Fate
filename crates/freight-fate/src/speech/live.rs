@@ -259,7 +259,7 @@ impl Speech {
         if !features.selects_voices() {
             return;
         }
-        let result = (|| -> Result<(), prism::Error> {
+        let result = (|| -> Result<(), prismer::Error> {
             for index in 0..backend.voices_count()? {
                 if backend.voice_name(index)? == voice {
                     backend.set_voice(index)?;
@@ -429,7 +429,7 @@ impl SpeechSink for Speech {
             if !backend.features().selects_voices() {
                 continue;
             }
-            let names = (|| -> Result<Vec<String>, prism::Error> {
+            let names = (|| -> Result<Vec<String>, prismer::Error> {
                 (0..backend.voices_count()?)
                     .map(|index| backend.voice_name(index))
                     .collect()
