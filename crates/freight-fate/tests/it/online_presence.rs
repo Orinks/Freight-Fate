@@ -725,7 +725,7 @@ fn test_the_secret_store_report_fails_when_the_backends_are_not_packaged() {}
 fn test_the_secret_store_report_fails_without_keyring_at_all() {}
 
 #[test]
-#[ignore = "tools/build_release.py stays Python; its Nuitka flags are tested there"]
+#[ignore = "the Nuitka build that needed keyring flags was deleted with the Python game"]
 fn test_the_release_build_asks_for_keyrings_backends_and_metadata() {}
 
 #[test]

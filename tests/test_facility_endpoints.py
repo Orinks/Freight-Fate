@@ -20,9 +20,7 @@ def _load_tool():
 
 
 def test_facility_endpoint_data_covers_supported_facilities(world):
-    data = json.loads(
-        Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig")
-    )
+    data = json.loads(Path("data/facility_endpoints.json").read_text(encoding="utf-8-sig"))
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 4271
@@ -72,9 +70,7 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
 
 
 def test_facility_endpoint_records_are_clean_and_honest(world):
-    data = json.loads(
-        Path("src/freight_fate/data/facility_endpoints.json").read_text(encoding="utf-8-sig")
-    )
+    data = json.loads(Path("data/facility_endpoints.json").read_text(encoding="utf-8-sig"))
 
     for facility_id, record in data["endpoints"].items():
         try:

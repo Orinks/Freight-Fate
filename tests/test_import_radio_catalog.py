@@ -29,7 +29,7 @@ def _load_importer():
 irc = _load_importer()
 
 OVERRIDES_PATH = ROOT / "data" / "radio_imported_overrides.json"
-CATALOG_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
+CATALOG_PATH = ROOT / "data" / "radio_imported.json"
 
 
 def _catalog() -> dict:

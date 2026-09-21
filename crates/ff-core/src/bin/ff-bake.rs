@@ -1,8 +1,8 @@
 //! `ff-bake` -- turn the JSON data tree into the shipped `world.ffdata`.
 //!
 //! ```text
-//! ff-bake --data-dir src/freight_fate/data --out dist/freight_fate/data/world.ffdata
-//! ff-bake --data-dir src/freight_fate/data --out <same path> --check
+//! ff-bake --data-dir data --out dist/freight_fate/data/world.ffdata
+//! ff-bake --data-dir data --out <same path> --check
 //! ```
 //!
 //! `--check` re-bakes to a temp file and compares bytes with the container
@@ -20,7 +20,7 @@ use ff_core::data::baked::{bake, bake_bytes, BAKED_FILE_NAME};
 const USAGE: &str = "\
 usage: ff-bake --data-dir <dir> --out <file> [--check] [--quiet]
 
-  --data-dir <dir>  the package data folder (src/freight_fate/data)
+  --data-dir <dir>  the world data folder (data/ in a checkout)
   --out <file>      where to write world.ffdata; a directory is allowed and
                     the file is named world.ffdata inside it
   --check           do not write: re-bake and compare bytes with --out

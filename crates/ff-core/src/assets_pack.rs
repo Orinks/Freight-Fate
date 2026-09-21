@@ -4,12 +4,12 @@
 //! instead of a browsable folder: `freight_fate/music.pak` carries every entry
 //! under `music/`, `freight_fate/sounds.pak` carries everything else. The
 //! split keeps the small (tens-of-MB) gameplay SFX library out of the much
-//! larger (several-hundred-MB) music payload, so an LFS pull for a sound-only
-//! change does not drag the whole music library with it. Each pack is a
+//! larger (several-hundred-MB) music payload, so a sound-only change does not
+//! drag the whole music library with it. Each pack is a
 //! deflated zip XOR-masked with a fixed key, so renaming one does not turn it
 //! back into an openable archive; this deters casual editing, nothing more.
-//! Career 1.9 source checkouts receive the encrypted packs through Git LFS.
-//! Tests can explicitly disable the default packs and exercise the loose-file
+//! In a source checkout `assets/sounds.pak` is an ordinary committed file and
+//! `assets/music.pak` is downloaded by `tools/build_release.py`. Tests can explicitly disable the default packs and exercise the loose-file
 //! fallback.
 //!
 //! `tools/pack_sounds.py` writes both packs; the audio engine reads them
@@ -45,10 +45,9 @@ pub const DEFAULT_MUSIC_PACK_NAME: &str = "music.pak";
 /// unmaterialised pack as present, so a test guarded with "if the file is not
 /// there, skip" never skips and asserts against 130 bytes of text instead.
 ///
-/// CI checks out without LFS deliberately: music.pak is 250 MB and sounds.pak
-/// 7.5 MB, and fetching both on every push exhausted the repository's LFS
-/// budget (see `.github/workflows/rust.yml`, and `ci.yml` for the Python
-/// side). A pointer here is the ordinary case on a runner, not a fault.
+/// The packs no longer live in Git LFS, but a checkout made while they did
+/// can still hold a pointer where `assets/sounds.pak` should be, so the
+/// guard stays.
 pub const LFS_POINTER_MAGIC: &[u8] = b"version https://git-lfs";
 
 /// Whether `path` is a Git LFS pointer standing in for the real file.
@@ -347,6 +346,12 @@ impl CombinedPack {
 /// Read-and-unmask one pack file, or None when it is absent/unreadable.
 fn load_one_pack(path: &Path, label: &str) -> Option<Arc<SoundPack>> {
     if !path.exists() {
+        // Once per process: the loader reads the packs a single time. A
+        // source run without music.pak (it is builder-local) says so here.
+        log::info!(
+            "No {label} pack at {}; its sounds come from loose files, if any",
+            path.display()
+        );
         return None;
     }
     match SoundPack::open(path) {
@@ -492,10 +497,9 @@ impl PackLoader {
     }
 }
 
-/// Where the shipped packs live: next to the data tree. The Python module
-/// used its own package directory (`src/freight_fate/`); a frozen build puts
-/// the packs under `<exe dir>/freight_fate/`, a source checkout has them in
-/// the repo. `FREIGHT_FATE_PACK_DIR` overrides both.
+/// Where the shipped packs live: a packaged build puts them under
+/// `<exe dir>/freight_fate/`, a source checkout under `assets/`.
+/// `FREIGHT_FATE_PACK_DIR` overrides both.
 pub fn default_pack_dir() -> PathBuf {
     if let Some(dir) = std::env::var_os("FREIGHT_FATE_PACK_DIR") {
         return PathBuf::from(dir);
@@ -518,8 +522,7 @@ pub fn default_pack_dir() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("..")
             .join("..")
-            .join("src")
-            .join("freight_fate"),
+            .join("assets"),
     );
     candidates
         .iter()
@@ -864,7 +867,7 @@ mod tests {
     }
 
     fn committed_pack_dir() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/freight_fate")
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets")
     }
 
     /// Whether the shipped pack at `path` is really here, saying out loud
@@ -886,15 +889,17 @@ mod tests {
             .unwrap_or_default();
         if is_lfs_pointer(path) {
             eprintln!(
-                "SKIPPING {}: it is a Git LFS pointer, not the pack. CI checks out \
-                 without LFS on purpose (fetching the packs on every push exhausted \
-                 the repository's LFS budget); run \
-                 `git lfs pull --include=\"src/freight_fate/{name}\"` to check this \
-                 locally.",
+                "SKIPPING {}: it is a leftover Git LFS pointer, not the pack. The \
+                 packs are plain files now: `git checkout -- assets/{name}` restores \
+                 sounds.pak, and tools/build_release.py downloads music.pak.",
                 path.display()
             );
         } else {
-            eprintln!("SKIPPING {}: not present (LFS)", path.display());
+            eprintln!(
+                "SKIPPING {}: not present (sounds.pak is committed; music.pak is \
+                 builder-local and tools/build_release.py downloads it)",
+                path.display()
+            );
         }
         false
     }
@@ -914,9 +919,9 @@ mod tests {
         // The trap this guard exists for: a pointer is a file that EXISTS,
         // so `Path::exists` alone reads an unmaterialised pack as present.
         //
-        // Written into a temp directory, never over the shipped packs: those
-        // are Git LFS objects (music.pak is 250 MB) and the working tree
-        // holds the only copy.
+        // Written into a temp directory, never over the shipped packs: the
+        // working tree holds the only local copy (music.pak is a 250 MB
+        // download).
         let tmp = tempfile::tempdir().unwrap();
         let pointer = tmp.path().join(DEFAULT_PACK_NAME);
         write_lfs_pointer(&pointer, &"a".repeat(64), 7_781_859);
@@ -1193,6 +1198,7 @@ mod tests {
         // The music side of the combined pack answers nothing when music.pak
         // itself is missing, while the sounds side is untouched -- the audio
         // engine takes it from there to the loose tree.
+        captured_logs(); // install the capture before the load
         let tmp = tempfile::tempdir().unwrap();
         let (sounds_out, _music_out) = write_split_fixture_packs(tmp.path());
         let loader = PackLoader::new(&sounds_out, tmp.path().join("no_music_here.pak"));
@@ -1203,6 +1209,40 @@ mod tests {
         );
         assert!(combined.read("music/x.ogg").is_none());
         assert!(!combined.has("music/x.ogg"));
+        loader.open();
+        // The session log says the music pack is missing, once.
+        let missing = tmp.path().join("no_music_here.pak").display().to_string();
+        let said: Vec<String> = captured_logs()
+            .into_iter()
+            .filter(|line| line.contains(&missing))
+            .collect();
+        assert_eq!(said.len(), 1, "{said:?}");
+        assert!(said[0].starts_with("INFO No music pack at "), "{said:?}");
+    }
+
+    /// Every log record this test binary has emitted since the capture was
+    /// installed (on first call), as "LEVEL message". No other ff-core unit
+    /// test installs a logger.
+    fn captured_logs() -> Vec<String> {
+        struct Capture;
+        static LINES: Lazy<Mutex<Vec<String>>> = Lazy::new(|| Mutex::new(Vec::new()));
+        impl log::Log for Capture {
+            fn enabled(&self, _: &log::Metadata) -> bool {
+                true
+            }
+            fn log(&self, record: &log::Record) {
+                LINES
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .push(format!("{} {}", record.level(), record.args()));
+            }
+            fn flush(&self) {}
+        }
+        static CAPTURE: Capture = Capture;
+        if log::set_logger(&CAPTURE).is_ok() {
+            log::set_max_level(log::LevelFilter::Info);
+        }
+        LINES.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     #[test]

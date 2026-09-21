@@ -74,7 +74,7 @@ from world_source import load_world  # noqa: E402
 scs.CURVE_PAD_M = 150.0
 
 ROOT = Path(__file__).resolve().parent.parent
-CURVES = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
+CURVES = ROOT / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
 
 # FOSSGIS runs a public, planet-wide Valhalla. It answers trace_attributes,
 # which means the whole tileset build is optional: a 400-point chunk of I-70

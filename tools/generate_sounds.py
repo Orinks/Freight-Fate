@@ -32,7 +32,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ASSETS = ROOT / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = ROOT / "assets" / "sounds"
 KEY_FILE = Path.home() / "AI API Keys.txt"
 SOUND_API = "https://api.elevenlabs.io/v1/sound-generation"
 # The current sound-effects model. It is also the API default, but naming it

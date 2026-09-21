@@ -7,12 +7,11 @@ authoring time.
 
 **Career 1.9 is a native Rust game.** The Cargo workspace under `crates/`
 (`ff-core`, `freight-fate`, `prism`, `prism-sys`, `bass-sys`) is the shipping
-runtime. Python is no longer part of gameplay: `src/freight_fate/` remains as
-the port's reference implementation and as the home of the world data tree,
-and `tools/` stays Python for baking, packaging, and data generation. Write
-gameplay changes in Rust. The `dev` line is still Python-only, so a fix that
-must reach both lines has to be written twice -- ask before assuming it
-should be.
+runtime, on both `dev` and `main`. The Python game is gone (its last release
+is the `v1.8.8.1` tag, and 1.8 gets no further releases); `tools/` stays
+Python for baking, packaging, and data generation. The world data tree is
+`data/`, the sounds and packs are under `assets/`. Write gameplay changes in
+Rust.
 
 ## How the code fits together
 
@@ -29,15 +28,12 @@ Read this before opening files; the rest is discoverable from `lib.rs` docs.
   (`speech_text`, `spoken_advice`, `speech_pacing`) live here too, so a
   transcript can be asserted without a game.
 - **Every `ff-core` module keeps the name of the Python module it replaced**,
-  and the port is line for line. When a Rust module's intent is unclear, the
-  `src/freight_fate/` file of the same name is the reference. `pyrandom` and
+  and the port was line for line. That Python is history, not a reference
+  to follow: it lives only in git (the parent of the commit "chore: delete
+  the Python game"; `v1.8.8.1` is the last 1.8 release). `pyrandom` and
   `pyfmt` exist because the tests pin spoken strings byte for byte to what
-  Python produced; do not "fix" their rounding or RNG. Three modules break
-  that rule and the Python is NOT their reference: `sim/turn_guide.rs` and
-  `data/corners.rs` have no Python counterpart at all, and `sim/lane.rs`
-  diverged from `sim/lane.py` when it grew a heading and a bicycle model --
-  reading the Python file for any of the three gives you retired behaviour.
-- **World data has two shapes.** The JSON tree under `src/freight_fate/data/`
+  Python produced; do not "fix" their rounding or RNG.
+- **World data has two shapes.** The JSON tree under `data/`
   (`FREIGHT_FATE_DATA_ROOT` overrides it) and the baked, memory-mapped
   `world.ffdata` container (`data/baked/`) that the shipped game reads. A loose
   JSON path that is missing on disk falls through to the container's copy, so
@@ -87,7 +83,8 @@ Read this before opening files; the rest is discoverable from `lib.rs` docs.
 
 Release notes are built only from curated entries in `CHANGELOG.md`, never
 from commit subjects. CI fails any PR that changes user-facing paths
-(`src/`, `docs/`, `CHANGELOG.md`, `README.md`, release tooling) without one.
+(`data/`, `assets/`, `docs/`, `crates/` outside crate tests and benches,
+`CHANGELOG.md`, `README.md`, `pyproject.toml`, release tooling) without one.
 
 - Player-facing change: add a bullet under `## Unreleased` in the fitting
   section (`Added`, `Changed`, `Fixed`, ...). A bold lead sentence that
@@ -251,17 +248,16 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 - Tests: `uv run pytest` -- about six seconds now, so just run all of it.
   `pyproject.toml` already sets `-n auto` and a 120 s per-test timeout, so
   a bare `pytest` is a full-CPU xdist run; that is why only one may be in
-  flight. A single file is `uv run pytest tests/test_build_release.py`.
-  **The suite covers the Python that still ships and nothing else**: the
-  build, bake, indexing and release tooling under `tools/`, plus the workflow
-  and sound-pack guards. The ~220 files that mirrored gameplay in
-  `src/freight_fate/` were retired on 2026-08-29: Career 1.9 is the Rust game
-  and `cargo test` is what proves it, so do NOT add a gameplay test here --
-  write it in Rust. A slow sweep test still needs its own
-  `@pytest.mark.timeout`; under xdist the thread timeout kills the worker and
-  reads as "node down".
-- Lint: `uv run ruff check src tests tools`
-- Byte-compile check: `uv run python -m compileall src tests tools`
+  flight. A single file is `uv run pytest tests/test_build_release_rust.py`.
+  **The suite covers the Python tooling and nothing else**: the build, bake,
+  indexing and release tooling under `tools/` (the world loader is the
+  `tools/ffworld/` package), plus the workflow and sound-pack guards. There
+  is no Python game left to test: `cargo test` proves the game, so do NOT
+  add a gameplay test here -- write it in Rust. A slow sweep test still needs
+  its own `@pytest.mark.timeout`; under xdist the thread timeout kills the
+  worker and reads as "node down".
+- Lint: `uv run ruff check tests tools`
+- Byte-compile check: `uv run python -m compileall tests tools`
 
 ### Both
 
@@ -295,9 +291,9 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   means adding a row there in the same change.
 - Never use Computer Use, desktop UI automation, or OS-level game window or
   process interaction to validate or control Freight Fate. These tools do not
-  reliably control Pygame and can disrupt a player's active drive. Use the
-  deterministic headless transcript/playtest harness, automated tests, and
-  user-provided manual validation instead. For agent-driven play against the
+  reliably control the game's SDL window and can disrupt a player's active
+  drive. Use the deterministic headless transcript/playtest harness,
+  automated tests, and user-provided manual validation instead. For agent-driven play against the
   REAL game (real runtime, real audio, real menus), the sanctioned path is
   `freightfate --agent-server`: an MCP server inside the game that gives an
   agent a player's capabilities only -- keys in through the normal input
@@ -306,10 +302,10 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 
 ## World and route data
 
-- The build tools edit `src/freight_fate/data/world_source/`; the game loads
-  the indexed `src/freight_fate/data/world_data/` tree. After editing the
-  source, regenerate with `uv run python tools/index_world.py` and verify with
-  `--check` -- CI and tests expect the two in sync.
+- The build tools edit `data/world_source/`; the game loads the indexed
+  `data/world_data/` tree. After editing the source, regenerate with
+  `uv run python tools/index_world.py` and verify with `--check` -- CI and
+  tests expect the two in sync.
 - Never read or write the source files directly. Go through
   `tools/world_source.py`: `load_world()` returns the whole world as one dict,
   `save_world(data)` writes it back as per-state shards. Both trees are
@@ -323,14 +319,13 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   it encodes the judgment rules and the spoken-text invariants.
 - The shipped game reads a single baked container, not the JSON tree. After
   a data change re-bake it with `cargo run -p ff-core --bin ff-bake --
-  --data-dir src/freight_fate/data --out dist/freight_fate/data/world.ffdata`,
+  --data-dir data --out dist/freight_fate/data/world.ffdata`,
   and prove a committed container matches its tree with the same command plus
   `--check`, which re-bakes to a temp file and compares bytes.
 - After data changes run the world and route tests: the `data_*` and `sim_*`
   cases in `crates/ff-core/tests/it/` -- e.g. `cargo test -p ff-core
-  data_world`. The Python world tests were retired with the rest of the
-  gameplay mirror; what remains on that side is the tooling that BUILDS the
-  data (`tests/test_index_world.py`, `tests/test_baked_data.py`).
+  data_world`. On the Python side only the tooling that BUILDS the data is
+  tested (`tests/test_index_world.py`).
 
 ### Provenance: read, derived, or assumed -- never blurred
 
@@ -351,7 +346,7 @@ reads as a survey.
   screen for **self-contradiction, not extremity**: real roads are sometimes
   brutal, so a record is suspect when it disagrees with ITSELF (a steep slope
   on ground classed level, an arc longer than its own span). Worked example:
-  `src/freight_fate/data/curves.py`.
+  `crates/ff-core/src/data/curves.rs`.
 - **Never tune a threshold until it looks right.** Derive it from a published
   standard, or calibrate against real data and report how well it separates.
 - **Screen at load; never edit the bake.** A screen that deletes what it
@@ -405,17 +400,18 @@ substitutes: reporting a bench as the playtest he asked for hands him a
 verdict nobody listened to.
 
 **Launch the scenario for him, with the watcher on it.** Handing over a
-command to paste is half the job. Start it -- `tools/playtest_road.py --find
-<feature>` for a road feature, `tools/playtest_sandbox.py --launch` for
-anything needing dispatch, a dock or the menus -- in the background, and put
+command to paste is half the job. Start it -- `cargo run --release -p
+freight-fate --bin freightfate -- --playtest-road --find <feature>` for a
+road feature, `... -- --playtest-sandbox --launch` for anything needing
+dispatch, a dock or the menus -- in the background, and put
 `tools/playtest_watch.py` on that session's log under the Monitor tool so its
 stdout becomes live notifications. It reports errors and any network call
 immediately (a sandboxed session must never reach the site), checks in every
 few minutes on where the drive got to, and summarises when the game exits.
 Then say what to drive and what to listen for, and let him drive. One game at
 a time: `SingleInstanceGuard` refuses a second window. Log paths are
-`logs/playtest.log` for playtest_road and `logs/playtest-manual.log` for the
-sandbox launcher.
+`logs/playtest.log` for `--playtest-road` and `logs/playtest-manual.log` for
+`--playtest-sandbox` (`--log PATH` overrides either).
 
 **Triage by what it costs the driver, not by whether it sounds like a
 bug.** Rule set 2026-08-23, after a "does the horn line read in quiet?"

@@ -50,7 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from straw_curve_sample import ADVISORY_MAX_MPH  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-CURVES = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
+CURVES = ROOT / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
 
 
 def clamp() -> tuple[str, int, int, int]:

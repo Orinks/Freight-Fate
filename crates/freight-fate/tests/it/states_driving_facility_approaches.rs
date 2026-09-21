@@ -14,15 +14,10 @@ use ff_core::sim::weather::WeatherSystem;
 use ff_core::speech_text::SpokenMessage;
 use freight_fate::states::driving_core::route_event_sound;
 
-/// The Python package's `data/` folder in the source tree.
+/// The checkout's world data tree (`data/`).
 fn data_dir() -> PathBuf {
     let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let dir = manifest
-        .join("..")
-        .join("..")
-        .join("src")
-        .join("freight_fate")
-        .join("data");
+    let dir = manifest.join("..").join("..").join("data");
     dir.canonicalize().unwrap_or(dir)
 }
 

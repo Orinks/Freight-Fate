@@ -26,7 +26,8 @@ uses this native Rust runtime. See [the contributor architecture guide](../CLAUD
 for the crate layout and service boundaries.
 
 The Python module and class references below are **legacy port references**
-under `src/freight_fate/`, including `models/`, `sim/`, and `states/`.
+to the deleted Python game (in git history; `v1.8.8.1` is its last release),
+including `models/`, `sim/`, and `states/`.
 They are not the current gameplay implementation. Rust
 modules generally retain the names of their Python counterparts under
 `crates/ff-core/src/` or `crates/freight-fate/src/`; consult those modules
@@ -203,10 +204,10 @@ has to degrade silently when offline.
 
 Not classes, but part of the ontology, because the shape is load-bearing:
 
-- Tools edit `src/freight_fate/data/world_source/`, never directly: go through
+- Tools edit `data/world_source/`, never directly: go through
   `tools/world_source.py`, where `load_world()` returns the whole world as one
   dict and `save_world(data)` writes it back as per-state shards.
-- The game loads the indexed `src/freight_fate/data/world_data/` tree.
+- The game loads the indexed `data/world_data/` tree.
 - `tools/index_world.py` regenerates the index; `--check` verifies the two are
   in sync, and CI and tests expect that.
 
@@ -549,10 +550,11 @@ the CB, spoken by a driver on the radio. It is trade slang, and it is flavour.
 In a warning, a menu item, a status readout, or anything the game says in its
 own voice, the word is "trooper".
 
-This is enforced, not just documented:
-`tests/test_enforcement_presence.py::test_bear_is_cb_voice_only_in_every_player_facing_string`
-scans every player-facing string in `src/` and fails if the word appears
-outside a CB clause. The check exists because slang leaks: the word is
+The Python game enforced this with a sweep of every player-facing string
+that failed if the word appeared outside a CB clause. The Rust port has no
+equivalent yet (`test_bear_is_cb_voice_only_in_every_player_facing_string`
+in `crates/ff-core/tests/it/sim_enforcement_presence.rs` is an ignored
+placeholder), so for now it is a review rule. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 
@@ -580,8 +582,8 @@ nothing else -- every safety call, route instruction, and money consequence
 still speaks, in the shortest form this ontology allows, and everything that
 is color, confirmation, coaching, or congratulation is an earcon or silence.
 Two rules bound every terse rendering, and the pairs themselves live in
-`speech_text.py` (one definition, both forms side by side, pinned by
-`tests/test_terse_contract.py`):
+`speech_text.rs` (one definition, both forms side by side, pinned by the
+tests in that module):
 
 **Compress words, never certainty.** A qualifier that changes a decision
 survives terse. Parking certainty is the worked example: all five values stay

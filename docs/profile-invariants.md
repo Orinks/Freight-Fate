@@ -8,7 +8,7 @@ single source of truth for what an honest profile must satisfy.
 Two tiers, and the split matters:
 
 - **Hard invariants** are true in every version of the game. The client
-  enforces them too (`src/freight_fate/profile_invariants.py` is the
+  enforces them too (`crates/ff-core/src/profile_invariants.rs` is the
   executable mirror of section 1, run on every server-verified restore as
   defense in depth). No honest save ever breaks one.
 - **Plausibility rules** compare fields against each other and against the
@@ -17,7 +17,11 @@ Two tiers, and the split matters:
   `validator_version` when they change.
 
 Maintenance rule: when a feature adds or changes a field, this doc and the
-client module change **in the same PR** as the feature. A field with no
+client module change **in the same PR** as the feature.
+
+"The export" below is the catalog snapshot the server's validator is built
+from. `cargo run -p ff-core --bin ff-invariants -- <output>` writes it
+(`--check` compares instead); the Rust exporter is the only one. A field with no
 entry here is a field the gate silently trusts.
 
 ## 1. Hard invariants (client-enforced, version-stable)
@@ -98,7 +102,7 @@ rejects the backup of every driver who took that step. A career that
 launders invented money through the garage is left to offline forensics.
 
 2.2 **XP against the curve and the miles.** Level thresholds are the
-`LEVEL_XP` table in `models/career.py`. The ceiling is
+`LEVEL_XP` table in `crates/ff-core/src/models/career.rs`. The ceiling is
 `deliveries * xpFlatPerDelivery + total_miles * xpPerMileMax`, both
 exported in the invariants, plus a slack of a dollar or so for rounding.
 
@@ -122,8 +126,8 @@ also carries a `tier` (`training` / `certificate` / `endorsement` /
 `specialist`) for public-profile grouping.
 
 2.4 **Achievements against the stats that earn them.** Every id in
-`achievements` (see `src/freight_fate/achievements.py` for the canonical
-set) has a triggering condition; the gate spot-checks the cheap ones:
+`achievements` (see `crates/ff-core/src/achievements/catalog.rs` for the
+canonical set) has a triggering condition; the gate spot-checks the cheap ones:
 `five_deliveries`/`ten_deliveries` against `career.deliveries`,
 `thousand_miles`/`long_haul` against `total_miles`, `level_three` against
 XP, `twenty_five_grand` against `total_earnings`. An achievement without

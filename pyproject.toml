@@ -17,30 +17,12 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Games/Entertainment :: Simulation",
 ]
+# The game is Rust (crates/); this project is the Python build, bake and data
+# tooling under tools/. numpy is the one runtime import those tools share
+# (tools/assets_pack.py masks the sound packs with it).
 dependencies = [
-    "pygame>=2.6",
-    "prismatoid>=0.16",
     "numpy>=1.26",
-    "certifi>=2024.7.4",
-    "cryptography>=45.0",
-    "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
-    # Optional Discord Rich Presence. Imported defensively: if it is ever
-    # absent, or Discord is closed, the game still starts, plays, and exits.
-    "pypresence>=4.3",
-    # Platform secret store for the online driver token: Windows Credential
-    # Manager, macOS Keychain, Secret Service on Linux. keyring pulls its own
-    # per-platform backends, so this one line covers all three builds.
-    # Imported defensively -- a machine with no working store falls back to a
-    # private file (see freight_fate.online_presence).
-    "keyring>=25.0",
 ]
-
-[project.scripts]
-freight-fate = "freight_fate.app:main"
-# Controller input diagnostic: logs the game's GameController events alongside
-# the raw joystick layer to a file, for tracking down pads (e.g. DualSense)
-# whose triggers/shoulders do not map through. Run: uv run controller-diagnostics
-controller-diagnostics = "freight_fate.controller_diagnostics:main"
 
 [project.urls]
 Repository = "https://github.com/Orinks/Freight-fate"
@@ -51,15 +33,13 @@ dev = [
     "pytest-cov>=6.0",
     "pytest-xdist>=3.6",
     "pytest-timeout>=2.3",
+    "pyyaml>=6.0",
     "ruff>=0.8",
     "soundfile>=0.14.0",
     "pre-commit>=4.6.0",
     "hypothesis>=6.155.7",
     "openrouteservice>=2.3.3",
     "osmium>=4.3.1",
-]
-build = [
-    "nuitka>=4.0.8",
 ]
 # Build-time route-enrichment tooling only (tools/enrich_routes.py --ors-smoke
 # and ORS-backed corridor generation). Never a runtime dependency, so the
@@ -68,22 +48,10 @@ tooling = [
     "osmium>=4.0.2",
     "openrouteservice>=2.2.0",
 ]
-# Controller input diagnostic (`uv run controller-diagnostics`). It reuses the
-# game's own input stack, so it needs only the core pygame dependency; listed
-# here so the group resolves standalone via `uv run --group controller-diagnostics`.
-controller-diagnostics = [
-    "pygame>=2.6",
-]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/freight_fate"]
-
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv]
+# Not an installable package: nothing here is imported from site-packages.
+package = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -101,10 +69,9 @@ pythonpath = ["tools"]
 # it. Keeping a second suite green against the reference implementation cost
 # more than it caught.
 #
-# -n auto still spreads the run across cores, capped in tests/conftest.py: a
-# worker loads pygame and the audio stack, so past about eight the run stops
-# getting faster and, on a 28-core machine, started dying with an
-# INTERNALERROR in the reporter instead of merely running slowly.
+# -n auto still spreads the run across cores, capped in tests/conftest.py:
+# past about eight the run stops getting faster and, on a 28-core machine,
+# started dying with an INTERNALERROR in the reporter.
 addopts = "-q -n auto --timeout=120 --timeout-method=thread"
 markers = [
     "property: property-based randomized tests",

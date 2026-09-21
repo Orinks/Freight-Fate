@@ -563,7 +563,7 @@ pub fn load_full_catalog(data_root: &Path) -> Result<Vec<RadioStation>, CatalogE
 
 /// Where the shipped data tree lives: the same root every other data
 /// loader uses (`FREIGHT_FATE_DATA_ROOT` override, `<exe dir>/freight_fate/data`
-/// in a frozen build, the repo's `src/freight_fate/data` from source).
+/// in a frozen build, the repo's `data/` from source).
 /// `FREIGHT_FATE_DATA_DIR` is the *saves* directory and must not be read
 /// here: tests that point it at a temp dir broke every radio test.
 pub fn default_data_root() -> PathBuf {

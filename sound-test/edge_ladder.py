@@ -37,7 +37,7 @@ from pulse_synth import SR  # noqa: E402
 
 SECONDS = 4.0
 TAIL_S = 0.5  # rendered past the loop, wrap-folded onto the start
-OUT = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+OUT = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 SPEED_MS = 62 * 0.44704
 

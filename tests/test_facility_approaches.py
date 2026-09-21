@@ -20,9 +20,7 @@ def _load_tool():
 
 
 def test_facility_approach_data_covers_full_facility_set(world):
-    data = json.loads(
-        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
-    )
+    data = json.loads(Path("data/facility_approaches.json").read_text(encoding="utf-8"))
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 4271
@@ -71,9 +69,7 @@ def test_facility_approach_data_covers_full_facility_set(world):
 
 
 def test_facility_approach_records_are_clean_and_honest(world):
-    data = json.loads(
-        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
-    )
+    data = json.loads(Path("data/facility_approaches.json").read_text(encoding="utf-8"))
 
     for facility_id, record in data["approaches"].items():
         try:
@@ -102,38 +98,6 @@ def test_facility_approach_records_are_clean_and_honest(world):
             assert record["fallback"]
             assert record["fallback_reason"]
             assert record["source_type"] == "facility_approach_fallback"
-
-
-def test_facility_route_prefers_turn_level_source_approach(world):
-    from freight_fate.data.world_services import _spoken_road_text
-    from freight_fate.sim.trip import Trip, TripEvent, TripEventKind
-    from freight_fate.sim.vehicle import TruckState
-    from freight_fate.sim.weather import WeatherSystem
-    from freight_fate.states.driving import _route_event_sound
-
-    data = json.loads(
-        Path("src/freight_fate/data/facility_approaches.json").read_text(encoding="utf-8")
-    )
-    facility_id, record = next(item for item in data["approaches"].items() if item[1]["turn_level"])
-    facility = world.facility_by_id(facility_id)
-    route = world.facility_approach_route(record["city"], facility.name)
-    approach = world.facility_source_approach(record["city"], facility.name)
-
-    assert approach is not None
-    assert approach.turn_level
-    assert route.miles == pytest.approx(approach.total_miles)
-    # The route speaks the first ref of a list ("(US 281;CR 13)" is heard as
-    # "(US 281)"), so compare what is spoken, not the baked label.
-    assert route.highways == [_spoken_road_text(segment.road) for segment in approach.segments]
-    trip = Trip(route, TruckState(), WeatherSystem())
-    start_cue = next(cue for cue in trip.navigation_cues if cue.key == "local:start")
-    assert start_cue.direction == "ahead"
-    assert (
-        _route_event_sound(
-            TripEvent(TripEventKind.GPS_CUE, start_cue.near_text, {"cue": start_cue})
-        )
-        == "events/turn_ahead"
-    )
 
 
 def test_facility_route_keeps_existing_fallback_when_no_source_geometry(world):
@@ -851,64 +815,3 @@ def test_merge_rebuilds_a_chain_whose_endpoint_the_resweep_replaced():
     assert merged["generated"]["merge"]["rebuilt_to_new_endpoint"] == 1
     assert merged["generated"]["merge"]["stale_chain_kept"] == 1
     assert tool.shared_turn_level(existing, merged) == (4, 4)
-
-
-def test_facility_approach_status_names_the_dock_not_the_town():
-    # Owner playtest 2026-07-19: 14 miles of "toward Camp Verde" while
-    # pulling out of Camp Verde for its own warehouse read as a wrong turn.
-    from freight_fate.data.world import Leg
-    from freight_fate.data.world_models import Route, StateMileage
-    from freight_fate.sim import Trip, TruckState, WeatherSystem
-
-    leg = Leg(
-        "camp_verde_az_us",
-        "camp_verde_az_us",
-        14.0,
-        "South Quarterhorse Lane",
-        "flat",
-        (),
-        state_miles=(StateMileage("Arizona", 14.0),),
-    )
-    route = Route(["camp_verde_az_us", "camp_verde_az_us"], [leg])
-    trip = Trip(
-        route,
-        TruckState(),
-        WeatherSystem("desert_southwest", seed=1),
-        seed=2,
-        destination_label="dry warehouse Camp Verde Dry Warehouse",
-    )
-    status = trip.progress_summary()
-    assert "toward dry warehouse Camp Verde Dry Warehouse" in status
-    assert "toward Camp Verde," not in status
-    assert "Destination dry warehouse Camp Verde Dry Warehouse ahead." in status
-
-
-def test_long_synthetic_approach_steps_down_45_25_15(world):
-    """Owner design 2026-07-24: a long local approach is an arterial before
-    it is an access road -- 45 wide out, 25 for the last two miles, 15 at
-    the gate. A blanket 25 for six-plus miles was a crawl no city posts."""
-    from freight_fate.sim.trip import Trip
-    from freight_fate.sim.vehicle import TruckState
-    from freight_fate.sim.weather import WeatherSystem
-
-    # Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
-    # regeocode; Kenosha Dry Warehouse gained an 0.81-mile turn-level chain in
-    # the 2026-09-16 departure-route sweep. Payson went with the 2026-09-20
-    # stand-in cut, so this is Port Saint Lucie now: no source-backed
-    # endpoint, so no sweep can route it (the Rust test made the same choice).
-    route = world.facility_approach_route(
-        "port_saint_lucie_fl_us", "Port Saint Lucie Grocery Distribution Center"
-    )
-    assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
-    truck = TruckState()
-    truck.transmission.automatic = True
-    truck.start_engine()
-    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
-
-    reasons = [(z.reason, z.limit_mph) for z in trip.zones]
-    assert ("facility approach", 45.0) in reasons
-    assert ("facility access road", 25.0) in reasons
-    assert ("facility gate", 15.0) in reasons
-    arterial = next(z for z in trip.zones if z.reason == "facility approach")
-    access = next(z for z in trip.zones if z.reason == "facility access road")
-    assert arterial.end_mi == access.start_mi  # steps down, never overlaps up

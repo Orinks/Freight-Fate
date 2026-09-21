@@ -322,11 +322,13 @@ fn macos_app_bundle(exe_dir: &Path) -> Option<PathBuf> {
     }
 }
 
-/// Walk up from `start` looking for the project root (`src/freight_fate`).
+/// Walk up from `start` looking for the project root: the workspace
+/// `Cargo.toml` with `crates/ff-core` beside it. A crate's own `Cargo.toml`
+/// does not qualify, so the walk from `crates/ff-core` goes past it.
 fn find_project_root(start: &Path) -> Option<PathBuf> {
     let mut cursor = Some(start);
     while let Some(dir) = cursor {
-        if dir.join("src").join("freight_fate").is_dir() {
+        if dir.join("Cargo.toml").is_file() && dir.join("crates").join("ff-core").is_dir() {
             return Some(dir.to_path_buf());
         }
         cursor = dir.parent();
@@ -344,8 +346,7 @@ pub fn game_root() -> PathBuf {
         }
         return exe_dir;
     }
-    // Running from source: this crate sits at `crates/ff-core` in the repo,
-    // as `settings.py` sat at `src/freight_fate/settings.py`.
+    // Running from source: this crate sits at `crates/ff-core` in the repo.
     if let Some(root) = find_project_root(Path::new(env!("CARGO_MANIFEST_DIR"))) {
         return root;
     }
@@ -424,11 +425,12 @@ mod tests {
     #[test]
     fn the_source_checkout_keeps_saves_beside_the_project() {
         let root = game_root();
-        assert!(
-            root.join("src").join("freight_fate").is_dir(),
-            "{}",
-            root.display()
-        );
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(Path::parent)
+            .expect("ff-core sits two levels under the repo root");
+        assert_eq!(root, repo);
+        assert!(root.join("Cargo.toml").is_file(), "{}", root.display());
         if !cfg!(target_os = "macos") {
             assert_eq!(save_root(), root.join("saves"));
         }

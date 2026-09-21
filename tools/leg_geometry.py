@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import straw_curve_sample as scs  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
+GEOM_DIR = ROOT / "data" / "world_data" / "us" / "geometry"
 
 FT_PER_M = 0.3048
 

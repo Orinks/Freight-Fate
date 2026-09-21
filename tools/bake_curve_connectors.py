@@ -149,7 +149,7 @@ import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-GAMEPLAY = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay"
+GAMEPLAY = ROOT / "data" / "world_data" / "us" / "gameplay"
 CURVES = GAMEPLAY / "curves.jsonl"
 FACTS = GAMEPLAY / "curve_osm.jsonl"
 

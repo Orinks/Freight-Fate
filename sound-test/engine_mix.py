@@ -58,7 +58,7 @@ from engine_v1 import engine
 from pulse_synth import SR, write_wav
 
 pulse_synth.OUT = Path(r"C:\temp\fftest")
-ASSETS = Path(__file__).resolve().parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+ASSETS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 
 def read_mono(rel: str, seconds: float) -> np.ndarray:

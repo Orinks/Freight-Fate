@@ -35,9 +35,7 @@ import numpy as np
 import soundfile as sf
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LICENSED_ENGINE = os.path.join(
-    REPO, "src", "freight_fate", "assets", "sounds-licensed", "engine"
-)
+LICENSED_ENGINE = os.path.join(REPO, "assets", "sounds-licensed", "engine")
 AB_DIR = r"C:\temp\ffsound"
 
 # (file, native rpm) -- must match audio.ENGINE_BANDS. Idle excluded: real.
@@ -134,9 +132,7 @@ def extend(path: str, native_rpm: float, band_index: int) -> None:
     env = noise_spec_mag.copy()
     kernel = 9
     padded = np.pad(env, kernel // 2, mode="edge")
-    env = np.array(
-        [np.median(padded[i : i + kernel]) for i in range(len(env))]
-    )
+    env = np.array([np.median(padded[i : i + kernel]) for i in range(len(env))])
     src_freqs = np.fft.rfftfreq(n, 1.0 / sr)
     out_freqs = np.fft.rfftfreq(out_len, 1.0 / sr)
     env_out = np.interp(out_freqs, src_freqs, env)
@@ -168,8 +164,8 @@ def extend(path: str, native_rpm: float, band_index: int) -> None:
     )
     n_partials = sum(1 for _ in groups)  # octave groups actually used
     print(
-        f"{name:12s} rev {rev_hz:5.2f} Hz  {n/sr:5.2f}s -> {out_len/sr:5.2f}s "
-        f"({revs} revs)  harm/total {harmonic_energy/orig_power:4.2f}  "
+        f"{name:12s} rev {rev_hz:5.2f} Hz  {n / sr:5.2f}s -> {out_len / sr:5.2f}s "
+        f"({revs} revs)  harm/total {harmonic_energy / orig_power:4.2f}  "
         f"octave groups {n_partials}"
     )
 
