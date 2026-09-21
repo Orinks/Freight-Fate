@@ -38,6 +38,7 @@ mod bass_engine;
 mod bass_radio;
 pub mod classic_music;
 mod engine;
+pub mod hand_made;
 mod null;
 mod sustain;
 
@@ -676,6 +677,10 @@ pub trait Audio {
     }
     /// Whether the music channel is still producing sound.
     fn music_playing(&self) -> bool;
+    /// How long the playing music track runs, when the stream can tell.
+    fn music_length_s(&self) -> Option<f64> {
+        None
+    }
     /// The song the playing radio stream reports, or None when it reports
     /// nothing (or nothing is streaming).
     fn radio_now_playing(&self) -> Option<String>;

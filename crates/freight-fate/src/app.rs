@@ -39,6 +39,7 @@ pub mod held_keys;
 pub mod logging;
 pub mod sdl_shell;
 pub mod speech_delivery;
+pub mod synth_music;
 pub mod testing;
 
 pub use context::{
@@ -955,6 +956,8 @@ impl App {
         boot_timing::mark("quit: duty watch");
         self.ctx.services.cloud.shutdown(); // flushes the final save's backup, bounded
         boot_timing::mark("quit: cloud backup");
+        self.ctx.synth_worker.shutdown(Duration::from_millis(2500));
+        boot_timing::mark("quit: synthesized music");
         profile_module::set_save_listener(None);
         self.ctx.controller.shutdown();
         boot_timing::mark("quit: controller");

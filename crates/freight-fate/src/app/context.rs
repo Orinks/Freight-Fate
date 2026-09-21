@@ -30,7 +30,7 @@ use ff_core::data::world::World;
 use ff_core::message_log::{MessageCategory, MessageLog};
 use ff_core::models::economy::Economy;
 use ff_core::models::profile::Profile;
-use ff_core::music::music_track_duration_s;
+use ff_core::music_synth::SynthWorker;
 use ff_core::playtest_levers::LeverContext;
 use ff_core::settings::Settings;
 use ff_core::sim::real_fuel_price::FuelPriceProvider;
@@ -195,11 +195,19 @@ pub struct GameContext {
     pub(crate) handed_back: VecDeque<String>,
 
     // -- music rotation ----------------------------------------------------------------
-    music_pool_positions: HashMap<(String, Vec<String>), usize>,
-    music_pool_last: HashMap<String, String>,
-    music_rotation_pool: Option<(String, Vec<String>)>,
+    pub(crate) music_pool_positions: HashMap<(String, Vec<String>), usize>,
+    pub(crate) music_pool_last: HashMap<String, String>,
+    /// The CALLER's pool and sequence, so leaving Synthesized mode finds the
+    /// soundtrack again (see `app::synth_music`).
+    pub(crate) music_rotation_pool: Option<(String, Vec<String>)>,
+    /// Whether the rotation was started in Synthesized mode; a flip since
+    /// then restarts it instead of refreshing it.
+    music_rotation_synth: bool,
     music_rotation_track: Option<String>,
     music_rotation_elapsed_s: f64,
+    music_rotation_duration_s: f64,
+    /// Renders synthesized pieces off the loop; shut down in `App::shutdown`.
+    pub synth_worker: SynthWorker,
 
     // -- live-data providers, lazy and session-long -----------------------------------
     real_weather: Option<Arc<RealWeatherProvider>>,
@@ -269,8 +277,11 @@ impl GameContext {
             music_pool_positions: HashMap::new(),
             music_pool_last: HashMap::new(),
             music_rotation_pool: None,
+            music_rotation_synth: false,
             music_rotation_track: None,
             music_rotation_elapsed_s: 0.0,
+            music_rotation_duration_s: 0.0,
+            synth_worker: SynthWorker::start(),
             real_weather: None,
             real_traffic: None,
             weather_alerts: None,
@@ -617,11 +628,6 @@ impl GameContext {
         }
     }
 
-    /// Restart whatever music is playing so a music setting is heard at once.
-    pub fn restart_music(&mut self) {
-        self.apply_active_radio_settings();
-    }
-
     /// Whether a drive under the menus has its radio on (the main menu's
     /// `_driving_radio_active`).
     pub fn driving_radio_active(&self) -> bool {
@@ -849,7 +855,8 @@ impl GameContext {
         fade_ms: u32,
         advance: bool,
     ) -> String {
-        if !advance {
+        let synth = self.settings.synth_music;
+        if !advance && self.music_rotation_synth == synth {
             if let (Some((pool, _)), Some(track)) =
                 (&self.music_rotation_pool, &self.music_rotation_track)
             {
@@ -863,18 +870,30 @@ impl GameContext {
                 }
             }
         }
-        let track = self.next_music_track(pool_name, sequence);
-        if track.is_empty() {
+        let effective = self.effective_sequence(pool_name, sequence);
+        let effective_refs: Vec<&str> = effective.iter().map(String::as_str).collect();
+        let picked = self.next_music_track(pool_name, &effective_refs);
+        if picked.is_empty() {
             self.clear_music_rotation();
-            return track;
+            return picked;
+        }
+        let track = self.resolve_synth(&picked);
+        // Queue the piece after this one so it is ready when this ends.
+        if let Some(pos) = effective.iter().position(|k| *k == picked) {
+            if let Some(next) = effective.get((pos + 1) % effective.len()) {
+                self.request_synth(next);
+            }
         }
         self.music_rotation_pool = Some((
             pool_name.to_string(),
             sequence.iter().map(|s| s.to_string()).collect(),
         ));
+        self.music_rotation_synth = synth;
         self.music_rotation_track = Some(track.clone());
         self.music_rotation_elapsed_s = 0.0;
         self.audio.play_music_with(&track, fade_ms);
+        // Once per track: a synth length is a full composition, too dear per frame.
+        self.music_rotation_duration_s = self.track_duration_s(&track);
         track
     }
 
@@ -883,7 +902,7 @@ impl GameContext {
         // Every state's per-frame update lands here, which makes it the one
         // place the live diesel price is sure to be kept current.
         self.sync_fuel_prices();
-        let (Some(_), Some(track)) = (&self.music_rotation_pool, &self.music_rotation_track) else {
+        let (Some(_), Some(_)) = (&self.music_rotation_pool, &self.music_rotation_track) else {
             // No menu bed is rotating. A drive sitting under this menu
             // (pause, settings, a traffic stop...) keeps its own playlist
             // turning over, so the music does not fall silent when the
@@ -892,7 +911,7 @@ impl GameContext {
             return;
         };
         self.music_rotation_elapsed_s += dt.max(0.0);
-        if self.music_rotation_elapsed_s < music_track_duration_s(track) {
+        if self.music_rotation_elapsed_s < self.music_rotation_duration_s {
             return;
         }
         let (pool_name, sequence) = self.music_rotation_pool.clone().expect("checked above");

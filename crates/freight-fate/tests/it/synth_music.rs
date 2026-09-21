@@ -84,3 +84,44 @@ fn the_menu_theme_is_registered_by_app_startup_alone() {
     assert_eq!(ext, "ogg");
     assert_eq!(&bytes[..4], b"OggS");
 }
+
+#[test]
+fn synthesized_menus_open_on_headlights_west_and_hold_no_pack_music() {
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    let original = ff_core::music::select_menu_music_sequence(None);
+    let refs: Vec<&str> = original.iter().map(String::as_str).collect();
+    let track = app.ctx.play_music_sequence("menu", &refs);
+    assert_eq!(track, ff_core::music_synth::CLASSIC_MENU);
+}
+
+#[test]
+fn an_unready_piece_falls_back_to_its_classic_and_is_requested() {
+    use ff_core::music_synth::{StyleId, SynthKey, SynthWorker, CLASSIC_MENU};
+    let mut app = TestApp::new();
+    let key = SynthKey {
+        style: StyleId::Regional,
+        music_seed: 5,
+        index: 0,
+    }
+    .key();
+    assert_eq!(app.ctx.resolve_synth(&key), CLASSIC_MENU);
+    // The worker was asked: within a bounded wait the piece is published.
+    let t = std::time::Instant::now();
+    while !SynthWorker::is_ready(&key) && t.elapsed().as_secs() < 60 {
+        std::thread::sleep(std::time::Duration::from_millis(20));
+    }
+    assert_eq!(app.ctx.resolve_synth(&key), key);
+}
+
+#[test]
+fn switching_back_to_original_restores_the_soundtrack() {
+    let mut app = TestApp::new();
+    let original = ff_core::music::select_menu_music_sequence(None);
+    let refs: Vec<&str> = original.iter().map(String::as_str).collect();
+    app.ctx.settings.synth_music = true;
+    app.ctx.play_music_sequence("menu", &refs);
+    app.ctx.settings.synth_music = false;
+    app.ctx.restart_music();
+    assert_eq!(app.ctx.music_rotation_track(), Some(original[0].as_str()));
+}
