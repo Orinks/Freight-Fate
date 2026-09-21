@@ -151,6 +151,32 @@ fn the_synthesized_roadhouse_plays_synth_music_and_no_host_breaks() {
     }
 }
 
+/// The Roadhouse's rotation start already resolves and plays the track it
+/// lands on; it must also queue the one after that so a track change never
+/// lands on an unrendered piece and falls back to the same classic twice in
+/// a row.
+#[test]
+fn starting_the_roadhouse_rotation_queues_the_next_synthesized_piece() {
+    use ff_core::music_synth::{SynthKey, SynthWorker};
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    let mut d = a_drive(&mut app);
+    let station = d.radio.current_station();
+    d.radio_airtime_s = 0.0; // a cold start: track index 0, so `next` is fixed.
+    d.start_station_rotation(&mut app.ctx, &station, 0);
+    let len = d.radio_playlist.len();
+    let next = d.radio_playlist[(d.radio_track_index + 1) % len].clone();
+    assert!(
+        SynthKey::parse(&next).is_some(),
+        "expected a synth key after the opening track, got {next}"
+    );
+    let t = std::time::Instant::now();
+    while !SynthWorker::is_ready(&next) && t.elapsed().as_secs() < 60 {
+        std::thread::sleep(std::time::Duration::from_millis(20));
+    }
+    assert!(SynthWorker::is_ready(&next), "{next} never rendered");
+}
+
 #[test]
 fn now_playing_names_a_synthesized_piece() {
     let mut app = TestApp::new();

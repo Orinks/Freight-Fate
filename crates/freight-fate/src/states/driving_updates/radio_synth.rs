@@ -39,18 +39,23 @@ impl DrivingState {
 
     /// The playlist entry at `index`, resolved in place: an unrendered piece
     /// becomes its place's classic, so the length check reads what is really
-    /// playing. The entry after it is queued for rendering. Anything that is
-    /// not a synthesized key passes through untouched.
+    /// playing. The entry after it is queued for rendering -- asked for
+    /// before this one, since this one already has a classic to fall back on
+    /// and the worker's queue is small enough that the wrong order can starve
+    /// the piece the next track change actually needs. Anything that is not
+    /// a synthesized key passes through untouched. Shared by both
+    /// `start_station_rotation` (tuning in) and `play_station_track` (a
+    /// track change), so a rotation always keeps one piece ahead of itself.
     pub(crate) fn resolve_station_track(&mut self, ctx: &mut GameContext, index: usize) -> String {
         let len = self.radio_playlist.len();
         let Some(entry) = self.radio_playlist.get(index % len.max(1)).cloned() else {
             return String::new();
         };
+        if let Some(next) = self.radio_playlist.get((index + 1) % len).cloned() {
+            ctx.request_synth(&next);
+        }
         let key = ctx.resolve_synth(&entry);
         self.radio_playlist[index % len] = key.clone();
-        if let Some(next) = self.radio_playlist.get((index + 1) % len) {
-            ctx.request_synth(next);
-        }
         key
     }
 
