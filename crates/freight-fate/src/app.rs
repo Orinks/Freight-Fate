@@ -796,6 +796,21 @@ impl App {
         for line in self.ctx.services.cloud.take_announcements() {
             self.ctx.say_with(line, Say::queued());
         }
+        // A reviewed career the server accepted: clear its mark silently so
+        // the next backup goes up unmarked. A career that is not loaded
+        // clears the next time it is accepted.
+        for name in self.ctx.services.cloud.take_absolved() {
+            if let Some(profile) = self
+                .ctx
+                .profile
+                .as_mut()
+                .filter(|p| crate::cloud_saves::save_slot_name(&p.name) == name)
+            {
+                profile.integrity_modified = false;
+                profile.integrity_notice_pending = false;
+                self.ctx.save_profile();
+            }
+        }
         // Another driver setting off or signing off, when the player asked
         // to hear it: same channel, same reason.
         for line in self.ctx.services.duty.take_announcements() {

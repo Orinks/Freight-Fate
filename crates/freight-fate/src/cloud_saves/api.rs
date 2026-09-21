@@ -88,6 +88,9 @@ pub fn upload_save(
         "content": base64::engine::general_purpose::STANDARD.encode(&content),
         "summary": summary,
         "meaningfulPlay": meaningful_play,
+        // Tells the server this build understands a career held for review,
+        // so it answers `held_for_review` instead of a legacy reason.
+        "reviewAware": true,
     });
     let reply = match transport.call(&saves_url(), Some(&payload), &identity.auth_headers(), None) {
         Ok(reply) => reply,
@@ -122,6 +125,10 @@ pub fn upload_save(
             out.insert("contentHash".to_string(), Value::from(content_hash));
             if let Some(name) = reply.get("evictedSaveName").and_then(Value::as_str) {
                 out.insert("evictedSaveName".to_string(), Value::from(name));
+            }
+            // The owner accepted a held career: the caller clears its mark.
+            if reply.get("clearIntegrityFlag") == Some(&Value::Bool(true)) {
+                out.insert("clearIntegrityFlag".to_string(), Value::Bool(true));
             }
             return out;
         }

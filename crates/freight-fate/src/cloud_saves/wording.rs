@@ -62,6 +62,11 @@ pub const REJECTED_UPLOAD_REASONS: &[&str] = &[
     // forever while the player was told nothing at all.
     "too_many_slots",
     "signing_unavailable",
+    // A career carrying the "changed outside the game" mark waits for the
+    // owner to review it; a retry cannot change that answer, so the queue
+    // must stop instead of retrying every two minutes forever.
+    "held_for_review",
+    "review_declined",
 ];
 
 /// Sort an `upload_save` failure `reason` into the family its
@@ -128,6 +133,20 @@ pub const SERVER_FAULT_REJECTION_REASONS: &[&str] = &["signing_unavailable"];
 /// the same story for the same reason code.
 pub fn rejection_status(name: &str, reason: Option<&str>) -> String {
     let reason = reason.unwrap_or("");
+    if reason == "held_for_review" {
+        return format!(
+            "{name}: backup waiting for review. This career was changed outside \
+the game or copied from another computer, so it is checked by hand before it \
+backs up. Your local career is safe."
+        );
+    }
+    if reason == "review_declined" {
+        return format!(
+            "{name}: backup declined after review. Your local career is safe. \
+Restoring your last cloud backup of it from the Online menu starts it backing \
+up again."
+        );
+    }
     if ARITHMETIC_REJECTION_REASONS.contains(&reason) {
         return format!(
             "{name}: backup not accepted. The numbers in this save do not \
