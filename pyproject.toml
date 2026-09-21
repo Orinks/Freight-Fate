@@ -19,13 +19,9 @@ classifiers = [
 ]
 # The game is Rust (crates/); this project is the Python build, bake and data
 # tooling under tools/. numpy is the one runtime import those tools share
-# (tools/assets_pack.py masks the sound packs with it). sound_lib is never
-# imported: tools/fetch_bass.py copies the Windows BASS add-ons (AAC, FLAC,
-# Opus, HLS) out of its wheel, because un4seen publishes them on a page
-# rather than at a download URL.
+# (tools/assets_pack.py masks the sound packs with it).
 dependencies = [
     "numpy>=1.26",
-    "sound_lib @ git+https://github.com/samtupy/sound_lib_macos_fixes.git",
 ]
 
 [project.urls]

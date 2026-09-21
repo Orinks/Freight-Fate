@@ -24,9 +24,9 @@ The pins name the builds the game has actually been played against: the ones
 `sound_lib` ships and the Python release has always bundled. Checked against
 un4seen on 2026-08-23, `bass.dll` and `basshls.dll` are byte-identical to the
 current downloads; `bassflac.dll` and `bassopus.dll` are not, because upstream
-has moved on, and the AAC add-on no longer sits at a guessable URL. So the
-fetch prefers the local `sound_lib` copy and reaches the network only where
-the pin still matches. Re-pinning is a deliberate job, not a bump: fetch,
+has moved on, and the AAC add-on no longer sits at a guessable URL. So those
+three are fetched as plain files from `sound_lib`'s own repository at a pinned
+commit, and the other two from un4seen. Re-pinning is a deliberate job, not a bump: fetch,
 listen to the engine ring and a live radio stream, then update the hashes.
 
 What the fetch provides, and where each pinned build came from:
