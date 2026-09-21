@@ -1782,7 +1782,7 @@ your orinks.net account, cloud backup, and every sharing choice in one place:
 | Automatic cloud retention | Your account keeps up to ten cloud careers. When a new active career replaces the least recently played cloud career, Freight Fate names the removed cloud backup and confirms that its local career was not deleted. |
 | Share notable deliveries to Mastodon | When on, finishing a delivery that earns an achievement, a level, or a perfect streak posts a short public summary to your own Mastodon account with the FreightFateRuns hashtag. That tag is only used by these automatic posts; the FreightFate tag is where players talk about the game, so you can mute one without losing the other. Routine deliveries are never posted. Off until you link a Mastodon account. |
 | Link a Mastodon account | Opens a page on orinks.net where you authorize your own Mastodon server, using the same orinks.net sign-in as driver setup. Unlinking happens on the same page. |
-| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
+| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. If you pause or leave the game sitting for half an hour, the presence comes down until you play again, so it never claims you are mid-run when you have stepped away. On by default; no effect if Discord is closed. Works without a driver profile. |
 
 ### Problem reports
 

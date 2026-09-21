@@ -3786,7 +3786,7 @@ class DrivingUpdateMixin:
         if self._ramp_mi is not None:
             return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
-            return  # recovery state: guide the player back to the missed exit
+            return  # unrecoverable miss: still at the gate, don't stack 15-mph strikes
         if self._pull_over is not None:
             return  # already stopped; the dash has nothing to add
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)

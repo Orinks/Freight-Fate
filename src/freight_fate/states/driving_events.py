@@ -1943,7 +1943,7 @@ class DrivingEventMixin:
             return None
         details = self._destination_exit_details()
         if details is None:
-            at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
+            at_mi = self._synthetic_destination_exit_mi()
             exit_label = ""
             exit_phrase = ""
         else:
@@ -2128,6 +2128,15 @@ class DrivingEventMixin:
         if self._exit_signal_on:
             return True
         return stop.type == "delivery_destination" and self.ctx.settings.lane_is_automated()
+
+    def _synthetic_destination_exit_mi(self) -> float:
+        """End-of-route approach used when the last miles have no labeled exit.
+
+        Rural and US-highway finishes bake no interchange inside the scan
+        window. Announcement already falls back to one mile before the end;
+        missed-exit recovery must rewind onto that same approach.
+        """
+        return max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
 
     def _city_state(self, city: str) -> str:
         """The spoken state name for a city key, or "" when the world is silent.
@@ -5303,30 +5312,50 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         self._exit_signal_canceled = False
         self._cancel_cruise()
-        if exit_details is not None:
-            exit_at = exit_details[0]
-        else:
-            # Rural approaches carry no baked interchange, so the details
-            # scan finds nothing -- but the exit the player just missed was
-            # the synthetic one _destination_exit_stop places a mile before
-            # route end, and the loop-back must return to it. Without this
-            # the second miss stranded the trip at 0 miles remaining with
-            # no exit left to signal for (owner playtest, Sedona to Camp
-            # Verde on AZ-260, 2026-07-18).
-            exit_at = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
-        # Every miss loops back. The say-once latch must never swallow
-        # this reposition: when it did, the second miss stranded the trip
-        # pinned at the end of the route with no exit left to signal for,
-        # cruise dying every frame (playtest transcript, 2026-07-16).
-        self._missed_destination_exit_said = True
+        # Labeled interchange when the scan found one; otherwise the same
+        # synthetic end-of-route approach the announcement already uses.
+        # Rural and US-highway finishes bake no interchange inside the scan
+        # window (Hattiesburg on US-49 / US-98, and the owner playtest from
+        # Sedona to Camp Verde on AZ-260, 2026-07-18), and speaking a dispatch
+        # reroute the trip never performs left those runs stuck past the yard.
+        exit_at = (
+            exit_details[0]
+            if exit_details is not None
+            else self._synthetic_destination_exit_mi()
+        )
+        # Drop back a full exit window, not a fixed mile: under time
+        # compression one mile passes in a few real seconds, making the
+        # re-approach unwinnable before it was heard.
+        recover_pos = max(0.0, exit_at - self._exit_window_mi())
+        if recover_pos >= exit_at - 0.05:
+            # The rewind cannot move the truck, so there is no turnaround to
+            # promise. Say it once and stay honest rather than repeating a
+            # reroute line the trip never performs.
+            if self._missed_destination_exit_said:
+                return
+            self._missed_destination_exit_said = True
+            self.ctx.audio.play("ui/warning")
+            self._set_status(
+                "Destination exit missed. No safe turnaround on this approach."
+            )
+            self.ctx.say_event(
+                f"You missed the destination exit for {self._destination_facility_text()}. "
+                "Dispatch cannot find a safe turnaround on this approach.",
+                interrupt=True,
+                category=SpeechCategory.NAVIGATION,
+            )
+            return
+        # Every miss loops back, and the say-once latch must never swallow the
+        # reposition: when it did, the second miss stranded the trip pinned at
+        # the end of the route with no exit left to signal for, cruise dying
+        # every frame (playtest transcript, 2026-07-16). The latch belongs to
+        # the unrecoverable dead-end above; leaving it false here is what lets
+        # posted-limit strikes resume once the truck is back on the approach.
         self.trip.game_minutes += EXIT_MISS_LOOP_MIN
         # The loop-back is a real drive: hours, fatigue, and idle fuel move
         # with the clock, exactly as the facility-gate miss charges them.
         self._charge_scripted_loop(EXIT_MISS_LOOP_MIN)
-        # Drop back a full exit window, not a fixed mile: under time
-        # compression one mile passes in a few real seconds, making the
-        # re-approach unwinnable before it was heard.
-        self.trip.position_mi = max(0.0, exit_at - self._exit_window_mi())
+        self.trip.position_mi = recover_pos
         self._destination_exit_announced_key = None
         self._destination_exit_response_s = 0.0
         self._destination_exit_cache = None
