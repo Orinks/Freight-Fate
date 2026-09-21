@@ -71,6 +71,8 @@
 
 ### Fixed
 
+- **A deleted career no longer asks which copy to keep.** The Online menu named a career you no longer have, and nothing could clear it.
+
 - **Grain elevators, quarries, lumber yards and materials yards now start with street directions.** Those four kinds of stop never had them.
 
 - **Rail ramps, air cargo docks, food terminals and industrial parks start with street directions too.**

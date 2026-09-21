@@ -52,6 +52,7 @@ use crate::online_journal::py_json_dumps;
 use crate::online_presence::{
     default_transport, join_with_timeout, py_str, truthy, OnlineIdentity,
 };
+use ff_core::models::profile::{Profile, LEGACY_SAVE_SUFFIX, SAVE_SUFFIX};
 use ff_core::sim::real_traffic::{wall_clock, Clock};
 
 // A save burst (delivery, achievement, rest) writes the file several times in
@@ -419,6 +420,7 @@ impl CloudSaves {
             return;
         }
         self.inner.started.store(true, Ordering::SeqCst);
+        self.inner.forget_conflicts_with_no_local_save();
         self.inner.log_sync_state();
         self.inner.stop.clear();
         if self.inner.threaded {
@@ -666,6 +668,46 @@ impl CloudSaves {
 impl Inner {
     fn enabled(&self) -> bool {
         self.enabled.load(Ordering::SeqCst)
+    }
+
+    /// Drop conflicts for careers this computer no longer has.
+    ///
+    /// A conflict is a choice between this machine's save and the cloud's.
+    /// With no local save there is no "keep mine" to offer, so the record
+    /// cannot be resolved by anything the player does -- and the two heals
+    /// in [`Inner::upload_slot`] never reach it, because both run on the way
+    /// to an upload and a career with no save on disk never queues one. The
+    /// Online hub went on saying "<career> is waiting for you to choose
+    /// which copy to keep" for a career that was gone from the cloud AND
+    /// from the computer, with no way to clear it (Shane, 2026-09-20).
+    ///
+    /// Forgetting rather than hiding matters: a stale row left in
+    /// `cloud_saves.json` would attach itself to the next career started
+    /// under the same name, and block ITS backups against a revision that
+    /// was never its own.
+    fn forget_conflicts_with_no_local_save(&self) {
+        // Strip the known suffixes rather than taking file_stem(): a career
+        // named "Run 1.9" would otherwise read back as "Run 1" and its live
+        // conflict would be forgotten as stale.
+        let on_disk: std::collections::BTreeSet<String> = Profile::list_saves()
+            .iter()
+            .filter_map(|path| path.file_name().map(|n| n.to_string_lossy().to_string()))
+            .filter_map(|name| {
+                name.strip_suffix(SAVE_SUFFIX)
+                    .or_else(|| name.strip_suffix(LEGACY_SAVE_SUFFIX))
+                    .map(str::to_string)
+            })
+            .collect();
+        for (name, entry) in self.sync_state.slots() {
+            if slot_conflict(&entry).is_none() || on_disk.contains(&name) {
+                continue;
+            }
+            log::info!(
+                "Cloud sync state for {name}: a conflict was waiting for a career this \
+computer no longer has; forgetting it so the slot starts clean"
+            );
+            self.sync_state.forget(&name);
+        }
     }
 
     /// One line per known slot at startup: the kept session logs only go

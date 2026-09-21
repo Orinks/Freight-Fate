@@ -240,8 +240,14 @@ fn test_status_says_off_while_backups_are_disabled() {
         service.status(),
         "Cloud backup is off. Saves on this computer are not backed up."
     );
+    // Turning it on starts the service, and startup now reads the save
+    // directory to drop conflicts for careers this computer no longer has,
+    // so the thread needs a directory of its own.
+    let saves = tempfile::tempdir().unwrap();
+    let previous = ff_core::settings::set_thread_data_dir(Some(saves.path().to_path_buf()));
     service.set_enabled(true);
     assert_eq!(service.status(), "Cloud backup is ready.");
+    ff_core::settings::set_thread_data_dir(previous);
 }
 
 // -- upload scheduling ------------------------------------------------------------
@@ -2929,4 +2935,63 @@ fn test_url_quote_matches_urllib() {
     assert_eq!(url_quote("Road Star"), "Road%20Star");
     assert_eq!(url_quote("a/b-c_d.e~f"), "a/b-c_d.e~f");
     assert_eq!(url_quote("café"), "caf%C3%A9");
+}
+
+// -- a conflict for a career this computer no longer has --------------------------
+
+/// Shane, 2026-09-20: the Online hub said "testing the limit is waiting for
+/// you to choose which copy to keep" for a career that was in neither the
+/// cloud nor on his computer, and nothing he could do cleared it.
+///
+/// Both existing heals live in `upload_slot`, on the way to an upload. A
+/// career with no save on disk never queues one, so neither heal could ever
+/// run and the row was permanent.
+#[test]
+fn test_a_conflict_for_a_deleted_career_is_forgotten_at_startup() {
+    let app = TestApp::new();
+    let _ = &app; // the save directory is pinned for this thread by TestApp
+    let transport = Arc::new(FakeTransport::new());
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+    service
+        .sync_state()
+        .record_conflict("testing the limit", &conflict_map(Some(40)));
+    assert!(service.conflicts().contains_key("testing the limit"));
+
+    service.start();
+
+    assert!(
+        service.conflicts().is_empty(),
+        "a conflict with no local career to keep must not survive startup"
+    );
+    // Forgotten, not merely hidden: a row left behind would attach itself to
+    // the next career started under the same name.
+    assert!(service.sync_state().slot("testing the limit").is_empty());
+    service.shutdown();
+}
+
+#[test]
+fn test_a_conflict_for_a_career_still_on_disk_survives_startup() {
+    let app = TestApp::new();
+    let _ = &app;
+    let mut profile = Profile::new();
+    profile.name = "Road Star".to_string();
+    profile
+        .save()
+        .expect("the career saves to the pinned directory");
+
+    let transport = Arc::new(FakeTransport::new());
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+    service
+        .sync_state()
+        .record_conflict("Road Star", &conflict_map(Some(40)));
+
+    service.start();
+
+    assert!(
+        service.conflicts().contains_key("Road Star"),
+        "the player still has this career; the choice is real and must stay"
+    );
+    service.shutdown();
 }
