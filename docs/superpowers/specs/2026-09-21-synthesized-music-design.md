@@ -128,7 +128,7 @@ No audio device, no threads; testable with `cargo test -p ff-core`.
   per piece.
 - Piece seed = hash(style id, music seed, track index).
 
-### `freight-fate::audio::synth_music` (worker)
+### `ff-core::music_synth::worker` (worker)
 
 - One worker thread, a bounded request channel (capacity 2), results back on
   a channel the loop polls. The loop never waits on a render.
