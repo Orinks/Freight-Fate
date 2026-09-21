@@ -380,6 +380,11 @@ impl App {
     }
 
     fn build(shell: Option<SdlShell>, speech: Box<dyn SpeechSink>, audio: Box<dyn Audio>) -> App {
+        // The restored 1.5 classics: compiled in, so they must exist before
+        // the title screen's first menu theme, not just before a drive.
+        // Idempotent and cheap (an in-memory registration, no I/O), so
+        // calling it here as well as at driving startup costs nothing.
+        crate::audio::classic_music::register();
         let settings = Settings::load();
         boot_timing::mark("settings");
         let message_log = MessageLog::new();
