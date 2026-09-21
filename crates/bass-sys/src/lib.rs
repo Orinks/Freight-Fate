@@ -237,6 +237,9 @@ pub const BASS_MUSIC_PRESCAN: DWORD = BASS_STREAM_PRESCAN;
 pub const BASS_MUSIC_RAMPS: DWORD = 0x400;
 /// Sinc-interpolated sample mixing.
 pub const BASS_MUSIC_SINCINTER: DWORD = 0x80_0000;
+/// Stop the music on a backward jump effect (`Bxx` to an earlier order), so
+/// a module written to loop forever ends after one pass.
+pub const BASS_MUSIC_STOPBACK: DWORD = 0x8_0000;
 
 /// Slide attribute logarithmically (`BASS_ChannelSlideAttribute` flag).
 pub const BASS_SLIDE_LOG: DWORD = 0x100_0000;
@@ -597,5 +600,6 @@ mod tests {
         assert_eq!(BASS_MUSIC_PRESCAN, 0x20000);
         assert_eq!(BASS_MUSIC_RAMPS, 0x400);
         assert_eq!(BASS_MUSIC_SINCINTER, 0x80_0000);
+        assert_eq!(BASS_MUSIC_STOPBACK, 0x8_0000);
     }
 }

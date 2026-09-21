@@ -25,7 +25,8 @@ use bass_sys::{
     BASS_ACTIVE_PLAYING, BASS_ATTRIB_FREQ, BASS_ATTRIB_PAN, BASS_ATTRIB_VOL,
     BASS_CONFIG_DEV_DEFAULT, BASS_CONFIG_NET_BUFFER, BASS_CONFIG_NET_PREBUF,
     BASS_CONFIG_NET_READTIMEOUT, BASS_CONFIG_NET_TIMEOUT, BASS_DEFAULT_DEVICE, BASS_ERROR_ALREADY,
-    BASS_MUSIC_PRESCAN, BASS_MUSIC_RAMPS, BASS_MUSIC_SINCINTER, BASS_STREAM_AUTOFREE,
+    BASS_MUSIC_PRESCAN, BASS_MUSIC_RAMPS, BASS_MUSIC_SINCINTER, BASS_MUSIC_STOPBACK,
+    BASS_STREAM_AUTOFREE,
 };
 use ff_core::audio_fades::FadeScheduler;
 use ff_core::audio_loops::SustainLoopSpec;
@@ -365,7 +366,12 @@ impl BassBackend {
             .iter()
             .any(|m| m.eq_ignore_ascii_case(ext))
         {
-            let flags = BASS_MUSIC_RAMPS | BASS_MUSIC_SINCINTER | BASS_MUSIC_PRESCAN;
+            let mut flags = BASS_MUSIC_RAMPS | BASS_MUSIC_SINCINTER | BASS_MUSIC_PRESCAN;
+            // A one-shot module must end so a playlist can advance: many
+            // modules loop back to the start with a `Bxx` jump forever.
+            if !looping {
+                flags |= BASS_MUSIC_STOPBACK;
+            }
             safe::music_load_mem_shared(data, flags | BASS_STREAM_AUTOFREE)
         } else {
             safe::stream_create_mem_shared(data, BASS_STREAM_AUTOFREE)
