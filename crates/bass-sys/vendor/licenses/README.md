@@ -37,7 +37,7 @@ What the fetch provides, and where each pinned build came from:
 | `bassopus.dll` | BASSOPUS add-on, same wheel |
 | `bassflac.dll` | BASSFLAC add-on, same wheel |
 | `bass_aac.dll` | BASS_AAC add-on, same wheel |
-| `basshls.dll` | BASSHLS 2.4 add-on, from the Freight Fate Python tree (`src/freight_fate/lib/`), with its `basshls.txt` release note |
+| `basshls.dll` | BASSHLS 2.4 add-on, from the Freight Fate source tree (`assets/lib/`), with its `basshls.txt` release note |
 
 BASS and its add-ons are copyright Un4seen Developments Ltd. They are not
 open source. The `sound_lib` wrapper around them is MIT-licensed (Christopher
@@ -51,7 +51,7 @@ licence; see <https://www.un4seen.com/bass.html#license>). The add-ons
 (BASSOPUS, BASSFLAC, BASS_AAC, BASSHLS) are "free to use with BASS", i.e.
 they inherit the BASS licence terms. The Rust port takes exactly the same
 licence position as the Python game it replaces, which ships these same
-files through `sound_lib` and `src/freight_fate/lib/` today.
+files through `sound_lib` and its `lib/` folder.
 
 The BASSHLS release note reproduced in `windows-x86_64/basshls.txt` carries
 Un4seen's own warranty disclaimer:

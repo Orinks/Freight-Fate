@@ -2,8 +2,9 @@
 //! screen reader and no network. World data, the simulation, the career
 //! models, and the spoken-text rules the rest of the game renders.
 //!
-//! Ported module by module from `src/freight_fate/` (Python); each module
-//! here keeps the name of the Python module it replaces.
+//! Ported module by module from the retired Python game's `freight_fate`
+//! package; each module here keeps the name of the Python module it
+//! replaces.
 
 // Python-compatibility shims (no Python original).
 pub mod pyfmt;

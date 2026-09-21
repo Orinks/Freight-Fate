@@ -201,7 +201,7 @@ fn the_public_profile_catalogs_are_derived_from_live_game_catalogs() {
 fn ff_invariants_writes_and_checks_the_export() {
     let dir = tempfile::tempdir().expect("a temp dir");
     let out = dir.path().join("profile_integrity_invariants.json");
-    let data_dir = repo_root().join("src/freight_fate/data");
+    let data_dir = repo_root().join("data");
 
     let exporter = || {
         let mut command = Command::new(env!("CARGO_BIN_EXE_ff-invariants"));

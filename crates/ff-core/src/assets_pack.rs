@@ -492,10 +492,9 @@ impl PackLoader {
     }
 }
 
-/// Where the shipped packs live: next to the data tree. The Python module
-/// used its own package directory (`src/freight_fate/`); a frozen build puts
-/// the packs under `<exe dir>/freight_fate/`, a source checkout has them in
-/// the repo. `FREIGHT_FATE_PACK_DIR` overrides both.
+/// Where the shipped packs live: a packaged build puts them under
+/// `<exe dir>/freight_fate/`, a source checkout under `assets/`.
+/// `FREIGHT_FATE_PACK_DIR` overrides both.
 pub fn default_pack_dir() -> PathBuf {
     if let Some(dir) = std::env::var_os("FREIGHT_FATE_PACK_DIR") {
         return PathBuf::from(dir);
@@ -518,8 +517,7 @@ pub fn default_pack_dir() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("..")
             .join("..")
-            .join("src")
-            .join("freight_fate"),
+            .join("assets"),
     );
     candidates
         .iter()
@@ -864,7 +862,7 @@ mod tests {
     }
 
     fn committed_pack_dir() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/freight_fate")
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets")
     }
 
     /// Whether the shipped pack at `path` is really here, saying out loud
@@ -886,15 +884,17 @@ mod tests {
             .unwrap_or_default();
         if is_lfs_pointer(path) {
             eprintln!(
-                "SKIPPING {}: it is a Git LFS pointer, not the pack. CI checks out \
-                 without LFS on purpose (fetching the packs on every push exhausted \
-                 the repository's LFS budget); run \
-                 `git lfs pull --include=\"src/freight_fate/{name}\"` to check this \
-                 locally.",
+                "SKIPPING {}: it is a leftover Git LFS pointer, not the pack. The \
+                 packs are plain files now: `git checkout -- assets/{name}` restores \
+                 sounds.pak, and tools/build_release.py downloads music.pak.",
                 path.display()
             );
         } else {
-            eprintln!("SKIPPING {}: not present (LFS)", path.display());
+            eprintln!(
+                "SKIPPING {}: not present (sounds.pak is committed; music.pak is \
+                 builder-local and tools/build_release.py downloads it)",
+                path.display()
+            );
         }
         false
     }
