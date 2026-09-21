@@ -118,32 +118,7 @@ pub fn enforcement_signature_wav() -> Vec<u8> {
             }
         }
     }
-    wav_bytes(&samples, 2, SIGNATURE_RATE)
-}
-
-/// A canonical RIFF/WAVE container around 16-bit PCM frames (what Python's
-/// `wave` module writes).
-fn wav_bytes(samples: &[i16], channels: u16, rate: u32) -> Vec<u8> {
-    let data_len = (samples.len() * 2) as u32;
-    let block_align = channels * 2;
-    let mut out = Vec::with_capacity(44 + data_len as usize);
-    out.extend_from_slice(b"RIFF");
-    out.extend_from_slice(&(36 + data_len).to_le_bytes());
-    out.extend_from_slice(b"WAVE");
-    out.extend_from_slice(b"fmt ");
-    out.extend_from_slice(&16u32.to_le_bytes());
-    out.extend_from_slice(&1u16.to_le_bytes()); // PCM
-    out.extend_from_slice(&channels.to_le_bytes());
-    out.extend_from_slice(&rate.to_le_bytes());
-    out.extend_from_slice(&(rate * block_align as u32).to_le_bytes());
-    out.extend_from_slice(&block_align.to_le_bytes());
-    out.extend_from_slice(&16u16.to_le_bytes());
-    out.extend_from_slice(b"data");
-    out.extend_from_slice(&data_len.to_le_bytes());
-    for sample in samples {
-        out.extend_from_slice(&sample.to_le_bytes());
-    }
-    out
+    ff_core::wav::pcm16_wav(&samples, 2, SIGNATURE_RATE)
 }
 
 static REGISTERED: Once = Once::new();

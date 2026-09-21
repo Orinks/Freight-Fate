@@ -36,6 +36,7 @@ pub mod speech_pacing;
 pub mod speech_text;
 pub mod spoken_advice;
 pub mod units;
+pub mod wav;
 
 // Packages.
 pub mod data;
