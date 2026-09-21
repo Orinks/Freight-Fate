@@ -170,6 +170,10 @@
 - **Opening the pause menu now stops the tank surge sound.** It no longer keeps playing through the menu and back into the drive.
 - **More truck stops announce their own exit number and the light or stop sign on their own ramp.** Many had a neighbouring exit's number.
 
+### Compatibility
+
+- **On Linux, speech now uses the Speech Dispatcher installed on your computer.** Install it first if your system lacks it; the game will not start without it.
+
 
 ### Changed
 

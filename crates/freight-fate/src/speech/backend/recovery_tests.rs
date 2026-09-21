@@ -119,7 +119,7 @@ fn ordinary_registry_acquires_each_backend_once_per_session() {
             |_| panic!("ordinary worker created a private voice"),
             |_| {
                 misses.set(misses.get() + 1);
-                Err(prism::Error::NoBackend)
+                Err(prismer::Error::BackendNotAvailable)
             },
         );
         assert!(missing.is_err());

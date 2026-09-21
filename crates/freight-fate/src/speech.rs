@@ -32,7 +32,7 @@
 //!
 //! # Threading: each Prism context stays on its speech worker
 //!
-//! Every call on a Prism [`prism::Context`] -- construction, health checks,
+//! Every call on a Prism [`prismer::Prism`] -- construction, health checks,
 //! speaking, configuring and shutdown -- happens on the worker that created
 //! it. [`Speech`] is deliberately not `Send` or `Sync`. Recovery may leave an
 //! old generation inside an in-flight native call while a replacement uses

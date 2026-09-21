@@ -152,16 +152,14 @@ jobs:
     # Windows only, deliberately.
     #
     # The workspace links SDL2 dynamically against the prebuilt libsdl-org
-    # release under `vendor/sdl2/<os>-<arch>/`, and loads BASS and Prism at
-    # run time out of `crates/bass-sys/vendor/<os>-<arch>/` and
-    # `crates/prism-sys/vendor/<os>-<arch>/`. Today the tree carries:
+    # release under `vendor/sdl2/<os>-<arch>/`, loads BASS at run time out of
+    # `crates/bass-sys/vendor/<os>-<arch>/`, and compiles Prism from source
+    # (the `prismer` crate) into the executable. Today the tree carries:
     #
     #   vendor/sdl2/            windows-x86_64 only
     #   crates/bass-sys/vendor/ windows-x86_64, macos-*, linux-* (all fetched)
-    #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64,
-    #                           linux-x86_64, linux-aarch64
     #
-    # macOS and Linux both build from source -- BASS fetched, Prism vendored,
+    # macOS and Linux both build from source -- BASS fetched, Prism and
     # SDL2 compiled in statically -- and the nightly snapshot workflow
     # (build-career-1.9.yml) builds, tests and packages both, then boots the
     # Linux tarball and AppImage on seven distributions. This per-push
@@ -279,13 +277,13 @@ jobs:
         run: cargo test -p ff-core -p freight-fate --no-run --locked --timings
 
       - name: Show the staged native libraries
-        # The build scripts (crates/bass-sys/build.rs, crates/prism-sys/
-        # build.rs, crates/freight-fate/build.rs) copy the vendored DLLs out
-        # of the committed vendor directories into target/<profile>/. Verified
-        # on a clean target directory in this repo: one cargo invocation with
+        # The build scripts (crates/bass-sys/build.rs,
+        # crates/freight-fate/build.rs) copy the vendored DLLs out of the
+        # committed vendor directories into target/<profile>/. Verified on a
+        # clean target directory in this repo: one cargo invocation with
         # nothing else done by hand leaves SDL2.dll, bass.dll, bass_aac.dll,
-        # bassflac.dll, basshls.dll, bassopus.dll and prism.dll beside the
-        # binary. The test executables themselves live in
+        # bassflac.dll, basshls.dll and bassopus.dll beside the binary (Prism
+        # is linked in). The test executables themselves live in
         # target/<profile>/deps/, and `cargo test` prepends both that
         # directory and target/<profile> to PATH before running one, which is
         # how they resolve SDL2.dll; run such a binary by hand without that

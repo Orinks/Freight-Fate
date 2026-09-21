@@ -10,6 +10,8 @@
 use std::{env, fs, path::PathBuf};
 
 fn main() {
+    delay_load_prism_backends();
+    link_prism_system_libraries();
     let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let root = manifest.ancestors().nth(2).unwrap().to_path_buf();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
@@ -38,5 +40,69 @@ fn main() {
                 let _ = fs::copy(&p, profile.join(p.file_name().unwrap()));
             }
         }
+    }
+}
+
+/// Delay-load the DLLs behind Prism's Windows backends (NVDA, JAWS, ...).
+///
+/// prismer links Prism statically and publishes the list, but a link flag
+/// only takes effect on the final link, which happens here. Without it every
+/// screen reader client DLL becomes a hard import and the game will not start
+/// on a machine missing any of them.
+fn delay_load_prism_backends() {
+    println!("cargo:rerun-if-env-changed=DEP_PRISMER_DELAY_LOAD_DLLS");
+    if env::var("CARGO_CFG_TARGET_ENV").as_deref() != Ok("msvc") {
+        return;
+    }
+    let Ok(dlls) = env::var("DEP_PRISMER_DELAY_LOAD_DLLS") else {
+        return;
+    };
+    for dll in dlls.split(';').filter(|dll| !dll.is_empty()) {
+        println!("cargo:rustc-link-arg=/DELAYLOAD:{dll}");
+    }
+}
+
+/// Link what Prism's macOS and Linux backends import.
+///
+/// prism-sys names these for Windows only, and a static library leaves them
+/// to the final link. macOS: the frameworks its CMake links (AVSpeech,
+/// VoiceOver, power management). Linux: whichever of speech-dispatcher and
+/// glibmm and giomm (Orca) pkg-config finds -- the same test Prism's CMake used to
+/// decide whether to build those backends at all.
+fn link_prism_system_libraries() {
+    match env::var("CARGO_CFG_TARGET_OS").as_deref() {
+        Ok("macos") => {
+            for framework in [
+                "Foundation",
+                "AVFoundation",
+                "AppKit",
+                "IOKit",
+                "CoreFoundation",
+            ] {
+                println!("cargo:rustc-link-lib=framework={framework}");
+            }
+            println!("cargo:rustc-link-lib=objc");
+        }
+        Ok("linux") => {
+            for module in ["speech-dispatcher", "glibmm-2.68", "giomm-2.68"] {
+                let Ok(out) = std::process::Command::new("pkg-config")
+                    .args(["--libs", module])
+                    .output()
+                else {
+                    continue;
+                };
+                if !out.status.success() {
+                    continue;
+                }
+                for flag in String::from_utf8_lossy(&out.stdout).split_whitespace() {
+                    if let Some(dir) = flag.strip_prefix("-L") {
+                        println!("cargo:rustc-link-search=native={dir}");
+                    } else if let Some(lib) = flag.strip_prefix("-l") {
+                        println!("cargo:rustc-link-lib={lib}");
+                    }
+                }
+            }
+        }
+        _ => {}
     }
 }

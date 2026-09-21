@@ -6,7 +6,7 @@ blind and low-vision players. Full contributor policy lives in
 authoring time.
 
 **Career 1.9 is a native Rust game.** The Cargo workspace under `crates/`
-(`ff-core`, `freight-fate`, `prism`, `prism-sys`, `bass-sys`) is the shipping
+(`ff-core`, `freight-fate`, `bass-sys`) is the shipping
 runtime, on both `dev` and `main`. The Python game is gone (its last release
 is the `v1.8.8.1` tag, and 1.8 gets no further releases); `tools/` stays
 Python for baking, packaging, and data generation. The world data tree is
@@ -56,9 +56,12 @@ Read this before opening files; the rest is discoverable from `lib.rs` docs.
 - **Speech and audio are pluggable and optional.** `speech/` has the live
   Prism backend on its own worker thread, a capture sink the tests read
   transcripts from, and fakes. `audio/` is BASS behind a backend trait with a
-  null fallback. `prism`/`prism-sys` wrap the Prism screen-reader and TTS
-  library; `bass-sys` declares the BASS C ABI by hand and loads the DLL at
-  run time, so a machine without either still starts the game.
+  null fallback. The Prism screen-reader and TTS library comes from the
+  `prismer` crate, compiled from source (CMake and a C++23 compiler) and
+  linked into the executable; the screen-reader client DLLs behind it are
+  delay-loaded, so a missing reader costs that reader, not the game.
+  `bass-sys` declares the BASS C ABI by hand and loads the DLL at run time,
+  so a machine without BASS still starts the game.
 - **Environment variables are two different roots.** `FREIGHT_FATE_DATA_ROOT`
   is where world data comes from; `FREIGHT_FATE_DATA_DIR` is where settings,
   saves and the keyring-backed token go. The playtest harness redirects the

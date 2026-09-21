@@ -115,11 +115,8 @@ impl FakeVoice {
         Box::new(self.clone())
     }
 
-    fn failure() -> prism::Error {
-        prism::Error::Native {
-            code: -1,
-            message: "speech backend failed".to_string(),
-        }
+    fn failure() -> prismer::Error {
+        prismer::Error::SpeakFailure
     }
 }
 
@@ -132,7 +129,7 @@ impl VoiceBackend for FakeVoice {
         self.state.borrow().features
     }
 
-    fn output(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error> {
+    fn output(&mut self, text: &str, interrupt: bool) -> Result<(), prismer::Error> {
         let mut state = self.state.borrow_mut();
         if state.fail_output {
             return Err(Self::failure());
@@ -141,11 +138,11 @@ impl VoiceBackend for FakeVoice {
         Ok(())
     }
 
-    fn speak(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error> {
+    fn speak(&mut self, text: &str, interrupt: bool) -> Result<(), prismer::Error> {
         self.output(text, interrupt)
     }
 
-    fn braille(&mut self, text: &str) -> Result<(), prism::Error> {
+    fn braille(&mut self, text: &str) -> Result<(), prismer::Error> {
         let mut state = self.state.borrow_mut();
         if !state.features.supports_braille || state.fail_braille {
             return Err(Self::failure());
@@ -154,31 +151,31 @@ impl VoiceBackend for FakeVoice {
         Ok(())
     }
 
-    fn stop(&mut self) -> Result<(), prism::Error> {
+    fn stop(&mut self) -> Result<(), prismer::Error> {
         self.state.borrow_mut().stop_calls += 1;
         Ok(())
     }
 
-    fn set_rate(&mut self, rate: f64) -> Result<(), prism::Error> {
+    fn set_rate(&mut self, rate: f64) -> Result<(), prismer::Error> {
         self.state.borrow_mut().rate = Some(rate);
         Ok(())
     }
 
-    fn set_pitch(&mut self, pitch: f64) -> Result<(), prism::Error> {
+    fn set_pitch(&mut self, pitch: f64) -> Result<(), prismer::Error> {
         self.state.borrow_mut().pitch = Some(pitch);
         Ok(())
     }
 
-    fn set_volume(&mut self, volume: f64) -> Result<(), prism::Error> {
+    fn set_volume(&mut self, volume: f64) -> Result<(), prismer::Error> {
         self.state.borrow_mut().volume = Some(volume);
         Ok(())
     }
 
-    fn voices_count(&self) -> Result<usize, prism::Error> {
+    fn voices_count(&self) -> Result<usize, prismer::Error> {
         Ok(self.state.borrow().voices.len())
     }
 
-    fn voice_name(&self, index: usize) -> Result<String, prism::Error> {
+    fn voice_name(&self, index: usize) -> Result<String, prismer::Error> {
         self.state
             .borrow()
             .voices
@@ -187,7 +184,7 @@ impl VoiceBackend for FakeVoice {
             .ok_or_else(Self::failure)
     }
 
-    fn set_voice(&mut self, index: usize) -> Result<(), prism::Error> {
+    fn set_voice(&mut self, index: usize) -> Result<(), prismer::Error> {
         self.state.borrow_mut().voice = Some(index);
         Ok(())
     }
@@ -247,9 +244,9 @@ impl VoiceRegistry for FakeRegistry {
             .unwrap_or(0)
     }
 
-    fn acquire(&self, id: BackendId) -> Result<Box<dyn VoiceBackend>, prism::Error> {
+    fn acquire(&self, id: BackendId) -> Result<Box<dyn VoiceBackend>, prismer::Error> {
         self.index_of(id)
             .map(|index| self.order[index].boxed())
-            .ok_or(prism::Error::NoBackend)
+            .ok_or(prismer::Error::BackendNotAvailable)
     }
 }

@@ -17,6 +17,10 @@ on:
         description: "Skip release creation"
         type: boolean
         default: false
+      branch:
+        description: "Branch to build (a dry run is the way to try one)"
+        type: string
+        default: dev
 
 permissions:
   contents: write
@@ -38,7 +42,9 @@ env:
   # The `1.9-tester-*` tag scheme deliberately does NOT change. The
   # in-game updater's developer-snapshot channel finds builds by that
   # name, so renaming it would strand everyone already on one.
-  CAREER_BRANCH: "dev"
+  # A manual run may name another branch to try; the schedule always
+  # builds dev.
+  CAREER_BRANCH: ${{ inputs.branch || 'dev' }}
 
 jobs:
   prepare:
@@ -319,6 +325,17 @@ jobs:
             libasound2-dev libpulse-dev libpipewire-0.3-dev \
             libdbus-1-dev libudev-dev libibus-1.0-dev \
             file desktop-file-utils
+
+      # Prism is compiled from source and linked into the executable. It
+      # needs C++23 (<expected>, so gcc 12; 22.04 defaults to 11) and builds
+      # its speech-dispatcher and Orca backends only when their development
+      # packages are here -- without them Linux players would get no speech.
+      - name: Install Prism build dependencies
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            gcc-12 g++-12 libspeechd-dev libglibmm-2.68-dev
+          echo "CC=gcc-12" >> "$GITHUB_ENV"
+          echo "CXX=g++-12" >> "$GITHUB_ENV"
 
       - name: Check Rust formatting
         run: cargo fmt --all --check

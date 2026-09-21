@@ -4,8 +4,7 @@
 //!
 //! One Prism context per process, on one thread at a time: every test takes
 //! `LIVE_PRISM` and builds and drops its own context inside it. They skip
-//! (pass, printing why) under `FREIGHT_FATE_NO_SPEECH` or when the native
-//! library is absent, so CI without a screen reader is unaffected.
+//! (pass, printing why) under `FREIGHT_FATE_NO_SPEECH` so CI without a screen reader is unaffected.
 
 use std::sync::Mutex;
 
@@ -19,10 +18,6 @@ static LIVE_PRISM: Mutex<()> = Mutex::new(());
 fn live_prism_allowed() -> bool {
     if std::env::var_os("FREIGHT_FATE_NO_SPEECH").is_some_and(|v| !v.is_empty()) {
         eprintln!("skipping live Prism check: FREIGHT_FATE_NO_SPEECH is set");
-        return false;
-    }
-    if !prism::native_available() {
-        eprintln!("skipping live Prism check: Prism native library not available");
         return false;
     }
     true
@@ -162,18 +157,21 @@ fn live_configure_clamps_nothing_and_sapi_lists_voices() {
     if !live_prism_allowed() {
         return;
     }
-    let Ok(context) = prism::Context::new() else {
+    let Ok(context) = prismer::Prism::new() else {
         return;
     };
-    let Some(sapi_id) = context.id_by_name("SAPI") else {
+    let Ok(sapi) = context.create(prismer::BackendId::SAPI) else {
         eprintln!("skipping: no SAPI backend registered");
         return;
     };
-    let Ok(mut sapi) = context.acquire(sapi_id) else {
-        eprintln!("skipping: SAPI could not be acquired");
+    if sapi.initialize().is_err() {
+        eprintln!("skipping: SAPI could not be initialized");
         return;
-    };
-    if !sapi.features().is_supported_at_runtime() {
+    }
+    if !sapi
+        .features()
+        .contains(prismer::Features::IS_SUPPORTED_AT_RUNTIME)
+    {
         eprintln!("skipping: SAPI not usable at runtime");
         return;
     }
@@ -211,8 +209,11 @@ fn live_configure_clamps_nothing_and_sapi_lists_voices() {
     let _ = sapi.set_pitch(0.5);
     let _ = sapi.set_volume(1.0);
     drop(sapi);
+    drop(context);
 
-    let registry = PrismRegistry::from_context(context);
+    let Ok(registry) = PrismRegistry::new() else {
+        return;
+    };
     let mut speech = Speech::with_registry(Box::new(registry), Some("SAPI".to_string()));
     assert_eq!(speech.backend_name(), "SAPI");
     assert!(speech.supports_rate() && speech.supports_pitch() && speech.supports_volume());

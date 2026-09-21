@@ -22,7 +22,12 @@ workspace = true
 
 [dependencies]
 ff-core = { path = "../ff-core" }
-prism = { path = "../prism" }
+# Prism is compiled from source and linked in; see build.rs for the
+# delay-loaded screen reader DLLs that keeps optional.
+# Pinned past 0.1.1: that release drops every backend from a static link,
+# fixed upstream the next day (Prism's backend anchors). Back to a crates.io
+# version once one ships with it.
+prismer = { git = "https://github.com/trypsynth/prismer", rev = "3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b", features = ["static"] }
 bass-sys = { path = "../bass-sys" }
 anyhow.workspace = true
 thiserror.workspace = true

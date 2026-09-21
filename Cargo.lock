@@ -671,7 +671,7 @@ dependencies = [
  "log",
  "once_cell",
  "parking_lot",
- "prism",
+ "prismer",
  "raw-window-handle",
  "regex",
  "sdl2",
@@ -1360,20 +1360,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "prism"
-version = "1.9.0"
+name = "prism-sys"
+version = "0.1.1"
+source = "git+https://github.com/trypsynth/prismer?rev=3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b#3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b"
 dependencies = [
- "log",
- "prism-sys",
- "thiserror",
+ "cmake",
 ]
 
 [[package]]
-name = "prism-sys"
-version = "1.9.0"
+name = "prismer"
+version = "0.1.1"
+source = "git+https://github.com/trypsynth/prismer?rev=3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b#3aed6f8c50a94a194cc2d8a8d8ea6a10357c665b"
 dependencies = [
- "libloading",
- "log",
+ "prism-sys",
 ]
 
 [[package]]

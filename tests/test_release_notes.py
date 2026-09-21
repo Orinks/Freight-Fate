@@ -636,7 +636,7 @@ def test_career_19_snapshot_workflow_contract():
     # this is the only workflow that builds the Rust game, so it is the
     # nightly. build.yml's schedule was retired in the same change because it
     # builds the Python game, which dev no longer has.
-    assert 'CAREER_BRANCH: "dev"' in workflow
+    assert "CAREER_BRANCH: ${{ inputs.branch || 'dev' }}" in workflow
     assert "group: career-19-snapshot\n" in workflow
     assert "career-19-snapshot-${{ github.ref }}" not in workflow
     assert 'cron: "37 2 * * *"' in workflow
@@ -713,10 +713,9 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     smoke = (Path(__file__).resolve().parents[1] / "tools" / "linux_smoke.sh").read_text(
         encoding="utf-8"
     )
-    # Speech is not disabled in the container boot: libprism.so and its
-    # bundled glib are really opened, which is where a loader would object.
+    # Speech is not disabled in the container boot: Prism really opens the
+    # system's speech-dispatcher, which is where a loader would object.
     assert "FREIGHT_FATE_NO_SPEECH" not in smoke
-    assert "prism: loaded from" in smoke
     assert "Speech backend: Speech Dispatcher" in smoke
     assert 'grep -q " ERROR "' in smoke
     assert "--appimage-extract-and-run --smoke" in smoke
