@@ -2,8 +2,13 @@
 //! the fallback when a piece is not ready.
 
 use crate::states_main_menu_support::*;
+use ff_core::data::world::get_world;
+use ff_core::models::jobs::{Job, CARGO_CATALOG};
+use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
+use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
 use freight_fate::states::main_menu::{SettingsCategoryState, SettingsState};
 
 type Cat = SettingsCategoryState;
@@ -112,6 +117,123 @@ fn an_unready_piece_falls_back_to_its_classic_and_is_requested() {
         std::thread::sleep(std::time::Duration::from_millis(20));
     }
     assert_eq!(app.ctx.resolve_synth(&key), key);
+}
+
+/// The Denver run the radio rotation tests drive (`a_denver_drive` in
+/// `states_driving_updates_radio.rs`).
+fn a_drive(app: &mut TestApp) -> DrivingState {
+    let world = get_world();
+    app.ctx.profile = Some(Profile::named_in("Radio Power", "Denver"));
+    let route = world
+        .route_from_cities(&["Denver", "Salt Lake City"])
+        .expect("Denver to Salt Lake City routes");
+    let job = Job::new(
+        &CARGO_CATALOG["general"],
+        12.0,
+        "Denver",
+        "Denver Dry Warehouse",
+        "Salt Lake City",
+        520.0,
+        2400.0,
+        14.0,
+    );
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(42),
+        DRIVE_PHASE_DELIVERY,
+        Some(13.0),
+    );
+    drive.trip.set_npc_vehicles(Vec::new());
+    drive
+}
+
+#[test]
+fn the_synthesized_roadhouse_plays_synth_music_and_no_host_breaks() {
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    let mut d = a_drive(&mut app);
+    let station = d.radio.current_station();
+    assert_eq!(station.playlist, "route");
+    let pool = d.station_rotation_pool(&app.ctx, &station, false);
+    assert!(pool.iter().all(|k| k.starts_with("synth_drive_day_")
+        || k == "classic_open_road"
+        || k.starts_with("hand_made/")));
+    // Play through more tracks than a break interval: nothing from a host break.
+    d.start_station_rotation(&mut app.ctx, &station, 0);
+    for _ in 0..(ff_core::music::RADIO_TRACKS_PER_HOST_BREAK * 2) {
+        d.radio_elapsed_s = 1.0e9;
+        d.update_radio_playback(&mut app.ctx, false, 0.0);
+        assert!(d.radio_break_queue.is_empty());
+    }
+}
+
+#[test]
+fn now_playing_names_a_synthesized_piece() {
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    let mut d = a_drive(&mut app);
+    d.trip.truck.start_engine();
+    let text = d.radio_now_playing_text(&mut app.ctx);
+    assert!(
+        text.contains("Synthesized: Day Drive, number")
+            || text.contains("Open Road, from Freight Fate 1.5"),
+        "{text}"
+    );
+}
+
+#[test]
+fn original_mode_roadhouse_is_unchanged() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let station = d.radio.current_station();
+    assert_eq!(
+        d.station_rotation_pool(&app.ctx, &station, false),
+        d.day_music_sequence
+    );
+}
+
+/// The twin of the no-breaks test in Original mode: the same loop does reach
+/// a host break, so the synthesized test is not passing on a silent station.
+#[test]
+fn the_original_roadhouse_still_has_host_breaks() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let station = d.radio.current_station();
+    d.start_station_rotation(&mut app.ctx, &station, 0);
+    let mut heard_a_break = false;
+    for _ in 0..(ff_core::music::RADIO_TRACKS_PER_HOST_BREAK * 2) {
+        d.radio_elapsed_s = 1.0e9;
+        d.update_radio_playback(&mut app.ctx, false, 0.0);
+        heard_a_break |= !d.radio_break_queue.is_empty();
+    }
+    assert!(heard_a_break);
+}
+
+#[test]
+fn flipping_the_music_source_mid_drive_restarts_the_roadhouse() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let station = d.radio.current_station();
+    d.start_station_rotation(&mut app.ctx, &station, 0);
+    // A seed roll in Original mode leaves the Original rotation alone.
+    app.ctx.settings.music_seed += 1;
+    d.apply_radio_settings_to_drive(&mut app.ctx);
+    assert_eq!(d.radio_station_id, station.id);
+    app.ctx.settings.synth_music = true;
+    d.apply_radio_settings_to_drive(&mut app.ctx);
+    assert!(d.radio_station_id.is_empty());
+    let night = d.music_night;
+    d.update_radio_playback(&mut app.ctx, night, 0.0);
+    assert_eq!(d.radio_station_id, station.id);
+    assert!(
+        d.radio_playlist
+            .iter()
+            .all(|k| k.starts_with("synth_drive_") || k.starts_with("classic_")),
+        "{:?}",
+        d.radio_playlist
+    );
 }
 
 #[test]

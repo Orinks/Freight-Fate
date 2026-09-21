@@ -6,3 +6,8 @@ use ff_core::music_synth::StyleId;
 pub fn extras_for(_place: StyleId) -> Vec<String> {
     Vec::new()
 }
+
+/// The spoken title of a hand-made piece, for now playing.
+pub fn title_for(_key: &str) -> Option<String> {
+    None
+}

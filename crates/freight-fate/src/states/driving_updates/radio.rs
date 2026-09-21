@@ -304,7 +304,12 @@ impl DrivingState {
     /// arrives mid-song the way a real dial does, and keeps running while the
     /// driver is elsewhere on the dial, which is why tuning back finds the
     /// station further along instead of back at the top.
-    fn station_cue(&self, station: &RadioStation, tracks: &[String]) -> RotationCue {
+    pub(super) fn station_cue(
+        &self,
+        ctx: &GameContext,
+        station: &RadioStation,
+        tracks: &[String],
+    ) -> RotationCue {
         if tracks.is_empty() {
             return RotationCue::default();
         }
@@ -315,11 +320,20 @@ impl DrivingState {
             playlist: &station.playlist,
             seed_key: &seed_key,
             tracks,
+            breaks: !self.synth_roadhouse(ctx, station),
         };
         cue_after(&rotation, self.radio_airtime_s)
     }
 
-    pub fn station_rotation_pool(&self, station: &RadioStation, night: bool) -> Vec<String> {
+    pub fn station_rotation_pool(
+        &self,
+        ctx: &GameContext,
+        station: &RadioStation,
+        night: bool,
+    ) -> Vec<String> {
+        if let Some(pool) = self.synth_roadhouse_pool(ctx, station, night) {
+            return pool;
+        }
         if station.playlist == "route" {
             return if night {
                 self.night_music_sequence.clone()
@@ -348,9 +362,14 @@ impl DrivingState {
         let night = is_night(self.trip.current_hour());
         self.music_night = night;
         self.radio_station_id = station.id.clone();
-        self.radio_playlist = self.station_rotation_pool(station, night);
-        let cue = self.station_cue(station, &self.radio_playlist);
-        let key = cue.current_key(&self.radio_playlist);
+        self.radio_playlist = self.station_rotation_pool(ctx, station, night);
+        self.synth_music_applied = Some(self.roadhouse_synth_state(ctx));
+        let cue = self.station_cue(ctx, station, &self.radio_playlist);
+        let key = if cue.in_break() {
+            cue.current_key(&self.radio_playlist)
+        } else {
+            self.resolve_station_track(ctx, cue.track_index)
+        };
         // A spoken host break, station ID or ad plays whole. Cutting into one
         // mid-word is what a real dial does and what a screen reader user
         // should never have to sit through, and a few seconds of drift on a
@@ -389,12 +408,14 @@ impl DrivingState {
             return;
         }
         self.radio_elapsed_s += dt.max(0.0);
-        let current = if !self.radio_break_queue.is_empty() {
-            self.radio_break_queue[self.radio_break_pos].clone()
+        let len = if !self.radio_break_queue.is_empty() {
+            content_duration_s(&self.radio_break_queue[self.radio_break_pos])
         } else {
-            self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone()
+            let current =
+                self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone();
+            self.station_track_len_s(ctx, &station, &current)
         };
-        if self.radio_elapsed_s < content_duration_s(&current) {
+        if self.radio_elapsed_s < len {
             return;
         }
         self.radio_elapsed_s = 0.0;
@@ -411,7 +432,9 @@ impl DrivingState {
         }
         self.radio_track_index += 1;
         self.radio_tracks_since_break += 1;
-        if self.radio_tracks_since_break >= RADIO_TRACKS_PER_HOST_BREAK {
+        if self.radio_tracks_since_break >= RADIO_TRACKS_PER_HOST_BREAK
+            && !self.synth_roadhouse(ctx, &station)
+        {
             let queue = plan_break(
                 &station.id,
                 &station.host,
@@ -433,8 +456,10 @@ impl DrivingState {
     }
 
     pub fn play_station_track(&mut self, ctx: &mut GameContext, fade_ms: u32) {
-        let key = self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone();
-        ctx.audio.play_music_with(&key, fade_ms);
+        let key = self.resolve_station_track(ctx, self.radio_track_index);
+        if !key.is_empty() {
+            ctx.audio.play_music_with(&key, fade_ms);
+        }
     }
 
     /// `_start_playlist_station(station, fade_ms=900, advance=False)`, with
@@ -846,6 +871,7 @@ impl DrivingState {
     /// moment the row is toggled, the cab says so, and the radio lands on
     /// the Roadhouse like any other handover.
     pub fn apply_radio_settings_to_drive(&mut self, ctx: &mut GameContext) {
+        self.restart_roadhouse_on_synth_change(ctx);
         let before = self.radio.current_station();
         {
             let view = RadioSettingsView(&ctx.settings);
@@ -1035,6 +1061,9 @@ impl DrivingState {
             return "The engine is off. The radio has no power.".to_string();
         }
         let station = self.radio.current_station();
+        if let Some(text) = self.synth_now_playing(ctx, &station) {
+            return text;
+        }
         if !self.station_sends_song_info(&station) {
             return format!("{} does not send song information.", station.display_name());
         }

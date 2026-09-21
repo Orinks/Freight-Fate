@@ -138,6 +138,9 @@ pub struct DrivingState {
     pub radio_break_pos: usize,
     pub radio_break_count: usize,
     pub radio_tracks_since_break: usize,
+    // Synthesized Roadhouse: the (synthesized, seed) last applied, and the playing track's length.
+    pub synth_music_applied: Option<(bool, i64)>,
+    pub radio_track_len: Option<(String, f64)>,
     // How long the stations have been on the air this drive, in real seconds.
     // A station keeps broadcasting while the driver is listening to another
     // one (or to nothing at all), so tuning back in has to land where it got

@@ -22,6 +22,9 @@ pub struct StationRotation<'a> {
     pub playlist: &'a str,
     pub seed_key: &'a str,
     pub tracks: &'a [String],
+    /// False for a station that runs song into song with no voiced breaks
+    /// (the Roadhouse in Synthesized mode).
+    pub breaks: bool,
 }
 
 /// A station's rotation frozen at one instant: the same fields the driving
@@ -122,7 +125,7 @@ fn step(cue: &mut RotationCue, rotation: &StationRotation) {
     }
     cue.track_index += 1;
     cue.tracks_since_break += 1;
-    if cue.tracks_since_break < RADIO_TRACKS_PER_HOST_BREAK {
+    if cue.tracks_since_break < RADIO_TRACKS_PER_HOST_BREAK || !rotation.breaks {
         return;
     }
     let queue = plan_break(
@@ -157,6 +160,7 @@ mod tests {
             playlist: "country",
             seed_key: "77|kbsk-billings",
             tracks,
+            breaks: true,
         }
     }
 
@@ -257,6 +261,7 @@ mod tests {
                 playlist: "country",
                 seed_key: "77|kbsk-billings",
                 tracks: &big_sky,
+                breaks: true,
             },
             airtime,
         );
@@ -267,6 +272,7 @@ mod tests {
                 playlist: "country",
                 seed_key: "77|krwl-dallas",
                 tracks: &rawhide,
+                breaks: true,
             },
             airtime,
         );
@@ -280,6 +286,20 @@ mod tests {
     }
 
     #[test]
+    fn a_station_without_breaks_never_opens_one() {
+        let tracks = country();
+        let rot = StationRotation {
+            breaks: false,
+            ..rotation(&tracks)
+        };
+        for minutes in 0..240 {
+            let cue = cue_after(&rot, minutes as f64 * 60.0);
+            assert!(!cue.in_break(), "a break at {minutes} minutes");
+            assert_eq!(cue.break_count, 0);
+        }
+    }
+
+    #[test]
     fn an_empty_station_stays_put() {
         let empty: Vec<String> = Vec::new();
         let rot = StationRotation {
@@ -288,6 +308,7 @@ mod tests {
             playlist: "",
             seed_key: "77|nowhere",
             tracks: &empty,
+            breaks: true,
         };
         let cue = cue_after(&rot, 900.0);
         assert_eq!(cue, RotationCue::default());
