@@ -3554,7 +3554,15 @@
       "state": "WA",
       "country": "US",
       "region": "pacific_northwest",
-      "locations": [],
+      "locations": [
+        {
+          "name": "TA Express Blaine",
+          "type": "company_yard",
+          "lat": 48.99126,
+          "lon": -122.73412,
+          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach)."
+        }
+      ],
       "lat": 48.9881108,
       "lon": -122.743575
     },

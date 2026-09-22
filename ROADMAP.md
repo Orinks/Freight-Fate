@@ -1237,6 +1237,19 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
+### Reefer, APU, and fuel-island hotel power (2.0 candidates)
+
+Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
+and unnamed as blockers for the ALCAN corridor.
+
+- [ ] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
+      spoil model (not multi-temp zones).
+- [ ] **APU on/off** as low hotel burn versus idling the tractor.
+- [ ] **Fuel island: tractor-off required** while reefer TRU / APU may stay on.
+- [ ] *(defer)* Multi-temp compartments, shore power, deep TRU fault trees,
+      battery APU, scored idle noise, and HOS accounting driven from reefer
+      duty — park until the coarse slice earns its keep.
+
 ### Personal conveyance and duty-purpose correction
 
 Regulatory baseline: [FMCSA personal-conveyance guidance](https://www.fmcsa.dot.gov/regulations/hours-service/personal-conveyance)

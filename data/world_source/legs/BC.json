@@ -1,0 +1,155 @@
+{
+  "legs": [
+    {
+      "from": "surrey_bc_ca",
+      "to": "blaine_wa_us",
+      "miles": 16,
+      "highway": "Hwy 15 / Pacific Highway",
+      "terrain": "hills",
+      "divided": true,
+      "lanes": 2,
+      "stops": [],
+      "border_crossing": {
+        "id": "blaine_pacific_highway",
+        "from_country": "CA",
+        "to_country": "US",
+        "ports": [
+          "blaine_pacific_highway"
+        ],
+        "mode": "through_freight",
+        "cabotage": "forbidden"
+      },
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 49.17699,
+            "lon": -122.73002
+          },
+          {
+            "at_mi": 3.2,
+            "lat": 49.147,
+            "lon": -122.73472
+          },
+          {
+            "at_mi": 6.4,
+            "lat": 49.10613,
+            "lon": -122.73818
+          },
+          {
+            "at_mi": 9.6,
+            "lat": 49.06905,
+            "lon": -122.7355
+          },
+          {
+            "at_mi": 12.8,
+            "lat": 49.02555,
+            "lon": -122.73525
+          },
+          {
+            "at_mi": 16.0,
+            "lat": 48.98811,
+            "lon": -122.74334
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 223.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 3.2,
+            "elevation_ft": 3.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 6.4,
+            "elevation_ft": 13.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 9.6,
+            "elevation_ft": 6.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 12.8,
+            "elevation_ft": 52.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 16.0,
+            "elevation_ft": 59.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 16.0,
+            "avg_grade_pct": 0.05,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla auto route geometry (development-time). Truck-class refine blocked on public FOSSGIS truck costing for this POE."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Blaine Pacific Highway POE",
+            "at_mi": 12.8,
+            "type": "border",
+            "state": "Washington",
+            "highway": "Hwy 15 / Pacific Highway",
+            "lat": 49.002,
+            "lon": -122.756,
+            "source": "Pacific Highway commercial port of entry (Blaine). Locked Phase A POE; Sumas is alternate only. Prefer Hwy 15 / Pacific Highway label (not Hwy 99 / Peace Arch)."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 15.0
+          },
+          {
+            "state": "Washington",
+            "miles": 1.0
+          }
+        ],
+        "state_crossings": [
+          {
+            "at_mi": 12.8,
+            "from_state": "British Columbia",
+            "state": "Washington",
+            "place": "Blaine Pacific Highway (Pacific Highway POE) on Hwy 15",
+            "source": "International border on the continuous Pacific Highway truck path; position approximate from public POE coordinates matched to Valhalla geometry (development-time)."
+          }
+        ],
+        "border_crossing": {
+          "id": "blaine_pacific_highway",
+          "from_country": "CA",
+          "to_country": "US",
+          "ports": [
+            "blaine_pacific_highway"
+          ],
+          "mode": "through_freight",
+          "cabotage": "forbidden"
+        },
+        "source": "Development-time public Valhalla auto-profile geometry over OpenStreetMap (valhalla1.openstreetmap.de), sampled 2026-09-22, along Hwy 15 / Pacific Highway. Paid miles kept at 16. Public FOSSGIS Valhalla truck costing is NOT adopted here: unconstrained truck returned ~40.5 mi (vs ~14\u201316 on the commercial Pacific Highway path). Named HGV honesty debt until a regional BC/WA truck bake (ask before Josh overnight).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 14.0,
+            "mph": 50,
+            "source": "Coarse Hwy 15 / Pacific Highway urban approach default; CA statutory truck caps still unresearched (named units debt). Not an OSM maxspeed:hgv harvest.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    }
+  ]
+}

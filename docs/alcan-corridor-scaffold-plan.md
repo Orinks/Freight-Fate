@@ -1,12 +1,11 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A first city/leg tip landed** on `feat/career-2.0` (Bellingham → Blaine → Surrey). Ruth geometry cut next.
-Still no Anchorage, no full Canada board, no Dawson→Tok short-hop.
+Status: **Phase A tip KEEP + FIX 1–3 landed** on `feat/career-2.0` (Bellingham ↔ Blaine ↔ Surrey, both directions). Still no Anchorage, no full Canada board, no Dawson Creek / inland ALCAN until Ruth GO.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
 
-**Locked Phase A routing decisions:** the primary POE is **Blaine Pacific Highway**; **Sumas is an alternate only if the POE decision flips**. With Blaine, the BC entry is `surrey_bc_ca` or another **verified tractor-parking node on Hwy 99**. `abbotsford_bc_ca` is allowed only when the POE is Sumas. The first legs must retain **real routed ALCAN highway mileage**, not compressed short-hop proxies.
+**Locked Phase A routing decisions:** the primary POE is **Blaine Pacific Highway**; **Sumas is an alternate only if the POE decision flips**. With Blaine, the BC entry is `surrey_bc_ca` or another **verified tractor-parking node on Hwy 15 / Pacific Highway**. `abbotsford_bc_ca` is allowed only when the POE is Sumas. The first legs must retain **real routed ALCAN highway mileage**, not compressed short-hop proxies.
 
 Deferred mentions already in-tree:
 - `docs/highway-spider-methodology.md` §1 Phase 3 — Canadian corridors deferred; points here.
@@ -51,7 +50,7 @@ Key shape matches current slug rule: `{name}_{region}_{country}` (e.g. `bellingh
 | Role | Proposed key | Notes |
 | --- | --- | --- |
 | US attach (exists) | `bellingham_wa_us` | Do not re-mint |
-| BC entry service node | `surrey_bc_ca` (Blaine primary) | With Blaine Pacific Highway, use Surrey or another **verified tractor-parking node on Hwy 99**; not a tourism lodge. `abbotsford_bc_ca` is allowed only if the POE flips to Sumas. **Ruth locks key with POE.** |
+| BC entry service node | `surrey_bc_ca` (Blaine primary) | With Blaine Pacific Highway, use Surrey or another **verified tractor-parking node on Hwy 15 / Pacific Highway**; not a tourism lodge. `abbotsford_bc_ca` is allowed only if the POE flips to Sumas. **Ruth locks key with POE.** |
 | Mile 0 ALCAN | `dawson_creek_bc_ca` | Required |
 | ALCAN BC | `fort_nelson_bc_ca` | Required |
 | ALCAN YT | `watson_lake_yt_ca` | Required |
@@ -86,7 +85,7 @@ Honesty on Blaine→Dawson Creek may add checkpoints / service pins without disp
 
 Direction shown northbound; expect matching southbound edges when the graph lands.
 
-1. `bellingham_wa_us` → **(Blaine Pacific Hwy POE)** → `surrey_bc_ca` (or a verified Hwy 99 tractor-parking node; `abbotsford_bc_ca` only if POE flips to Sumas)
+1. `bellingham_wa_us` → **(Blaine Pacific Hwy POE)** → `surrey_bc_ca` (or a verified Hwy 15 / Pacific Highway tractor-parking node; `abbotsford_bc_ca` only if POE flips to Sumas)
 2. BC entry → …optional pass-throughs (Prince George, Fort St. John, …)… → `dawson_creek_bc_ca` using the real routed highway mileage
 3. `dawson_creek_bc_ca` → `fort_nelson_bc_ca` (Alaska Hwy)
 4. `fort_nelson_bc_ca` → `watson_lake_yt_ca`
@@ -168,7 +167,7 @@ For ALCAN / CA / AK world-data work **after Ruth cuts this plan**:
 
 ## 7. GO gates (before first city/leg PR)
 
-1. Ruth cuts this plan (Blaine Pacific Highway primary; Sumas only if the POE flips; Surrey/Hwy 99 BC entry key; pass-through list).
+1. Ruth cuts this plan (Blaine Pacific Highway primary; Sumas only if the POE flips; Surrey/Hwy 15 Pacific Highway BC entry key; pass-through list).
 2. Confirm extract path: BC/YT/AK coverage via public APIs / regional Geofabrik first (see §5.1); treat 96 GB HANDOFF gate as soft unless APIs fail honesty.
 3. Name the temporary HOS honesty debt (US through-freight clock only) and keep CAD purse, deep border gameplay, and full-country expansion deferred.
 4. Only then: first PR adds country/geo hooks + corridor cities/legs — **still no rest-of-Canada bulk.**
@@ -187,23 +186,32 @@ Landed on `feat/career-2.0` after Chelsea GO (plan locks kept: Blaine primary, S
 | `bellingham_wa_us` | (exists) | US attach; unchanged |
 | `blaine_wa_us` | — | New US stand-in service pin near Pacific Highway POE |
 | `surrey_bc_ca` | — | New CA stand-in; pin at City of Surrey truck parking **17768 96 Avenue** (Hwy 15 / Pacific Highway corridor) |
-| `bellingham_wa_us` → `blaine_wa_us` | **22** | I-5; public OSRM driving geometry 2026-09-22 |
-| `blaine_wa_us` → `surrey_bc_ca` | **16** | Hwy 15 / Pacific Highway via Blaine POE; `border_crossing` stub (`through_freight`, cabotage forbidden) |
+| `bellingham_wa_us` ↔ `blaine_wa_us` | **22** | I-5 both directions; public Valhalla truck costing 2026-09-22 |
+| `blaine_wa_us` ↔ `surrey_bc_ca` | **16** | Hwy 15 / Pacific Highway via Blaine POE both directions; `border_crossing` both ways (`through_freight`, cabotage forbidden) |
 
 ### Mileage / geometry source
 
-- Route distance + `route_points`: public OSRM (`router.project-osrm.org`) over OSM, development-time 2026-09-22.
+- I-5 tip: public Valhalla truck costing (`valhalla1.openstreetmap.de`) over OSM, development-time 2026-09-22; paid miles 22.
+- Hwy 15 tip: public Valhalla auto-profile densify (truck costing rejected as dishonest at this POE); paid miles 16.
 - Elevation: Open-Meteo elevation API.
-- **Not** a truck-class Valhalla/ORS HGV bake. Named debt for Ruth cut.
+- Prefer **Hwy 15 / Pacific Highway** label (not Hwy 99 / Peace Arch) for this POE.
 
-### Named honesty debts (this tip)
+### Ruth KEEP + FIX (landed)
+
+| FIX | Landed |
+| --- | --- |
+| **1 southbound reverse edges** | Authored `surrey_bc_ca`→`blaine_wa_us`→`bellingham_wa_us` with mirrored miles/geometry. CA→US leg carries the same `border_crossing` id `blaine_pacific_highway`, mode `through_freight`, cabotage `forbidden` (countries flipped). Filed under from-country (`ca/legs/BC.json`). Directed uniqueness allows both orientations; runtime adjacency still walks either way via `Leg::other`. |
+| **2 truck-class refine** | I-5 Bellingham↔Blaine: public Valhalla **truck** costing (`valhalla1.openstreetmap.de`, loaded-semi options) + Washington RCW 46.61.410 **60 mph** `hgv:true` speed context. Blaine↔Surrey: public Valhalla **auto** densify on Hwy 15 / Pacific Highway (paid miles kept at 16); FOSSGIS Valhalla **truck** unconstrained returned ~40.5 mi and is **not** adopted. |
+| **3 locations** | `surrey_bc_ca`: City of Surrey truck parking at **17768 96 Avenue** (~41 spaces). `blaine_wa_us`: **TA Express Blaine** (1300 Boblett St / I-5 Exit 275, ~34 truck spaces). Stand-in expand keeps curated yards without unlocking a four-template skyline. |
+
+### Named honesty debts (remaining)
 
 1. **HOS:** US through-freight clock only — never labeled as Canadian HOS / south-of-60 compliance.
-2. **Units / speed:** CA statutory truck caps not researched; tip speed_limits are coarse placeholders.
+2. **Units / speed:** CA statutory truck caps still unresearched on Hwy 15; Blaine↔Surrey speed_limits stay coarse `hgv:false` placeholders.
 3. **Currency:** no CAD purse / FX.
-4. **Border gameplay:** data stub only (`border_crossing` on the Blaine→Surrey leg); no inspection beat / clearance sim.
-5. **HGV geometry:** car-profile OSRM + coarse grades until Ruth cuts truck geometry / regional extract bake.
-6. **Stand-in markets:** Blaine and Surrey are stand-in yards (no surveyed CA career board / cabotage).
+4. **Border gameplay:** data stub only (`border_crossing` both directions); no inspection beat / clearance sim.
+5. **HGV geometry (cross-border):** public FOSSGIS Valhalla truck costing is dishonest at this POE (~40.5 mi vs ~14–16 on Pacific Highway). Remaining debt: regional WA/BC truck bake / ORS key / Josh overnight PBF—**ask Chelsea before overnight**. I-5 tip truck refine is landed.
+6. **Stand-in markets:** Blaine and Surrey stay stand-in markets (curated truck lots only; no CA career board / cabotage).
 7. **Job board:** destinations are same-country as origin (US board will not offer Surrey). Through-freight CA pass-through is driveable; CA domestic dispatch is not Phase A.
 
 

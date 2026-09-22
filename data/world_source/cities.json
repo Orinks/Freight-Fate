@@ -3554,7 +3554,15 @@
       "state": "WA",
       "country": "US",
       "region": "pacific_northwest",
-      "locations": [],
+      "locations": [
+        {
+          "name": "TA Express Blaine",
+          "type": "company_yard",
+          "lat": 48.99126,
+          "lon": -122.73412,
+          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach)."
+        }
+      ],
       "lat": 48.9881108,
       "lon": -122.743575
     },
@@ -7993,7 +8001,15 @@
       "state": "BC",
       "country": "CA",
       "region": "pacific_northwest",
-      "locations": [],
+      "locations": [
+        {
+          "name": "City of Surrey Truck Parking (17768 96 Avenue)",
+          "type": "company_yard",
+          "lat": 49.176804,
+          "lon": -122.7300234,
+          "source_note": "City of Surrey commercial truck parking site at 17768 96 Avenue (Anniedale-Tynehead), Hwy 15 / Pacific Highway corridor. City news and corporate reports advance this City-owned lot (~41 truck spaces) under Temporary Use Permit / licence with Prudential Transportation. Pin matches the Phase A Surrey stand-in coordinates."
+        }
+      ],
       "lat": 49.176804,
       "lon": -122.7300234
     }

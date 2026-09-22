@@ -271,19 +271,49 @@ fn test_each_metro_expands_to_representative_facilities() {
             .map(|loc| loc.facility_type.as_str())
             .collect();
         let curated = city.locations.iter().any(|loc| !loc.template);
-        if is_stand_in_market(&city.key) && !curated {
-            assert!(
-                templates.len() <= 1,
-                "{}: a stand-in market gets one yard, not {:?}",
-                city.name,
-                templates
-            );
-            assert!(templates.iter().all(|kind| *kind == "company_yard"));
+        if is_stand_in_market(&city.key) {
+            let parking_only_curated = curated
+                && city.locations.iter().all(|loc| {
+                    loc.facility_type == "company_yard" || loc.facility_type == "terminal"
+                })
+                && !city.locations.iter().any(|loc| loc.template);
+            if parking_only_curated {
+                // ALCAN Phase A FIX 3: Surrey/Blaine truck lots stay yards.
+                assert!(
+                    city.locations.len() <= 2,
+                    "{}: parking-only stand-in should stay a yard, not {:?}",
+                    city.name,
+                    city.locations
+                        .iter()
+                        .map(|l| l.facility_type.as_str())
+                        .collect::<Vec<_>>()
+                );
+            } else if !curated {
+                assert!(
+                    templates.len() <= 1,
+                    "{}: a stand-in market gets one yard, not {:?}",
+                    city.name,
+                    templates
+                );
+                assert!(templates.iter().all(|kind| *kind == "company_yard"));
+            } else {
+                // Stand-in list + ordinary curated freight (Winona, …): full market.
+                assert!(city.locations.len() >= 5);
+            }
         } else {
             assert!(city.locations.len() >= 5);
         }
         assert!(!city.market_tags.is_empty());
-        assert!(city.locations.iter().any(|loc| loc.template));
+        let parking_only_curated = is_stand_in_market(&city.key)
+            && curated
+            && city
+                .locations
+                .iter()
+                .all(|loc| loc.facility_type == "company_yard" || loc.facility_type == "terminal")
+            && !city.locations.iter().any(|loc| loc.template);
+        if !parking_only_curated {
+            assert!(city.locations.iter().any(|loc| loc.template));
+        }
         assert!(city
             .locations
             .iter()
@@ -881,17 +911,63 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.name,
             city.lon
         );
-        let floor = if is_stand_in_market(&city.key) && city.locations.iter().all(|l| l.template) {
-            1
-        } else {
-            2
-        };
+        let floor = if is_stand_in_market(&city.key) { 1 } else { 2 };
         assert!(
             city.locations.len() >= floor,
             "{}: too few freight locations",
             city.name
         );
     }
+}
+
+#[test]
+fn test_alcan_phase_a_tip_is_bidirectional() {
+    let world = world();
+    let south = world
+        .shortest_route("surrey_bc_ca", "bellingham_wa_us", None, false)
+        .expect("surrey loads")
+        .expect("southbound ALCAN tip must route");
+    assert_eq!(
+        south.cities,
+        vec![
+            "surrey_bc_ca".to_string(),
+            "blaine_wa_us".to_string(),
+            "bellingham_wa_us".to_string()
+        ]
+    );
+    let north = world
+        .shortest_route("bellingham_wa_us", "surrey_bc_ca", None, false)
+        .expect("bellingham loads")
+        .expect("northbound ALCAN tip must route");
+    assert_eq!(
+        north.cities,
+        vec![
+            "bellingham_wa_us".to_string(),
+            "blaine_wa_us".to_string(),
+            "surrey_bc_ca".to_string()
+        ]
+    );
+    // Authored reverse edges exist (FIX 1), not only undirected adjacency.
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    assert!(directed.contains(&("surrey_bc_ca", "blaine_wa_us")));
+    assert!(directed.contains(&("blaine_wa_us", "bellingham_wa_us")));
+    assert!(directed.contains(&("blaine_wa_us", "surrey_bc_ca")));
+    assert!(directed.contains(&("bellingham_wa_us", "blaine_wa_us")));
+    // Curated truck lots (FIX 3).
+    let surrey = world.city("surrey_bc_ca").expect("surrey");
+    assert!(surrey
+        .locations
+        .iter()
+        .any(|loc| loc.name.contains("17768") || loc.name.contains("Truck Parking")));
+    let blaine = world.city("blaine_wa_us").expect("blaine");
+    assert!(blaine
+        .locations
+        .iter()
+        .any(|loc| loc.name.contains("TA Express")));
 }
 
 #[test]
@@ -920,12 +996,16 @@ fn test_legs_are_sane_and_unique() {
             (10.0..=800.0).contains(&leg.miles),
             "absurd mileage: {leg:?}"
         );
-        let pair = if leg.a <= leg.b {
-            (leg.a.clone(), leg.b.clone())
-        } else {
-            (leg.b.clone(), leg.a.clone())
-        };
-        assert!(seen.insert(pair), "duplicate leg {}-{}", leg.a, leg.b);
+        // Directed uniqueness: the graph may author both A→B and B→A (ALCAN
+        // Phase A FIX 1 southbound reverse edges). Undirected adjacency still
+        // walks either orientation via Leg::other.
+        let pair = (leg.a.clone(), leg.b.clone());
+        assert!(
+            seen.insert(pair),
+            "duplicate directed leg {}-{}",
+            leg.a,
+            leg.b
+        );
     }
 }
 

@@ -5,10 +5,12 @@
 ### Changed
 
 - Phase A ALCAN: US job boards stay same-country (no Canadian destinations on the through-freight corridor tip).
+- Phase A ALCAN FIX: I-5 Bellingham↔Blaine uses public Valhalla truck costing and Washington RCW 46.61.410 60 mph HGV speed context; Hwy 15 Blaine↔Surrey keeps paid miles with Valhalla auto densify (FOSSGIS truck costing rejected as dishonest at this POE).
 
 ### Added
 
 - Phase A ALCAN tip: Blaine Pacific Highway entry nodes and legs (`bellingham_wa_us` → `blaine_wa_us` → `surrey_bc_ca`) with honest public-OSRM mileages on `feat/career-2.0`.
+- Phase A ALCAN FIX 1–3: southbound reverse edges (`surrey_bc_ca`→`blaine_wa_us`→`bellingham_wa_us`) with matching border metadata; Surrey City truck parking and TA Express Blaine as curated stand-in yards; Hwy 15 / Pacific Highway labeling preferred for this POE.
 
 - **The ELD now tracks your 70-hour, 8-day work cycle.** When a day of cycle hours is left the status line says so, and a 34-hour rest starts a fresh week.
 
