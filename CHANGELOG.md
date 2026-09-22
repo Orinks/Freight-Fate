@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Phase A ALCAN: Tok and Fairbanks resolve to Alaska Time on the shipped-city timezone gate (CONUS-only check widened for the AK terminus).
 - Phase A ALCAN: US job boards stay same-country (no Canadian destinations on the through-freight corridor tip).
 - Phase A ALCAN FIX: I-5 Bellingham↔Blaine uses public Valhalla truck costing and Washington RCW 46.61.410 60 mph HGV speed context; Hwy 15 Blaine↔Surrey keeps paid miles with Valhalla auto densify (FOSSGIS truck costing rejected as dishonest at this POE).
 
