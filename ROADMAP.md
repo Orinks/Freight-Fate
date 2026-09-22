@@ -224,10 +224,17 @@ These items are part of the release-gate sweep:
       confirmations) now ducks the bed the same way when game sounds step
       back for speech is on. The cue levels were never low; the unducked
       road bed was masking them.
-- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE;
-      last open world-data item for 1.9. The real-zone floor and the
-      merge-free opening miles landed 2026-08-16; what remains is departure
-      chains for the other 72 percent of facilities, a data project.
+- [x] Departing straight into a hazard at route mile zero -- DONE,
+      CLOSED 2026-09-22 at the current `origin/dev` tip (`e2d27d5b`),
+      closing the 1.9 release gate at current tip coverage. The real-zone
+      floor and the merge-free opening miles landed 2026-08-16. The Sep 16-17
+      ship-line history already on `dev` includes `2cbd19ed`, `a378909c`,
+      `fdcbe821`, `ba06486f`, later `4d2150cb` (2,416/5,037, about 48%),
+      and `5f26a6d8`, among the follow-ups. At this tip,
+      `data/facility_approaches.json` has 2,456 / 4,271 `turn_level`
+      approaches (57.5%); its `generated.merge` metadata is dated 2026-09-20,
+      and the all-49-state batch is present. This closes the gate at the
+      documented coverage; it does not claim turn geometry for every facility.
       Builder side landed 2026-09-16: the turn-level route pass now takes
       cold storage, food processors, grocery DCs, grain elevators and ports,
       and a state batch merges into the checked-in file instead of
@@ -299,7 +306,10 @@ These items are part of the release-gate sweep:
       at Baton Rouge and New Orleans, the Connecticut at Hartford, a
       motorway or water elsewhere), 2 would need a private road mid-route
       or a gate on a public street, 1 has under half a mile of public
-      street, and 3 have a private stretch past the cut (see below).
+      street, and 3 have a private stretch past the cut (see below). A
+      matcher/sibling facility-type widen is explicitly deferred past
+      2026-10-04. The ruled-out private-yard and no-path leftovers remain
+      honest refusals, not a data-PR target.
 - [x] Re-sweep facility endpoints with a matcher that reads an object's own
       tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
       ruling that the 1,396 chains to non-sites stay until a re-sweep
