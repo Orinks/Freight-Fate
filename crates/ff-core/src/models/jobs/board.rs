@@ -403,8 +403,27 @@ impl<'w> JobBoard<'w> {
             }
         }
         let mut computed: Vec<Candidate> = Vec::new();
+        // Phase A ALCAN: the continuous graph may reach Canada pass-through
+        // towns, but the job board must not mint CA destinations for a US
+        // carrier (through-freight corridor ≠ cabotage board). Keep offers
+        // same-country until a Canada domestic career board is an explicit cut.
+        let origin_country = self
+            .world
+            .cities
+            .get(city)
+            .map(|c| c.country.as_str())
+            .unwrap_or("US");
         for dest in self.world.city_names() {
             if dest == city {
+                continue;
+            }
+            let dest_country = self
+                .world
+                .cities
+                .get(&dest)
+                .map(|c| c.country.as_str())
+                .unwrap_or("US");
+            if dest_country != origin_country {
                 continue;
             }
             if let Ok(Some(route)) = self.world.supported_route(city, &dest, None) {

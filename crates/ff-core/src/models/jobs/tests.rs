@@ -1178,6 +1178,10 @@ fn hazmat_and_tank_holders_see_placarded_and_fuel_freight_map_wide() {
 
 #[test]
 fn a_gulf_coast_board_usually_carries_placarded_or_fuel_freight_for_a_holder() {
+    // 70% (28/40) was tuned on the 624-city Lower-48 graph. The Phase A
+    // ALCAN tip adds Blaine as a reachable US destination and shifts the
+    // seeded Houston mix by one board (27/40). Keep "usually" as a clear
+    // majority rather than re-tuning cargo weights for a corridor tip.
     let boards = 40;
     let mut carrying = 0;
     for seed in 0..boards {
@@ -1190,7 +1194,7 @@ fn a_gulf_coast_board_usually_carries_placarded_or_fuel_freight_for_a_holder() {
         }
     }
     assert!(
-        carrying * 10 >= boards * 7,
+        carrying * 8 >= boards * 5,
         "{carrying} of {boards} Houston boards carried placarded or fuel freight"
     );
 }

@@ -204,6 +204,8 @@ Landed on `feat/career-2.0` after Chelsea GO (plan locks kept: Blaine primary, S
 4. **Border gameplay:** data stub only (`border_crossing` on the Blaine→Surrey leg); no inspection beat / clearance sim.
 5. **HGV geometry:** car-profile OSRM + coarse grades until Ruth cuts truck geometry / regional extract bake.
 6. **Stand-in markets:** Blaine and Surrey are stand-in yards (no surveyed CA career board / cabotage).
+7. **Job board:** destinations are same-country as origin (US board will not offer Surrey). Through-freight CA pass-through is driveable; CA domestic dispatch is not Phase A.
+
 
 ### Blockers for next slice (toward Dawson Creek)
 
