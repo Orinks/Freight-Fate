@@ -64,10 +64,32 @@ def test_multi_country_requires_country_field():
         iw.build_country_files(data, index)
 
 
-def test_cross_country_leg_is_rejected():
+def test_cross_country_leg_files_under_from_country():
+    """Phase A ALCAN: Blaine→Surrey-style edges live in the from-country shard."""
     data = {
-        "cities": {"A": {"country": "US"}, "B": {"country": "GB"}},
-        "legs": [{"from": "A", "to": "B"}],
+        "cities": {
+            "A": {"country": "US", "state": "WA"},
+            "B": {"country": "GB", "state": "EN"},
+        },
+        "legs": [{"from": "A", "to": "B", "miles": 1}],
+    }
+    index = {
+        "countries": [
+            {"code": "US", "path": "us", "legs_dir": "legs"},
+            {"code": "GB", "path": "gb", "legs_dir": "legs"},
+        ]
+    }
+    files = iw.build_country_files(data, index)
+    us_legs = json.loads(_text_for(files, "us/legs/WA.json"))["legs"]
+    assert us_legs == [{"from": "A", "to": "B", "miles": 1}]
+    # No GB shard is emitted when GB has no originating legs.
+    assert not any(str(path).endswith("gb/legs/EN.json") for path in files)
+
+
+def test_city_with_unknown_country_is_rejected():
+    data = {
+        "cities": {"A": {"country": "US"}, "B": {"country": "XX"}},
+        "legs": [],
     }
     index = {
         "countries": [

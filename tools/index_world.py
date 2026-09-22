@@ -73,13 +73,22 @@ def build_country_files(data: dict[str, Any], index: dict[str, Any]) -> dict[Pat
         c["code"]: {"cities": {}, "legs": []} for c in countries
     }
     for name, city in data.get("cities", {}).items():
-        by_country[_country_of(city, single)]["cities"][name] = city
+        code = _country_of(city, single)
+        if code not in by_country:
+            raise SystemExit(f"City {name} country {code!r} is not in world_data/index.json")
+        by_country[code]["cities"][name] = city
     for leg in data.get("legs", []):
         from_city = data["cities"].get(leg["from"], {})
         to_city = data["cities"].get(leg["to"], {})
         code = _country_of(from_city, single)
-        if _country_of(to_city, single) != code:
-            raise SystemExit(f"Cross-country leg {leg['from']}->{leg['to']} is not supported.")
+        # Phase A ALCAN: cross-border legs (e.g. Blaine WA -> Surrey BC) are
+        # filed under the *from* country shard. Cabotage stays forbidden in
+        # leg border_crossing metadata; the indexer only places the edge.
+        to_code = _country_of(to_city, single)
+        if to_code != code and to_code not in by_country:
+            raise SystemExit(
+                f"Cross-country leg {leg['from']}->{leg['to']} targets unknown country {to_code!r}"
+            )
         by_country[code]["legs"].append(leg)
 
     files: dict[Path, str] = {}

@@ -131,6 +131,9 @@ STATE_REGION: dict[str, str] = {
     # Pacific Northwest
     "OR": "pacific_northwest",
     "WA": "pacific_northwest",
+    # Phase A ALCAN through-freight BC/YT share PNW flavor until Canada taxonomy.
+    "BC": "pacific_northwest",
+    "YT": "pacific_northwest",
 }
 
 

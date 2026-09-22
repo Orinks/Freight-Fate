@@ -3549,6 +3549,15 @@
       "lat": 48.7519,
       "lon": -122.4787
     },
+    "blaine_wa_us": {
+      "spoken_city": "Blaine",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 48.9881108,
+      "lon": -122.743575
+    },
     "pendleton_or_us": {
       "spoken_city": "Pendleton",
       "state": "OR",

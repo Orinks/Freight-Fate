@@ -1,0 +1,13 @@
+{
+  "cities": {
+    "surrey_bc_ca": {
+      "spoken_city": "Surrey",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 49.176804,
+      "lon": -122.7300234
+    }
+  }
+}

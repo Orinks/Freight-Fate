@@ -3549,6 +3549,15 @@
       "lat": 48.7519,
       "lon": -122.4787
     },
+    "blaine_wa_us": {
+      "spoken_city": "Blaine",
+      "state": "WA",
+      "country": "US",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 48.9881108,
+      "lon": -122.743575
+    },
     "pendleton_or_us": {
       "spoken_city": "Pendleton",
       "state": "OR",
@@ -7978,6 +7987,15 @@
           "source": "Real frozen beef patty plant, 1208 Progress Boulevard in the Elberton Industrial Park; Food Safety and Inspection Service inspected establishment. Development Authority of Elbert County employer list, accessed 2026-08-16."
         }
       ]
+    },
+    "surrey_bc_ca": {
+      "spoken_city": "Surrey",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "locations": [],
+      "lat": 49.176804,
+      "lon": -122.7300234
     }
   }
 }

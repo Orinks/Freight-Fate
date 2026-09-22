@@ -139,6 +139,10 @@ pub const STATE_REGION: &[(&str, &str)] = &[
     // Pacific Northwest
     ("OR", "pacific_northwest"),
     ("WA", "pacific_northwest"),
+    // Phase A ALCAN through-freight: Lower Mainland / corridor BC (and YT later)
+    // share PNW weather/hazard flavor until a Canada region taxonomy lands.
+    ("BC", "pacific_northwest"),
+    ("YT", "pacific_northwest"),
 ];
 
 /// Return the canonical region for a city by state code and coordinates.
