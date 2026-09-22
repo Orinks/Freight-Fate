@@ -6,6 +6,8 @@ No city JSON, legs, or Canada/AK country packs in this tip.
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
 
+**Locked Phase A routing decisions:** the primary POE is **Blaine Pacific Highway**; **Sumas is an alternate only if the POE decision flips**. With Blaine, the BC entry is `surrey_bc_ca` or another **verified tractor-parking node on Hwy 99**. `abbotsford_bc_ca` is allowed only when the POE is Sumas. The first legs must retain **real routed ALCAN highway mileage**, not compressed short-hop proxies.
+
 Deferred mentions already in-tree:
 - `docs/highway-spider-methodology.md` §1 Phase 3 — Canadian corridors deferred; points here.
 - `data/spider/gap-fill/HANDOFF.md` — U.S. coverage first; Canada (Alcan program) unblocks after, “gated anyway on the 96 GB RAM arrival for the world extract.”
@@ -49,7 +51,7 @@ Key shape matches current slug rule: `{name}_{region}_{country}` (e.g. `bellingh
 | Role | Proposed key | Notes |
 | --- | --- | --- |
 | US attach (exists) | `bellingham_wa_us` | Do not re-mint |
-| BC entry service node | `abbotsford_bc_ca` (default proposal) | One BC entry service node with tractor parking; not a tourism lodge. With primary POE **Blaine (Pacific Hwy)** Ruth may pick a nearer Blaine-side service city instead; if POE is Sumas, Abbotsford fits naturally. **Ruth locks key with POE.** |
+| BC entry service node | `surrey_bc_ca` (Blaine primary) | With Blaine Pacific Highway, use Surrey or another **verified tractor-parking node on Hwy 99**; not a tourism lodge. `abbotsford_bc_ca` is allowed only if the POE flips to Sumas. **Ruth locks key with POE.** |
 | Mile 0 ALCAN | `dawson_creek_bc_ca` | Required |
 | ALCAN BC | `fort_nelson_bc_ca` | Required |
 | ALCAN YT | `watson_lake_yt_ca` | Required |
@@ -57,9 +59,10 @@ Key shape matches current slug rule: `{name}_{region}_{country}` (e.g. `bellingh
 | AK entry | `tok_ak_us` | Required |
 | Main AK node (Phase A end) | `fairbanks_ak_us` | Required; Phase A terminus |
 
-### Preferred primary POE
+### Locked primary POE
 
-- **Primary:** Pacific Highway **Blaine** (unless Ruth prefers Sumas).
+- **Primary:** Pacific Highway **Blaine**.
+- **Alternate only:** **Sumas**; use it only if the POE decision explicitly flips. Only then is `abbotsford_bc_ca` an acceptable BC entry service node.
 - Model the crossing as **border data on the cross-border leg(s)**, not as a fake “teleport city.” Optional US-side service pin only if needed for fuel/parking honesty; do not invent a career city just to name the booth.
 
 ### Allowed pass-through fuel/parking towns (no full careers)
@@ -83,15 +86,15 @@ Honesty on Blaine→Dawson Creek may add checkpoints / service pins without disp
 
 Direction shown northbound; expect matching southbound edges when the graph lands.
 
-1. `bellingham_wa_us` → **(Blaine Pacific Hwy POE)** → BC entry service node (`abbotsford_bc_ca` or Ruth-chosen Blaine-side pair)
-2. BC entry → …optional pass-throughs (Prince George, Fort St. John, …)… → `dawson_creek_bc_ca`
+1. `bellingham_wa_us` → **(Blaine Pacific Hwy POE)** → `surrey_bc_ca` (or a verified Hwy 99 tractor-parking node; `abbotsford_bc_ca` only if POE flips to Sumas)
+2. BC entry → …optional pass-throughs (Prince George, Fort St. John, …)… → `dawson_creek_bc_ca` using the real routed highway mileage
 3. `dawson_creek_bc_ca` → `fort_nelson_bc_ca` (Alaska Hwy)
 4. `fort_nelson_bc_ca` → `watson_lake_yt_ca`
 5. `watson_lake_yt_ca` → `whitehorse_yt_ca`
 6. `whitehorse_yt_ca` → **(Poker Creek AK / Beaver Creek YT border)** → `tok_ak_us`
 7. `tok_ak_us` → `fairbanks_ak_us`
 
-No Seattle→Fairbanks skip. No short-hop “ALCAN” that omits Mile 0 / Whitehorse / the Poker Creek–Beaver Creek crossing.
+No Seattle→Fairbanks skip. No short-hop “ALCAN” that omits Mile 0 / Whitehorse / the Poker Creek–Beaver Creek crossing, and no compressed `dawson_creek_bc_ca` → `tok_ak_us` proxy. The first legs must preserve verified, routed ALCAN road mileage through each corridor segment; do not substitute straight-line, guessed, or short-hop distances.
 
 ---
 
@@ -129,8 +132,8 @@ Exact schema lands with the first city/leg PR **after** Ruth cuts this plan — 
 | --- | --- | --- |
 | Country packs | `index.json` → US only | CA pack path; AK cities under US (or explicit AK handling); geo names for BC/YT |
 | Units | Player `imperial_units` toggle; sim stores miles | Jurisdiction truck caps beyond US state mph table; `docs/map-enrichment-recipe.md` already says non-US needs jurisdiction keys + canonical km/h defaults |
-| Currency | USD-centric money / speech | CAD (and FX or dual purse) not required to *drive* the corridor, but pay/fuel speech will lie if ignored — flag for follow-up |
-| HOS | FMCSA-style clock | Canadian HOS / south-of-60 vs north rules not modeled; Phase A may ship corridor geometry with “US clock while through-freight” only if Ruth accepts that as temporary — do not silently invent CA rules |
+| Currency | USD-centric money / speech | CAD purse (and FX or dual purse) is deferred; it is not required to *drive* the corridor, but pay/fuel speech will lie if ignored — flag for follow-up |
+| HOS | FMCSA-style clock | Canadian HOS / south-of-60 vs north rules not modeled; Phase A may use the US through-freight clock only as a **named HOS honesty debt** accepted for this tip. Never silently label it Canadian law or imply Canadian compliance. |
 | Borders | State-line cues | International border mechanic still **deferred**; need at least data hooks (above) before pretending clearance gameplay |
 | Map extracts | US Geofabrik / self-hosted ORS-Overpass for US | **Need BC / YT / AK extracts** — US extract alone cannot bake honest ALCAN geometry |
 | HANDOFF / extract gate | `data/spider/gap-fill/HANDOFF.md` cites **96 GB RAM world extract** as a Canada unblock | **Soft for Phase A** if public Overpass / routing / Geofabrik *regional* downloads already cover the ALCAN filament honestly. Escalate to a full PBF / Valhalla-class bake only when APIs fail honesty — see §5.1 |
@@ -159,14 +162,15 @@ For ALCAN / CA / AK world-data work **after Ruth cuts this plan**:
 - Ferry-as-drive via Haines/Skagway.
 - Europe (#195) or rest-of-Canada bulk before Alaska map phase.
 - Silent use of car-speed limits / mph-only tables on CA/YT statutory truck caps.
+- CAD purse / FX work, deep border gameplay, and other full Canada or Alaska economy work are deferred from this plan tip.
 
 ---
 
 ## 7. GO gates (before first city/leg PR)
 
-1. Ruth cuts this plan (POE Blaine vs Sumas; BC entry service key; pass-through list).
+1. Ruth cuts this plan (Blaine Pacific Highway primary; Sumas only if the POE flips; Surrey/Hwy 99 BC entry key; pass-through list).
 2. Confirm extract path: BC/YT/AK coverage via public APIs / regional Geofabrik first (see §5.1); treat 96 GB HANDOFF gate as soft unless APIs fail honesty.
-3. Agree temporary stance on HOS/currency/units for through-freight Phase A vs hard blockers.
+3. Name the temporary HOS honesty debt (US through-freight clock only) and keep CAD purse, deep border gameplay, and full-country expansion deferred.
 4. Only then: first PR adds country/geo hooks + corridor cities/legs — **still no rest-of-Canada bulk.**
 
 After Phase A lands continuously to Fairbanks: **Phase B = Alaska expansion** (named next), then Phase C rest of Canada, then Phase D Europe.
