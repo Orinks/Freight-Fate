@@ -133,7 +133,18 @@ Exact schema lands with the first city/leg PR **after** Ruth cuts this plan — 
 | HOS | FMCSA-style clock | Canadian HOS / south-of-60 vs north rules not modeled; Phase A may ship corridor geometry with “US clock while through-freight” only if Ruth accepts that as temporary — do not silently invent CA rules |
 | Borders | State-line cues | International border mechanic still **deferred**; need at least data hooks (above) before pretending clearance gameplay |
 | Map extracts | US Geofabrik / self-hosted ORS-Overpass for US | **Need BC / YT / AK extracts** — US extract alone cannot bake honest ALCAN geometry |
-| HANDOFF gate | `data/spider/gap-fill/HANDOFF.md` cites **96 GB RAM world extract** as a Canada unblock gate | **Confirm whether that gate still blocks** tooling for Phase A corridor extracts, or whether corridor-sized extracts can proceed earlier |
+| HANDOFF / extract gate | `data/spider/gap-fill/HANDOFF.md` cites **96 GB RAM world extract** as a Canada unblock | **Soft for Phase A** if public Overpass / routing / Geofabrik *regional* downloads already cover the ALCAN filament honestly. Escalate to a full PBF / Valhalla-class bake only when APIs fail honesty — see §5.1 |
+
+
+### 5.1 Extract / bake ops policy (owner)
+
+For ALCAN / CA / AK world-data work **after Ruth cuts this plan**:
+
+1. **Prefer public APIs first.** Overpass, public routing, and Geofabrik *regional* downloads as needed. Slow is fine; stay honest. Corridor-scale Overpass / API work can run on Chelsea’s Linux box.
+2. **Full PBF bake or Valhalla-class jobs** (only when APIs cannot keep the filament honest): run on **Josh (Windows)**, with large OSM on **E: (SanDisk SSD)** — not C: or D:. **Ask Chelsea before starting anything that needs Josh left awake overnight** (that machine often sleeps).
+3. **Do not assume Chelsea’s Linux box can hold Valhalla tiles.** It has 16 GB RAM and no swap; Valhalla-class tile builds OOM there.
+
+**96 GB HANDOFF gate:** soft if APIs cover the ALCAN filament. Only escalate to Josh for bulk extract when APIs fail honesty. Still: **plan tip → Ruth cut → then data.** No `world_data` bulk in this tip.
 
 ---
 
@@ -154,7 +165,7 @@ Exact schema lands with the first city/leg PR **after** Ruth cuts this plan — 
 ## 7. GO gates (before first city/leg PR)
 
 1. Ruth cuts this plan (POE Blaine vs Sumas; BC entry service key; pass-through list).
-2. Confirm extract path: BC/YT/AK coverage available without waiting on a full “rest of Canada” board; resolve 96 GB HANDOFF gate question.
+2. Confirm extract path: BC/YT/AK coverage via public APIs / regional Geofabrik first (see §5.1); treat 96 GB HANDOFF gate as soft unless APIs fail honesty.
 3. Agree temporary stance on HOS/currency/units for through-freight Phase A vs hard blockers.
 4. Only then: first PR adds country/geo hooks + corridor cities/legs — **still no rest-of-Canada bulk.**
 
