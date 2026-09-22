@@ -1,7 +1,7 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **plan tip for cut before any `world_data` bulk.** Branch: `feat/career-2.0`.
-No city JSON, legs, or Canada/AK country packs in this tip.
+Status: **Phase A first city/leg tip landed** on `feat/career-2.0` (Bellingham → Blaine → Surrey). Ruth geometry cut next.
+Still no Anchorage, no full Canada board, no Dawson→Tok short-hop.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -174,3 +174,40 @@ For ALCAN / CA / AK world-data work **after Ruth cuts this plan**:
 4. Only then: first PR adds country/geo hooks + corridor cities/legs — **still no rest-of-Canada bulk.**
 
 After Phase A lands continuously to Fairbanks: **Phase B = Alaska expansion** (named next), then Phase C rest of Canada, then Phase D Europe.
+
+
+---
+
+## 8. First tip landed (Bellingham → Blaine → Surrey)
+
+Landed on `feat/career-2.0` after Chelsea GO (plan locks kept: Blaine primary, Surrey BC entry, no Abbotsford).
+
+| Key / leg | Miles | Notes |
+| --- | --- | --- |
+| `bellingham_wa_us` | (exists) | US attach; unchanged |
+| `blaine_wa_us` | — | New US stand-in service pin near Pacific Highway POE |
+| `surrey_bc_ca` | — | New CA stand-in; pin at City of Surrey truck parking **17768 96 Avenue** (Hwy 15 / Pacific Highway corridor) |
+| `bellingham_wa_us` → `blaine_wa_us` | **22** | I-5; public OSRM driving geometry 2026-09-22 |
+| `blaine_wa_us` → `surrey_bc_ca` | **16** | Hwy 15 / Pacific Highway via Blaine POE; `border_crossing` stub (`through_freight`, cabotage forbidden) |
+
+### Mileage / geometry source
+
+- Route distance + `route_points`: public OSRM (`router.project-osrm.org`) over OSM, development-time 2026-09-22.
+- Elevation: Open-Meteo elevation API.
+- **Not** a truck-class Valhalla/ORS HGV bake. Named debt for Ruth cut.
+
+### Named honesty debts (this tip)
+
+1. **HOS:** US through-freight clock only — never labeled as Canadian HOS / south-of-60 compliance.
+2. **Units / speed:** CA statutory truck caps not researched; tip speed_limits are coarse placeholders.
+3. **Currency:** no CAD purse / FX.
+4. **Border gameplay:** data stub only (`border_crossing` on the Blaine→Surrey leg); no inspection beat / clearance sim.
+5. **HGV geometry:** car-profile OSRM + coarse grades until Ruth cuts truck geometry / regional extract bake.
+6. **Stand-in markets:** Blaine and Surrey are stand-in yards (no surveyed CA career board / cabotage).
+
+### Blockers for next slice (toward Dawson Creek)
+
+- Extend BC pass-throughs (`prince_george_bc_ca`, `fort_st_john_bc_ca`) + `dawson_creek_bc_ca` with **real** routed miles (no short-hop).
+- City lat test currently asserts `lat < 50.0` (`data_world.rs`) — blocks northern BC / YT / AK keys until raised.
+- Prefer public Overpass / regional Geofabrik before Josh overnight PBF/Valhalla (ask Chelsea).
+- Still no Anchorage (Phase B).
