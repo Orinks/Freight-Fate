@@ -900,7 +900,9 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.region
         );
         assert!(
-            24.0 < city.lat && city.lat < 50.0,
+            // Northern BC ALCAN inland (Prince George / Dawson Creek / Fort St. John)
+            // sits above 50°N; keep CONUS+southern-CA floor, raise ceiling for Phase A.
+            24.0 < city.lat && city.lat < 60.0,
             "{}: lat {}",
             city.name,
             city.lat
@@ -968,6 +970,88 @@ fn test_alcan_phase_a_tip_is_bidirectional() {
         .locations
         .iter()
         .any(|loc| loc.name.contains("TA Express")));
+}
+
+#[test]
+fn test_alcan_phase_a_inland_filament_to_dawson_creek() {
+    let world = world();
+    let north = world
+        .shortest_route("surrey_bc_ca", "dawson_creek_bc_ca", None, false)
+        .expect("surrey loads")
+        .expect("inland ALCAN filament must reach Dawson Creek Mile 0");
+    assert_eq!(
+        north.cities,
+        vec![
+            "surrey_bc_ca".to_string(),
+            "prince_george_bc_ca".to_string(),
+            "dawson_creek_bc_ca".to_string(),
+        ]
+    );
+    let south = world
+        .shortest_route("dawson_creek_bc_ca", "surrey_bc_ca", None, false)
+        .expect("dawson creek loads")
+        .expect("southbound inland filament must route");
+    assert_eq!(
+        south.cities,
+        vec![
+            "dawson_creek_bc_ca".to_string(),
+            "prince_george_bc_ca".to_string(),
+            "surrey_bc_ca".to_string(),
+        ]
+    );
+    // Fort St. John is the Alaska Hwy pass-through north of Mile 0 (not a skip).
+    let fsj = world
+        .shortest_route("dawson_creek_bc_ca", "fort_st_john_bc_ca", None, false)
+        .expect("dawson creek loads")
+        .expect("Dawson Creek must reach Fort St. John on the Alaska Highway");
+    assert_eq!(
+        fsj.cities,
+        vec![
+            "dawson_creek_bc_ca".to_string(),
+            "fort_st_john_bc_ca".to_string(),
+        ]
+    );
+    // Inland BC filament is authored as directed edges both ways (no border
+    // on these legs — border_crossing stays Blaine POE only in source JSON).
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    for (a, b) in [
+        ("surrey_bc_ca", "prince_george_bc_ca"),
+        ("prince_george_bc_ca", "surrey_bc_ca"),
+        ("prince_george_bc_ca", "dawson_creek_bc_ca"),
+        ("dawson_creek_bc_ca", "prince_george_bc_ca"),
+        ("dawson_creek_bc_ca", "fort_st_john_bc_ca"),
+        ("fort_st_john_bc_ca", "dawson_creek_bc_ca"),
+    ] {
+        assert!(
+            directed.contains(&(a, b)),
+            "missing directed inland leg {a}->{b}"
+        );
+    }
+    // Paid inland miles stay in the honest truck-routed band (not short-hop).
+    let pg = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "surrey_bc_ca" && leg.b == "prince_george_bc_ca")
+        .expect("surrey->prince george");
+    assert!(
+        (400.0..=520.0).contains(&pg.miles),
+        "Surrey–Prince George must be real Hwy 1/97 miles, got {}",
+        pg.miles
+    );
+    let dc = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "prince_george_bc_ca" && leg.b == "dawson_creek_bc_ca")
+        .expect("prince george->dawson creek");
+    assert!(
+        (200.0..=300.0).contains(&dc.miles),
+        "Prince George–Dawson Creek must be real Hwy 97 miles, got {}",
+        dc.miles
+    );
 }
 
 #[test]

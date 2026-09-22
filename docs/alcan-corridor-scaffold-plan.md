@@ -1,6 +1,6 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed** on `feat/career-2.0` (Bellingham ↔ Blaine ↔ Surrey, both directions). Still no Anchorage, no full Canada board, no Dawson Creek / inland ALCAN until Ruth GO.
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland filament to Dawson Creek Mile 0 landed** on `feat/career-2.0` (Bellingham ↔ Blaine ↔ Surrey ↔ Prince George ↔ Dawson Creek ↔ Fort St. John). Still no Anchorage, no full Canada board, no Fort Nelson / Yukon / Tok until Ruth GO.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -215,9 +215,30 @@ Landed on `feat/career-2.0` after Chelsea GO (plan locks kept: Blaine primary, S
 7. **Job board:** destinations are same-country as origin (US board will not offer Surrey). Through-freight CA pass-through is driveable; CA domestic dispatch is not Phase A.
 
 
-### Blockers for next slice (toward Dawson Creek)
+### Inland filament landed (Surrey → Dawson Creek Mile 0)
 
-- Extend BC pass-throughs (`prince_george_bc_ca`, `fort_st_john_bc_ca`) + `dawson_creek_bc_ca` with **real** routed miles (no short-hop).
-- City lat test currently asserts `lat < 50.0` (`data_world.rs`) — blocks northern BC / YT / AK keys until raised.
+Ruth GO after KEEP on FIX tip `43a85ac0`. Daytime public Valhalla truck costing only (no Josh overnight PBF/Valhalla).
+
+| Key / leg | Miles | Notes |
+| --- | --- | --- |
+| `prince_george_bc_ca` | — | Pass-through stand-in; Husky/Esso Travel Centre pin (1148 Pacific St) |
+| `dawson_creek_bc_ca` | — | ALCAN Mile 0; city pin at Mile 0 milepost; Husky 1700 Alaska Hwy lot |
+| `fort_st_john_bc_ca` | — | Alaska Hwy pass-through north of Mile 0; Smith Fuel Services pin |
+| `surrey_bc_ca` ↔ `prince_george_bc_ca` | **465** | Hwy 1 / Hwy 97 (Fraser Canyon + Cariboo); both directions; public Valhalla truck |
+| `prince_george_bc_ca` ↔ `dawson_creek_bc_ca` | **254** | Hwy 97 / John Hart Highway; both directions; public Valhalla truck |
+| `dawson_creek_bc_ca` ↔ `fort_st_john_bc_ca` | **45** | Alaska Highway; both directions; public Valhalla truck |
+
+No `border_crossing` on inland legs (border metadata stays at Blaine POE only). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
+
+### Mileage / geometry source (inland)
+
+- Public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options) 2026-09-22; paid miles match router (±5 mi band rounded).
+- Elevation: Open-Meteo elevation API along densified shape (~30 mi samples on long legs).
+- City lat integrity ceiling raised to `60.0` for northern BC (YT / AK still need a later raise).
+
+### Blockers for next slice (toward Fort Nelson / Yukon)
+
+- Continue ALCAN north: `fort_nelson_bc_ca` → `watson_lake_yt_ca` → `whitehorse_yt_ca` with real routed miles.
+- Lat ceiling `60.0` blocks Whitehorse (~60.7) / AK until raised again; lon ceiling `-125` blocks AK.
 - Prefer public Overpass / regional Geofabrik before Josh overnight PBF/Valhalla (ask Chelsea).
 - Still no Anchorage (Phase B).

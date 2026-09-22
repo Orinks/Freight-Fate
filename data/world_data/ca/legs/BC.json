@@ -1,6 +1,814 @@
 {
   "legs": [
     {
+      "from": "dawson_creek_bc_ca",
+      "to": "fort_st_john_bc_ca",
+      "miles": 45,
+      "highway": "Alaska Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 55.75847,
+            "lon": -120.22868
+          },
+          {
+            "at_mi": 7.5,
+            "lat": 55.83302,
+            "lon": -120.3608
+          },
+          {
+            "at_mi": 15.0,
+            "lat": 55.90391,
+            "lon": -120.50208
+          },
+          {
+            "at_mi": 22.5,
+            "lat": 55.98233,
+            "lon": -120.61548
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 56.08838,
+            "lon": -120.64676
+          },
+          {
+            "at_mi": 37.5,
+            "lat": 56.18136,
+            "lon": -120.70313
+          },
+          {
+            "at_mi": 45.0,
+            "lat": 56.24188,
+            "lon": -120.80582
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2188.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 7.5,
+            "elevation_ft": 2486.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 15.0,
+            "elevation_ft": 2345.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 22.5,
+            "elevation_ft": 2414.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 2372.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 37.5,
+            "elevation_ft": 2007.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 45.0,
+            "elevation_ft": 2257.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 45.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 45.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 45.2 mi; paid miles 45. BC inland ALCAN through-freight filament (no border on this leg).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
+      "from": "dawson_creek_bc_ca",
+      "to": "prince_george_bc_ca",
+      "miles": 254,
+      "highway": "Hwy 97 / John Hart Highway",
+      "terrain": "mountain",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 55.75847,
+            "lon": -120.22868
+          },
+          {
+            "at_mi": 31.8,
+            "lat": 55.77382,
+            "lon": -121.009
+          },
+          {
+            "at_mi": 63.5,
+            "lat": 55.69396,
+            "lon": -121.64139
+          },
+          {
+            "at_mi": 95.2,
+            "lat": 55.59811,
+            "lon": -122.33452
+          },
+          {
+            "at_mi": 127.0,
+            "lat": 55.40023,
+            "lon": -122.6321
+          },
+          {
+            "at_mi": 158.8,
+            "lat": 55.07635,
+            "lon": -123.01801
+          },
+          {
+            "at_mi": 190.5,
+            "lat": 54.67255,
+            "lon": -122.77099
+          },
+          {
+            "at_mi": 222.2,
+            "lat": 54.25358,
+            "lon": -122.62125
+          },
+          {
+            "at_mi": 254.0,
+            "lat": 53.8723,
+            "lon": -122.73573
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2188.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 31.8,
+            "elevation_ft": 2378.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 63.5,
+            "elevation_ft": 2126.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 95.2,
+            "elevation_ft": 2116.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 127.0,
+            "elevation_ft": 2880.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 158.8,
+            "elevation_ft": 2293.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 190.5,
+            "elevation_ft": 2283.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 222.2,
+            "elevation_ft": 2313.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 254.0,
+            "elevation_ft": 1952.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 254.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "mountain",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Chetwynd",
+            "at_mi": 63.5,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 55.69396,
+            "lon": -121.64139,
+            "source": "Real town on Hwy 97 between prince_george_bc_ca and dawson_creek_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          },
+          {
+            "name": "Mackenzie Junction",
+            "at_mi": 158.8,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 55.07635,
+            "lon": -123.01801,
+            "source": "Real town on Hwy 97 between prince_george_bc_ca and dawson_creek_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 254.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 254.4 mi; paid miles 254. BC inland ALCAN through-freight filament (no border on this leg). Reverse edge mirrored from northbound geometry.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
+      "from": "fort_st_john_bc_ca",
+      "to": "dawson_creek_bc_ca",
+      "miles": 45,
+      "highway": "Alaska Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 56.24188,
+            "lon": -120.80582
+          },
+          {
+            "at_mi": 7.5,
+            "lat": 56.18136,
+            "lon": -120.70313
+          },
+          {
+            "at_mi": 15.0,
+            "lat": 56.08838,
+            "lon": -120.64676
+          },
+          {
+            "at_mi": 22.5,
+            "lat": 55.98233,
+            "lon": -120.61548
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 55.90391,
+            "lon": -120.50208
+          },
+          {
+            "at_mi": 37.5,
+            "lat": 55.83302,
+            "lon": -120.3608
+          },
+          {
+            "at_mi": 45.0,
+            "lat": 55.75847,
+            "lon": -120.22868
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2257.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 7.5,
+            "elevation_ft": 2007.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 15.0,
+            "elevation_ft": 2372.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 22.5,
+            "elevation_ft": 2414.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 2345.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 37.5,
+            "elevation_ft": 2486.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 45.0,
+            "elevation_ft": 2188.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 45.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 45.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 45.2 mi; paid miles 45. BC inland ALCAN through-freight filament (no border on this leg). Reverse edge mirrored from northbound geometry.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
+      "from": "prince_george_bc_ca",
+      "to": "dawson_creek_bc_ca",
+      "miles": 254,
+      "highway": "Hwy 97 / John Hart Highway",
+      "terrain": "mountain",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 53.8723,
+            "lon": -122.73573
+          },
+          {
+            "at_mi": 31.8,
+            "lat": 54.25358,
+            "lon": -122.62125
+          },
+          {
+            "at_mi": 63.5,
+            "lat": 54.67255,
+            "lon": -122.77099
+          },
+          {
+            "at_mi": 95.2,
+            "lat": 55.07635,
+            "lon": -123.01801
+          },
+          {
+            "at_mi": 127.0,
+            "lat": 55.40023,
+            "lon": -122.6321
+          },
+          {
+            "at_mi": 158.8,
+            "lat": 55.59811,
+            "lon": -122.33452
+          },
+          {
+            "at_mi": 190.5,
+            "lat": 55.69396,
+            "lon": -121.64139
+          },
+          {
+            "at_mi": 222.2,
+            "lat": 55.77382,
+            "lon": -121.009
+          },
+          {
+            "at_mi": 254.0,
+            "lat": 55.75847,
+            "lon": -120.22868
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1952.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 31.8,
+            "elevation_ft": 2313.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 63.5,
+            "elevation_ft": 2283.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 95.2,
+            "elevation_ft": 2293.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 127.0,
+            "elevation_ft": 2880.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 158.8,
+            "elevation_ft": 2116.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 190.5,
+            "elevation_ft": 2126.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 222.2,
+            "elevation_ft": 2378.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 254.0,
+            "elevation_ft": 2188.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 254.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "mountain",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Mackenzie Junction",
+            "at_mi": 95.2,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 55.07635,
+            "lon": -123.01801,
+            "source": "Real town on Hwy 97 between prince_george_bc_ca and dawson_creek_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          },
+          {
+            "name": "Chetwynd",
+            "at_mi": 190.5,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 55.69396,
+            "lon": -121.64139,
+            "source": "Real town on Hwy 97 between prince_george_bc_ca and dawson_creek_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 254.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 254.4 mi; paid miles 254. BC inland ALCAN through-freight filament (no border on this leg).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
+      "from": "prince_george_bc_ca",
+      "to": "surrey_bc_ca",
+      "miles": 465,
+      "highway": "Hwy 1 / Hwy 97",
+      "terrain": "mountain",
+      "divided": true,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 53.8723,
+            "lon": -122.73573
+          },
+          {
+            "at_mi": 29.1,
+            "lat": 53.48542,
+            "lon": -122.6364
+          },
+          {
+            "at_mi": 58.1,
+            "lat": 53.1261,
+            "lon": -122.35491
+          },
+          {
+            "at_mi": 87.2,
+            "lat": 52.80461,
+            "lon": -122.42272
+          },
+          {
+            "at_mi": 116.2,
+            "lat": 52.42531,
+            "lon": -122.34602
+          },
+          {
+            "at_mi": 145.3,
+            "lat": 52.13374,
+            "lon": -122.1327
+          },
+          {
+            "at_mi": 174.4,
+            "lat": 51.89111,
+            "lon": -121.68725
+          },
+          {
+            "at_mi": 203.4,
+            "lat": 51.62343,
+            "lon": -121.29601
+          },
+          {
+            "at_mi": 232.5,
+            "lat": 51.25191,
+            "lon": -121.47593
+          },
+          {
+            "at_mi": 261.6,
+            "lat": 50.93215,
+            "lon": -121.41854
+          },
+          {
+            "at_mi": 290.6,
+            "lat": 50.55356,
+            "lon": -121.29847
+          },
+          {
+            "at_mi": 319.7,
+            "lat": 50.25462,
+            "lon": -121.51267
+          },
+          {
+            "at_mi": 348.8,
+            "lat": 49.89658,
+            "lon": -121.44619
+          },
+          {
+            "at_mi": 377.8,
+            "lat": 49.55307,
+            "lon": -121.44438
+          },
+          {
+            "at_mi": 406.9,
+            "lat": 49.25742,
+            "lon": -121.67745
+          },
+          {
+            "at_mi": 435.9,
+            "lat": 49.06041,
+            "lon": -122.17194
+          },
+          {
+            "at_mi": 465.0,
+            "lat": 49.17699,
+            "lon": -122.73002
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1952.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 29.1,
+            "elevation_ft": 2496.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 58.1,
+            "elevation_ft": 2611.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 87.2,
+            "elevation_ft": 1899.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 116.2,
+            "elevation_ft": 2326.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 145.3,
+            "elevation_ft": 2112.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 174.4,
+            "elevation_ft": 2683.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 203.4,
+            "elevation_ft": 3313.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 232.5,
+            "elevation_ft": 3592.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 261.6,
+            "elevation_ft": 1745.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 290.6,
+            "elevation_ft": 977.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 319.7,
+            "elevation_ft": 836.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 348.8,
+            "elevation_ft": 492.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 377.8,
+            "elevation_ft": 331.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 406.9,
+            "elevation_ft": 315.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 435.9,
+            "elevation_ft": 23.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 465.0,
+            "elevation_ft": 223.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 465.0,
+            "avg_grade_pct": 0.07,
+            "terrain": "mountain",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Quesnel",
+            "at_mi": 58.1,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 53.1261,
+            "lon": -122.35491,
+            "source": "Real town on Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          },
+          {
+            "name": "Williams Lake",
+            "at_mi": 145.3,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 52.13374,
+            "lon": -122.1327,
+            "source": "Real town on Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          },
+          {
+            "name": "Cache Creek",
+            "at_mi": 261.6,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 1 / Hwy 97",
+            "lat": 50.93215,
+            "lon": -121.41854,
+            "source": "Real town on Hwy 1 / Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          },
+          {
+            "name": "Hope",
+            "at_mi": 377.8,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 1",
+            "lat": 49.55307,
+            "lon": -121.44438,
+            "source": "Real town on Hwy 1 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time). Mirrored on reverse edge."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 465.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 465.1 mi; paid miles 465. BC inland ALCAN through-freight filament (no border on this leg). Reverse edge mirrored from northbound geometry.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
       "from": "surrey_bc_ca",
       "to": "blaine_wa_us",
       "miles": 16,
@@ -142,6 +950,264 @@
             "at_mi": 14.0,
             "mph": 50,
             "source": "Coarse Hwy 15 / Pacific Highway urban approach default; CA statutory truck caps still unresearched (named units debt). Not an OSM maxspeed:hgv harvest.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": []
+      }
+    },
+    {
+      "from": "surrey_bc_ca",
+      "to": "prince_george_bc_ca",
+      "miles": 465,
+      "highway": "Hwy 1 / Hwy 97",
+      "terrain": "mountain",
+      "divided": true,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 49.17699,
+            "lon": -122.73002
+          },
+          {
+            "at_mi": 29.1,
+            "lat": 49.06041,
+            "lon": -122.17194
+          },
+          {
+            "at_mi": 58.1,
+            "lat": 49.25742,
+            "lon": -121.67745
+          },
+          {
+            "at_mi": 87.2,
+            "lat": 49.55307,
+            "lon": -121.44438
+          },
+          {
+            "at_mi": 116.2,
+            "lat": 49.89658,
+            "lon": -121.44619
+          },
+          {
+            "at_mi": 145.3,
+            "lat": 50.25462,
+            "lon": -121.51267
+          },
+          {
+            "at_mi": 174.4,
+            "lat": 50.55356,
+            "lon": -121.29847
+          },
+          {
+            "at_mi": 203.4,
+            "lat": 50.93215,
+            "lon": -121.41854
+          },
+          {
+            "at_mi": 232.5,
+            "lat": 51.25191,
+            "lon": -121.47593
+          },
+          {
+            "at_mi": 261.6,
+            "lat": 51.62343,
+            "lon": -121.29601
+          },
+          {
+            "at_mi": 290.6,
+            "lat": 51.89111,
+            "lon": -121.68725
+          },
+          {
+            "at_mi": 319.7,
+            "lat": 52.13374,
+            "lon": -122.1327
+          },
+          {
+            "at_mi": 348.8,
+            "lat": 52.42531,
+            "lon": -122.34602
+          },
+          {
+            "at_mi": 377.8,
+            "lat": 52.80461,
+            "lon": -122.42272
+          },
+          {
+            "at_mi": 406.9,
+            "lat": 53.1261,
+            "lon": -122.35491
+          },
+          {
+            "at_mi": 435.9,
+            "lat": 53.48542,
+            "lon": -122.6364
+          },
+          {
+            "at_mi": 465.0,
+            "lat": 53.8723,
+            "lon": -122.73573
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 223.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 29.1,
+            "elevation_ft": 23.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 58.1,
+            "elevation_ft": 315.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 87.2,
+            "elevation_ft": 331.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 116.2,
+            "elevation_ft": 492.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 145.3,
+            "elevation_ft": 836.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 174.4,
+            "elevation_ft": 977.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 203.4,
+            "elevation_ft": 1745.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 232.5,
+            "elevation_ft": 3592.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 261.6,
+            "elevation_ft": 3313.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 290.6,
+            "elevation_ft": 2683.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 319.7,
+            "elevation_ft": 2112.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 348.8,
+            "elevation_ft": 2326.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 377.8,
+            "elevation_ft": 1899.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 406.9,
+            "elevation_ft": 2611.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 435.9,
+            "elevation_ft": 2496.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 465.0,
+            "elevation_ft": 1952.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 465.0,
+            "avg_grade_pct": 0.07,
+            "terrain": "mountain",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Hope",
+            "at_mi": 87.2,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 1",
+            "lat": 49.55307,
+            "lon": -121.44438,
+            "source": "Real town on Hwy 1 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          },
+          {
+            "name": "Cache Creek",
+            "at_mi": 203.4,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 1 / Hwy 97",
+            "lat": 50.93215,
+            "lon": -121.41854,
+            "source": "Real town on Hwy 1 / Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          },
+          {
+            "name": "Williams Lake",
+            "at_mi": 319.7,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 52.13374,
+            "lon": -122.1327,
+            "source": "Real town on Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          },
+          {
+            "name": "Quesnel",
+            "at_mi": 406.9,
+            "type": "place",
+            "state": "British Columbia",
+            "highway": "Hwy 97",
+            "lat": 53.1261,
+            "lon": -122.35491,
+            "source": "Real town on Hwy 97 between surrey_bc_ca and prince_george_bc_ca; position matched to public Valhalla truck route geometry (development-time)."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "British Columbia",
+            "miles": 465.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 465.1 mi; paid miles 465. BC inland ALCAN through-freight filament (no border on this leg).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural BC truck context for Phase A inland filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
             "hgv": false
           }
         ],

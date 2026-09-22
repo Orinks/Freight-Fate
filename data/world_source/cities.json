@@ -8012,6 +8012,57 @@
       ],
       "lat": 49.176804,
       "lon": -122.7300234
+    },
+    "prince_george_bc_ca": {
+      "spoken_city": "Prince George",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 53.8722547,
+      "lon": -122.7361198,
+      "locations": [
+        {
+          "name": "Husky / Esso Travel Centre (1148 Pacific Street)",
+          "type": "company_yard",
+          "lat": 53.8722547,
+          "lon": -122.7361198,
+          "source_note": "Husky/Esso travel centre at 1148 Pacific Street, Prince George BC (Hwy 97 corridor). Truck-stop directories list ~20\u201325 truck parking spaces, diesel, and 24/7 amenities. Stand-in fuel/parking pin for ALCAN Phase A through-freight (no CA domestic career board)."
+        }
+      ]
+    },
+    "dawson_creek_bc_ca": {
+      "spoken_city": "Dawson Creek",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 55.7584791,
+      "lon": -120.2286885,
+      "locations": [
+        {
+          "name": "Husky (1700 Alaska Highway)",
+          "type": "company_yard",
+          "lat": 55.766161,
+          "lon": -120.2510583,
+          "source_note": "Husky fuel at 1700 Alaska Highway, Dawson Creek BC, near Mile 0 of the Alaska Highway. City pin is the Alaska Highway Mile 0 milepost on 102 Avenue. Stand-in fuel/parking for ALCAN Phase A Mile 0 (through-freight only; no CA domestic career board)."
+        }
+      ]
+    },
+    "fort_st_john_bc_ca": {
+      "spoken_city": "Fort St. John",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 56.2418833,
+      "lon": -120.8066055,
+      "locations": [
+        {
+          "name": "Smith Fuel Services (9516 78 Street)",
+          "type": "company_yard",
+          "lat": 56.2418833,
+          "lon": -120.8066055,
+          "source_note": "Smith Fuel Services commercial fuel at 9516 78 Street / Northern Lights Drive, Fort St. John BC, on the Alaska Highway approach. Stand-in fuel/parking pass-through north of Dawson Creek Mile 0 for ALCAN Phase A through-freight (no CA domestic career board)."
+        }
+      ]
     }
   }
 }
