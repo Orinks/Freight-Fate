@@ -97,13 +97,13 @@ fn test_search_tunes_a_station_by_name() {
     activate(&mut state, &mut app.ctx, "Search stations");
     assert!(top_is::<RadioSearchEntryState>(&app));
 
-    type_query(&mut app, "darren");
+    type_query(&mut app, "phoenix");
     app.handle_event(&key(Key::Return));
     assert!(top_is::<RadioStationListState>(&app));
 
     let rows = with_top_ctx::<RadioStationListState, _>(&mut app, build_labels);
     assert!(
-        rows[0].starts_with("Darren Duff radio, Web radio, always available"),
+        rows[0].starts_with("Phoenix Fire FM, Web radio, always available"),
         "{rows:?}"
     );
 
@@ -111,12 +111,12 @@ fn test_search_tunes_a_station_by_name() {
     app.handle_event(&key(Key::Return));
     assert_eq!(
         with_drive(&drive, |d| d.radio.station_id.clone()),
-        "darren-duff-radio"
+        "phoenix-fire-fm"
     );
     assert!(
         app.main_lines()
             .iter()
-            .any(|line| line.contains("Darren Duff radio")),
+            .any(|line| line.contains("Phoenix Fire FM")),
         "{:?}",
         app.main_lines()
     );
