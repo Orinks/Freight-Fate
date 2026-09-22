@@ -1,12 +1,16 @@
 name: Career 1.9 snapshot
 
-# The nightly for the 1.9 line, which since the 2026-09-20 cutover is
-# `dev` (see CAREER_BRANCH below).
+# The nightly (and the stable release path) for the 1.9 line, which since
+# the 2026-09-20 cutover is `dev` (see CAREER_BRANCH below).
 #
 # A scheduled run executes the copy of this file on the DEFAULT branch
 # (main), whatever the checked-out code is, so after changing it here push
 # the same file to main or the nightly quietly keeps the old job list. The
 # Prepare job fails a scheduled run whose file differs from CAREER_BRANCH's.
+#
+# Stable releases: push a `v*.*.*` tag. That trigger drops `--prerelease`,
+# takes the version from the tag, and writes notes via
+# `tools/release_notes.py stable`. Do not tag from this workflow.
 
 on:
   schedule:
@@ -21,6 +25,12 @@ on:
         description: "Branch to build (a dry run is the way to try one)"
         type: string
         default: dev
+  # Stable releases: push a v*.*.* tag on the commit to ship. Do not invent
+  # the tag from a schedule or dispatch -- only an explicit tag push cuts a
+  # stable GitHub release (no --prerelease, notes from the version block).
+  push:
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -44,7 +54,10 @@ env:
   # name, so renaming it would strand everyone already on one.
   # A manual run may name another branch to try; the schedule always
   # builds dev.
-  CAREER_BRANCH: ${{ inputs.branch || 'dev' }}
+  # Tag pushes build the tagged commit. Schedule/dispatch still build
+  # `dev` (or the dispatch branch). A tag that only exists on another
+  # tip must not silently rebuild today's dev.
+  CAREER_BRANCH: ${{ github.event_name == 'push' && github.ref || inputs.branch || 'dev' }}
 
 jobs:
   prepare:
@@ -55,6 +68,8 @@ jobs:
       should_build: ${{ steps.check.outputs.should_build }}
       tag: ${{ steps.check.outputs.tag }}
       commit_sha: ${{ steps.check.outputs.commit_sha }}
+      is_prerelease: ${{ steps.check.outputs.is_prerelease }}
+      version: ${{ steps.check.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -84,8 +99,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "tag=1.9-tester-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
           echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+          # Stable path: an explicit v*.*.* tag push. Version and tag come
+          # from the tag itself; notes come from the matching CHANGELOG
+          # block (falling back to Unreleased if that heading is not cut
+          # yet). Never invent a stable tag from schedule or dispatch.
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG#v}"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "tag=1.9-tester-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "version=" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
 
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             echo "should_build=true" >> "$GITHUB_OUTPUT"
@@ -530,27 +562,35 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+          IS_PRERELEASE: ${{ needs.prepare.outputs.is_prerelease }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
           (cd release-assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
           (cd release-assets && sha256sum -c checksums.txt)
 
-          LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
-          if [ -n "$LAST_TAG" ]; then
-            gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
-            python3 tools/release_notes.py nightly \
-              --previous-tag "$LAST_TAG" \
-              --exclude-notes previous-notes.md \
-              --output notes.md
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
+            if [ -n "$LAST_TAG" ]; then
+              gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+              python3 tools/release_notes.py nightly \
+                --previous-tag "$LAST_TAG" \
+                --exclude-notes previous-notes.md \
+                --output notes.md
+            else
+              python3 tools/release_notes.py nightly --first-snapshot --output notes.md
+            fi
           else
-            python3 tools/release_notes.py nightly --first-snapshot --output notes.md
+            # Stable notes: the matching ## version block, or Unreleased if
+            # that heading has not been cut yet (release_notes.stable_notes).
+            python3 tools/release_notes.py stable --version "$VERSION" --output notes.md
           fi
           test -s notes.md
           python3 tools/release_notes.py check-size --input notes.md --max-characters 120000
           test -s release-assets/checksums.txt
 
       - name: Create prerelease
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ inputs.dry_run != true && needs.prepare.outputs.is_prerelease == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
@@ -564,3 +604,20 @@ jobs:
           gh release create "$TAG" release-assets/* --notes-file notes.md \
             --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
             --prerelease --target "$COMMIT_SHA"
+
+      - name: Create stable release
+        if: ${{ inputs.dry_run != true && needs.prepare.outputs.is_prerelease == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          # Stable tags are owner-pushed. Never delete or move one from CI.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to replace a stable release." >&2
+            exit 1
+          fi
+          gh release create "$TAG" release-assets/* --notes-file notes.md \
+            --title "Freight Fate $VERSION" \
+            --target "$COMMIT_SHA"
