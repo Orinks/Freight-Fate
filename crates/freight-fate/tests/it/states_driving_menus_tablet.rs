@@ -97,7 +97,7 @@ fn test_search_tunes_a_station_by_name() {
     activate(&mut state, &mut app.ctx, "Search stations");
     assert!(top_is::<RadioSearchEntryState>(&app));
 
-    type_query(&mut app, "phoenix");
+    type_query(&mut app, "phoenix fire");
     app.handle_event(&key(Key::Return));
     assert!(top_is::<RadioStationListState>(&app));
 
