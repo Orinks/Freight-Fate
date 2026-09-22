@@ -9,6 +9,9 @@
 ### Added
 
 - Phase A ALCAN tip: Blaine Pacific Highway entry nodes and legs (`bellingham_wa_us` → `blaine_wa_us` → `surrey_bc_ca`) with honest public-OSRM mileages on `feat/career-2.0`.
+
+- **The ELD now tracks your 70-hour, 8-day work cycle.** When a day of cycle hours is left the status line says so, and a 34-hour rest starts a fresh week.
+
 - **The game lists every screen reader it finds on your computer.** Start it with `--list-speech-backends` and it names the one it would speak through.
 
 - **Country, classic rock, blues, and Night Line stations play new songs.**

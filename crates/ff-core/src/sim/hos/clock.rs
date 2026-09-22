@@ -4,9 +4,10 @@ use serde_json::{json, Value};
 
 use super::pyjson::{py_float_or, py_iter, py_max, py_repr_str, py_str, py_str_or};
 use super::{
-    duration_text, is_duty_status, is_non_enforced, limits, positive_minutes, BREAK_MIN,
-    HOS_HISTORY_MAX, HOS_SPLIT_REST_HISTORY_MAX, SLEEP_MIN, SPLIT_LONG_ALT_MIN, SPLIT_LONG_MIN,
-    SPLIT_SHORT_ALT_MIN, SPLIT_SHORT_MIN, WARNING_THRESHOLDS_MIN,
+    cycle_limit, duration_text, is_duty_status, is_non_enforced, limits, positive_minutes,
+    BREAK_MIN, CYCLE_SPEAK_MIN, CYCLE_WINDOW_MIN, HOS_HISTORY_MAX, HOS_SPLIT_REST_HISTORY_MAX,
+    RESTART_MIN, SLEEP_MIN, SPLIT_LONG_ALT_MIN, SPLIT_LONG_MIN, SPLIT_SHORT_ALT_MIN,
+    SPLIT_SHORT_MIN, WARNING_THRESHOLDS_MIN,
 };
 use crate::pyfmt::{fmt_f, py_str_float};
 
@@ -91,6 +92,14 @@ pub struct HosLimit {
     pub due: &'static str,
 }
 
+/// One on-duty span on the 8-day cycle ledger. `end_min` is where the
+/// ledger clock stood when it ended.
+#[derive(Clone, Debug, PartialEq)]
+pub struct CycleEntry {
+    pub end_min: f64,
+    pub on_duty_min: f64,
+}
+
 /// The Python `repr` of the two events' field tuples, which is what the
 /// save stores as `split_credit_key`: strings single-quoted, floats as
 /// Python prints them, `((...), (...))` with `", "` separators.
@@ -159,7 +168,13 @@ fn keep_last<T>(items: &mut Vec<T>, max: usize) {
 
 const ENFORCEMENT_OFF: &str =
     "Hours of service enforcement is off; the ELD clock still records time.";
-const RESET_ADVICE: &str = "Sleep 10 hours at a rest stop to reset.";
+fn reset_advice(kind: &str) -> &'static str {
+    if kind == "cycle" {
+        "Take a 34-hour restart, or wait for hours to age off your 8-day ledger."
+    } else {
+        "Sleep 10 hours at a rest stop to reset."
+    }
+}
 
 /// kind -> (clause after "you are", sentence that can lead a readout)
 fn shift_over(kind: &str) -> (&'static str, &'static str) {
@@ -169,6 +184,7 @@ fn shift_over(kind: &str) -> (&'static str, &'static str) {
             "Out of driving time for this shift.",
         ),
         "duty" => ("past your duty window", "Your duty window has closed."),
+        "cycle" => ("out of cycle hours", "Your 70-hour cycle is used up."),
         other => panic!("no shift-over wording for HOS kind {other:?}"),
     }
 }
@@ -208,6 +224,13 @@ pub struct HosClock {
     pub history: Vec<HosEvent>,
     pub split_rest_history: Vec<HosEvent>,
     pub split_credit_key: Option<String>,
+    /// total game minutes the clock has been told about since the ledger began
+    pub cycle_clock_min: f64,
+    /// on-duty spans within the trailing 8-day cycle window
+    pub cycle_entries: Vec<CycleEntry>,
+    /// consecutive off-duty/sleeper minutes toward a 34-hour restart; unlike
+    /// `off_duty_min` this is never capped at `SLEEP_MIN`
+    pub restart_off_min: f64,
 }
 
 impl Default for HosClock {
@@ -223,6 +246,9 @@ impl Default for HosClock {
             history: Vec::new(),
             split_rest_history: Vec::new(),
             split_credit_key: None,
+            cycle_clock_min: 0.0,
+            cycle_entries: Vec::new(),
+            restart_off_min: 0.0,
         }
     }
 }
@@ -243,6 +269,7 @@ impl HosClock {
         self.status = "driving".to_string();
         self.non_driving_min = 0.0;
         self.off_duty_min = 0.0;
+        self.advance_cycle(minutes, true);
     }
 
     /// Work time away from the wheel: fueling, loading, inspections, service.
@@ -253,11 +280,13 @@ impl HosClock {
         self.status = "on_duty_not_driving".to_string();
         self.off_duty_min = 0.0;
         self.record_non_driving(minutes);
+        self.advance_cycle(minutes, true);
     }
 
     /// Off-duty time. Short breaks do not extend the 14-hour window.
     pub fn off_duty(&mut self, minutes: f64) {
         let minutes = positive_minutes(minutes);
+        self.advance_cycle(minutes, false);
         self.record_event("off_duty", minutes, "normal");
         self.duty_min += minutes;
         self.status = "off_duty".to_string();
@@ -273,6 +302,7 @@ impl HosClock {
     /// Sleeper-berth time. A full 10 hours resets; shorter rests may split.
     pub fn sleeper(&mut self, minutes: f64) {
         let minutes = positive_minutes(minutes);
+        self.advance_cycle(minutes, false);
         self.record_event("sleeper_berth", minutes, "normal");
         if !pauses_duty_window("sleeper_berth", minutes, "normal") {
             self.duty_min += minutes;
@@ -295,6 +325,14 @@ impl HosClock {
     /// A full 10-hour off-duty reset: a fresh shift (`sleep()` in Python,
     /// which defaults the status to the sleeper berth).
     pub fn sleep(&mut self) {
+        self.advance_cycle(SLEEP_MIN, false);
+        self.sleep_as("sleeper_berth");
+    }
+
+    /// A 34-hour restart: consecutive off-duty time that clears the cycle
+    /// ledger, recorded as a sleeper-berth full reset.
+    pub fn restart(&mut self) {
+        self.advance_cycle(RESTART_MIN, false);
         self.sleep_as("sleeper_berth");
     }
 
@@ -313,6 +351,52 @@ impl HosClock {
         self.off_duty_min = SLEEP_MIN;
         self.split_credit_key = None;
         self.warned.clear();
+    }
+
+    /// Advance the 8-day cycle ledger. `on_duty` minutes accrue; anything
+    /// else builds toward the 34-hour restart. An entry counts whole until
+    /// its end falls out of the trailing window.
+    fn advance_cycle(&mut self, minutes: f64, on_duty: bool) {
+        self.cycle_clock_min += minutes;
+        if on_duty {
+            self.restart_off_min = 0.0;
+            match self.cycle_entries.last_mut() {
+                Some(last)
+                    if (last.end_min / 60.0).floor() == (self.cycle_clock_min / 60.0).floor() =>
+                {
+                    last.on_duty_min += minutes;
+                    last.end_min = self.cycle_clock_min;
+                }
+                _ => self.cycle_entries.push(CycleEntry {
+                    end_min: self.cycle_clock_min,
+                    on_duty_min: minutes,
+                }),
+            }
+        } else {
+            self.restart_off_min += minutes;
+            if self.restart_off_min >= RESTART_MIN {
+                self.cycle_entries.clear();
+                self.warned.retain(|w| !w.starts_with("cycle:"));
+            }
+        }
+        self.cycle_entries
+            .retain(|e| e.end_min > self.cycle_clock_min - CYCLE_WINDOW_MIN);
+    }
+
+    /// On-duty minutes currently on the 8-day cycle ledger.
+    pub fn cycle_used_min(&self) -> f64 {
+        self.cycle_entries.iter().map(|e| e.on_duty_min).sum()
+    }
+
+    /// Minutes left on the 70-hour cycle for a mode, None when it enforces
+    /// nothing.
+    pub fn cycle_remaining_min(&self, mode: &str) -> Option<f64> {
+        cycle_limit(mode).map(|limit| limit - self.cycle_used_min())
+    }
+
+    /// Minutes of off-duty time still needed for a 34-hour restart.
+    pub fn restart_remaining_min(&self) -> f64 {
+        (RESTART_MIN - self.restart_off_min).max(0.0)
     }
 
     fn record_non_driving(&mut self, minutes: f64) {
@@ -455,6 +539,7 @@ impl HosClock {
     /// [`Self::sleeper_split_rest`] recorded under an explicit event source.
     pub fn sleeper_split_rest_from(&mut self, minutes: f64, source: &str) -> bool {
         let minutes = positive_minutes(minutes);
+        self.advance_cycle(minutes, false);
         self.record_event("sleeper_berth", minutes, source);
         if !pauses_duty_window("sleeper_berth", minutes, source) {
             self.duty_min += minutes;
@@ -493,6 +578,11 @@ impl HosClock {
                 kind: "duty",
                 remaining_min: duty_limit - self.duty_min,
                 due: "your duty window closes. You need 10 hours of sleep",
+            },
+            HosLimit {
+                kind: "cycle",
+                remaining_min: cycle_limit(mode).unwrap_or(0.0) - self.cycle_used_min(),
+                due: "your 70-hour cycle is used up. You need a 34-hour restart",
             },
         ]
     }
@@ -538,13 +628,17 @@ impl HosClock {
     }
 
     /// Out-of-service time for the current violation: 30 minutes for a missed
-    /// break, a full 10-hour reset for drive or duty.
+    /// break, a 34-hour restart for a cycle-only violation, a full 10-hour
+    /// reset for drive or duty.
     pub fn out_of_service_minutes(&self, mode: &str) -> f64 {
         if self.is_break_only_violation(mode) {
-            BREAK_MIN
-        } else {
-            SLEEP_MIN
+            return BREAK_MIN;
         }
+        let blown = self.blown_kinds(mode);
+        if blown.contains(&"cycle") && !blown.contains(&"drive") && !blown.contains(&"duty") {
+            return RESTART_MIN;
+        }
+        SLEEP_MIN
     }
 
     /// Plain spoken phrases for every limit currently blown.
@@ -559,6 +653,7 @@ impl HosClock {
                 "drive" => Some("you had driven past the 11-hour driving limit"),
                 "duty" => Some("your 14-hour duty window had expired"),
                 "break" => Some("you were past the 30-minute break requirement"),
+                "cycle" => Some("you had used up your 70-hour cycle"),
                 _ => None,
             })
             .map(str::to_string)
@@ -605,6 +700,7 @@ impl HosClock {
                         "drive" => 0,
                         "duty" => 1,
                         "break" => 2,
+                        "cycle" => 3,
                         _ => 9,
                     };
                     candidates.push((
@@ -669,6 +765,12 @@ impl HosClock {
                         Take a 30-minute break at a rest stop."
                     .to_string();
             }
+            if blown == ["cycle"] {
+                return "Hours of service: your 70-hour cycle is used up. \
+                        Take a 34-hour restart, or wait for hours to age off your \
+                        8-day ledger."
+                    .to_string();
+            }
             return "Hours of service: past your limit. Sleep 10 hours at a rest stop to reset."
                 .to_string();
         }
@@ -677,11 +779,19 @@ impl HosClock {
             Some(pending) => format!(" {pending}"),
             None => String::new(),
         };
+        let cycle_clause = match self.cycle_remaining_min(mode) {
+            Some(remaining) if remaining <= CYCLE_SPEAK_MIN => format!(
+                " Cycle: {} of 70 hours used, {} left.",
+                duration_text(self.cycle_used_min() / 60.0),
+                duration_text(remaining / 60.0),
+            ),
+            _ => String::new(),
+        };
         if duty_left <= break_left {
             return format!(
                 "ELD status {status}. Hours of service: \
                  {} of driving left, \
-                 {} of duty window left.{suffix}",
+                 {} of duty window left.{cycle_clause}{suffix}",
                 duration_text(drive_left),
                 duration_text(duty_left),
             );
@@ -690,7 +800,7 @@ impl HosClock {
             "ELD status {status}. Hours of service: \
              {} of driving left, \
              break due in {}, \
-             duty window closes in {}.{suffix}",
+             duty window closes in {}.{cycle_clause}{suffix}",
             duration_text(drive_left),
             duration_text(break_left),
             duration_text(duty_left),
@@ -724,6 +834,15 @@ impl HosClock {
                 duration_text(duty_left)
             ));
         }
+        if let Some(remaining) = self.cycle_remaining_min(mode) {
+            if remaining <= CYCLE_SPEAK_MIN {
+                lines.push(format!(
+                    "Cycle: {} of 70 hours used, {} left.",
+                    duration_text(self.cycle_used_min() / 60.0),
+                    duration_text(remaining / 60.0),
+                ));
+            }
+        }
         if let Some(pending) = self.split_pending_summary() {
             lines.push(pending.to_string());
         }
@@ -752,6 +871,8 @@ impl HosClock {
             Some("drive")
         } else if blown("duty") {
             Some("duty")
+        } else if blown("cycle") {
+            Some("cycle")
         } else {
             None
         }
@@ -828,8 +949,9 @@ impl HosClock {
         }
         if let Some(kind) = over {
             return format!(
-                "{answer}, but you are {}. {RESET_ADVICE}",
-                shift_over(kind).0
+                "{answer}, but you are {}. {}",
+                shift_over(kind).0,
+                reset_advice(kind)
             );
         }
         format!("{answer}.{detail}")
@@ -846,7 +968,7 @@ impl HosClock {
         }
         let (drive_left, duty_left, break_left) = self.hours_left(mode);
         if let Some(kind) = self.shift_over_kind(mode) {
-            return format!("{} {RESET_ADVICE}", shift_over(kind).1);
+            return format!("{} {}", shift_over(kind).1, reset_advice(kind));
         }
         let drive_text = format!("Driving time left: {}", duration_text(drive_left));
         let duty_text = format!("Duty window closes in {}", duration_text(duty_left));
@@ -894,6 +1016,7 @@ impl HosClock {
         let drive_left = drive_limit - self.driving_min;
         let duty_left = duty_limit - self.duty_min;
         let break_left = break_after - self.since_break_min;
+        let cycle_left = self.cycle_remaining_min(mode).unwrap_or(f64::INFINITY);
         let mut candidates = vec![
             (
                 "drive",
@@ -901,6 +1024,7 @@ impl HosClock {
                 "your driving time for this shift runs out",
             ),
             ("duty", duty_left, "your duty window closes"),
+            ("cycle", cycle_left, "your 70-hour cycle runs out"),
         ];
         if duty_left > break_left {
             candidates.push(("break", break_left, "your 30-minute break is due"));
@@ -919,6 +1043,7 @@ impl HosClock {
         let limit_name = match kind {
             "drive" => "driving-time limit",
             "duty" => "duty window",
+            "cycle" => "70-hour cycle",
             _ => "break",
         };
         format!(
@@ -977,6 +1102,13 @@ impl HosClock {
             "history": self.history.iter().map(HosEvent::to_dict).collect::<Vec<_>>(),
             "split_rest_history": self.split_rest_history.iter().map(HosEvent::to_dict).collect::<Vec<_>>(),
             "split_credit_key": self.split_credit_key,
+            "cycle_clock_min": self.cycle_clock_min,
+            "restart_off_min": self.restart_off_min,
+            "cycle_entries": self
+                .cycle_entries
+                .iter()
+                .map(|e| json!({"end_min": e.end_min, "on_duty_min": e.on_duty_min}))
+                .collect::<Vec<_>>(),
         })
     }
 
@@ -1020,6 +1152,24 @@ impl HosClock {
             }
         }
         let warned: Vec<String> = py_iter(obj.get("warned"))?.iter().map(py_str).collect();
+        let mut cycle_entries = Vec::new();
+        if let Some(Value::Array(raw_entries)) = obj.get("cycle_entries") {
+            for raw in raw_entries {
+                let Some(entry) = raw.as_object() else {
+                    continue;
+                };
+                let (Some(end_min), Some(on_duty_min)) = (
+                    py_float_or(entry.get("end_min"), 0.0),
+                    py_float_or(entry.get("on_duty_min"), 0.0),
+                ) else {
+                    continue;
+                };
+                cycle_entries.push(CycleEntry {
+                    end_min,
+                    on_duty_min,
+                });
+            }
+        }
         let split_credit_key = match obj.get("split_credit_key") {
             None | Some(Value::Null) => None,
             Some(value) => Some(py_str(value)),
@@ -1037,6 +1187,9 @@ impl HosClock {
             history,
             split_rest_history,
             split_credit_key,
+            cycle_clock_min: py_float_or(obj.get("cycle_clock_min"), 0.0).unwrap_or(0.0),
+            cycle_entries,
+            restart_off_min: py_float_or(obj.get("restart_off_min"), 0.0).unwrap_or(0.0),
         })
     }
 }

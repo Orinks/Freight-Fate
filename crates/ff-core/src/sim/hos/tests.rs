@@ -1525,3 +1525,194 @@ fn next_limit_keeps_the_first_on_a_tie() {
     assert_eq!(SHOULDER_DAMAGE_PCT, 3.0);
     assert_eq!(FATIGUE_SEVERE, 80.0);
 }
+
+// -- the 70-hour/8-day cycle ledger -------------------------------------------------
+
+/// `cycles` shifts of `drive_min` each, a full sleep between, so the daily
+/// clocks stay fresh while the cycle ledger fills.
+fn cycle_used_after(c: &mut HosClock, cycles: usize, drive_min: f64) {
+    for _ in 0..cycles {
+        c.drive(drive_min);
+        c.sleep();
+    }
+}
+
+#[test]
+fn cycle_accrues_only_on_duty() {
+    let mut c = HosClock::new();
+    c.drive(300.0);
+    c.on_duty(60.0);
+    c.off_duty(120.0);
+    assert!(approx(c.cycle_used_min(), 360.0));
+    assert!(approx(c.restart_off_min, 120.0));
+}
+
+#[test]
+fn cycle_ages_out_after_eight_days() {
+    let mut c = HosClock::new();
+    c.drive(600.0);
+    // Alternate a minute on duty with a long off-duty stretch: each round is
+    // 1001 minutes (~8.3 days over 12 rounds) and no off-duty stretch ever
+    // reaches the 34-hour restart.
+    for _ in 0..12 {
+        c.on_duty(1.0);
+        c.off_duty(1000.0);
+    }
+    assert!(c.cycle_clock_min > CYCLE_WINDOW_MIN);
+    // The 600-minute drive ended more than 8 days behind the ledger clock,
+    // and the round-1 minute merged into its hour bucket went with it.
+    assert!(approx(c.cycle_used_min(), 11.0));
+    assert!(c.cycle_used_min() < 600.0 + 12.0);
+}
+
+#[test]
+fn restart_clears_ledger() {
+    let mut c = HosClock::new();
+    c.drive(600.0);
+    c.sleeper(600.0);
+    c.sleeper(600.0);
+    c.off_duty(840.0); // 2040 consecutive off-duty minutes
+    assert!(approx(c.cycle_used_min(), 0.0));
+
+    let mut loaded = HosClock::new();
+    cycle_used_after(&mut loaded, 7, 600.0);
+    assert!(loaded.cycle_used_min() >= CYCLE_LIMIT_MIN);
+    loaded.restart();
+    assert!(approx(loaded.cycle_used_min(), 0.0));
+    assert!(approx(loaded.restart_remaining_min(), 0.0));
+
+    // Any on-duty minute breaks the restart streak.
+    let mut streak = HosClock::new();
+    streak.off_duty(500.0);
+    streak.drive(1.0);
+    assert!(approx(streak.restart_off_min, 0.0));
+    assert!(streak.restart_remaining_min() > 0.0);
+}
+
+#[test]
+fn cycle_limit_enforced_in_realistic_and_relaxed_not_debug_off() {
+    let mut c = HosClock::new();
+    cycle_used_after(&mut c, 7, 600.0); // 4200 on-duty minutes on the ledger
+    assert!(c.in_violation("realistic"));
+    assert!(c.in_violation("relaxed"));
+    assert!(!c.in_violation("debug_off"));
+    assert_eq!(c.blown_kinds("realistic"), vec!["cycle"]);
+    assert_eq!(
+        c.summary("realistic"),
+        "Hours of service: your 70-hour cycle is used up. \
+         Take a 34-hour restart, or wait for hours to age off your 8-day ledger."
+    );
+    assert_eq!(c.out_of_service_minutes("realistic"), RESTART_MIN);
+    assert!(c
+        .violation_causes("realistic")
+        .contains(&"you had used up your 70-hour cycle".to_string()));
+}
+
+#[test]
+fn summary_mentions_cycle_only_when_a_day_is_left() {
+    let fresh = HosClock::new();
+    assert!(!fresh.summary("realistic").contains("Cycle:"));
+
+    let mut c = HosClock::new();
+    cycle_used_after(&mut c, 6, 600.0); // used 3600, remaining 600 <= 1440
+    let summary = c.summary("realistic");
+    assert!(summary.contains("Cycle: 60 hours of 70 hours used, 10 hours left."));
+    assert!(c
+        .summary_lines("realistic")
+        .iter()
+        .any(|line| line == "Cycle: 60 hours of 70 hours used, 10 hours left."));
+}
+
+#[test]
+fn check_warnings_speaks_cycle_thresholds() {
+    let mut c = HosClock::new();
+    cycle_used_after(&mut c, 6, 600.0); // used 3600
+    c.on_duty(500.0); // used 4100, cycle remaining 100
+
+    let msgs = c.check_warnings("realistic");
+    assert_eq!(msgs.len(), 1);
+    assert_eq!(
+        msgs[0],
+        "Hours of service: 2 hours until your 70-hour cycle is used up. \
+         You need a 34-hour restart."
+    );
+    c.drive(45.0); // remaining 55
+    let msgs = c.check_warnings("realistic");
+    assert_eq!(msgs.len(), 1);
+    assert_eq!(
+        msgs[0],
+        "Hours of service: 1 hour until your 70-hour cycle is used up. \
+         You need a 34-hour restart."
+    );
+    c.drive(30.0); // remaining 25
+    let msgs = c.check_warnings("realistic");
+    assert_eq!(msgs.len(), 1);
+    assert_eq!(
+        msgs[0],
+        "Hours of service: 30 minutes until your 70-hour cycle is used up. \
+         You need a 34-hour restart."
+    );
+    c.drive(30.0); // used up
+    let msgs = c.check_warnings("realistic");
+    assert_eq!(msgs.len(), 1);
+    assert_eq!(
+        msgs[0],
+        "Hours of service violation: your 70-hour cycle is used up. \
+         You need a 34-hour restart. Driving on risks fines at inspections."
+    );
+}
+
+#[test]
+fn cycle_round_trips_through_save() {
+    let mut c = HosClock::new();
+    c.drive(300.0);
+    c.on_duty(60.0);
+    c.off_duty(120.0);
+    c.drive(90.0);
+
+    let loaded = HosClock::from_dict(&c.to_dict());
+    assert_eq!(loaded, c);
+
+    // An old save carries no cycle keys: the ledger starts fresh.
+    let mut data = c.to_dict();
+    let obj = data.as_object_mut().unwrap();
+    obj.remove("cycle_clock_min");
+    obj.remove("restart_off_min");
+    obj.remove("cycle_entries");
+    let old = HosClock::from_dict(&data);
+    assert_eq!(old.cycle_clock_min, 0.0);
+    assert_eq!(old.restart_off_min, 0.0);
+    assert!(old.cycle_entries.is_empty());
+    assert!(approx(old.cycle_used_min(), 0.0));
+
+    // Unreadable fields fall back to zeros; unreadable entries are skipped.
+    let partial = HosClock::from_dict(&json!({
+        "cycle_clock_min": "nope",
+        "restart_off_min": [],
+        "cycle_entries": [{"end_min": 100.0, "on_duty_min": 60.0}, 7, {"end_min": "x"}],
+    }));
+    assert_eq!(partial.cycle_clock_min, 0.0);
+    assert_eq!(partial.restart_off_min, 0.0);
+    assert_eq!(
+        partial.cycle_entries,
+        vec![CycleEntry {
+            end_min: 100.0,
+            on_duty_min: 60.0
+        }]
+    );
+}
+
+#[test]
+fn arrival_note_names_the_cycle_when_it_binds() {
+    let mut clock = HosClock::new();
+    cycle_used_after(&mut clock, 6, 600.0);
+    clock.on_duty(550.0); // cycle remaining 50, the nearest limit
+    assert_eq!(
+        clock.arrival_note("realistic", 60.0),
+        " Your 70-hour cycle comes about 10 minutes before you would reach it."
+    );
+    assert_eq!(
+        clock.arrival_note("realistic", 40.0),
+        " You would arrive before your 70-hour cycle runs out."
+    );
+}

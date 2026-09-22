@@ -444,6 +444,14 @@ impl EnforcementStopState {
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
+            } else if minutes >= hos::RESTART_MIN {
+                format!(
+                    "{lead}{why} Out of service: thirty-four hours parked on the shoulder. It \
+                     is {}, your 70-hour cycle is fresh, you wake rested, and the delivery \
+                     deadline kept counting.{}",
+                    clock_text(d.trip.local_hour()),
+                    wake_air_instruction(d, ctx, false)
+                )
             } else {
                 format!(
                     "{lead}{why} Out of service: ten hours parked on the shoulder. It is {}, \
