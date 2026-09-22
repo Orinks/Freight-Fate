@@ -1,6 +1,6 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland filament to Dawson Creek Mile 0 landed** on `feat/career-2.0` (Bellingham ↔ Blaine ↔ Surrey ↔ Prince George ↔ Dawson Creek ↔ Fort St. John). Still no Anchorage, no full Canada board, no Fort Nelson / Yukon / Tok until Ruth GO.
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed** on `feat/career-2.0` (… ↔ Fort St. John ↔ Fort Nelson ↔ Watson Lake ↔ Whitehorse). Still no Anchorage, no full Canada board, no Tok/Fairbanks until Poker Creek / Beaver Creek border metadata + Ruth GO.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -236,9 +236,29 @@ No `border_crossing` on inland legs (border metadata stays at Blaine POE only). 
 - Elevation: Open-Meteo elevation API along densified shape (~30 mi samples on long legs).
 - City lat integrity ceiling raised to `60.0` for northern BC (YT / AK still need a later raise).
 
-### Blockers for next slice (toward Fort Nelson / Yukon)
+### North filament landed (Fort St. John → Whitehorse)
 
-- Continue ALCAN north: `fort_nelson_bc_ca` → `watson_lake_yt_ca` → `whitehorse_yt_ca` with real routed miles.
-- Lat ceiling `60.0` blocks Whitehorse (~60.7) / AK until raised again; lon ceiling `-125` blocks AK.
+Ruth GO after KEEP on inland tip `4b375017`. Daytime public Valhalla truck costing only (no Josh overnight PBF/Valhalla).
+
+| Key / leg | Miles | Notes |
+| --- | --- | --- |
+| `fort_nelson_bc_ca` | — | Alaska Hwy pass-through; Esso / Ft Nelson Bulk Sales pin (5303 48th Avenue) |
+| `watson_lake_yt_ca` | — | Yukon entry on ALCAN; Petro-Canada 137 Frank Trail pin (~5 truck spaces) |
+| `whitehorse_yt_ca` | — | Phase A Yukon terminus; downtown pin + McCrae Petro-Canada lot (91007 Alaska Hwy, ~10 spaces) |
+| `fort_st_john_bc_ca` ↔ `fort_nelson_bc_ca` | **239** | Alaska Highway; both directions; public Valhalla truck |
+| `fort_nelson_bc_ca` ↔ `watson_lake_yt_ca` | **319** | Alaska Highway (BC→YT); both directions; public Valhalla truck; coarse `state_miles` split near Contact Creek / Lower Post |
+| `watson_lake_yt_ca` ↔ `whitehorse_yt_ca` | **273** | Alaska Highway; both directions; public Valhalla truck |
+
+No Tok / Fairbanks. No Poker Creek AK / Beaver Creek YT `border_crossing` yet (CA→US attach deferred). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
+
+### Mileage / geometry source (north)
+
+- Public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options) 2026-09-22; paid miles match router (±5 mi band rounded).
+- Elevation: Open-Meteo elevation API along densified shape (~30 mi samples).
+- City lat integrity ceiling raised to `62.0` for Whitehorse (~60.7°N); lon floor lowered to `-142.0` for western YT (~-135). Tok/Fairbanks lat still out of band.
+
+### Blockers for next slice (toward Tok / Fairbanks)
+
+- Do **not** add Tok/Fairbanks without Poker Creek AK / Beaver Creek YT border metadata on the CA→US leg.
 - Prefer public Overpass / regional Geofabrik before Josh overnight PBF/Valhalla (ask Chelsea).
 - Still no Anchorage (Phase B).

@@ -900,15 +900,15 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.region
         );
         assert!(
-            // Northern BC ALCAN inland (Prince George / Dawson Creek / Fort St. John)
-            // sits above 50°N; keep CONUS+southern-CA floor, raise ceiling for Phase A.
-            24.0 < city.lat && city.lat < 60.0,
+            // ALCAN Phase A through Yukon (Whitehorse ~60.7°N) raises the lat ceiling;
+            // lon floor opens western YT (~-135) without admitting Tok/Fairbanks lat yet.
+            24.0 < city.lat && city.lat < 62.0,
             "{}: lat {}",
             city.name,
             city.lat
         );
         assert!(
-            -125.0 < city.lon && city.lon < -66.0,
+            -142.0 < city.lon && city.lon < -66.0,
             "{}: lon {}",
             city.name,
             city.lon
@@ -1051,6 +1051,94 @@ fn test_alcan_phase_a_inland_filament_to_dawson_creek() {
         (200.0..=300.0).contains(&dc.miles),
         "Prince George–Dawson Creek must be real Hwy 97 miles, got {}",
         dc.miles
+    );
+}
+
+#[test]
+fn test_alcan_phase_a_north_filament_to_whitehorse() {
+    let world = world();
+    let north = world
+        .shortest_route("fort_st_john_bc_ca", "whitehorse_yt_ca", None, false)
+        .expect("fort st john loads")
+        .expect("ALCAN north filament must reach Whitehorse");
+    assert_eq!(
+        north.cities,
+        vec![
+            "fort_st_john_bc_ca".to_string(),
+            "fort_nelson_bc_ca".to_string(),
+            "watson_lake_yt_ca".to_string(),
+            "whitehorse_yt_ca".to_string(),
+        ]
+    );
+    let south = world
+        .shortest_route("whitehorse_yt_ca", "fort_st_john_bc_ca", None, false)
+        .expect("whitehorse loads")
+        .expect("southbound ALCAN north filament must route");
+    assert_eq!(
+        south.cities,
+        vec![
+            "whitehorse_yt_ca".to_string(),
+            "watson_lake_yt_ca".to_string(),
+            "fort_nelson_bc_ca".to_string(),
+            "fort_st_john_bc_ca".to_string(),
+        ]
+    );
+    // Directed edges both ways; no Tok/Fairbanks skip; no Poker Creek border yet.
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    for (a, b) in [
+        ("fort_st_john_bc_ca", "fort_nelson_bc_ca"),
+        ("fort_nelson_bc_ca", "fort_st_john_bc_ca"),
+        ("fort_nelson_bc_ca", "watson_lake_yt_ca"),
+        ("watson_lake_yt_ca", "fort_nelson_bc_ca"),
+        ("watson_lake_yt_ca", "whitehorse_yt_ca"),
+        ("whitehorse_yt_ca", "watson_lake_yt_ca"),
+    ] {
+        assert!(
+            directed.contains(&(a, b)),
+            "missing directed north ALCAN leg {a}->{b}"
+        );
+    }
+    assert!(
+        !world.cities.contains_key("tok_ak_us"),
+        "Tok must not land without Poker Creek / Beaver Creek border metadata"
+    );
+    assert!(
+        !world.cities.contains_key("fairbanks_ak_us"),
+        "Fairbanks is not this filament"
+    );
+    let fsj_fn = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "fort_st_john_bc_ca" && leg.b == "fort_nelson_bc_ca")
+        .expect("fsj->fort nelson");
+    assert!(
+        (220.0..=260.0).contains(&fsj_fn.miles),
+        "Fort St. John–Fort Nelson must be real Alaska Highway miles, got {}",
+        fsj_fn.miles
+    );
+    let fn_wl = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "fort_nelson_bc_ca" && leg.b == "watson_lake_yt_ca")
+        .expect("fort nelson->watson lake");
+    assert!(
+        (290.0..=350.0).contains(&fn_wl.miles),
+        "Fort Nelson–Watson Lake must be real Alaska Highway miles, got {}",
+        fn_wl.miles
+    );
+    let wl_wh = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "watson_lake_yt_ca" && leg.b == "whitehorse_yt_ca")
+        .expect("watson lake->whitehorse");
+    assert!(
+        (240.0..=310.0).contains(&wl_wh.miles),
+        "Watson Lake–Whitehorse must be real Alaska Highway miles, got {}",
+        wl_wh.miles
     );
 }
 

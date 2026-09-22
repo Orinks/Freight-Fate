@@ -8063,6 +8063,57 @@
           "source_note": "Smith Fuel Services commercial fuel at 9516 78 Street / Northern Lights Drive, Fort St. John BC, on the Alaska Highway approach. Stand-in fuel/parking pass-through north of Dawson Creek Mile 0 for ALCAN Phase A through-freight (no CA domestic career board)."
         }
       ]
+    },
+    "fort_nelson_bc_ca": {
+      "spoken_city": "Fort Nelson",
+      "state": "BC",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 58.8048351,
+      "lon": -122.7014595,
+      "locations": [
+        {
+          "name": "Esso / Ft Nelson Bulk Sales (5303 48th Avenue)",
+          "type": "company_yard",
+          "lat": 58.802163,
+          "lon": -122.7036488,
+          "source_note": "Esso / Ft Nelson Bulk Sales cardlock and diesel at 5303 48th Avenue, Fort Nelson BC (Alaska Highway corridor; operator also lists Mile 293 Gasoline Alley). Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board)."
+        }
+      ]
+    },
+    "watson_lake_yt_ca": {
+      "spoken_city": "Watson Lake",
+      "state": "YT",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 60.0624306,
+      "lon": -128.7068037,
+      "locations": [
+        {
+          "name": "Petro-Canada (137 Frank Trail)",
+          "type": "company_yard",
+          "lat": 60.0524072,
+          "lon": -128.6662836,
+          "source_note": "Petro-Canada / Petro-Pass fuel on Hwy 1 at 137 Frank Trail, Watson Lake YT (Alaska Highway). Truck-stop directories list ~5 truck parking spaces and diesel. Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board)."
+        }
+      ]
+    },
+    "whitehorse_yt_ca": {
+      "spoken_city": "Whitehorse",
+      "state": "YT",
+      "country": "CA",
+      "region": "pacific_northwest",
+      "lat": 60.721571,
+      "lon": -135.054932,
+      "locations": [
+        {
+          "name": "McCrae Petro-Canada (91007 Alaska Highway)",
+          "type": "company_yard",
+          "lat": 60.6387178,
+          "lon": -135.0021221,
+          "source_note": "McCrae Petro-Canada at 91007 Alaska Highway, Whitehorse YT (south approach / McRae). Truck-stop directories list ~10 truck parking spaces, diesel, and driver amenities. City pin stays downtown Whitehorse; lot pin is the ALCAN stand-in fuel/parking for Phase A through-freight (no CA domestic career board)."
+        }
+      ]
     }
   }
 }

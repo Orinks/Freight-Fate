@@ -846,9 +846,9 @@ fn test_world_cities_have_coordinates() {
     for city in world.cities.values() {
         assert!(city.lat != 0.0, "{} missing latitude", city.name);
         assert!(city.lon != 0.0, "{} missing longitude", city.name);
-        // Northern BC ALCAN inland cities sit above 50°N (Phase A).
-        assert!(city.lat > 24.0 && city.lat < 60.0);
-        assert!(city.lon > -125.0 && city.lon < -66.0);
+        // ALCAN Phase A through Whitehorse (~60.7°N / ~-135°W).
+        assert!(city.lat > 24.0 && city.lat < 62.0);
+        assert!(city.lon > -142.0 && city.lon < -66.0);
     }
 }
 
