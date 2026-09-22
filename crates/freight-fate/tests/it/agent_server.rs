@@ -98,7 +98,9 @@ fn the_first_play_call_is_what_wakes_the_game() {
 }
 
 #[test]
-fn quitting_before_the_game_exists_needs_no_game() {
+fn quitting_before_the_game_exists_ends_the_server() {
+    // An idle server still holds the release executable open, so a quit with
+    // no game up has to end the process too, not wait for the next call.
     let script = [call(1, "quit_game", "{}"), call(2, "listen", "{}")].join("\n");
     let (tx, rx) = mpsc::channel();
     let server = std::thread::spawn(move || {
@@ -107,19 +109,24 @@ fn quitting_before_the_game_exists_needs_no_game() {
         out
     });
 
-    let request = await_play_request(&rx).expect("the listen is the first play request");
-    assert!(matches!(request.command(), Command::Listen));
-    request.answer(Ok("heard".to_string()));
+    assert!(
+        await_play_request(&rx).is_none(),
+        "a quit with no game ends the server instead of booting one"
+    );
 
     let answered = results(&server.join().unwrap());
+    assert_eq!(
+        answered.len(),
+        1,
+        "nothing after the quit is read: {answered:?}"
+    );
     let quit_text = answered[0]["result"]["content"][0]["text"]
         .as_str()
         .unwrap_or_default();
     assert!(
-        quit_text.contains("not running"),
-        "quit with no game is answered, not booted: {quit_text:?}"
+        quit_text.contains("server has ended"),
+        "the quit is answered before the process goes: {quit_text:?}"
     );
-    assert_eq!(answered[1]["result"]["content"][0]["text"], "heard");
 }
 
 #[test]

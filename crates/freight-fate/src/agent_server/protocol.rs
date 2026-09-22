@@ -373,6 +373,11 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
             }
         };
         respond_raw(out, &json!({"jsonrpc": "2.0", "id": id, "result": reply}));
+        if method == "tools/call" && params.get("name").and_then(Value::as_str) == Some("quit_game")
+        {
+            // A quit ends the process; nothing after it is read.
+            return;
+        }
     }
 }
 

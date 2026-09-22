@@ -236,21 +236,21 @@ impl Request {
     }
 }
 
-/// Block until the client asks for something only a running game can do,
-/// answering what needs no game on the way (a quit with nothing to quit).
-/// `None` when the client hangs up first: the handshake alone never boots a
-/// game, so a session that only asked for the tool list ends here, quietly.
+/// Block until the client asks for something only a running game can do.
+/// `None` when the client hangs up first, or quits with no game up: the
+/// handshake alone never boots a game, and an idle server still holds the
+/// release executable open, so a quit ends the process either way and the
+/// next build is not refused "access denied" (owner, 2026-09-22).
 pub fn await_play_request(requests: &mpsc::Receiver<Request>) -> Option<Request> {
-    loop {
-        let request = requests.recv().ok()?;
-        match request.command {
-            Command::Quit => request.answer(Ok(
-                "The game is not running; nothing to quit. Any other tool call boots it."
-                    .to_string(),
-            )),
-            _ => return Some(request),
-        }
+    let request = requests.recv().ok()?;
+    if matches!(request.command, Command::Quit) {
+        request.answer(Ok(
+            "No game was running; the server has ended. The next tool call starts a fresh one."
+                .to_string(),
+        ));
+        return None;
     }
+    Some(request)
 }
 
 /// The per-frame policy servicing agent commands inside the real game loop.
@@ -806,13 +806,14 @@ fn run_with_staged(
 ) -> i32 {
     use crate::playtest::sandbox;
     let (requests, rx) = mpsc::channel();
-    std::thread::spawn(move || serve(requests));
+    let server = std::thread::spawn(move || serve(requests));
     eprintln!("MCP serving on stdio; the game boots at the first play request.");
     let mut staged = staged;
     loop {
         // Only a play request boots anything. A client that asked for the
         // tool list and hung up gets its answers and never a game window.
         let Some(first) = await_play_request(&rx) else {
+            finish_serving(&server);
             return 0;
         };
         let (mut app, mut guard) = match boot(reset, online) {
@@ -853,8 +854,21 @@ fn run_with_staged(
         app.run_with_player_input(None, |input, dt| policy.step(input, dt));
         guard.release();
         sandbox::close_session();
+        finish_serving(&server);
         return 0;
     }
+}
+
+/// Give the stdio thread a bounded moment to write the last reply (the
+/// quit's own answer) before the process exits under it. It returns by
+/// itself after a quit or when stdin closes; a human quitting from the menu
+/// leaves it blocked on stdin, which the bound covers.
+fn finish_serving(server: &std::thread::JoinHandle<()>) {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+    while !server.is_finished() && std::time::Instant::now() < deadline {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    eprintln!("MCP server exiting.");
 }
 
 /// Everything a running game needs, in the order it can be refused:
