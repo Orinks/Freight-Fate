@@ -438,8 +438,9 @@ pub struct DrivingState {
     // ramp joins the surface road, and the light's cycle state if a signal.
     // "signal" | "stop" | "yield" | "roundabout" | "none" | "" (no ramp)
     pub ramp_control: String,
+    pub ramp_light_profile: u8, // seeded fixed timing plan for this terminal
     pub ramp_light_offset_s: f64, // seeded phase into the light cycle
-    pub ramp_light_timer: f64,    // real seconds since the ramp was taken
+    pub ramp_light_timer: f64,  // real seconds since the ramp was taken
     pub ramp_light_announced: bool,
     pub ramp_light_last_phase: String, // "red" | "yellow" | "green", once announced
     pub ramp_terminal_done: bool,

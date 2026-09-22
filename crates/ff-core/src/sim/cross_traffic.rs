@@ -141,6 +141,8 @@ pub struct CrossVehicle {
     pub from_side: &'static str,
     /// Has passed the conflict point (for the sweep cue).
     pub crossed: bool,
+    /// Was already entering the intersection when the cross street was held.
+    pub committed: bool,
     /// Its crossing cue has been triggered.
     pub sound_started: bool,
 }
@@ -155,13 +157,11 @@ const SIDES: [&str; 2] = ["left", "right"];
 
 /// The living crossroad at one terminal.
 ///
-/// `player_has_green` mirrors the PLAYER's signal phase when the
-/// terminal is a light: the cross street runs the orthogonal phase, so
-/// cross traffic flows on the player's red and queues at its own bar on
-/// the player's green -- which is why a red light is audibly BUSY and a
-/// green is audible as the cross stream dying. Stop and yield terminals
-/// leave it False-flowing (cross traffic has the right of way and never
-/// stops).
+/// `player_has_green` means the cross street is being held. At a signal that
+/// includes the player's green and yellow plus any shared red clearance, so
+/// cross traffic queues at its own bar before the player's green begins. Stop
+/// and yield terminals leave it false (cross traffic has the right of way and
+/// never stops).
 #[derive(Clone, Debug)]
 pub struct CrossTraffic {
     pub seed: i64,
@@ -170,6 +170,7 @@ pub struct CrossTraffic {
     pub near_city: bool,
     pub vehicles: Vec<CrossVehicle>,
     pub player_has_green: bool,
+    cross_street_was_stopped: bool,
     rng: PyRandom,
     /// Seconds to the next arrival, per side (left, right).
     next_spawn_s: [f64; 2],
@@ -184,6 +185,7 @@ impl CrossTraffic {
             near_city,
             vehicles: Vec::new(),
             player_has_green: false,
+            cross_street_was_stopped: false,
             rng: PyRandom::new_from_i64(seed),
             next_spawn_s: [0.0, 0.0],
         };
@@ -271,6 +273,7 @@ impl CrossTraffic {
             length_mi,
             from_side: side,
             crossed: false,
+            committed: false,
             sound_started: false,
         });
     }
@@ -281,6 +284,17 @@ impl CrossTraffic {
     /// the real clock). Returns vehicles that crossed the conflict point
     /// this frame, for the crossing-sweep cue.
     pub fn update(&mut self, dt: f64) -> Vec<CrossVehicle> {
+        if self.player_has_green && !self.cross_street_was_stopped {
+            for vehicle in &mut self.vehicles {
+                vehicle.committed = vehicle.front_mi() >= CROSS_BAR_MI;
+            }
+        } else if !self.player_has_green {
+            for vehicle in &mut self.vehicles {
+                vehicle.committed = false;
+            }
+        }
+        self.cross_street_was_stopped = self.player_has_green;
+
         for (i, side) in SIDES.iter().enumerate() {
             self.next_spawn_s[i] -= dt;
             if self.next_spawn_s[i] <= 0.0 {
@@ -314,13 +328,9 @@ impl CrossTraffic {
                 // The cross street's own red: queue at its bar while the
                 // player holds green. Vehicles already past the bar clear
                 // the intersection rather than trapping themselves in it.
-                if player_has_green && v.position_mi < CROSS_BAR_MI {
-                    let bar_gap = CROSS_BAR_MI - v.front_mi();
-                    if bar_gap <= 0.0 {
-                        target = 0.0;
-                    } else {
-                        target = target.min(SAFE_SPEED_K * bar_gap.sqrt());
-                    }
+                if player_has_green && !v.committed {
+                    let bar_gap = (CROSS_BAR_MI - v.front_mi()).max(0.0);
+                    target = target.min(SAFE_SPEED_K * bar_gap.sqrt());
                 }
                 if let Some((leader_pos, leader_speed)) = leader {
                     let gap = leader_pos - v.front_mi();
@@ -355,6 +365,10 @@ impl CrossTraffic {
                 v.speed_mph = v.speed_mph.max(0.0);
                 let before = v.position_mi;
                 v.position_mi += v.speed_mph * dt / 3600.0;
+                if player_has_green && !v.committed && v.front_mi() > CROSS_BAR_MI {
+                    v.position_mi = CROSS_BAR_MI - v.length_mi;
+                    v.speed_mph = 0.0;
+                }
                 if !v.crossed && before < 0.0 && 0.0 <= v.position_mi {
                     v.crossed = true;
                     crossed_now.push(v.clone());

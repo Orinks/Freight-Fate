@@ -453,6 +453,7 @@ impl DrivingState {
             ramp_arrival_grace_s: 0.0,
             ramp_terminal_miss_count: 0,
             ramp_control: String::new(),
+            ramp_light_profile: 0,
             ramp_light_offset_s: 0.0,
             ramp_light_timer: 0.0,
             ramp_light_announced: false,

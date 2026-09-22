@@ -184,9 +184,26 @@ pub const RAMP_BAR_REACTION_S: f64 = 1.5;
 pub const CRITICAL_CALL_WINDOW_S: f64 = 8.0;
 pub const CRITICAL_RESPEAK_DELAY_S: f64 = 2.0;
 pub const RAMP_CONTROL_ANNOUNCE_MI: f64 = 0.38; // where the terminal callout fires on the ramp
-pub const RAMP_LIGHT_RED_S: f64 = 12.0; // red phase of the terminal light, real seconds
-pub const RAMP_LIGHT_GREEN_S: f64 = 15.0; // green phase: a real minor-leg minimum, crossable from a stop
-pub const RAMP_LIGHT_YELLOW_S: f64 = 4.0; // yellow phase; entering on yellow is legal, like the real law
+
+// Game tuning, not a claim about any field signal plan. FHWA's planning-level
+// examples commonly begin at 60-second cycles; these four seeded profiles run
+// 60, 66, 72, or 78 real seconds so every terminal does not feel metronomic.
+// https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter3.htm
+pub const RAMP_LIGHT_RED_S: f64 = 30.0; // shortest profile; includes clearance below
+pub const RAMP_LIGHT_RED_STEP_S: f64 = 4.0;
+pub const RAMP_LIGHT_GREEN_S: f64 = 26.0; // shortest profile; room for a loaded departure
+pub const RAMP_LIGHT_GREEN_STEP_S: f64 = 2.0;
+pub const RAMP_LIGHT_PROFILE_COUNT: i64 = 4;
+// The player's light remains red for this final part of its red interval while
+// the cross street is also held. The MUTCD makes red clearance an engineering
+// decision; this fixed game interval gives even this model's slowest vehicle
+// enough time to accelerate from its 45-foot cross bar and clear the 55-foot
+// conflict window rather than pretending to reproduce a real site.
+// https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/part4.pdf#page=120
+pub const RAMP_LIGHT_RED_CLEARANCE_S: f64 = 7.0;
+// MUTCD 4F.17 recommends 3 to 6 seconds and says a timing plan's yellow must
+// not vary cycle by cycle. Four seconds remains fixed for every game profile.
+pub const RAMP_LIGHT_YELLOW_S: f64 = 4.0;
 pub const RED_STOP_MPH: f64 = 3.0; // at or under this you have honored a red or a stop sign
                                    // The stop bar's continuous tone level (BAR_SOLID_VOLUME) is re-exported from
                                    // ff_core::sound_catalog by the prelude, so the road and the Learn game

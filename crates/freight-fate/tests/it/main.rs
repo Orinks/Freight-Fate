@@ -168,5 +168,6 @@ mod updater;
 mod windows_subsystem;
 
 mod states_ramp_assist_control;
+mod states_ramp_signal_timing;
 
 mod states_driving_hos_planning;

@@ -34,6 +34,8 @@
 
 ### Changed
 
+- **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
+
 - **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.
 
 - **A career declined after review stops backing up.** You hear once, by name, that its backup was declined.

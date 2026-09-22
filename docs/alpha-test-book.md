@@ -185,8 +185,8 @@ nothing. Chapter 3.
 dodgeable hazards, sideswipe risk, construction lane closures, keep-right
 nags, and exits that gate on being in the right lane. Highway exits take
 a real setup — signal with X, get to the exit lane, make ramp speed at
-the gore. Signalized ramp terminals run a red/green cycle with dedicated
-earcons. Chapter 4.
+the gore. Signalized ramp terminals run a stable green/yellow/red cycle with
+dedicated earcons and a cross-traffic clearance before green. Chapter 4.
 
 **Traffic has a clock.** Congestion is grounded in real federal traffic
 counts per leg: metro stretches jam at rush hour and flow free at
