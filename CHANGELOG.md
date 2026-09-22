@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Phase A ALCAN: US job boards stay same-country (no Canadian destinations on the through-freight corridor tip).
+
 ### Added
 
 - Phase A ALCAN tip: Blaine Pacific Highway entry nodes and legs (`bellingham_wa_us` → `blaine_wa_us` → `surrey_bc_ca`) with honest public-OSRM mileages on `feat/career-2.0`.
