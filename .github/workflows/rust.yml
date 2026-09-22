@@ -51,9 +51,9 @@ on:
   push:
     # Alongside main and dev, the Rust release lines take direct pushes instead
     # of PRs, so each needs its own entry for this CI to run.
-    branches: [main, dev, feat/career-1.9, feat/rust-port]
+    branches: [main, dev, feat/career-1.9, feat/career-2.0, feat/rust-port]
   pull_request:
-    branches: [main, dev, feat/career-1.9]
+    branches: [main, dev, feat/career-1.9, feat/career-2.0]
     paths:
       - "crates/**"
       - "data/**"
