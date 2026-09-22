@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "afd69d7a9418d2e80c02235fded66a0a0d5f2e7c72c434d3b629d7831f986b03";
+pub const CATALOG_DIGEST: &str = "8a0be9ee9387f8edd9c1f913584275ad7af8d33adab0c0f6c2df8d43b7136d44";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -34,7 +34,7 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
     AchievementCategory {
         id: "road",
         title: "Out on the Road",
-        description: "Clean runs, hard climbs, and the everyday craft of hauling freight.",
+        description: "Clean runs, hard climbs, and the everyday work of hauling freight.",
     },
     AchievementCategory {
         id: "working_day",
@@ -44,22 +44,22 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
     AchievementCategory {
         id: "career",
         title: "Career and Rank",
-        description: "Levels, money, and trucks -- the long climb from rookie to owner-operator.",
+        description: "Levels, money, and trucks -- the long climb from hire to owner-operator.",
     },
     AchievementCategory {
         id: "radio_songs",
         title: "The Dial and Song Towns",
-        description: "Stations chased down the dial, and the towns the old songs already knew.",
+        description: "Stations you catch on the dial, and the towns those songs put on the map.",
     },
     AchievementCategory {
         id: "weather_seasons",
         title: "Weather and the Calendar",
-        description: "Rain, snow, fog, and the seasons that turned while you kept driving.",
+        description: "Rain, snow, fog, and the seasons while you kept driving.",
     },
     AchievementCategory {
         id: "places",
         title: "Places on the Map",
-        description: "Cities, states, and regions where your freight found a home.",
+        description: "Cities, states, and regions you hauled into.",
     },
     AchievementCategory {
         id: "hidden",

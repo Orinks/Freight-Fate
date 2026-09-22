@@ -34,6 +34,8 @@
 
 ### Changed
 
+- **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.
+
 - **A career declined after review stops backing up.** You hear once, by name, that its backup was declined.
 
 - **Discord presence comes down when you step away.** A paused game used to show your run all evening. It now hides after half an hour.
