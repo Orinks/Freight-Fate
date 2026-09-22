@@ -360,6 +360,90 @@ fn opening_the_pause_menu_freezes_the_signal_clock() {
 }
 
 #[test]
+fn route_transition_assistance_slows_a_green_arrival_to_rolling_speed() {
+    // Agent drive, Eagles Landing, 2026-09-22: the light turned green half a
+    // mile up the ramp at 50 mph, the assist only lifted, and the truck went
+    // through "far too fast" with the assist on. Hands off, it now meets the
+    // bar at rolling speed and says once that it is slowing.
+    let mut harness: PlaytestHarness = start_drive("Green arrival");
+    harness.prepare_for_driving(0.0);
+    harness.app.ctx.settings.route_transition_assist = true;
+    harness.with_drive(|drive, _| {
+        stage_signal(drive);
+        drive.ramp_mi = Some(RAMP_ACCESS_MI + 0.4);
+        drive.ramp_light_last_phase = "green".to_string();
+        drive.trip.truck.velocity_mps = 50.0 / 2.23694;
+    });
+    harness.clear_speech();
+
+    let mut crossing_mph = None;
+    for _ in 0..(90.0 / DT) as usize {
+        // Hold the green: this pins the arrival, not the light's timing.
+        harness.with_drive(|drive, _| {
+            drive.ramp_light_offset_s = drive.ramp_light_red_s() + 1.0;
+            drive.ramp_light_timer = 0.0;
+        });
+        let speed = harness.read_drive(|drive| drive.trip.truck.speed_mph());
+        frame(&mut harness, DT);
+        if harness.read_drive(|drive| drive.ramp_terminal_done) {
+            crossing_mph = Some(speed);
+            break;
+        }
+    }
+
+    let lines = spoken(&harness);
+    let crossing_mph = crossing_mph.expect("the truck never reached the bar");
+    assert!(
+        crossing_mph <= GREEN_ROLL_MPH,
+        "crossed the green at {crossing_mph:.1} mph: {lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|line| line.contains("far too fast")),
+        "{lines:?}"
+    );
+    assert_eq!(
+        lines
+            .iter()
+            .filter(|line| line.contains("slowing for the green light"))
+            .count(),
+        1,
+        "{lines:?}"
+    );
+}
+
+#[test]
+fn an_assisted_red_stop_is_never_called_short_of_the_light() {
+    // Agent drive, 2026-09-22: stopped by the assist at the red, the cab said
+    // "Stopped short of the light" on both sides of the assist's own
+    // "Stopped at the red light". Inside the hold window the assist owns it.
+    let mut harness: PlaytestHarness = start_drive("Assisted red");
+    harness.prepare_for_driving(0.0);
+    harness.app.ctx.settings.route_transition_assist = true;
+    harness.with_drive(|drive, _| {
+        stage_signal(drive);
+        drive.ramp_mi = Some(RAMP_ACCESS_MI + RAMP_ASSIST_HOLD_MI * 0.5);
+        drive.trip.truck.velocity_mps = 0.0;
+    });
+    harness.clear_speech();
+
+    for _ in 0..(3.0 / DT) as usize {
+        frame(&mut harness, DT);
+    }
+
+    let lines = spoken(&harness);
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.contains("Stopped at the red light")),
+        "{lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|line| line.contains("short of the light")),
+        "{lines:?}"
+    );
+}
+
+#[test]
 fn a_loaded_truck_departs_on_the_shortest_green_with_manual_acceleration() {
     let mut harness: PlaytestHarness = start_drive("Loaded green");
     harness.prepare_for_driving(0.0);

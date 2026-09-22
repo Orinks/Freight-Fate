@@ -95,6 +95,10 @@
 
 ### Fixed
 
+- **Route-transition assistance slows for a green light, not just a red.** It takes you through at rolling speed instead of too fast.
+
+- **A light the assist stopped you at is no longer called "stopped short".** You hear only that assistance is holding for green.
+
 - **You have to shut the tractor off before the fuel island will fill you.** Same bar as a car pump. The rest-stop and full-lot menus offer the engine kill switch so you are not stuck leaving the stop to turn it off.
 
 - **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)

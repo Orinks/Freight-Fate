@@ -146,6 +146,7 @@ impl DrivingState {
         self.ramp_gap_milestones_said.clear();
         self.ramp_bar_tick_timer = 0.0;
         self.ramp_assist_said = false;
+        self.ramp_green_roll_said = false;
         self.ramp_assist_brake = 0.0;
         self.ramp_waiting_at_sign = false;
         self.approach_pull_ahead = false;
@@ -536,11 +537,18 @@ impl DrivingState {
         if self.ramp_creep_prompt_said {
             return;
         }
-        self.ramp_creep_prompt_said = true;
         // Name the gap: "creep" for a real 600-foot gap takes minutes and
         // reads as a light stuck in a loop. Far back is a drive, and the red
         // phase is exactly the time to make it.
         let gap_mi = ramp_mi - RAMP_ACCESS_MI;
+        if ctx.settings.route_transition_assist && gap_mi <= RAMP_ASSIST_HOLD_MI {
+            // Inside the hold window the assist owns the stop and says so
+            // itself. This runs first in the frame, so it used to say
+            // "Stopped short of the light" around the assist's own "Stopped
+            // at the red light" (agent drive, 2026-09-22).
+            return;
+        }
+        self.ramp_creep_prompt_said = true;
         if matches!(self.ramp_control.as_str(), "stop" | "yield" | "roundabout") {
             let noun = match self.ramp_control.as_str() {
                 "stop" => "the stop sign",

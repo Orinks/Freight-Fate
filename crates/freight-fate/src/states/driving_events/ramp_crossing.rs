@@ -78,16 +78,47 @@ impl DrivingState {
                 // "braking for the light" had been spent on the first red
                 // (Tyler Cross-Dock replay, 2026-09-03).
                 self.ramp_assist_said = false;
-                self.ramp_assist_brake = 0.0;
                 // A green (or a yellow already at the bar) is legal to roll,
-                // but not at speed: lift for the clean-roll threshold with
-                // room to spare. This is a roll, not a stop; a held service
-                // floor here spent reservoir air after the ramp cap had
-                // already started slowing the truck (Joshua, 2026-08-28).
-                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
-                    && speed > GREEN_ROLL_MPH - 5.0
-                {
+                // but not at speed. The lift alone left a truck arriving on
+                // green at the ramp's own advisory, and it crossed "far too
+                // fast" with the assist on (agent drive, Eagles Landing,
+                // 2026-09-22; longer greens make that arrival the common
+                // one). The assist's job is to take the truck THROUGH the
+                // light, then facility assistance takes over (owner,
+                // 2026-09-22). So the servo meets a roll target at the bar
+                // instead of a stop, and lets go once the truck is under it -- a
+                // measured application, never the held service floor that
+                // spent reservoir air on the way down (Joshua, 2026-08-28).
+                let roll_mph = GREEN_ROLL_MPH - 5.0;
+                if speed <= roll_mph {
+                    self.ramp_assist_brake = 0.0;
+                    return;
+                }
+                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck) {
                     self.trip.truck.throttle = 0.0;
+                }
+                let gap_m = 0.5f64.max(gap_mi * 1609.344);
+                let v_mps = 0.0f64.max(self.trip.truck.velocity_mps);
+                let roll_mps = roll_mph / MPH_PER_MPS;
+                let needed = (v_mps * v_mps - roll_mps * roll_mps).max(0.0) / (2.0 * gap_m);
+                let idle = self.ramp_assist_brake <= 0.0;
+                if needed < RAMP_ASSIST_DECEL_RELEASE_MPS2
+                    || (idle && needed < RAMP_ASSIST_DECEL_START_MPS2)
+                {
+                    self.ramp_assist_brake = 0.0;
+                    return;
+                }
+                self.ramp_assist_brake =
+                    assist_servo_brake(self.ramp_assist_brake, needed, &self.trip.truck);
+                self.trip.truck.throttle = 0.0;
+                self.trip.truck.brake = self.trip.truck.brake.max(self.ramp_assist_brake);
+                if !self.ramp_green_roll_said {
+                    self.ramp_green_roll_said = true;
+                    self.pause_speed_control(ctx, true);
+                    self.say_route_confirmation(
+                        ctx,
+                        "Route-transition assistance slowing for the green light.",
+                    );
                 }
                 return;
             }

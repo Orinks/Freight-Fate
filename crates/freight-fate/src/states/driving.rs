@@ -456,6 +456,7 @@ pub struct DrivingState {
     pub ramp_bar_tick_timer: f64,
     pub bar_solid_on: bool, // the bar's continuous final-zone tone
     pub ramp_assist_said: bool,
+    pub ramp_green_roll_said: bool, // "slowing for the green" spoken this terminal
     // The pedal route-transition assistance is currently holding for the
     // terminal, so it can follow the demand up without letting go and
     // re-making the application every few frames.

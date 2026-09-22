@@ -467,6 +467,7 @@ impl DrivingState {
             ramp_bar_tick_timer: 0.0,
             bar_solid_on: false,
             ramp_assist_said: false,
+            ramp_green_roll_said: false,
             ramp_assist_brake: 0.0,
             approach_pull_ahead: false,
             approach_pull_ahead_canceled: false,
