@@ -637,17 +637,23 @@ impl DrivingState {
         lead: &str,
         clear: bool,
     ) -> String {
+        // A facility with a street chain is miles past this terminal: "the
+        // entrance" there was followed by "5 miles to the facility gate"
+        // (agent drive into Abilene, 2026-09-22).
+        let whither = if self.ramp_continues_to_destination_streets(ctx) {
+            "onto the streets"
+        } else {
+            "to the entrance"
+        };
         if self.approach_pull_ahead_available(ctx) {
             self.approach_pull_ahead = true;
             let clear = if clear { " Clear." } else { "" };
-            return format!(
-                "{lead}{clear} Facility stopping assistance is taking you to the entrance."
-            );
+            return format!("{lead}{clear} Facility stopping assistance is taking you {whither}.");
         }
         if clear {
-            format!("{lead} Clear; pull ahead to the entrance.")
+            format!("{lead} Clear; pull ahead {whither}.")
         } else {
-            format!("{lead} Pull ahead to the entrance.")
+            format!("{lead} Pull ahead {whither}.")
         }
     }
 

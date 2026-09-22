@@ -1125,6 +1125,37 @@ fn test_destination_exit_completion_clears_remaining_route_miles() {
     );
 }
 
+#[test]
+fn test_the_gore_of_a_labeled_exit_never_invents_a_second_destination_exit() {
+    // Agent drive into Abilene, 2026-09-22: inside the last 0.05 mile before
+    // exit 286A the scan found nothing ahead, the drive fell back to an
+    // estimated exit near the route's end, and the cab said "In 3 miles, the
+    // destination exit" seconds before the truck took 286A.
+    let mut harness = a_drive("Gore");
+    let labeled = harness.with_drive(|drive, ctx| drive.scan_destination_exit_details(ctx, false));
+    let (exit_at, _, _) = labeled.expect("the default delivery route has a labeled exit");
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = exit_at - 0.03;
+        drive.destination_exit_cache = None;
+        assert!(
+            drive.destination_exit_stop(ctx).is_none(),
+            "no second destination exit at the gore of the real one"
+        );
+        drive.trip.position_mi = exit_at + 0.2;
+        drive.destination_exit_cache = None;
+        assert!(drive.destination_exit_stop(ctx).is_none());
+    });
+    harness.with_drive(|drive, ctx| drive.check_destination_exit(ctx));
+    assert!(
+        !events(&harness)
+            .iter()
+            .any(|line| line.contains("destination exit")),
+        "{:?}",
+        events(&harness)
+    );
+}
+
 /// Keeps the weather import honest for the rigging above.
 #[allow(dead_code)]
 fn _weather_kind_is_used() -> WeatherSystem {

@@ -95,6 +95,10 @@
 
 ### Fixed
 
+- **Right at the destination exit, the cab no longer announces a second one further on.** The exit you are taking is the only destination exit you hear.
+
+- **Where a ramp leads onto city streets, the handoff at its end says so.** You hear "onto the streets" instead of "to the entrance".
+
 - **Route-transition assistance slows for a green light, not just a red.** It takes you through at rolling speed instead of too fast.
 
 - **A light the assist stopped you at is no longer called "stopped short".** You hear only that assistance is holding for green.

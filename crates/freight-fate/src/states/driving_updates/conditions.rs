@@ -468,8 +468,13 @@ impl DrivingState {
         self.destination_assist_brake = 0.0;
         // ROUTE, not the ambient default: an automation just released the
         // pedals (the automation-handoff rule, 2026-08-20).
+        let whither = if self.ramp_continues_to_destination_streets(ctx) {
+            "onto the streets"
+        } else {
+            "to the entrance"
+        };
         ctx.say_event_with(
-            "Facility stopping assistance released; pull ahead to the entrance.",
+            format!("Facility stopping assistance released; pull ahead {whither}."),
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),

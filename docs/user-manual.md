@@ -1177,8 +1177,10 @@ bar instead of a quarter mile short and creeping blind.
 Once the stop is honored and the way is clear, who pulls ahead depends on
 Facility stopping assistance. With it off, the cab says "Clear; pull ahead to
 the entrance" (or "Green light. Pull ahead to the entrance") and the last
-stretch is yours. With it on, the cab says "Facility stopping assistance is
-taking you to the entrance" and the truck moves off on its own: where the ramp
+stretch is yours; where city streets follow the ramp, it says "onto the
+streets" instead. With it on, the cab says "Facility stopping assistance is
+taking you to the entrance", or "onto the streets", and the truck moves off
+on its own: where the ramp
 ends at the gate, the assist drives it there and stops; where the facility sits
 at the end of city streets, the assist rolls the truck to the streets and the
 speed keeper takes them, holding the posted number and easing for each corner,

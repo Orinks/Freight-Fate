@@ -879,8 +879,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     assert!(
         !heard
             .iter()
-            .any(|line| line.contains("Pull ahead to the entrance")
-                || line.contains("taking the pedals")),
+            .any(|line| line.contains("Pull ahead ") || line.contains("taking the pedals")),
         "{}",
         harness.transcript_text()
     );
@@ -1104,7 +1103,7 @@ fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
     println!("{}", release.report(destination));
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you to the entrance."),
+        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1184,7 +1183,7 @@ fn test_with_the_assist_off_the_clear_sign_still_hands_the_last_stretch_to_the_d
     let release = arrive_from_the_sign(destination, false, false);
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear; pull ahead to the entrance."),
+        release.said("Stopped at the sign. Clear; pull ahead onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1211,7 +1210,11 @@ fn test_the_drivers_brake_cancels_the_automatic_pull_ahead() {
         println!("{}", release.report(destination));
         assert!(release.moved_off_alone, "{}", release.report(destination));
         assert!(
-            release.said("Facility stopping assistance released; pull ahead to the entrance."),
+            release.said(if destination.chain {
+                "Facility stopping assistance released; pull ahead onto the streets."
+            } else {
+                "Facility stopping assistance released; pull ahead to the entrance."
+            }),
             "{}",
             release.report(destination)
         );

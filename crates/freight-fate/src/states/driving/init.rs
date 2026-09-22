@@ -487,6 +487,7 @@ impl DrivingState {
             departure_checked: false,
             ladder_leg_index: -1,
             destination_exit_cache: None,
+            destination_exit_labeled: None,
             cruise_mph: None,
             cruise_working_mph: None,
             cruise_held_mph: None,

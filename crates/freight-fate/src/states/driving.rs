@@ -500,6 +500,10 @@ pub struct DrivingState {
     pub ladder_leg_index: i64,
     // (position when computed, scan result) -- see _destination_exit_details
     pub destination_exit_cache: Option<DestinationExitScan>,
+    /// Whether this trip's route has a labeled destination exit at all, keyed
+    /// by `trip_generation`: only a route without one may fall back to the
+    /// estimated exit before the end.
+    pub destination_exit_labeled: Option<(u64, bool)>,
 
     // ---- driving_events.py / driving_speed_control.py: cruise and the keeper -----------
     pub cruise_mph: Option<f64>,
