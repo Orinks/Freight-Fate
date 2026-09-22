@@ -1,6 +1,6 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed** on `feat/career-2.0` (… ↔ Fort St. John ↔ Fort Nelson ↔ Watson Lake ↔ Whitehorse). Still no Anchorage, no full Canada board, no Tok/Fairbanks until Poker Creek / Beaver Creek border metadata + Ruth GO.
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Still no Anchorage, no full Canada board. Phase A continuous Lower-48→Fairbanks corridor complete pending Ruth cut.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -255,10 +255,23 @@ No Tok / Fairbanks. No Poker Creek AK / Beaver Creek YT `border_crossing` yet (C
 
 - Public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options) 2026-09-22; paid miles match router (±5 mi band rounded).
 - Elevation: Open-Meteo elevation API along densified shape (~30 mi samples).
-- City lat integrity ceiling raised to `62.0` for Whitehorse (~60.7°N); lon floor lowered to `-142.0` for western YT (~-135). Tok/Fairbanks lat still out of band.
+- City lat integrity ceiling raised to `66.0` for Fairbanks (~64.8°N); lon floor lowered to `-150.0` for Interior AK (~-147.7). Anchorage still Phase B.
 
-### Blockers for next slice (toward Tok / Fairbanks)
+### Phase A AK terminus (Tok / Fairbanks) — landed
 
-- Do **not** add Tok/Fairbanks without Poker Creek AK / Beaver Creek YT border metadata on the CA→US leg.
+| Key / leg | Miles | Notes |
+| --- | --- | --- |
+| `tok_ak_us` | — | Alaska Highway entry; Young's Chevron stand-in fuel/parking |
+| `fairbanks_ak_us` | — | Phase A AK terminus; Sourdough Fuel (1688 Airport Way) stand-in |
+| `whitehorse_yt_ca` ↔ `tok_ak_us` | **387** | Alaska Highway both directions; `border_crossing` id `poker_creek_beaver_creek`, mode `through_freight`, cabotage `forbidden` (both ways); Alcan POE at ~297.5 mi northbound |
+| `tok_ak_us` ↔ `fairbanks_ak_us` | **202** | Alaska Highway / Richardson Highway (AK-2); both directions; public Valhalla truck |
+
+No Anchorage (Phase B). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
+
+Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.
+
+### Blockers for next slice (Phase B Alaska / rest of Canada)
+
+- Do **not** add Anchorage without continuous AK highway graph beyond Fairbanks.
 - Prefer public Overpass / regional Geofabrik before Josh overnight PBF/Valhalla (ask Chelsea).
 - Still no Anchorage (Phase B).

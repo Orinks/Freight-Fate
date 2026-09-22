@@ -1,0 +1,491 @@
+{
+  "legs": [
+    {
+      "from": "fairbanks_ak_us",
+      "to": "tok_ak_us",
+      "miles": 202,
+      "highway": "Alaska Highway / Richardson Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 64.83803,
+            "lon": -147.71674
+          },
+          {
+            "at_mi": 22.0,
+            "lat": 64.67871,
+            "lon": -147.12045
+          },
+          {
+            "at_mi": 52.0,
+            "lat": 64.33091,
+            "lon": -146.7651
+          },
+          {
+            "at_mi": 82.0,
+            "lat": 64.19714,
+            "lon": -145.91483
+          },
+          {
+            "at_mi": 112.0,
+            "lat": 63.90457,
+            "lon": -145.25343
+          },
+          {
+            "at_mi": 142.0,
+            "lat": 63.68741,
+            "lon": -144.46264
+          },
+          {
+            "at_mi": 172.0,
+            "lat": 63.45116,
+            "lon": -143.83809
+          },
+          {
+            "at_mi": 202.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 449.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 22.0,
+            "elevation_ft": 538.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 52.0,
+            "elevation_ft": 974.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 82.0,
+            "elevation_ft": 977.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 112.0,
+            "elevation_ft": 1210.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 142.0,
+            "elevation_ft": 1341.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 172.0,
+            "elevation_ft": 1538.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 202.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 202.0,
+            "avg_grade_pct": 0.11,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 202.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 202.5 mi; paid miles 202. Alaska Highway / Richardson Highway (AK-2) ALCAN Phase A through-freight filament Fairbanks\u2192Tok. No Anchorage (Phase B).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse placeholder ~55 mph rural Alaska Highway truck context for Phase A terminus; CA statutory truck caps and US HGV refine still named honesty debts (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "tok_ak_us",
+      "to": "fairbanks_ak_us",
+      "miles": 202,
+      "highway": "Alaska Highway / Richardson Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 63.45116,
+            "lon": -143.83809
+          },
+          {
+            "at_mi": 60.0,
+            "lat": 63.68741,
+            "lon": -144.46264
+          },
+          {
+            "at_mi": 90.0,
+            "lat": 63.90457,
+            "lon": -145.25343
+          },
+          {
+            "at_mi": 120.0,
+            "lat": 64.19714,
+            "lon": -145.91483
+          },
+          {
+            "at_mi": 150.0,
+            "lat": 64.33091,
+            "lon": -146.7651
+          },
+          {
+            "at_mi": 180.0,
+            "lat": 64.67871,
+            "lon": -147.12045
+          },
+          {
+            "at_mi": 202.0,
+            "lat": 64.83803,
+            "lon": -147.71674
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 1538.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 60.0,
+            "elevation_ft": 1341.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 90.0,
+            "elevation_ft": 1210.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 120.0,
+            "elevation_ft": 977.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 150.0,
+            "elevation_ft": 974.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 180.0,
+            "elevation_ft": 538.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 202.0,
+            "elevation_ft": 449.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 202.0,
+            "avg_grade_pct": -0.11,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 202.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 202.5 mi; paid miles 202. Alaska Highway / Richardson Highway (AK-2) ALCAN Phase A through-freight filament Tok\u2192Fairbanks terminus. No Anchorage (Phase B). Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse placeholder ~55 mph rural Alaska Highway truck context for Phase A terminus; CA statutory truck caps and US HGV refine still named honesty debts (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "tok_ak_us",
+      "to": "whitehorse_yt_ca",
+      "miles": 387,
+      "highway": "Alaska Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          },
+          {
+            "at_mi": 27.0,
+            "lat": 63.22859,
+            "lon": -142.24436
+          },
+          {
+            "at_mi": 57.0,
+            "lat": 62.9582,
+            "lon": -141.63003
+          },
+          {
+            "at_mi": 87.0,
+            "lat": 62.65709,
+            "lon": -141.05547
+          },
+          {
+            "at_mi": 117.0,
+            "lat": 62.29765,
+            "lon": -140.78251
+          },
+          {
+            "at_mi": 147.0,
+            "lat": 61.9647,
+            "lon": -140.43266
+          },
+          {
+            "at_mi": 177.0,
+            "lat": 61.68372,
+            "lon": -139.76998
+          },
+          {
+            "at_mi": 207.0,
+            "lat": 61.412,
+            "lon": -139.18524
+          },
+          {
+            "at_mi": 237.0,
+            "lat": 61.14661,
+            "lon": -138.55889
+          },
+          {
+            "at_mi": 267.0,
+            "lat": 60.95345,
+            "lon": -138.0303
+          },
+          {
+            "at_mi": 297.0,
+            "lat": 60.80933,
+            "lon": -137.43006
+          },
+          {
+            "at_mi": 327.0,
+            "lat": 60.80708,
+            "lon": -136.58268
+          },
+          {
+            "at_mi": 357.0,
+            "lat": 60.84998,
+            "lon": -135.78494
+          },
+          {
+            "at_mi": 387.0,
+            "lat": 60.72147,
+            "lon": -135.05545
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 27.0,
+            "elevation_ft": 1748.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 57.0,
+            "elevation_ft": 1791.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 87.0,
+            "elevation_ft": 1834.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 117.0,
+            "elevation_ft": 2385.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 147.0,
+            "elevation_ft": 2214.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 177.0,
+            "elevation_ft": 2398.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 207.0,
+            "elevation_ft": 2713.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 237.0,
+            "elevation_ft": 2647.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 267.0,
+            "elevation_ft": 3002.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 297.0,
+            "elevation_ft": 2227.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 327.0,
+            "elevation_ft": 2345.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 357.0,
+            "elevation_ft": 2208.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 387.0,
+            "elevation_ft": 2089.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 387.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Poker Creek / Beaver Creek (Alcan Port of Entry)",
+            "at_mi": 89.5,
+            "type": "border",
+            "state": "Yukon",
+            "highway": "Alaska Highway",
+            "lat": 62.62063,
+            "lon": -141.00756,
+            "source": "Alcan Port of Entry (US CBP) at Poker Creek AK on the Alaska Highway; pairs with Canada Border Services at Beaver Creek YT. OSM barrier=border_control matched to public Valhalla truck-costing geometry (development-time)."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 89.5
+          },
+          {
+            "state": "Yukon",
+            "miles": 297.5
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 386.8 mi; paid miles 387. Alaska Highway ALCAN Phase A through-freight filament Tok\u2192Whitehorse via Poker Creek AK / Beaver Creek YT border (border_crossing id poker_creek_beaver_creek). Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse placeholder ~55 mph rural Alaska Highway truck context for Phase A terminus; CA statutory truck caps and US HGV refine still named honesty debts (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": [
+          {
+            "at_mi": 89.5,
+            "from_state": "Alaska",
+            "state": "Yukon",
+            "place": "Poker Creek AK / Beaver Creek YT (Alcan Port of Entry) on the Alaska Highway",
+            "source": "International border on the continuous Alaska Highway truck path at Alcan Port of Entry (Poker Creek); Canada Border Services Beaver Creek is ~18 mi prior. Position from OSM border_control matched to public Valhalla truck-costing geometry (development-time)."
+          }
+        ],
+        "border_crossing": {
+          "id": "poker_creek_beaver_creek",
+          "from_country": "US",
+          "to_country": "CA",
+          "ports": [
+            "poker_creek_beaver_creek"
+          ],
+          "mode": "through_freight",
+          "cabotage": "forbidden"
+        }
+      },
+      "border_crossing": {
+        "id": "poker_creek_beaver_creek",
+        "from_country": "US",
+        "to_country": "CA",
+        "ports": [
+          "poker_creek_beaver_creek"
+        ],
+        "mode": "through_freight",
+        "cabotage": "forbidden"
+      }
+    }
+  ]
+}

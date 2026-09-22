@@ -900,15 +900,15 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.region
         );
         assert!(
-            // ALCAN Phase A through Yukon (Whitehorse ~60.7°N) raises the lat ceiling;
-            // lon floor opens western YT (~-135) without admitting Tok/Fairbanks lat yet.
-            24.0 < city.lat && city.lat < 62.0,
+            // ALCAN Phase A Fairbanks terminus (~64.8°N / ~-147.7°W) raises ceilings;
+            // Anchorage (~61.2°N / ~-149.9°W) still deferred to Phase B graph work.
+            24.0 < city.lat && city.lat < 66.0,
             "{}: lat {}",
             city.name,
             city.lat
         );
         assert!(
-            -142.0 < city.lon && city.lon < -66.0,
+            -150.0 < city.lon && city.lon < -66.0,
             "{}: lon {}",
             city.name,
             city.lon
@@ -1083,7 +1083,7 @@ fn test_alcan_phase_a_north_filament_to_whitehorse() {
             "fort_st_john_bc_ca".to_string(),
         ]
     );
-    // Directed edges both ways; no Tok/Fairbanks skip; no Poker Creek border yet.
+    // Directed edges both ways on the north filament (Tok/Fairbanks covered by terminus test).
     let directed: Vec<_> = world
         .legs
         .iter()
@@ -1102,14 +1102,8 @@ fn test_alcan_phase_a_north_filament_to_whitehorse() {
             "missing directed north ALCAN leg {a}->{b}"
         );
     }
-    assert!(
-        !world.cities.contains_key("tok_ak_us"),
-        "Tok must not land without Poker Creek / Beaver Creek border metadata"
-    );
-    assert!(
-        !world.cities.contains_key("fairbanks_ak_us"),
-        "Fairbanks is not this filament"
-    );
+    // Tok/Fairbanks + Poker Creek border land in
+    // test_alcan_phase_a_terminus_to_fairbanks (Phase A AK terminus slice).
     let fsj_fn = world
         .legs
         .iter()
@@ -1140,6 +1134,125 @@ fn test_alcan_phase_a_north_filament_to_whitehorse() {
         "Watson Lake–Whitehorse must be real Alaska Highway miles, got {}",
         wl_wh.miles
     );
+}
+
+#[test]
+fn test_alcan_phase_a_terminus_to_fairbanks() {
+    let world = world();
+    let north = world
+        .shortest_route("whitehorse_yt_ca", "fairbanks_ak_us", None, false)
+        .expect("whitehorse loads")
+        .expect("ALCAN Phase A terminus must reach Fairbanks");
+    assert_eq!(
+        north.cities,
+        vec![
+            "whitehorse_yt_ca".to_string(),
+            "tok_ak_us".to_string(),
+            "fairbanks_ak_us".to_string(),
+        ]
+    );
+    let south = world
+        .shortest_route("fairbanks_ak_us", "whitehorse_yt_ca", None, false)
+        .expect("fairbanks loads")
+        .expect("southbound ALCAN terminus filament must route");
+    assert_eq!(
+        south.cities,
+        vec![
+            "fairbanks_ak_us".to_string(),
+            "tok_ak_us".to_string(),
+            "whitehorse_yt_ca".to_string(),
+        ]
+    );
+    // Continuous Lower 48 → Fairbanks through Blaine (no Anchorage; no teleport).
+    let full = world
+        .shortest_route("bellingham_wa_us", "fairbanks_ak_us", None, false)
+        .expect("bellingham loads")
+        .expect("Lower 48 must reach Fairbanks on the Phase A ALCAN corridor");
+    assert!(
+        full.cities.iter().any(|c| c == "blaine_wa_us"),
+        "must enter Canada via Blaine Pacific Highway, got {:?}",
+        full.cities
+    );
+    assert!(
+        full.cities.iter().any(|c| c == "dawson_creek_bc_ca"),
+        "must pass Dawson Creek Mile 0, got {:?}",
+        full.cities
+    );
+    assert!(
+        full.cities.iter().any(|c| c == "whitehorse_yt_ca"),
+        "must pass Whitehorse, got {:?}",
+        full.cities
+    );
+    assert!(
+        !full.cities.iter().any(|c| c == "anchorage_ak_us"),
+        "Anchorage is Phase B, not Phase A terminus"
+    );
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    for (a, b) in [
+        ("whitehorse_yt_ca", "tok_ak_us"),
+        ("tok_ak_us", "whitehorse_yt_ca"),
+        ("tok_ak_us", "fairbanks_ak_us"),
+        ("fairbanks_ak_us", "tok_ak_us"),
+    ] {
+        assert!(
+            directed.contains(&(a, b)),
+            "missing directed terminus ALCAN leg {a}->{b}"
+        );
+    }
+    // Poker Creek / Beaver Creek border_crossing on both CA↔US directions.
+    let yt = include_str!("../../../../data/world_data/ca/legs/YT.json");
+    let ak = include_str!("../../../../data/world_data/us/legs/AK.json");
+    assert!(
+        yt.contains("\"from\": \"whitehorse_yt_ca\"")
+            && yt.contains("\"to\": \"tok_ak_us\"")
+            && yt.contains("poker_creek_beaver_creek")
+            && yt.contains("through_freight")
+            && yt.contains("\"cabotage\": \"forbidden\""),
+        "CA→US Whitehorse→Tok must carry poker_creek_beaver_creek through_freight border stub"
+    );
+    assert!(
+        ak.contains("\"from\": \"tok_ak_us\"")
+            && ak.contains("\"to\": \"whitehorse_yt_ca\"")
+            && ak.contains("poker_creek_beaver_creek")
+            && ak.contains("through_freight")
+            && ak.contains("\"cabotage\": \"forbidden\""),
+        "US→CA Tok→Whitehorse must carry poker_creek_beaver_creek through_freight border stub"
+    );
+    let wh_tok = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "whitehorse_yt_ca" && leg.b == "tok_ak_us")
+        .expect("whitehorse->tok");
+    assert!(
+        (360.0..=420.0).contains(&wh_tok.miles),
+        "Whitehorse–Tok must be real Alaska Highway miles, got {}",
+        wh_tok.miles
+    );
+    let tok_fb = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "tok_ak_us" && leg.b == "fairbanks_ak_us")
+        .expect("tok->fairbanks");
+    assert!(
+        (180.0..=230.0).contains(&tok_fb.miles),
+        "Tok–Fairbanks must be real Alaska/Richardson Highway miles, got {}",
+        tok_fb.miles
+    );
+    // Stand-in fuel lots.
+    let tok = world.city("tok_ak_us").expect("tok");
+    assert!(tok
+        .locations
+        .iter()
+        .any(|loc| loc.name.contains("Chevron") || loc.name.contains("Young")));
+    let fb = world.city("fairbanks_ak_us").expect("fairbanks");
+    assert!(fb
+        .locations
+        .iter()
+        .any(|loc| loc.name.contains("Sourdough") || loc.name.contains("Airport")));
 }
 
 #[test]

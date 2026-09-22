@@ -339,6 +339,237 @@
     },
     {
       "from": "whitehorse_yt_ca",
+      "to": "tok_ak_us",
+      "miles": 387,
+      "highway": "Alaska Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 60.72147,
+            "lon": -135.05545
+          },
+          {
+            "at_mi": 30.0,
+            "lat": 60.84998,
+            "lon": -135.78494
+          },
+          {
+            "at_mi": 60.0,
+            "lat": 60.80708,
+            "lon": -136.58268
+          },
+          {
+            "at_mi": 90.0,
+            "lat": 60.80933,
+            "lon": -137.43006
+          },
+          {
+            "at_mi": 120.0,
+            "lat": 60.95345,
+            "lon": -138.0303
+          },
+          {
+            "at_mi": 150.0,
+            "lat": 61.14661,
+            "lon": -138.55889
+          },
+          {
+            "at_mi": 180.0,
+            "lat": 61.412,
+            "lon": -139.18524
+          },
+          {
+            "at_mi": 210.0,
+            "lat": 61.68372,
+            "lon": -139.76998
+          },
+          {
+            "at_mi": 240.0,
+            "lat": 61.9647,
+            "lon": -140.43266
+          },
+          {
+            "at_mi": 270.0,
+            "lat": 62.29765,
+            "lon": -140.78251
+          },
+          {
+            "at_mi": 300.0,
+            "lat": 62.65709,
+            "lon": -141.05547
+          },
+          {
+            "at_mi": 330.0,
+            "lat": 62.9582,
+            "lon": -141.63003
+          },
+          {
+            "at_mi": 360.0,
+            "lat": 63.22859,
+            "lon": -142.24436
+          },
+          {
+            "at_mi": 387.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 2089.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 30.0,
+            "elevation_ft": 2208.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 60.0,
+            "elevation_ft": 2345.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 90.0,
+            "elevation_ft": 2227.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 120.0,
+            "elevation_ft": 3002.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 150.0,
+            "elevation_ft": 2647.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 180.0,
+            "elevation_ft": 2713.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 210.0,
+            "elevation_ft": 2398.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 240.0,
+            "elevation_ft": 2214.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 270.0,
+            "elevation_ft": 2385.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 300.0,
+            "elevation_ft": 1834.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 330.0,
+            "elevation_ft": 1791.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 360.0,
+            "elevation_ft": 1748.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          },
+          {
+            "at_mi": 387.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-22."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 387.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-22."
+          }
+        ],
+        "checkpoints": [
+          {
+            "name": "Poker Creek / Beaver Creek (Alcan Port of Entry)",
+            "at_mi": 297.5,
+            "type": "border",
+            "state": "Alaska",
+            "highway": "Alaska Highway",
+            "lat": 62.62063,
+            "lon": -141.00756,
+            "source": "Alcan Port of Entry (US CBP) at Poker Creek AK on the Alaska Highway; pairs with Canada Border Services at Beaver Creek YT. OSM barrier=border_control matched to public Valhalla truck-costing geometry (development-time)."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Yukon",
+            "miles": 297.5
+          },
+          {
+            "state": "Alaska",
+            "miles": 89.5
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 386.8 mi; paid miles 387. Alaska Highway ALCAN Phase A through-freight filament Whitehorse\u2192Tok via Poker Creek AK / Beaver Creek YT border (border_crossing id poker_creek_beaver_creek). Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 56,
+            "source": "Coarse placeholder ~90 km/h rural YT Alaska Highway truck context until the Alcan Port of Entry, then ~55 mph AK rural; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": [
+          {
+            "at_mi": 297.5,
+            "from_state": "Yukon",
+            "state": "Alaska",
+            "place": "Poker Creek AK / Beaver Creek YT (Alcan Port of Entry) on the Alaska Highway",
+            "source": "International border on the continuous Alaska Highway truck path at Alcan Port of Entry (Poker Creek); Canada Border Services Beaver Creek is ~18 mi prior. Position from OSM border_control matched to public Valhalla truck-costing geometry (development-time)."
+          }
+        ],
+        "border_crossing": {
+          "id": "poker_creek_beaver_creek",
+          "from_country": "CA",
+          "to_country": "US",
+          "ports": [
+            "poker_creek_beaver_creek"
+          ],
+          "mode": "through_freight",
+          "cabotage": "forbidden"
+        }
+      },
+      "border_crossing": {
+        "id": "poker_creek_beaver_creek",
+        "from_country": "CA",
+        "to_country": "US",
+        "ports": [
+          "poker_creek_beaver_creek"
+        ],
+        "mode": "through_freight",
+        "cabotage": "forbidden"
+      }
+    },
+    {
+      "from": "whitehorse_yt_ca",
       "to": "watson_lake_yt_ca",
       "miles": 273,
       "highway": "Alaska Highway",

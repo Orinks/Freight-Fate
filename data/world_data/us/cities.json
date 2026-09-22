@@ -7995,6 +7995,40 @@
           "source": "Real frozen beef patty plant, 1208 Progress Boulevard in the Elberton Industrial Park; Food Safety and Inspection Service inspected establishment. Development Authority of Elbert County employer list, accessed 2026-08-16."
         }
       ]
+    },
+    "tok_ak_us": {
+      "spoken_city": "Tok",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 63.3366667,
+      "lon": -142.985555,
+      "locations": [
+        {
+          "name": "Young's Chevron (Alaska Highway)",
+          "type": "company_yard",
+          "lat": 63.3353228,
+          "lon": -142.985827,
+          "source_note": "Young's Chevron fuel on the Alaska Highway in Tok AK (Unorganized Borough). OSM amenity=fuel pin; stand-in fuel/parking for ALCAN Phase A Alaska entry (through-freight only; no Anchorage / Phase B graph)."
+        }
+      ]
+    },
+    "fairbanks_ak_us": {
+      "spoken_city": "Fairbanks",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 64.837845,
+      "lon": -147.716675,
+      "locations": [
+        {
+          "name": "Sourdough Fuel (1688 Airport Way)",
+          "type": "company_yard",
+          "lat": 64.8371392,
+          "lon": -147.7505063,
+          "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B)."
+        }
+      ]
     }
   }
 }
