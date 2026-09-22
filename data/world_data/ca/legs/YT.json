@@ -168,7 +168,16 @@
         "interchanges": [],
         "restrictions": [],
         "lane_segments": [],
-        "traffic_aadt": []
+        "traffic_aadt": [],
+        "state_crossings": [
+          {
+            "at_mi": 12.0,
+            "from_state": "Yukon",
+            "state": "British Columbia",
+            "place": "Yukon\u2013British Columbia line on the Alaska Highway (near Contact Creek / Lower Post)",
+            "source": "Approximate British Columbia\u2013Yukon line on the Alaska Highway near Contact Creek / Lower Post, matched to public Valhalla truck-costing geometry (development-time, valhalla1.openstreetmap.de). Coarse at_mi from ~12 mi YT remainder into Watson Lake (Historic Mile ~627 border vs Mile ~635 Watson Lake)."
+          }
+        ]
       }
     },
     {

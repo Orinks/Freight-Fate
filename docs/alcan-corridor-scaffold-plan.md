@@ -246,7 +246,7 @@ Ruth GO after KEEP on inland tip `4b375017`. Daytime public Valhalla truck costi
 | `watson_lake_yt_ca` | — | Yukon entry on ALCAN; Petro-Canada 137 Frank Trail pin (~5 truck spaces) |
 | `whitehorse_yt_ca` | — | Phase A Yukon terminus; downtown pin + McCrae Petro-Canada lot (91007 Alaska Hwy, ~10 spaces) |
 | `fort_st_john_bc_ca` ↔ `fort_nelson_bc_ca` | **239** | Alaska Highway; both directions; public Valhalla truck |
-| `fort_nelson_bc_ca` ↔ `watson_lake_yt_ca` | **319** | Alaska Highway (BC→YT); both directions; public Valhalla truck; coarse `state_miles` split near Contact Creek / Lower Post |
+| `fort_nelson_bc_ca` ↔ `watson_lake_yt_ca` | **319** | Alaska Highway (BC→YT); both directions; public Valhalla truck; coarse `state_miles` + `state_crossings` near Contact Creek / Lower Post |
 | `watson_lake_yt_ca` ↔ `whitehorse_yt_ca` | **273** | Alaska Highway; both directions; public Valhalla truck |
 
 No Tok / Fairbanks. No Poker Creek AK / Beaver Creek YT `border_crossing` yet (CA→US attach deferred). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
