@@ -9,6 +9,7 @@ use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_int, round_py_n};
 use ff_core::sim::hos;
 use ff_core::sim::roadside_inspection::InspectionLevel;
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::vehicle::TruckState;
 use serde_json::json;
 
 use crate::app::{GameContext, Say};
@@ -21,8 +22,8 @@ use crate::states::driving_core::{
     advance_rest_clock, clock_text, deadline_text, hos_mut_of, hos_of, pay_advance_grant,
     pay_advance_unavailable_reason, player_pays_operating_costs, poi_ambient_key, profile_mut_of,
     profile_of, record_inspection, road_repair_cost, shut_down_engine, wake_air_instruction,
-    RigBuff, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE, MECHANIC_WAIT_MIN, MOTEL_COST,
-    ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
+    FacilityEngine, RigBuff, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE, MECHANIC_WAIT_MIN,
+    MOTEL_COST, ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
     ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
@@ -184,11 +185,14 @@ impl RestStopState {
         }
 
         if has("fuel") {
+            // Kill switch while parked: the road's engine key is out of reach
+            // under this menu, and the fuel island refuses a running tractor.
+            items.push(self.facility_engine_item_for(d.trip.truck.engine_on));
             let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
                     "Fills the tank at the regional diesel price plus a 35 dollar service fee. \
-                     Short on cash, it buys what you can afford.",
+                     Short on cash, it buys what you can afford. The engine must be off.",
                 ),
             );
         }
@@ -1168,6 +1172,43 @@ impl RestStopState {
         ctx.audio.play("ui/notify");
         ctx.say(&text);
         ctx.say_with(self.current_text(ctx), Say::queued().review(false));
+    }
+
+    /// [`FacilityEngine::facility_engine_item`] with engine state already in hand
+    /// (rows build inside a DriveRef borrow).
+    fn facility_engine_item_for(&self, engine_on: bool) -> MenuItem<Self> {
+        if engine_on {
+            MenuItem::new(
+                crate::states::driving_core::FACILITY_ENGINE_SHUT_DOWN_ITEM,
+                |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
+            )
+            .help("Engine off while parked, no fuel burned. Required before the fuel island.")
+        } else {
+            MenuItem::new(
+                crate::states::driving_core::FACILITY_ENGINE_START_ITEM,
+                |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
+            )
+            .help("Starts the engine. The parking brake needs 100 psi of air.")
+        }
+    }
+}
+
+impl FacilityEngine for RestStopState {
+    fn facility_engine_on(&self, _ctx: &GameContext) -> bool {
+        self.driving
+            .read(|d| d.trip.truck.engine_on)
+            .unwrap_or(false)
+    }
+
+    fn with_facility_truck<R>(
+        &mut self,
+        ctx: &mut GameContext,
+        f: impl FnOnce(&mut GameContext, &mut TruckState) -> R,
+    ) -> R {
+        self.driving
+            .clone()
+            .call(self, ctx, |_s, ctx, d| f(ctx, &mut d.trip.truck))
+            .expect("the rest stop keeps the drive under it")
     }
 }
 
