@@ -101,6 +101,7 @@
 
 ### Fixed
 
+- Phase A ALCAN: BC↔YT `state_crossings` on Fort Nelson–Watson Lake Alaska Highway legs (corridor metadata completeness).
 - **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
 
 - **Manage careers lists careers from earlier versions, so you can delete them.** Before, one stayed on the Choose career list for good.
