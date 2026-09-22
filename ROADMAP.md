@@ -160,13 +160,14 @@ These steps remain open even where a related implementation bullet is checked:
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
-- [ ] The owner voice pass over seven achievement titles. The
-      physical-Mac VoiceOver listening pass was DROPPED as a release
-      gate (2026-09-20, owner): there is no physical Mac to test on.
-      Prism reaches VoiceOver the same way it reaches every other
-      reader, and the native runner boots the packaged app before it
-      ships, so the gate could never have been cleared here anyway.
-      Revive it only if a Mac tester appears.
+- [x] The owner voice pass over seven achievement titles (2026-09-22).
+      The category-description cut landed and the owner accepted all
+      seven titles as-is. The physical-Mac VoiceOver listening pass was
+      DROPPED as a release gate (2026-09-20, owner): there is no physical
+      Mac to test on. Prism reaches VoiceOver the same way it reaches
+      every other reader, and the native runner boots the packaged app
+      before it ships, so that sub-gate could never have been cleared
+      here anyway. Revive the Mac listen only if a Mac tester appears.
 - [x] The Unreleased block is ready to cut stable notes from
       (2026-09-20). The four tester-line bullets are gone: the staging
       orinks.net copy, the Update channel developer-snapshots row, and
