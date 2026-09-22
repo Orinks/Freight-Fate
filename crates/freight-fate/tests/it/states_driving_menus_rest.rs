@@ -516,13 +516,19 @@ fn test_a_full_lot_still_offers_the_pumps_first() {
     let mut state =
         ParkingFullState::with_drive(DriveRef::of(&drive), travel_center("Prairie Plaza", at));
     let rows = build_labels(&mut state, &mut app.ctx);
+    // Engine kill switch sits with the pumps: the island refuses a running
+    // tractor, and the road's engine key is out of reach under this menu.
     assert!(
-        rows[0].starts_with("Refuel ") || rows[0].starts_with("Fuel:"),
+        rows[0] == "Shut down the engine" || rows[0] == "Start the engine",
         "{rows:?}"
     );
-    assert_eq!(rows[1], "Drive on to the next stop");
-    assert!(rows[2].starts_with("Motel room:"), "{rows:?}");
-    assert_eq!(rows[3], "Park on the shoulder and sleep");
+    assert!(
+        rows[1].starts_with("Refuel ") || rows[1].starts_with("Fuel:"),
+        "{rows:?}"
+    );
+    assert_eq!(rows[2], "Drive on to the next stop");
+    assert!(rows[3].starts_with("Motel room:"), "{rows:?}");
+    assert_eq!(rows[4], "Park on the shoulder and sleep");
 }
 
 #[test]
@@ -1056,4 +1062,104 @@ fn test_the_walk_around_says_what_an_inspector_would_find_first() {
         said.contains("Brakes close to the adjustment limit: an inspector would write this up."),
         "{said}"
     );
+}
+
+// -- fuel island needs the tractor off --------------------------------------------------------
+
+#[test]
+fn test_refuel_refuses_while_the_tractor_engine_is_running() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = 10.0;
+        d.trip.truck.engine_on = true;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, travel_center("Pilot Travel Center", at));
+    let before = with_drive(&drive, |d| d.trip.truck.fuel_gal);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Refuel");
+    let after = with_drive(&drive, |d| d.trip.truck.fuel_gal);
+    assert_eq!(after, before, "tank must not fill with the engine running");
+    assert!(
+        with_drive(&drive, |d| d.trip.truck.engine_on),
+        "refuse must not silently kill the engine"
+    );
+    assert_eq!(last(&app), "Shut the engine off before you fuel.");
+}
+
+#[test]
+fn test_refuel_is_allowed_once_the_tractor_engine_is_off() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(50_000.0);
+    with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = 10.0;
+        d.trip.truck.engine_on = false;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, travel_center("Pilot Travel Center", at));
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Refuel");
+    with_drive(&drive, |d| {
+        assert_eq!(d.trip.truck.fuel_gal, d.trip.truck.specs.fuel_tank_gal);
+    });
+    assert!(
+        app.main_lines()
+            .iter()
+            .any(|line| line.starts_with("Refueled ")),
+        "{:?}",
+        app.main_lines()
+    );
+}
+
+#[test]
+fn test_rest_stop_engine_row_shuts_down_so_fuel_can_proceed() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(50_000.0);
+    with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = 10.0;
+        d.trip.truck.engine_on = true;
+        d.trip.truck.velocity_mps = 0.0;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, travel_center("Love's Travel Stop", at));
+    let rows = build_labels(&mut state, &mut app.ctx);
+    assert!(rows.iter().any(|r| r == "Shut down the engine"), "{rows:?}");
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Shut down the engine");
+    assert!(!with_drive(&drive, |d| d.trip.truck.engine_on));
+    assert_eq!(last(&app), "Engine off.");
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Refuel");
+    with_drive(&drive, |d| {
+        assert_eq!(d.trip.truck.fuel_gal, d.trip.truck.specs.fuel_tank_gal);
+    });
+}
+
+#[test]
+fn test_a_full_lot_refuses_fuel_while_the_engine_is_running() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = 10.0;
+        d.trip.truck.engine_on = true;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state =
+        ParkingFullState::with_drive(DriveRef::of(&drive), travel_center("Prairie Plaza", at));
+    let before = with_drive(&drive, |d| d.trip.truck.fuel_gal);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Refuel");
+    assert_eq!(with_drive(&drive, |d| d.trip.truck.fuel_gal), before);
+    assert_eq!(last(&app), "Shut the engine off before you fuel.");
 }

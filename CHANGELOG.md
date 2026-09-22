@@ -93,6 +93,8 @@
 
 ### Fixed
 
+- **You have to shut the tractor off before the fuel island will fill you.** Same bar as a car pump. The rest-stop and full-lot menus offer the engine kill switch so you are not stuck leaving the stop to turn it off.
+
 - **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
 
 - **Manage careers lists careers from earlier versions, so you can delete them.** Before, one stayed on the Choose career list for good.
