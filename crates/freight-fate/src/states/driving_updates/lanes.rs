@@ -34,6 +34,7 @@ impl DrivingState {
             steer = ctx.controller.steering();
         }
         self.lane.steering = steer;
+        self.lane.straighten = ctx.bindings.pressed(&ctx.input, Action::Straighten);
         // The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane_before_narrow = Some(self.lane.lane);
         let count = if self.ramp_mi.is_some() {

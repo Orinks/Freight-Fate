@@ -241,7 +241,7 @@ impl DrivingState {
             Action::RadioFavorite => self.toggle_radio_favorite(ctx),
             Action::RadioNowPlaying => self.speak_radio_now_playing(ctx),
             Action::RadioStatus => self.speak_radio_status(ctx),
-            Action::Accelerate | Action::Brake | Action::EmergencyBrake => {}
+            Action::Accelerate | Action::Brake | Action::EmergencyBrake | Action::Straighten => {}
         }
     }
 

@@ -1225,8 +1225,8 @@ against.
 
 ### September 23 flight's driving notes
 
-flight drove with every assist off and sent four notes. The first three
-have shipped; the straighten-up key is still open.
+flight drove with every assist off and sent four notes. All four have
+shipped.
 
 - [x] **The drift lean reads the heading, not only the position.** Both
       drift producers (the engine lean and the opt-in tone) lean on
@@ -1262,9 +1262,10 @@ have shipped; the straighten-up key is still open.
       its last fifth of a mile. The agent drive that found it also found the
       automatic hunting on the new clock (the torque interruption was still
       real time); the gearbox timers now run in the motion sub-steps.
-- [ ] **A straighten-up key.** Held, it applies only the heading half of
-      partial lane keeping's steering law until the truck points down the
-      road. It goes in the bindings table.
+- [x] **A straighten-up key.** Slash, held, applies only the heading half
+      of partial lane keeping's steering law (`LaneKeeping::straighten`), so
+      the truck points down the road and keeps its place in the lane. A
+      bindings-table row, keyboard only: a pad steers on the stick.
 
 ### September 23 agent drive into Abilene
 

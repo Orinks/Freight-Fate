@@ -66,6 +66,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Partial adds gentle drift with generous steering help. A short beep comes from the side you drift toward; steer away from it. A softer chime means you are centered again.",
             "Off drifts like a real wheel, with rumble-strip warnings and consequences, and every exit needs its signal and its exit lane.",
             "Lane changes: on partial or off, hold the steer across the lane line; on full, tap {{steer_left}} or {{steer_right}}.",
+            "On partial or off, hold {{straighten}} to point the truck straight down the road. It leaves where you sit in the lane to you.",
             "Discord presence shows your broad activity in Discord: the main menu, a route, resting, with the route and cargo. Never your saves or personal details. On by default; nothing happens if Discord is closed.",
             "Profile sharing can show a driver name you choose, your route, cargo, rough progress, achievements, road-journal posts, career totals, your truck, and your last-saved city on orinks.net. Full saves and precise location stay private.",
             "Nothing is shared until you set it up: the first time, your browser opens to pick that driver name and confirm. Connecting the account turns Profile sharing on and starts backing your careers up; each is its own row on the Online menu.",

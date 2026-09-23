@@ -214,6 +214,10 @@ pub struct LaneKeeping {
     /// points right of the road. Zero means tracking it.
     pub yaw_rad: f64,
     pub steering: f64,
+    /// The straighten-up key is held: steer out the heading error only,
+    /// the heading half of partial lane keeping's law. It points the truck
+    /// down the road and leaves where it sits in the lane to the driver.
+    pub straighten: bool,
     pub lane: i64, // everyone starts in the right lane
     pub lane_count: i64,
     pub crossed: i64, // last update's lane change: +1 left, -1 right
@@ -245,6 +249,7 @@ impl LaneKeeping {
             offset: 0.0,
             yaw_rad: 0.0,
             steering: 0.0,
+            straighten: false,
             lane: 0,
             lane_count: DEFAULT_LANE_COUNT,
             crossed: 0,
@@ -358,6 +363,8 @@ impl LaneKeeping {
         // input rather than a rollover (see MAX_STEER_LATERAL_G).
         let helper = if assist_steers(assist) {
             -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
+        } else if self.straighten {
+            -self.yaw_rad * ASSIST_YAW_GAIN
         } else {
             0.0
         };

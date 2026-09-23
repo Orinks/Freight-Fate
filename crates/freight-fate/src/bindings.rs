@@ -46,6 +46,7 @@ pub enum Action {
     EmergencyBrake,
     SteerLeft,
     SteerRight,
+    Straighten,
     Engine,
     ParkingBrake,
     Horn,
@@ -275,6 +276,13 @@ const TABLE: &[Row] = &[
         "steer_right",
         "Steer right",
         &[Chord::plain(Key::Right)],
+        &[],
+    ),
+    (
+        Action::Straighten,
+        "straighten",
+        "Straighten up",
+        &[Chord::plain(Key::Slash)],
         &[],
     ),
     (
