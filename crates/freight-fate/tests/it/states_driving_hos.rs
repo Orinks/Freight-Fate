@@ -328,10 +328,11 @@ fn test_rest_stop_menu_break_and_sleep() {
         assert!(approx(p.fatigue, 15.0), "{}", p.fatigue);
     }
 
-    harness.select_menu_item("Sleep 10 hours");
+    // The break is the first half hour of the ten.
+    harness.select_menu_item("Sleep 9.5 hours more to finish a 10-hour reset");
     assert!(approx(
         harness.read_drive(|d| d.trip.game_minutes),
-        minutes_before + 30.0 + 600.0
+        minutes_before + 600.0
     ));
     {
         let p = harness.app.ctx.profile.as_ref().expect("a career");

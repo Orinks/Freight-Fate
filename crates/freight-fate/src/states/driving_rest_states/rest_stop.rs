@@ -228,12 +228,24 @@ impl RestStopState {
                     .help(sleeper_split_help(hours)),
                 );
             }
-            items.push(
-                MenuItem::new("Sleep 10 hours", |s: &mut Self, ctx| s.sleep(ctx)).help(
+            // A rest already under way counts toward the ten hours, so the
+            // reset row only asks for what is left of it.
+            let (label, help) = match hos_of(ctx).reset_minutes_left() {
+                Some(left) => (
+                    format!(
+                        "Sleep {} more to finish a 10-hour reset",
+                        hos::duration_text(left / 60.0)
+                    ),
+                    "Your rest since you parked counts. Full reset, fresh hours of service and \
+                     zero fatigue.",
+                ),
+                None => (
+                    "Sleep 10 hours".to_string(),
                     "Full reset, fresh hours of service and zero fatigue. Clock and deadline \
                      advance 10 hours.",
                 ),
-            );
+            };
+            items.push(MenuItem::new(label, |s: &mut Self, ctx| s.sleep(ctx)).help(help));
         } else if !is_scale {
             // No proper sleeper facility here, but you can always bed down in
             // the lot -- a legal reset, just cramped and poor rest. Except at
@@ -477,6 +489,8 @@ impl RestStopState {
         if increment_stat(profile_mut_of(ctx), "breaks_taken") >= 25 {
             ctx.award_achievement("coffee_regular");
         }
+        // The break counts toward a 10-hour reset; the reset row says so.
+        self.refresh(ctx, true);
     }
 
     fn food_break(&mut self, ctx: &mut GameContext) {
@@ -499,6 +513,7 @@ impl RestStopState {
         self.save_here(ctx, true);
         ctx.audio.play("ui/notify");
         ctx.say(&text);
+        self.refresh(ctx, true);
     }
 
     fn sleeper_split_rest(&mut self, ctx: &mut GameContext, hours: i64) {
@@ -535,9 +550,17 @@ impl RestStopState {
                     let duty_limit = hos::limits(&mode).map(|(_, duty, _)| duty).unwrap_or(0.0);
                     let duty_left_h = (duty_limit - hos_of(ctx).duty_min).max(0.0) / 60.0;
                     let window = if duty_left_h <= 0.0 {
-                        "Warning: this sleep did NOT reset your hours, and your duty window has \
-                         closed. Finish the split or take a full 10-hour reset before driving. "
-                            .to_string()
+                        let reset = match hos_of(ctx).reset_minutes_left() {
+                            Some(left) => format!(
+                                "sleep {} more here to finish a 10-hour reset",
+                                hos::duration_text(left / 60.0)
+                            ),
+                            None => "take a full 10-hour reset".to_string(),
+                        };
+                        format!(
+                            "Warning: this sleep did NOT reset your hours, and your duty window \
+                             has closed. Finish the split or {reset} before driving. "
+                        )
                     } else {
                         let closes = clock_text((d.trip.local_hour() + duty_left_h) % 24.0);
                         if minutes >= hos::SPLIT_LONG_MIN {
@@ -584,15 +607,22 @@ impl RestStopState {
         let before_fatigue = profile_of(ctx).fatigue;
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             let engine_off = shut_down_engine(d, ctx);
-            advance_rest_clock(d, ctx, hos::SLEEP_MIN, None, "");
+            let owed = hos_of(ctx).reset_minutes_left();
+            advance_rest_clock(d, ctx, owed.unwrap_or(hos::SLEEP_MIN), None, "");
             hos_mut_of(ctx).sleep();
             {
                 let p = profile_mut_of(ctx);
                 p.fatigue = hos::rest_sleep(p.fatigue);
             }
+            let slept = match owed {
+                Some(left) => format!(
+                    "You slept {} more, 10 hours of rest in a row, and woke rested.",
+                    hos::duration_text(left / 60.0)
+                ),
+                None => "You slept 10 hours and woke rested.".to_string(),
+            };
             format!(
-                "{engine_off}You slept 10 hours and woke rested. It is {}. Hours of service \
-                 reset. {}{}",
+                "{engine_off}{slept} It is {}. Hours of service reset. {}{}",
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx),
                 wake_air_instruction(d, ctx, true)

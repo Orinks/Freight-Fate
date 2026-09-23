@@ -97,6 +97,8 @@
 
 ### Fixed
 
+- **Back-to-back sleeps at one stop count as one rest.** After 3 hours and 3 more, the menu offers the last 4 to finish your 10-hour reset. (Reported by Vol4life.)
+
 - **Right at the destination exit, the cab no longer announces a second one further on.** The exit you are taking is the only destination exit you hear.
 
 - **Where a ramp leads onto city streets, the handoff at its end says so.** You hear "onto the streets" instead of "to the entrance".
