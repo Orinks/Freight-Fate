@@ -961,6 +961,37 @@ impl Trip {
         }
     }
 
+    /// Mark the road behind the truck as already driven, for a trip placed
+    /// partway along it (a staged bench drive).
+    ///
+    /// Placed at mile 1175, the first frame found every state line, toll,
+    /// town and roadside callout from mile 0 "just passed" and spoke them:
+    /// Iowa's welcome on a Texas road, a turnpike toll charged, two
+    /// achievements (agent drives, 2026-09-23). The toll, town and callout
+    /// checks only ever fire for road already behind the truck, so running
+    /// them here with their output dropped latches exactly that; navigation
+    /// cues also look ahead, so only the ones behind are marked.
+    pub fn settle_road_behind(&mut self) {
+        let events = self.events.len();
+        let tolls = self.toll_charges.len();
+        self.check_tolls();
+        self.check_cities();
+        self.check_roadside_callouts();
+        self.events.truncate(events);
+        self.toll_charges.truncate(tolls);
+        let position = self.position_mi;
+        let behind: Vec<String> = self
+            .navigation_cues
+            .iter()
+            .filter(|cue| cue.at_mi < position)
+            .map(|cue| cue.key.clone())
+            .collect();
+        for key in behind {
+            self.announced_navigation.insert(format!("{key}:advance"));
+            self.announced_navigation.insert(format!("{key}:near"));
+        }
+    }
+
     pub fn emit(
         &mut self,
         kind: TripEventKind,
