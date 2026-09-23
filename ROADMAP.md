@@ -462,8 +462,10 @@ its status or release decision.
       missing from `--list-speech-backends`.
 - [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
       every backend unless linked whole. Reported with a standalone
-      reproduction as ethindp/prism#130; drop the whole-archive link in
-      `crates/freight-fate/build.rs` once a fix ships.
+      reproduction as ethindp/prism#130, fixed upstream 2026-09-22 by
+      ethindp/prism#135 (anchors for GCC and Clang). Waiting on a `prismer`
+      release that vendors it (0.1.3 does not); then drop the whole-archive
+      link in `crates/freight-fate/build.rs` and dry-run the nightly.
 
 ### September 21 the Python sunset
 
