@@ -285,12 +285,18 @@ impl DrivingState {
         // presses AFTER physics runs: the truck felt 0.09 of a 0.20 stop,
         // slowed at 0.43 m/s2 against the 0.6 planned, reached a stop bar at
         // 15 mph and had to slam the rest (agent drive into Abilene,
-        // 2026-09-23).
+        // 2026-09-23). Only while it still has a terminal to stop at: a press
+        // left over once the ramp is behind the truck held it on its brakes.
+        let ramp_terminal_brake = if self.ramp_mi.is_some() && !self.ramp_terminal_done {
+            self.ramp_assist_brake
+        } else {
+            0.0
+        };
         let assist_floor = self
             .keeper_snub
             .max(self.aeb_brake)
             .max(self.destination_assist_brake)
-            .max(self.ramp_assist_brake)
+            .max(ramp_terminal_brake)
             .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
             .clamp(0.0, 1.0);
         {

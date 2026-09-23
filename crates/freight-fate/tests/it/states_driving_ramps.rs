@@ -1728,6 +1728,32 @@ fn test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has() {
 }
 
 #[test]
+fn test_route_transition_assistance_lets_go_when_the_terminal_ends() {
+    // The frame holds the pedal at the terminal servo's last press, so a
+    // press left behind when the terminal ended -- crossed or run -- held the
+    // truck on its brakes for good (merge bench, 2026-09-23).
+    let mut harness = approaching_a_terminal("Ramps", "signal", 30.0);
+    for _ in 0..(60 * 120) {
+        frame(&mut harness, DT);
+        if harness.read_drive(|d| d.ramp_assist_brake > 0.0) {
+            break;
+        }
+    }
+    assert!(
+        harness.read_drive(|d| d.ramp_assist_brake > 0.0),
+        "the assist never braked for the red"
+    );
+    harness.with_drive(|d, _| d.ramp_terminal_done = true);
+    for _ in 0..60 {
+        frame(&mut harness, DT);
+    }
+    harness.read_drive(|d| {
+        assert_eq!(d.ramp_assist_brake, 0.0);
+        assert!(d.truck().brake < 0.05, "held at {:.2}", d.truck().brake);
+    });
+}
+
+#[test]
 fn test_route_transition_assistance_brakes_to_the_sign_without_slamming() {
     // Agent drive into Abilene, 2026-09-23: 25 mph and a thousand feet from
     // a stop sign. The terminal's servo pressed AFTER physics had run and
