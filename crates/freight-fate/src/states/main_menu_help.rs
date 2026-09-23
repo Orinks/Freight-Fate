@@ -177,7 +177,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Rest stops sit at highway exits, announced a few miles out, with one-mile exit cues and turn guidance.",
             "While rolling toward a sleep-capable stop, {{rest}} plans that stop and names the distance, exit, and whether stopping assistance is on. {{rest}} never signals: press {{take_exit}} to take the exit.",
             "{{take_exit}} signals or cancels the exit. Slow to forty five for the ramp and set up the exit lane unless lane keeping is on full. Too fast and you miss the exit. Off the ramp, brake to a stop for the rest stop menu: refuel, take a break, sleep, or save.",
-            "Most ramps end at a traffic light or a stop sign, called out on the way down. Lights cycle green, yellow, red, and every change is spoken. Yellow means stop unless you are already at the light.",
+            "Most ramps end at a traffic light or a stop sign, called out on the way down. Each light keeps a steady green, yellow, red cycle, every change is spoken, and cross traffic clears before green. Yellow means stop unless you are already at the light.",
             "Red light or stop sign: full stop at the bar, then go on green or in a clear gap. Rolling through draws horns; blowing through at speed means cross traffic clips the trailer.",
             "Destination exits are announced with their signed exit and toward cities. Use {{take_exit}} for the destination signal unless lane keeping is on full, which takes it for you. Off the highway, brake to a stop at the receiver gate.",
             "Miss the destination exit and dispatch loops you back through the next safe turnaround.",

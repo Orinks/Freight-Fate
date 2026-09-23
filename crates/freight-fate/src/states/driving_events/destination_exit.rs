@@ -21,6 +21,12 @@ impl DrivingState {
         }
         let details = self.destination_exit_details(ctx, false);
         let (at_mi, exit_label) = match details {
+            // The estimate is for a route with no labeled exit at all. On one
+            // that has it, "none ahead" means the truck is at or past the real
+            // exit, and inventing a second one there announced "In 3 miles,
+            // the destination exit" at the gore of exit 286A, seconds before
+            // the truck took it (agent drive into Abilene, 2026-09-22).
+            None if self.route_has_labeled_destination_exit(ctx) => return None,
             None => (
                 0.0f64.max(self.trip.total_miles() - DESTINATION_EXIT_BEFORE_END_MI),
                 String::new(),
@@ -38,6 +44,20 @@ impl DrivingState {
         stop.actions = vec!["deliver".to_string()];
         stop.exit_label = exit_label;
         Some(stop)
+    }
+
+    /// Whether the route carries a labeled destination exit anywhere, past
+    /// or ahead. Scanned once per trip: it walks every interchange.
+    fn route_has_labeled_destination_exit(&mut self, ctx: &GameContext) -> bool {
+        let generation = self.trip_generation;
+        if let Some((cached, labeled)) = self.destination_exit_labeled {
+            if cached == generation {
+                return labeled;
+            }
+        }
+        let labeled = self.scan_destination_exit_details(ctx, true).is_some();
+        self.destination_exit_labeled = Some((generation, labeled));
+        labeled
     }
 
     /// `_destination_exit_label()`.

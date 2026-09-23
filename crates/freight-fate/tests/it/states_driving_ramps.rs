@@ -2041,9 +2041,9 @@ fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp()
             forced = true;
             harness.with_drive(|d, _| {
                 d.ramp_control = "signal".to_string();
-                let cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S;
+                let cycle = d.ramp_light_cycle_s();
                 d.ramp_light_offset_s =
-                    (RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 5.0 - d.ramp_light_timer)
+                    (d.ramp_light_red_s() + d.ramp_light_green_s() - 5.0 - d.ramp_light_timer)
                         .rem_euclid(cycle);
                 d.ramp_light_last_phase = "green".to_string();
             });

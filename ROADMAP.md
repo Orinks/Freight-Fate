@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Ramp-end traffic lights keep one seeded 60 to 78 second plan per
+      intersection, with a 7 second all-red so cross traffic clears before green.
+
 - [x] Quiet speech keeps concise lane openings, confirmations, and status transitions; Urgent only omits routine costs and status, and suppressed categories skip review.
 
 - [x] Keep traffic light approaches and changes brief: Light red, Light yellow,
@@ -160,13 +163,14 @@ These steps remain open even where a related implementation bullet is checked:
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
-- [ ] The owner voice pass over seven achievement titles. The
-      physical-Mac VoiceOver listening pass was DROPPED as a release
-      gate (2026-09-20, owner): there is no physical Mac to test on.
-      Prism reaches VoiceOver the same way it reaches every other
-      reader, and the native runner boots the packaged app before it
-      ships, so the gate could never have been cleared here anyway.
-      Revive it only if a Mac tester appears.
+- [x] The owner voice pass over seven achievement titles (2026-09-22).
+      The category-description cut landed and the owner accepted all
+      seven titles as-is. The physical-Mac VoiceOver listening pass was
+      DROPPED as a release gate (2026-09-20, owner): there is no physical
+      Mac to test on. Prism reaches VoiceOver the same way it reaches
+      every other reader, and the native runner boots the packaged app
+      before it ships, so that sub-gate could never have been cleared
+      here anyway. Revive the Mac listen only if a Mac tester appears.
 - [x] The Unreleased block is ready to cut stable notes from
       (2026-09-20). The four tester-line bullets are gone: the staging
       orinks.net copy, the Update channel developer-snapshots row, and
@@ -224,10 +228,17 @@ These items are part of the release-gate sweep:
       confirmations) now ducks the bed the same way when game sounds step
       back for speech is on. The cue levels were never low; the unducked
       road bed was masking them.
-- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE;
-      last open world-data item for 1.9. The real-zone floor and the
-      merge-free opening miles landed 2026-08-16; what remains is departure
-      chains for the other 72 percent of facilities, a data project.
+- [x] Departing straight into a hazard at route mile zero -- DONE,
+      CLOSED 2026-09-22 at the current `origin/dev` tip (`e2d27d5b`),
+      closing the 1.9 release gate at current tip coverage. The real-zone
+      floor and the merge-free opening miles landed 2026-08-16. The Sep 16-17
+      ship-line history already on `dev` includes `2cbd19ed`, `a378909c`,
+      `fdcbe821`, `ba06486f`, later `4d2150cb` (2,416/5,037, about 48%),
+      and `5f26a6d8`, among the follow-ups. At this tip,
+      `data/facility_approaches.json` has 2,456 / 4,271 `turn_level`
+      approaches (57.5%); its `generated.merge` metadata is dated 2026-09-20,
+      and the all-49-state batch is present. This closes the gate at the
+      documented coverage; it does not claim turn geometry for every facility.
       Builder side landed 2026-09-16: the turn-level route pass now takes
       cold storage, food processors, grocery DCs, grain elevators and ports,
       and a state batch merges into the checked-in file instead of
@@ -299,7 +310,10 @@ These items are part of the release-gate sweep:
       at Baton Rouge and New Orleans, the Connecticut at Hartford, a
       motorway or water elsewhere), 2 would need a private road mid-route
       or a gate on a public street, 1 has under half a mile of public
-      street, and 3 have a private stretch past the cut (see below).
+      street, and 3 have a private stretch past the cut (see below). A
+      matcher/sibling facility-type widen is explicitly deferred past
+      2026-10-04. The ruled-out private-yard and no-path leftovers remain
+      honest refusals, not a data-PR target.
 - [x] Re-sweep facility endpoints with a matcher that reads an object's own
       tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
       ruling that the 1,396 chains to non-sites stay until a re-sweep
@@ -430,6 +444,26 @@ career (Shane's design ask).
 The detailed backlog retains the remaining work and its recorded release scope.
 Update each item where it is recorded; this reorganization does not change
 its status or release decision.
+
+### September 21 Prism from the prismer crate
+
+- [x] Prism comes from the `prismer` crate (0.1.3 or later), compiled from
+      source and linked into the executable, instead of the in-tree
+      `prism`/`prism-sys` crates loading a vendored library at run time.
+      The screen-reader client DLLs stay delay-loaded on Windows; Linux
+      links the system's speech-dispatcher, so a Linux install needs it to
+      start, and loses Prism's Orca backend (Ubuntu 22.04, the build host,
+      has no glibmm 2.68). Found on the way and fixed upstream as
+      trypsynth/prismer#2: the binding described version 3 of `PrismConfig`
+      while Prism wrote version 4, overrunning the caller's stack. Prism's
+      static backend anchors are MSVC-only, so `crates/freight-fate/build.rs`
+      links the archive whole on Linux and macOS, and the nightly now fails
+      when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
+      missing from `--list-speech-backends`.
+- [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
+      every backend unless linked whole. Reported with a standalone
+      reproduction as ethindp/prism#130; drop the whole-archive link in
+      `crates/freight-fate/build.rs` once a fix ships.
 
 ### September 21 the Python sunset
 
@@ -1102,7 +1136,9 @@ its status or release decision.
       enumerated outside the settings menu.
 - [ ] Owner verifies the OneCore leak with Prism's author before anything
       goes upstream; no issue or PR from this side (owner rule 2026-09-12).
-      Hand-off is the probe. Pinned 2026-09-12: the leak is in FREEING an
+      Hand-off is the probe, which left the tree with the in-tree Prism
+      crates on 2026-09-21: `git show f9c06a7f:crates/prism/examples/handle_leak_probe.rs`.
+      Pinned 2026-09-12: the leak is in FREEING an
       acquired (registry-cached) OneCore instance, not in acquiring it
       (acquire-and-never-free is flat); prismatoid 0.16.7, which 1.8 runs,
       frees the same way and is clean, while 0.17.3 and 0.18.2 both leak

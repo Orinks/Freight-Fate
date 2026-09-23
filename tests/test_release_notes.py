@@ -636,7 +636,9 @@ def test_career_19_snapshot_workflow_contract():
     # this is the only workflow that builds the Rust game, so it is the
     # nightly. build.yml's schedule was retired in the same change because it
     # builds the Python game, which dev no longer has.
-    assert 'CAREER_BRANCH: "dev"' in workflow
+    assert "inputs.branch || 'dev'" in workflow
+    # Tag pushes build the tagged ref, not tip-of-dev by accident.
+    assert "github.event_name == 'push' && github.ref" in workflow
     assert "group: career-19-snapshot\n" in workflow
     assert "career-19-snapshot-${{ github.ref }}" not in workflow
     assert 'cron: "37 2 * * *"' in workflow
@@ -653,7 +655,12 @@ def test_career_19_snapshot_workflow_contract():
     assert "./build-release.ps1" in workflow
     assert "windows-portable.zip" in workflow
     assert "macos-arm64.zip" in workflow
+    # Tester path still cuts a prerelease; the stable tag path does not.
     assert "--prerelease" in workflow
+    assert "Create stable release" in workflow
+    assert "tools/release_notes.py stable --version" in workflow
+    assert 'tags:\n      - "v*.*.*"' in workflow or '- "v*.*.*"' in workflow
+    assert "is_prerelease: ${{ steps.check.outputs.is_prerelease }}" in workflow
     assert "COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}" in workflow
     assert '--target "$COMMIT_SHA"' in workflow
     assert '--target "$CAREER_BRANCH"' not in workflow
@@ -713,10 +720,9 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     smoke = (Path(__file__).resolve().parents[1] / "tools" / "linux_smoke.sh").read_text(
         encoding="utf-8"
     )
-    # Speech is not disabled in the container boot: libprism.so and its
-    # bundled glib are really opened, which is where a loader would object.
+    # Speech is not disabled in the container boot: Prism really opens the
+    # system's speech-dispatcher, which is where a loader would object.
     assert "FREIGHT_FATE_NO_SPEECH" not in smoke
-    assert "prism: loaded from" in smoke
     assert "Speech backend: Speech Dispatcher" in smoke
     assert 'grep -q " ERROR "' in smoke
     assert "--appimage-extract-and-run --smoke" in smoke
@@ -807,6 +813,13 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     assert all(step["with"]["path"] == "release-assets" for step in downloads)
     create = next(step for step in release["steps"] if step.get("name") == "Create prerelease")
     assert 'gh release create "$TAG" release-assets/*' in create["run"]
+    assert "--prerelease" in create["run"]
+    assert "is_prerelease == 'true'" in create["if"]
+    stable = next(step for step in release["steps"] if step.get("name") == "Create stable release")
+    assert 'gh release create "$TAG" release-assets/*' in stable["run"]
+    assert "--prerelease" not in stable["run"]
+    assert "is_prerelease == 'false'" in stable["if"]
+    assert "Freight Fate $VERSION" in stable["run"]
     verify = next(
         step for step in release["steps"] if step.get("name") == "Verify release archives"
     )

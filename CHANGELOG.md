@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Bananavision channels are on the dial.** Nine HTTPS Icecast mounts from bananavision.tv — Main, Bananalodeon 80s, Bananalodeon, Bananarang, Educational, Brain, Star Trek Vision, MST3K, and Over the Edge — and they come in anywhere you drive.
+
 - **The game lists every screen reader it finds on your computer.** Start it with `--list-speech-backends` and it names the one it would speak through.
 
 - **Country, classic rock, blues, and Night Line stations play new songs.**
@@ -31,6 +33,12 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
+
+- **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
+
+- **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.
 
 - **A career declined after review stops backing up.** You hear once, by name, that its backup was declined.
 
@@ -88,6 +96,16 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Right at the destination exit, the cab no longer announces a second one further on.** The exit you are taking is the only destination exit you hear.
+
+- **Where a ramp leads onto city streets, the handoff at its end says so.** You hear "onto the streets" instead of "to the entrance".
+
+- **Route-transition assistance slows for a green light, not just a red.** It takes you through at rolling speed instead of too fast.
+
+- **A light the assist stopped you at is no longer called "stopped short".** You hear only that assistance is holding for green.
+
+- **You have to shut the tractor off before the fuel island will fill you.** Same bar as a car pump. The rest-stop and full-lot menus offer the engine kill switch so you are not stuck leaving the stop to turn it off.
 
 - **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
 
@@ -183,6 +201,10 @@
 
 - **Opening the pause menu now stops the tank surge sound.** It no longer keeps playing through the menu and back into the drive.
 - **More truck stops announce their own exit number and the light or stop sign on their own ramp.** Many had a neighbouring exit's number.
+
+### Compatibility
+
+- **On Linux, speech now uses the Speech Dispatcher installed on your computer.** Install it first if your system lacks it; the game will not start without it.
 
 
 ### Changed

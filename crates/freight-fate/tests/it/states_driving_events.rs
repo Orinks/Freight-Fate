@@ -334,10 +334,22 @@ fn test_transition_assist_caps_a_hot_green_crossing() {
 
     d.update_ramp_terminal_assist(&mut app.ctx);
 
-    // A green crossing is a roll, not the bar's real stop: lift instead of
-    // holding service brake while the ramp cap is already slowing the truck.
+    // The assist takes the truck THROUGH the light and facility assistance
+    // takes over after it (owner, 2026-09-22), so a hot green is brought to
+    // rolling speed by the bar -- a measured application, not a stop.
     assert_eq!(d.trip.truck.throttle, 0.0);
+    assert!(
+        d.trip.truck.brake > 0.0,
+        "40 mph this close to the bar needs brake"
+    );
+    assert!(d.trip.truck.brake < 1.0, "a roll, not the full stop hold");
+
+    // Under rolling speed it lets go: never a held service floor on a green.
+    d.trip.truck.velocity_mps = 15.0 / 2.23694;
+    d.trip.truck.brake = 0.0;
+    d.update_ramp_terminal_assist(&mut app.ctx);
     assert_eq!(d.trip.truck.brake, 0.0);
+    assert_eq!(d.ramp_assist_brake, 0.0);
 }
 
 #[test]

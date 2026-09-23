@@ -69,14 +69,22 @@ pub trait FuelPump: Menu {
     }
 
     fn refuel(&mut self, ctx: &mut GameContext) {
-        let Some((mut need, region)) = self.drive().with(ctx, |d, _| {
+        let Some((mut need, region, engine_on)) = self.drive().with(ctx, |d, _| {
             (
                 d.trip.truck.specs.fuel_tank_gal - d.trip.truck.fuel_gal,
                 d.trip.current_region().to_string(),
+                d.trip.truck.engine_on,
             )
         }) else {
             return;
         };
+        // Same bar as a car pump: tractor must be off before the nozzle goes
+        // in. Reefer/APU is not this flag and is not required off here.
+        if engine_on {
+            ctx.audio.play("ui/error");
+            ctx.say("Shut the engine off before you fuel.");
+            return;
+        }
         if need < 1.0 {
             ctx.say("The tank is already full.");
             return;

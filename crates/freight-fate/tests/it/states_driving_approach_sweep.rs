@@ -34,8 +34,7 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
-    DOCKING_MAX_MPH, FACILITY_LANE_ROLL_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S,
-    RED_STOP_MPH,
+    DOCKING_MAX_MPH, FACILITY_LANE_ROLL_MPH, RAMP_ACCESS_MI, RED_STOP_MPH,
 };
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
@@ -786,7 +785,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
         d.ramp_terminal_done = false;
         d.ramp_light_announced = true;
         d.ramp_light_last_phase = "green".to_string();
-        d.ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 2.0;
+        d.ramp_light_offset_s = d.ramp_light_red_s() + d.ramp_light_green_s() - 2.0;
         d.ramp_light_timer = 0.0;
         d.ramp_waiting_at_light = false;
         d.ramp_assist_said = false;
@@ -826,7 +825,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
                 d.ramp_light_offset_s = 1.0;
                 d.ramp_light_timer = 0.0;
             } else if waiting {
-                d.ramp_light_offset_s = RAMP_LIGHT_RED_S;
+                d.ramp_light_offset_s = d.ramp_light_red_s();
                 d.ramp_light_timer = 0.0;
                 d.ramp_light_last_phase = "red".to_string();
             }
@@ -880,8 +879,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     assert!(
         !heard
             .iter()
-            .any(|line| line.contains("Pull ahead to the entrance")
-                || line.contains("taking the pedals")),
+            .any(|line| line.contains("Pull ahead ") || line.contains("taking the pedals")),
         "{}",
         harness.transcript_text()
     );
@@ -1105,7 +1103,7 @@ fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
     println!("{}", release.report(destination));
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you to the entrance."),
+        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1185,7 +1183,7 @@ fn test_with_the_assist_off_the_clear_sign_still_hands_the_last_stretch_to_the_d
     let release = arrive_from_the_sign(destination, false, false);
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear; pull ahead to the entrance."),
+        release.said("Stopped at the sign. Clear; pull ahead onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1212,7 +1210,11 @@ fn test_the_drivers_brake_cancels_the_automatic_pull_ahead() {
         println!("{}", release.report(destination));
         assert!(release.moved_off_alone, "{}", release.report(destination));
         assert!(
-            release.said("Facility stopping assistance released; pull ahead to the entrance."),
+            release.said(if destination.chain {
+                "Facility stopping assistance released; pull ahead onto the streets."
+            } else {
+                "Facility stopping assistance released; pull ahead to the entrance."
+            }),
             "{}",
             release.report(destination)
         );

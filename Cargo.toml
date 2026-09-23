@@ -1,8 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/prism-sys",
-    "crates/prism",
     "crates/bass-sys",
     "crates/ff-core",
     "crates/freight-fate",

@@ -73,8 +73,10 @@ before starting a new drive.
 - **The hours clock answers one question at a time.** Alt+A, Alt+S, and Alt+D
   each ask a single question; C keeps the clock, the deadline, and whichever
   limit comes first.
-- **Traffic lights have a yellow, and every change is spoken.** Ramp-end
-  lights cycle green, yellow, red. Entering on green or yellow is legal.
+- **Traffic lights keep a steady cycle, and every change is spoken.** Each
+  ramp-end light keeps its timing while you approach. Reds and greens last
+  long enough to stop and pull a loaded truck away; entering on green or
+  yellow is legal, and cross traffic clears before green.
 - **The dash warns you about your own speed.** A few miles per hour over the
   posted limit chimes softly and names the limit, faster the further over you
   go. It is a courtesy alert with no setting; it starts more than 7 miles per
@@ -1164,8 +1166,10 @@ you while slowing down is still free.
 
 Ramp ends are real intersections. Most ramps end at a traffic light or a stop
 sign, called out on the way down. Lights cycle green, yellow, red, and speak
-every change. Enter on green or yellow; red means brake to a full stop at the
-bar and hold the brakes until it says green. Rolling a red draws horns;
+every change. Each light keeps a stable, slower cycle instead of changing its
+timing while you wait, and cross traffic clears before green. Enter on green
+or yellow; red means brake to a full stop at the bar and hold the brakes until
+it says green. Rolling a red draws horns;
 blowing one at speed means cross traffic finds your trailer. The stop bar has
 a parking-sensor tick that speeds up as you close on it, so you stop at the
 bar instead of a quarter mile short and creeping blind.
@@ -1173,8 +1177,10 @@ bar instead of a quarter mile short and creeping blind.
 Once the stop is honored and the way is clear, who pulls ahead depends on
 Facility stopping assistance. With it off, the cab says "Clear; pull ahead to
 the entrance" (or "Green light. Pull ahead to the entrance") and the last
-stretch is yours. With it on, the cab says "Facility stopping assistance is
-taking you to the entrance" and the truck moves off on its own: where the ramp
+stretch is yours; where city streets follow the ramp, it says "onto the
+streets" instead. With it on, the cab says "Facility stopping assistance is
+taking you to the entrance", or "onto the streets", and the truck moves off
+on its own: where the ramp
 ends at the gate, the assist drives it there and stops; where the facility sits
 at the end of city streets, the assist rolls the truck to the streets and the
 speed keeper takes them, holding the posted number and easing for each corner,

@@ -543,7 +543,17 @@ impl DrivingState {
         self.check_gate_approach_warning(ctx, dt);
         self.update_turn_commitment(ctx, dt);
         let moved_mi = self.trip.last_moved_mi;
+        // Advance and announce an already-active signal before adjudicating
+        // this frame's stop-bar crossing. Otherwise a yellow-to-red boundary
+        // uses the previous phase even though the real-time clock has moved.
+        let ramp_was_active = self.ramp_mi.is_some();
+        self.update_ramp_light(ctx, dt);
         self.update_exit_with_input(ctx, moved_mi, dt, hand_accelerating);
+        if !ramp_was_active && self.ramp_mi.is_some() {
+            // An exit can create its terminal above. Announce its seeded
+            // starting phase now without charging this frame's time twice.
+            self.update_ramp_light(ctx, 0.0);
+        }
         self.update_departure_ramp(ctx, moved_mi);
         // Immediately after the exit watch, which is what turns a signaled
         // scale exit into a ramp. Only now can a scale crossing be told apart
@@ -563,7 +573,6 @@ impl DrivingState {
         self.update_audio(ctx, dt);
         self.update_announcements(ctx, dt);
         self.update_ambient_events(ctx, dt);
-        self.update_ramp_light(ctx, dt);
         self.update_critical_respeak(ctx, dt);
         self.update_hazard(ctx, dt);
         self.update_grade_advisory(ctx);

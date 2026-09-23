@@ -1488,8 +1488,8 @@
       "region": "mid_south",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Radio Browser checked entry: WYXR. BASS live smoke OK 2026-07-13."
+      "supported": false,
+      "notes": "Radio Browser checked entry: WYXR. BASS live smoke OK 2026-07-13. Stream dead on 2026-09-22 release sweep: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)."
     },
     {
       "id": "wbhm-birmingham",
@@ -1509,8 +1509,8 @@
       "region": "southeast",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Radio Browser checked entry: WBHM 90.3 Birmingham, AL. BASS live smoke OK 2026-07-13."
+      "supported": false,
+      "notes": "Radio Browser checked entry: WBHM 90.3 Birmingham, AL. BASS live smoke OK 2026-07-13. Stream dead on 2026-09-22 release sweep: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)."
     },
     {
       "id": "wmnf-tampa",
@@ -1719,8 +1719,8 @@
       "region": "central_plains",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Radio Browser checked entry: kios. BASS live smoke OK 2026-07-13."
+      "supported": false,
+      "notes": "Radio Browser checked entry: kios. BASS live smoke OK 2026-07-13. Stream dead on 2026-09-22 release sweep: HTTP 404."
     },
     {
       "id": "kbsx-boise",
@@ -2181,8 +2181,8 @@
       "region": "desert_southwest",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Radio Browser checked entry: KXCI 91.3 community radio. BASS live smoke OK 2026-07-14. Desert Southwest sweep."
+      "supported": false,
+      "notes": "Radio Browser checked entry: KXCI 91.3 community radio. BASS live smoke OK 2026-07-14. Desert Southwest sweep. Stream dead on 2026-09-22 release sweep: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)."
     },
     {
       "id": "krwg-las-cruces",
@@ -3301,7 +3301,8 @@
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
     },
     {
       "id": "abc-jazz",
@@ -3317,7 +3318,8 @@
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
     },
     {
       "id": "abc-classic",
@@ -3333,7 +3335,8 @@
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
     },
     {
       "id": "abc-double-j",
@@ -3349,7 +3352,8 @@
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
     },
     {
       "id": "rte-radio-1",
@@ -5009,8 +5013,8 @@
       "state": "FL",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Rollins College, Winter Park (Orlando metro); low-power. Verified audio/mpeg 200."
+      "supported": false,
+      "notes": "Rollins College, Winter Park (Orlando metro); low-power. Verified audio/mpeg 200. Stream dead on 2026-09-22 release sweep: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)."
     },
     {
       "id": "wpkn-bridgeport",
@@ -14755,8 +14759,8 @@
       "frequency_mhz": 88.1,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Rust College (HBCU) station, Holly Springs MS (wurcfm.org). ONLY resolvable mount is StreamTheWorld (WURCFM.mp3) -> station_owned=false. onlineradiobox 302 -> StreamTheWorld; STW endpoint returns 302 to CDN edge (normal). Community-flavored HBCU college station (not a news/classical flagship). ~Class A 3kW; city coords. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Rust College (HBCU) station, Holly Springs MS (wurcfm.org). ONLY resolvable mount is StreamTheWorld (WURCFM.mp3) -> station_owned=false. onlineradiobox 302 -> StreamTheWorld; STW endpoint returns 302 to CDN edge (normal). Community-flavored HBCU college station (not a news/classical flagship). ~Class A 3kW; city coords. Non-NPR community radio. BASS live 3/3 2026-07-27. Stream dead on 2026-09-22 release sweep: HTTP 404."
     },
     {
       "id": "wsum-madison",
@@ -16375,7 +16379,7 @@
       "format": "rock",
       "id": "darren-duff-radio",
       "name": "Darren Duff radio",
-      "notes": "Requested by Brandon (tester, 2026-08-18); stream address supplied by Shane P. Verified live 2026-08-19: HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, 320 kbps stereo at 44.1 kHz, icy-genre Rock. The name here is the station's own icy-name, which matches what Brandon called it. Its icy-description is still the Icecast default placeholder, so there is no station blurb to quote.",
+      "notes": "Requested by Brandon (tester, 2026-08-18); stream address supplied by Shane P. Verified live 2026-08-19: HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, 320 kbps stereo at 44.1 kHz, icy-genre Rock. The name here is the station's own icy-name, which matches what Brandon called it. Its icy-description is still the Icecast default placeholder, so there is no station blurb to quote. Stream dead on 2026-09-22 release sweep: HTTP 404.",
       "real_stream": true,
       "safe_for_streaming": false,
       "source": "tester request; stream address from another tester, checked 2026-08-19",
@@ -16383,7 +16387,7 @@
       "station_type": "web",
       "stream_format": "mp3",
       "stream_url": "http://darrenduff.com:1979/stream.mp3",
-      "supported": true
+      "supported": false
     },
     {
       "always_available": true,
@@ -16485,6 +16489,159 @@
       "station_type": "web",
       "stream_format": "mp3",
       "stream_url": "https://custom-azura1.asurahosting.com/listen/x_transmission_fm/radio.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "variety",
+      "id": "bananavision-main",
+      "name": "Bananavision",
+      "notes": "Bananavision's main channel — a little bit of everything, per the channels page. icy-name: Bananavision. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/bananavision.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "kids, 80s",
+      "id": "bananavision-bananalodeon-80s",
+      "name": "Bananalodeon 80s",
+      "notes": "\"The first kids network,\" per the channels page. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/bananalodeon_80s.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "kids",
+      "id": "bananavision-bananalodeon",
+      "name": "Bananalodeon",
+      "notes": "Nick-era kids tunes, per the channels page. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/bananalodeon.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "nostalgia",
+      "id": "bananavision-bananarang",
+      "name": "Bananarang",
+      "notes": "\"It's all coming back to you,\" per the channels page. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/bananarang.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "kids educational",
+      "id": "bananavision-educational",
+      "name": "Educational",
+      "notes": "Kids' educational programming, per the channels page. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/educational.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "documentaries",
+      "id": "bananavision-brain",
+      "name": "Brain",
+      "notes": "Educational documentaries, per the channels page. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/brain.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "Star Trek",
+      "id": "bananavision-star-trek-vision",
+      "name": "Star Trek Vision",
+      "notes": "Star Trek audio, per the channels page. icy-name: Star Trek Vision. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/trek.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "MST3K",
+      "id": "bananavision-mst3k",
+      "name": "MST3K",
+      "notes": "Mystery Science Theater 3000 audio; dial label shortened from icy-name \"Mystery Science Theater 3000\". Channels page quote: \"Keep sharing the tapes.\" Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/mst3k.mp3",
+      "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "experimental",
+      "id": "bananavision-over-the-edge",
+      "name": "Over the Edge",
+      "notes": "Over the Edge audio, per the channels page. icy-name: Over the Edge. Verified live 2026-09-22 (Chelsea smoke): HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, icy-br 128. High-quality HTTPS MP3 mount on :8443 from https://bananavision.tv/channels.html; low-quality :8000 and OGG mounts left off.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "bananavision.tv channels page / Icecast mounts, checked 2026-09-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "https://bananavision.tv:8443/ote.mp3",
       "supported": true
     }
   ]

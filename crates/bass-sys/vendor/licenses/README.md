@@ -73,6 +73,6 @@ the platform's own codecs. Linux (`libbass.so`) goes in a sibling directory
 when it is added; the loader degrades to no audio rather than failing to
 start when a platform directory is absent.
 
-SDL2 (zlib) and Prism (MPL-2.0) stay vendored, under `vendor/sdl2/` and
-`crates/prism-sys/vendor/` — their licences permit redistribution without
-question.
+SDL2 (zlib) stays vendored under `vendor/sdl2/`, and Prism (MPL-2.0) is
+built from source by the `prismer` crate; both licences permit
+redistribution without question.

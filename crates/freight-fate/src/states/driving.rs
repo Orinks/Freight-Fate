@@ -438,8 +438,9 @@ pub struct DrivingState {
     // ramp joins the surface road, and the light's cycle state if a signal.
     // "signal" | "stop" | "yield" | "roundabout" | "none" | "" (no ramp)
     pub ramp_control: String,
+    pub ramp_light_profile: u8, // seeded fixed timing plan for this terminal
     pub ramp_light_offset_s: f64, // seeded phase into the light cycle
-    pub ramp_light_timer: f64,    // real seconds since the ramp was taken
+    pub ramp_light_timer: f64,  // real seconds since the ramp was taken
     pub ramp_light_announced: bool,
     pub ramp_light_last_phase: String, // "red" | "yellow" | "green", once announced
     pub ramp_terminal_done: bool,
@@ -455,6 +456,7 @@ pub struct DrivingState {
     pub ramp_bar_tick_timer: f64,
     pub bar_solid_on: bool, // the bar's continuous final-zone tone
     pub ramp_assist_said: bool,
+    pub ramp_green_roll_said: bool, // "slowing for the green" spoken this terminal
     // The pedal route-transition assistance is currently holding for the
     // terminal, so it can follow the demand up without letting go and
     // re-making the application every few frames.
@@ -498,6 +500,10 @@ pub struct DrivingState {
     pub ladder_leg_index: i64,
     // (position when computed, scan result) -- see _destination_exit_details
     pub destination_exit_cache: Option<DestinationExitScan>,
+    /// Whether this trip's route has a labeled destination exit at all, keyed
+    /// by `trip_generation`: only a route without one may fall back to the
+    /// estimated exit before the end.
+    pub destination_exit_labeled: Option<(u64, bool)>,
 
     // ---- driving_events.py / driving_speed_control.py: cruise and the keeper -----------
     pub cruise_mph: Option<f64>,
