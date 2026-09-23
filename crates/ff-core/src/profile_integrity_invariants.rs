@@ -491,6 +491,12 @@ pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value,
         "companyCareerTitles".into(),
         Value::from(inputs.company_career_titles.clone()),
     );
+    // Where a driver still on carrier wages leaves the owner-operator titles
+    // for the company ones (career_ladder::uses_company_career_ranks).
+    out.insert(
+        "companyRankForkLevel".into(),
+        Value::from(crate::models::career_ladder::COMPANY_RANK_FORK_LEVEL),
+    );
     out.insert("carrierLabels".into(), Value::Object(carrier_labels));
     out.insert("cityLabels".into(), Value::Object(city_labels));
     // The economy terms the cloud-save validator needs to tell an edited
