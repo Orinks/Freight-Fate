@@ -206,7 +206,11 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   any situation first (city, level, business status, cash, credentials,
   clock, fuel, damage, rest, seeds, any setting) and reopens the terminal;
   `start_at` stages a drive at a road feature. Neither is limited: the
-  sandbox is a throwaway copy. Check spoken readouts and event output
+  sandbox is a throwaway copy. `lockstep` (on) freezes the world between
+  tool calls, so time passes only inside `wait`, `pedal` and `wait_for`.
+  Use it wherever a round trip would cost road, such as steering with lane
+  keeping off or braking for a hazard. Leave it off when the owner is
+  driving alongside. Check spoken readouts and event output
   for the changed behavior, then end the session with `quit_game`. Treat
   `observe` as diagnostic state, and record any information the driver needed
   but could not hear. By default the window is minimized and the operator's

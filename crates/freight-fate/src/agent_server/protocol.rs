@@ -267,6 +267,19 @@ fn tools_list() -> Value {
             &["live"],
         ),
         tool(
+            "lockstep",
+            "Freeze the world between tool calls (on true), so the road waits while you \
+             think: time passes only inside wait, pedal and wait_for, and for the few \
+             frames a press or cruise call scripts. Use it to answer a cue in time \
+             where a round trip would otherwise cost road -- steering with lane keeping \
+             off, braking for a hazard. Off (false) runs the road on the wall clock \
+             again, which is the default and what an owner driving alongside needs.",
+            json!({
+                "on": {"type": "boolean", "description": "true to freeze the world between calls, false for the live road"},
+            }),
+            &["on"],
+        ),
+        tool(
             "quit_game",
             "Quit the game and end the session (the sandboxed career saves on the way \
              out, as a real quit does).",
@@ -549,6 +562,10 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
         "operator_keys" => match args.get("live").and_then(Value::as_bool) {
             Some(live) => Ok(Command::OperatorKeys { live }),
             None => Err("operator_keys needs live: true or false".to_string()),
+        },
+        "lockstep" => match args.get("on").and_then(Value::as_bool) {
+            Some(on) => Ok(Command::Lockstep { on }),
+            None => Err("lockstep needs on: true or false".to_string()),
         },
         "quit_game" => Ok(Command::Quit),
         other => Err(format!("unknown tool {other}")),

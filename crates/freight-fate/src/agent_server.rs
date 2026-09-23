@@ -159,6 +159,11 @@ pub enum Command {
     OperatorKeys {
         live: bool,
     },
+    /// Freeze the world between tool calls, so time passes only inside
+    /// `wait`, `pedal`, `wait_for` and the frames a call scripts.
+    Lockstep {
+        on: bool,
+    },
     Listen,
     Menu,
     Observe,
@@ -281,6 +286,13 @@ pub struct AgentPolicy {
     /// toggled the parking brake against the approach assist (found live,
     /// 2026-09-01). No finger taps inside a frame, so the agent must not.
     scripted: std::collections::VecDeque<Vec<InputEvent>>,
+    /// The world waits while no call is working. A client round trip is a
+    /// second or two of thinking, and with lane keeping off at highway speed
+    /// that is the truck across half a lane before the answer to a cue
+    /// lands (agent drive, 2026-09-23): every correction arrived late
+    /// whatever the guide said. Off by default, so an owner driving
+    /// alongside with operator keys keeps a live road.
+    lockstep: bool,
     quit: bool,
 }
 
@@ -730,12 +742,29 @@ impl AgentPolicy {
                 Command::OperatorKeys { live } => {
                     let _ = reply.send(Ok(input.set_operator_keys(live)));
                 }
+                Command::Lockstep { on } => {
+                    self.lockstep = on;
+                    let _ = reply.send(Ok(if on {
+                        "Lockstep is on: the world waits between tool calls. Time passes only \
+                         inside wait, pedal, wait_for, and the frames a call scripts."
+                    } else {
+                        "Lockstep is off: the road runs on the wall clock again."
+                    }
+                    .to_string()));
+                }
                 Command::Quit => {
                     let _ = reply.send(Ok("Quitting the game.".to_string()));
                     self.quit = true;
                     return false;
                 }
             }
+        }
+        let working = self.waiting.is_some()
+            || self.timed_hold.is_some()
+            || self.cruise_plan.is_some()
+            || !self.scripted.is_empty();
+        if self.lockstep && !working {
+            input.hold_world();
         }
         true
     }
@@ -766,6 +795,7 @@ pub fn policy(
         timed_hold: None,
         cruise_plan: None,
         scripted: std::collections::VecDeque::new(),
+        lockstep: false,
         quit: false,
     }
 }
