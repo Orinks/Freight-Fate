@@ -1225,8 +1225,8 @@ against.
 
 ### September 23 flight's driving notes
 
-flight drove with every assist off and sent four notes. The first has
-shipped; the others are recorded in the order they depend on each other.
+flight drove with every assist off and sent four notes. The first three
+have shipped; the straighten-up key is still open.
 
 - [x] **The drift lean reads the heading, not only the position.** Both
       drift producers (the engine lean and the opt-in tone) lean on
@@ -1239,8 +1239,8 @@ shipped; the others are recorded in the order they depend on each other.
       lean went quiet as soon as the settled point was centred, with heading
       still on, and the truck carried on across. `drift_speaks` now keeps
       it awake until the truck is also pointing down the road.
-- [x] **Truck physics on the clock that moves it** (branch
-      `feat/momentum-game-clock`, awaiting the owner's drive). `TruckState`
+- [x] **Truck physics on the clock that moves it** (merged to `dev`
+      2026-09-23 after two agent drives). `TruckState`
       integrates motion, freight and brake heat on the game clock in
       one-frame sub-steps, so a coast or a downhill covers the same road at
       any pace. The pedals press at their old rate divided by the pace and
