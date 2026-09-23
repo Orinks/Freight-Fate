@@ -1233,7 +1233,10 @@ shipped; the others are recorded in the order they depend on each other.
       slew, and the driver's yaw authority in `sim::lane`. In a closed-loop
       test, a driver who follows the old position-only lean out of a 0.6
       drift ends up 1.5 past centre, off the other edge. With the new lean
-      it is 0.05.
+      it is 0.05. The agent drive that checked it found one more gap: the
+      lean went quiet as soon as the settled point was centred, with heading
+      still on, and the truck carried on across. `drift_speaks` now keeps
+      it awake until the truck is also pointing down the road.
 - [ ] **Truck physics on the clock that moves it.** Distance advances at
       `dt * effective_time_scale` but `Truck::update` integrates on real
       `dt`, so grade and drag act on 1/20 of the time per mile at standard.

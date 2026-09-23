@@ -94,6 +94,28 @@ pub fn settled_offset(offset: f64, yaw_rad: f64, mph: f64) -> f64 {
     offset + lateral_per_s * (LEAN_REACTION_S + unwind_s / 2.0)
 }
 
+/// Whether the drift half of a lean speaks this frame, given whether it did
+/// last frame and [`settled_offset`] for this one.
+///
+/// Position wakes it only past `DRIFT_WAKE`, because the wander model moves
+/// the offset without ever touching the heading and must stay silent. The
+/// heading's share wakes it at `DRIFT_SLEEP`: nothing but the wheel turns
+/// the truck, so a heading worth the centred band is the driver's to take
+/// out. And it sleeps only when the truck is centred, will stay centred,
+/// AND is pointing down the road. Settling inside the band is not enough
+/// on its own, because that point assumes the driver takes the heading out
+/// and a quiet lean never asks them to (agent drive, 2026-09-23: back from
+/// the right edge, the lean went quiet with heading on and the truck
+/// carried on across to the far side before it woke).
+pub fn drift_speaks(was_speaking: bool, offset: f64, settled: f64) -> bool {
+    let heading = (settled - offset).abs();
+    if was_speaking {
+        offset.abs().max(settled.abs()).max(heading) >= DRIFT_SLEEP
+    } else {
+        offset.abs() >= DRIFT_WAKE || heading >= DRIFT_SLEEP
+    }
+}
+
 /// The player picks how loud the lane and edge cues speak (owner call
 /// 2026-07-27: the strip read too quiet on the first drive). Scales the
 /// edge ladder, the lane locator, and the dead-man's-curve strips alike.
@@ -227,20 +249,12 @@ impl LaneGuidance {
             };
         }
 
-        // Awake while EITHER the truck is off centre or its heading is taking
-        // it off: settled alone would sleep through the moment the lean flips
-        // to "straighten", which is the one the driver most needs to hear.
         let settled = settled_offset(lane.offset, lane.yaw_rad, mph);
-        let drift = lane.offset.abs().max(settled.abs());
         let in_curve_window =
             curve_steer != 0.0 || curve_ahead_mi.is_some_and(|mi| mi <= CURVE_LEAD_MI);
         let was_awake = self.awake;
-        if self.awake {
-            self.awake = in_curve_window || drift >= DRIFT_SLEEP;
-        } else {
-            self.awake = in_curve_window || drift > DRIFT_WAKE;
-        }
-        if self.awake && drift > DRIFT_WAKE {
+        self.awake = in_curve_window || drift_speaks(self.awake, lane.offset, settled);
+        if self.awake && lane.offset.abs().max(settled.abs()) > DRIFT_WAKE {
             self.episode_drifted = true;
         }
 
