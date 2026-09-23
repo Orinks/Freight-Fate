@@ -4,8 +4,10 @@
 //! and one process, with the tests running as parallel threads inside it.
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
-//! them. A new test file needs a line here. The one exception,
-//! `tests/classic_startup.rs`, needs a process nothing has touched yet.
+//! them. A new test file needs a line here. The exceptions:
+//! `tests/classic_startup.rs` needs a process nothing has touched yet, and
+//! `tests/agent_server.rs` tests agent tooling rather than the game, so it
+//! is its own binary that a plain `cargo test` leaves out (see Cargo.toml).
 
 mod account_achievements;
 mod audio_support;
@@ -22,7 +24,6 @@ mod transcript_cruise_support;
 mod trucking_weight_braking;
 
 mod adversarial;
-mod agent_server;
 mod app_achievements;
 mod app_controller;
 mod app_controls_reference;

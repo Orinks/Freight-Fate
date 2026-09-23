@@ -162,10 +162,14 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   build is shared). Integration tests live in `crates/<crate>/tests/it/*.rs`,
   wired in through that directory's `main.rs` -- one test binary named `it`
   per crate, deliberately, so add a `mod` line there rather than a new
-  top-level file. The three exceptions: `crates/ff-core/tests/data_baked.rs`
+  top-level file. The exceptions: `crates/ff-core/tests/data_baked.rs`
   and `data_map_correction.rs` each point the process at a different data
   root, and `crates/freight-fate/tests/classic_startup.rs` needs a process
   where the 1.5 classics are not yet registered, so each keeps its own binary.
+  `crates/freight-fate/tests/agent_server.rs` is agent tooling, not the game:
+  `test = false` in the crate's Cargo.toml keeps it out of a plain
+  `cargo test`, so run it by name (`cargo test -p freight-fate --test
+  agent_server`) after touching the agent server. CI runs it as its own step.
 - One test: `cargo test -p freight-fate --test it <name_filter> -- --nocapture`
   (`--test it` skips the unit-test and doc-test binaries; the filter is a
   substring of the test path).

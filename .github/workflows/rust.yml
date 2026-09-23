@@ -300,6 +300,11 @@ jobs:
         # crate it came from.
         run: cargo test -p ff-core -p freight-fate --locked
 
+      - name: cargo test (agent server)
+        # Agent tooling, not the game: `test = false` keeps it out of the run
+        # above and out of a plain local `cargo test`, so it runs by name.
+        run: cargo test -p freight-fate --test agent_server --locked
+
       - name: Compiler cache statistics
         if: always()
         run: sccache --show-stats
