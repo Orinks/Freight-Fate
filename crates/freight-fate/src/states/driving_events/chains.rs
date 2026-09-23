@@ -168,7 +168,7 @@ impl DrivingState {
                 let call = self.turn_approach_text(ctx, &corner, ahead);
                 first_corner = format!(" Then {}", lower_first(&call));
                 self.turn_advised.insert(corner.key.clone());
-                self.trip.controlled_turn = true;
+                self.pace_clock_for_turn(&corner, ahead);
                 // Spoken inside this line, so the corner counts as told;
                 // its earcon sounds when the truck actually turns, not here
                 // (see `resolve_turn`).

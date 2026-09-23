@@ -20,7 +20,6 @@ impl TruckState {
     // -- per-frame update ---------------------------------------------------------
 
     pub fn update(&mut self, dt: f64) {
-        self.transmission.update(dt);
         self.update_air_system(dt);
 
         // Motion runs on the clock that moves the truck. The trip advances
@@ -37,6 +36,12 @@ impl TruckState {
         let steps = (game_dt / MOTION_STEP_MAX_S).ceil().max(1.0);
         let step = game_dt / steps;
         for _ in 0..steps as usize {
+            // The gearbox's torque interruption is time the drive is cut, so
+            // it runs on the same clock as the motion it cuts. On the real
+            // clock a quarter-second upshift left a 14x truck unpowered for
+            // three game seconds; it bogged, kicked down and hunted, two
+            // dozen shifts in one pull-away (agent drive, 2026-09-23).
+            self.transmission.update(step);
             self.step_motion(step);
         }
         self.update_rpm(dt);

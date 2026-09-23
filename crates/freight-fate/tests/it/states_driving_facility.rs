@@ -1023,7 +1023,12 @@ fn test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back() {
     // Spoken here, so the commitment loop must not raise it again.
     let corner = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.turn_advised.contains(&corner.key));
-    assert!(d.trip.controlled_turn);
+    // The clock goes real at the corner's brake point, which a truck still
+    // at the stop bar has not reached (states_driving_turns pins that).
+    assert_eq!(
+        d.trip.controlled_turn,
+        corner.at_mi - d.trip.position_mi <= d.turn_brake_point_mi(&corner)
+    );
     // And the pause is gone: the next frame may hand the streets to the
     // keeper without waiting on a driver who is off the brake.
     assert!(!d.speed_control_paused_at_stop);

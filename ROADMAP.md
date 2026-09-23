@@ -1250,13 +1250,16 @@ shipped; the others are recorded in the order they depend on each other.
       the tail.
 - [ ] **Controller triggers as a rate.** The pedal now slews toward the
       trigger at the keys' travel rate; pad players have not tried it yet.
-- [ ] **Real time from the brake point, not from the corner call.**
-      `controlled_turn` drops the clock to 1x as the 25-second call opens,
-      capped at 2 miles, so a 30 mph approach crawls for about four real
-      minutes. Keep the call time-based. Drop the clock at reaction plus
-      braking distance to the corner's advise speed, and ease into it the
-      way `exit_approach_release_s` eases out. Depends on the physics item
-      above: braking distance has to mean the same thing at every clock.
+- [x] **Real time from the brake point, not from the corner call.** The
+      call stays time-based; `controlled_turn` now goes on at
+      `turn_brake_point_mi` (eight real seconds of reaction and settle plus
+      the shed to the advise speed at the keeper's 0.4 m/s²), and
+      `Trip::turn_clock` slides the pace down over the three real seconds
+      before it, the exit release run backwards. A 30 mph approach that
+      crawled four real minutes from a two-mile call now runs real time for
+      its last fifth of a mile. The agent drive that found it also found the
+      automatic hunting on the new clock (the torque interruption was still
+      real time); the gearbox timers now run in the motion sub-steps.
 - [ ] **A straighten-up key.** Held, it applies only the heading half of
       partial lane keeping's steering law until the truck points down the
       road. It goes in the bindings table.

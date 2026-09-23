@@ -363,16 +363,45 @@ fn test_the_window_is_real_seconds_not_a_fixed_distance() {
 }
 
 #[test]
-fn test_the_approach_decompresses_the_clock() {
+fn test_the_clock_waits_for_the_brake_point() {
+    // The call is sized in real seconds on the compressed clock, so it opens
+    // far out; dropping the clock there crawled a 30 mph approach for four
+    // real minutes (flight, and the agent drive into Abilene, 2026-09-23).
+    // The call still comes early. The clock stays paced past it, slides down
+    // ahead of the brake point, and is real time from the brake point on.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     street_chain(&mut d, 40.0, 0.5);
-    d.trip.position_mi = 0.4;
     mph(&mut d, 30.0);
-    assert!(d.trip.effective_time_scale() > 1.0);
+    let paced = d.trip.effective_time_scale();
+    assert!(paced > 1.0);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let brake_mi = d.turn_brake_point_mi(&cue);
+
+    d.trip.position_mi = 0.0;
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        !last_with(&app, "North Michigan Street").is_empty(),
+        "the call comes at the window"
+    );
+    assert!(!d.trip.controlled_turn);
+    assert_eq!(
+        d.trip.effective_time_scale(),
+        paced,
+        "still paced past the call"
+    );
+
+    // Easing: between the trip's pacing and real time.
+    d.trip.position_mi = cue.at_mi - brake_mi - 0.05;
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    let easing = d.trip.effective_time_scale();
+    assert!(1.0 < easing && easing < paced, "easing at {easing:.1}x");
+
+    d.trip.position_mi = cue.at_mi - brake_mi + 0.001;
     d.update_turn_commitment(&mut app.ctx, 0.016);
     assert!(d.trip.controlled_turn);
     assert_eq!(d.trip.effective_time_scale(), 1.0);
+
     d.trip.position_mi = 0.6;
     mph(&mut d, 18.0);
     let dt = d.turn_grace_s + 1.0;
@@ -753,18 +782,25 @@ fn test_a_corner_you_are_already_slow_enough_for_still_buys_real_seconds() {
     //
     // Being slow enough to MAKE the corner is not the same as being given time
     // to HEAR about it. The advisory may stay quiet; the clock may not stay
-    // compressed.
+    // compressed. It goes real at the brake point, which for a truck with no
+    // speed to shed is the reaction seconds alone.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     street_chain(&mut d, 40.0, 0.5);
-    d.trip.position_mi = 0.4;
     // Under the corner's own advised speed, the way the keeper holds a
     // truck through a facility zone.
     mph(&mut d, 8.0);
     let cue = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.trip.truck.speed_mph() <= d.turn_speed_mph(&cue));
     assert!(d.trip.effective_time_scale() > 1.0);
+    let brake_mi = d.turn_brake_point_mi(&cue);
+    let real_s = brake_mi / 8.0 * 3600.0;
+    assert!(
+        real_s >= 8.0,
+        "only {real_s:.1} real seconds to act on the corner"
+    );
 
+    d.trip.position_mi = cue.at_mi - brake_mi + 0.001;
     d.update_turn_commitment(&mut app.ctx, 0.016);
 
     assert!(d.trip.controlled_turn);
@@ -1912,11 +1948,20 @@ fn test_cruise_into_a_hot_bend_arrives_at_the_advisory() {
     let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
         servo_max = servo_max.max(d.curve_servo.as_ref().map_or(0.0, |s| s.brake));
     });
+    // A light trim, not a stop. It read under 0.12 while the gearbox's torque
+    // interruption ran on the real clock, and only because the box hunted
+    // the truck down to 25 for a 35 bend; arriving on the number now, the
+    // servo trims the last of it at about 0.15 (2026-09-23).
     assert!(
-        servo_max < 0.15,
+        servo_max < 0.2,
         "cruise makes the bend on its own; the servo should barely touch the pedal: {servo_max:.2}"
     );
 
+    assert!(
+        run.speed_at_start_mph >= 35.0 - 5.0,
+        "shed far past the advisory, to {:.1} mph",
+        run.speed_at_start_mph
+    );
     assert!(
         run.speed_at_start_mph <= 35.0 + 2.0,
         "crossed the bend's start at {:.1} mph: {:#?}",

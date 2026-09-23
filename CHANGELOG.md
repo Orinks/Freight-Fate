@@ -38,6 +38,8 @@
 
 - **Holding the brake or accelerator presses harder the longer you hold it.** A quick tap still does what it always did.
 
+- **City street turns keep the game's pace until it is time to brake.** Real time starts just before the turn, not a mile out. (Reported by flight.)
+
 - **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
 
 - **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.

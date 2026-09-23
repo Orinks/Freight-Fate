@@ -626,8 +626,9 @@ impl DrivingState {
     /// corner on.
     ///
     /// A corner in play decompresses the trip to real time so "Advise 20" is
-    /// plannable, and that happens a full spoken window out -- always wider
-    /// than this ease. Sizing the ease on the compressed clock instead read the
+    /// plannable, and that happens at its brake point -- reaction seconds plus
+    /// this ease's own shed, so always at or before it (`turn_brake_point_mi`).
+    /// Sizing the ease on the compressed clock instead read the
     /// corner as close from half a mile back and held the whole block at the
     /// corner speed, which is the sluggishness this fix must not trade the
     /// tester's problem for.

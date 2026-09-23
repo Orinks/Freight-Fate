@@ -302,8 +302,13 @@ pub struct Trip {
     pub dock_run_in: bool,
     /// A police stop is in progress: the clock stops compressing.
     pub pull_over_active: bool,
-    /// True from a street corner's approach call until the corner resolves.
+    /// True from a street corner's brake point until the corner resolves:
+    /// the clock is real time.
     pub controlled_turn: bool,
+    /// 0 to 1: how far the clock has eased toward real time on the approach
+    /// to a corner's brake point. Set every frame by the driving state; 0
+    /// means the trip's own pacing.
+    pub turn_clock: f64,
     /// True while curve assistance is still taking speed off for a bend.
     pub curve_shed_active: bool,
     /// Road left to an exit the driver has signalled for.
@@ -464,6 +469,7 @@ impl Trip {
             dock_run_in: false,
             pull_over_active: false,
             controlled_turn: false,
+            turn_clock: 0.0,
             curve_shed_active: false,
             exit_approach_mi: None,
             exit_approach_release_s: 0.0,
@@ -604,7 +610,11 @@ impl Trip {
         }
         let floor = LOW_SPEED_TIME_SCALE.min(full);
         let ramp = (self.truck.speed_mph() / FULL_COMPRESSION_MPH).min(1.0);
-        floor + (full - floor) * ramp
+        let paced = floor + (full - floor) * ramp;
+        // Easing into a corner's brake point, the mirror of the exit release
+        // above: the clock slides down to real time rather than dropping to it.
+        let real = full.min(1.0);
+        paced + (real - paced) * self.turn_clock.clamp(0.0, 1.0)
     }
 
     pub fn imperial(&self) -> bool {
