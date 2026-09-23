@@ -1237,13 +1237,19 @@ shipped; the others are recorded in the order they depend on each other.
       lean went quiet as soon as the settled point was centred, with heading
       still on, and the truck carried on across. `drift_speaks` now keeps
       it awake until the truck is also pointing down the road.
-- [ ] **Truck physics on the clock that moves it.** Distance advances at
-      `dt * effective_time_scale` but `Truck::update` integrates on real
-      `dt`, so grade and drag act on 1/20 of the time per mile at standard.
-      Coasting runs absurdly long, and building speed downhill on real
-      time and then switching back to standard gets distance for free.
-      Substep the truck on the game clock, keep pedal travel on the real
-      one, and drop the `fuel_burn_mult = scale` stand-in.
+- [x] **Truck physics on the clock that moves it** (branch
+      `feat/momentum-game-clock`, awaiting the owner's drive). `TruckState`
+      integrates motion, freight and brake heat on the game clock in
+      one-frame sub-steps, so a coast or a downhill covers the same road at
+      any pace. The pedals press at their old rate divided by the pace and
+      release on the real clock; cruise, the keeper and the curve servo run
+      their integrators on `motion_dt`, and the old multiply-by-the-pace
+      compensations in the servo, the keeper's ease and cruise's limit
+      lookahead are gone. A cruise pause for a bend under cruise's floor now
+      lifts at the bend's end, because a hands-off truck used to stall in
+      the tail.
+- [ ] **Controller triggers as a rate.** The pedal now slews toward the
+      trigger at the keys' travel rate; pad players have not tried it yet.
 - [ ] **Real time from the brake point, not from the corner call.**
       `controlled_turn` drops the clock to 1x as the 25-second call opens,
       capped at 2 miles, so a 30 mph approach crawls for about four real

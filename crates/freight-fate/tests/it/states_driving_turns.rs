@@ -2006,6 +2006,9 @@ fn test_a_bend_under_cruises_floor_is_braked_down_and_cruise_comes_back() {
     app.clear_speech();
 
     let mut paused_in_the_bend = false;
+    // Hands off the whole way: the promise is that the assists bring the
+    // truck through and back up, and coasting now slows it the way a real
+    // one does, so a pause that waited out the tail stranded it there.
     let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
         if d.trip.position_mi >= d.trip.curves[0].start_mi
             && d.trip.position_mi <= d.trip.curves[0].end_mi
@@ -2033,13 +2036,12 @@ fn test_a_bend_under_cruises_floor_is_braked_down_and_cruise_comes_back() {
         call.contains("curve assistance slowing. Cruise resumes past the bend"),
         "{call:?}"
     );
-    // Past the tail the pause is spent, and once the driver has the truck
-    // back up to road speed the session comes back on its own, at the set
-    // speed -- the line's promise.
+    // Out of the bend the pause is spent, the keeper builds the truck back up
+    // from under cruise's floor, and cruise comes back on its own at the set
+    // speed -- the line's promise, with no key pressed.
     assert!(d.cruise_resume_after_mi.is_none(), "{:#?}", run.lines);
     assert!(d.speed_control_armed, "{:#?}", run.lines);
-    app.ctx.input.press(Key::Up, Mods::NONE);
-    for _ in 0..(60.0 / DT) as usize {
+    for _ in 0..(90.0 / DT) as usize {
         if d.cruise_mph.is_some() {
             break;
         }

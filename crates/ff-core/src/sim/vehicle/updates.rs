@@ -10,10 +10,10 @@ use super::{
     CHAIN_WEAR_OVERSPEED_MULT, CHAIN_WEAR_PCT_PER_MILE, ENGINE_MOTORING_DRAG_FRACTION,
     ENGINE_ROTATING_INERTIA_KG_M2, ENGINE_WEAR_FUEL_PENALTY, ENGINE_WEAR_LUG_PCT_PER_S,
     ENGINE_WEAR_OVER_REV_PCT_PER_S, ENGINE_WEAR_PCT_PER_H_FULL_LOAD, ENGINE_WEAR_PCT_PER_H_IDLE, G,
-    LUG_RPM_FRACTION, LUG_THROTTLE, MAX_REVERSE_MPS, OVER_REV_RPM_MULT, ROAD_OVERSPEED_RPM_MULT,
-    RUNAWAY_DAMAGE_PCT_PER_S, RUNAWAY_SPEED_MPH, SHIFT_SYNC_BRAKE_FRACTION,
-    SHIFT_SYNC_FUEL_FRACTION, TIRE_WEAR_BRAKING_PCT, TIRE_WEAR_PCT_PER_MILE, TIRE_WINTER,
-    WINTER_TREAD_WEAR_MULT,
+    LUG_RPM_FRACTION, LUG_THROTTLE, MAX_REVERSE_MPS, MOTION_STEP_MAX_S, OVER_REV_RPM_MULT,
+    ROAD_OVERSPEED_RPM_MULT, RUNAWAY_DAMAGE_PCT_PER_S, RUNAWAY_SPEED_MPH,
+    SHIFT_SYNC_BRAKE_FRACTION, SHIFT_SYNC_FUEL_FRACTION, TIRE_WEAR_BRAKING_PCT,
+    TIRE_WEAR_PCT_PER_MILE, TIRE_WINTER, WINTER_TREAD_WEAR_MULT,
 };
 
 impl TruckState {
@@ -23,6 +23,32 @@ impl TruckState {
         self.transmission.update(dt);
         self.update_air_system(dt);
 
+        // Motion runs on the clock that moves the truck. The trip advances
+        // the road at `dt * time scale` (carried here as `fuel_burn_mult`),
+        // so forces integrated on real `dt` acted on a twentieth of the time
+        // per mile at standard: a truck that took twenty real seconds to pull
+        // away whatever the clock, coasting that ran for miles, and speed
+        // built downhill on real time and then spent on the flat at standard
+        // for free (flight, 2026-09-22). On the game clock every force gets
+        // the time a real mile gives it, so energy per mile is the same at
+        // any pacing. Sub-stepped, because a standard-pace frame is a third
+        // of a game second and the brakes can stop a lot of truck in that.
+        let game_dt = dt * self.fuel_burn_mult.max(0.0);
+        let steps = (game_dt / MOTION_STEP_MAX_S).ceil().max(1.0);
+        let step = game_dt / steps;
+        for _ in 0..steps as usize {
+            self.step_motion(step);
+        }
+        self.update_rpm(dt);
+        self.update_fuel(dt);
+        self.update_engine_temp(dt);
+        self.update_wear(dt);
+    }
+
+    /// One game-clock step of the truck's motion and of everything riding on
+    /// its acceleration: the freight, a liquid load, and the heat the brakes
+    /// soak up doing the stopping.
+    fn step_motion(&mut self, dt: f64) {
         // Four terms, not three. A liquid load pushes forward exactly when the
         // brakes are trying to stop -- it belongs here as its own force and not
         // inside resistance_force(), whose sign convention always opposes travel
@@ -58,10 +84,7 @@ impl TruckState {
             0.0
         };
         self.update_cargo(dt, decel_g);
-        self.update_rpm(dt);
-        self.update_fuel(dt);
-        self.update_temps(dt);
-        self.update_wear(dt);
+        self.update_brake_temp(dt);
     }
 
     pub(crate) fn update_rpm(&mut self, dt: f64) {
@@ -228,7 +251,13 @@ impl TruckState {
         burned
     }
 
+    #[cfg(test)]
     pub(crate) fn update_temps(&mut self, dt: f64) {
+        self.update_engine_temp(dt);
+        self.update_brake_temp(dt);
+    }
+
+    fn update_engine_temp(&mut self, dt: f64) {
         let s = &self.specs;
         let load = if self.engine_on {
             self.throttle * (self.rpm / s.max_rpm)
@@ -242,7 +271,10 @@ impl TruckState {
                 0.0
             });
         self.engine_temp_c += (target - self.engine_temp_c) * 0.03 * dt;
+    }
 
+    fn update_brake_temp(&mut self, dt: f64) {
+        let s = &self.specs;
         let speed = self.velocity_mps.abs();
         // Real energy accounting: the power the shoes actually dissipate
         // (force times speed) soaks into the drums' thermal mass. Heavier

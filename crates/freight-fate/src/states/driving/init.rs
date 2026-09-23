@@ -591,6 +591,8 @@ impl DrivingState {
             low_air_said: air_low_warning,
             spring_brake_said: spring_brakes_active,
             brake_lockout_cue_timer: 0.0,
+            pad_throttle_applied: 0.0,
+            pad_brake_applied: 0.0,
             brake_air_hissed: false,
             pending_low_air_buzzer: false,
             brake_peak_application: 0.0,

@@ -728,6 +728,9 @@ pub struct DrivingState {
     pub low_air_said: bool,
     pub spring_brake_said: bool,
     pub brake_lockout_cue_timer: f64,
+    /// The pedals the controller triggers press, slewed toward the trigger.
+    pub pad_throttle_applied: f64,
+    pub pad_brake_applied: f64,
     pub brake_air_hissed: bool, // rising-edge guard for the brake-apply hiss
     pub pending_low_air_buzzer: bool, // cold-start buzzer, held past the crank
     pub brake_peak_application: f64, // hardest press this application, shapes the release
