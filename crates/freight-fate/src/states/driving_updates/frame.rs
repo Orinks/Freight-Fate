@@ -280,10 +280,17 @@ impl DrivingState {
         // sweep, 2026-09-20). A pedal an assist is holding is not a pedal
         // the driver let go of, so the decay stops there. Their own brake
         // key still cancels the assist, which is what drops the floor.
+        //
+        // The ramp terminal's servo was left out, and it is the one that
+        // presses AFTER physics runs: the truck felt 0.09 of a 0.20 stop,
+        // slowed at 0.43 m/s2 against the 0.6 planned, reached a stop bar at
+        // 15 mph and had to slam the rest (agent drive into Abilene,
+        // 2026-09-23).
         let assist_floor = self
             .keeper_snub
             .max(self.aeb_brake)
             .max(self.destination_assist_brake)
+            .max(self.ramp_assist_brake)
             .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
             .clamp(0.0, 1.0);
         {

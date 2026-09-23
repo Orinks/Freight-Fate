@@ -50,6 +50,9 @@ impl DrivingState {
         if self.should_ignore_unsignalled_exit_pressure(ctx, event) {
             return;
         }
+        if self.corner_already_called(event) {
+            return;
+        }
         let kind = event.kind;
         let sound = route_event_sound(event);
         let mut message = event.message.clone();
@@ -725,6 +728,21 @@ impl DrivingState {
             tuning_for_time_scale(self.trip.time_scale).ambient_spacing_s;
     }
 
+    /// The route's quarter-mile lead for a street turn whose own approach
+    /// call has already been spoken: that call named the side, the street,
+    /// the distance and the advise speed, so the lead only says the same
+    /// thing again a few seconds later (owner, Abilene streets, 2026-09-23:
+    /// "announced at least twice before the turn. Necessary?").
+    fn corner_already_called(&self, event: &TripEvent) -> bool {
+        event.kind == TripEventKind::GpsCue
+            && event.data.advance.unwrap_or(false)
+            && event
+                .data
+                .cue
+                .as_ref()
+                .is_some_and(|cue| is_judged_turn(cue) && self.turn_advised.contains(&cue.key))
+    }
+
     /// `_should_ignore_destination_exit_gps_cue(event)`.
     pub fn should_ignore_destination_exit_gps_cue(
         &mut self,
@@ -930,6 +948,14 @@ impl DrivingState {
         }
         if event.kind == TripEventKind::GpsCue {
             if event.data.zone.is_some() {
+                return EventPriority::Route;
+            }
+            // A limit change is what enforcement reads, and each one is said
+            // once: the advance "drops to 55" marks 55 as announced, so when
+            // the pacer dropped it as stale chatter the boundary stayed silent
+            // too and the truck ran a 55 it never heard of (agent drive, exit
+            // 286A into Abilene, 2026-09-23).
+            if event.data.limit_change.unwrap_or(false) {
                 return EventPriority::Route;
             }
             let cue_kind = event

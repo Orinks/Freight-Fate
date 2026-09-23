@@ -70,9 +70,7 @@ impl DrivingState {
             let rng = match rng {
                 Some(rng) => rng,
                 None => {
-                    owned = PyRandom::new_from_i64(
-                        (self.trip_seed << 16) ^ (stop.at_mi * 100.0) as i64,
-                    );
+                    owned = self.ramp_rng(stop);
                     &mut owned
                 }
             };
@@ -91,6 +89,23 @@ impl DrivingState {
             };
         }
         control
+    }
+
+    /// The dice for a ramp with no recorded control, seeded by the EXIT, not
+    /// by the stop: two stops off one exit are one ramp. Seeded by each stop's
+    /// own mile, exit 286A into Abilene came out a stop sign for the delivery
+    /// and a traffic light for the truck stop 0.1 mile on, and the driver
+    /// heard both (agent drive, 2026-09-23).
+    fn ramp_rng(&self, stop: &RoadStop) -> PyRandom {
+        let exit_mi = stop
+            .interchange_mi
+            .or_else(|| {
+                self.trip
+                    .interchange_at(stop.at_mi, 0.15)
+                    .map(|interchange| interchange.at_mi)
+            })
+            .unwrap_or(stop.at_mi);
+        PyRandom::new_from_i64((self.trip_seed << 16) ^ (exit_mi * 100.0) as i64)
     }
 
     /// The interchange record this stop was matched to at bake time, by
@@ -132,7 +147,7 @@ impl DrivingState {
 
     /// Set up the terminal control state for the ramp just taken.
     pub fn begin_ramp_terminal(&mut self, ctx: &GameContext, stop: &RoadStop) {
-        let mut rng = PyRandom::new_from_i64((self.trip_seed << 16) ^ (stop.at_mi * 100.0) as i64);
+        let mut rng = self.ramp_rng(stop);
         self.ramp_control = self.ramp_control_for(ctx, stop, Some(&mut rng));
         let mut profile_rng = PyRandom::new_from_str(&self.ramp_terminal_timing_key(stop));
         self.ramp_light_profile = profile_rng.randrange(RAMP_LIGHT_PROFILE_COUNT) as u8;

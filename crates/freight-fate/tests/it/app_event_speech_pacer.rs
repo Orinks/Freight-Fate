@@ -72,23 +72,29 @@ fn test_say_event_flushes_a_stale_route_backlog_end_to_end() {
     // changes delivery, never drops the newest information.
     //
     // And a flush that lands inside a line's pre-utterance pause hands that
-    // line back to be queued behind the one that cut it, so the whole burst
-    // is still heard rather than only its last member: submitting all four
-    // in one frame used to leave the player with the fourth alone at the
-    // voice, three yard instructions destroyed before the voice said a word
-    // of them. The two hand-backs below are those recoveries.
-    let texts: Vec<&str> = calls.iter().map(|(t, _)| t.as_str()).collect();
+    // line back, so the whole burst is still heard rather than only its
+    // last member: submitting all four in one frame used to leave the player
+    // with the fourth alone at the voice, three yard instructions destroyed
+    // before the voice said a word of them.
+    //
+    // The hand-back is spoken FIRST, interrupting, and the line that flushed
+    // queues behind it. Requeued behind that line instead, it played the
+    // burst backwards -- 0, 1, 0, 2, 3, 2 -- and the older line landed last
+    // (agent drive, 2026-09-23). Each flush here restarts the line it cut,
+    // not a word of which was out yet, so the voice hears 0, 1, 2, 3.
     assert_eq!(
-        texts,
+        calls,
         vec![
-            approach[0],
-            approach[1],
-            approach[0], // handed back: cut 0 ms into its own delivery
-            approach[2],
-            approach[3],
-            approach[2], // handed back for the same reason
+            (approach[0].to_string(), false),
+            (approach[0].to_string(), true), // handed back, 0 ms in: restarts
+            (approach[1].to_string(), false),
+            (approach[1].to_string(), true), // and again for each flush
+            (approach[2].to_string(), false),
+            (approach[2].to_string(), true),
+            (approach[3].to_string(), false),
         ]
     );
+    let texts: Vec<&str> = calls.iter().map(|(t, _)| t.as_str()).collect();
     // Nothing was lost: every line of the approach reached the voice.
     for line in approach {
         assert!(texts.contains(&line), "{line} never reached the voice");

@@ -247,6 +247,17 @@ impl DrivingState {
         }
     }
 
+    /// The terminal's servo has a stop still to make at the bar: a sign, or
+    /// a light it is braking for or holding at.
+    pub(crate) fn ramp_terminal_owns_the_stop(&self) -> bool {
+        self.ramp_mi.is_some()
+            && !self.ramp_terminal_done
+            && self.ramp_light_announced
+            && (self.ramp_assist_brake > 0.0
+                || self.ramp_waiting_at_light
+                || self.ramp_control == "stop")
+    }
+
     /// "A semi crossing from the left", or "Cross traffic" with nothing near.
     fn crossing_description(&self) -> String {
         match self

@@ -1728,6 +1728,61 @@ fn test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has() {
 }
 
 #[test]
+fn test_route_transition_assistance_brakes_to_the_sign_without_slamming() {
+    // Agent drive into Abilene, 2026-09-23: 25 mph and a thousand feet from
+    // a stop sign. The terminal's servo pressed AFTER physics had run and
+    // was left out of the frame's assist floor, so the pedal decayed under
+    // it every frame: the truck slowed at about 0.43 m/s2 against the 0.6
+    // planned, reached the bar at 15 mph with "released" said over it, and
+    // slammed the rest. The plan is one steady application to the bar.
+    let mut harness = approaching_a_terminal("Ramps", "stop", 25.0);
+    harness.with_drive(|d, _| {
+        d.ramp_mi = Some(0.19 + RAMP_ACCESS_MI);
+        d.ramp_stop = Some(a_stop(d.trip.position_mi + 0.19 + RAMP_ACCESS_MI));
+    });
+    let mut hardest_mps2: f64 = 0.0;
+    let mut previous_mps = harness.read_drive(|d| d.truck().velocity_mps);
+    let mut mph_at_60_ft: Option<f64> = None;
+    for _ in 0..(60 * 120) {
+        frame(&mut harness, DT);
+        let (mps, done) = harness.read_drive(|d| (d.truck().velocity_mps, d.ramp_terminal_done));
+        let gap_ft = harness.read_drive(|d| (d.ramp_mi.unwrap_or(0.0) - RAMP_ACCESS_MI) * 5280.0);
+        if mph_at_60_ft.is_none() && gap_ft <= 60.0 {
+            mph_at_60_ft = Some(mps * MPH_PER_MPS);
+        }
+        // The final hold at a crawl is a parking application, not the stop.
+        if previous_mps * MPH_PER_MPS > 5.0 {
+            hardest_mps2 = hardest_mps2.max((previous_mps - mps) / DT);
+        }
+        previous_mps = mps;
+        if done {
+            break;
+        }
+    }
+    let lines = spoken(&harness.app);
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.starts_with("Stopped at the sign")),
+        "{lines:?}"
+    );
+    // On the profile, 60 feet out is about 5 mph; the decaying pedal reached
+    // it at 13 and stopped the rest on half a pedal.
+    let at_60 = mph_at_60_ft.expect("the truck reached the bar");
+    assert!(at_60 < 8.0, "{at_60:.1} mph 60 feet from the bar");
+    assert!(
+        hardest_mps2 < 1.0,
+        "the stop peaked at {hardest_mps2:.2} m/s2: {lines:?}"
+    );
+    assert!(
+        !lines
+            .iter()
+            .any(|line| line == "Route-transition assistance released."),
+        "released while still braking for the sign: {lines:?}"
+    );
+}
+
+#[test]
 fn test_route_transition_assistance_lifts_for_the_ramp_cap_before_the_stop() {
     // The ramp cap is sustained speed control, not the terminal stop. A
     // service-brake floor here held the drums for the whole ramp (and the

@@ -117,6 +117,28 @@ fn test_heuristic_control_is_deterministic_and_valid() {
 }
 
 #[test]
+fn test_every_stop_off_one_exit_meets_the_same_ramp_end() {
+    // Exit 286A into Abilene has no recorded control, and the dice were
+    // seeded by each stop's own mile: the delivery heard a stop sign and the
+    // truck stop 0.1 mile on a traffic light, for one ramp (agent drive,
+    // 2026-09-23). Seeded by the exit, they agree on every trip.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    let mut delivery = a_stop(30.0);
+    delivery.interchange_mi = Some(30.0);
+    let mut truck_stop = a_stop(30.1);
+    truck_stop.interchange_mi = Some(30.0);
+    for seed in 0..40 {
+        d.trip_seed = seed;
+        assert_eq!(
+            d.ramp_control_for(&app.ctx, &delivery, None),
+            d.ramp_control_for(&app.ctx, &truck_stop, None),
+            "trip seed {seed}"
+        );
+    }
+}
+
+#[test]
 fn test_a_scale_ramp_never_grows_a_terminal_control() {
     let mut app = TestApp::new();
     let d = a_real_drive(&mut app);
@@ -1049,6 +1071,29 @@ fn test_a_limit_change_cue_is_the_roads_state_not_a_turn() {
 }
 
 #[test]
+fn test_a_limit_change_may_never_age_out() {
+    // Each limit is said once: the advance "drops to 55" marks it announced,
+    // so a dropped advance left the boundary silent and the truck in a 55 it
+    // never heard of (agent drive, exit 286A into Abilene, 2026-09-23).
+    let mut app = TestApp::new();
+    let d = a_real_drive(&mut app);
+    for text in [
+        "Speed limit drops to 55 in half a mile.",
+        "Speed limit reduced to 55.",
+    ] {
+        let event = an_event(
+            TripEventKind::GpsCue,
+            text,
+            TripEventData {
+                limit_change: Some(true),
+                ..Default::default()
+            },
+        );
+        assert_eq!(d.event_priority(&event), EventPriority::Route, "{text}");
+    }
+}
+
+#[test]
 fn test_the_advance_half_of_a_cue_is_only_an_advisory() {
     let event = an_event(
         TripEventKind::GpsCue,
@@ -1769,6 +1814,32 @@ fn test_the_upcoming_readout_never_says_zero_miles() {
     let line = said.last().expect("U said nothing at all");
     assert!(!line.contains("0 miles"), "{line:?}");
     assert!(line.contains("0.4 miles"), "{line:?}");
+}
+
+#[test]
+fn test_the_upcoming_readout_leaves_highway_stops_on_the_highway() {
+    // Agent drive, exit 286A into Abilene, 2026-09-23: stopped at the ramp's
+    // stop sign, U said "Coming up: Flying J Travel Center Abilene in 0.1
+    // miles, where the ramp ends at a traffic light" -- a highway stop the
+    // truck had left the road for, and a ramp end it was already at.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    app.ctx.settings.imperial_units = true;
+    d.trip.position_mi = 50.0;
+    d.trip.zones.clear();
+    d.trip.curves.clear();
+    let pos = d.trip.position_mi;
+    d.trip.stops = vec![RoadStop::new("Flying J", pos + 0.1, "travel_center")];
+    d.ramp_mi = Some(0.02);
+    app.clear_speech();
+
+    d.speak_upcoming(&mut app.ctx, 15.0);
+
+    let said = app.main_lines();
+    assert!(
+        !said.iter().any(|line| line.contains("Flying J")),
+        "{said:?}"
+    );
 }
 
 #[test]

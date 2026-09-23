@@ -281,8 +281,7 @@ impl DrivingState {
         let settings = &ctx.settings;
         let direction = cue.direction.trim().to_lowercase();
         let street = self.turn_street_text(cue);
-        let target = settings.speed_text(self.turn_speed_mph(cue));
-        let mut call = if ahead_mi <= TURN_NOW_MI {
+        let call = if ahead_mi <= TURN_NOW_MI {
             format!("Turn {direction} now onto {street}.")
         } else {
             let distance = settings.short_distance_text(ahead_mi);
@@ -291,14 +290,25 @@ impl DrivingState {
         if self.terse_speech(ctx) {
             return call;
         }
-        call = format!("{call} Advise {target}.");
+        format!("{call} {}", self.turn_advice_text(ctx, cue))
+    }
+
+    /// The approach call's advisory half alone: "Advise 11 miles per hour.",
+    /// with the keeper's own line when it is taking the corner. Empty in
+    /// terse, which drops the advisory.
+    pub fn turn_advice_text(&self, ctx: &GameContext, cue: &NavigationCue) -> String {
+        if self.terse_speech(ctx) {
+            return String::new();
+        }
+        let target = ctx.settings.speed_text(self.turn_speed_mph(cue));
+        let mut advice = format!("Advise {target}.");
         if self.keeper_mph.is_some() && self.trip.truck.speed_mph() > self.turn_speed_mph(cue) {
             // The keeper sheds this corner's speed itself, so say so here
             // rather than as a second utterance on top of the corner call --
             // and so nobody reaches for the brake, which cancels the session.
-            call = format!("{call} Speed keeper easing.");
+            advice = format!("{advice} Speed keeper easing.");
         }
-        call
+        advice
     }
 
     // -- the frame ------------------------------------------------------------
@@ -346,8 +356,28 @@ impl DrivingState {
             // neither may latch a miss on first contact.
             self.turn_advised.insert(cue.key.clone());
             self.trip.controlled_turn = true;
-            let message = self.turn_approach_text(ctx, &cue, 0.0f64.max(ahead));
-            self.turn_grace_s = self.turn_grace_seconds(ctx, &message);
+            let full = self.turn_approach_text(ctx, &cue, 0.0f64.max(ahead));
+            self.turn_grace_s = self.turn_grace_seconds(ctx, &full);
+            // The route's own lead ("In a quarter mile, turn left onto a side
+            // street") may have just named this corner. Then the call keeps
+            // only what the lead did not say, the advise speed, instead of the
+            // whole corner again seconds later (owner, Abilene streets,
+            // 2026-09-23). A "now" call is the instruction itself and stays
+            // whole.
+            let lead_heard = ahead > TURN_NOW_MI
+                && self
+                    .trip
+                    .announced_navigation
+                    .contains(&format!("{}:advance", cue.key))
+                && (ctx
+                    .settings
+                    .speaks(Some(SpeechCategory::NavigationAdvisory))
+                    || !ctx.ladder_applies());
+            let message = if lead_heard {
+                self.turn_advice_text(ctx, &cue)
+            } else {
+                full
+            };
             // The earcon waits for the corner itself. It used to sound
             // here, on the approach, whether or not the words that go with
             // it were ever spoken -- so a rung that silenced the lead left a
@@ -374,7 +404,9 @@ impl DrivingState {
             // West Main Avenue" was dropped twice on one arrival and never
             // once heard (owner, Spokane, 2026-08-22). ROUTE, like the
             // trip's own near call.
-            if 0.0f64.max(ahead) <= TURN_NOW_MI {
+            if message.is_empty() {
+                // Terse, with the lead already heard: nothing new to say.
+            } else if 0.0f64.max(ahead) <= TURN_NOW_MI {
                 ctx.say_event_with(
                     message,
                     SayEvent::queued()

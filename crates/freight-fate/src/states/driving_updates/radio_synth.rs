@@ -5,7 +5,7 @@
 //! all of them.
 
 use ff_core::music_synth::{select_synth_drive_sequence, track_title};
-use ff_core::radio::{RadioStation, SAFE_ROUTE_PLAYLIST};
+use ff_core::radio::RadioStation;
 use ff_core::radio_content::content_duration_s;
 
 use crate::app::GameContext;
@@ -110,11 +110,15 @@ impl DrivingState {
     /// What a Roadhouse rotation started now would be built from: whether it
     /// is synthesized, and the seed when it is. The seed only matters while
     /// it is synthesized, so a roll in Original mode changes nothing.
+    ///
+    /// Read off the setting alone, never off `self.radio`: a rotation starts
+    /// inside `with_radio_backend`, which has swapped `self.radio` for an
+    /// empty stand-in, so looking the Roadhouse up there recorded Original
+    /// under a Synthesized playlist. A switch to Original then compared equal
+    /// and never restarted it (agent drive, 2026-09-23). The Roadhouse is the
+    /// one route-playlist station, so the setting is the whole answer.
     pub(crate) fn roadhouse_synth_state(&self, ctx: &GameContext) -> (bool, i64) {
-        let synth = self
-            .radio
-            .station_by_id(SAFE_ROUTE_PLAYLIST)
-            .is_some_and(|roadhouse| self.synth_roadhouse(ctx, roadhouse));
+        let synth = ctx.settings.synth_music;
         (synth, if synth { ctx.settings.music_seed } else { 0 })
     }
 

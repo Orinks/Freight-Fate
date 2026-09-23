@@ -1255,6 +1255,41 @@ shipped; the others are recorded in the order they depend on each other.
       partial lane keeping's steering law until the truck points down the
       road. It goes in the bindings table.
 
+### September 23 agent drive into Abilene
+
+An agent drive of `feat/momentum-game-clock`, Aberdeen yard to the Abilene
+gate, turned up these on dev's own code.
+
+- [x] **The ramp stop sign.** The terminal servo presses after physics and
+      was missing from the frame's `assist_floor`, so the pedal decayed under
+      it: 0.43 m/s² against the 0.6 planned, 13 mph sixty feet out, then half
+      a pedal. The cap's "released" line is held while the terminal owns the
+      stop.
+- [x] **Music source.** `roadhouse_synth_state` read the Roadhouse off the
+      radio state `with_radio_backend` had swapped out, so Synthesized to
+      Original never restarted the rotation.
+- [x] **Limit changes ride ROUTE.** The advance "drops to 55" marks the
+      limit announced; dropped as stale, it silenced the boundary too.
+- [x] **One call per street turn.** The route lead is dropped for a turn
+      already called, and a call after the lead keeps only its advise speed.
+- [x] **A flushed line's hand-back plays first.** `should_flush` handed
+      back a route line not a word of which had been heard, and it was
+      requeued behind the line that flushed it, so the road played
+      backwards. The hand-back is now spoken ahead of that line
+      (`EventSpeechPacer::note_ahead` keeps the newcomer the protected one).
+- [x] **Ramp readouts.** The route readout on a destination ramp adds the
+      street chain to the gate; U drops highway stops off the highway; the
+      unrecorded ramp control is seeded by the exit, not by each stop.
+- [ ] **Data: the Flying J listed at exit 286A** on the Wichita Falls to
+      Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
+      miles off this road by its own source note. Move it to an I-20
+      Abilene leg and re-bake.
+- [ ] **The speed keeper between close street turns.** It builds back to
+      the zone limit between turns a quarter mile apart (9 to 21 mph), then
+      eases in the last 0.07 mile at about 0.3 g. Hold the lower number
+      when the next turn is inside the keeper's own build-and-shed
+      distance.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
