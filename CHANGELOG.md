@@ -97,6 +97,8 @@
 
 ### Fixed
 
+- **Following the engine lean out of a drift no longer swings you across the lane.** It centres as the truck straightens, not once it reaches the middle. (Reported by flight.)
+
 - **Back-to-back sleeps at one stop count as one rest.** After 3 hours and 3 more, the menu offers the last 4 to finish your 10-hour reset. (Reported by Vol4life.)
 
 - **Right at the destination exit, the cab no longer announces a second one further on.** The exit you are taking is the only destination exit you hear.

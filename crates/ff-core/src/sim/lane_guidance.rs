@@ -33,7 +33,11 @@
 //!
 //! Port of `freight_fate/sim/lane_guidance.py`.
 
-use super::lane::{LaneKeeping, CENTERED_MAX, LANE_EDGE, OFF_ROAD, RUMBLE_START};
+use super::lane::{
+    LaneKeeping, CENTERED_MAX, FPS_PER_MPH, G_FPS2, HALF_LANE_FT, LANE_EDGE, MAX_STEER_LATERAL_G,
+    MAX_STEER_RAD, OFF_ROAD, RUMBLE_START, WHEELBASE_FT,
+};
+use super::turn_guide::{MAX_LEAN, SLEW_PER_S};
 
 /// The guide stays asleep inside this much of lane center: normal wander on a
 /// straight never wakes it (WANDER_RATE drift stays well inside 0.35).
@@ -58,6 +62,37 @@ pub const EDGE_SHOULDER_KEY: &str = "vehicle/edge_shoulder";
 pub const EDGE_STRIP_AT: f64 = 1.0; // past this the whole tire is on the strip
 pub const EDGE_VOLUME_MIN: f64 = 0.42;
 pub const EDGE_VOLUME_MAX: f64 = 0.88;
+
+/// How long a driver takes to answer the lean, seconds: the lean's own swing
+/// to centre from full, plus the textbook two-choice reaction time (about
+/// 0.3 s for left-or-right on a heard cue, Hick 1952). Derived from the
+/// guide's constants plus that one published figure, not tuned by ear.
+pub const LEAN_REACTION_S: f64 = 0.3 + MAX_LEAN / SLEW_PER_S;
+
+/// Where the truck comes to rest across its lane if the driver answers the
+/// lean now: the offset plus the heading's lateral stopping distance.
+///
+/// Flight's report, 2026-09-22: the lean followed lane POSITION, so it only
+/// swung back once the truck had crossed centre, and a driver following it
+/// overcorrected every time. Steering moves the heading and the heading moves
+/// the truck, so a guide on position alone lags by the whole time it takes
+/// to take the heading back out. This is that lag, measured like a braking
+/// distance: the heading carries on through the reaction time, then decays
+/// as the driver's full key unwinds it at the yaw rate the lane model grants
+/// (`MAX_STEER_LATERAL_G` at speed, full lock below it). The lean now swings
+/// to "straighten" while the truck is still on its way back, and it arrives
+/// at centre pointing down the road.
+pub fn settled_offset(offset: f64, yaw_rad: f64, mph: f64) -> f64 {
+    let fps = mph * FPS_PER_MPH;
+    if fps < 1.0 {
+        return offset;
+    }
+    let authority =
+        (fps * MAX_STEER_RAD.tan() / WHEELBASE_FT).min(MAX_STEER_LATERAL_G * G_FPS2 / fps);
+    let unwind_s = yaw_rad.abs() / authority;
+    let lateral_per_s = fps * yaw_rad.sin() / HALF_LANE_FT;
+    offset + lateral_per_s * (LEAN_REACTION_S + unwind_s / 2.0)
+}
 
 /// The player picks how loud the lane and edge cues speak (owner call
 /// 2026-07-27: the strip read too quiet on the first drive). Scales the
@@ -170,10 +205,12 @@ impl LaneGuidance {
     /// `curve_steer` is the signed steer the active bend asks for
     /// (-1 full left .. 1 full right, 0 when no bend is active);
     /// `curve_ahead_mi` is distance to the next curve's start (`None` when
-    /// nothing is inside the lookahead).
+    /// nothing is inside the lookahead); `mph` is the truck's speed, which
+    /// sizes the heading's share of the drift ([`settled_offset`]).
     pub fn update(
         &mut self,
         lane: &LaneKeeping,
+        mph: f64,
         dt: f64,
         assist_on: bool,
         curve_steer: f64,
@@ -190,7 +227,11 @@ impl LaneGuidance {
             };
         }
 
-        let drift = lane.offset.abs();
+        // Awake while EITHER the truck is off centre or its heading is taking
+        // it off: settled alone would sleep through the moment the lean flips
+        // to "straighten", which is the one the driver most needs to hear.
+        let settled = settled_offset(lane.offset, lane.yaw_rad, mph);
+        let drift = lane.offset.abs().max(settled.abs());
         let in_curve_window =
             curve_steer != 0.0 || curve_ahead_mi.is_some_and(|mi| mi <= CURVE_LEAD_MI);
         let was_awake = self.awake;
@@ -206,7 +247,7 @@ impl LaneGuidance {
         // Pursuit target: lean into the bend, corrected toward lane center.
         // Asleep, the target is home -- the bed slews back where it lives.
         let target = if self.awake {
-            (curve_steer - lane.offset / LANE_EDGE).clamp(-GUIDE_PAN_MAX, GUIDE_PAN_MAX)
+            (curve_steer - settled / LANE_EDGE).clamp(-GUIDE_PAN_MAX, GUIDE_PAN_MAX)
         } else {
             0.0
         };
@@ -250,7 +291,7 @@ mod tests {
     }
 
     fn frame(g: &mut LaneGuidance, lane: &LaneKeeping) -> GuidanceFrame {
-        g.update(lane, 1.0, true, 0.0, None)
+        g.update(lane, 60.0, 1.0, true, 0.0, None)
     }
 
     fn frame_curve(
@@ -259,7 +300,7 @@ mod tests {
         curve_steer: f64,
         curve_ahead_mi: Option<f64>,
     ) -> GuidanceFrame {
-        g.update(lane, 1.0, true, curve_steer, curve_ahead_mi)
+        g.update(lane, 60.0, 1.0, true, curve_steer, curve_ahead_mi)
     }
 
     #[test]
@@ -357,7 +398,7 @@ mod tests {
     #[test]
     fn test_assist_off_is_inert() {
         let mut g = LaneGuidance::new();
-        let f = g.update(&lane(0.9), 1.0, false, -0.8, None);
+        let f = g.update(&lane(0.9), 60.0, 1.0, false, -0.8, None);
         assert!(!f.awake);
         assert_eq!(f.pan, 0.0);
     }

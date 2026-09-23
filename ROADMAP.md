@@ -1221,6 +1221,37 @@ against.
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
       pays, which the toll inventory does not.
 
+### September 23 flight's driving notes
+
+flight drove with every assist off and sent four notes. The first has
+shipped; the others are recorded in the order they depend on each other.
+
+- [x] **The drift lean reads the heading, not only the position.** Both
+      drift producers (the engine lean and the opt-in tone) lean on
+      `lane_guidance::settled_offset`: the offset plus the heading's lateral
+      stopping distance, from a two-choice reaction time plus the lean's own
+      slew, and the driver's yaw authority in `sim::lane`. In a closed-loop
+      test, a driver who follows the old position-only lean out of a 0.6
+      drift ends up 1.5 past centre, off the other edge. With the new lean
+      it is 0.05.
+- [ ] **Truck physics on the clock that moves it.** Distance advances at
+      `dt * effective_time_scale` but `Truck::update` integrates on real
+      `dt`, so grade and drag act on 1/20 of the time per mile at standard.
+      Coasting runs absurdly long, and building speed downhill on real
+      time and then switching back to standard gets distance for free.
+      Substep the truck on the game clock, keep pedal travel on the real
+      one, and drop the `fuel_burn_mult = scale` stand-in.
+- [ ] **Real time from the brake point, not from the corner call.**
+      `controlled_turn` drops the clock to 1x as the 25-second call opens,
+      capped at 2 miles, so a 30 mph approach crawls for about four real
+      minutes. Keep the call time-based. Drop the clock at reaction plus
+      braking distance to the corner's advise speed, and ease into it the
+      way `exit_approach_release_s` eases out. Depends on the physics item
+      above: braking distance has to mean the same thing at every clock.
+- [ ] **A straighten-up key.** Held, it applies only the heading half of
+      partial lane keeping's steering law until the truck points down the
+      road. It goes in the bindings table.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
@@ -1299,9 +1330,9 @@ onto exit signalling.
       signals a street corner. The map is not the blocker -- baked tier-1
       maneuvers already carry direction and distance, which is what feeds
       the `events/turn_left` and `turn_right` earcons. What is missing is
-      the turn as a continuous act: `LaneKeeping` has a lateral offset and
-      a lane index and no heading, the same gap that killed the quick-time
-      turn in July. Needs a held tick that self-cancels at the corner and a
+      the turn as a continuous act. `LaneKeeping` has carried a heading
+      since 2026-09-18, which closes the gap that killed the quick-time
+      turn in July. Still needs a held tick that self-cancels at the corner and a
       rule about signalling before one, alongside whatever turn geometry
       the surface-intersection work (1.9, `docs/surface-roads-plan.md`
       phase 4) leaves behind. The self-cancel half of that now exists:

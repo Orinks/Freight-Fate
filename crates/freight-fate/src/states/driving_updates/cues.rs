@@ -500,6 +500,7 @@ impl DrivingState {
         // the guide moved to the engine the drift half came along ungated and
         // kept correcting a driver who had declined it (review I10).
         let lane_offset = if hear_drift { self.lane.offset } else { 0.0 };
+        let lane_heading_rad = if hear_drift { self.lane.yaw_rad } else { 0.0 };
         // `(claim, distance to its start, identity, shape, progress)`.
         let mut best: Option<(f64, f64, u64, TurnShape, f64)> = None;
         let mut consider = |to_start_mi: f64, turn_id: u64, shape: TurnShape, progress: f64| {
@@ -606,6 +607,7 @@ impl DrivingState {
                 steering,
                 speed_mph: speed,
                 lane_offset,
+                lane_heading_rad,
                 progress,
             },
             None => TurnInput {
@@ -616,6 +618,7 @@ impl DrivingState {
                 steering,
                 speed_mph: speed,
                 lane_offset,
+                lane_heading_rad,
                 progress: 1.0,
             },
         }
@@ -646,13 +649,20 @@ impl DrivingState {
             0.0
         };
         let frame = if !warned {
-            self.lane_guidance.update(&self.lane, dt, false, 0.0, None)
+            self.lane_guidance
+                .update(&self.lane, 0.0, dt, false, 0.0, None)
         } else {
             let assist_on =
                 ctx.settings.lane_is_manual() && self.trip.truck.speed_mph() >= LANE_MIN_MPH;
             let curve_ahead_mi = self.trip.curve_ahead_mi(CURVE_LEAD_MI);
-            self.lane_guidance
-                .update(&self.lane, dt, assist_on, curve_steer, curve_ahead_mi)
+            self.lane_guidance.update(
+                &self.lane,
+                self.trip.truck.speed_mph(),
+                dt,
+                assist_on,
+                curve_steer,
+                curve_ahead_mi,
+            )
         };
         // The turn's own lean comes first: it is the one the owner asked for,
         // and it says how much wheel is still owed rather than how far off
