@@ -38,8 +38,10 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [x] Ramp-end traffic lights keep one seeded 60 to 78 second plan per
-      intersection, with a 7 second all-red so cross traffic clears before green.
+- [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
+      intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
+      call eats the first second and a half) and a 7 second all-red so cross
+      traffic clears before green.
 
 - [x] Quiet speech keeps concise lane openings, confirmations, and status transitions; Urgent only omits routine costs and status, and suppressed categories skip review.
 

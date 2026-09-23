@@ -42,6 +42,8 @@
 
 - **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
 
+- **Yellow lights at the end of a ramp last longer.** A yellow now holds six seconds, enough to hear it and brake.
+
 - **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
 
 - **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.
@@ -110,6 +112,12 @@
 - **A lower speed limit is always announced.** The warning and the new limit no longer go unspoken when the road is busy.
 
 - **Street turns are called once.** After the quarter-mile notice, the turn's own call adds only the advise speed.
+
+- **A turn right after another is called before you reach it.** Turns taken slowly chime as you make them, too.
+
+- **The end of an acceleration lane says you have merged.** You hear "Lane ended" instead of being told to merge left into the passing lane.
+
+- **City streets to a delivery keep the game's pace.** Real time starts near the gate, not for the whole drive in from the ramp.
 
 - **Announcements made at the same moment are spoken in order.** An older line no longer plays after the newer one that replaced it.
 

@@ -721,6 +721,9 @@ pub struct DrivingState {
     /// was told nothing about a corner is not chimed at for it either
     /// (owner, 2026-09-20).
     pub turn_announced: HashSet<String>,
+    /// Corners whose own call already said "now": the route's call at the
+    /// corner would only say the turn again.
+    pub turn_called_now: HashSet<String>,
     pub turn_grace_s: f64,
 
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------
@@ -847,6 +850,9 @@ pub struct DrivingState {
     pub auto_jake_cooldown_s: f64, // rate limit between stage steps
     pub shift_recover_t: f64, // 0->1 recovery progress after an automatic shift ends
     pub shift_hold_rpm: Option<f64>, // engine voice held here through a shift
+    /// Real seconds the shift in flight has been heard, for its engagement
+    /// clunk (see `SHIFT_CLUNK_PAIR_MIN_S`).
+    pub shift_heard_s: f64,
     pub manual_engage_clunk_pending: bool, // a manual shift's second clunk, owed at engagement
     // Smooth only the audible engine load. Physics keeps the raw throttle,
     // while small controller and cruise changes blend into the engine bed.

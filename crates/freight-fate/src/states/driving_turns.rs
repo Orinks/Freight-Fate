@@ -126,6 +126,7 @@ impl DrivingState {
         self.turn_missed.clear();
         self.turn_resolved.clear();
         self.turn_announced.clear();
+        self.turn_called_now.clear();
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
     }
@@ -284,6 +285,15 @@ impl DrivingState {
         reaction_mi + self.keeper_ease_mi(self.turn_speed_mph(cue), 0.0)
     }
 
+    /// Whether a facility street chain has reached the brake point for the
+    /// stop at its end: reaction seconds plus the shed to a standstill, on
+    /// the real clock, the same rule a turn keeps.
+    pub fn at_the_gates_brake_point(&self) -> bool {
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0;
+        self.trip.remaining_miles() <= reaction_mi + self.keeper_ease_mi(0.0, 0.0)
+    }
+
     /// Pace the clock for a corner `ahead` miles off: real time inside the
     /// brake point, sliding down to it over `TURN_CLOCK_EASE_REAL_S` before.
     pub(crate) fn pace_clock_for_turn(&mut self, cue: &NavigationCue, ahead: f64) {
@@ -402,16 +412,20 @@ impl DrivingState {
             // only what the lead did not say, the advise speed, instead of the
             // whole corner again seconds later (owner, Abilene streets,
             // 2026-09-23). A "now" call is the instruction itself and stays
-            // whole.
-            let lead_heard = ahead > TURN_NOW_MI
-                && self
+            // whole -- unless the route's own act-now call ("Turn right onto
+            // a service road.") already gave it, which it does for a turn
+            // right at the gate: then "Turn right now onto a service road"
+            // was the same turn said twice (agent drive, Aberdeen yard).
+            let heard = |drive: &Self, half: &str, category: SpeechCategory| {
+                drive
                     .trip
                     .announced_navigation
-                    .contains(&format!("{}:advance", cue.key))
-                && (ctx
-                    .settings
-                    .speaks(Some(SpeechCategory::NavigationAdvisory))
-                    || !ctx.ladder_applies());
+                    .contains(&format!("{}:{half}", cue.key))
+                    && (ctx.settings.speaks(Some(category)) || !ctx.ladder_applies())
+            };
+            let lead_heard = (ahead > TURN_NOW_MI
+                && heard(self, "advance", SpeechCategory::NavigationAdvisory))
+                || heard(self, "near", SpeechCategory::Navigation);
             let message = if lead_heard {
                 self.turn_advice_text(ctx, &cue)
             } else {
@@ -443,6 +457,9 @@ impl DrivingState {
             // West Main Avenue" was dropped twice on one arrival and never
             // once heard (owner, Spokane, 2026-08-22). ROUTE, like the
             // trip's own near call.
+            if !lead_heard && 0.0f64.max(ahead) <= TURN_NOW_MI {
+                self.turn_called_now.insert(cue.key.clone());
+            }
             if message.is_empty() {
                 // Terse, with the lead already heard: nothing new to say.
             } else if 0.0f64.max(ahead) <= TURN_NOW_MI {
@@ -510,6 +527,7 @@ impl DrivingState {
         }
         self.trip.position_mi = floor.max(cue.at_mi - self.turn_window_mi());
         self.turn_advised.remove(&cue.key);
+        self.turn_called_now.remove(&cue.key);
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
         // The trip's own GPS maneuver announcements latch per cue key; without

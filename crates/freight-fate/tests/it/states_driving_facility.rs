@@ -1071,6 +1071,22 @@ fn test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back() {
     // And the pause is gone: the next frame may hand the streets to the
     // keeper without waiting on a driver who is off the brake.
     assert!(!d.speed_control_paused_at_stop);
+    // "Then turn left now onto North 1st Street" said it: the route's own
+    // call at the corner is not said again on top (agent drive, exit 286A,
+    // 2026-09-23).
+    if message.contains(" now onto ") {
+        let before = app.event_lines().len();
+        let near = ff_core::sim::trip_models::TripEvent {
+            kind: ff_core::sim::trip_models::TripEventKind::GpsCue,
+            message: ff_core::speech_text::SpokenMessage::new(corner.near_text.clone()),
+            data: ff_core::sim::trip_models::TripEventData {
+                cue: Some(corner.clone()),
+                ..Default::default()
+            },
+        };
+        d.handle_trip_event(&mut app.ctx, &near);
+        assert_eq!(app.event_lines().len(), before, "{:?}", app.event_lines());
+    }
 }
 
 // -- the pickup gate (tests/test_pickup_loading.py, drive half) -----------------------

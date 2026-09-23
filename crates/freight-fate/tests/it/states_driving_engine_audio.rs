@@ -350,9 +350,9 @@ fn test_auto_shift_voice_sighs_with_physics_and_clunks_on_engagement() {
     });
     log.borrow_mut().banks.clear();
 
-    update_audio(&mut harness, 0.0);
+    update_audio(&mut harness, 0.2);
     harness.with_drive(|drive, _| drive.truck_mut().rpm = 1150.0); // sighs down
-    update_audio(&mut harness, 0.0);
+    update_audio(&mut harness, 0.2);
     assert_eq!(last_rpm(&log).0, 1150.0, "the voice rides the fall");
     assert!(
         log.borrow().banks.is_empty(),
@@ -378,6 +378,26 @@ fn test_auto_shift_voice_sighs_with_physics_and_clunks_on_engagement() {
 
     log.borrow_mut().banks.clear();
     update_audio(&mut harness, 0.0); // recovery continues: clunk fires only once
+    assert!(log.borrow().banks.is_empty(), "{:#?}", log.borrow().banks);
+}
+
+#[test]
+fn test_a_shift_too_quick_to_hear_as_two_clunks_plays_one() {
+    // The truck shifts on the game clock, so at a compressed pace a whole
+    // shift fits in a frame and its opening and engagement clunks landed as
+    // one doubled click: a launch rattled (agent drive, 2026-09-23).
+    let (mut harness, log) = a_drive("Quick Shift");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.transmission.automatic = true;
+        truck.transmission.gear = 4;
+        truck.rpm = 1400.0;
+        truck.transmission.shift_timer = 0.05;
+    });
+    update_audio(&mut harness, 1.0 / 60.0);
+    log.borrow_mut().banks.clear();
+    harness.with_drive(|drive, _| drive.truck_mut().transmission.shift_timer = 0.0);
+    update_audio(&mut harness, 1.0 / 60.0);
     assert!(log.borrow().banks.is_empty(), "{:#?}", log.borrow().banks);
 }
 

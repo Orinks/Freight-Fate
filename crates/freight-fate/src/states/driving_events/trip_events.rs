@@ -54,6 +54,18 @@ impl DrivingState {
             return;
         }
         let kind = event.kind;
+        // The route's own call counts as telling the driver about the turn,
+        // so the turn chimes as the truck takes it. Only the turn's approach
+        // call used to count, and a truck already under a turn's speed never
+        // gets one: every turn taken at a crawl went by without its chime
+        // (agent drive, Aberdeen yard, 2026-09-23).
+        if kind == TripEventKind::GpsCue
+            && (ctx.settings.speaks(Self::event_category(event)) || !ctx.ladder_applies())
+        {
+            if let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) {
+                self.turn_announced.insert(cue.key.clone());
+            }
+        }
         let sound = route_event_sound(event);
         let mut message = event.message.clone();
         // Cue strings stay "billed to carrier settlement" so trip-cue tests
@@ -733,14 +745,23 @@ impl DrivingState {
     /// the distance and the advise speed, so the lead only says the same
     /// thing again a few seconds later (owner, Abilene streets, 2026-09-23:
     /// "announced at least twice before the turn. Necessary?").
+    ///
+    /// And the route's call AT the turn, when the turn's own call already
+    /// said "now": the street chain's briefing ends "Then turn left now onto
+    /// North 1st Street", and "Turn left onto North 1st Street" followed it
+    /// straight away (agent drive, exit 286A, 2026-09-23).
     fn corner_already_called(&self, event: &TripEvent) -> bool {
-        event.kind == TripEventKind::GpsCue
-            && event.data.advance.unwrap_or(false)
-            && event
-                .data
-                .cue
-                .as_ref()
-                .is_some_and(|cue| is_judged_turn(cue) && self.turn_advised.contains(&cue.key))
+        if event.kind != TripEventKind::GpsCue {
+            return false;
+        }
+        let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) else {
+            return false;
+        };
+        if event.data.advance.unwrap_or(false) {
+            self.turn_advised.contains(&cue.key)
+        } else {
+            self.turn_called_now.contains(&cue.key)
+        }
     }
 
     /// `_should_ignore_destination_exit_gps_cue(event)`.

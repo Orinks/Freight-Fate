@@ -391,6 +391,78 @@ fn test_the_turn_earcon_waits_for_the_corner_itself() {
 }
 
 #[test]
+fn test_a_turn_taken_at_a_crawl_still_chimes_when_the_route_called_it() {
+    // A truck already under a turn's speed gets no approach call, only the
+    // route's own "Turn left onto 3rd Avenue Southeast" -- and that never
+    // counted as telling the driver, so the turn went by without its chime
+    // (agent drive, Aberdeen yard, 2026-09-23).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let near = ff_core::sim::trip_models::TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: ff_core::speech_text::SpokenMessage::new(cue.near_text.clone()),
+        data: ff_core::sim::trip_models::TripEventData {
+            cue: Some(cue.clone()),
+            ..Default::default()
+        },
+    };
+    d.handle_trip_event(&mut app.ctx, &near);
+    assert!(d.turn_announced.contains(&cue.key));
+}
+
+#[test]
+fn test_a_turn_inside_the_last_ones_tail_is_called_before_it() {
+    // One street turn speaks at a time, and a turn just taken stayed the
+    // "nearest" for the tenth of a mile past it: a second turn inside that
+    // tenth was called only once the truck was round it (agent drive,
+    // Aberdeen yard, 2026-09-23).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    street_chain(&mut d, 1.0, 0.06);
+    let corners: Vec<_> = d
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| is_judged_turn(cue))
+        .cloned()
+        .collect();
+    assert!(corners.len() >= 2, "the chain has two turns");
+    let (first, second) = (&corners[0], &corners[1]);
+    assert!(
+        second.at_mi - first.at_mi < 0.1,
+        "the second is inside the tail"
+    );
+    // Called but not yet taken, the first keeps the floor: nothing about the
+    // second is said over it.
+    d.trip.position_mi = first.at_mi - 0.05;
+    d.trip.check_navigation_cues();
+    assert!(d
+        .trip
+        .announced_navigation
+        .contains(&format!("{}:near", first.key)));
+    for half in ["advance", "near"] {
+        assert!(
+            !d.trip
+                .announced_navigation
+                .contains(&format!("{}:{half}", second.key)),
+            "the second turn's {half} was said over the first"
+        );
+    }
+    d.trip.position_mi = first.at_mi + 0.001;
+    d.trip.check_navigation_cues();
+    d.trip.position_mi = second.at_mi - 0.02;
+    d.trip.check_navigation_cues();
+    assert!(
+        d.trip
+            .announced_navigation
+            .contains(&format!("{}:near", second.key)),
+        "the second turn was not called before it"
+    );
+}
+
+#[test]
 fn test_a_cold_arrival_at_the_turn_still_gets_its_window() {
     // A resumed save can reach the turn without ever hearing the approach.
     let mut app = TestApp::new();

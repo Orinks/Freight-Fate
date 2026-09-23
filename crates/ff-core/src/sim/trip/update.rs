@@ -451,7 +451,21 @@ impl Trip {
             if cue.kind != "local_turn" {
                 continue;
             }
+            // A turn already called and already taken is done speaking. Left
+            // in the running, a corner just taken stayed "nearest" for the
+            // tenth of a mile past it, and a second corner inside that tenth
+            // had its call held until the truck was round it: "Turn left onto
+            // 3rd Avenue Southeast" after the lean had already closed (agent
+            // drive, Aberdeen yard, 2026-09-23). One still ahead keeps the
+            // floor, or the turn after it is announced over it.
             let ahead = cue.at_mi - self.position_mi;
+            if ahead <= 0.0
+                && self
+                    .announced_navigation
+                    .contains(&format!("{}:near", cue.key))
+            {
+                continue;
+            }
             if ahead >= -0.1 && next_turn_ahead.is_none_or(|best| ahead < best) {
                 next_turn_key = Some(cue.key.clone());
                 next_turn_ahead = Some(ahead);

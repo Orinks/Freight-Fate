@@ -1604,8 +1604,12 @@ fn test_a_truck_up_to_speed_gets_the_plain_merge_line() {
 
     d.update_departure_ramp(&mut app.ctx, 0.10);
 
+    // Said as done: the truck is already in the mainline's right lane, and
+    // "Merge left" sent a driver who obeyed it into the passing lane (agent
+    // drives out of Aberdeen, 2026-09-23).
     let spoken = app.event_lines().join(" ");
-    assert!(spoken.contains("Lane ending. Merge left."), "{spoken}");
+    assert!(spoken.contains("Lane ended."), "{spoken}");
+    assert!(!spoken.contains("Merge left"), "{spoken}");
 }
 
 // -- arrival and the gate (test_facility_overshoot.py) --------------------------------
