@@ -208,7 +208,16 @@ fn a_staged_drive_does_not_replay_the_road_behind_it() {
     assert!(!text.contains("Crossing into"), "{text}");
     assert!(!text.contains("toll"), "{text}");
     assert!(!text.contains("trooper has somebody"), "{text}");
-    harness.read_drive(|d| assert!(d.trip.toll_charges.is_empty()));
+    harness.read_drive(|d| {
+        assert!(d.trip.toll_charges.is_empty());
+        // Posts wholly behind the start are heard-and-passed without a sound.
+        for post in &d.trip.posts {
+            if post.at_mi + post.reach_mi < start_mi {
+                assert!(d.marked_post_ids.contains(&post.id()));
+                assert!(!post.announced, "a post behind the start made a noise");
+            }
+        }
+    });
 }
 
 #[test]
