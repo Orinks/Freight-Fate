@@ -34,6 +34,8 @@
 
 ### Changed
 
+- **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
+
 - **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
 
 - **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.
