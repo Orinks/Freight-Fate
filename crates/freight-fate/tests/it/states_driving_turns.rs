@@ -188,6 +188,65 @@ fn test_approach_call_names_the_side_street_distance_and_speed() {
     assert_eq!(app.event_lines().len(), 1); // said once, not every frame
 }
 
+/// Owner, Abilene streets, 2026-09-23: "That left turn announced at least
+/// twice before the turn. Necessary?" The route's quarter-mile lead and the
+/// turn's own approach call named the same corner seconds apart.
+fn the_route_lead_for(d: &mut DrivingState) -> ff_core::sim::trip_models::TripEvent {
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    ff_core::sim::trip_models::TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: ff_core::speech_text::SpokenMessage::new(format!(
+            "In a quarter mile, {}.",
+            cue.text
+        )),
+        data: ff_core::sim::trip_models::TripEventData {
+            cue: Some(cue),
+            advance: Some(true),
+            ..Default::default()
+        },
+    }
+}
+
+#[test]
+fn test_the_route_lead_stays_quiet_for_a_turn_already_called() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    app.clear_speech();
+    d.trip.position_mi = 0.4;
+    mph(&mut d, 30.0);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert_eq!(app.event_lines().len(), 1, "the approach call");
+    let lead = the_route_lead_for(&mut d);
+    d.handle_trip_event(&mut app.ctx, &lead);
+    assert_eq!(app.event_lines().len(), 1, "{:?}", app.event_lines());
+}
+
+#[test]
+fn test_a_turn_call_after_the_route_lead_adds_only_the_advisory() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    app.clear_speech();
+    d.trip.position_mi = 0.4;
+    mph(&mut d, 30.0);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let lead = the_route_lead_for(&mut d);
+    d.trip
+        .announced_navigation
+        .insert(format!("{}:advance", cue.key));
+    d.handle_trip_event(&mut app.ctx, &lead);
+    clock.advance(5.0); // the lead has been heard
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert_eq!(
+        app.event_lines().last().map(String::as_str),
+        Some("Advise 11 miles per hour."),
+        "{:?}",
+        app.event_lines()
+    );
+}
+
 #[test]
 fn test_terse_keeps_direction_street_and_distance_but_drops_the_advisory() {
     let mut app = TestApp::new();

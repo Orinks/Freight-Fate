@@ -245,6 +245,27 @@ fn flipping_the_music_source_mid_drive_restarts_the_roadhouse() {
 }
 
 #[test]
+fn switching_to_original_mid_drive_restarts_a_synthesized_roadhouse() {
+    // The drive's own radio start runs through the backend, which swaps the
+    // radio state out while it plays: the rotation recorded Original under a
+    // Synthesized playlist, so switching to Original compared equal and the
+    // synthesized pieces played on (agent drive, 2026-09-23).
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    let mut d = a_drive(&mut app);
+    d.trip.truck.engine_on = true; // the radio runs on the engine
+    d.play_radio_current(&mut app.ctx);
+    let station = d.radio.current_station();
+    assert_eq!(d.radio_station_id, station.id);
+    app.ctx.settings.synth_music = false;
+    d.apply_radio_settings_to_drive(&mut app.ctx);
+    assert!(
+        d.radio_station_id.is_empty(),
+        "the Roadhouse kept its synthesized rotation"
+    );
+}
+
+#[test]
 fn switching_back_to_original_restores_the_soundtrack() {
     let mut app = TestApp::new();
     let original = ff_core::music::select_menu_music_sequence(None);

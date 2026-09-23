@@ -594,7 +594,19 @@ impl DrivingState {
         // gate in 0 miles", and before that watched it sit on "2 miles" for
         // three minutes while he closed on it (2026-08-23). The bend clause
         // below always asked for precise; the rest did not.
-        if let Some(stop) = self.trip.upcoming_stop(within_mi).cloned() {
+        //
+        // Off the highway there is no next highway stop: on an exit ramp or
+        // the streets, "Coming up: Flying J in 0.1 miles, where the ramp ends
+        // at a traffic light" named a stop the truck had already left the
+        // road for, and a ramp end that was a stop sign (agent drive, exit
+        // 286A, 2026-09-23).
+        let on_the_highway = self.ramp_mi.is_none() && !self.on_local_streets();
+        if let Some(stop) = self
+            .trip
+            .upcoming_stop(within_mi)
+            .cloned()
+            .filter(|_| on_the_highway)
+        {
             // The ramp's ending is part of the plan: a stop sign first heard
             // mid-ramp is too late to brake for.
             let ending = match self.ramp_control_for(ctx, &stop, None).as_str() {

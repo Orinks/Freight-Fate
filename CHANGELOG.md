@@ -103,6 +103,22 @@
 
 ### Fixed
 
+- **Route-transition assistance brakes smoothly to a stop sign.** It slows steadily to the line instead of arriving fast and stopping hard.
+
+- **Switching the music source during a drive now changes the radio straight away.** Choosing Original ends the synthesized playlist.
+
+- **A lower speed limit is always announced.** The warning and the new limit no longer go unspoken when the road is busy.
+
+- **Street turns are called once.** After the quarter-mile notice, the turn's own call adds only the advise speed.
+
+- **Announcements made at the same moment are spoken in order.** An older line no longer plays after the newer one that replaced it.
+
+- **The route readout on an exit ramp counts to the facility gate.** When streets follow the ramp, it no longer reads the ramp's end as the destination.
+
+- **The upcoming readout stops listing highway stops once you leave the highway.**
+
+- **Every stop at one exit agrees on how its ramp ends.** You no longer hear a traffic light and a stop sign for the same ramp.
+
 - **Following the engine lean out of a drift no longer swings you across the lane.** It centres as the truck straightens, not once it reaches the middle. (Reported by flight.)
 
 - **Back-to-back sleeps at one stop count as one rest.** After 3 hours and 3 more, the menu offers the last 4 to finish your 10-hour reset. (Reported by Vol4life.)

@@ -812,6 +812,14 @@ impl EventSpeechPacer {
         self.receipts.has_pending(now)
     }
 
+    /// A handed-back line spoken AHEAD of the line that flushed it: the
+    /// channel is busy for its length too, but the flushing line stays the
+    /// newest protected one, so a later flush rescues that line rather than
+    /// this one a second time.
+    pub fn note_ahead(&mut self, text: &str) {
+        self.clear_at += Self::duration_s(text);
+    }
+
     /// A rescued line is the same delivery, now queued to finish.
     pub fn resume_delivery(&mut self, text: &str) {
         self.receipts.resume_text(text, self.clear_at);

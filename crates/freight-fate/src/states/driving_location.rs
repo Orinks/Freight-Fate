@@ -100,9 +100,19 @@ impl DrivingState {
             return;
         }
         if self.destination_exit_taken {
-            let target = self.approach_facility_text(ctx);
+            let mut target = self.approach_facility_text(ctx);
             // The ramp's own countdown, never the frozen mainline remainder.
-            let ramp_left = self.ramp_mi;
+            let mut ramp_left = self.ramp_mi;
+            // Unless streets follow the ramp: then the gate is those streets
+            // further on, and "50 feet to the Abilene metro freight market"
+            // at a stop sign five miles short of it was the ramp's end
+            // mistaken for the destination (agent drive, 2026-09-23).
+            if self.ramp_continues_to_destination_streets(ctx) {
+                if let Some(streets) = self.surface_chain_route(ctx) {
+                    target = format!("the gate at {target}");
+                    ramp_left = Some(ramp_left.unwrap_or(0.0) + streets.miles());
+                }
+            }
             self.say_local_status(
                 ctx,
                 &target,

@@ -148,6 +148,45 @@ fn a_facility_with_an_early_corner(world: &'static World) -> Option<(String, Str
     None
 }
 
+#[test]
+fn test_the_route_readout_at_a_ramp_with_streets_after_it_counts_to_the_gate() {
+    // Agent drive, exit 286A into Abilene, 2026-09-23: stopped at the ramp's
+    // stop sign, R said "50 feet to the Abilene metro freight market" with
+    // five miles of streets still to drive to the gate.
+    let world = get_world();
+    let Some((city, location)) = a_facility_with_an_early_corner(world) else {
+        return; // no baked chain facility to stand in for Abilene
+    };
+    let streets = world
+        .facility_approach_route(&city, &location)
+        .expect("a chain route")
+        .miles();
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.job.destination = city;
+    d.job.destination_location = location;
+    d.destination_chain_ahead = None;
+    d.destination_exit_taken = true;
+    let mut stop = ff_core::sim::trip_models::RoadStop::new(
+        "destination",
+        d.trip.position_mi,
+        "delivery_destination",
+    );
+    stop.interchange_mi = None;
+    d.ramp_stop = Some(stop);
+    d.ramp_mi = Some(0.01);
+    app.clear_speech();
+
+    d.speak_route_status(&mut app.ctx);
+
+    let line = app.main_lines().pop().expect("R said nothing");
+    assert!(line.contains("to the gate at"), "{line}");
+    assert!(
+        !line.contains("feet") || streets < 0.1,
+        "the ramp's end read as the destination: {line}"
+    );
+}
+
 /// `_at_gate`: put the truck right at the finished route end, rolling at
 /// `mph`.
 fn at_gate(d: &mut DrivingState, mph: f64, warned: bool) {
