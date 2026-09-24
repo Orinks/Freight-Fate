@@ -41,12 +41,9 @@
 //!   the driver is warned;
 //! - at the threshold itself, the truck goes over.
 //!
-//! **The margin over the number the cab speaks** is pinned per load in
-//! `tests::the_margin_over_the_spoken_advisory`. The game's signs are priced
-//! at 0.30 g plus bank (`data::curves::ADVISORY_LATERAL_G`), so a full trailer
-//! at its advisory sits at this warning share and goes over a few miles an
-//! hour past it; the cab never speaks a number above the load's own safe
-//! speed (the game layer's `spoken_advisory_mph`).
+//! **The margin a correctly posted sign leaves** (`data::curves`, the MUTCD
+//! ball-bank criteria: 0.26 g at 20 mph and under, 0.21 at 25 to 30, 0.18 at
+//! 35 and up, bank on top). Pinned in `tests::the_margin_over_a_posted_sign`.
 
 use super::{TruckState, G, MPS_TO_MPH, M_PER_FT};
 use crate::data::corners::{rollover_threshold_g, TRUCK_ROLLOVER_G};
@@ -248,23 +245,19 @@ mod tests {
         );
     }
 
-    /// How far over the number the cab speaks each load goes over, in mph, on
-    /// a bend whose sign is priced the way the game prices it (0.30 g plus
-    /// bank). The spoken number is the sign's, or the load's own safe speed
-    /// where that is lower (the cab rounds that down to a 5 mph step, so the
-    /// real margin is at least this). Recorded so a change to the pricing or
-    /// the ladder is deliberate; these are the "few mph" of the lead's check
-    /// (2026-09-24).
+    /// How far over a correctly posted advisory each load starts to pay and
+    /// goes over, in mph: the lead's check (2026-09-24) that a truck does not
+    /// roll "a few mph over" a sign the MUTCD would post.
     #[test]
-    fn the_margin_over_the_spoken_advisory() {
-        use crate::data::curves::ADVISORY_LATERAL_G;
-        let speed =
-            |lateral: f64, radius_ft: f64| (lateral * G * radius_ft * M_PER_FT).sqrt() * MPS_TO_MPH;
-        let over = |t: &TruckState, advisory: f64, bank: f64| {
-            let radius_ft = advisory * advisory / (15.0 * (ADVISORY_LATERAL_G + bank));
-            let threshold = t.planning_roll_threshold_g();
-            let spoken = advisory.min(speed(ROLL_WARN_SHARE * threshold + bank, radius_ft));
-            speed(threshold + bank, radius_ft) - spoken
+    fn the_margin_over_a_posted_sign() {
+        use crate::data::curves::advisory_side_friction;
+        let over = |t: &TruckState, advisory: f64, bank: f64, share: f64| {
+            // The tightest bend a sign of this speed can stand on: one that
+            // asks exactly the criterion at the posted number.
+            let f = advisory_side_friction(advisory as i64);
+            let radius_ft = advisory * advisory / (15.0 * (f + bank));
+            let lateral = share * t.planning_roll_threshold_g() + bank;
+            (lateral * G * radius_ft * M_PER_FT).sqrt() * MPS_TO_MPH - advisory
         };
         let loads = [
             ("empty", truck(0.0)),
@@ -276,19 +269,21 @@ mod tests {
         // (advisory, bank, [roll margin per load]): low-speed bends are on
         // unbanked roads, and 35 and up carry the 6 percent roads are built to.
         let pinned: [(f64, f64, [f64; 5]); 4] = [
-            (15.0, 0.0, [7.9, 4.8, 1.2, 1.2, 1.2]),
-            (25.0, 0.0, [13.1, 8.0, 2.0, 1.9, 2.0]),
-            (45.0, 0.06, [20.3, 12.3, 3.0, 2.9, 3.0]),
-            (65.0, 0.06, [29.3, 17.8, 4.4, 4.2, 4.3]),
+            (15.0, 0.0, [9.6, 6.3, 2.4, 1.7, 2.3]),
+            (25.0, 0.0, [20.6, 14.5, 7.2, 6.0, 7.1]),
+            (45.0, 0.06, [35.0, 25.2, 13.7, 11.8, 13.6]),
+            (65.0, 0.06, [50.5, 36.4, 19.8, 17.0, 19.7]),
         ];
         for (advisory, bank, rolls) in pinned {
             for ((name, t), want) in loads.iter().zip(rolls) {
-                let roll = over(t, advisory, bank);
-                assert!(roll > 0.0, "{name} goes over at the spoken {advisory}");
+                let warn = over(t, advisory, bank, ROLL_WARN_SHARE);
+                let roll = over(t, advisory, bank, 1.0);
+                // At the sign itself nothing costs: the model holds a
+                // correctly posted advisory with every load.
+                assert!(warn > 0.0, "{name} pays at a posted {advisory}: {warn:.1}");
                 assert!(
                     (roll - want).abs() <= 0.2,
-                    "{name} at a {advisory} sign rolls {roll:.1} over the spoken number, \
-                     pinned {want}"
+                    "{name} at a posted {advisory} rolls {roll:.1} over, pinned {want}"
                 );
             }
         }

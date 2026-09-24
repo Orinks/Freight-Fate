@@ -11,7 +11,10 @@
 //! reported. Every mainline curve, at its own advisory, held for as long as the
 //! truck is really in it.
 
-use ff_core::data::curves::{load, superelevation_at, CurveRecord, ADVISORY_LATERAL_G};
+use ff_core::data::curves::{
+    advisory_side_friction, bend_bank, load, posted_advisory_mph, superelevation_at, CurveRecord,
+    ADVISORY_MIN_MPH,
+};
 use ff_core::sim::lane::{LaneKeeping, RoadConditions, LANE_EDGE, MPH_PER_MPS};
 
 /// How far through the bend the truck is carried, in seconds of arc.
@@ -130,18 +133,68 @@ fn test_a_bend_taken_far_over_its_advisory_still_runs_wide() {
 }
 
 /// The advisory formula's own terms, so the bank credit below can never be
-/// read as a tuning knob: `e + f = V^2 / 15R` is what priced every row.
+/// read as a tuning knob: `e + f = V^2 / 15R`, with f the MUTCD ball-bank
+/// criterion, is what posted every row.
 #[test]
-fn test_the_bank_credited_is_the_bank_the_advisory_was_priced_with() {
-    for radius in [200.0, 500.0, 1_000.0, 3_000.0, 10_000.0] {
+fn test_the_bank_credited_is_the_bank_the_advisory_was_posted_with() {
+    for radius in [200.0, 500.0, 1_000.0, 3_000.0] {
         for design in [35.0, 55.0, 70.0] {
-            let e = superelevation_at(radius, design);
-            let advisory = (15.0 * radius * (e + ADVISORY_LATERAL_G)).sqrt();
-            let tire_demand = advisory * advisory / (15.0 * radius) - e;
+            let e = bend_bank(radius, Some(design));
+            let advisory = posted_advisory_mph(radius, e);
+            let tire_demand = (advisory * advisory) as f64 / (15.0 * radius) - e;
             assert!(
-                (tire_demand - ADVISORY_LATERAL_G).abs() < 1e-9,
+                tire_demand <= advisory_side_friction(advisory) + 1e-9,
                 "at {radius} ft and {design} mph the advisory asks {tire_demand} of the tires"
             );
         }
     }
+}
+
+/// Every signed bend in the bake, at the number on its sign, asks a full
+/// trailer less than its warning share: the game's own advisory never sits
+/// above the speed its own roll model holds the load at. The only rows a sign
+/// cannot carry are those too tight for the lowest plaque, and the cab speaks
+/// the load's own number for those (`spoken_advisory_mph`).
+#[test]
+#[cfg_attr(ci_quick, ignore = "sweep: every mainline curve in the bake")]
+fn test_every_signed_bend_holds_a_full_trailer_at_its_advisory() {
+    use ff_core::sim::vehicle::{TruckState, REFERENCE_CARGO_KG, ROLL_WARN_SHARE};
+    let full = TruckState {
+        trailer_attached: true,
+        cargo_kg: REFERENCE_CARGO_KG,
+        ..TruckState::default()
+    };
+    let mut checked = 0usize;
+    let mut plaque_floor = 0usize;
+    for records in load().values() {
+        for record in records
+            .iter()
+            .filter(|r| !r.connector && r.min_radius_ft > 0)
+        {
+            checked += 1;
+            let radius = record.min_radius_ft as f64;
+            // Credited the most bank any row is posted with, the built 6
+            // percent: a row posted on less asks less than its criterion
+            // anyway, and the criterion tops out at 0.26 g.
+            let asks = (record.advisory_mph * record.advisory_mph) as f64 / (15.0 * radius)
+                - ff_core::data::curves::SUPERELEVATION_BUILT;
+            let share = asks / full.roll_threshold_g();
+            if share > ROLL_WARN_SHARE {
+                assert_eq!(
+                    record.advisory_mph, ADVISORY_MIN_MPH,
+                    "a {radius} ft bend posted {} asks a full trailer {share:.2}",
+                    record.advisory_mph
+                );
+                plaque_floor += 1;
+            }
+        }
+    }
+    assert!(
+        checked > 1_000,
+        "the curve bake did not load: {checked} rows"
+    );
+    assert!(
+        plaque_floor * 100 < checked,
+        "{plaque_floor} of {checked} bends are too tight for any plaque"
+    );
 }

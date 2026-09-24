@@ -399,19 +399,61 @@ pub const ADVISORY_MAX_MPH: i64 = 80;
 
 pub const ADVISORY_LATERAL_G: f64 = 0.30;
 
+/// The side friction a correctly posted advisory asks of a vehicle, in g in
+/// its own frame (`V^2/15R - e`), by the advisory's own speed.
+///
+/// READ, MUTCD 11th edition (2023) 2C.59 paragraph 12E, the ball-bank method:
+/// 16 degrees at 20 mph or less, 14 degrees at 25 to 30, 12 degrees at 35 and
+/// higher. The degrees become side friction by two published equivalences,
+/// both read from FHWA-SA-11-22, "Procedures for Setting Advisory Speeds on
+/// Curves" (2011): section 3.6 quotes the 2004 Green Book, "these readings are
+/// consistent with side friction factors of 0.21, 0.18" for 14 and 12
+/// degrees; its Curve Advisory Speed worksheet pairs a 16 degree equivalent
+/// ball-bank reading with an average side friction demand of 0.26 g.
+///
+/// This replaced the bake's flat 0.30 g plus bank (`ADVISORY_LATERAL_G`),
+/// which put the spoken advisory where a full trailer is a few miles an hour
+/// from going over: a sign priced the way MUTCD prices it leaves a loaded
+/// truck the margin real drivers have (the same section: drivers "often
+/// exceed existing posted advisory curve speeds by 7 to 10 mph").
+pub fn advisory_side_friction(mph: i64) -> f64 {
+    if mph <= 20 {
+        0.26
+    } else if mph <= 30 {
+        0.21
+    } else {
+        0.18
+    }
+}
+
 /// The most lateral acceleration any advisory is established at, in g. READ,
-/// FHWA-SA-11-22, "Procedures for Setting Advisory Speeds on Curves" (2011),
-/// 3.7, the accelerometer method: "A measurement of 0.26 g ... to 0.30 g ...
-/// is considered an acceptable range for establishing advisory speeds." Past
-/// this a bend is being taken faster than any posted advisory would ever have
-/// asked, which is where the roll model starts charging a full trailer
-/// (`sim::vehicle::ROLL_WARN_SHARE`).
+/// FHWA-SA-11-22 3.7, the accelerometer method: "A measurement of 0.26 g ...
+/// to 0.30 g ... is considered an acceptable range for establishing advisory
+/// speeds." Past this a bend is being taken faster than any posted advisory
+/// would ever have asked, which is where the roll model starts charging a
+/// full trailer (`sim::vehicle::ROLL_WARN_SHARE`).
 pub const ADVISORY_ACCEPTABLE_MAX_G: f64 = 0.30;
+
+/// The advisory a bend is posted at, from its own radius and bank.
+///
+/// FHWA-SA-11-22 3.6.2, READ: test runs go up in 5 mph steps and the advisory
+/// "is set at the highest test speed that does not result in a ball-bank
+/// indicator reading greater than an acceptable level" -- so this rounds
+/// DOWN, never to the nearest five. Floored at the lowest plaque the MUTCD
+/// provides (`ADVISORY_MIN_MPH`) and capped at `ADVISORY_MAX_MPH`, the top of
+/// the friction table everything here is built on.
+pub fn posted_advisory_mph(radius_ft: f64, bank: f64) -> i64 {
+    let asks = |mph: i64| (mph * mph) as f64 / (15.0 * radius_ft.max(1.0)) - bank.max(0.0);
+    let mut mph = ADVISORY_MIN_MPH;
+    while mph + 5 <= ADVISORY_MAX_MPH && asks(mph + 5) <= advisory_side_friction(mph + 5) {
+        mph += 5;
+    }
+    mph
+}
 
 /// The bank a mapped bend on a leg built for `design_mph` is credited with:
 /// [`superelevation_at`] on roads designed at [`BANKED_DESIGN_MIN_MPH`] and
-/// above, and none below it, where town streets are left unbanked -- the same
-/// rule the advisory is repriced and screened with.
+/// above, and none below it, where town streets are left unbanked.
 pub fn bend_bank(radius_ft: f64, design_mph: Option<f64>) -> f64 {
     design_mph
         .filter(|mph| *mph >= BANKED_DESIGN_MIN_MPH)
@@ -582,72 +624,32 @@ pub fn leg_design_speeds_of(world: &World) -> HashMap<String, f64> {
     out
 }
 
-/// The row's advisory, corrected for the bank its road must carry.
-fn banked_advisory(row: &CurveRow, design_mph: Option<f64>) -> i64 {
-    let baked = row.advisory_mph;
-    let Some(design_mph) = design_mph else {
-        return baked;
-    };
-    if design_mph < BANKED_DESIGN_MIN_MPH {
-        return baked;
-    }
-    let radius = row.min_radius_ft as f64;
-    if radius <= 0.0 {
-        return baked;
-    }
-    // Only ever upward: the bake read the road flat, and a bank can only help.
-    // A curve that somehow reads slower banked than flat keeps the flat number
-    // rather than being quietly slowed by a correction meant to speed it up.
-    // Both sides are capped, so a gentle bend cannot be repriced past the top
-    // of the friction table the repricing is built on (ADVISORY_MAX_MPH).
-    baked
-        .max(advisory_with_bank_mph(radius, design_mph))
-        .min(ADVISORY_MAX_MPH)
-}
-
-/// The most cornering a loaded combination's tires will supply, in g.
-///
-/// The static rollover threshold a loaded five-axle combination is built to,
-/// NHTSA DOT HS 811 734 -- the same number the lane model corners against
-/// (`sim::lane::MAX_ROAD_LATERAL_G`), which is the point: a number the game
-/// speaks must be one the truck it is spoken to can drive.
-pub const HOLDABLE_LATERAL_G: f64 = 0.35;
-
 /// The slowest an advisory is ever spoken as, mph.
 ///
 /// The lowest advisory plaque the MUTCD provides (2C.08, Table 2C-5 starts at
-/// 15), and the floor the curve bake already writes. A screen may step an
-/// advisory down to here and no further: below it the bend is not a curve
-/// warning any more, it is a corner, which `data::corners` prices.
+/// 15), and the floor the curve bake already writes. Below it the bend is not
+/// a curve warning any more, it is a corner, which `data::corners` prices.
 pub const ADVISORY_MIN_MPH: i64 = 15;
 
-/// An advisory the truck cannot actually hold, stepped down until it can.
+/// The advisory a row is spoken with: posted from its own radius and bank by
+/// the MUTCD ball-bank criteria ([`posted_advisory_mph`]). Not the travel
+/// path radius FHWA-SA-11-22's worksheet flattens a bend to: the lane model
+/// drives the curve's own radius, and a sign priced on a flatter path asked
+/// more of it than it holds (tried, 2026-09-24).
 ///
-/// A SELF-CONTRADICTION screen, not a taste adjustment. Every advisory is
-/// priced at [`ADVISORY_LATERAL_G`] plus the bank and then rounded to the
-/// nearest five, and rounding UP is what does the damage: 141 feet at 6
-/// percent prices out at 27.6 and is posted 30, which asks 0.37 g of the
-/// tires against the 0.35 they have. Seven bends in the shipped bake were over
-/// that line, and a truck taking any of them at the number the cab had just
-/// called out left its lane whatever the driver or the assists did (sweep over
-/// all 25,761 signed bends, 2026-09-19).
-///
-/// Downward only, to the next multiple of five, and never below the 15 the
-/// bake floors at: the row's geometry is not in question, only the rounding
-/// applied on top of it, and every correction runs toward caution.
-fn holdable_advisory(advisory_mph: i64, radius_ft: f64, bank: f64) -> i64 {
-    if radius_ft <= 0.0 {
-        return advisory_mph;
+/// The bake wrote `advisory_mph` at a flat 0.30 g rounded to the nearest five,
+/// and two corrections sat on top of it: a bank reprice that only ever raised
+/// the number, and a screen that stepped down the seven signs rounding had
+/// pushed past a full trailer's 0.35 g. Both answered a number that was too
+/// fast to begin with -- a correctly posted sign asks 0.18 to 0.26 g, not
+/// 0.30 -- and a row priced from its geometry needs neither. A row with no
+/// radius keeps the baked number: there is nothing to price it from.
+fn row_advisory(row: &CurveRow, design_mph: Option<f64>) -> i64 {
+    let radius = row.min_radius_ft as f64;
+    if radius <= 0.0 {
+        return row.advisory_mph;
     }
-    let mut mph = advisory_mph;
-    while mph > ADVISORY_MIN_MPH {
-        let demand = (mph * mph) as f64 / (15.0 * radius_ft) - bank;
-        if demand <= HOLDABLE_LATERAL_G {
-            break;
-        }
-        mph -= 5;
-    }
-    mph.max(ADVISORY_MIN_MPH)
+    posted_advisory_mph(radius, bend_bank(radius, design_mph))
 }
 
 /// A bend tighter than its own road may legally hold, on level ground.
@@ -877,12 +879,7 @@ pub fn build_from_sources(
                 // their flag: curve physics wants them, spoken layers skip
                 // them -- ramps carry their own speech.
                 let design_mph = design_speeds.get(&row.leg).copied();
-                let advisory_mph = banked_advisory(&row, design_mph);
-                // Last, because it judges the number the other corrections
-                // produced: an advisory the truck cannot hold is a row that
-                // disagrees with itself, whatever priced it.
-                let bank = bend_bank(row.min_radius_ft as f64, design_mph);
-                let advisory_mph = holdable_advisory(advisory_mph, row.min_radius_ft as f64, bank);
+                let advisory_mph = row_advisory(&row, design_mph);
                 by_leg
                     .entry(row.leg.clone())
                     .or_default()
@@ -1287,6 +1284,50 @@ mod tests {
         // TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5
         // line at 45 mph.
         assert_eq!(BANKED_DESIGN_MIN_MPH, 50.0);
+    }
+
+    #[test]
+    fn test_a_bend_is_posted_by_the_mutcd_ball_bank_criteria() {
+        // MUTCD 11th ed. 2C.59: 16 / 14 / 12 degrees, read as side friction
+        // through FHWA-SA-11-22 (0.26 / 0.21 / 0.18).
+        assert_eq!(advisory_side_friction(15), 0.26);
+        assert_eq!(advisory_side_friction(20), 0.26);
+        assert_eq!(advisory_side_friction(25), 0.21);
+        assert_eq!(advisory_side_friction(30), 0.21);
+        assert_eq!(advisory_side_friction(35), 0.18);
+        assert_eq!(advisory_side_friction(70), 0.18);
+        let asks = |mph: i64, radius: f64, bank: f64| (mph * mph) as f64 / (15.0 * radius) - bank;
+        for radius in [60.0, 150.0, 300.0, 563.0, 1_010.0, 2_500.0] {
+            for bank in [0.0, 0.04, 0.06] {
+                let posted = posted_advisory_mph(radius, bank);
+                assert_eq!(posted % 5, 0, "{radius} ft posted {posted}");
+                // The posted speed does not exceed the criterion...
+                if posted > ADVISORY_MIN_MPH {
+                    assert!(asks(posted, radius, bank) <= advisory_side_friction(posted) + 1e-12);
+                }
+                // ...and the next step up does: the highest test speed that
+                // passes, rounded DOWN (FHWA-SA-11-22 3.6.2).
+                if posted < ADVISORY_MAX_MPH {
+                    assert!(
+                        asks(posted + 5, radius, bank) > advisory_side_friction(posted + 5),
+                        "{radius} ft at {bank}: {} would also pass",
+                        posted + 5
+                    );
+                }
+            }
+        }
+        // Recorded, so a change to the criteria is deliberate: a 563 ft bend
+        // with the full bank, the 45 mph row of the pinned margin table.
+        assert_eq!(posted_advisory_mph(563.0, 0.06), 45);
+        assert_eq!(posted_advisory_mph(1_010.0, 0.06), 60);
+        assert_eq!(posted_advisory_mph(150.0, 0.0), 20);
+        // Too tight for any plaque: the lowest one, and the cab speaks the
+        // load's own number instead (`spoken_advisory_mph`).
+        assert_eq!(posted_advisory_mph(30.0, 0.0), ADVISORY_MIN_MPH);
+        // No bank below the banked design speeds.
+        assert_eq!(bend_bank(300.0, Some(45.0)), 0.0);
+        assert_eq!(bend_bank(300.0, None), 0.0);
+        assert!(bend_bank(300.0, Some(55.0)) > 0.0);
     }
 
     #[test]

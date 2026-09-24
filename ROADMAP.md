@@ -1448,7 +1448,7 @@ mainline behaviour.
       cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
       2C.59's ball-bank criteria read as 0.26 / 0.21 / 0.18 g
       (FHWA-SA-11-22) and leave it 14 and 20. Repricing that way (stacked
-      branch `feat/mutcd-advisories`) calls an interstate slowdown every 38
+      branch `feat/mutcd-advisories`) calls an interstate slowdown every 25
       miles against the owner's floor of 100 (2026-08-23): the bake's
       minimum radii read low on flat interstates (I-94 Billings to Miles
       City, 1,323 ft, posted 65 in an 80). It needs the radius re-measured,
