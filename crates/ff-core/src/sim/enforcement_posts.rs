@@ -17,6 +17,8 @@
 //! Presence is not difficulty: placement and staffing read nothing from
 //! `hazard_scale`, and there is no player setting here any more.
 
+use std::fmt::Write;
+
 use crate::pyfmt::{fmt_f, round_py_n};
 use crate::pyrandom::PyRandom;
 use crate::sim::season::day_of_week;
@@ -333,12 +335,24 @@ impl EnforcementPost {
     }
 
     pub fn id(&self) -> String {
-        format!(
-            "post:{}:{}:{}",
-            self.leg_index,
-            fmt_f(self.at_mi, 1),
-            self.kind
-        )
+        let mut id = String::new();
+        self.write_id(&mut id);
+        id
+    }
+
+    /// [`EnforcementPost::id`] written into `out` (cleared first), so a
+    /// per-frame caller can reuse one buffer instead of allocating per post.
+    pub fn write_id(&self, out: &mut String) {
+        out.clear();
+        out.push_str("post:");
+        let _ = write!(out, "{}:", self.leg_index);
+        if self.at_mi.is_nan() {
+            out.push_str("nan");
+        } else {
+            let _ = write!(out, "{:.1}", self.at_mi);
+        }
+        out.push(':');
+        out.push_str(&self.kind);
     }
 
     /// Short internal context label, interpolated into spoken lines.
@@ -711,7 +725,11 @@ impl Trip {
     /// A mutable handle on one post by id, for the driving layer's
     /// `declined`/`announced` bookkeeping.
     pub fn post_mut(&mut self, post_id: &str) -> Option<&mut EnforcementPost> {
-        self.posts.iter_mut().find(|p| p.id() == post_id)
+        let mut id = String::new();
+        self.posts.iter_mut().find(|p| {
+            p.write_id(&mut id);
+            id == post_id
+        })
     }
 }
 

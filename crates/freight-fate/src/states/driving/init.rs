@@ -419,6 +419,7 @@ impl DrivingState {
             deferred_post_ids: HashSet::new(),
             held_observation: None,
             pacing_mi: HashMap::new(),
+            post_id_scratch: String::new(),
             rescue_offered: false,
             damage_band,
             worst_damage_band: damage_band,
