@@ -403,12 +403,30 @@ impl<'w> JobBoard<'w> {
     }
 
     /// Whether any supported corridor option from origin to destination stays
-    /// on the National Network approximation (plus reasonable access) so
-    /// STAA twin trailers may run it. See `data::national_network`.
+    /// on the National Network approximation (plus reasonable access) inside
+    /// the lower-48 US so STAA twin trailers may run it. ALCAN, Canada, and
+    /// Alaska lanes are refused by policy. See `data::national_network`.
     pub(crate) fn national_network_lane(&self, origin: &str, destination: &str) -> bool {
-        use crate::data::national_network::route_allows_staa_doubles;
+        use crate::data::national_network::{
+            city_outside_lower_48, filter_staa_doubles_routes, route_outside_lower_48,
+        };
+        let city_blocked = |key: &str| {
+            self.world
+                .cities
+                .get(key)
+                .map(city_outside_lower_48)
+                .unwrap_or_else(|| crate::data::national_network::city_key_outside_lower_48(key))
+        };
+        if city_blocked(origin) || city_blocked(destination) {
+            return false;
+        }
         match self.world.supported_route_options(origin, destination, 3) {
-            Ok(routes) => routes.iter().any(route_allows_staa_doubles),
+            Ok(routes) => {
+                if routes.iter().all(route_outside_lower_48) && !routes.is_empty() {
+                    return false;
+                }
+                !filter_staa_doubles_routes(&routes).is_empty()
+            }
             Err(_) => false,
         }
     }

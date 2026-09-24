@@ -313,6 +313,47 @@ fn turnpike_doubles_never_leave_the_frozen_network() {
 }
 
 #[test]
+fn parcel_doubles_board_skips_alaska_and_canada_lanes() {
+    use crate::data::national_network::STAA_DOUBLES_CORRIDOR_REFUSAL;
+    assert_eq!(
+        STAA_DOUBLES_CORRIDOR_REFUSAL,
+        "Dispatch doesn't run twins on that lane."
+    );
+    let b = board(1);
+    // Alaska and Canada endpoints are outside the lower 48 by policy.
+    assert!(!b.national_network_lane("fairbanks_ak_us", "tok_ak_us"));
+    assert!(!b.national_network_lane("tok_ak_us", "anchorage_ak_us"));
+    assert!(!b.national_network_lane("surrey_bc_ca", "whitehorse_yt_ca"));
+    // A lower-48 Interstate corridor still clears the lane check.
+    assert!(
+        b.national_network_lane("chicago_il_us", "gary_in_us")
+            || b.national_network_lane("denver_co_us", "colorado_springs_co_us")
+            || b.national_network_lane("seattle_wa_us", "tacoma_wa_us"),
+        "expected at least one lower-48 Interstate pair to clear the twin lane"
+    );
+}
+
+#[test]
+fn parcel_doubles_never_offered_from_alaska() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    for seed in 0..4 {
+        let jobs = board(seed).offers(
+            "Fairbanks",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        assert!(
+            jobs.iter().all(|j| j.cargo.key != "parcel_doubles"),
+            "seed {seed} offered parcel_doubles out of Fairbanks"
+        );
+    }
+}
+
+#[test]
 fn parcel_doubles_require_the_national_network_flag() {
     let doubles = cargo_type("parcel_doubles").expect("catalog");
     assert!(doubles.national_network);

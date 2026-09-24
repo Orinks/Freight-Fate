@@ -5,8 +5,9 @@ use serde_json::{json, Map, Value};
 use std::collections::HashSet;
 
 use ff_core::data::national_network::{
-    cargo_requires_national_network, filter_staa_doubles_routes, STAA_DOUBLES_REROUTE_NOTE,
-    STAA_DOUBLES_ROUTE_REFUSAL,
+    cargo_requires_national_network, city_key_outside_lower_48, city_outside_lower_48,
+    filter_staa_doubles_routes, route_outside_lower_48, STAA_DOUBLES_CORRIDOR_REFUSAL,
+    STAA_DOUBLES_REROUTE_NOTE, STAA_DOUBLES_ROUTE_REFUSAL,
 };
 use ff_core::data::world::World;
 use ff_core::data::world_models::Route;
@@ -742,9 +743,27 @@ impl PickupFacilityState {
             ctx.say("Dispatch cannot find a route for this load.");
             return;
         }
-        // STAA twin trailers: keep only National Network / reasonable-access
-        // lanes. Dropping some options is a reroute; dropping all refuses.
+        // STAA twin trailers: refuse ALCAN / Canada / Alaska by policy, then
+        // keep only National Network / reasonable-access lanes. Dropping some
+        // options is a reroute; dropping all refuses with the matching line.
         let (routes, staa_note) = if cargo_requires_national_network(self.job.cargo.key) {
+            let origin_key = ctx.world.resolve_city_key(&self.job.origin);
+            let dest_key = ctx.world.resolve_city_key(&self.job.destination);
+            let city_blocked = |key: &str| {
+                ctx.world
+                    .cities
+                    .get(key)
+                    .map(city_outside_lower_48)
+                    .unwrap_or_else(|| city_key_outside_lower_48(key))
+            };
+            if city_blocked(&origin_key)
+                || city_blocked(&dest_key)
+                || routes.iter().all(route_outside_lower_48)
+            {
+                ctx.audio.play("ui/error");
+                ctx.say(STAA_DOUBLES_CORRIDOR_REFUSAL);
+                return;
+            }
             let before = routes.len();
             let filtered = filter_staa_doubles_routes(&routes);
             if filtered.is_empty() {
