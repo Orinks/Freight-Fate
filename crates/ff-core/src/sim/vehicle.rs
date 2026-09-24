@@ -18,10 +18,15 @@ use crate::sim::transmission::Transmission;
 mod air;
 mod condition;
 mod forces;
+mod hotel;
 mod mass;
 mod shifting;
 mod updates;
 
+pub use hotel::{
+    cargo_needs_reefer_key, HotelEvents, APU_BURN_GAL_PER_S, REEFER_BAND_C, REEFER_BURN_GAL_PER_S,
+    REEFER_SETPOINT_C, REEFER_SPOIL_GRACE_MIN,
+};
 pub use mass::DIESEL_KG_PER_GAL;
 
 #[cfg(test)]
@@ -583,6 +588,22 @@ pub struct TruckState {
     /// boxes must not be able to tell this code exists.
     pub liquid: Option<LiquidLoad>,
 
+    /// Reefer TRU running. Burns diesel from the tractor tank (v1 simplification).
+    pub reefer_on: bool,
+    /// Auxiliary power unit running. Low hotel burn from the tractor tank.
+    pub apu_on: bool,
+    /// Coarse cargo temperature (°C). Meaningful when `cargo_needs_reefer`.
+    pub cargo_temp_c: f64,
+    /// Outdoor air the cargo drifts toward when the TRU is off. Set by the
+    /// driving layer from weather when available.
+    pub ambient_temp_c: f64,
+    /// Current job needs the reefer TRU. Set by the driving layer from cargo.
+    pub cargo_needs_reefer: bool,
+    /// Game minutes the cargo has sat outside the coarse reefer band.
+    pub reefer_out_of_range_min: f64,
+    /// One-shot: TRU quit because the tractor tank ran dry.
+    pub reefer_just_starved: bool,
+
     /// ECM road-speed governor: above this the engine simply stops fuelling,
     /// exactly like the rpm governor below. None = ungoverned. Not persisted --
     /// the driving layer sets it from the damage bands every frame.
@@ -653,6 +674,13 @@ impl TruckState {
             corner_advisory_mph: 0.0,
             corner_radius_ft: 0.0,
             liquid: None,
+            reefer_on: false,
+            apu_on: false,
+            cargo_temp_c: AMBIENT_C,
+            ambient_temp_c: AMBIENT_C,
+            cargo_needs_reefer: false,
+            reefer_out_of_range_min: 0.0,
+            reefer_just_starved: false,
             speed_cap_mph: None,
             stalled: false,
             high_idle_rpm: None,
