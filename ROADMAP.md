@@ -489,11 +489,12 @@ its status or release decision.
 - [ ] `sound-test/` carries old ruff lint and format debt, so the
       pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
       Clean it up and drop the exclude.
-- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
-      test that failed on the word outside a CB clause in any player-facing
-      string; the Rust
-      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
-      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
+- [x] The "bear is CB voice only" source sweep is ported (2026-09-24).
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` reads every
+      string literal in both crates, multi-line and raw strings included, and
+      fails on "bear" or "bears" in any case outside a line that names the
+      CB; the song title "Black Bear Road" is the one exception. It lands
+      green: today's hits are all CB chatter.
 
 ### September 11 trucking corrections
 

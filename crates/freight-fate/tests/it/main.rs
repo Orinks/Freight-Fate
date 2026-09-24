@@ -11,6 +11,7 @@
 
 mod account_achievements;
 mod audio_support;
+mod badge_moments_support;
 mod dispatch_relay;
 mod live_fuel_prices;
 mod live_weather_alerts;
@@ -46,6 +47,9 @@ mod audio_radio_now_playing;
 mod audio_sound_pack;
 mod audio_speech_audio;
 mod audio_speech_ducking;
+mod badge_moments_career;
+mod badge_moments_places;
+mod badge_moments_runs;
 mod bench_drive;
 mod browser_guard;
 mod cloud_backup_review;
