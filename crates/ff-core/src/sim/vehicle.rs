@@ -25,7 +25,7 @@ mod updates;
 
 pub use hotel::{
     cargo_needs_reefer_key, HotelEvents, APU_BURN_GAL_PER_S, REEFER_BAND_C, REEFER_BURN_GAL_PER_S,
-    REEFER_SETPOINT_C, REEFER_SPOIL_GRACE_MIN,
+    REEFER_DRIFT_RATE, REEFER_HOLD_RATE, REEFER_SETPOINT_C, REEFER_SPOIL_GRACE_MIN,
 };
 pub use mass::DIESEL_KG_PER_GAL;
 

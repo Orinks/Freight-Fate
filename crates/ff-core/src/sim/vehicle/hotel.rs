@@ -16,9 +16,11 @@ pub const REEFER_SETPOINT_C: f64 = 2.0;
 pub const REEFER_BAND_C: f64 = 4.0;
 
 /// Approach rate toward setpoint while the TRU is on (fraction of gap per game-second).
-const REEFER_HOLD_RATE: f64 = 0.0025;
+/// Slowed with drift so a warm box cools over hours, not minutes.
+pub const REEFER_HOLD_RATE: f64 = 3.3e-5;
 /// Approach rate toward ambient while the TRU is off.
-const REEFER_DRIFT_RATE: f64 = 0.0009;
+/// Tuned so 2 C -> 6 C in ~30 C ambient takes about 3.5 game hours.
+pub const REEFER_DRIFT_RATE: f64 = 1.2e-5;
 
 /// Game minutes cargo may sit outside the band before spoilage starts.
 pub const REEFER_SPOIL_GRACE_MIN: f64 = 45.0;
@@ -46,14 +48,11 @@ impl TruckState {
         let was = self.cargo_needs_reefer;
         self.cargo_needs_reefer = needs;
         if needs && !was {
-            // Fresh reefer load: start near the setpoint if the unit is on,
-            // otherwise at ambient so an off unit has work to do.
-            self.cargo_temp_c = if self.reefer_on {
-                REEFER_SETPOINT_C
-            } else {
-                self.ambient_temp_c
-            };
+            // Fresh reefer load: always tendered at the coarse setpoint, and
+            // the TRU auto-starts. Alt+R is manual after that.
+            self.cargo_temp_c = REEFER_SETPOINT_C;
             self.reefer_out_of_range_min = 0.0;
+            let _ = self.start_reefer();
         }
         if !needs {
             self.reefer_on = false;
@@ -89,23 +88,26 @@ impl TruckState {
         self.apu_on = false;
     }
 
-    /// Burn hotel diesel and advance coarse cargo temp over game-seconds.
+    /// Burn hotel diesel and advance coarse cargo temp.
     ///
-    /// Uses the same game-second denomination as [`Self::update_fuel`]: callers
-    /// pass `dt * fuel_burn_mult` from the frame loop, or raw game-seconds from
-    /// a scripted rest advance.
-    pub fn advance_hotel_power(&mut self, game_seconds: f64) -> HotelEvents {
+    /// `burn_seconds` follows the fuel clock (`dt * fuel_burn_mult` on the
+    /// frame loop). `thermo_seconds` is the cargo/spoil clock and must not
+    /// use `fuel_burn_mult` -- rest advances pass the same game-seconds for
+    /// both.
+    pub fn advance_hotel_power(&mut self, burn_seconds: f64, thermo_seconds: f64) -> HotelEvents {
         let mut events = HotelEvents::default();
-        if game_seconds <= 0.0 {
+        if burn_seconds <= 0.0 && thermo_seconds <= 0.0 {
             return events;
         }
 
         let mut burn = 0.0;
-        if self.reefer_on {
-            burn += REEFER_BURN_GAL_PER_S * game_seconds;
-        }
-        if self.apu_on {
-            burn += APU_BURN_GAL_PER_S * game_seconds;
+        if burn_seconds > 0.0 {
+            if self.reefer_on {
+                burn += REEFER_BURN_GAL_PER_S * burn_seconds;
+            }
+            if self.apu_on {
+                burn += APU_BURN_GAL_PER_S * burn_seconds;
+            }
         }
         if burn > 0.0 {
             let had_reefer = self.reefer_on;
@@ -130,7 +132,11 @@ impl TruckState {
             }
         }
 
-        if self.cargo_needs_reefer && self.trailer_attached && self.cargo_kg > 0.0 {
+        if thermo_seconds > 0.0
+            && self.cargo_needs_reefer
+            && self.trailer_attached
+            && self.cargo_kg > 0.0
+        {
             let target = if self.reefer_on {
                 REEFER_SETPOINT_C
             } else {
@@ -142,10 +148,10 @@ impl TruckState {
                 REEFER_DRIFT_RATE
             };
             let gap = target - self.cargo_temp_c;
-            self.cargo_temp_c += gap * (1.0 - (-rate * game_seconds).exp());
+            self.cargo_temp_c += gap * (1.0 - (-rate * thermo_seconds).exp());
 
             let in_band = (self.cargo_temp_c - REEFER_SETPOINT_C).abs() <= REEFER_BAND_C;
-            let minutes = game_seconds / 60.0;
+            let minutes = thermo_seconds / 60.0;
             if in_band {
                 self.reefer_out_of_range_min = 0.0;
             } else {
@@ -209,13 +215,13 @@ mod tests {
     #[test]
     fn reefer_burns_only_when_on() {
         let mut t = truck();
-        t.reefer_on = false;
+        t.stop_reefer();
         let before = t.fuel_gal;
-        t.advance_hotel_power(3600.0);
+        t.advance_hotel_power(3600.0, 3600.0);
         assert!((t.fuel_gal - before).abs() < 1e-9);
 
         t.reefer_on = true;
-        t.advance_hotel_power(3600.0);
+        t.advance_hotel_power(3600.0, 3600.0);
         let burned = before - t.fuel_gal;
         assert!(burned > 0.3 && burned < 0.6, "burned {burned}");
     }
@@ -223,21 +229,47 @@ mod tests {
     #[test]
     fn temp_holds_when_on_and_drifts_when_off() {
         let mut t = truck();
+        // Auto-start left it on at setpoint; warm the box then hold.
         t.cargo_temp_c = 25.0;
         t.reefer_on = true;
-        t.advance_hotel_power(3600.0 * 2.0);
+        t.advance_hotel_power(0.0, 3600.0 * 24.0);
         assert!(
             (t.cargo_temp_c - REEFER_SETPOINT_C).abs() < 1.5,
             "held at {}",
             t.cargo_temp_c
         );
 
-        t.reefer_on = false;
+        t.stop_reefer();
+        t.cargo_temp_c = REEFER_SETPOINT_C;
         t.ambient_temp_c = 30.0;
-        t.advance_hotel_power(3600.0 * 3.0);
+        t.advance_hotel_power(0.0, 3600.0 * 3.5);
         assert!(
-            t.cargo_temp_c > 10.0,
-            "should drift toward ambient, got {}",
+            t.cargo_temp_c > 5.0 && t.cargo_temp_c < 8.0,
+            "should drift toward ambient over hours, got {}",
+            t.cargo_temp_c
+        );
+    }
+
+    #[test]
+    fn drift_from_setpoint_to_band_edge_takes_about_three_to_four_hours() {
+        // 2 C -> 6 C in 30 C ambient with the unit off.
+        let mut t = truck();
+        t.stop_reefer();
+        t.cargo_temp_c = REEFER_SETPOINT_C;
+        t.ambient_temp_c = 30.0;
+        t.reefer_out_of_range_min = 0.0;
+
+        let step = 60.0; // one game minute
+        let mut elapsed = 0.0;
+        let limit = 3600.0 * 5.0;
+        while t.cargo_temp_c < 6.0 && elapsed < limit {
+            t.advance_hotel_power(0.0, step);
+            elapsed += step;
+        }
+        let hours = elapsed / 3600.0;
+        assert!(
+            (3.0..4.0).contains(&hours),
+            "2 C to 6 C took {hours:.2} game hours (want 3-4); temp={}",
             t.cargo_temp_c
         );
     }
@@ -245,11 +277,10 @@ mod tests {
     #[test]
     fn spoilage_only_for_reefer_freight_past_threshold() {
         let mut reefer = truck();
-        reefer.reefer_on = false;
+        reefer.stop_reefer();
         reefer.ambient_temp_c = 30.0;
         reefer.cargo_temp_c = 30.0;
-        // Drive well past grace while out of range.
-        reefer.advance_hotel_power(60.0 * 90.0);
+        reefer.advance_hotel_power(0.0, 60.0 * 90.0);
         assert!(
             reefer.cargo_damage_pct > 0.0,
             "reefer should spoil, got {}",
@@ -262,8 +293,38 @@ mod tests {
         dry.reefer_on = false;
         dry.ambient_temp_c = 30.0;
         dry.cargo_temp_c = 30.0;
-        dry.advance_hotel_power(60.0 * 90.0);
+        dry.advance_hotel_power(0.0, 60.0 * 90.0);
         assert_eq!(dry.cargo_damage_pct, 0.0);
+    }
+
+    #[test]
+    fn spoil_timing_ignores_fuel_burn_mult() {
+        let mut low = truck();
+        low.stop_reefer();
+        low.ambient_temp_c = 30.0;
+        low.cargo_temp_c = 30.0;
+        low.fuel_burn_mult = 1.0;
+        low.engine_on = false;
+
+        let mut high = truck();
+        high.stop_reefer();
+        high.ambient_temp_c = 30.0;
+        high.cargo_temp_c = 30.0;
+        high.fuel_burn_mult = 100.0;
+        high.engine_on = false;
+
+        // Same wall-clock updates: thermo must match even when burn mult differs.
+        for _ in 0..3_600 {
+            low.update(1.0);
+            high.update(1.0);
+        }
+        assert!(
+            (low.reefer_out_of_range_min - high.reefer_out_of_range_min).abs() < 1e-6,
+            "low={} high={}",
+            low.reefer_out_of_range_min,
+            high.reefer_out_of_range_min
+        );
+        assert_eq!(low.cargo_damage_pct > 0.0, high.cargo_damage_pct > 0.0);
     }
 
     #[test]
@@ -272,20 +333,19 @@ mod tests {
         t.set_cargo_needs_reefer(false);
         t.apu_on = false;
         let before = t.fuel_gal;
-        t.advance_hotel_power(3600.0);
+        t.advance_hotel_power(3600.0, 3600.0);
         assert!((t.fuel_gal - before).abs() < 1e-9);
 
         t.apu_on = true;
-        t.advance_hotel_power(3600.0);
+        t.advance_hotel_power(3600.0, 3600.0);
         let burned = before - t.fuel_gal;
         assert!(burned > 0.15 && burned < 0.3, "APU burned {burned}");
 
-        // APU alone burns less than reefer alone over the same hour.
         let mut r = truck();
         r.reefer_on = true;
         r.apu_on = false;
         let reefer_before = r.fuel_gal;
-        r.advance_hotel_power(3600.0);
+        r.advance_hotel_power(3600.0, 3600.0);
         let reefer_burned = reefer_before - r.fuel_gal;
         assert!(reefer_burned > burned);
     }
@@ -306,9 +366,26 @@ mod tests {
         let mut t = truck();
         t.fuel_gal = 0.05;
         t.reefer_on = true;
-        let ev = t.advance_hotel_power(3600.0);
+        let ev = t.advance_hotel_power(3600.0, 3600.0);
         assert!(ev.reefer_starved);
         assert!(!t.reefer_on);
         assert_eq!(t.fuel_gal, 0.0);
+    }
+
+    #[test]
+    fn fresh_reefer_load_starts_at_setpoint_with_unit_on() {
+        let mut t = TruckState::new(TruckSpecs::default());
+        t.fuel_gal = 50.0;
+        t.ambient_temp_c = 30.0;
+        t.cargo_temp_c = 30.0;
+        t.cargo_kg = 10_000.0;
+        t.trailer_attached = true;
+        t.set_cargo_needs_reefer(true);
+        assert!(
+            (t.cargo_temp_c - REEFER_SETPOINT_C).abs() < 1e-9,
+            "temp {}",
+            t.cargo_temp_c
+        );
+        assert!(t.reefer_on, "TRU should auto-start on cold pickup");
     }
 }

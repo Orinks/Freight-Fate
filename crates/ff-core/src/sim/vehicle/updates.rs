@@ -61,7 +61,8 @@ impl TruckState {
         self.update_rpm(dt);
         self.update_fuel(dt);
         // Hotel burns use the same game-second scale as update_fuel.
-        self.advance_hotel_power(dt * self.fuel_burn_mult);
+        // Fuel burn follows mpg compression; cargo temp/spoil do not.
+        self.advance_hotel_power(dt * self.fuel_burn_mult, dt);
         self.update_temps(dt);
         self.update_wear(dt);
     }
