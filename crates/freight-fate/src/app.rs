@@ -1175,6 +1175,7 @@ mod operator_keys_tests {
                 key: Key::Space,
                 mods: Mods::NONE,
                 text: Some(' '),
+                repeat: false,
             },
             InputEvent::KeyUp {
                 key: Key::Space,

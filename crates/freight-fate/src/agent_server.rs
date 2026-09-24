@@ -306,8 +306,12 @@ impl AgentPolicy {
 
     /// Script a finger tap: down on one frame, up on the next.
     fn tap(&mut self, key: Key, text: Option<char>, mods: Mods) {
-        self.scripted
-            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+        self.scripted.push_back(vec![InputEvent::KeyDown {
+            key,
+            mods,
+            text,
+            repeat: false,
+        }]);
         self.scripted
             .push_back(vec![InputEvent::KeyUp { key, mods }]);
     }
@@ -513,8 +517,12 @@ impl AgentPolicy {
                         alt: mods.alt || chord_mods.alt,
                     };
                     for _ in 0..times.clamp(1, 50) {
-                        self.scripted
-                            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+                        self.scripted.push_back(vec![InputEvent::KeyDown {
+                            key,
+                            mods,
+                            text,
+                            repeat: false,
+                        }]);
                         self.scripted
                             .push_back(vec![InputEvent::KeyUp { key, mods }]);
                     }
@@ -539,6 +547,7 @@ impl AgentPolicy {
                         key,
                         mods: Mods::NONE,
                         text,
+                        repeat: false,
                     });
                     let _ = reply.send(Ok("held down.".to_string()));
                 }
@@ -583,6 +592,7 @@ impl AgentPolicy {
                         key,
                         mods: Mods::NONE,
                         text,
+                        repeat: false,
                     });
                     let seconds = seconds.clamp(0.05, MAX_PEDAL_SECONDS);
                     self.timed_hold = Some((key, seconds));
