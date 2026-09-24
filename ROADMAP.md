@@ -141,9 +141,16 @@ These steps remain open even where a related implementation bullet is checked:
       rework left the Vercel build deploying a backend only on `dev`,
       so `main` would have shipped the new site against production's old
       Convex functions. Fixed in orinks-net `9925714` first.
-- [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
-      the place-callouts ladder rides the release merge to dev.
-- [ ] **The 1.9 stable-release path.** OWNER RULING 2026-09-20: 1.8 gets
+- [x] The place-callouts ladder is on dev (`e340995e`): `place_callouts`
+      is off, sparse or all, sparse by default, and split from the
+      sitting-budget chatter.
+- [ ] The radio stream sweep (`--recheck-dead`) runs before the release.
+- [x] **The 1.9 stable-release path is written; pushing a `v*.*.*` tag
+      cuts the release** (`9bbe8f12`). The tag push drops `--prerelease`,
+      takes the version and tag from the tag, and writes the notes with
+      `tools/release_notes.py stable`; CI never creates, moves or deletes a
+      stable tag. `main`'s copy of `build-career-1.9.yml` matches `dev`'s.
+      OWNER RULING 2026-09-20: 1.8 gets
       no further releases of any kind, and the next stable is 1.9. So
       `build.yml` was deleted rather than retired in stages -- it built
       the Python game (no `rustup` step, no `fetch_bass.py`, and
@@ -152,19 +159,13 @@ These steps remain open even where a related implementation bullet is checked:
       nightly could not succeed against a Rust `dev`, and its tag trigger
       would have handed a `v1.9.0` to Nuitka. `build-career-1.9.yml` is
       the only workflow that builds the game now.
-      * What is left to build: that workflow only cuts PRERELEASES today
-        (`--prerelease`, `1.9-tester-*` tags, version from the date). A
-        stable release needs the version and tag to come from a `v*.*.*`
-        push, the prerelease flag dropped, and stable release notes.
-      * Deliberately not written yet. Nothing can exercise it short of
-        tagging a real release, and 1.9 is not close to stable. Write it
-        when it is, against a workflow that has been running nightly by
-        then rather than against guesses now.
       * [x] Also freed by the ruling, and DONE in the Python sunset
         (2026-09-21): `tools/build_release.py`'s Python/Nuitka mode,
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
+- [ ] The owner pushes the `v1.9.0` tag on the commit to ship, last, after
+      every other gate here is closed.
 - [x] The owner voice pass over seven achievement titles (2026-09-22).
       The category-description cut landed and the owner accepted all
       seven titles as-is. The physical-Mac VoiceOver listening pass was
@@ -427,12 +428,6 @@ endpoints behind miles of private road.
       sweeping junction is now genuinely faster than a square one and a
       switchback slower. The local-geometry layer still reports 0 read; it
       serves the retired city-service rows and nothing the game drives.
-- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
-      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
-      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
-      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
-      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
-      in: 29 states carry live construction now, 15 of them new that day.
 
 #### Owner decisions
 
@@ -1236,17 +1231,17 @@ against.
       cannot hold it were deliberately NOT written. They stay as the profile
       left them for the load screen to clamp, because baking a bridge deck in
       as a grade would put it beyond the one rule that catches it.
-- [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
-      out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
-      reader that trusts the status stores that string as an elevation.
+- [x] USGS answers an out-of-coverage point with HTTP 200 and the text
+      `Call failed.`, so a reader that trusts the status stores that string
+      as an elevation. `tools/screen_grades_3dep.py` refuses any non-JSON
+      body (pinned by `tests/test_screen_grades_3dep.py`), and the gotcha is
+      written up in `docs/data-sources.md` for the next USGS reader.
 - [ ] California stays dark until a route-to-district lookup exists. Caltrans
       publishes lane closures per district with no key, but district 7 alone
       is 17.6 MB against an 8-second feed budget.
-- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
-      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
-      feed, and EIA fuel prices. Not in the registry at all: Alabama,
-      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
-      Tennessee, West Virginia, Wyoming, DC.
+- The keyed feeds (Colorado and the other states that want a registered
+  key, and EIA fuel prices) moved to the 1.10 section, under "Deferred from
+  1.9: live feeds that need a key".
 - [x] The National Highway System and FHWA toll facility datasets were
       checked and left: the route graph already carries truck-restricted
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
@@ -1440,6 +1435,23 @@ onto exit signalling.
 ### World and narration
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#world-and-narration).
+
+### Deferred from 1.9: live feeds that need a key
+
+Moved here 2026-09-24. Both need a registered API key, and a key shipped in
+a public build leaks.
+
+- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
+      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
+      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
+      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
+      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
+      in: 29 states carry live construction now, 15 of them new that day.
+- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
+      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
+      feed, and EIA fuel prices. Not in the registry at all: Alabama,
+      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
+      Tennessee, West Virginia, Wyoming, DC.
 
 ## Shipped in 1.6.0
 
