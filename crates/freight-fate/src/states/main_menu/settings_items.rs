@@ -425,7 +425,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
-                    "Optional early advice about a reachable break or sleep stop, or when none is reachable. Standard driving speech speaks one suggestion before the next hours warning. Quiet and Urgent only keep it silent. Your required hours warnings and readout keys still work when this is off.",
+                    "Optional early advice for a break or sleep stop with time to spare. If an earlier stop fits, the hint also names the last legally reachable fallback. Standard driving speech speaks one suggestion before the next hours warning. Press Alt D for full hours and route details. Quiet and Urgent only keep the automatic hint silent. Your required hours warnings and readout keys still work when this is off.",
                 ),
                 // The overspeed warning no longer has a row. It armed at the
                 // same 5-over pace predictive cruise itself holds, so it

@@ -520,7 +520,11 @@ its status or release decision.
       the full reset. A 30-minute break, either 7/3 split order, and full
       10-hour reset have menu-level scenario coverage.
 - [x] Optional HOS planning hints, off by default, use the legal-reach planner
-      as the next limit reaches three game-hours. They speak once per break or
+      as the next limit reaches three game-hours. An earlier compatible stop is
+      suggested when its estimated arrival leaves a useful 30-to-90-minute
+      buffer; the last legally reachable stop remains the fallback in the hint
+      and Alt+D. If the fallback is tight, an earlier safe stop is still named
+      even when it is more than 90 minutes early. Hints speak once per break or
       shift in Standard, including a no-reachable-stop case; Quiet and Urgent
       only remain silent. Required warnings and requested readouts stay active.
 - [x] `--agent-server --operator-keys` keeps the window up and lets the

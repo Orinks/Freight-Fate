@@ -223,7 +223,8 @@ fn tools_list() -> Value {
              brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
              out_of_service_events (counts on the record; with damage they set the \
              safety band that decides who is pulled into the inspection lane), \
-             rested (true takes a full sleep), clear_load (true drops a load in \
+             rested (true takes a full sleep), hos_driving_min, hos_duty_min and \
+             hos_since_break_min (sandbox HOS counters in game minutes), clear_load (true drops a load in \
              progress first), market_seed and board_seed (the dispatch board rolls \
              from them), settings (an object of setting name to value, for this \
              session), and name (the career created when none is loaded; default \
@@ -246,6 +247,9 @@ fn tools_list() -> Value {
                 "citations": {"type": "integer"},
                 "out_of_service_events": {"type": "integer"},
                 "rested": {"type": "boolean"},
+                "hos_driving_min": {"type": "number"},
+                "hos_duty_min": {"type": "number"},
+                "hos_since_break_min": {"type": "number"},
                 "clear_load": {"type": "boolean"},
                 "market_seed": {"type": "integer"},
                 "board_seed": {"type": "integer"},

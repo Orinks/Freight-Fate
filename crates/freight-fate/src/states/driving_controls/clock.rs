@@ -247,7 +247,13 @@ impl DrivingState {
         let Some(advice) = self.hos_stop_advice(ctx) else {
             return String::new();
         };
-        advice.summary(&ctx.settings.distance_text(advice.ahead_mi, false))
+        let fallback_distance = ctx.settings.distance_text(advice.ahead_mi, false);
+        let suggested_distance = advice
+            .suggested
+            .as_ref()
+            .map(|option| ctx.settings.distance_text(option.ahead_mi, false))
+            .unwrap_or_else(|| fallback_distance.clone());
+        advice.summary(&suggested_distance, &fallback_distance)
     }
 
     /// `_legal_miles_for_hos(remaining_min)`.
@@ -266,7 +272,13 @@ impl DrivingState {
             if !(0.0..=within_mi).contains(&ahead) {
                 continue;
             }
-            if !stop.actions.iter().any(|a| a == action) || stop.parking == "none" {
+            if !stop
+                .actions
+                .iter()
+                .any(|a| a == action || (action == "break" && a == "sleep"))
+                || stop.parking == "none"
+                || !stop.accessible_to(self.trip.bobtail)
+            {
                 continue;
             }
             if best.is_none_or(|b| stop.at_mi < b.at_mi) {

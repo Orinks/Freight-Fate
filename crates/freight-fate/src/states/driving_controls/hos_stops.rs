@@ -58,13 +58,18 @@ impl DrivingState {
         // A destination within legal reach needs no intermediate rest.
         // A new key after a rest lets the speech ladder speak this advice
         // again, while the saved prefix prevents duplicates in this window.
-        let distance = ctx.settings.distance_text(advice.ahead_mi, false);
-        if let Some(message) = advice.planning_hint(&distance) {
+        let fallback_distance = ctx.settings.distance_text(advice.ahead_mi, false);
+        let suggested_distance = advice
+            .suggested
+            .as_ref()
+            .map(|option| ctx.settings.distance_text(option.ahead_mi, false))
+            .unwrap_or_else(|| fallback_distance.clone());
+        if let Some(message) = advice.planning_hint(&suggested_distance, &fallback_distance) {
             let key = format!("{prefix}{:.0}", self.absolute_game_hour(ctx, None) * 60.0);
             ctx.reset_event_condition(&key);
             self.hos_plan_hint_pending = Some(key.clone());
             ctx.say_event_with(
-                message,
+                format!("{message} Press Alt D for full hours and route details."),
                 SayEvent::queued()
                     .key(&key)
                     .priority(EventPriority::Route)

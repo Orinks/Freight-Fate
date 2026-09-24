@@ -2,6 +2,7 @@
 
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
+use freight_fate::states::base::{InputEvent, Key, Mods};
 
 use super::states_driving_menus_support::{a_drive_between, drive_and_ctx};
 
@@ -75,7 +76,7 @@ fn optional_hint_waits_until_three_hours_and_speaks_once() {
     let heard = app.event_lines().join(" ");
     assert!(heard.contains("Plan your next sleep stop"), "{heard}");
     assert!(heard.contains("Last"), "{heard}");
-    assert!(heard.contains("last reachable one"), "{heard}");
+    assert!(heard.contains("last legally reachable fallback"), "{heard}");
     drive_and_ctx(&drive, &mut app, |d, ctx| d.maybe_hos_planning_hint(ctx));
     assert_eq!(
         app.event_lines()
@@ -105,6 +106,85 @@ fn optional_hint_waits_until_three_hours_and_speaks_once() {
         app.ctx.profile.as_ref().unwrap().hos.warned,
         pending
     );
+}
+
+#[test]
+fn early_sleep_hint_and_requested_readout_separate_plan_from_legal_fallback() {
+    let (mut app, drive) = setup("sleep");
+    app.ctx.settings.hos_planning_hints = true;
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.trip.stops = vec![
+            stop("Comfortable", 70.0, "sleep"),
+            stop("Legal fallback", 110.0, "sleep"),
+        ];
+        ctx.profile.as_mut().unwrap().hos.duty_min = 720.0;
+        let advice = d.hos_stop_advice(ctx).unwrap();
+        assert_eq!(advice.suggested.as_ref().unwrap().stop.name, "Comfortable");
+        assert_eq!(advice.stop.as_ref().unwrap().name, "Legal fallback");
+        d.maybe_hos_planning_hint(ctx);
+    });
+    let hint = app.event_lines().join(" ");
+    assert!(hint.contains("Plan your next sleep stop early"), "{hint}");
+    assert!(hint.contains("Comfortable"), "{hint}");
+    assert!(hint.contains("Last legally reachable fallback"), "{hint}");
+    assert!(hint.contains("Legal fallback"), "{hint}");
+    assert!(hint.contains("Press Alt D"), "{hint}");
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.handle_key_event(ctx, &InputEvent::key_mods(Key::D, Mods::ALT));
+    });
+    let readout = app.main_lines().join(" ");
+    assert!(
+        readout.contains("Suggested sleep stop: travel center: Comfortable"),
+        "{readout}"
+    );
+    assert!(
+        readout.contains("Last legally reachable fallback: travel center: Legal fallback"),
+        "{readout}"
+    );
+}
+
+#[test]
+fn urgent_shoulder_reason_ignores_vehicle_incompatible_stops() {
+    let (mut app, drive) = setup("sleep");
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.trip.stops = vec![stop("Accessible", 20.0, "sleep")];
+        ctx.profile.as_mut().unwrap().hos.duty_min = 830.0;
+        assert!(d.upcoming_stop_with_action("sleep", 15.0).is_some());
+        let mut inaccessible = stop("Bobtail only", 20.0, "sleep");
+        inaccessible.vehicle_access = "bobtail_only".into();
+        d.trip.stops = vec![inaccessible];
+        assert!(d.upcoming_stop_with_action("sleep", 15.0).is_none());
+        let reason = d.emergency_shoulder_sleep_reason(ctx).unwrap();
+        assert!(
+            reason.contains("no suitable route stop is visible"),
+            "{reason}"
+        );
+    });
+}
+
+#[test]
+fn early_break_hint_prefers_a_break_stop_and_keeps_a_sleep_stop_as_fallback() {
+    let (mut app, drive) = setup("break");
+    app.ctx.settings.hos_planning_hints = true;
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.trip.stops = vec![
+            stop("Break first", 70.0, "break"),
+            stop("Sleeper fallback", 110.0, "sleep"),
+        ];
+        let hos = &mut ctx.profile.as_mut().unwrap().hos;
+        hos.duty_min = 0.0;
+        hos.driving_min = 360.0;
+        hos.since_break_min = 360.0;
+        let advice = d.hos_stop_advice(ctx).unwrap();
+        assert_eq!(advice.action, "break");
+        assert_eq!(advice.suggested.as_ref().unwrap().stop.name, "Break first");
+        assert_eq!(advice.stop.as_ref().unwrap().name, "Sleeper fallback");
+        d.maybe_hos_planning_hint(ctx);
+    });
+    let hint = app.event_lines().join(" ");
+    assert!(hint.contains("Plan your next break stop early"), "{hint}");
+    assert!(hint.contains("Break first"), "{hint}");
+    assert!(hint.contains("Sleeper fallback"), "{hint}");
 }
 
 #[test]
