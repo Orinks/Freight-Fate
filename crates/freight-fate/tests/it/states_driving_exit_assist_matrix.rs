@@ -327,11 +327,14 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
     if !d.ramp_terminal_done && bar_mi > -0.01 {
         // A yield is rolled only into a gap the driver can hear is there,
         // judged close to the line; farther out it is approached as a stop.
-        let clear = d
-            .cross_bubble
-            .as_ref()
-            .is_none_or(|bubble| bubble.clear_to_cross());
         let control = d.ramp_control.clone();
+        let clear = if matches!(control.as_str(), "yield" | "roundabout") {
+            d.yield_gap_clear()
+        } else {
+            d.cross_bubble
+                .as_ref()
+                .is_none_or(|bubble| bubble.clear_to_cross())
+        };
         let phase = d.ramp_light_phase();
         // Route-transition assistance rolls a clear yield itself; a driver on
         // their own stops at it and goes when the gap is there.
@@ -762,4 +765,117 @@ fn test_every_assist_follows_the_exit_rules_on_every_kind_of_exit() {
         KINDS.len() * PRESETS.len(),
         failures.join("\n\n")
     );
+}
+
+// -- a yield, judged where the truck meets the crossroad ------------------------------
+
+/// Drive the yield bench to its ramp, then put the truck's front at the
+/// crossroad -- the yield line plus the MUTCD 3B.19 distance to the near edge
+/// -- rolling at 12 mph, with one car on an otherwise empty crossroad whose
+/// front reaches the conflict window `car_after_clear_s` seconds after the
+/// truck's rear will have cleared it (negative: before). Returns what was said
+/// once the crossing was judged.
+fn roll_the_yield_with_a_car(car_after_clear_s: f64) -> String {
+    use ff_core::sim::cross_traffic::{
+        yield_crossing_times_s, CrossTraffic, CrossVehicle, COMBINATION_LENGTH_FT,
+        CONFLICT_WINDOW_FT, YIELD_LINE_TO_CROSSROAD_FT,
+    };
+    let mut harness = start(Preset::None, Kind::Yield);
+    for _ in 0..(30 * 60 * 3) {
+        if harness.read_drive(|d| d.ramp_mi.is_some()) {
+            break;
+        }
+        frame_plain(&mut harness);
+    }
+    let past_line_ft = YIELD_LINE_TO_CROSSROAD_FT + 0.5;
+    let (_, clear_s) = yield_crossing_times_s(12.0, -past_line_ft, COMBINATION_LENGTH_FT);
+    let car_mph = 45.0;
+    let car_fps = car_mph * 5280.0 / 3600.0;
+    let front_ft = CONFLICT_WINDOW_FT + (clear_s + car_after_clear_s) * car_fps;
+    harness.clear_speech();
+    harness.with_drive(move |d, ctx| {
+        assert!(
+            d.truck().trailer_attached,
+            "the combination length is the one timed"
+        );
+        d.ramp_control = "yield".to_string();
+        d.ramp_terminal_done = false;
+        d.ramp_light_announced = true;
+        let mut bubble = CrossTraffic::new(1, "yield", false);
+        bubble.vehicles = vec![CrossVehicle {
+            position_mi: -(front_ft + 15.0) / 5280.0,
+            speed_mph: car_mph,
+            target_mph: car_mph,
+            vehicle_class: "car",
+            length_mi: 15.0 / 5280.0,
+            from_side: "left",
+            crossed: false,
+            committed: false,
+            sound_started: false,
+        }];
+        d.cross_bubble = Some(bubble);
+        d.ramp_mi = Some(RAMP_ACCESS_MI - past_line_ft / 5280.0);
+        d.truck_mut().velocity_mps = 12.0 * MPS_PER_MPH;
+        d.update_ramp_terminal(ctx);
+        assert!(
+            d.ramp_terminal_done,
+            "the crossing is judged at the crossroad"
+        );
+    });
+    harness.transcript_text()
+}
+
+fn frame_plain(harness: &mut PlaytestHarness) {
+    harness.advance_clock(DT);
+    harness.with_drive(|d, ctx| d.update_frame(ctx, DT));
+}
+
+#[test]
+fn test_a_gap_clear_at_the_line_and_through_the_crossing_is_clean() {
+    // The reported case: the car arrives a second after the truck is across.
+    // Judged a hundred feet past the line it read as forced; judged at the
+    // crossroad over the truck's own crossing it is a clean gap.
+    let heard = roll_the_yield_with_a_car(1.0);
+    assert!(heard.contains("Through the yield in a gap"), "{heard}");
+    assert!(!heard.contains("forced the gap"), "{heard}");
+}
+
+#[test]
+fn test_a_gap_that_closes_during_the_crossing_is_forced() {
+    let heard = roll_the_yield_with_a_car(-1.5);
+    assert!(heard.contains("You forced the gap at the yield"), "{heard}");
+}
+
+#[test]
+fn test_the_assists_still_roll_a_clear_yield() {
+    // Route-transition assistance, alone and with facility stopping
+    // assistance, rolls an empty crossroad's yield rather than stopping at it.
+    for preset in [Preset::Transition, Preset::All] {
+        let mut harness = start(preset, Kind::Yield);
+        let mut done = false;
+        for _ in 0..(30 * 60 * 6) {
+            // Nothing on the crossroad, for the whole run.
+            harness.with_drive(|d, _| {
+                if let Some(bubble) = d.cross_bubble.as_mut() {
+                    bubble.vehicles.clear();
+                }
+            });
+            frame_plain(&mut harness);
+            if harness.read_drive(|d| d.ramp_mi.is_some() && d.ramp_terminal_done) {
+                done = true;
+                break;
+            }
+        }
+        let heard = harness.transcript_text();
+        assert!(done, "{preset:?}: never crossed\n{heard}");
+        assert!(
+            heard.contains("Through the yield in a gap"),
+            "{preset:?}\n{heard}"
+        );
+        assert!(
+            !heard.contains("Stopped at the yield"),
+            "{preset:?}\n{heard}"
+        );
+        assert!(!heard.contains("far too fast"), "{preset:?}\n{heard}");
+    }
 }

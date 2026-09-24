@@ -6,6 +6,10 @@ use ff_core::models::enforcement::{
 };
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::pyrandom::PyRandom;
+use ff_core::sim::cross_traffic::{
+    yield_crossing_times_s, CrossVehicle, COMBINATION_LENGTH_FT, TRACTOR_LENGTH_FT,
+    YIELD_LINE_TO_CROSSROAD_FT,
+};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
@@ -97,10 +101,7 @@ impl DrivingState {
             }
         }
         if matches!(self.ramp_control.as_str(), "yield" | "roundabout") {
-            let clear = self
-                .cross_bubble
-                .as_ref()
-                .is_none_or(|bubble| bubble.clear_to_cross());
+            let clear = self.yield_gap_clear();
             // Already stopped at the line waiting for a gap, the gap is the
             // hold's to announce and release ("Gap in traffic."), below. The
             // roll here used to catch it first: the gap came, nothing was
@@ -137,10 +138,13 @@ impl DrivingState {
                     "yield" => "yield",
                     _ => "roundabout entry",
                 };
-                let blocked = self
-                    .cross_bubble
-                    .as_ref()
-                    .is_some_and(|bubble| !bubble.clear_to_cross());
+                let blocked = if self.ramp_control == "stop" {
+                    self.cross_bubble
+                        .as_ref()
+                        .is_some_and(|bubble| !bubble.clear_to_cross())
+                } else {
+                    !self.yield_gap_clear()
+                };
                 if blocked {
                     if !self.ramp_waiting_at_sign {
                         self.ramp_waiting_at_sign = true;
@@ -279,6 +283,59 @@ impl DrivingState {
 
     /// The terminal's servo has a stop still to make at the bar: a sign, or
     /// a light it is braking for or holding at.
+    /// When this truck enters the crossroad past a yield line and when its
+    /// rear clears it, in seconds from now, were it doing `speed_mph` here.
+    fn yield_crossing_s(&self, speed_mph: f64) -> (f64, f64) {
+        let to_line_ft = self
+            .ramp_mi
+            .map_or(0.0, |ramp_mi| (ramp_mi - RAMP_ACCESS_MI) * 5280.0);
+        let length_ft = if self.trip.truck.trailer_attached {
+            COMBINATION_LENGTH_FT
+        } else {
+            TRACTOR_LENGTH_FT
+        };
+        yield_crossing_times_s(speed_mph, to_line_ft, length_ft)
+    }
+
+    /// Whether a yield's gap is there for THIS truck: nothing in the
+    /// crossroad from when it enters to when its rear clears, timed at the
+    /// roll speed it will cross at (or from a stand, if it is stopped).
+    ///
+    /// The cross bubble's own `clear_to_cross` looks four seconds ahead,
+    /// which a car clears and a loaded tractor-semitrailer pulling away from
+    /// the line does not: it needs about ten.
+    pub fn yield_gap_clear(&self) -> bool {
+        let Some(bubble) = self.cross_bubble.as_ref() else {
+            return true;
+        };
+        let roll_mph = self.trip.truck.speed_mph().min(YIELD_ROLL_MPH - 3.0);
+        let (enter, exit) = self.yield_crossing_s(roll_mph);
+        bubble.conflict_between(enter, exit).is_none()
+    }
+
+    /// What a truck rolling a yield meets as its front reaches the crossroad:
+    /// a vehicle in the conflict window now is a hit; one that reaches it
+    /// before the truck's rear has cleared the crossroad is a forced gap; a
+    /// gap that holds all the way across is clean.
+    fn yield_meeting(&mut self, speed_mph: f64) -> (CrossMeeting, Option<CrossVehicle>) {
+        if self.cross_bubble.is_none() {
+            // No bubble to consult (an older save mid-ramp): roll the same
+            // seeded crossroad the terminal would have built.
+            let _ = self.cross_violation_meets();
+        }
+        let (_, exit) = self.yield_crossing_s(speed_mph);
+        let Some(bubble) = self.cross_bubble.as_ref() else {
+            return (CrossMeeting::Empty, None);
+        };
+        if let Some(vehicle) = bubble.occupant() {
+            return (CrossMeeting::Hit, Some(vehicle.clone()));
+        }
+        if let Some(vehicle) = bubble.conflict_between(0.0, exit) {
+            return (CrossMeeting::Near, Some(vehicle.clone()));
+        }
+        (CrossMeeting::Empty, None)
+    }
+
     pub(crate) fn ramp_terminal_owns_the_stop(&self) -> bool {
         self.ramp_mi.is_some()
             && !self.ramp_terminal_done
@@ -321,7 +378,7 @@ impl DrivingState {
             return;
         }
         if matches!(self.ramp_control.as_str(), "yield" | "roundabout") {
-            self.cross_yield(ctx, speed, past_bar);
+            self.cross_yield(ctx, speed);
             return;
         }
         self.ramp_terminal_done = true;
@@ -577,18 +634,22 @@ impl DrivingState {
     /// the clean crossing, stopping is always legal, and an occupied window is
     /// the clip machinery -- at THEIR closing speed, because you rolled under
     /// their bumper.
-    fn cross_yield(&mut self, ctx: &mut GameContext, speed: f64, past_bar: bool) {
+    ///
+    /// Judged where the truck meets cross traffic, not at an arbitrary point:
+    /// the crossroad begins a few feet past the yield line, and the gap has to
+    /// hold for as long as the truck takes to get its whole length across
+    /// (`yield_meeting`).
+    fn cross_yield(&mut self, ctx: &mut GameContext, speed: f64) {
         let noun = if self.ramp_control == "roundabout" {
             "roundabout"
         } else {
             "yield"
         };
         if speed <= RED_STOP_MPH {
-            // Stopped: exactly the stop sign's wait, spoken for a yield.
-            let blocked = self
-                .cross_bubble
-                .as_ref()
-                .is_some_and(|bubble| !bubble.clear_to_cross());
+            // Stopped: exactly the stop sign's wait, spoken for a yield --
+            // except the gap it waits for is one this truck can pull across
+            // from a stand.
+            let blocked = !self.yield_gap_clear();
             if blocked {
                 if !self.ramp_waiting_at_sign {
                     self.ramp_waiting_at_sign = true;
@@ -606,11 +667,20 @@ impl DrivingState {
             self.say_route_navigation(ctx, &message);
             return;
         }
-        if !past_bar {
-            return; // still rolling down to the line; the gap decides there
+        // Rolling: the verdict lands where the truck's front reaches the
+        // crossroad. It used to wait for the stop bar's grace distance, about
+        // a hundred feet past the line, so a gap that was clear at the line
+        // and held through the crossing could read as forced by a car that
+        // arrived after the truck had gone (fix/yield-at-the-line,
+        // 2026-09-24).
+        let at_the_crossroad = self
+            .ramp_mi
+            .is_some_and(|ramp_mi| ramp_mi <= RAMP_ACCESS_MI - YIELD_LINE_TO_CROSSROAD_FT / 5280.0);
+        if !at_the_crossroad {
+            return; // still rolling down to the crossroad; the gap decides there
         }
         self.ramp_terminal_done = true;
-        let (met, vehicle) = self.cross_violation_meets();
+        let (met, vehicle) = self.yield_meeting(speed);
         let pan = if vehicle
             .as_ref()
             .is_none_or(|vehicle| vehicle.from_side == "right")

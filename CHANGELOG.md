@@ -116,6 +116,8 @@
 
 ### Fixed
 
+- **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
+
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
 
 - **Facility stopping assistance now slows for the exit ramp's curve.** The whole ramp also runs in real time.

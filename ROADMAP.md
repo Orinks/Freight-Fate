@@ -1378,10 +1378,16 @@ mainline behaviour.
       0.3 mph over; the street pull-ahead aiming at the mainline's limit; the
       steering lean bending the whole ramp; "oncoming lane" on a one-way
       ramp; the yield unnamed in the take line.
-- [ ] **A yield's gap is judged past the line.** `cross_yield` rules on the
-      crossing once the truck is the grace distance (about 100 ft) beyond
-      the line, so a gap that was clear at the line can read as "forced".
-      Judge it at the line.
+- [x] **A yield's gap is judged at the crossroad** (fix/yield-at-the-line,
+      2026-09-24). It was judged about 100 ft past the line, so a gap clear
+      at the line could read as "forced". The crossroad now starts 17 ft past
+      the yield line (the middle of MUTCD 11th ed. 3B.19's 4 to 30 ft,
+      assumed), is two 12 ft lanes (assumed), and a WB-67 (73.5 ft, Green
+      Book Table 2-1a, read) must get across it on Long's truck acceleration;
+      a gap that holds for that whole crossing is clean, one that closes
+      during it is forced (`CrossTraffic::conflict_between`). The same timing
+      decides when a yield or roundabout is clear to roll or to pull out
+      from a stop. Stop signs still use the four-second look.
 
 ## 1.10 planned -- the working week and home
 
