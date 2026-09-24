@@ -304,6 +304,7 @@ fn test_a_motel_bed_is_not_five_by_two() {
         profile.achievements.clear();
     }
     activate(&mut state, &mut app.ctx, "Sleep 10 hours in the lot");
+    activate(&mut state, &mut app.ctx, "Sleep 10 hours in the lot");
     assert!(
         app.ctx
             .profile
@@ -422,7 +423,7 @@ fn test_prefer_sleep_lands_the_cursor_on_the_first_sleep_row() {
     let mut state = RestStopState::with_drive(DriveRef::of(&drive), sleep_stop(at), true);
     Menu::enter(&mut state, &mut app.ctx);
     let rows = labels(&state, &app.ctx);
-    assert_eq!(rows[state.menu().index], "Sleep 2 hours in sleeper berth");
+    assert_eq!(rows[state.menu().index], "Sleep 10 hours");
     for hours in [2, 3, 7, 8] {
         assert!(
             rows.contains(&format!("Sleep {hours} hours in sleeper berth")),

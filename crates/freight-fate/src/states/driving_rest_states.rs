@@ -20,6 +20,7 @@
 mod fuel_pump;
 mod loyalty;
 mod parking_full;
+mod rest_preview;
 mod rest_stop;
 mod roadside;
 mod shoulder;

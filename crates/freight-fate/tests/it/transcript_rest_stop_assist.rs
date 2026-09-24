@@ -476,11 +476,11 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     );
     assert_eq!(
         harness.focused_label().unwrap_or_default(),
-        "Sleep 2 hours in sleeper berth"
+        "Sleep 10 hours"
     );
     assert!(spoken(&harness)
         .iter()
-        .any(|line| line.contains("Sleep 2 hours in sleeper berth")));
+        .any(|line| line.contains("Sleep 10 hours")));
     let labels = harness.menu_labels();
     for hours in [2, 3, 7, 8] {
         assert!(
@@ -503,13 +503,15 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     let armed_i = index_of("stopping assistance armed");
     let braking_i = index_of("Facility stopping assistance taking the pedals");
     let stopped_i = index_of("Stopped at public rest area");
-    let menu_i = index_of("Sleep 2 hours in sleeper berth");
+    let menu_i = index_of("Sleep 10 hours");
     assert!(
         selected_i < armed_i && armed_i < braking_i && braking_i < stopped_i && stopped_i < menu_i,
         "{selected_i} {armed_i} {braking_i} {stopped_i} {menu_i}"
     );
 
-    harness.key(freight_fate::playtest::harness::key_event(Key::Down, None));
+    for _ in 0..3 {
+        harness.key(freight_fate::playtest::harness::key_event(Key::Up, None));
+    }
     assert_eq!(
         harness.focused_label().unwrap_or_default(),
         "Sleep 3 hours in sleeper berth"

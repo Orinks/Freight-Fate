@@ -29,6 +29,7 @@ use crate::states::driving_core::{
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
+use crate::states::driving_rest_states::rest_preview::{sleep_preview, SleepChoice};
 
 const REST_STOP_INTRO_HELP: &str =
     "Enter selects, Escape returns to the road. Breaks and sleep advance the clock and the \
@@ -48,7 +49,7 @@ pub struct RestStopState {
     prefer_sleep: bool,
     fueled_here: bool,
     inspection_complete: bool,
-    confirm_sleep_rested: bool,
+    pending_sleep: Option<SleepChoice>,
 }
 
 impl RestStopState {
@@ -60,7 +61,7 @@ impl RestStopState {
             prefer_sleep,
             fueled_here: false,
             inspection_complete: false,
-            confirm_sleep_rested: false,
+            pending_sleep: None,
         }
     }
 
@@ -73,13 +74,13 @@ impl RestStopState {
             prefer_sleep,
             fueled_here: false,
             inspection_complete: false,
-            confirm_sleep_rested: false,
+            pending_sleep: None,
         }
     }
 
     /// `enter()` run while the drive is still in hand -- see `drive_ref`.
     pub fn enter_over_drive(&mut self, ctx: &mut GameContext, driving: &mut DrivingState) {
-        self.confirm_sleep_rested = false;
+        self.pending_sleep = None;
         let items = self.rows(ctx, driving);
         self.menu.items = items;
         self.place_cursor(ctx);
@@ -95,7 +96,7 @@ impl RestStopState {
                 .menu
                 .items
                 .iter()
-                .position(|item| item.text(self, ctx).starts_with("Sleep "))
+                .position(|item| item.text(self, ctx) == "Sleep 10 hours")
                 .unwrap_or(0);
             self.menu.index = index;
             // This is an arrival hint, not a permanent focus policy.
@@ -107,27 +108,34 @@ impl RestStopState {
         }
     }
 
-    /// Warn once before a redundant sleep, matching the terminal. A sleep
-    /// gains nothing when hours of service are already fresh and this rest
-    /// cannot lower fatigue any further -- for a proper berth that means zero
-    /// fatigue, for a lot's poor rest it bottoms out at the shoulder floor.
-    /// Returns true if this press should be blocked.
-    fn guard_double_sleep(&mut self, ctx: &mut GameContext, fatigue_floor: f64) -> bool {
+    /// Read the result before changing time, fatigue, money, or the ELD.
+    /// A second Enter on the same row accepts; moving focus cancels it.
+    fn confirm_sleep(
+        &mut self,
+        ctx: &mut GameContext,
+        choice: SleepChoice,
+        fatigue_floor: f64,
+    ) -> bool {
+        if self.pending_sleep == Some(choice) {
+            self.pending_sleep = None;
+            return false;
+        }
+        self.pending_sleep = Some(choice);
         let gains_nothing = {
             let p = profile_of(ctx);
             p.hos.driving_min <= 0.0 && p.hos.duty_min <= 0.0 && p.fatigue <= fatigue_floor
         };
-        if gains_nothing && !self.confirm_sleep_rested {
-            self.confirm_sleep_rested = true;
-            ctx.audio.play("ui/warning");
-            ctx.say(
-                "You are already rested: fresh hours of service and nothing to gain here. \
-                 Sleeping only moves the clock and the deadline. Enter again to sleep anyway.",
-            );
+        let Some(preview) = self.driving.read(|d| sleep_preview(d, ctx, choice)) else {
+            self.pending_sleep = None;
             return true;
+        };
+        ctx.audio.play("ui/warning");
+        if gains_nothing {
+            ctx.say(&format!("You are already rested. {preview}"));
+        } else {
+            ctx.say(&preview);
         }
-        self.confirm_sleep_rested = false;
-        false
+        true
     }
 
     fn announce_over_drive(&mut self, ctx: &mut GameContext, d: &mut DrivingState) {
@@ -502,7 +510,7 @@ impl RestStopState {
     }
 
     fn sleeper_split_rest(&mut self, ctx: &mut GameContext, hours: i64) {
-        if self.guard_double_sleep(ctx, 0.0) {
+        if self.confirm_sleep(ctx, SleepChoice::Sleeper(hours), 0.0) {
             return;
         }
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
@@ -578,7 +586,7 @@ impl RestStopState {
     }
 
     fn sleep(&mut self, ctx: &mut GameContext) {
-        if self.guard_double_sleep(ctx, 0.0) {
+        if self.confirm_sleep(ctx, SleepChoice::Sleeper(10), 0.0) {
             return;
         }
         let before_fatigue = profile_of(ctx).fatigue;
@@ -624,6 +632,9 @@ impl RestStopState {
             ));
             return;
         }
+        if self.confirm_sleep(ctx, SleepChoice::Motel, 0.0) {
+            return;
+        }
         profile_mut_of(ctx).spend(MOTEL_COST);
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
             // A motel bed is still a real sleep: no truck idles all night
@@ -660,7 +671,7 @@ impl RestStopState {
     /// reset, but cramped poor rest (no proper sleeper), so you wake still
     /// tired. No shoulder fine -- a lot is more legitimate than the freeway.
     fn emergency_lot_sleep(&mut self, ctx: &mut GameContext) {
-        if self.guard_double_sleep(ctx, hos::FATIGUE_SHOULDER_FLOOR) {
+        if self.confirm_sleep(ctx, SleepChoice::Lot, hos::FATIGUE_SHOULDER_FLOOR) {
             return;
         }
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
@@ -1304,7 +1315,7 @@ impl Menu for RestStopState {
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {
-        self.confirm_sleep_rested = false;
+        self.pending_sleep = None;
         let items = self.build_items(ctx);
         self.menu.items = items;
         self.place_cursor(ctx);
@@ -1324,7 +1335,7 @@ impl Menu for RestStopState {
     // confirmation, so a stale "press Enter again" can never sleep you
     // silently later.
     fn move_by(&mut self, ctx: &mut GameContext, delta: i64) {
-        self.confirm_sleep_rested = false;
+        self.pending_sleep = None;
         let core = self.menu_mut();
         if core.items.is_empty() {
             return;
@@ -1336,7 +1347,7 @@ impl Menu for RestStopState {
     }
 
     fn jump(&mut self, ctx: &mut GameContext, index: usize) {
-        self.confirm_sleep_rested = false;
+        self.pending_sleep = None;
         let core = self.menu_mut();
         if core.items.is_empty() {
             return;

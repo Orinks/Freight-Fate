@@ -34,6 +34,8 @@
 
 ### Changed
 
+- **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.
+
 - **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
 
 - **Achievement category menu help text got an owner voice pass.** Five category descriptions now read the way the road says them.

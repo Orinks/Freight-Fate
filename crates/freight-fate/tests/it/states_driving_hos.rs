@@ -329,6 +329,7 @@ fn test_rest_stop_menu_break_and_sleep() {
     }
 
     harness.select_menu_item("Sleep 10 hours");
+    harness.select_menu_item("Sleep 10 hours");
     assert!(approx(
         harness.read_drive(|d| d.trip.game_minutes),
         minutes_before + 30.0 + 600.0
@@ -435,6 +436,7 @@ fn test_split_sleeper_rest_action_advances_clock_and_speaks_status() {
     harness.clear_speech();
 
     harness.select_menu_item("Sleep 8 hours in sleeper berth");
+    harness.select_menu_item("Sleep 8 hours in sleeper berth");
 
     assert!(approx(
         harness.read_drive(|d| d.trip.game_minutes),
@@ -485,6 +487,7 @@ fn test_split_sleeper_rest_action_advances_clock_and_speaks_status() {
         .hos
         .drive(300.0);
     harness.select_menu_item("Sleep 2 hours in sleeper berth");
+    harness.select_menu_item("Sleep 2 hours in sleeper berth");
 
     let completed = spoken(&harness)
         .into_iter()
@@ -529,6 +532,7 @@ fn test_long_sleeper_period_pauses_duty_window_and_says_so() {
         .clone();
     harness.clear_speech();
 
+    harness.select_menu_item("Sleep 8 hours in sleeper berth");
     harness.select_menu_item("Sleep 8 hours in sleeper berth");
 
     let hos = harness
@@ -579,6 +583,7 @@ fn test_sleeping_shuts_down_a_running_engine() {
     assert!(harness.state_is::<RestStopState>());
     harness.clear_speech();
 
+    harness.select_menu_item("Sleep 10 hours");
     harness.select_menu_item("Sleep 10 hours");
 
     let cold_start_psi = harness.read_drive(|d| d.trip.truck.specs.air_cold_start_psi);

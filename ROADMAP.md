@@ -514,6 +514,11 @@ its status or release decision.
       qualifying rest from the window; the short half counts until the pair
       is credited. Tester report 2026-09-11: 7 duty hours plus an 8-hour
       berth rest woke to a closed window.
+- [x] Rest-stop sleep choices preview the resulting driving allowance, legal
+      driving cutoff, fatigue, game-clock cost, and delivery deadline before
+      a second press commits the rest. Arrival at a planned sleep stop focuses
+      the full reset. A 30-minute break, either 7/3 split order, and full
+      10-hour reset have menu-level scenario coverage.
 - [x] `--agent-server --operator-keys` keeps the window up and lets the
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still

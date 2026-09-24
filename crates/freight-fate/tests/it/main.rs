@@ -119,6 +119,7 @@ mod states_driving_menus_roadside;
 mod states_driving_menus_tablet;
 mod states_driving_multilane_speech;
 mod states_driving_ramps;
+mod states_driving_rest_choice_scenarios;
 mod states_driving_retarder;
 mod states_driving_road;
 mod states_driving_speech_ladder;
