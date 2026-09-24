@@ -30,6 +30,8 @@ pub fn advance_rest_clock(
 ) {
     let start_hour = driving.absolute_game_hour(ctx, None);
     driving.trip.truck.advance_parked_time(minutes);
+    // Reefer/APU keep burning (and cargo temp keeps drifting) through a rest.
+    driving.trip.truck.advance_hotel_power(minutes * 60.0);
     driving.trip.game_minutes += minutes;
     driving.trip.weather.update(minutes);
     if let Some(status) = duty_status {

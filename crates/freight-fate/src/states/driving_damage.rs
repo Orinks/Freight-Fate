@@ -177,7 +177,13 @@ impl DrivingState {
         let curve = self.trip.curve_at(self.trip.position_mi);
         let bend = curve.filter(|curve| !curve.connector);
         let speed_mph = self.trip.truck.speed_mph();
+        let ambient = self
+            .trip
+            .weather
+            .temperature_c()
+            .unwrap_or(ff_core::sim::vehicle::AMBIENT_C);
         let t = &mut self.trip.truck;
+        t.ambient_temp_c = ambient;
         t.corner_overspeed_mph = match &bend {
             Some(bend) => (speed_mph - bend.advisory_mph as f64).max(0.0),
             None => 0.0,

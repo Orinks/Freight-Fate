@@ -313,4 +313,63 @@ impl DrivingState {
             ctx.say(&result.message);
         }
     }
+
+    /// Alt+R: trailer refrigeration unit on or off.
+    pub fn toggle_reefer(&mut self, ctx: &mut GameContext) {
+        if !self.trip.truck.cargo_needs_reefer()
+            || !self.trip.truck.trailer_attached
+            || self.trip.truck.cargo_kg <= 0.0
+        {
+            ctx.audio.play("ui/error");
+            ctx.say("No reefer load aboard.");
+            return;
+        }
+        if self.trip.truck.reefer_on {
+            self.trip.truck.stop_reefer();
+            self.set_status("Reefer off.");
+            ctx.say_with(
+                "Reefer off.",
+                Say::new().category(SpeechCategory::Confirmation),
+            );
+            return;
+        }
+        if self.trip.truck.start_reefer() {
+            self.set_status("Reefer on.");
+            ctx.say_with(
+                "Reefer on.",
+                Say::new().category(SpeechCategory::Confirmation),
+            );
+            return;
+        }
+        ctx.audio.play("ui/error");
+        if self.trip.truck.fuel_gal <= 0.0 {
+            ctx.say("No fuel for the reefer.");
+        } else {
+            ctx.say("The reefer will not start.");
+        }
+    }
+
+    /// Alt+U: auxiliary power unit on or off.
+    pub fn toggle_apu(&mut self, ctx: &mut GameContext) {
+        if self.trip.truck.apu_on {
+            self.trip.truck.stop_apu();
+            self.set_status("APU off.");
+            ctx.say_with(
+                "APU off.",
+                Say::new().category(SpeechCategory::Confirmation),
+            );
+            return;
+        }
+        if self.trip.truck.start_apu() {
+            self.set_status("APU on.");
+            ctx.say_with("APU on.", Say::new().category(SpeechCategory::Confirmation));
+            return;
+        }
+        ctx.audio.play("ui/error");
+        if self.trip.truck.fuel_gal <= 0.0 {
+            ctx.say("No fuel for the APU.");
+        } else {
+            ctx.say("The APU will not start.");
+        }
+    }
 }

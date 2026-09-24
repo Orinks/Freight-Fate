@@ -94,6 +94,7 @@ impl DrivingState {
             None
         };
         truck.cargo_fragility = cargo_fragility(delivery_cargo);
+        truck.set_cargo_needs_reefer(delivery_cargo.is_some_and(|c| c.needs_reefer()));
         // A tank load is the only freight that keeps moving after the truck
         // stops. How full the shell is comes straight from the load's weight,
         // so the wave is a deterministic property of the job -- the same run

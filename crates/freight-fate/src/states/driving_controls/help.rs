@@ -161,6 +161,11 @@ impl DrivingState {
             n(Action::Fuel)
         ));
         text.push_str(&format!(
+            "{} reefer on or off. {} APU on or off. ",
+            n(Action::Reefer),
+            n(Action::Apu)
+        ));
+        text.push_str(&format!(
             "{} clock, deadline, and the hours limit that comes first. ",
             n(Action::Clock)
         ));
@@ -364,8 +369,10 @@ impl DrivingState {
             n(Action::EngineBrake)
         ));
         text.push_str(&format!(
-            "{} starts or stops the engine, {} reads fuel, {} reads the posted ",
+            "{} starts or stops the engine, {} the reefer, {} the APU, {} reads fuel, {} reads the posted ",
             capitalized(&n(Action::Engine)),
+            n(Action::Reefer),
+            n(Action::Apu),
             n(Action::Fuel),
             n(Action::SpeedLimit)
         ));
