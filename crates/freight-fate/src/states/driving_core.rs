@@ -319,6 +319,19 @@ pub fn record_inspection(ctx: &mut GameContext) {
     }
 }
 
+/// Collapse runs of the same spoken name so a facility-approach route
+/// (which repeats one city key once per local leg) does not read as
+/// "Portland to Portland to Portland" on the Map and settlement screens.
+pub fn unique_consecutive(parts: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = Vec::with_capacity(parts.len());
+    for part in parts {
+        if out.last().map(String::as_str) != Some(part.as_str()) {
+            out.push(part.clone());
+        }
+    }
+    out
+}
+
 /// `_join_phrase`: "a", "a, and b", "a, b, and c".
 pub fn join_phrase(parts: &[String]) -> String {
     match parts {
@@ -976,6 +989,20 @@ impl RadioRoute for RadioRouteView<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unique_consecutive_collapses_runs_only() {
+        assert_eq!(unique_consecutive(&[]), Vec::<String>::new());
+        assert_eq!(
+            unique_consecutive(&["Portland".into(), "Portland".into(), "Astoria".into()]),
+            vec!["Portland".to_string(), "Astoria".to_string()]
+        );
+        // A real corridor that revisits a city non-consecutively stays intact.
+        assert_eq!(
+            unique_consecutive(&["A".into(), "B".into(), "A".into(),]),
+            vec!["A".to_string(), "B".to_string(), "A".to_string()]
+        );
+    }
 
     #[test]
     fn join_phrase_reads_like_a_list() {
