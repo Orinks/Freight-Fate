@@ -20,6 +20,9 @@ impl DrivingState {
             || !ctx.settings.speaks(Some(SpeechCategory::Coaching))
             || self.departure_chain
             || self.surface_chain
+            || self.selected_stop_key.is_some()
+            || self.ramp_stop.is_some()
+            || self.exit_signal_on
             || self.hos_stop_warning_pending.is_some()
             || ctx.event_delivery_pending()
         {
@@ -32,10 +35,11 @@ impl DrivingState {
             return;
         }
         let prefix = format!("{}:plan-hint:", limit.kind);
+        let stop_warning_prefix = format!("{}:hos-stop:", limit.kind);
         if hos_of(ctx)
             .warned
             .iter()
-            .any(|key| key.starts_with(&prefix))
+            .any(|key| key.starts_with(&prefix) || key.starts_with(&stop_warning_prefix))
         {
             return;
         }

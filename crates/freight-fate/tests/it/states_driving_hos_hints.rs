@@ -229,3 +229,45 @@ fn interrupted_hint_is_retried_until_delivery_completes() {
         .iter()
         .any(|key| key.contains("plan-hint")));
 }
+
+#[test]
+fn selected_stop_and_earlier_stop_warning_suppress_late_planning_advice() {
+    let (mut app, drive) = setup("sleep");
+    app.ctx.settings.hos_planning_hints = true;
+    app.ctx.profile.as_mut().unwrap().hos.duty_min = 660.0;
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.selected_stop_key = Some("planned-stop".to_string());
+        d.maybe_hos_planning_hint(ctx);
+    });
+    assert!(app.event_lines().is_empty());
+    assert!(app.ctx.profile.as_ref().unwrap().hos.warned.is_empty());
+
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.selected_stop_key = None;
+        let kind = ctx
+            .profile
+            .as_ref()
+            .unwrap()
+            .hos
+            .next_limit(&ctx.settings.hos_mode)
+            .unwrap()
+            .kind;
+        ctx.profile
+            .as_mut()
+            .unwrap()
+            .hos
+            .warned
+            .push(format!("{kind}:hos-stop:planned-stop"));
+        d.maybe_hos_planning_hint(ctx);
+    });
+    assert!(app.event_lines().is_empty());
+    assert!(!app
+        .ctx
+        .profile
+        .as_ref()
+        .unwrap()
+        .hos
+        .warned
+        .iter()
+        .any(|key| key.contains("plan-hint")));
+}
