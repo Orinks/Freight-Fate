@@ -235,11 +235,19 @@ impl DrivingState {
         let jake_slowing = self.trip.truck.engine_brake()
             && self.trip.truck.throttle < 0.05
             && self.trip.truck.grip >= 0.55;
-        let needs_service = !jake_slowing || excess_now.is_some_and(|excess| excess > 10.0);
+        // With the retarder slowing the truck the drums join from 10 over,
+        // faded in across the mile an hour under it: switched at 10, the
+        // pedal pumped on and off while the truck sat on the line, and every
+        // application costs air.
+        let service_share = if jake_slowing {
+            excess_now.map_or(0.0, |excess| (excess - 9.0).clamp(0.0, 1.0))
+        } else {
+            1.0
+        };
         // The spoken cues get a cooldown on top: even a legitimate slow
         // cycle (cruise pulling back up to the engage line) must not chant.
         self.curve_assist_cue_s = (self.curve_assist_cue_s - dt).max(0.0);
-        if curve_assisting && needs_service {
+        if curve_assisting && service_share > 0.0 {
             // Sized from how far OVER the bend's advisory the truck is, not
             // from `curve`: that used to be a severity around 1.0 and is a
             // curvature around 0.002 since the lane model grew a heading, so
@@ -251,7 +259,7 @@ impl DrivingState {
                 .trip
                 .truck
                 .brake
-                .max(0.35f64.min(0.1 + over_mph * 0.02));
+                .max(service_share * 0.35f64.min(0.1 + over_mph * 0.02));
         }
         // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp with no baked bend is
         // priced off its own radius above, so an exit taken over that number

@@ -269,7 +269,12 @@ impl Trip {
                 }
             }
         }
-        self.weather_source_status = source_status;
+        // A new route cell's first fetch reads as loading for a moment; while
+        // simulated weather is already in use that is not news, and failing
+        // back to it must not announce the fallback a second time.
+        if !(source_status == "loading" && self.weather_source_status == "fallback") {
+            self.weather_source_status = source_status;
+        }
         let effects = self.weather.effects();
         self.truck.grip = effects.grip;
         self.truck.water_mm = effects.water_mm;

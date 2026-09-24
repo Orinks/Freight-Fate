@@ -514,6 +514,12 @@ pub const CRUISE_SNUB_BRAKE: f64 = 0.3; // a real application, not a drag
                                         // Interactive descent control's ceiling while a grade lasts. A cap on the
                                         // working target only -- it must never be written into the set speed.
 pub const DESCENT_SAFE_MAX_MPH: f64 = 55.0;
+
+/// Closing on a lower target, cruise's service trim fades in from this far
+/// over and reaches its full over/30 a mile an hour later. A switched edge
+/// pumps the pedal, and air is charged per application.
+pub const CRUISE_CLOSE_FEATHER_FROM_MPH: f64 = 1.0;
+
 // When has a hill BEATEN the descent control, as opposed to merely being held?
 //
 // The descent twin of CRUISE_GRADE_BEATEN_*, and it did not exist until

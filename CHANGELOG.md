@@ -143,6 +143,9 @@
 - **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.
 
 - **The engine lean leads you through an exit ramp's curve with lane-departure warning off.**
+- **Adaptive cruise and the speed assists no longer drain the air tanks by pumping the brakes.** They hold the pedal steady while they slow you.
+
+- **Losing live weather is announced once.** You no longer hear that simulated weather is in use every minute while it stays that way.
 
 - **The stop bar countdown and stop bar tone stay quiet on a green light.**
 

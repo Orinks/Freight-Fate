@@ -733,6 +733,43 @@ fn test_g_announces_upcoming_grade_without_nothing_steep() {
 }
 
 #[test]
+fn test_interactive_descent_brake_does_not_pump_on_its_edge() {
+    // Interactive descent control's brake used to switch straight to a third
+    // of the pedal at eight over its safe ceiling. With the automatic
+    // retarder manager in charge (no cruise snub), a grade the jake cannot
+    // hold parked the truck on that edge and the pedal pumped: every new
+    // application costs air (the pedal-fanning class, 2026-09-24).
+    let mut harness = cruising("Descent Edge", 62.0, 200.0, &[(0.0, BENCH_MILES, -8.0)]);
+    harness.app.ctx.settings.descent_speed_control = "interactive".to_string();
+    harness.with_drive(|d, _| d.auto_jake = true);
+    let mut rises = 0.0;
+    let mut last_brake = 0.0;
+    let mut top = 0.0f64;
+    for _ in 0..(60 * 90) {
+        harness.advance_clock(DT);
+        let (brake, speed) = harness.with_drive(|d, ctx| {
+            d.truck_mut().grade = -0.08;
+            let ramp = DT * 2.2;
+            let brake = d.truck().brake;
+            d.truck_mut().brake = 0.0f64.max(brake - ramp * 3.0);
+            d.update_cruise(ctx, DT, false, false, false);
+            d.update_auto_jake(ctx, DT);
+            d.truck_mut().auto_shift();
+            d.truck_mut().update(DT);
+            (d.truck().brake, d.truck().speed_mph())
+        });
+        rises += (brake - last_brake).max(0.0);
+        last_brake = brake;
+        top = top.max(speed);
+    }
+    assert!(
+        top > DESCENT_SAFE_MAX_MPH + 7.0,
+        "the grade never beat the retarder ({top:.1} mph), so the edge was never reached"
+    );
+    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
+}
+
+#[test]
 fn test_g_keeps_clear_road_report_when_no_grade_is_ahead() {
     let mut harness = cruising("G Clear Road", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
     harness.clear_speech();
