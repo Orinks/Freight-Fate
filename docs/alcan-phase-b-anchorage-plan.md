@@ -1,6 +1,6 @@
 # ALCAN Phase B plan — Anchorage on the continuous AK truck graph
 
-Status: **PLAN ONLY** (Ruth FIX tip). No `world_data` / city / leg JSON. Phase A continuous Lower-48 → Fairbanks remains **KEEP**. Both corridors + B1-then-B2 order **KEEP**. Owner GO after this FIX cut lands.
+Status: **B1 world_data landed** (Tok Cutoff/Glenn → Anchorage). Plan FIX tip `37915685` kept. Phase A Lower-48 → Fairbanks **KEEP**. B2 Parks **not started**. Both corridors + B1-then-B2 order **KEEP**.
 
 Parent scaffold: [`docs/alcan-corridor-scaffold-plan.md`](./alcan-corridor-scaffold-plan.md) (sequence A corridor → **B Alaska map** → C rest of Canada → D Europe).
 

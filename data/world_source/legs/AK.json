@@ -486,6 +486,614 @@
         "mode": "through_freight",
         "cabotage": "forbidden"
       }
+    },
+    {
+      "from": "tok_ak_us",
+      "to": "glennallen_ak_us",
+      "miles": 139,
+      "highway": "Tok Cutoff / Richardson Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          },
+          {
+            "at_mi": 30.42,
+            "lat": 62.99634,
+            "lon": -143.36231
+          },
+          {
+            "at_mi": 59.5,
+            "lat": 62.72422,
+            "lon": -143.89132
+          },
+          {
+            "at_mi": 90.62,
+            "lat": 62.56655,
+            "lon": -144.66585
+          },
+          {
+            "at_mi": 122.09,
+            "lat": 62.30201,
+            "lon": -145.29572
+          },
+          {
+            "at_mi": 139.0,
+            "lat": 62.10847,
+            "lon": -145.47834
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 30.42,
+            "elevation_ft": 2122.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 59.5,
+            "elevation_ft": 2299.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 90.62,
+            "elevation_ft": 1876.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 122.09,
+            "elevation_ft": 1423.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 139.0,
+            "elevation_ft": 1519.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 139.0,
+            "avg_grade_pct": -0.02,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 139.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 136.3 mi; paid miles 139. Tok Cutoff / Richardson Highway. Tok Cutoff (AK-1) + Richardson to Hub of Alaska / Glennallen; ALCAN Phase B1.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "glennallen_ak_us",
+      "to": "tok_ak_us",
+      "miles": 139,
+      "highway": "Tok Cutoff / Richardson Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 62.10847,
+            "lon": -145.47834
+          },
+          {
+            "at_mi": 16.91,
+            "lat": 62.30201,
+            "lon": -145.29572
+          },
+          {
+            "at_mi": 48.38,
+            "lat": 62.56655,
+            "lon": -144.66585
+          },
+          {
+            "at_mi": 79.5,
+            "lat": 62.72422,
+            "lon": -143.89132
+          },
+          {
+            "at_mi": 108.58,
+            "lat": 62.99634,
+            "lon": -143.36231
+          },
+          {
+            "at_mi": 139.0,
+            "lat": 63.33665,
+            "lon": -142.98556
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1519.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 16.91,
+            "elevation_ft": 1423.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 48.38,
+            "elevation_ft": 1876.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 79.5,
+            "elevation_ft": 2299.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 108.58,
+            "elevation_ft": 2122.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 139.0,
+            "elevation_ft": 1633.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 139.0,
+            "avg_grade_pct": 0.02,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 139.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 136.3 mi; paid miles 139. Tok Cutoff / Richardson Highway. Tok Cutoff (AK-1) + Richardson to Hub of Alaska / Glennallen; ALCAN Phase B1. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "glennallen_ak_us",
+      "to": "palmer_ak_us",
+      "miles": 145,
+      "highway": "Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 62.10847,
+            "lon": -145.47834
+          },
+          {
+            "at_mi": 33.87,
+            "lat": 62.08243,
+            "lon": -146.38291
+          },
+          {
+            "at_mi": 65.73,
+            "lat": 61.93717,
+            "lon": -147.17448
+          },
+          {
+            "at_mi": 95.72,
+            "lat": 61.79235,
+            "lon": -147.90939
+          },
+          {
+            "at_mi": 127.86,
+            "lat": 61.72716,
+            "lon": -148.7488
+          },
+          {
+            "at_mi": 145.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1519.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 33.87,
+            "elevation_ft": 2454.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 65.73,
+            "elevation_ft": 3294.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 95.72,
+            "elevation_ft": 1545.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 127.86,
+            "elevation_ft": 554.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 145.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 145.0,
+            "avg_grade_pct": -0.17,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 145.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 139.8 mi; paid miles 145. Glenn Highway (AK-1). Glenn Highway via Eureka Summit; paid milepost Glenn MP187 to MP42 (Valhalla truck shape densified; router undercount not shipped).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "palmer_ak_us",
+      "to": "glennallen_ak_us",
+      "miles": 145,
+      "highway": "Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          },
+          {
+            "at_mi": 17.14,
+            "lat": 61.72716,
+            "lon": -148.7488
+          },
+          {
+            "at_mi": 49.28,
+            "lat": 61.79235,
+            "lon": -147.90939
+          },
+          {
+            "at_mi": 79.27,
+            "lat": 61.93717,
+            "lon": -147.17448
+          },
+          {
+            "at_mi": 111.13,
+            "lat": 62.08243,
+            "lon": -146.38291
+          },
+          {
+            "at_mi": 145.0,
+            "lat": 62.10847,
+            "lon": -145.47834
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 17.14,
+            "elevation_ft": 554.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 49.28,
+            "elevation_ft": 1545.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 79.27,
+            "elevation_ft": 3294.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 111.13,
+            "elevation_ft": 2454.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 145.0,
+            "elevation_ft": 1519.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 145.0,
+            "avg_grade_pct": 0.17,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 145.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 139.8 mi; paid miles 145. Glenn Highway (AK-1). Glenn Highway via Eureka Summit; paid milepost Glenn MP187 to MP42 (Valhalla truck shape densified; router undercount not shipped). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "palmer_ak_us",
+      "to": "anchorage_ak_us",
+      "miles": 42,
+      "highway": "Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          },
+          {
+            "at_mi": 13.5,
+            "lat": 61.46278,
+            "lon": -149.34519
+          },
+          {
+            "at_mi": 29.11,
+            "lat": 61.29595,
+            "lon": -149.58989
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 61.21832,
+            "lon": -149.90035
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 13.5,
+            "elevation_ft": 26.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 29.11,
+            "elevation_ft": 469.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 111.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 42.0,
+            "avg_grade_pct": -0.06,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 42.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 42.9 mi; paid miles 42. Glenn Highway (AK-1). Glenn Highway Palmer to Anchorage; paid milepost Glenn MP42 to MP0.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "anchorage_ak_us",
+      "to": "palmer_ak_us",
+      "miles": 42,
+      "highway": "Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.21832,
+            "lon": -149.90035
+          },
+          {
+            "at_mi": 12.89,
+            "lat": 61.29595,
+            "lon": -149.58989
+          },
+          {
+            "at_mi": 28.5,
+            "lat": 61.46278,
+            "lon": -149.34519
+          },
+          {
+            "at_mi": 42.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 111.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 12.89,
+            "elevation_ft": 469.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 28.5,
+            "elevation_ft": 26.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 42.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 42.0,
+            "avg_grade_pct": 0.06,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 42.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 42.9 mi; paid miles 42. Glenn Highway (AK-1). Glenn Highway Palmer to Anchorage; paid milepost Glenn MP42 to MP0. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
     }
   ]
 }

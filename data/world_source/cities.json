@@ -8148,6 +8148,71 @@
           "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B)."
         }
       ]
+    },
+    "glennallen_ak_us": {
+      "spoken_city": "Glennallen",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 62.1083455,
+      "lon": -145.4779829,
+      "locations": [
+        {
+          "name": "Hub of Alaska (Glenn Hwy / Richardson Hwy)",
+          "type": "company_yard",
+          "lat": 62.1083455,
+          "lon": -145.4779829,
+          "source_note": "Hub of Alaska travel center at the Glenn Highway / Richardson Highway junction, Glennallen AK (Unorganized Borough). Nominatim geocode 2026-09-24 (Hub of Alaska, Glenn Highway, Glennallen). Public directories (AllStays / truckstopsandservices) list diesel and ~20\u201325 truck parking spaces. Primary Glennallen fuel/parking pin for ALCAN Phase B1. City location type is company_yard because FREIGHT_LOCATION_TYPES has no travel_center/parking class (same soft type debt as Phase A corridor pins)."
+        },
+        {
+          "name": "Glennallen Fuel & Service (Glenn Highway)",
+          "type": "company_yard",
+          "lat": 62.1077746,
+          "lon": -145.5368658,
+          "source_note": "Glennallen Fuel & Service on the Glenn Highway, Glennallen AK. Nominatim geocode 2026-09-24. Public directories list diesel and ~10 truck parking spaces. Verified alternate Glennallen lot (Hub of Alaska remains primary)."
+        }
+      ]
+    },
+    "palmer_ak_us": {
+      "spoken_city": "Palmer",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 61.5997,
+      "lon": -149.1128,
+      "locations": [
+        {
+          "name": "Mat-Su Valley freight stand-in (Palmer)",
+          "type": "company_yard",
+          "lat": 61.5997,
+          "lon": -149.1128,
+          "source_note": "Palmer AK Mat-Su market stand-in yard. No verified public tractor-stop pin: Palmer Chevron on Glenn (~MP 42) remains unverified for diesel AND tractor parking (ALCAN Phase B plan). Do not invent parking capacity. City is the sole Mat-Su market node on B1."
+        }
+      ]
+    },
+    "anchorage_ak_us": {
+      "spoken_city": "Anchorage",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 61.2181,
+      "lon": -149.9003,
+      "locations": [
+        {
+          "name": "Essential One (9250 King Street)",
+          "type": "company_yard",
+          "lat": 61.1370513,
+          "lon": -149.8790685,
+          "source_note": "Essential One / Petro 49 / Shoreside high-flow diesel and cardlock at 9250 King Street, Anchorage AK 99515. Nominatim address geocode 2026-09-24. AllStays lists ~3 truck parking spaces in a dirt lot \u2014 capacity debt recorded honestly; not a large travel center. Anchorage fuel pin for ALCAN Phase B1. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+        },
+        {
+          "name": "Port of Alaska / Ship Creek industrial drop",
+          "type": "terminal",
+          "lat": 61.2446867,
+          "lon": -149.8816953,
+          "source_note": "Port of Alaska (Anchorage) industrial / consignee delivery end near the port complex north of downtown / Ship Creek industrial area. Nominatim 'Port of Alaska, Anchorage' 2026-09-24. Delivery end for Anchorage \u2014 not a public truck stop; fuel/parking remains Essential One (~3 spaces)."
+        }
+      ]
     }
   }
 }

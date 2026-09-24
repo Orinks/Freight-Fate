@@ -900,8 +900,8 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.region
         );
         assert!(
-            // ALCAN Phase A Fairbanks terminus (~64.8°N / ~-147.7°W) raises ceilings;
-            // Anchorage (~61.2°N / ~-149.9°W) still deferred to Phase B graph work.
+            // ALCAN Phase A Fairbanks (~64.8°N / ~-147.7°W) and Phase B1 Anchorage
+            // (~61.2°N / ~-149.9°W) fit these ceilings (lon floor -150.0 clears -149.9).
             24.0 < city.lat && city.lat < 66.0,
             "{}: lat {}",
             city.name,
@@ -1253,6 +1253,150 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         .locations
         .iter()
         .any(|loc| loc.name.contains("Sourdough") || loc.name.contains("Airport")));
+}
+
+#[test]
+fn test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage() {
+    let world = world();
+    let south = world
+        .shortest_route("tok_ak_us", "anchorage_ak_us", None, false)
+        .expect("tok loads")
+        .expect("ALCAN Phase B1 must reach Anchorage via Glennallen and Palmer");
+    assert_eq!(
+        south.cities,
+        vec![
+            "tok_ak_us".to_string(),
+            "glennallen_ak_us".to_string(),
+            "palmer_ak_us".to_string(),
+            "anchorage_ak_us".to_string(),
+        ]
+    );
+    let north = world
+        .shortest_route("anchorage_ak_us", "tok_ak_us", None, false)
+        .expect("anchorage loads")
+        .expect("northbound Phase B1 filament must route");
+    assert_eq!(
+        north.cities,
+        vec![
+            "anchorage_ak_us".to_string(),
+            "palmer_ak_us".to_string(),
+            "glennallen_ak_us".to_string(),
+            "tok_ak_us".to_string(),
+        ]
+    );
+    // Continuous Lower 48 → Anchorage through Blaine + Phase A corridor (no teleport).
+    let full = world
+        .shortest_route("bellingham_wa_us", "anchorage_ak_us", None, false)
+        .expect("bellingham loads")
+        .expect("Lower 48 must reach Anchorage on ALCAN + Phase B1");
+    assert!(
+        full.cities.iter().any(|c| c == "blaine_wa_us"),
+        "must enter Canada via Blaine, got {:?}",
+        full.cities
+    );
+    assert!(
+        full.cities.iter().any(|c| c == "tok_ak_us"),
+        "must pass Tok, got {:?}",
+        full.cities
+    );
+    assert!(
+        full.cities.iter().any(|c| c == "glennallen_ak_us"),
+        "must pass Glennallen on Tok Cutoff/Glenn, got {:?}",
+        full.cities
+    );
+    assert!(
+        !full.cities.iter().any(|c| c == "fairbanks_ak_us"),
+        "B1 Tok→Anchorage must not detour Fairbanks/Parks, got {:?}",
+        full.cities
+    );
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    for (a, b) in [
+        ("tok_ak_us", "glennallen_ak_us"),
+        ("glennallen_ak_us", "tok_ak_us"),
+        ("glennallen_ak_us", "palmer_ak_us"),
+        ("palmer_ak_us", "glennallen_ak_us"),
+        ("palmer_ak_us", "anchorage_ak_us"),
+        ("anchorage_ak_us", "palmer_ak_us"),
+    ] {
+        assert!(
+            directed.contains(&(a, b)),
+            "missing directed Phase B1 leg {a}->{b}"
+        );
+    }
+    let tok_gl = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "tok_ak_us" && leg.b == "glennallen_ak_us")
+        .expect("tok->glennallen");
+    assert!(
+        (130.0..=150.0).contains(&tok_gl.miles),
+        "Tok–Glennallen must be ~139 mi, got {}",
+        tok_gl.miles
+    );
+    let gl_pa = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "glennallen_ak_us" && leg.b == "palmer_ak_us")
+        .expect("glennallen->palmer");
+    assert!(
+        (gl_pa.miles - 145.0).abs() < 0.5,
+        "Glennallen–Palmer paid miles must be milepost 145, got {}",
+        gl_pa.miles
+    );
+    let pa_anc = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "palmer_ak_us" && leg.b == "anchorage_ak_us")
+        .expect("palmer->anchorage");
+    assert!(
+        (pa_anc.miles - 42.0).abs() < 0.5,
+        "Palmer–Anchorage paid miles must be milepost 42, got {}",
+        pa_anc.miles
+    );
+    let glenn = world.city("glennallen_ak_us").expect("glennallen");
+    assert!(
+        glenn
+            .locations
+            .iter()
+            .any(|loc| loc.name.contains("Hub of Alaska")),
+        "Glennallen primary pin must be Hub of Alaska"
+    );
+    assert!(
+        glenn
+            .locations
+            .iter()
+            .any(|loc| loc.name.contains("Glennallen Fuel")),
+        "Glennallen alternate pin must be Glennallen Fuel"
+    );
+    let palmer = world.city("palmer_ak_us").expect("palmer");
+    assert!(
+        !palmer
+            .locations
+            .iter()
+            .any(|loc| loc.name.to_lowercase().contains("chevron")),
+        "Palmer must not pin unverified Chevron truck stop"
+    );
+    let anc = world.city("anchorage_ak_us").expect("anchorage");
+    assert!(
+        anc.locations
+            .iter()
+            .any(|loc| loc.name.contains("Essential One")),
+        "Anchorage fuel pin must be Essential One"
+    );
+    assert!(
+        anc.locations
+            .iter()
+            .any(|loc| { loc.name.contains("Port of Alaska") || loc.name.contains("Ship Creek") }),
+        "Anchorage delivery end must be Port/Ship Creek industrial, not a truck stop"
+    );
+    assert!(
+        !anc.locations.iter().any(|loc| loc.name.contains("gakona")),
+        "gakona must not appear"
+    );
 }
 
 #[test]
