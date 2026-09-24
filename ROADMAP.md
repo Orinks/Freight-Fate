@@ -1268,10 +1268,14 @@ not started here.
       or Alaska lanes until provincial and Alaska doubles rules are
       modeled.**
 - [x] **FIX 2: LCV turnpike trailer (landed).** `turnpike_doubles` uses its
-      own `turnpike_double` program (two 53-foot vans, ~130 ft overall
-      combination), separate from STAA `double_van` pups. Offered and
-      routed only on listed classic LCV turnpike highways (NY/MA I-90;
-      OH/IN I-80 and I-90; KS I-35 / I-335 / I-70) plus short staging
+      own `turnpike_double` program: two **48-foot** vans (spoken
+      "48-foot turnpike doubles"), about **102 ft** cargo-carrying length
+      and **117 ft** overall, separate from STAA `double_van` pups.
+      Requires the doubles endorsement and the LCV certificate. Never
+      offered as hazmat. Offered and routed only on an explicit allowlist
+      of classic turnpike city-pair legs (NY Thruway I-90 / I-87, Mass
+      Pike I-90, Ohio Turnpike west of the Elyria split, Indiana Toll
+      Road, Kansas Turnpike Wichita–Emporia–Topeka) plus short staging
       stubs. Spoken refusal: "Dispatch only clears long doubles on the
       turnpike."
 - [ ] **Honesty debt: Florida's Turnpike and Western LCV corridors.** FL
@@ -1281,11 +1285,19 @@ not started here.
 - [ ] **Honesty debt: staging lots.** Break-bulk yards at turnpike exits
       are approximated as same-city locals / end approaches / ≤ 1.0 mi
       stubs, not curated LCV staging facilities.
+- [ ] **Honesty debt: no LCV driver certification or carrier permit gate
+      (49 CFR 380).** Holding the in-game LCV certificate opens the
+      freight; federal driver entry-level LCV training and carrier
+      permits are not modeled.
+- [ ] **Honesty debt: hazmat in doubles not modeled.** Placarded freight
+      never uses `turnpike_double`; twin hazmat rules are not simulated.
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
 - [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
-      shares the stock trailer tare / legal-GVW clamp; dedicated LCV mass
-      is owed here.
+      shares the stock trailer tare / legal-GVW clamp. Per-corridor LCV
+      GVW caps are recorded in `data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`
+      (OH/IN/MA 127,400 lb; NY 143,000 lb; KS 120,000 lb) but not enforced
+      yet.
 
 ### Reefer, APU, and fuel-island hotel power (2.0 candidates)
 
