@@ -1987,6 +1987,7 @@
     "fatigue",
     "fines_owed",
     "game_hours",
+    "home_terminal_city",
     "hos",
     "hos_key_notice_left",
     "integrity_modified",

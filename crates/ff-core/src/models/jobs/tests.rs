@@ -1510,8 +1510,7 @@ fn thin_outbound_origin_weight_cuts_ship_selection() {
     // Origin selection multiplies facility_weight by this factor for pins
     // tagged thin_outbound (Fairbanks Carlile), so inbound destination weight
     // stays full while outbound origin weight is clearly lower.
-    assert!(THIN_OUTBOUND_ORIGIN_WEIGHT < 0.5);
-    assert!(THIN_OUTBOUND_ORIGIN_WEIGHT > 0.0);
+    const { assert!(THIN_OUTBOUND_ORIGIN_WEIGHT > 0.0 && THIN_OUTBOUND_ORIGIN_WEIGHT < 0.5) };
 }
 
 #[test]

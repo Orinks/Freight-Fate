@@ -363,7 +363,7 @@ impl Profile {
 /// Synthetic "{City} Company Yard" homes never existed as a save field; this
 /// catches cities that only have fuel/parking pins by walking to the nearest
 /// offerable yard city (or leaving the key unchanged when already offerable).
-fn migrate_home_terminal_city(city: &str) -> String {
+pub(super) fn migrate_home_terminal_city(city: &str) -> String {
     use crate::data::world::get_world;
     let world = get_world();
     world

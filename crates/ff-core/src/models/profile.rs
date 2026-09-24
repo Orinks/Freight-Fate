@@ -570,7 +570,9 @@ impl Profile {
         Profile {
             name: name.to_string(),
             current_city: current_city.to_string(),
-            home_terminal_city: current_city.to_string(),
+            // The same key a reload resolves to, so saving never reads as a
+            // change the player made.
+            home_terminal_city: serialize::migrate_home_terminal_city(current_city),
             ..Self::default()
         }
     }
