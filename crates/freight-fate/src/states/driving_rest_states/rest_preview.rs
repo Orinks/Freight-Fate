@@ -119,7 +119,7 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
     };
     format!(
         "Preview: sleep {hours} hours in {}. {effect} {legal} Fatigue goes from {} to {}. \
-         The game clock advances {hours} hours. {deadline}{pending}{cost} Press Enter again to sleep, or move to another choice.",
+         The game clock advances {hours} hours. {deadline}{pending}{cost} Select this choice again to sleep, or move to another choice.",
         choice.name(),
         fmt_f(profile.fatigue, 0),
         fmt_f(fatigue_after, 0)

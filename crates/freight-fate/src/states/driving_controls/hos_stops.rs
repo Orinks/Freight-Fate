@@ -1,6 +1,7 @@
 //! Route advice and advance warnings for the next required rest.
 
 use crate::app::{GameContext, SayEvent};
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{hos_mut_of, hos_of};
 use ff_core::models::jobs::hos_stops::{plan_hos_stop, HosStopAdvice, StopPlanningRoute};
@@ -69,7 +70,10 @@ impl DrivingState {
             ctx.reset_event_condition(&key);
             self.hos_plan_hint_pending = Some(key.clone());
             ctx.say_event_with(
-                format!("{message} Press Alt D for full hours and route details."),
+                format!(
+                    "{message} Press {} for full hours and route details.",
+                    ctx.control_name(Action::HosDrive)
+                ),
                 SayEvent::queued()
                     .key(&key)
                     .priority(EventPriority::Route)

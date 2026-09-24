@@ -257,7 +257,7 @@ impl DrivingState {
         }
         line.push_str(&format!(
             " Facility stopping assistance disarmed for that stop. Press {} to plan the next \
-             sleep-capable stop.",
+             suitable rest stop.",
             ctx.control_hint("rest")
         ));
         self.say_confirmation_interrupt(ctx, &line);

@@ -24,7 +24,7 @@ impl DrivingState {
             self.say_plain(ctx, "Already on the exit ramp.");
             return;
         }
-        let selected = self.selected_sleep_stop();
+        let selected = self.selected_rest_stop();
         let window = self.exit_window_mi();
         let selected_ahead = selected.as_ref().is_some_and(|stop| {
             let ahead = stop.at_mi - self.trip.position_mi;
@@ -55,7 +55,7 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "No route exit to signal for yet. Press {} to plan a sleep-capable stop.",
+                    "No route exit to signal for yet. Press {} to plan a suitable rest stop.",
                     ctx.control_hint("rest")
                 ),
             );
@@ -213,8 +213,7 @@ impl DrivingState {
         if scale_claimed.is_some() {
             if let Some(outranked) = outranked.as_ref() {
                 if self.is_selected_stop(Some(outranked)) || self.trip.is_planned(outranked) {
-                    message
-                        .push_str(" Your planned sleep stop waits until you are past the scale.");
+                    message.push_str(" Your planned rest stop waits until you are past the scale.");
                 }
             }
         }

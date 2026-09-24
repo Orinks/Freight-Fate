@@ -4,7 +4,7 @@
 
 ### Added
 
-- **HOS planning hints suggest a break or sleep stop with time to spare.** When an earlier compatible stop offers a useful buffer, the hint names it and the last legally reachable fallback. Turn hints on under Difficulty and hours of service; Alt+D retains the full stop estimates.
+- **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
 
 - **Bananavision channels are on the dial.** Nine HTTPS Icecast mounts from bananavision.tv — Main, Bananalodeon 80s, Bananalodeon, Bananarang, Educational, Brain, Star Trek Vision, MST3K, and Over the Edge — and they come in anywhere you drive.
 

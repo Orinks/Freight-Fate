@@ -406,10 +406,12 @@ pub struct DrivingState {
     // ---- driving_events.py: exits, ramps, the destination ---------------------------------
     pub signal_timer: f64,
     pub exit_stop: Option<RoadStop>, // active route exit
-    // Stable proof that the player explicitly selected an optional sleep
+    // Stable proof that the player explicitly selected an optional rest
     // stop with T. _exit_stop is not enough: destination approaches infer
     // it automatically, and a canceled signal can leave it populated.
     pub selected_stop_key: Option<String>,
+    /// Whether T selected this stop for the next 30-minute HOS break.
+    pub selected_stop_break: bool,
     pub selected_stop_assist_armed: bool,
     pub selected_stop_assist_said: bool,
     pub selected_stop_assist_brake: f64,

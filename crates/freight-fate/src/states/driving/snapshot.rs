@@ -280,6 +280,10 @@ impl DrivingState {
             "selected_stop_key".to_string(),
             json!(self.selected_stop_key),
         );
+        out.insert(
+            "selected_stop_break".to_string(),
+            json!(self.selected_stop_break),
+        );
         // Kept for a save opened by an older build, which knows only the name.
         out.insert(
             "planned_stop".to_string(),
@@ -440,6 +444,8 @@ impl DrivingState {
             (Some(selected), Some(planned)) if selected == planned => selected_key,
             _ => None,
         };
+        state.selected_stop_break =
+            state.selected_stop_key.is_some() && b(data, "selected_stop_break", false);
         let tolls: Vec<Value> = data
             .get("toll_charges")
             .and_then(Value::as_array)

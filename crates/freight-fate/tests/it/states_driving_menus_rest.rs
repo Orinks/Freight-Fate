@@ -12,10 +12,11 @@ use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
+use freight_fate::controller::ControllerButton;
 
 use ff_core::sim::roadside_inspection::{InspectionLevel, DECAL_VALID_HOURS, OUT_OF_SERVICE_FINE};
 use freight_fate::app::testing::TestApp;
-use freight_fate::states::base::Menu;
+use freight_fate::states::base::{InputEvent, Menu};
 use freight_fate::states::driving_core::{
     FIELD_REPAIR_DAMAGE_PCT, INSPECTION_MIN, MECHANIC_WAIT_MIN, ROAD_BRAKE_COST_PER_PCT,
     ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_SPECIALIST_COST_PER_PCT, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
@@ -413,6 +414,76 @@ fn test_moving_off_a_sleep_row_withdraws_the_pending_confirmation() {
         last(&app)
     );
     assert_eq!(with_drive(&drive, |d| d.trip.game_minutes), before);
+}
+
+#[test]
+fn first_letter_navigation_withdraws_sleep_confirmation_before_selecting_again() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, sleep_stop(at));
+    Menu::enter(&mut state, &mut app.ctx);
+    activate(&mut state, &mut app.ctx, "Sleep 10 hours");
+    let before_time = with_drive(&drive, |d| d.trip.game_minutes);
+    let profile = app.ctx.profile.as_ref().unwrap();
+    let before_hos = profile.hos.clone();
+    let before_fatigue = profile.fatigue;
+    let before_money = profile.money();
+
+    state.first_letter_jump(&mut app.ctx, "t");
+    assert_eq!(
+        labels(&state, &app.ctx)[state.menu().index],
+        "Take a 30-minute break"
+    );
+    for _ in 0..state.menu().items.len() {
+        state.first_letter_jump(&mut app.ctx, "s");
+        if labels(&state, &app.ctx)[state.menu().index] == "Sleep 10 hours" {
+            break;
+        }
+    }
+    assert_eq!(
+        labels(&state, &app.ctx)[state.menu().index],
+        "Sleep 10 hours"
+    );
+    app.clear_speech();
+    Menu::activate(&mut state, &mut app.ctx);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Preview: sleep 10 hours"), "{said}");
+    assert_eq!(with_drive(&drive, |d| d.trip.game_minutes), before_time);
+    let profile = app.ctx.profile.as_ref().unwrap();
+    assert_eq!(profile.hos, before_hos);
+    assert_eq!(profile.fatigue, before_fatigue);
+    assert_eq!(profile.money(), before_money);
+}
+
+#[test]
+fn controller_navigation_cancels_sleep_preview_and_a_second_select_confirms() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, sleep_stop(at));
+    app.ctx.profile.as_mut().unwrap().fatigue = 40.0;
+    Menu::enter(&mut state, &mut app.ctx);
+    let sleep_index = labels(&state, &app.ctx)
+        .iter()
+        .position(|row| row == "Sleep 10 hours")
+        .unwrap();
+    state.jump(&mut app.ctx, sleep_index);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    state.handle_controller(&mut app.ctx, &InputEvent::button(ControllerButton::A));
+    assert_eq!(with_drive(&drive, |d| d.trip.game_minutes), before);
+    state.handle_controller(
+        &mut app.ctx,
+        &InputEvent::button(ControllerButton::DPadDown),
+    );
+    state.handle_controller(&mut app.ctx, &InputEvent::button(ControllerButton::DPadUp));
+    app.clear_speech();
+    state.handle_controller(&mut app.ctx, &InputEvent::button(ControllerButton::A));
+    assert_eq!(with_drive(&drive, |d| d.trip.game_minutes), before);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Select this choice again to sleep"), "{said}");
+    state.handle_controller(&mut app.ctx, &InputEvent::button(ControllerButton::A));
+    assert!(with_drive(&drive, |d| d.trip.game_minutes) > before);
 }
 
 #[test]

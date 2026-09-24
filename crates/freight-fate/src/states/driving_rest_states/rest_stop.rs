@@ -32,7 +32,15 @@ use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 use crate::states::driving_rest_states::rest_preview::{sleep_preview, SleepChoice};
 
 const REST_STOP_INTRO_HELP: &str =
-    "Enter selects, Escape returns to the road. Sleep choices first read a preview; press Enter again to sleep. Breaks and sleep advance the clock and the deadline.";
+    "Select opens a choice; Back returns to the road. Sleep choices first read a preview; select the same choice again to sleep. Breaks and sleep advance the clock and the deadline.";
+
+/// One-time menu focus when the driver arrives at a selected rest stop.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RestFocus {
+    Default,
+    Break,
+    Sleep,
+}
 
 /// Which wear meter a road shop is selling a job on.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -45,19 +53,19 @@ pub struct RestStopState {
     menu: MenuCore<Self>,
     driving: DriveRef,
     pub stop: RoadStop,
-    prefer_sleep: bool,
+    preferred_rest: RestFocus,
     fueled_here: bool,
     inspection_complete: bool,
     pending_sleep: Option<SleepChoice>,
 }
 
 impl RestStopState {
-    pub fn new(ctx: &GameContext, stop: RoadStop, prefer_sleep: bool) -> Self {
+    pub fn new(ctx: &GameContext, stop: RoadStop, preferred_rest: RestFocus) -> Self {
         RestStopState {
             menu: MenuCore::new(&stop.spoken_name()).with_intro_help(REST_STOP_INTRO_HELP),
             driving: DriveRef::active(ctx),
             stop,
-            prefer_sleep,
+            preferred_rest,
             fueled_here: false,
             inspection_complete: false,
             pending_sleep: None,
@@ -70,7 +78,11 @@ impl RestStopState {
             menu: MenuCore::new(&stop.spoken_name()).with_intro_help(REST_STOP_INTRO_HELP),
             driving,
             stop,
-            prefer_sleep,
+            preferred_rest: if prefer_sleep {
+                RestFocus::Sleep
+            } else {
+                RestFocus::Default
+            },
             fueled_here: false,
             inspection_complete: false,
             pending_sleep: None,
@@ -90,18 +102,23 @@ impl RestStopState {
     }
 
     fn place_cursor(&mut self, ctx: &GameContext) {
-        if self.prefer_sleep {
+        if self.preferred_rest != RestFocus::Default {
+            let preferred_row = if self.preferred_rest == RestFocus::Break {
+                "Take a 30-minute break"
+            } else {
+                "Sleep 10 hours"
+            };
             let index = self
                 .menu
                 .items
                 .iter()
-                .position(|item| item.text(self, ctx) == "Sleep 10 hours")
+                .position(|item| item.text(self, ctx) == preferred_row)
                 .unwrap_or(0);
             self.menu.index = index;
             // This is an arrival hint, not a permanent focus policy.
             // Returning from a submenu must preserve the row the player
             // invoked.
-            self.prefer_sleep = false;
+            self.preferred_rest = RestFocus::Default;
         } else {
             self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));
         }
@@ -1340,8 +1357,8 @@ impl Menu for RestStopState {
             .call(self, ctx, |s, ctx, d| s.announce_over_drive(ctx, d));
     }
 
-    // Moving off a sleep item withdraws its pending double-press
-    // confirmation, so a stale "press Enter again" can never sleep you
+    // Moving off a sleep item withdraws its pending double-select
+    // confirmation, so a stale preview can never sleep you
     // silently later.
     fn move_by(&mut self, ctx: &mut GameContext, delta: i64) {
         self.pending_sleep = None;
@@ -1364,6 +1381,26 @@ impl Menu for RestStopState {
         core.index = index.min(core.items.len() - 1);
         ctx.audio.play("ui/menu_move");
         self.speak_current(ctx);
+    }
+
+    fn first_letter_jump(&mut self, ctx: &mut GameContext, ch: &str) {
+        self.pending_sleep = None;
+        let n = self.menu().items.len();
+        if n == 0 {
+            return;
+        }
+        let start = self.menu().index;
+        for offset in 1..=n {
+            let i = (start + offset) % n;
+            if self.menu().items[i]
+                .text(self, ctx)
+                .to_lowercase()
+                .starts_with(ch)
+            {
+                self.jump(ctx, i);
+                return;
+            }
+        }
     }
 
     fn presence(&self, ctx: &GameContext) -> Option<PresenceState> {

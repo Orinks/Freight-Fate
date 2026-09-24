@@ -523,7 +523,9 @@ its status or release decision.
       as the next limit reaches three game-hours. An earlier compatible stop is
       suggested when its estimated arrival leaves a useful 30-to-90-minute
       buffer; the last legally reachable stop remains the fallback in the hint
-      and Alt+D. If the fallback is tight, an earlier safe stop is still named
+      and Alt+D. While rolling, T selects the recommended break or sleep stop,
+      with its matching rest row focused on arrival; repeating T cancels it.
+      If the fallback is tight, an earlier safe stop is still named
       even when it is more than 90 minutes early. Hints speak once per break or
       shift in Standard, including a no-reachable-stop case; Quiet and Urgent
       only remain silent. Required warnings and requested readouts stay active.

@@ -248,7 +248,7 @@ impl DrivingState {
         text.push_str("nearly to a stop and ease around. ");
         let rest = n(Action::Rest);
         text.push_str(&format!(
-            "{rest} plans the next nearby sleep-capable stop while rolling, then {exit} "
+            "{rest} plans the recommended break or sleep stop when HOS planning hints are on; otherwise it plans the next sleep-capable stop while rolling. {exit} "
         ));
         text.push_str(&format!(
             "signals for its exit. Stopped at a route stop, {rest} opens its menu: "
@@ -374,10 +374,10 @@ impl DrivingState {
             n(Action::ParkingBrake)
         ));
         text.push_str(&format!(
-            "brake, {} plans a nearby sleep stop while rolling or opens its actions when ",
+            "brake, {} plans a recommended break or sleep stop when HOS planning hints are on, or the next sleep stop otherwise; stopped at a stop, it opens its actions. ",
             n(Action::Rest)
         ));
-        text.push_str("stopped at it; away from route points while fully stopped, it opens ");
+        text.push_str("Away from route points while fully stopped, it opens ");
         text.push_str(&format!(
             "emergency shoulder sleep. {} opens the status menu. ",
             capitalized(&n(Action::Status))
