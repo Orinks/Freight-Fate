@@ -7,6 +7,7 @@ use ff_core::models::business_constants::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR}
 use ff_core::models::profile::Profile;
 
 use freight_fate::app::testing::TestApp;
+use freight_fate::playtest::road::{build_driving, find_feature, RoadOptions};
 use freight_fate::playtest::scenario::{apply, Scenario};
 
 fn scenario(json: Value) -> Scenario {
@@ -124,4 +125,34 @@ fn test_staging_leaves_the_title_screen_under_the_terminal_and_the_game_running(
     );
     assert!(text.contains("Tonopah, Nevada terminal"), "{text}");
     assert!(text.contains("level 3"), "{text}");
+}
+
+#[test]
+fn road_staging_keeps_the_sandbox_driver_hours_and_fatigue() {
+    let mut app = TestApp::new();
+    apply(
+        &mut app.ctx,
+        &scenario(json!({"city": "Buffalo", "rested": true})),
+    )
+    .unwrap();
+    let p = app.ctx.profile.as_mut().unwrap();
+    p.hos.on_duty(760.0);
+    p.hos.drive(20.0);
+    p.fatigue = 67.0;
+
+    let opts = RoadOptions {
+        feature: "stop".to_string(),
+        trip_seed: Some(7),
+        ..Default::default()
+    };
+    let pairs = vec![("Buffalo".to_string(), "Albany".to_string())];
+    let hit = find_feature(app.ctx.world, &pairs, "stop", &opts, Some(7))
+        .into_iter()
+        .next()
+        .expect("a stop on the test corridor");
+    let _ = build_driving(&mut app.ctx, &hit, &opts);
+    let staged = app.ctx.profile.as_ref().unwrap();
+    assert_eq!(staged.hos.duty_min, 780.0);
+    assert_eq!(staged.hos.driving_min, 20.0);
+    assert_eq!(staged.fatigue, 67.0);
 }

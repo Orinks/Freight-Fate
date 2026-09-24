@@ -1248,16 +1248,18 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     // run -- so a quiet rung reported "quiet" and changed nothing, and every
     // rung sounded identical (owner, 2026-08-17).
     profile.tutorial_done = true;
-    // A scenario staged before this carries its truck and its record into
-    // the drive: `start_at` after `scenario` keeps the damage, the wear and
-    // the citations that were asked for, so an inspection has something to
-    // find. A fresh process has no profile and gets the sound bench truck.
+    // A scenario staged before this carries its truck, driving record, and
+    // HOS state into the drive. Otherwise `start_at` silently replaces a
+    // staged short-rest or near-limit clock with a fully rested bench driver.
+    // A fresh process has no profile and gets the sound bench truck.
     if let Some(previous) = ctx.profile.as_ref() {
         profile.truck = previous.truck.clone();
         profile.truck_conditions = previous.truck_conditions.clone();
         profile.driving_record = previous.driving_record.clone();
         profile.out_of_service_events = previous.out_of_service_events;
         profile.career.reputation = previous.career.reputation;
+        profile.hos = previous.hos.clone();
+        profile.fatigue = previous.fatigue;
         // A slip-seating driver's yard spares are drawn from the career's
         // own name, so this bench career's pool is not the scenario's: the
         // record the scenario set would sit under keys this drive never
