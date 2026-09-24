@@ -1400,6 +1400,145 @@ fn test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage() {
 }
 
 #[test]
+fn test_alcan_phase_b2_parks_to_anchorage() {
+    let world = world();
+    let south = world
+        .shortest_route("fairbanks_ak_us", "anchorage_ak_us", None, false)
+        .expect("fairbanks loads")
+        .expect("ALCAN Phase B2 Parks must reach Anchorage");
+    assert_eq!(
+        south.cities,
+        vec![
+            "fairbanks_ak_us".to_string(),
+            "nenana_ak_us".to_string(),
+            "healy_ak_us".to_string(),
+            "wasilla_ak_us".to_string(),
+            "anchorage_ak_us".to_string(),
+        ]
+    );
+    assert!(
+        !south.cities.iter().any(|c| c == "cantwell_ak_us"),
+        "Cantwell must stay collapsed, got {:?}",
+        south.cities
+    );
+    let north = world
+        .shortest_route("anchorage_ak_us", "fairbanks_ak_us", None, false)
+        .expect("anchorage loads")
+        .expect("northbound Parks filament must route");
+    assert_eq!(
+        north.cities,
+        vec![
+            "anchorage_ak_us".to_string(),
+            "wasilla_ak_us".to_string(),
+            "healy_ak_us".to_string(),
+            "nenana_ak_us".to_string(),
+            "fairbanks_ak_us".to_string(),
+        ]
+    );
+    // Mat-Su connector both ways; Palmer remains Mat-Su market, Wasilla pass-through.
+    let directed: Vec<_> = world
+        .legs
+        .iter()
+        .map(|leg| (leg.a.as_str(), leg.b.as_str()))
+        .collect();
+    for (a, b) in [
+        ("fairbanks_ak_us", "nenana_ak_us"),
+        ("nenana_ak_us", "fairbanks_ak_us"),
+        ("nenana_ak_us", "healy_ak_us"),
+        ("healy_ak_us", "nenana_ak_us"),
+        ("healy_ak_us", "wasilla_ak_us"),
+        ("wasilla_ak_us", "healy_ak_us"),
+        ("wasilla_ak_us", "anchorage_ak_us"),
+        ("anchorage_ak_us", "wasilla_ak_us"),
+        ("palmer_ak_us", "wasilla_ak_us"),
+        ("wasilla_ak_us", "palmer_ak_us"),
+    ] {
+        assert!(
+            directed.contains(&(a, b)),
+            "missing directed Phase B2 leg {a}->{b}"
+        );
+    }
+    let fbx_nen = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "fairbanks_ak_us" && leg.b == "nenana_ak_us")
+        .expect("fairbanks->nenana");
+    assert!(
+        (fbx_nen.miles - 57.0).abs() < 0.5,
+        "Fairbanks–Nenana must be ~57, got {}",
+        fbx_nen.miles
+    );
+    let nen_hea = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "nenana_ak_us" && leg.b == "healy_ak_us")
+        .expect("nenana->healy");
+    assert!(
+        (nen_hea.miles - 58.0).abs() < 0.5,
+        "Nenana–Healy must be ~58, got {}",
+        nen_hea.miles
+    );
+    let hea_was = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "healy_ak_us" && leg.b == "wasilla_ak_us")
+        .expect("healy->wasilla");
+    assert!(
+        (hea_was.miles - 207.0).abs() < 0.5,
+        "Healy–Wasilla (Cantwell collapsed) must be ~207, got {}",
+        hea_was.miles
+    );
+    let was_anc = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "wasilla_ak_us" && leg.b == "anchorage_ak_us")
+        .expect("wasilla->anchorage");
+    assert!(
+        (was_anc.miles - 44.0).abs() < 0.5,
+        "Wasilla–Anchorage must be ~44, got {}",
+        was_anc.miles
+    );
+    let pal_was = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "palmer_ak_us" && leg.b == "wasilla_ak_us")
+        .expect("palmer->wasilla");
+    assert!(
+        (10.0..=15.0).contains(&pal_was.miles),
+        "Palmer–Wasilla connector must be ~11–13, got {}",
+        pal_was.miles
+    );
+    let healy = world.city("healy_ak_us").expect("healy");
+    assert!(
+        healy
+            .locations
+            .iter()
+            .any(|loc| loc.name.contains("Fisher Fuel")),
+        "Healy thin pin must be Fisher Fuel"
+    );
+    let nenana = world.city("nenana_ak_us").expect("nenana");
+    assert!(
+        !nenana
+            .locations
+            .iter()
+            .any(|loc| loc.name.to_lowercase().contains("a-frame")),
+        "Nenana must not pin unverified A-Frame"
+    );
+    let wasilla = world.city("wasilla_ak_us").expect("wasilla");
+    assert!(
+        !wasilla.locations.iter().any(|loc| {
+            let n = loc.name.to_lowercase();
+            n.contains("holiday") || n.contains("three bears") || n.contains("fishers")
+        }),
+        "Wasilla must not pin unverified travel-center lots"
+    );
+    assert!(
+        world.city("cantwell_ak_us").is_err(),
+        "cantwell_ak_us must not exist while collapsed"
+    );
+}
+
+#[test]
 fn test_legs_are_sane_and_unique() {
     let world = world();
     let mut seen: HashSet<(String, String)> = HashSet::new();

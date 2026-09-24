@@ -1,6 +1,6 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage world_data landed** (glennallen/palmer/anchorage). B2 Parks not started. No full Canada board.
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage** and **B2 Parks** (nenana/healy/wasilla; Cantwell collapsed) world_data landed. No full Canada board.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -21,7 +21,7 @@ Deferred mentions already in-tree:
 | Phase | Scope | This tip? |
 | --- | --- | --- |
 | **A** | Minimal Canada ALCAN corridor that puts Alaska on the continuous truck graph (through-freight only; no Canada domestic cabotage) | **Yes — scaffold/plan only** |
-| **B** | Map Alaska itself (beyond Tok/Fairbanks as mere endpoints — real AK highway graph / cities). Anchorage only when the AK highway graph reaches it continuously. Haines/Skagway = ferry later, never continuous drive. Plan: [`alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) (B1 Tok Cutoff/Glenn first, B2 Parks second). | **B1 data landed**; B2 Parks not started |
+| **B** | Map Alaska itself (beyond Tok/Fairbanks as mere endpoints — real AK highway graph / cities). Anchorage only when the AK highway graph reaches it continuously. Haines/Skagway = ferry later, never continuous drive. Plan: [`alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) (B1 Tok Cutoff/Glenn first, B2 Parks second). | **B1 + B2 data landed**; Cantwell collapsed |
 | **C** | Rest of Canada (full board) | After B |
 | **D** | Europe (#195) | After C |
 
@@ -272,6 +272,6 @@ Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine
 
 ### Blockers for next slice (Phase B Alaska / rest of Canada)
 
-- Phase B plan: [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md). **B1 Tok Cutoff/Glenn → Anchorage landed.** B2 Parks not started.
+- Phase B plan: [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md). **B1 + B2 landed** (Cantwell collapsed; no `cantwell_ak_us`).
 - Prefer public Overpass / regional Geofabrik before any overnight PBF/Valhalla bake.
-- No Parks / Nenana / Healy / Cantwell / Wasilla data until B2.
+- Phase C rest of Canada still deferred.

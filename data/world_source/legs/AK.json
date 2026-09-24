@@ -1094,6 +1094,966 @@
         "traffic_aadt": [],
         "state_crossings": []
       }
+    },
+    {
+      "from": "fairbanks_ak_us",
+      "to": "nenana_ak_us",
+      "miles": 57,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 64.83803,
+            "lon": -147.71674
+          },
+          {
+            "at_mi": 18.53,
+            "lat": 64.78855,
+            "lon": -148.21124
+          },
+          {
+            "at_mi": 40.31,
+            "lat": 64.6982,
+            "lon": -148.76766
+          },
+          {
+            "at_mi": 57.0,
+            "lat": 64.56353,
+            "lon": -149.09584
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 449.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 18.53,
+            "elevation_ft": 1414.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 40.31,
+            "elevation_ft": 958.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 57.0,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 57.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 57.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "nenana_ak_us",
+      "to": "fairbanks_ak_us",
+      "miles": 57,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 64.56353,
+            "lon": -149.09584
+          },
+          {
+            "at_mi": 16.69,
+            "lat": 64.6982,
+            "lon": -148.76766
+          },
+          {
+            "at_mi": 38.47,
+            "lat": 64.78855,
+            "lon": -148.21124
+          },
+          {
+            "at_mi": 57.0,
+            "lat": 64.83803,
+            "lon": -147.71674
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 16.69,
+            "elevation_ft": 958.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 38.47,
+            "elevation_ft": 1414.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 57.0,
+            "elevation_ft": 449.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 57.0,
+            "avg_grade_pct": 0.03,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 57.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "nenana_ak_us",
+      "to": "healy_ak_us",
+      "miles": 58,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 64.56353,
+            "lon": -149.09584
+          },
+          {
+            "at_mi": 21.36,
+            "lat": 64.30252,
+            "lon": -149.07409
+          },
+          {
+            "at_mi": 40.57,
+            "lat": 64.0741,
+            "lon": -149.20051
+          },
+          {
+            "at_mi": 58.0,
+            "lat": 63.87619,
+            "lon": -149.01974
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 21.36,
+            "elevation_ft": 538.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 40.57,
+            "elevation_ft": 1059.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 58.0,
+            "elevation_ft": 1443.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 58.0,
+            "avg_grade_pct": 0.35,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 58.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "healy_ak_us",
+      "to": "nenana_ak_us",
+      "miles": 58,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 63.87619,
+            "lon": -149.01974
+          },
+          {
+            "at_mi": 17.43,
+            "lat": 64.0741,
+            "lon": -149.20051
+          },
+          {
+            "at_mi": 36.64,
+            "lat": 64.30252,
+            "lon": -149.07409
+          },
+          {
+            "at_mi": 58.0,
+            "lat": 64.56353,
+            "lon": -149.09584
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1443.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 17.43,
+            "elevation_ft": 1059.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 36.64,
+            "elevation_ft": 538.1,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 58.0,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 58.0,
+            "avg_grade_pct": -0.35,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 58.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "healy_ak_us",
+      "to": "wasilla_ak_us",
+      "miles": 207,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 63.87619,
+            "lon": -149.01974
+          },
+          {
+            "at_mi": 29.67,
+            "lat": 63.5006,
+            "lon": -148.81683
+          },
+          {
+            "at_mi": 60.13,
+            "lat": 63.1884,
+            "lon": -149.36162
+          },
+          {
+            "at_mi": 91.55,
+            "lat": 62.85297,
+            "lon": -149.87733
+          },
+          {
+            "at_mi": 121.38,
+            "lat": 62.50693,
+            "lon": -150.261
+          },
+          {
+            "at_mi": 151.33,
+            "lat": 62.131,
+            "lon": -150.03877
+          },
+          {
+            "at_mi": 182.7,
+            "lat": 61.72266,
+            "lon": -150.03956
+          },
+          {
+            "at_mi": 207.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 1443.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 29.67,
+            "elevation_ft": 2037.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 60.13,
+            "elevation_ft": 2093.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 91.55,
+            "elevation_ft": 1246.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 121.38,
+            "elevation_ft": 656.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 151.33,
+            "elevation_ft": 377.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 182.7,
+            "elevation_ft": 278.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 207.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 207.0,
+            "avg_grade_pct": -0.1,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 207.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "wasilla_ak_us",
+      "to": "healy_ak_us",
+      "miles": 207,
+      "highway": "George Parks Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          },
+          {
+            "at_mi": 24.3,
+            "lat": 61.72266,
+            "lon": -150.03956
+          },
+          {
+            "at_mi": 55.67,
+            "lat": 62.131,
+            "lon": -150.03877
+          },
+          {
+            "at_mi": 85.62,
+            "lat": 62.50693,
+            "lon": -150.261
+          },
+          {
+            "at_mi": 115.45,
+            "lat": 62.85297,
+            "lon": -149.87733
+          },
+          {
+            "at_mi": 146.87,
+            "lat": 63.1884,
+            "lon": -149.36162
+          },
+          {
+            "at_mi": 177.33,
+            "lat": 63.5006,
+            "lon": -148.81683
+          },
+          {
+            "at_mi": 207.0,
+            "lat": 63.87619,
+            "lon": -149.01974
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 24.3,
+            "elevation_ft": 278.9,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 55.67,
+            "elevation_ft": 377.3,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 85.62,
+            "elevation_ft": 656.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 115.45,
+            "elevation_ft": 1246.7,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 146.87,
+            "elevation_ft": 2093.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 177.33,
+            "elevation_ft": 2037.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 207.0,
+            "elevation_ft": 1443.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 207.0,
+            "avg_grade_pct": 0.1,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 207.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "wasilla_ak_us",
+      "to": "anchorage_ak_us",
+      "miles": 44,
+      "highway": "George Parks Highway / Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          },
+          {
+            "at_mi": 11.3,
+            "lat": 61.46479,
+            "lon": -149.32484
+          },
+          {
+            "at_mi": 28.86,
+            "lat": 61.30572,
+            "lon": -149.58628
+          },
+          {
+            "at_mi": 44.0,
+            "lat": 61.21832,
+            "lon": -149.90035
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 11.3,
+            "elevation_ft": 23.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 28.86,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 44.0,
+            "elevation_ft": 111.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 44.0,
+            "avg_grade_pct": -0.1,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 44.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "anchorage_ak_us",
+      "to": "wasilla_ak_us",
+      "miles": 44,
+      "highway": "George Parks Highway / Glenn Highway",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.21832,
+            "lon": -149.90035
+          },
+          {
+            "at_mi": 15.14,
+            "lat": 61.30572,
+            "lon": -149.58628
+          },
+          {
+            "at_mi": 32.7,
+            "lat": 61.46479,
+            "lon": -149.32484
+          },
+          {
+            "at_mi": 44.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 111.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 15.14,
+            "elevation_ft": 357.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 32.7,
+            "elevation_ft": 23.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 44.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 44.0,
+            "avg_grade_pct": 0.1,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 44.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "palmer_ak_us",
+      "to": "wasilla_ak_us",
+      "miles": 13,
+      "highway": "Mat-Su connector",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          },
+          {
+            "at_mi": 4.69,
+            "lat": 61.5518,
+            "lon": -149.20677
+          },
+          {
+            "at_mi": 9.58,
+            "lat": 61.57019,
+            "lon": -149.34536
+          },
+          {
+            "at_mi": 13.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 4.69,
+            "elevation_ft": 121.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 9.58,
+            "elevation_ft": 252.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 13.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 13.0,
+            "avg_grade_pct": 0.14,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 13.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "wasilla_ak_us",
+      "to": "palmer_ak_us",
+      "miles": 13,
+      "highway": "Mat-Su connector",
+      "terrain": "hills",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.58227,
+            "lon": -149.44257
+          },
+          {
+            "at_mi": 3.42,
+            "lat": 61.57019,
+            "lon": -149.34536
+          },
+          {
+            "at_mi": 8.31,
+            "lat": 61.5518,
+            "lon": -149.20677
+          },
+          {
+            "at_mi": 13.0,
+            "lat": 61.59983,
+            "lon": -149.11274
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 341.2,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 3.42,
+            "elevation_ft": 252.6,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 8.31,
+            "elevation_ft": 121.4,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          },
+          {
+            "at_mi": 13.0,
+            "elevation_ft": 242.8,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 13.0,
+            "avg_grade_pct": -0.14,
+            "terrain": "hills",
+            "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 13.0
+          }
+        ],
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
     }
   ]
 }

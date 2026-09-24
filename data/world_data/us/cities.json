@@ -8094,6 +8094,57 @@
           "source_note": "Port of Alaska (Anchorage) industrial / consignee delivery end near the port complex north of downtown / Ship Creek industrial area. Nominatim 'Port of Alaska, Anchorage' 2026-09-24. Delivery end for Anchorage \u2014 not a public truck stop; fuel/parking remains Essential One (~3 spaces)."
         }
       ]
+    },
+    "nenana_ak_us": {
+      "spoken_city": "Nenana",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 64.5635293,
+      "lon": -149.0959778,
+      "locations": [
+        {
+          "name": "Nenana Parks Highway pass-through stand-in",
+          "type": "company_yard",
+          "lat": 64.5635293,
+          "lon": -149.0959778,
+          "source_note": "Nenana AK Parks Highway pass-through stand-in. No verified public tractor-stop pin: A-Frame SVC / Parks fuel remains unverified for diesel AND tractor parking (ALCAN Phase B plan). Do not invent parking capacity. Not a job-board market."
+        }
+      ]
+    },
+    "healy_ak_us": {
+      "spoken_city": "Healy",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 63.875976,
+      "lon": -149.01869,
+      "locations": [
+        {
+          "name": "Fisher Fuel (Parks Highway MM 249.5)",
+          "type": "company_yard",
+          "lat": 63.875976,
+          "lon": -149.01869,
+          "source_note": "Fisher Fuel at Parks Highway MM 249.5, Healy AK 99743. Coordinates from truckstopsandservices.com directory map pin (63.875976, -149.01869), cross-checked to MM 249.5 / AllStays / GasBuddy listings 2026-09-24. Diesel; AllStays lists ~3 truck parking spaces \u2014 capacity recorded honestly, not inflated. Thin pass-through fuel pin only; Healy is not a job-board market. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+        }
+      ]
+    },
+    "wasilla_ak_us": {
+      "spoken_city": "Wasilla",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 61.5824216,
+      "lon": -149.442563,
+      "locations": [
+        {
+          "name": "Wasilla Parks Highway pass-through stand-in",
+          "type": "company_yard",
+          "lat": 61.5824216,
+          "lon": -149.442563,
+          "source_note": "Wasilla AK Parks Highway pass-through stand-in. Not a Mat-Su job-board market \u2014 Palmer remains the sole Mat-Su market. Holiday / Three Bears / Fishers Big Lake lots remain unverified for diesel AND tractor parking (ALCAN Phase B plan). Do not invent parking capacity. No fuel pin."
+        }
+      ]
     }
   }
 }

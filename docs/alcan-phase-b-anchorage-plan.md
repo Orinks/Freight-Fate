@@ -1,6 +1,6 @@
 # ALCAN Phase B plan — Anchorage on the continuous AK truck graph
 
-Status: **B1 world_data landed** (Tok Cutoff/Glenn → Anchorage). Plan FIX tip `37915685` kept. Phase A Lower-48 → Fairbanks **KEEP**. B2 Parks **not started**. Both corridors + B1-then-B2 order **KEEP**.
+Status: **B1 + B2 world_data landed** (Tok Cutoff/Glenn → Anchorage; Parks Fairbanks → Anchorage with Cantwell collapsed). Plan FIX tip `37915685` kept. Phase A Lower-48 → Fairbanks **KEEP**. Both corridors + B1-then-B2 order **KEEP**.
 
 Parent scaffold: [`docs/alcan-corridor-scaffold-plan.md`](./alcan-corridor-scaffold-plan.md) (sequence A corridor → **B Alaska map** → C rest of Canada → D Europe).
 
