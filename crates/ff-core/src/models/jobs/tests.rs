@@ -1302,3 +1302,64 @@ fn a_gulf_coast_board_usually_carries_placarded_or_fuel_freight_for_a_holder() {
         "{carrying} of {boards} Houston boards carried placarded or fuel freight"
     );
 }
+
+#[test]
+fn test_generated_jobs_never_use_travel_center_or_truck_parking_endpoints() {
+    // Sample major boards plus ALCAN cities that only curate public lots.
+    let cities = [
+        "Chicago",
+        "Houston",
+        "Anchorage",
+        "tok_ak_us",
+        "fairbanks_ak_us",
+        "healy_ak_us",
+        "glennallen_ak_us",
+        "blaine_wa_us",
+        "surrey_bc_ca",
+        "whitehorse_yt_ca",
+        "fort_nelson_bc_ca",
+        "watson_lake_yt_ca",
+    ];
+    for city in cities {
+        for seed in 0..12 {
+            for job in offers(seed, city, ALL, 8) {
+                assert_ne!(
+                    job.origin_type, "travel_center",
+                    "{city} seed {seed} origin {}",
+                    job.origin_location
+                );
+                assert_ne!(
+                    job.origin_type, "truck_parking",
+                    "{city} seed {seed} origin {}",
+                    job.origin_location
+                );
+                assert_ne!(
+                    job.destination_type, "travel_center",
+                    "{city} seed {seed} dest {}",
+                    job.destination_location
+                );
+                assert_ne!(
+                    job.destination_type, "truck_parking",
+                    "{city} seed {seed} dest {}",
+                    job.destination_location
+                );
+            }
+        }
+    }
+    // Travel-center-only cities must offer an empty board, not invent freight.
+    for city in ["tok_ak_us", "healy_ak_us", "blaine_wa_us", "surrey_bc_ca"] {
+        assert!(
+            offers(1, city, ALL, 8).is_empty(),
+            "{city} must not mint jobs from a fuel/parking-only pin"
+        );
+    }
+    // Anchorage still boards from the Port terminal (some seeds miss when the
+    // dest cycle lands only on travel-center-only neighbors; check a range).
+    let anchorage_jobs: usize = (0..20)
+        .map(|seed| offers(seed, "anchorage_ak_us", ALL, 8).len())
+        .sum();
+    assert!(
+        anchorage_jobs > 0,
+        "Anchorage Port terminal must still mint jobs across seeds"
+    );
+}

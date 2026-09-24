@@ -761,18 +761,18 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
         &["electronics", "general", "retail", "parcel"],
     ),
     (
-        // Public travel centers / fuel+parking lots used as city pins (ALCAN
-        // corridor). Same soft freight roles as company_yard so stand-in
-        // markets that only curate a real truck stop stay job-board capable.
+        // Public travel centers / fuel+parking lots used as city pins.
+        // Fuel, parking, and rest only — never job-board freight endpoints.
         "travel_center",
-        &["general", "retail", "parcel"],
-        &["general", "retail", "parcel", "fuel_bulk"],
+        &[],
+        &[],
     ),
     (
         // Public tractor parking lots (no travel-center amenities required).
+        // Parking and rest only — never job-board freight endpoints.
         "truck_parking",
-        &["general", "retail", "parcel"],
-        &["general", "retail", "parcel"],
+        &[],
+        &[],
     ),
     (
         "warehouse",

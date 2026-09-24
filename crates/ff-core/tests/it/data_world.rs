@@ -196,8 +196,18 @@ fn test_every_city_has_locations_with_known_cargo() {
             );
             assert!(!loc.spoken_name().is_empty());
             assert!(!loc.source_note.is_empty());
-            assert!(!loc.roles.is_empty());
-            assert!(!loc.ships.is_empty() || !loc.receives.is_empty());
+            let service_only = matches!(
+                loc.facility_type.as_str(),
+                "travel_center" | "truck_parking"
+            );
+            if service_only {
+                // Fuel / parking / rest pins: no freight roles by design.
+                assert!(loc.ships.is_empty() && loc.receives.is_empty());
+                assert!(loc.roles.is_empty());
+            } else {
+                assert!(!loc.roles.is_empty());
+                assert!(!loc.ships.is_empty() || !loc.receives.is_empty());
+            }
         }
     }
 }
@@ -218,6 +228,32 @@ fn test_home_terminal_prefers_explicit_terminal_and_falls_back_to_yard() {
     assert_eq!(fallback.name, "Chicago Company Yard");
     assert_eq!(fallback.label(), "company yard");
     assert_eq!(fallback.spoken_name(), "company yard: Chicago Company Yard");
+}
+
+#[test]
+fn test_home_terminal_never_picks_travel_center_or_truck_parking() {
+    let world = world();
+    // Healy's only curated pin is Fisher Fuel (travel_center). Home terminal
+    // must announce a synthetic company yard, never the fuel stop.
+    let healy = world.home_terminal("healy_ak_us").expect("healy");
+    assert_eq!(healy.kind, "company_yard");
+    assert_eq!(healy.name, "Healy Company Yard");
+    assert!(!healy.name.to_lowercase().contains("fisher"));
+    assert_ne!(healy.kind, "travel_center");
+    assert_ne!(healy.kind, "truck_parking");
+
+    let err = world
+        .default_facility("healy_ak_us")
+        .expect_err("Healy has no company_yard/terminal");
+    assert!(
+        err.to_string().contains("no freight facilities"),
+        "unexpected default_facility error: {err}"
+    );
+
+    // Anchorage keeps Port of Alaska as terminal home.
+    let anc = world.home_terminal("anchorage_ak_us").expect("anchorage");
+    assert_eq!(anc.kind, "terminal");
+    assert!(anc.name.contains("Port of Alaska"));
 }
 
 #[test]
@@ -1588,6 +1624,73 @@ fn test_alcan_public_lots_use_travel_center_or_truck_parking() {
     );
     let surrey = world.city("surrey_bc_ca").expect("surrey");
     assert_eq!(surrey.locations.len(), 1);
+}
+
+#[test]
+fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
+    use ff_core::data::world_constants::{
+        facility_cargo_roles, lookup, DEFAULT_POI_ACTIONS, FACILITY_APPROACH_MILES,
+        FACILITY_APPROACH_ROADS,
+    };
+    let world = world();
+    let cases = [
+        ("blaine_wa_us", "TA Express", "travel_center"),
+        ("surrey_bc_ca", "Truck Parking", "truck_parking"),
+        ("prince_george_bc_ca", "Husky / Esso", "travel_center"),
+        ("dawson_creek_bc_ca", "Husky", "travel_center"),
+        ("fort_st_john_bc_ca", "Smith Fuel", "travel_center"),
+        ("fort_nelson_bc_ca", "Esso", "travel_center"),
+        ("watson_lake_yt_ca", "Petro-Canada", "travel_center"),
+        ("whitehorse_yt_ca", "McCrae", "travel_center"),
+        ("tok_ak_us", "Chevron", "travel_center"),
+        ("fairbanks_ak_us", "Sourdough", "travel_center"),
+        ("glennallen_ak_us", "Hub of Alaska", "travel_center"),
+        ("glennallen_ak_us", "Glennallen Fuel", "travel_center"),
+        ("anchorage_ak_us", "Essential One", "travel_center"),
+        ("healy_ak_us", "Fisher Fuel", "travel_center"),
+    ];
+    assert_eq!(cases.len(), 14, "all ALCAN retyped public lots");
+    for (city, needle, want) in cases {
+        let c = world.city(city).unwrap_or_else(|_| panic!("{city}"));
+        let loc = c
+            .locations
+            .iter()
+            .find(|l| l.name.contains(needle))
+            .unwrap_or_else(|| panic!("{city} missing {needle}"));
+        assert_eq!(loc.facility_type, want, "{city} {needle}");
+        assert!(
+            loc.ships.is_empty() && loc.receives.is_empty(),
+            "{city} {needle} must ship/receive no freight"
+        );
+        let (ships, receives) = facility_cargo_roles(want).expect("roles table");
+        assert!(
+            ships.is_empty() && receives.is_empty(),
+            "{want} cargo roles"
+        );
+        let actions = lookup(DEFAULT_POI_ACTIONS, want).expect("poi actions");
+        assert!(
+            actions.iter().any(|a| *a == "park"),
+            "{want} must support parking"
+        );
+        assert!(
+            actions.iter().any(|a| *a == "break" || *a == "sleep"),
+            "{want} must support rest"
+        );
+        if want == "travel_center" {
+            assert!(
+                actions.iter().any(|a| *a == "fuel"),
+                "travel_center must support fuel"
+            );
+        }
+        assert!(
+            lookup(FACILITY_APPROACH_MILES, want).is_some(),
+            "{want} approach miles"
+        );
+        assert!(
+            lookup(FACILITY_APPROACH_ROADS, want).is_some(),
+            "{want} approach road"
+        );
+    }
 }
 
 #[test]

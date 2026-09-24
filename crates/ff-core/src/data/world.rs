@@ -678,38 +678,36 @@ impl World {
     }
 
     /// Stable fallback for legacy jobs that only named a city.
+    ///
+    /// Only `company_yard` or `terminal` may be returned. Travel centers and
+    /// truck parking are fuel/rest pins, never dispatch yards. When the city
+    /// has neither, this errors (`{city} has no freight facilities`) rather
+    /// than inventing a warehouse or picking a fuel stop — callers should
+    /// treat that city as not offering a default freight endpoint.
     pub fn default_facility(&self, city: &str) -> Result<&Location, DataError> {
         let key = self.resolve_city_key(city);
         let Some(city_obj) = self.cities.get(&key) else {
             return Err(DataError::key(format!("Unknown city: {city}")));
         };
         let locations = &city_obj.locations;
-        const PREFERRED: &[&str] = &[
-            "company_yard",
-            "travel_center",
-            "truck_parking",
-            "terminal",
-            "dry_warehouse",
-            "warehouse",
-            "distribution",
-            "cross_dock",
-        ];
+        const PREFERRED: &[&str] = &["company_yard", "terminal"];
         for facility_type in PREFERRED {
             if let Some(location) = locations.iter().find(|l| l.facility_type == *facility_type) {
                 return Ok(location);
             }
         }
-        locations
-            .first()
-            .ok_or_else(|| DataError::key(format!("{city} has no freight facilities")))
+        Err(DataError::key(format!("{city} has no freight facilities")))
     }
 
     /// Return the player's dispatch yard for a service area.
     ///
-    /// The world data mostly lists shippers and receivers rather than company
-    /// yards, so explicit terminal facilities are preferred and every other
-    /// city gets a stable fallback yard name. `HomeTerminal.city` carries the
-    /// spoken city name -- the terminal object exists to be announced.
+    /// Prefers an explicit `terminal`, then an explicit `company_yard`. Travel
+    /// centers and truck parking are never home terminals (fuel/rest only).
+    /// When the city has neither yard type, a stable synthetic
+    /// "`{city} Company Yard`" name is announced for the service area — same
+    /// historical contract for towns that list shippers/receivers but no
+    /// company terminal. `HomeTerminal.city` carries the spoken city name.
+    /// Regional carrier hiring by home terminal builds on this rule.
     pub fn home_terminal(&self, city: &str) -> Result<HomeTerminal, DataError> {
         let key = self.resolve_city_key(city);
         let Some(city_obj) = self.cities.get(&key) else {
@@ -737,18 +735,6 @@ impl World {
                 &city_obj.name,
                 &city_obj.state,
                 "company_yard",
-            ));
-        }
-        if let Some(location) = city_obj
-            .locations
-            .iter()
-            .find(|l| l.facility_type == "travel_center" || l.facility_type == "truck_parking")
-        {
-            return Ok(HomeTerminal::new(
-                &location.name,
-                &city_obj.name,
-                &city_obj.state,
-                &location.facility_type,
             ));
         }
         Ok(HomeTerminal::new(

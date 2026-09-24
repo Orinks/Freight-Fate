@@ -126,9 +126,18 @@ pub(super) fn validate_city_locations(
                 "{city} facility {rname} has no source note"
             )));
         }
-        if location.ships.is_empty() && location.receives.is_empty() {
+        let service_only = matches!(
+            location.facility_type.as_str(),
+            "travel_center" | "truck_parking"
+        );
+        if location.ships.is_empty() && location.receives.is_empty() && !service_only {
             return Err(DataError::value(format!(
                 "{city} facility {rname} has no cargo roles"
+            )));
+        }
+        if service_only && !(location.ships.is_empty() && location.receives.is_empty()) {
+            return Err(DataError::value(format!(
+                "{city} facility {rname} is a fuel/rest pin and must not carry freight cargo roles"
             )));
         }
         facilities_by_id.insert(location.id.clone(), location.clone());
