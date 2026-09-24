@@ -1247,6 +1247,10 @@ and unnamed as blockers for the ALCAN corridor.
 - [x] **APU on/off** as low hotel burn versus idling the tractor. Alt+U.
 - [x] **Fuel island: tractor-off required** while reefer TRU / APU may stay on
       ("Shut the engine off before you fuel.").
+- [ ] **Frozen setpoint (-18 C)** for loads to or from frozen-food docks,
+      keyed off `facility_ships_frozen_as_chilled` (the same facility check
+      that drives the chilled spoken cargo label). Drop the chilled relabel
+      once this lands.
 - [ ] *(defer)* Multi-temp compartments, shore power, deep TRU fault trees,
       battery APU, scored idle noise, and HOS accounting driven from reefer
       duty — park until the coarse slice earns its keep.
