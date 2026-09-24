@@ -41,6 +41,8 @@
 
 - **The exit speed is now said as you enter the deceleration lane.** A ramp curve taken faster than that shifts the load.
 
+- **Exit ramps are now as long as the real ones.** A short ramp gives you less room to stop at the bottom.
+
 - **A loaded delivery's deadline now covers a legal sleep forced by your current hours.** Dispatch checks again at departure and tells you when it adjusts the time.
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.

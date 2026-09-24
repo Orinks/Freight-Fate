@@ -3,7 +3,7 @@
 //! realistic exit redesign, 2026-09-24; the pieces are in
 //! `trip_models::ramps`).
 
-use crate::sim::trip_models::{exit_ramp_layout, ExitRampLayout, RoadStop};
+use crate::sim::trip_models::{deceleration_lane_mi, exit_ramp_layout, ExitRampLayout, RoadStop};
 
 use super::Trip;
 
@@ -21,15 +21,18 @@ impl Trip {
 
     /// Gore-to-stop-bar length of the exit ramp serving `stop`, in miles.
     ///
-    /// The one place a ramp's length comes from. With no per-exit record it
-    /// is the sourced default: the Green Book deceleration lane for this
-    /// corridor and ramp speed, the ramp speed's own curve, and a DERIVED
-    /// climb plus an ASSUMED queue (see `exit_ramp_layout`) -- about 1,200 to
-    /// 2,000 feet, where the unsourced flat half mile it replaced was 2,640.
+    /// The one place a ramp's length comes from. The Green Book deceleration
+    /// lane for this corridor and ramp speed, then the exit's own ramp as
+    /// OpenStreetMap measures it from the gore to the crossroad (the bake
+    /// starts at the gore, so the lane goes in front). With no measured length
+    /// it is the sourced default: the lane, the ramp speed's own curve, and a
+    /// DERIVED climb plus an ASSUMED queue (see `exit_ramp_layout`).
     pub fn ramp_length_mi(&self, stop: &RoadStop) -> f64 {
-        // ramp-length bake: prefer the per-exit record once it lands
         let (highway_mph, ramp_mph, grade_pct) = self.exit_ramp_inputs(stop);
-        exit_ramp_layout(highway_mph, ramp_mph, grade_pct, None).length_mi()
+        let measured = self
+            .ramp_length_mi_at(stop.interchange_mi.unwrap_or(stop.at_mi))
+            .map(|osm_mi| deceleration_lane_mi(highway_mph, ramp_mph, grade_pct) + osm_mi);
+        exit_ramp_layout(highway_mph, ramp_mph, grade_pct, measured).length_mi()
     }
 
     /// The exit ramp serving `stop`, piece by piece, fitted to

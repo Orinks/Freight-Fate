@@ -1345,9 +1345,14 @@ mainline behaviour.
       comes from `Trip::ramp_length_mi`: lane, curve, a derived 590 ft climb
       and an assumed 200 ft queue, about 1,200 to 2,000 ft where the flat
       unsourced half mile was 2,640.
-- [ ] **Per-exit ramp length from OSM.** `Trip::ramp_length_mi` returns the
-      default until the interchange record carries a measured gore-to-
-      terminal distance (bake in progress); prefer the record once it lands.
+- [x] **Per-exit ramp length from OSM.** Each exit carries its ramp length
+      per direction, measured along the ramp from where it leaves the
+      motorway to where it meets the surface road (or the merge on a
+      freeway-to-freeway ramp). It covers 16,882 of 18,165 exits (92.9%),
+      median 1,474 ft (5th percentile 735, 95th 3,456); 172 values under
+      300 ft and 47 over 1.5 miles were dropped. The OSM length starts at
+      the gore, so `Trip::ramp_length_mi` adds the deceleration lane in
+      front of it; exits without a length keep the derived default.
 - [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
       assumed level because nothing records its climb or drop. Needs an
       elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.

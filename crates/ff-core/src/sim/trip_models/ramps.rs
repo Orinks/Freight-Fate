@@ -236,6 +236,11 @@ pub const RAMP_TANGENT_CLIMB_FT: f64 = 590.0;
 /// 40 feet per vehicle for 15 to 19 percent trucks (RDM Table 4-14, READ);
 /// the vehicle count is the assumption.
 pub const RAMP_QUEUE_FT: f64 = 200.0;
+/// READ: the deceleration the Green Book's stopping sight distance is built
+/// on, 11.2 ft/s^2 (2018 section 3.2.2). A measured ramp too short to hold
+/// its curve and a stop from the curve speed at that rate keeps that stop
+/// anyway: the curve is our assumed shape, the stop at the bar is not.
+pub const RAMP_STOP_DECEL_FT_S2: f64 = 11.2;
 
 /// One exit ramp, gore to stop bar: the deceleration lane, the controlling
 /// curve, and the tangent run down to the terminal.
@@ -277,7 +282,11 @@ pub fn exit_ramp_layout(
     let decel_mi = deceleration_lane_mi(highway_mph, ramp_mph, mainline_grade_pct);
     let curve_mi = ramp_curve_mi(ramp_mph);
     let tangent_mi = match length_mi {
-        Some(length) => (length - decel_mi - curve_mi).max(0.0),
+        Some(length) => {
+            let curve_fps = ramp_mph * 5280.0 / 3600.0;
+            let stop_mi = curve_fps * curve_fps / (2.0 * RAMP_STOP_DECEL_FT_S2) / 5280.0;
+            (length - decel_mi - curve_mi).max(stop_mi)
+        }
         None => (RAMP_TANGENT_CLIMB_FT + RAMP_QUEUE_FT) / 5280.0,
     };
     ExitRampLayout {
@@ -370,6 +379,19 @@ mod tests {
     fn merge_target_tracks_traffic_speed_instead_of_a_fixed_shortfall() {
         assert_eq!(merge_traffic_target_mph(70.0), 52.5);
         assert_eq!(merge_traffic_target_mph(55.0), 41.25);
+    }
+
+    #[test]
+    fn a_measured_ramp_fits_its_run_and_never_loses_room_to_stop() {
+        let lane = deceleration_lane_mi(70.0, 45.0, 0.0);
+        let curve = ramp_curve_mi(45.0);
+        let long = exit_ramp_layout(70.0, 45.0, 0.0, Some(lane + 1500.0 / 5280.0));
+        assert!((long.length_mi() - (lane + 1500.0 / 5280.0)).abs() < 1e-9);
+        assert!((long.tangent_mi - (1500.0 / 5280.0 - curve)).abs() < 1e-9);
+        // 300 ft of ramp cannot hold a 45 mph curve and a stop: the run keeps
+        // the Green Book stopping distance, 66^2 / 22.4 = 194.5 ft.
+        let short = exit_ramp_layout(70.0, 45.0, 0.0, Some(lane + 300.0 / 5280.0));
+        assert!((short.tangent_mi * 5280.0 - 194.46).abs() < 0.1);
     }
 
     fn lane_ft(highway_mph: f64, ramp_mph: f64, grade_pct: f64) -> f64 {
