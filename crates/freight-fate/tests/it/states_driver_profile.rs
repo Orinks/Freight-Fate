@@ -49,7 +49,7 @@ fn full_profile() -> Value {
             "damageFreeRate": 99.0,
             "safetyRecord": {
                 "citations": 2, "seriousViolations": 0, "majorOffenses": 0,
-                "cargoClaims": 1, "carrierTerminations": 0, "repossessions": 0,
+                "outOfServiceOrders": 1, "cargoClaims": 1, "carrierTerminations": 0, "repossessions": 0,
             },
             "statesVisited": 12,
             "citiesVisited": 40,
@@ -106,8 +106,8 @@ fn test_the_rows_follow_the_designs_spoken_order_one_fact_each() {
             "Lifetime miles: 45,679",
             "On time: 97 percent",
             "Damage free: 99 percent",
-            "Safety record: 2 citations, 0 serious violations, 0 major offenses, 1 cargo claim, \
-             0 carrier terminations, 0 repossessions",
+            "Safety record: 2 citations, 0 serious violations, 0 major offenses, \
+             1 out-of-service order, 1 cargo claim, 0 carrier terminations, 0 repossessions",
             "States visited: 12",
             "Cities visited: 40",
             "Longest haul: 1,200 miles",
@@ -148,6 +148,21 @@ fn test_a_driver_with_nothing_shared_yet_reads_as_empty_not_broken() {
             "No road journal entries yet",
         ]
     );
+}
+
+#[test]
+fn test_a_site_that_does_not_send_orders_reads_the_record_without_them() {
+    let mut profile = full_profile();
+    profile["snapshot"]["safetyRecord"]
+        .as_object_mut()
+        .expect("a record")
+        .remove("outOfServiceOrders");
+    let listed = profile_rows(&profile);
+    let record = listed
+        .iter()
+        .find(|r| r.starts_with("Safety record"))
+        .expect("a safety record row");
+    assert!(!record.contains("out-of-service"), "{record}");
 }
 
 #[test]

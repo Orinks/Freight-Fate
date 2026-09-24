@@ -30,14 +30,14 @@ KEY = "modal"
 RNG = np.random.default_rng(7)
 
 IDLE_RPM = 647.0
-FIRING_ORDER = [1, 5, 3, 6, 2, 4]     # classic inline-six firing order
-LOPE_DEPTH = 0.16                     # half-order amplitude wobble (~5 Hz @ idle)
-C2C_JITTER = 0.06                     # combustion-to-combustion amplitude spread
-CYL_TRIM_SD = 0.05                    # fixed per-cylinder amplitude imbalance
-KNOCK_BASE = 0.45                     # combustion grit already present at idle
-KNOCK_GAIN = 0.55                     # extra knock that comes in with load
-BED_LEVEL = 1.0                       # continuous mechanical/airflow bed (fills
-                                      # the gaps between firings -> real fullness)
+FIRING_ORDER = [1, 5, 3, 6, 2, 4]  # classic inline-six firing order
+LOPE_DEPTH = 0.16  # half-order amplitude wobble (~5 Hz @ idle)
+C2C_JITTER = 0.06  # combustion-to-combustion amplitude spread
+CYL_TRIM_SD = 0.05  # fixed per-cylinder amplitude imbalance
+KNOCK_BASE = 0.45  # combustion grit already present at idle
+KNOCK_GAIN = 0.55  # extra knock that comes in with load
+BED_LEVEL = 1.0  # continuous mechanical/airflow bed (fills
+# the gaps between firings -> real fullness)
 N_MODES = 30
 
 
@@ -65,13 +65,13 @@ def derive_modes() -> list[tuple[float, float, float]]:
         env[i] = S[np.abs(logf - logf[i]) <= half].mean()
 
     band = (f >= 40.0) & (f <= 4500.0)
-    idx0 = np.argmax(band)
     e = env[band]
     ff = f[band]
     # min ~1/6-octave spacing between picked modes
     df = f[1] - f[0]
-    peaks, props = find_peaks(e, distance=max(1, int((ff.mean() / 6) / df)),
-                              prominence=e.max() * 0.02)
+    peaks, props = find_peaks(
+        e, distance=max(1, int((ff.mean() / 6) / df)), prominence=e.max() * 0.02
+    )
     if len(peaks) < N_MODES:
         peaks, props = find_peaks(e, prominence=e.max() * 0.005)
     order = np.argsort(props["prominences"])[::-1][:N_MODES]
@@ -114,12 +114,12 @@ def build_excitation(rpm_of_t: np.ndarray) -> np.ndarray:
 
     cyl_trim = 1.0 + RNG.normal(0.0, CYL_TRIM_SD, 6)
 
-    rate = rpm_of_t / 20.0 / C.SR          # firings per sample
+    rate = rpm_of_t / 20.0 / C.SR  # firings per sample
     phase = np.cumsum(rate)
     ev = np.where(np.diff(np.floor(phase)) >= 1)[0] + 1
 
     for idx in ev:
-        k = int(phase[idx])                # global firing count
+        k = int(phase[idx])  # global firing count
         cyl = FIRING_ORDER[k % 6] - 1
         lope = 1.0 + LOPE_DEPTH * np.sin(2.0 * np.pi * (k / 6.0))
         amp = cyl_trim[cyl] * lope * (1.0 + RNG.normal(0.0, C2C_JITTER))
@@ -127,8 +127,8 @@ def build_excitation(rpm_of_t: np.ndarray) -> np.ndarray:
         knock = KNOCK_BASE + KNOCK_GAIN * load
         L = min(lk, n - idx)
         seg = kern[:L]
-        exc[idx:idx + L] += amp * seg
-        exc[idx:idx + L] += amp * knock * RNG.standard_normal(L) * seg
+        exc[idx : idx + L] += amp * seg
+        exc[idx : idx + L] += amp * knock * RNG.standard_normal(L) * seg
     # Continuous mechanical/airflow bed: a steady low-level broadband drive so
     # the resonators never fall completely silent between firings. Its level is
     # fixed (not load-scaled), so it fills the idle without dragging the rev
@@ -148,7 +148,7 @@ def _biquad_bandpass(f0: float, q: float):
 def run_bank(exc: np.ndarray, modes) -> np.ndarray:
     """Parallel fixed resonator bank -- the sum is the engine body's response."""
     out = np.zeros_like(exc)
-    for (f0, q, g) in modes:
+    for f0, q, g in modes:
         b, a = _biquad_bandpass(f0, q)
         out += g * lfilter(b, a, exc)
     return out
@@ -179,8 +179,7 @@ def apply_logf_gain(x: np.ndarray, gain: np.ndarray) -> np.ndarray:
     n = len(x)
     f = np.fft.rfftfreq(n, 1.0 / C.SR)
     lf = np.log2(np.maximum(f, 1.0))
-    g = np.interp(lf, np.log2(C.THIRD_OCT), gain,
-                  left=gain[0], right=gain[-1])
+    g = np.interp(lf, np.log2(C.THIRD_OCT), gain, left=gain[0], right=gain[-1])
     return np.fft.irfft(np.fft.rfft(x) * g, n)
 
 
@@ -198,7 +197,7 @@ def main() -> None:
     idle_raw = synth(np.full(int(3.0 * C.SR), IDLE_RPM), modes)
     gain = third_oct_gain(idle_raw)
     idle_eq = apply_logf_gain(idle_raw, gain)
-    body = idle_eq[int(0.3 * C.SR):int(2.7 * C.SR)]
+    body = idle_eq[int(0.3 * C.SR) : int(2.7 * C.SR)]
     body = body - body.mean()
     loop = C.make_seamless_loop(body, xfade_s=0.14)
     idle_out = C.tile(loop, 6.0)
@@ -211,9 +210,8 @@ def main() -> None:
     rev = apply_logf_gain(synth(rpm, modes), gain)
 
     # Cruise: steady 1500 rpm, EQ, re-loop seamless, tile to 4 s.
-    cruise_raw = apply_logf_gain(synth(np.full(int(1.6 * C.SR), 1500.0), modes),
-                                 gain)
-    cbody = cruise_raw[int(0.25 * C.SR):int(1.45 * C.SR)]
+    cruise_raw = apply_logf_gain(synth(np.full(int(1.6 * C.SR), 1500.0), modes), gain)
+    cbody = cruise_raw[int(0.25 * C.SR) : int(1.45 * C.SR)]
     cbody = cbody - cbody.mean()
     cruise = C.tile(C.make_seamless_loop(cbody, xfade_s=0.12), 4.0)
 
@@ -228,12 +226,12 @@ def main() -> None:
 
     print("modes (f,Q,g):")
     for mfq in modes:
-        print("   %6.1f Hz  Q%4.1f  g%.3f" % mfq)
+        f_hz, q, g = mfq
+        print(f"   {f_hz:6.1f} Hz  Q{q:4.1f}  g{g:.3f}")
     print("wrote:")
     for p in paths:
         print("  ", p)
-    print("rms  idle=%.3f rev=%.3f cruise=%.3f"
-          % (rms(idle_out), rms(rev), rms(cruise)))
+    print(f"rms  idle={rms(idle_out):.3f} rev={rms(rev):.3f} cruise={rms(cruise):.3f}")
     print("score:", C.score(loop, rev))
 
 

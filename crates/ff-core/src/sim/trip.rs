@@ -29,6 +29,7 @@ use crate::sim::vehicle::TruckState;
 use crate::sim::weather::WeatherSystem;
 use crate::units::{distance_unit, spoken_distance, spoken_gap, to_distance};
 
+mod exit_ramps;
 mod limits;
 mod lookups;
 mod placement;
@@ -333,6 +334,10 @@ pub struct Trip {
     /// While on an exit ramp the truck is off the highway: the mile marker
     /// holds and highway events pause.
     pub on_ramp: bool,
+    /// The grade under the truck on the ramp proper, published each tick by
+    /// the driving state; None reads the mainline's, which is right for the
+    /// deceleration lane running beside it. Honoured only while `on_ramp`.
+    pub ramp_grade: Option<f64>,
     pub last_moved_mi: f64,
     pub announced_cities: HashSet<usize>,
     pub announced_navigation: HashSet<String>,
@@ -487,6 +492,7 @@ impl Trip {
             planned_stop_key: None,
             exit_in_progress: None,
             on_ramp: false,
+            ramp_grade: None,
             last_moved_mi: 0.0,
             announced_cities: HashSet::new(),
             announced_navigation: HashSet::new(),

@@ -13,7 +13,7 @@ hiccup at the patch, and both edges crossfade linearly (correlated,
 near-periodic material). Jake loops are exempt: their pops ARE the
 instrument.
 
-Usage: uv run python tools/patch_loop_transients.py  (repairs in place,
+Usage: uv run --group tooling python tools/patch_loop_transients.py  (repairs in place,
 prints a before/after event report).
 """
 

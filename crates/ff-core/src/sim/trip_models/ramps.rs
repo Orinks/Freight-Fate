@@ -113,18 +113,81 @@ pub fn acceleration_lane_capability_mph(truck: &TruckState, lane_mi: f64, grade:
     simulated.speed_mph()
 }
 
-// Getting OFF is the same problem mirrored: AASHTO Green Book Table 10-5
-// (TxDOT RDM Table 3-15), feet of deceleration lane by design speed.
-pub const DECELERATION_LANE_FT: [(f64, f64); 8] = [
-    (30.0, 235.0),
-    (40.0, 315.0),
-    (50.0, 435.0),
-    (55.0, 480.0),
-    (60.0, 530.0),
-    (65.0, 570.0),
-    (70.0, 615.0),
-    (75.0, 660.0),
+// -- Getting off the highway: the deceleration lane --------------------------
+// READ: AASHTO Green Book 2018 (7th ed.) Table 10-6, "Minimum Deceleration
+// Lane Lengths for Exit Terminals with Flat Grades of Less Than 3 Percent",
+// as reproduced in the NCHRP 15-75 appendices (Report 1081, 2024) and
+// matching WSDOT Design Manual Exhibit 1360-11. Earlier editions numbered it
+// 10-5, and so did this comment until 2026-09-24, when it also had 40 mph at
+// 315 feet (the book says 320) and no 45 mph row at all.
+//
+// Feet of lane from the point the lane is full width to the ramp's
+// controlling feature, by highway design speed (rows) and the design speed
+// of that controlling feature (columns). Column 0 is the Stop condition. A
+// row ends where the book prints "--": a ramp feature that fast off a road
+// that slow is not a combination the table sizes.
+pub const DECELERATION_LANE_RAMP_MPH: [f64; 9] =
+    [0.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0];
+pub const DECELERATION_LANE_FT: [(f64, &[f64]); 11] = [
+    (30.0, &[235.0, 200.0, 170.0, 140.0]),
+    (35.0, &[280.0, 250.0, 210.0, 185.0, 150.0]),
+    (40.0, &[320.0, 295.0, 265.0, 235.0, 185.0, 155.0]),
+    (45.0, &[385.0, 350.0, 325.0, 295.0, 250.0, 220.0]),
+    (
+        50.0,
+        &[435.0, 405.0, 385.0, 355.0, 315.0, 285.0, 225.0, 175.0],
+    ),
+    (
+        55.0,
+        &[480.0, 455.0, 440.0, 410.0, 380.0, 350.0, 285.0, 235.0],
+    ),
+    (
+        60.0,
+        &[
+            530.0, 500.0, 480.0, 460.0, 430.0, 405.0, 350.0, 300.0, 240.0,
+        ],
+    ),
+    (
+        65.0,
+        &[
+            570.0, 540.0, 520.0, 500.0, 470.0, 440.0, 390.0, 340.0, 280.0,
+        ],
+    ),
+    (
+        70.0,
+        &[
+            615.0, 590.0, 570.0, 550.0, 520.0, 490.0, 440.0, 390.0, 340.0,
+        ],
+    ),
+    (
+        75.0,
+        &[
+            660.0, 635.0, 620.0, 600.0, 575.0, 535.0, 490.0, 440.0, 390.0,
+        ],
+    ),
+    (
+        80.0,
+        &[
+            705.0, 680.0, 665.0, 645.0, 620.0, 580.0, 535.0, 490.0, 440.0,
+        ],
+    ),
 ];
+
+/// READ: Green Book 2018 Table 10-5, the DECELERATION column (TxDOT RDM Table
+/// 4-19, WSDOT Exhibit 1360-11): `(grade percent, factor)`. Upgrades help a
+/// truck shed speed, so less lane; downgrades fight it, so more. The book's
+/// bands are "3 to 4" and "5 to 6" percent; WSDOT's reading, "3 to less than
+/// 5" and "5 or more", closes the gap between them and is what this uses.
+pub const DECELERATION_LANE_GRADE_FACTOR: [(f64, f64); 4] =
+    [(3.0, 0.9), (5.0, 0.8), (-3.0, 1.2), (-5.0, 1.35)];
+
+/// Feet of Table 10-6 for one highway row at one ramp speed, clamped to the
+/// columns the row prints.
+fn deceleration_row_ft(row: &[f64], ramp_mph: f64) -> f64 {
+    let columns = &DECELERATION_LANE_RAMP_MPH[..row.len()];
+    let table: Vec<(f64, f64)> = columns.iter().copied().zip(row.iter().copied()).collect();
+    interpolate_lane_ft(&table, ramp_mph)
+}
 
 /// AASHTO ramp design speed as a share of the mainline: directional ramps
 /// take the top of the 70-85 percent band, surface-road ramps the lower end.
@@ -132,19 +195,107 @@ pub const RAMP_DIRECTIONAL_SHARE: f64 = 0.85;
 pub const RAMP_SURFACE_SHARE: f64 = 0.70;
 pub const RAMP_MIN_DESIGN_MPH: f64 = 30.0;
 
-/// Miles of deceleration lane an exit at `highway_mph` really has. The grade
-/// multipliers are the acceleration table's, inverted in sense.
-pub fn deceleration_lane_mi(highway_mph: f64, grade_pct: f64) -> f64 {
-    let feet = interpolate_lane_ft(&DECELERATION_LANE_FT, highway_mph);
+/// Miles of deceleration lane an exit at `highway_mph` has for a ramp whose
+/// controlling feature is designed for `ramp_mph` (0 for a stop), on the
+/// mainline's `grade_pct`. Interpolated both ways across Table 10-6 and
+/// clamped to its edges, then multiplied by the book's own deceleration
+/// grade factor.
+pub fn deceleration_lane_mi(highway_mph: f64, ramp_mph: f64, grade_pct: f64) -> f64 {
+    let rows: Vec<(f64, f64)> = DECELERATION_LANE_FT
+        .iter()
+        .map(|(speed, row)| (*speed, deceleration_row_ft(row, ramp_mph)))
+        .collect();
+    let feet = interpolate_lane_ft(&rows, highway_mph);
     let mut factor = 1.0;
-    for (threshold, value) in ACCELERATION_LANE_GRADE_FACTOR {
-        if threshold < 0.0 && grade_pct <= threshold {
-            factor = 1.0 / value; // downhill: harder to shed, so more lane
-        } else if threshold > 0.0 && grade_pct >= threshold {
-            factor = 1.0 / value;
+    for (threshold, value) in DECELERATION_LANE_GRADE_FACTOR {
+        let downhill_enough = threshold < 0.0 && grade_pct <= threshold;
+        let uphill_enough = threshold > 0.0 && grade_pct >= threshold;
+        if downhill_enough || uphill_enough {
+            factor = value;
         }
     }
     feet * factor / 5280.0
+}
+
+// -- The ramp past the deceleration lane -------------------------------------
+// Nothing about an exit's shape is baked (research 2026-09-24, section 7): no
+// per-exit length, deflection or grade. So the ramp is three pieces, each
+// labelled for what it is.
+
+/// ASSUMED: how far the ramp's controlling curve turns, 45 degrees. A diamond
+/// ramp bends off the mainline toward its crossroad; nothing records by how
+/// much, and this is a middling bend rather than a loop. Its radius is not
+/// assumed -- it is the ramp speed's own AASHTO minimum, `min_radius_ft`.
+pub const RAMP_CURVE_DEFLECTION_RAD: f64 = std::f64::consts::FRAC_PI_4;
+/// DERIVED: the climb or drop to the crossroad. A grade separation of about
+/// 23.5 feet (the middle of the 22-25 foot band in the research) taken at
+/// the 4 percent a ramp grade should preferably stay under (Green Book / TxDOT
+/// RDM Table 15-2, READ) is 23.5 / 0.04 = 587 feet, rounded.
+pub const RAMP_TANGENT_CLIMB_FT: f64 = 590.0;
+/// ASSUMED: storage for the queue at the terminal. Five vehicles at TxDOT's
+/// 40 feet per vehicle for 15 to 19 percent trucks (RDM Table 4-14, READ);
+/// the vehicle count is the assumption.
+pub const RAMP_QUEUE_FT: f64 = 200.0;
+/// READ: the deceleration the Green Book's stopping sight distance is built
+/// on, 11.2 ft/s^2 (2018 section 3.2.2). A measured ramp too short to hold
+/// its curve and a stop from the curve speed at that rate keeps that stop
+/// anyway: the curve is our assumed shape, the stop at the bar is not.
+pub const RAMP_STOP_DECEL_FT_S2: f64 = 11.2;
+
+/// One exit ramp, gore to stop bar: the deceleration lane, the controlling
+/// curve, and the tangent run down to the terminal.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ExitRampLayout {
+    pub decel_mi: f64,
+    pub curve_mi: f64,
+    pub tangent_mi: f64,
+    /// The speed the curve is built for, which the deceleration lane is
+    /// sized to reach.
+    pub curve_mph: f64,
+    /// ASSUMED 0 percent: the ramp past the deceleration lane has no baked
+    /// grade, and a guessed climb or drop would read as a survey.
+    pub grade: f64,
+}
+
+impl ExitRampLayout {
+    /// The whole ramp, gore to stop bar.
+    pub fn length_mi(&self) -> f64 {
+        self.decel_mi + self.curve_mi + self.tangent_mi
+    }
+}
+
+/// Miles of the ramp's controlling curve: its AASHTO minimum radius at the
+/// ramp speed, turned through [`RAMP_CURVE_DEFLECTION_RAD`].
+pub fn ramp_curve_mi(ramp_mph: f64) -> f64 {
+    crate::data::curves::min_radius_ft(ramp_mph) * RAMP_CURVE_DEFLECTION_RAD / 5280.0
+}
+
+/// Lay out an exit ramp. `length_mi` is a measured gore-to-terminal length
+/// when one is known; the lane and the curve are never shortened for it, so
+/// a length shorter than those two is read as having no tangent at all.
+pub fn exit_ramp_layout(
+    highway_mph: f64,
+    ramp_mph: f64,
+    mainline_grade_pct: f64,
+    length_mi: Option<f64>,
+) -> ExitRampLayout {
+    let decel_mi = deceleration_lane_mi(highway_mph, ramp_mph, mainline_grade_pct);
+    let curve_mi = ramp_curve_mi(ramp_mph);
+    let tangent_mi = match length_mi {
+        Some(length) => {
+            let curve_fps = ramp_mph * 5280.0 / 3600.0;
+            let stop_mi = curve_fps * curve_fps / (2.0 * RAMP_STOP_DECEL_FT_S2) / 5280.0;
+            (length - decel_mi - curve_mi).max(stop_mi)
+        }
+        None => (RAMP_TANGENT_CLIMB_FT + RAMP_QUEUE_FT) / 5280.0,
+    };
+    ExitRampLayout {
+        decel_mi,
+        curve_mi,
+        tangent_mi,
+        curve_mph: ramp_mph,
+        grade: 0.0,
+    }
 }
 
 /// The speed this ramp is built for, from the road it leaves.
@@ -228,6 +379,73 @@ mod tests {
     fn merge_target_tracks_traffic_speed_instead_of_a_fixed_shortfall() {
         assert_eq!(merge_traffic_target_mph(70.0), 52.5);
         assert_eq!(merge_traffic_target_mph(55.0), 41.25);
+    }
+
+    #[test]
+    fn a_measured_ramp_fits_its_run_and_never_loses_room_to_stop() {
+        let lane = deceleration_lane_mi(70.0, 45.0, 0.0);
+        let curve = ramp_curve_mi(45.0);
+        let long = exit_ramp_layout(70.0, 45.0, 0.0, Some(lane + 1500.0 / 5280.0));
+        assert!((long.length_mi() - (lane + 1500.0 / 5280.0)).abs() < 1e-9);
+        assert!((long.tangent_mi - (1500.0 / 5280.0 - curve)).abs() < 1e-9);
+        // 300 ft of ramp cannot hold a 45 mph curve and a stop: the run keeps
+        // the Green Book stopping distance, 66^2 / 22.4 = 194.5 ft.
+        let short = exit_ramp_layout(70.0, 45.0, 0.0, Some(lane + 300.0 / 5280.0));
+        assert!((short.tangent_mi * 5280.0 - 194.46).abs() < 0.1);
+    }
+
+    fn lane_ft(highway_mph: f64, ramp_mph: f64, grade_pct: f64) -> f64 {
+        (deceleration_lane_mi(highway_mph, ramp_mph, grade_pct) * 5280.0 * 1000.0).round() / 1000.0
+    }
+
+    #[test]
+    fn deceleration_lane_reads_green_book_table_10_6() {
+        // The two rows the old one-column table had wrong or missing.
+        assert_eq!(lane_ft(40.0, 0.0, 0.0), 320.0);
+        assert_eq!(lane_ft(45.0, 0.0, 0.0), 385.0);
+        // The curve columns, not just Stop.
+        assert_eq!(lane_ft(70.0, 30.0, 0.0), 520.0);
+        assert_eq!(lane_ft(70.0, 45.0, 0.0), 390.0);
+        assert_eq!(lane_ft(60.0, 50.0, 0.0), 240.0);
+        // Between rows and columns it interpolates.
+        assert_eq!(lane_ft(67.5, 30.0, 0.0), 495.0);
+        assert_eq!(lane_ft(70.0, 32.5, 0.0), 505.0);
+        // A ramp faster than the row prints takes the row's last column.
+        assert_eq!(lane_ft(40.0, 45.0, 0.0), 155.0);
+    }
+
+    #[test]
+    fn deceleration_grade_factors_are_the_books_own() {
+        let flat = lane_ft(70.0, 35.0, 0.0);
+        assert_eq!(flat, 490.0);
+        for (grade, factor) in [
+            (2.9, 1.0),
+            (3.5, 0.9),
+            (6.0, 0.8),
+            (-3.5, 1.2),
+            (-6.0, 1.35),
+        ] {
+            let feet = lane_ft(70.0, 35.0, grade);
+            assert!((feet - flat * factor).abs() < 0.01, "{grade}: {feet}");
+        }
+    }
+
+    #[test]
+    fn the_default_ramp_lands_in_the_derived_band() {
+        // Research section 5: roughly 1,200 to 2,000 feet, gore to terminal.
+        for (highway, ramp) in [(55.0, 40.0), (65.0, 45.0), (70.0, 30.0), (75.0, 50.0)] {
+            let layout = exit_ramp_layout(highway, ramp, 0.0, None);
+            let feet = layout.length_mi() * 5280.0;
+            assert!(
+                (1_000.0..=2_200.0).contains(&feet),
+                "{highway}/{ramp}: {feet}"
+            );
+            assert_eq!(layout.grade, 0.0);
+        }
+        // A measured length keeps the lane and the curve and fits the tangent.
+        let measured = exit_ramp_layout(70.0, 35.0, 0.0, Some(0.4));
+        assert!((measured.length_mi() - 0.4).abs() < 1e-9);
+        assert_eq!(measured.decel_mi, deceleration_lane_mi(70.0, 35.0, 0.0));
     }
 
     #[test]

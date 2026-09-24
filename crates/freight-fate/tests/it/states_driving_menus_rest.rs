@@ -992,7 +992,9 @@ fn test_a_targeted_record_takes_the_inspection_lane() {
         let p = app.ctx.profile.as_mut().expect("a career");
         p.career.reputation = 10.0;
         p.driving_record.citations = 6;
+        p.driving_record.citation_times = vec![p.game_hours; 6];
         p.out_of_service_events = 3;
+        p.driving_record.out_of_service_times = vec![p.game_hours; 3];
     }
     with_drive(&drive, |d| d.trip.truck.damage_pct = 70.0);
     let at = with_drive(&drive, |d| d.trip.position_mi);
@@ -1029,7 +1031,9 @@ fn test_bald_tires_in_the_lane_are_out_of_service_until_replaced() {
         let p = app.ctx.profile.as_mut().expect("a career");
         p.career.reputation = 10.0;
         p.driving_record.citations = 6;
+        p.driving_record.citation_times = vec![p.game_hours; 6];
         p.out_of_service_events = 3;
+        p.driving_record.out_of_service_times = vec![p.game_hours; 3];
     }
     with_drive(&drive, |d| {
         d.trip.truck.tire_wear_pct = 95.0;

@@ -1080,8 +1080,9 @@ unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
 
 Inspections are real. A clean record is waved through an open scale nearly
-every time; a record carrying citations or out-of-service history is
-pulled into the lane, and the lane is a Level 1 inspection: driver,
+every time; a record carrying citations or out-of-service orders from the
+last game year is pulled into the lane, and older ones no longer count
+against you there. The lane is a Level 1 inspection: driver,
 paperwork, a walk-around and a look under the truck, about 45 minutes on
 duty. Worn tires, brakes near their limit, body damage and whatever the
 last driver left on a hooked trailer get written up, with a fine and a
@@ -1194,8 +1195,12 @@ drive the streets for you.
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
 up for it. As an announced exit approaches, use X to signal or cancel your intent,
-slow to 45 miles per hour or less, and set up the exit lane unless lane keeping
-is on full. The signal-on announcement also names how the ramp ends -- a traffic
+and set up the exit lane unless lane keeping is on full. Keep road speed to
+the gore: it accepts anything up to the speed the posted limit allows. Past the
+gore you are in the deceleration lane, a short lane beside the highway, and
+the game says the exit speed there. Brake to it before the ramp curve at the
+end of that lane; a loaded truck taking that curve too fast shifts its load
+and can run wide. The signal-on announcement also names how the ramp ends -- a traffic
 light or a stop sign -- so the braking plan can start on the mainline, and the
 U upcoming readout carries the same warning. Once you are on a ramp that ends
 in a light or a sign, the game clock runs in real time until you are through
@@ -1212,13 +1217,13 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to slow down and set up for the ramp. With lane keeping on partial
+and tells you to set up for it. With lane keeping on partial
 or off, use X to signal and move right for the exit lane. On full, lane keeping
 takes the destination exit for you, and the first call of each approach says so. If automatic speed control is
-active, it eases the truck to 40 miles per hour or your lower cruise target,
-below the 45 mile-per-hour ramp limit, so you can reach ramp speed without an
-abrupt handoff. Press X to take the exit; automatic speed control releases as
-you enter the ramp, then you brake to the stop. If you miss the destination
+active, it holds road speed and eases at most 10 miles per hour below it just
+before the gore. Press X to take the exit; automatic speed control pauses as
+you enter the deceleration lane, then you brake to the exit speed for the ramp
+curve and on to the stop. If you miss the destination
 exit, continue to the next safe turnaround. Dispatch loops you back onto the
 approach so you can hear the exit call again and press X to take it. On full,
 the turnaround and the fresh exit call both say lane keeping is taking it, so
@@ -1625,7 +1630,11 @@ Interactive is a descent-control level, not a preset.
 
 #### Exit and stopping assistance
 
-Exit speed assistance slows for an already-selected exit. Facility stopping
+Exit speed assistance brakes in the deceleration lane of an already-selected
+exit, so the truck reaches the exit speed by the ramp curve. On the highway it
+only slows a truck the gore would refuse. Route-transition, curve, or
+facility stopping assistance does the same braking when exit speed assistance
+is off. Facility stopping
 assistance (the destination approach assistance row) slows and stops at the
 selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
 cleared stop or green light at the end of the destination ramp, it also pulls

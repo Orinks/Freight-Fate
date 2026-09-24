@@ -1312,7 +1312,7 @@ fn test_a_scale_ramp_uses_real_time_so_the_driver_can_stop_at_the_bar() {
     let mut drive = a_drive(&mut app, "Scale Clock");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     drive.ramp_stop = Some(scale);
-    drive.ramp_mi = Some(RAMP_LENGTH_MI);
+    drive.ramp_mi = Some(0.5);
     drive.ramp_control.clear();
 
     drive.update_exit(&mut app.ctx, 0.0, 0.1);
@@ -1501,6 +1501,7 @@ fn test_the_safety_record_line_says_a_band_and_never_a_trade_acronym() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }
@@ -1541,6 +1542,7 @@ fn test_a_clean_record_is_waved_through_and_a_dirty_one_is_not() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }

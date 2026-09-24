@@ -1158,7 +1158,7 @@ repository root; Markdown links are relative to this document.
       stretch. On a ramp with no terminal control (`ramp_control == "none"`:
       every scale ramp, a freeway-to-freeway ramp, or the dice) the
       `facility_final_approach` bypass latches at the TOP of the ramp, so the
-      truck crawled the entire `RAMP_LENGTH_MI` at 12 with the lane posted
+      truck crawled the entire ramp (then a flat half mile) at 12 with the lane posted
       at 15 or more. Second edge: `loop_back_to_destination_terminal` reset
       the pull-ahead but not `destination_arrival_active`, so the retry after
       a blown gate was held at the walk from the turnaround on and the
@@ -3768,10 +3768,10 @@ repository root; Markdown links are relative to this document.
       spoken approach target is `min(cruise, exit cap)`. The ramp number is
       a ceiling, not a demand.
 
-      Still open from this: `deceleration_lane_mi` is modelled but unused.
-      The ramp is a flat `RAMP_LENGTH_MI` of 0.5 that stands in for the
-      deceleration lane plus the ramp proper; sizing the shed from the real
-      lane length (and its downhill multiplier) is the next slice.
+      Closed 2026-09-24 by the realistic exit: the flat half-mile ramp is
+      gone. `Trip::ramp_length_mi` lays each ramp out as a Green Book
+      deceleration lane (with the book's own grade factors), the ramp curve,
+      and the run to the bar, and the shed happens in that lane.
 
 - [x] **The reverse trap: the throttle latch ate the shift out of reverse
       (FIXED 2026-08-21).** Owner hit it at the I-40 scale mid-playtest --

@@ -2,7 +2,7 @@
 //! changes, crossings, a road that narrows under the truck, coned-off lanes,
 //! and keep-right pressure.
 
-use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft, superelevation_at};
+use ff_core::data::curves::{advisory_with_bank_mph, superelevation_at};
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -78,25 +78,28 @@ impl DrivingState {
                 let _ = (tightness, load);
                 let direction = if bend.direction == 'L' { -1.0 } else { 1.0 };
                 curve = direction / (bend.min_radius_ft as f64).max(1.0);
-                // Spoken slip warning: entering a curve well above advisory
-                // pushes the truck toward the shoulder and the driver should
-                // know why.
                 if excess > 15.0 && !self.curve_slip_active {
-                    self.curve_slip_active = true;
                     let phrase = self.pacenote_phrase(bend);
-                    ctx.say_event_with(
-                        format!("{phrase}, too fast, drifting to the outside."),
-                        SayEvent::new().category(SpeechCategory::Safety),
-                    );
+                    self.announce_curve_slip(ctx, &phrase);
                 }
             }
             None => curve = 0.0,
         }
-        if self.ramp_mi.is_some() && !self.surface_chain {
-            // A ramp peels off the mainline and keeps bending. Its radius is
-            // DERIVED from the speed it is posted at, through the same AASHTO
-            // point-mass control the curve bake uses, rather than a flat push
-            // invented for the old model.
+        let ramp_curve = self.ramp_curve_radius_ft();
+        if let Some(ramp_radius) = ramp_curve {
+            // The same warning for the ramp's own curve, whose advisory is
+            // the exit speed: taken hot it runs wide and moves the load just
+            // as a mapped bend does (review of the realistic exit,
+            // 2026-09-24).
+            let exit_speed = self.armed_ramp_mph(None);
+            if self.trip.truck.speed_mph() - exit_speed > 15.0 && !self.curve_slip_active {
+                self.announce_curve_slip(ctx, "Ramp curve");
+            }
+            // The ramp's controlling curve, past its deceleration lane. Its
+            // radius is DERIVED from the speed it is posted at, through the
+            // same AASHTO point-mass control the curve bake uses, rather than
+            // a flat push invented for the old model; see
+            // `ramp_curve_radius_ft`.
             //
             // NOT on the facility street chain, which keeps `ramp_mi` set long
             // after the ramp is behind the truck: a ramp's curvature held over
@@ -104,10 +107,9 @@ impl DrivingState {
             // steering it walked the truck into the median and wrote it off
             // (every chain destination in the approach sweep, first run of the
             // heading model).
-            let ramp_radius = min_radius_ft(self.armed_ramp_mph(None));
-            curve += 1.0 / ramp_radius.max(1.0);
+            curve += 1.0 / ramp_radius;
         }
-        if active.is_none() && self.curve_slip_active {
+        if active.is_none() && ramp_curve.is_none() && self.curve_slip_active {
             self.curve_slip_active = false;
         }
         self.update_curve_run(ctx, active.as_ref());
@@ -353,8 +355,13 @@ impl DrivingState {
         } else {
             ramp_cap_mph
         };
+        // Not in the deceleration lane: the truck arrives there at road speed
+        // by design, and the lane's own servo brakes it to the exit speed by
+        // the curve (`update_deceleration_lane`). Lifting there as well only
+        // announced a second assist for the same slowing.
         let transition_assisting = ctx.settings.route_transition_assist
             && self.ramp_mi.is_some()
+            && !self.in_deceleration_lane()
             && self.trip.truck.speed_mph() > ramp_hold_mph;
         if transition_assisting {
             // A ramp cap is sustained speed control, not the bar's stop.
@@ -459,6 +466,18 @@ impl DrivingState {
     }
 
     /// Advance an assist-off tap change: signal clicks, then the flip.
+    /// Spoken slip warning: entering a curve well above its advisory pushes
+    /// the truck toward the shoulder, and the driver should know why. Once
+    /// per curve, for a mapped bend (named by its pacenote) and for an exit
+    /// ramp's curve alike.
+    fn announce_curve_slip(&mut self, ctx: &mut GameContext, phrase: &str) {
+        self.curve_slip_active = true;
+        ctx.say_event_with(
+            format!("{phrase}, too fast, drifting to the outside."),
+            SayEvent::new().category(SpeechCategory::Safety),
+        );
+    }
+
     pub fn update_tap_lane_change(&mut self, ctx: &mut GameContext, dt: f64) {
         let Some(mut target) = self.lane_change_target else {
             if !self.steer_cue_active && !self.exit_blinker_on() {

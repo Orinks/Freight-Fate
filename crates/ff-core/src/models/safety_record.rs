@@ -17,8 +17,21 @@
 //!
 //! Higher is worse, matching the real convention: 0 is a driver nobody has any
 //! reason to look at, 100 is one every screening lane flags.
+//!
+//! The real score weighs the last 24 months, so a bad stretch fades. Here the
+//! citations, serious violations, out-of-service orders and fatigue events
+//! count inside [`SAFETY_RECORD_WINDOW_DAYS`], the one game year reputation
+//! and the carrier's review already use. Clean inspections stay a lifetime
+//! credit.
 
+use crate::models::enforcement::REVIEW_WINDOW_DAYS;
 use crate::pyfmt::round_py_n;
+
+/// How far back the scale's screening looks. The real carrier score is
+/// time-weighted over 24 months; this is the game's one-year window for the
+/// same reason `REVIEW_WINDOW_DAYS` gives: the clock only moves on the road,
+/// so a longer window is a lifetime mark by another name (owner, 2026-09-14).
+pub const SAFETY_RECORD_WINDOW_DAYS: i64 = REVIEW_WINDOW_DAYS;
 
 pub const SAFETY_RECORD_MIN: f64 = 0.0;
 pub const SAFETY_RECORD_MAX: f64 = 100.0;
@@ -117,10 +130,7 @@ pub fn selection_score(inputs: &SelectionInputs) -> f64 {
 ///
 /// Every method has the default the Python `getattr(..., default)` used, so a
 /// partially built profile, an older save and the test fixtures all work.
-// TODO(lead): implement for models::profile::Profile (career.reputation,
-// driving_record.citations / serious_violations / fatigue_events,
-// out_of_service_events, achievement_stats["inspections_passed"],
-// selection_score).
+/// The four record counts are the ones inside [`SAFETY_RECORD_WINDOW_DAYS`].
 pub trait SafetyRecordProfile {
     fn career_reputation(&self) -> f64 {
         REPUTATION_NEUTRAL
