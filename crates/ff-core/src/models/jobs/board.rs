@@ -11,7 +11,7 @@ use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
 use crate::models::jobs::{
     cargo_type, dispatch_deadline_hours, facility_cargo, market_tag_cargo_bonus,
-    minimum_pay_for_level, plan_hos, CargoType, Job, CARGO_CATALOG, DEADLINE_DISPATCH_SLACK_RANGE,
+    minimum_pay_for_level, plan_hos, CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE,
     FACILITY_SELECTION_WEIGHTS, HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS,
     HOOKUP_FEE, LEVEL_DISTANCE_CAPS, LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES,
     MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI, PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS,
@@ -161,6 +161,7 @@ impl<'w> JobBoard<'w> {
             .candidates(&city)
             .into_iter()
             .filter(|c| c.1 >= MIN_JOB_DISTANCE_MI)
+            .filter(|c| self.city_has_freight_receiver(&c.0))
             .collect();
         let cap = Self::distance_cap(level);
         let mut reachable: Vec<Candidate> =
@@ -183,9 +184,17 @@ impl<'w> JobBoard<'w> {
         let mut attempts = 0;
         while jobs.len() < count && attempts < count * 30 {
             attempts += 1;
-            let location = self.choose_origin_location(city_obj, level, carrier_key, &held);
-            let cargo_key =
-                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held);
+            let Some(location) = self.choose_origin_location(city_obj, level, carrier_key, &held)
+            else {
+                // City has no freight-capable shipper (e.g. travel-center-only
+                // ALCAN pins). Empty board is honest.
+                break;
+            };
+            let Some(cargo_key) =
+                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held)
+            else {
+                continue;
+            };
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
             let locked = !cargo.missing_credentials(endorsements).is_empty();
             // a locked job may appear once in a while as a teaser, otherwise skip
@@ -264,9 +273,9 @@ impl<'w> JobBoard<'w> {
             .clone();
         let held: Vec<&str> = endorsements.iter().map(AsRef::as_ref).collect();
         for _ in 0..30 {
-            let location = self.choose_origin_location(city_obj, level, carrier_key, &held);
+            let location = self.choose_origin_location(city_obj, level, carrier_key, &held)?;
             let cargo_key =
-                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held);
+                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held)?;
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
             if !cargo.missing_credentials(endorsements).is_empty() {
                 continue;
@@ -508,14 +517,27 @@ impl<'w> JobBoard<'w> {
         pool[idx].clone()
     }
 
+    /// True when the city has at least one facility that receives freight.
+    /// Travel centers and truck parking ship/receive nothing, so a corridor
+    /// of fuel-only pins must not soak up the destination cycle.
+    fn city_has_freight_receiver(&self, city: &str) -> bool {
+        let Some(city_obj) = self.world.cities.get(city) else {
+            return false;
+        };
+        city_obj
+            .locations
+            .iter()
+            .any(|location| !Self::cargo_for_location(location, "receives", None).is_empty())
+    }
+
     fn choose_origin_location<'c>(
         &mut self,
         city: &'c City,
         level: i64,
         carrier_key: &str,
         held: &[&str],
-    ) -> &'c Location {
-        let mut plausible: Vec<&Location> = city
+    ) -> Option<&'c Location> {
+        let plausible: Vec<&Location> = city
             .locations
             .iter()
             .filter(|location| {
@@ -524,7 +546,9 @@ impl<'w> JobBoard<'w> {
             })
             .collect();
         if plausible.is_empty() {
-            plausible = city.locations.iter().collect();
+            // No freight shipper at this city (travel_center / truck_parking
+            // pins ship nothing). Do not fall back onto a fuel lot.
+            return None;
         }
         let weights: Vec<f64> = plausible
             .iter()
@@ -542,7 +566,7 @@ impl<'w> JobBoard<'w> {
             })
             .collect();
         let idx = self.rng.choices_indices_weighted(&weights, 1)[0];
-        plausible[idx]
+        Some(plausible[idx])
     }
 
     /// The cargo asks for a course-earned credential (one no level grants:
@@ -566,14 +590,12 @@ impl<'w> JobBoard<'w> {
         level: i64,
         carrier_key: &str,
         held: &[&str],
-    ) -> &'static str {
-        let mut cargo_keys = Self::cargo_for_location(location, "ships", Some(level));
+    ) -> Option<&'static str> {
+        let cargo_keys = Self::cargo_for_location(location, "ships", Some(level));
         if cargo_keys.is_empty() {
-            cargo_keys = CARGO_CATALOG
-                .values()
-                .filter(|cargo| cargo.min_level <= level)
-                .map(|cargo| cargo.key)
-                .collect();
+            // Do not invent freight from the full catalog for a pin that
+            // ships nothing (travel_center / truck_parking).
+            return None;
         }
         let weights: Vec<f64> = cargo_keys
             .iter()
@@ -587,7 +609,7 @@ impl<'w> JobBoard<'w> {
             })
             .collect();
         let idx = self.rng.choices_indices_weighted(&weights, 1)[0];
-        cargo_keys[idx]
+        Some(cargo_keys[idx])
     }
 
     /// `_cargo_for_location(location, role, level)`.

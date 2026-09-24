@@ -4,6 +4,8 @@
 
 ### Changed
 
+- `travel_center` and `truck_parking` city lots are fuel, parking, and rest only (no freight cargo roles); home terminal and default facility pick only `company_yard` or `terminal`.
+
 - City facilities may be typed `travel_center` or `truck_parking` for public tractor lots; ALCAN corridor public stops retyped off `company_yard`.
 - Phase A ALCAN: Tok and Fairbanks resolve to Alaska Time on the shipped-city timezone gate (CONUS-only check widened for the AK terminus).
 - Phase A ALCAN: US job boards stay same-country (no Canadian destinations on the through-freight corridor tip).

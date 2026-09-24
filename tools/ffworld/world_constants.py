@@ -412,13 +412,14 @@ FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
         "ships": ("electronics", "general", "retail", "parcel"),
         "receives": ("electronics", "general", "retail", "parcel"),
     },
+    # Fuel/parking/rest city pins only — never job-board freight endpoints.
     "travel_center": {
-        "ships": ("general", "retail", "parcel"),
-        "receives": ("general", "retail", "parcel", "fuel_bulk"),
+        "ships": (),
+        "receives": (),
     },
     "truck_parking": {
-        "ships": ("general", "retail", "parcel"),
-        "receives": ("general", "retail", "parcel"),
+        "ships": (),
+        "receives": (),
     },
     "warehouse": {
         "ships": ("bulk", "general", "machinery", "retail", "construction"),
