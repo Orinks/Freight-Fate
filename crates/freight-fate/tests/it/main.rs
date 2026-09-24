@@ -51,6 +51,8 @@ mod badge_moments_career;
 mod badge_moments_places;
 mod badge_moments_road;
 mod badge_moments_runs;
+mod badge_moments_stops;
+mod badge_moments_terminal;
 mod bench_drive;
 mod browser_guard;
 mod cloud_backup_review;

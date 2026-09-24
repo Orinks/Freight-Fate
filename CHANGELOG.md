@@ -110,6 +110,10 @@
 
 ### Fixed
 
+- **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
+
+- **Refusing a bad trailer at pickup no longer earns Somebody Else's Turn at delivery.** The trailer you dropped was the sound one.
+
 - **Adaptive cruise no longer damages the freight when it brakes downhill for traffic, a ramp, or a lower limit.**
 
 - **The Map Route line no longer repeats the deadhead city.** A facility approach that used the same city on every local leg is spoken once. (#205)
