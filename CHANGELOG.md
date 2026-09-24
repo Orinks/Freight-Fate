@@ -126,6 +126,8 @@
 
 ### Fixed
 
+- **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
+
 - **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.
 
 - **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
