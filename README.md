@@ -140,17 +140,36 @@ compile its bundled SDL2. Source builders do not need to add
 
 ## Build a standalone copy
 
-After installing Git, Rust, and `uv`, run the release builder from PowerShell:
+After installing Git, Rust, `uv`, and CMake (Prism is compiled from C++
+source), run the release builder for your platform from the repository root.
+On Windows, from PowerShell:
 
 ```powershell
 ./build-release.ps1
 ```
 
-The script installs the required project dependencies, builds the native game,
-fetches and verifies BASS and the public music pack, checks the staged game,
-and writes the Windows portable zip to `dist/`. Players using the portable zip
-and contributors using this standalone build script do not need to find or
+On macOS or Linux, from a terminal:
+
+```bash
+./build-release.sh
+```
+
+Either script checks the prerequisites, installs the pinned Rust toolchain
+and the project's Python tooling, builds the native game, fetches and
+verifies BASS and the public music pack, checks the staged game, and writes
+the archive for that platform to `dist/`: the Windows portable zip, the
+macOS app zip, or the Linux tarball. Players using those archives and
+contributors using these standalone build scripts do not need to find or
 copy audio files themselves.
+
+Windows also needs the Visual Studio Build Tools with the "Desktop
+development with C++" workload and its optional C++ ATL component (Prism's
+speech backends include `atlbase.h`); the script checks for both and prints
+the `winget` or Visual Studio Installer command that adds what is missing.
+Linux needs GCC 13 or newer plus the SDL2 development packages the nightly
+Career 1.9 workflow installs; on Ubuntu 22.04 the script picks up
+`gcc-13`/`g++-13` itself when the default `gcc` is older. macOS builds SDL2
+from source, so do not install Homebrew's `sdl2`.
 
 ### Advanced maintainer overrides
 
