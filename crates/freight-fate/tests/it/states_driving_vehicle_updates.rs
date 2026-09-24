@@ -576,6 +576,21 @@ fn test_the_descent_advisory_names_controls_the_driver_actually_has() {
     // The manual box keeps the gear advice, because it can act on it.
     d.trip.truck.transmission.automatic = false;
     assert!(d.descend_advice(&app.ctx).starts_with("Pick your gear"));
+
+    // With the jake already on, J turns it OFF: the agent drive into Edwards
+    // (2026-09-24) heard "Set the engine brake with J", pressed it, and got
+    // "Jake off." So the jake clause goes, and an automatic has nothing left
+    // to be told.
+    d.trip.truck.engine_brake_stage = 2;
+    assert_eq!(
+        d.descend_advice(&app.ctx),
+        "Pick your gear before it starts."
+    );
+    d.trip.truck.transmission.automatic = true;
+    assert_eq!(d.descend_advice(&app.ctx), "");
+    d.trip.truck.engine_brake_stage = 0;
+    d.auto_jake = true; // armed, sitting at stage zero on the flat
+    assert_eq!(d.descend_advice(&app.ctx), "");
 }
 
 // -- ignored: the roadside screens a settled stop pushes ------------------------------

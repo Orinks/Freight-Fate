@@ -122,6 +122,30 @@
 
 ### Fixed
 
+- **The stop bar countdown and stop bar tone stay quiet on a green light.**
+
+- **Exit announcements are no longer said twice or cut off.** The exit you take, the ramp's light and a hold at the sign are each heard once.
+
+- **A highway speed limit change is no longer spoken as you take an exit.**
+
+- **Stopping where the stop bar tone starts counts as stopping at the sign.** A stop farther back is said once, with the distance.
+
+- **Route-transition assistance says once that it is slowing for the light, sign or yield.**
+
+- **U names the destination exit, and gives the distance to the facility gate itself.**
+
+- **C's arrival estimate uses the road left to the gate once you are off the highway.**
+
+- **The facility gate warning stays quiet when an assist is already holding you to its speed.**
+
+- **The speed keeper says it is easing only when it is slowing the truck down.**
+
+- **Billboards wait until you are past the exit you are taking.**
+
+- **The downgrade warning no longer tells you to set the engine brake when it is already on.**
+
+- **The engine brake's growl no longer restarts over and over as the throttle comes and goes.**
+
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.

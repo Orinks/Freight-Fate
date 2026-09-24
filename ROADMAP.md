@@ -1407,6 +1407,33 @@ mainline behaviour.
       during it is forced (`CrossTraffic::conflict_between`). The same timing
       decides when a yield or roundabout is clear to roll or to pull out
       from a stop. Stop signs still use the four-second look.
+- [x] **The exit drives' speech and sounds** (fix/exit-drive-speech,
+      2026-09-24, from six agent drives through signal, stop, yield,
+      roundabout and truck-stop exits). The stop-bar ticks and held tone stay
+      quiet on a green. The pacer no longer flushes a ROUTE or CRITICAL line
+      the player is part way through when nothing else is queued behind it:
+      the next line waits, so the take line is not said twice or cut by
+      "Light red." A line about a hold at the bar is dropped once the gap or
+      the green comes rather than replayed before the release. A mainline
+      limit change at the gore is not spoken over the take line. A stop inside
+      the held tone counts as a stop at the sign, and "Stopped N short" always
+      names N and is said once per stop. Route-transition assistance says one
+      line for one approach. U names the destination exit and reads the gate,
+      not its zone; C estimates the approach from the road left to the gate.
+      The pre-gate warning is silent when facility stopping assistance or the
+      keeper already holds the gate's 15; the keeper says "easing" only when
+      it is actually slowing; billboards wait out the last mile of an exit;
+      the descent advice does not tell a driver with the jake on to press J;
+      the jake growl holds through a gap instead of restarting. Adaptive
+      cruise holding five over a lowered limit is the documented design
+      (`ACC_LIMIT_OFFSET_MPH`, and the driving help: "never holds more than
+      five over the posted limit"), left as is.
+- [ ] **"Live weather unavailable. Simulated weather in use." repeats every
+      few minutes** on a drive with no live source (agent drive, 2026-09-24).
+      Said once per drive would do; the V key already answers.
+- [ ] **Air ready went false at 62 mph on the mainline** in the truck-stop
+      drive (agent drive D, 2026-09-24) with no brake use logged around it.
+      Needs a log of the pressure trace to say whether it is real.
 
 ## 1.10 planned -- the working week and home
 

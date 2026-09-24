@@ -634,6 +634,53 @@ fn test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so() {
     assert!(harness.read_drive(|d| d.trip.limit_drop_preannounced.contains(&15.0)));
 }
 
+/// Agent drive A (2026-09-24): "Posted limit lower; speed keeper easing to
+/// 15" said again while the truck was building speed from 9. A truck under
+/// the number is not being eased, so nothing is said.
+#[test]
+fn test_speed_keeper_says_nothing_of_easing_when_already_under_the_number() {
+    let mut harness = bench_drive("Keeper Under", 200.0, 0.0);
+    release_keys(&mut harness);
+    press(&mut harness, Key::E, None);
+    harness.with_drive(|d, _| {
+        d.truck_mut().cargo_kg = 0.0;
+        d.truck_mut().grade = 0.0;
+        d.truck_mut().transmission.gear = 3;
+        d.truck_mut().velocity_mps = 9.0 * MPS_PER_MPH;
+    });
+    let drop_mi = harness.read_drive(|d| d.trip.position_mi + 0.3);
+    harness.with_drive(move |d, _| {
+        d.trip.zones = vec![
+            Zone::new(0.0, drop_mi, 25.0, "facility access road"),
+            Zone::new(drop_mi, 1e6, 15.0, "facility access road"),
+        ];
+    });
+    harness.clear_speech();
+    press(&mut harness, Key::K, None);
+    // Holding the road's 25 and already aiming at the 15 -- the keeper's held
+    // ease target, the state a truck is in when it pulls away again short of
+    // the drop.
+    harness.with_drive(move |d, _| {
+        d.keeper_mph = Some(25.0);
+        d.keeper_ease_target = Some((drop_mi, 15.0, "posted limit".to_string()));
+    });
+    for _ in 0..(60 * 30) {
+        frame(&mut harness, DT);
+        if harness.read_drive(|d| d.trip.position_mi) >= drop_mi {
+            break;
+        }
+    }
+    let lines = spoken(&harness);
+    assert!(
+        harness.read_drive(|d| d.truck().speed_mph()) <= 15.0 + KEEPER_SNUB_OVER_MPH,
+        "{lines:#?}"
+    );
+    assert!(
+        !lines.iter().any(|e| e.contains("speed keeper easing")),
+        "{lines:#?}"
+    );
+}
+
 #[test]
 fn test_speed_keeper_takes_the_next_street_up_to_its_posted_number() {
     // The tester report: the keeper "sometimes doesn't hold speeds on access
