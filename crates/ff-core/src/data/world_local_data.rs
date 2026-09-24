@@ -19,8 +19,8 @@ use super::world_constants::{
     set_contains, CITY_SERVICE_ORDER, CITY_SERVICE_SOURCE_TYPES, RAW_POI_TEXT_MARKERS,
 };
 use super::world_models::{
-    DataError, FacilityApproach, FacilityEndpoint, LocalApproach, LocalGeometry,
-    LocalGeometrySegment,
+    DataError, Driveway, ExitChain, FacilityApproach, FacilityEndpoint, LocalApproach,
+    LocalGeometry, LocalGeometrySegment, StreetControl, StreetLimit,
 };
 use super::world_parsing::py_repr_str;
 use crate::pyfmt::round_py_n;
@@ -318,10 +318,132 @@ struct RawSegment {
     /// geometry landed, which `data::corners` prices as a square corner.
     #[serde(default)]
     turn_deg: f64,
+    /// Street detail (`tools/street_chain.py`), facility chains only.
+    #[serde(default)]
+    limit_mph: Option<f64>,
+    #[serde(default)]
+    limit_source: String,
+    #[serde(default)]
+    controls: Vec<RawControl>,
+}
+
+#[derive(Deserialize)]
+struct RawControl {
+    at_mi: f64,
+    kind: String,
+}
+
+#[derive(Deserialize)]
+struct RawDriveway {
+    at_mi: f64,
+    lat: f64,
+    lon: f64,
+    kind: String,
+    #[serde(default)]
+    source: String,
+}
+
+#[derive(Deserialize)]
+struct RawExitChain {
+    terminal_node: i64,
+    #[serde(default)]
+    total_miles: f64,
+    #[serde(default)]
+    segments: Vec<RawSegment>,
+    #[serde(default)]
+    driveway: Option<RawDriveway>,
 }
 
 fn default_speed() -> f64 {
     25.0
+}
+
+const LIMIT_SOURCES: [&str; 3] = ["read", "statutory", "assumed"];
+const CONTROL_KINDS: [&str; 4] = ["signal", "all_way_stop", "stop", "give_way"];
+const DRIVEWAY_KINDS: [&str; 2] = ["service_road", "private_road"];
+
+/// A facility chain's segments, with the street detail validated: a limit
+/// needs its kind and a plausible number, a control a known kind on the
+/// street, or the file is refused -- a number whose provenance is lost reads
+/// as a survey.
+fn facility_segments(
+    p: &str,
+    rid: &str,
+    raw_segments: &[RawSegment],
+) -> Result<Vec<LocalGeometrySegment>, DataError> {
+    let bad = |what: &str| DataError::value(format!("{p} facility approach {rid} {what}"));
+    let mut segments = Vec::with_capacity(raw_segments.len());
+    for raw_segment in raw_segments {
+        let segment_road = s(&raw_segment.road);
+        let cue = s(&raw_segment.cue);
+        if segment_road.is_empty() || cue.is_empty() || raw_segment.miles <= 0.0 {
+            return Err(bad("has invalid segment"));
+        }
+        if exposes_raw(&format!("{segment_road} {cue}")) {
+            return Err(bad("segment exposes raw text"));
+        }
+        let source = s(&raw_segment.limit_source);
+        let limit = match raw_segment.limit_mph {
+            None if source.is_empty() => None,
+            Some(mph) if LIMIT_SOURCES.contains(&source.as_str()) && mph > 0.0 && mph <= 90.0 => {
+                Some(StreetLimit { mph, source })
+            }
+            _ => return Err(bad("has a street limit without a known kind")),
+        };
+        let miles = round_py_n(raw_segment.miles, 2);
+        let mut controls = Vec::with_capacity(raw_segment.controls.len());
+        for control in &raw_segment.controls {
+            if !CONTROL_KINDS.contains(&control.kind.as_str())
+                || !(0.0..=miles + 0.01).contains(&control.at_mi)
+            {
+                return Err(bad(
+                    "has a street control off its street or of no known kind",
+                ));
+            }
+            controls.push(StreetControl {
+                at_mi: control.at_mi,
+                kind: control.kind.clone(),
+            });
+        }
+        segments.push(LocalGeometrySegment {
+            road: segment_road,
+            miles,
+            cue,
+            speed_mph: raw_segment.speed_mph,
+            turn_deg: raw_segment.turn_deg,
+            limit,
+            controls,
+        });
+    }
+    Ok(segments)
+}
+
+fn facility_driveway(
+    p: &str,
+    rid: &str,
+    raw: Option<&RawDriveway>,
+    total_miles: f64,
+) -> Result<Option<Driveway>, DataError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+    if !DRIVEWAY_KINDS.contains(&raw.kind.as_str())
+        || s(&raw.source).is_empty()
+        || !(0.0..=total_miles + 0.05).contains(&raw.at_mi)
+        || !(-90.0..=90.0).contains(&raw.lat)
+        || !(-180.0..=180.0).contains(&raw.lon)
+    {
+        return Err(DataError::value(format!(
+            "{p} facility approach {rid} has an invalid driveway"
+        )));
+    }
+    Ok(Some(Driveway {
+        at_mi: raw.at_mi,
+        lat: raw.lat,
+        lon: raw.lon,
+        kind: raw.kind.clone(),
+        source: s(&raw.source),
+    }))
 }
 
 #[derive(Deserialize)]
@@ -405,6 +527,8 @@ pub fn load_local_geometries(path: &Path) -> Result<IndexMap<String, LocalGeomet
                 cue,
                 speed_mph: raw_segment.speed_mph,
                 turn_deg: raw_segment.turn_deg,
+                limit: None,
+                controls: Vec::new(),
             });
         }
         let total_miles = round_py_n(entry.total_miles, 2);
@@ -623,6 +747,10 @@ struct FacilityApproachEntry {
     final_hint: String,
     #[serde(default)]
     source_note: String,
+    #[serde(default)]
+    driveway: Option<RawDriveway>,
+    #[serde(default)]
+    exit_chains: Vec<RawExitChain>,
 }
 
 #[derive(Deserialize)]
@@ -668,26 +796,24 @@ pub fn load_facility_approaches(
                 "{p} facility approach {rid} is fallback without reason"
             )));
         }
-        let mut segments = Vec::with_capacity(entry.segments.len());
-        for raw_segment in &entry.segments {
-            let segment_road = s(&raw_segment.road);
-            let cue = s(&raw_segment.cue);
-            if segment_road.is_empty() || cue.is_empty() || raw_segment.miles <= 0.0 {
+        let p = p.to_string();
+        let segments = facility_segments(&p, &rid, &entry.segments)?;
+        let total_miles = round_py_n(entry.total_miles, 2);
+        let driveway = facility_driveway(&p, &rid, entry.driveway.as_ref(), total_miles)?;
+        let mut exit_chains = Vec::with_capacity(entry.exit_chains.len());
+        for chain in &entry.exit_chains {
+            let segments = facility_segments(&p, &rid, &chain.segments)?;
+            if chain.terminal_node <= 0 || segments.is_empty() {
                 return Err(DataError::value(format!(
-                    "{p} facility approach {rid} has invalid segment"
+                    "{p} facility approach {rid} has an exit chain with no terminal or streets"
                 )));
             }
-            if exposes_raw(&format!("{segment_road} {cue}")) {
-                return Err(DataError::value(format!(
-                    "{p} facility approach {rid} segment exposes raw text"
-                )));
-            }
-            segments.push(LocalGeometrySegment {
-                road: segment_road,
-                miles: round_py_n(raw_segment.miles, 2),
-                cue,
-                speed_mph: raw_segment.speed_mph,
-                turn_deg: raw_segment.turn_deg,
+            let total_miles = round_py_n(chain.total_miles, 2);
+            exit_chains.push(ExitChain {
+                terminal_node: chain.terminal_node,
+                total_miles,
+                driveway: facility_driveway(&p, &rid, chain.driveway.as_ref(), total_miles)?,
+                segments,
             });
         }
         if entry.turn_level && segments.is_empty() {
@@ -713,7 +839,7 @@ pub fn load_facility_approaches(
                 fallback_reason,
                 nearest_road_context: entry.nearest_road_context,
                 representative_fallback: entry.representative_fallback,
-                total_miles: round_py_n(entry.total_miles, 2),
+                total_miles,
                 approach_road: road,
                 segments,
                 gate_hint: entry.gate_hint,
@@ -721,6 +847,8 @@ pub fn load_facility_approaches(
                 dock_hint: entry.dock_hint,
                 final_hint: s(&entry.final_hint),
                 source_note: s(&entry.source_note),
+                driveway,
+                exit_chains,
             },
         );
     }

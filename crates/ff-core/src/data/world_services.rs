@@ -11,8 +11,8 @@ use super::world_constants::{
     FACILITY_APPROACH_ROADS, FACILITY_APPROACH_TRUSTED_MAX_MI,
 };
 use super::world_models::{
-    CityService, DataError, FacilityApproach, FacilityEndpoint, Leg, LocalApproach, LocalGeometry,
-    Route,
+    CityService, DataError, Driveway, FacilityApproach, FacilityEndpoint, Leg, LocalApproach,
+    LocalGeometry, LocalGeometrySegment, Route,
 };
 use super::world_parsing::crc32;
 use crate::pyfmt::round_py_n;
@@ -99,6 +99,27 @@ fn local_cue_direction(cue: &str) -> &'static str {
     } else {
         ""
     }
+}
+
+/// A baked facility chain as a drivable same-city route, one leg a street,
+/// each carrying its spoken cue, turn angle and street detail.
+fn local_chain_route(city: &str, segments: &[LocalGeometrySegment]) -> Route {
+    let legs: Vec<Leg> = segments
+        .iter()
+        .map(|segment| {
+            Leg::local(
+                city,
+                segment.miles,
+                &spoken_road_text(&segment.road),
+                &spoken_road_text(&segment.cue),
+                segment.speed_mph,
+            )
+            .with_turn_deg(segment.turn_deg)
+            .with_street(segment.limit.clone(), segment.controls.clone())
+        })
+        .collect();
+    let cities = vec![city.to_string(); legs.len() + 1];
+    Route::from_legs(cities, legs)
 }
 
 /// The same street chain driven outbound: leg order reversed, and each
@@ -304,6 +325,52 @@ impl World {
         self.local_geometry(&format!("facility:{}", location.id))
     }
 
+    /// The facility's street chain from one ramp terminal -- the OSM node an
+    /// exit ramp ends at (`Trip::ramp_terminal_node_at`) -- to the facility,
+    /// whole, or None when no chain was baked from that terminal.
+    pub fn facility_exit_route(
+        &self,
+        city: &str,
+        location_name: &str,
+        terminal_node: i64,
+    ) -> Result<Option<Route>, DataError> {
+        let city = self.resolve_city_key(city);
+        let location = self.facility_location(&city, location_name)?;
+        Ok(self
+            .facility_approaches()?
+            .get(&location.id)
+            .and_then(|approach| {
+                approach
+                    .exit_chains
+                    .iter()
+                    .find(|chain| chain.terminal_node == terminal_node)
+            })
+            .map(|chain| local_chain_route(&city, &chain.segments)))
+    }
+
+    /// Where a facility's street chain leaves the public street: the chain
+    /// from `terminal_node`, or the default chain for None. None when that
+    /// chain ends on a public street, or there is no such chain.
+    pub fn facility_driveway(
+        &self,
+        city: &str,
+        location_name: &str,
+        terminal_node: Option<i64>,
+    ) -> Result<Option<Driveway>, DataError> {
+        let location = self.facility_location(city, location_name)?;
+        let Some(approach) = self.facility_approaches()?.get(&location.id) else {
+            return Ok(None);
+        };
+        Ok(match terminal_node {
+            None => approach.driveway.clone(),
+            Some(node) => approach
+                .exit_chains
+                .iter()
+                .find(|chain| chain.terminal_node == node)
+                .and_then(|chain| chain.driveway.clone()),
+        })
+    }
+
     /// The facility's street chain driven outbound -- gate toward the
     /// highway on-ramp -- or `None` when the facility has no genuine
     /// multi-segment turn-level chain (those keep the scripted departure).
@@ -336,22 +403,7 @@ impl World {
         let location = self.facility_location(&city, location_name)?;
         if let Some(source_approach) = self.facility_approaches()?.get(&location.id) {
             if source_approach.turn_level && !source_approach.segments.is_empty() {
-                let legs: Vec<Leg> = source_approach
-                    .segments
-                    .iter()
-                    .map(|segment| {
-                        Leg::local(
-                            &city,
-                            segment.miles,
-                            &spoken_road_text(&segment.road),
-                            &spoken_road_text(&segment.cue),
-                            segment.speed_mph,
-                        )
-                        .with_turn_deg(segment.turn_deg)
-                    })
-                    .collect();
-                let cities = vec![city.clone(); legs.len() + 1];
-                return Ok(Route::from_legs(cities, legs));
+                return Ok(local_chain_route(&city, &source_approach.segments));
             }
         }
         let endpoint = self.facility_endpoints()?.get(&location.id);

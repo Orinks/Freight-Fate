@@ -997,13 +997,29 @@ RAMP_LENGTH_SOURCE = (
     f"clamped. Local Geofabrik extract accessed {ACCESSED_DATE}: "
     "https://www.openstreetmap.org/"
 )
+RAMP_TERMINAL_SOURCE = (
+    "read from OpenStreetMap topology: the surface-road node where the same "
+    "walk that measures ramp_length ends (the crossroad or dead end the "
+    "motorway_link way reaches), per direction of travel. Only baked beside a "
+    "length that passed its screen, and never for a ramp that ends in a merge. "
+    f"Local Geofabrik extract accessed {ACCESSED_DATE}: https://www.openstreetmap.org/"
+)
 M_TO_FT = 3.28084
 
 
 def ramp_length_m(
     graph: dict[str, Any], locs: dict[int, tuple[float, float]], gore: int
 ) -> float | None:
-    """Along-way distance from ``gore`` to where its ramp ends, or None.
+    """Along-way distance from ``gore`` to where its ramp ends, or None."""
+    end = ramp_end(graph, locs, gore)
+    return None if end is None else end[0]
+
+
+def ramp_end(
+    graph: dict[str, Any], locs: dict[int, tuple[float, float]], gore: int
+) -> tuple[float, int | None] | None:
+    """(along-way metres, surface terminal node) from ``gore`` to where its
+    ramp ends, or None. The node is None when the ramp ends in a merge.
 
     Dijkstra over the directed link graph. Terminals are the same ones
     ``walk_far_ends`` stops at; the nearest surface terminal wins over the
@@ -1015,7 +1031,7 @@ def ramp_length_m(
     crossroad = graph.get("crossroad", frozenset())
     best = {gore: 0.0}
     heap = [(0.0, gore)]
-    merge: float | None = None
+    merge: tuple[float, None] | None = None
     popped = 0
     while heap and popped <= RAMP_TOPO_WALK_CAP:
         dist, node = heapq.heappop(heap)
@@ -1024,10 +1040,10 @@ def ramp_length_m(
         popped += 1
         if node != gore:
             if node in mainline:
-                merge = dist if merge is None else merge
+                merge = (dist, None) if merge is None else merge
                 continue
             if node in crossroad or not out.get(node):
-                return dist
+                return dist, node
         a = locs.get(node)
         for nxt in out.get(node, ()):
             b = locs.get(nxt)
@@ -1077,7 +1093,14 @@ def bake_ramp_lengths_for_leg(
     leg_miles = float(leg["miles"])
     touched = 0
     for ix in interchanges:
-        for key in ("ramp_length_ft_forward", "ramp_length_ft_backward", "ramp_length_source"):
+        for key in (
+            "ramp_length_ft_forward",
+            "ramp_length_ft_backward",
+            "ramp_length_source",
+            "ramp_terminal_forward",
+            "ramp_terminal_backward",
+            "ramp_terminal_source",
+        ):
             ix.pop(key, None)
         estimate = _exit_location(geom, float(ix.get("at_mi", 0.0)), leg_miles)
         (lat, lon), radius_m = _pinned_exit_location(ix, estimate, junction_refs or {})
@@ -1105,18 +1128,31 @@ def bake_ramp_lengths_for_leg(
             if direction not in nearest or dist < nearest[direction][0]:
                 nearest[direction] = (dist, gore)
         measured = False
+        terminal = False
         for direction, (_, gore) in sorted(nearest.items()):
             stats["length_gores"] = stats.get("length_gores", 0) + 1
-            length_m = ramp_length_m(graph, locs, gore)
-            length_ft = screen_ramp_length_ft(
-                None if length_m is None else length_m * M_TO_FT, stats
-            )
+            end = ramp_end(graph, locs, gore)
+            length_ft = screen_ramp_length_ft(None if end is None else end[0] * M_TO_FT, stats)
             if length_ft is not None:
                 ix[f"ramp_length_ft_{direction}"] = round(length_ft, 1)
                 measured = True
+                # Only a surface end whose walk the length screen trusts: a
+                # merge has no street to hand over to, and a dropped length
+                # means the walk itself is in doubt.
+                node = end[1] if end is not None else None
+                if node is not None and node in locs:
+                    lat, lon = locs[node]
+                    ix[f"ramp_terminal_{direction}"] = {
+                        "node": int(node),
+                        "lat": round(lat, 7),
+                        "lon": round(lon, 7),
+                    }
+                    terminal = True
         if measured:
             ix["ramp_length_source"] = RAMP_LENGTH_SOURCE
             touched += 1
+        if terminal:
+            ix["ramp_terminal_source"] = RAMP_TERMINAL_SOURCE
     return touched
 
 
@@ -1151,6 +1187,13 @@ def ramp_length_meta(legs: list[dict[str, Any]], stats: dict[str, int]) -> dict[
         "exits": len(exits),
         "exits_with_length": covered,
         "coverage_ratio": round(covered / len(exits), 4) if exits else 0.0,
+        # Surface terminal nodes (read), per direction; a merge has none.
+        "directional_terminals": sum(
+            1
+            for ix in exits
+            for key in ("ramp_terminal_forward", "ramp_terminal_backward")
+            if key in ix
+        ),
         "directional_lengths": len(lengths),
         "percentiles_ft": {f"p{p}": pct(p) for p in (5, 25, 50, 75, 95)},
         "screen": {

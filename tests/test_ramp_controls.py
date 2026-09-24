@@ -278,10 +278,23 @@ def test_ramp_lengths_bake_per_direction_from_the_nearest_gore():
     assert ix["ramp_length_ft_forward"] == round(_path_m(m, locs, [10, 11, 12]) * m.M_TO_FT, 1)
     assert ix["ramp_length_ft_backward"] == round(_path_m(m, locs, [20, 21, 22]) * m.M_TO_FT, 1)
     assert ix["ramp_length_source"].startswith("derived from OpenStreetMap geometry")
+    # The node each ramp ends at is kept, so a street chain can start there.
+    assert ix["ramp_terminal_forward"] == {"node": 12, "lat": 40.053, "lon": -80.001}
+    assert ix["ramp_terminal_backward"]["node"] == 22
+    assert ix["ramp_terminal_source"].startswith("read from OpenStreetMap topology")
     # The neighbor's short ramp alone: its direction bakes nothing, counted.
     lone = {**topo, "grid": m._GoreGrid([(*locs[30], 30)])}
     leg2 = {"miles": 6.9, "corridor": {"interchanges": [{"at_mi": 3.45, "name": "Test"}]}}
     stats2: dict[str, int] = {}
     assert m.bake_ramp_lengths_for_leg(leg2, lone, geom, {}, stats2) == 0
     assert "ramp_length_ft_forward" not in leg2["corridor"]["interchanges"][0]
+    assert "ramp_terminal_forward" not in leg2["corridor"]["interchanges"][0]
     assert stats2["length_too_short"] == 1
+
+
+def test_a_ramp_that_ends_in_a_merge_has_no_street_terminal():
+    m = _topo_tools()
+    locs = {1: (40.0, -80.0), 2: (40.002, -80.0), 4: (40.0025, -80.0)}
+    system = m.build_ramp_link_graph([([1, 2, 4], "yes")], motorway_node_ids={1, 4})
+    length, node = m.ramp_end(system, locs, 1)
+    assert node is None and length > 0

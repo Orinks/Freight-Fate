@@ -33,6 +33,7 @@ mod exit_ramps;
 mod limits;
 mod lookups;
 mod placement;
+mod streets;
 mod update;
 mod zones;
 

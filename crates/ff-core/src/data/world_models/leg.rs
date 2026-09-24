@@ -10,7 +10,7 @@ use parking_lot::Mutex;
 use super::{
     lane_word, DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark,
     LaneSegment, RouteCheckpoint, RoutePoint, RouteRestriction, SpeedLimitSample, StateCrossing,
-    StateMileage, Stop, TollEvent, TrafficVolumeSample,
+    StateMileage, Stop, StreetControl, StreetLimit, TollEvent, TrafficVolumeSample,
 };
 use crate::data::world::World;
 use crate::data::world_corridor::build_leg_corridor;
@@ -132,6 +132,11 @@ pub struct Leg {
     /// magnitude survives a route reversal unchanged: an inbound 90-degree
     /// right is an outbound 90-degree left at the same corner.
     pub local_turn_deg: f64,
+    /// A facility street's posted limit and what kind of value it is, and
+    /// its READ traffic controls (`tools/street_chain.py`). None and empty on
+    /// highways, on chains baked before the street detail, and outbound.
+    pub local_limit: Option<StreetLimit>,
+    pub local_controls: Vec<StreetControl>,
     /// Whether the leg runs on a divided carriageway, baked from real OSM
     /// oneway-pair geometry (Track D2). None where the bake was mixed or
     /// thin -- honest absence; the runtime infers from road class instead.
@@ -171,6 +176,8 @@ impl Leg {
             local_cue: String::new(),
             local_speed_mph: 0.0,
             local_turn_deg: 0.0,
+            local_limit: None,
+            local_controls: Vec::new(),
             divided: None,
             meta_complete: None,
             corridor: OnceCell::new(),
@@ -199,6 +206,13 @@ impl Leg {
     /// corner with no measurement is a real, expected state.
     pub fn with_turn_deg(mut self, degrees: f64) -> Self {
         self.local_turn_deg = degrees;
+        self
+    }
+
+    /// The street detail of the facility chain segment this leg drives.
+    pub fn with_street(mut self, limit: Option<StreetLimit>, controls: Vec<StreetControl>) -> Self {
+        self.local_limit = limit;
+        self.local_controls = controls;
         self
     }
 
@@ -409,6 +423,8 @@ impl Clone for Leg {
             local_cue: self.local_cue.clone(),
             local_speed_mph: self.local_speed_mph,
             local_turn_deg: self.local_turn_deg,
+            local_limit: self.local_limit.clone(),
+            local_controls: self.local_controls.clone(),
             divided: self.divided,
             meta_complete: self.meta_complete,
             corridor,

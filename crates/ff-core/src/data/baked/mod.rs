@@ -99,7 +99,12 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 ///
 /// 4: an interchange carries its OSM-derived ramp length per direction
 /// (`ramp_length_ft_forward/backward`, `ramp_length_source`).
-pub const FORMAT_VERSION: u32 = 4;
+///
+/// 5: an interchange carries the OSM node its ramp ends at per direction
+/// (`ramp_terminal_node_*`); a facility street carries its posted limit and
+/// kind and its controls, and a facility approach its driveway and one
+/// street chain per ramp terminal (`exit_chains`).
+pub const FORMAT_VERSION: u32 = 5;
 
 const HEADER_LEN: usize = 32;
 

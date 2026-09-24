@@ -17,10 +17,12 @@ use crate::pyfmt::{py_int, py_str_float, round_py_int, round_py_n};
 
 mod interchange;
 mod leg;
+mod street;
 pub use interchange::{
     destinations_without_via, format_route_ref, join_destinations, route_token, Interchange,
 };
 pub use leg::{CorridorBuilder, CorridorDetail, DetailSource, Leg, Route, NO_LEG_ID};
+pub use street::{Driveway, ExitChain, LocalGeometrySegment, StreetControl, StreetLimit};
 
 /// The errors the Python data layer raised: `ValueError` for data that
 /// fails validation, `KeyError` for an unknown city/facility/service, and
@@ -276,6 +278,10 @@ pub struct FacilityApproach {
     pub dock_hint: bool,
     pub final_hint: String,
     pub source_note: String,
+    /// Where `segments` leaves the public street, if the chain does.
+    pub driveway: Option<Driveway>,
+    /// One chain per ramp terminal a delivery can arrive at, whole.
+    pub exit_chains: Vec<ExitChain>,
 }
 
 /// A roadside stop (truck stop, rest area, weigh station, ...) along a leg.
@@ -822,28 +828,6 @@ pub struct LocalApproach {
     pub fallback_reason: String,
     pub distance_to_road_mi: f64,
     pub turn_segments: Vec<String>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct LocalGeometrySegment {
-    pub road: String,
-    pub miles: f64,
-    pub cue: String,
-    pub speed_mph: f64,
-    /// Turn angle at the junction onto this segment, degrees; 0.0 unmeasured.
-    pub turn_deg: f64,
-}
-
-impl Default for LocalGeometrySegment {
-    fn default() -> Self {
-        LocalGeometrySegment {
-            road: String::new(),
-            miles: 0.0,
-            cue: String::new(),
-            speed_mph: 25.0,
-            turn_deg: 0.0,
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
