@@ -101,10 +101,11 @@ fn local_cue_direction(cue: &str) -> &'static str {
     }
 }
 
-/// A baked facility chain as a drivable same-city route, one leg a street,
-/// each carrying its spoken cue, turn angle and street detail. The streets
-/// from the chain's driveway on are its yard (`Leg::local_yard`).
-fn local_chain_route(
+/// A baked facility or road-stop chain as a drivable same-city route, one
+/// leg a street, each carrying its spoken cue, turn angle and street detail.
+/// The streets from the chain's driveway on are its yard or lot
+/// (`Leg::local_yard`).
+pub(crate) fn local_chain_route(
     city: &str,
     segments: &[LocalGeometrySegment],
     driveway: Option<&Driveway>,

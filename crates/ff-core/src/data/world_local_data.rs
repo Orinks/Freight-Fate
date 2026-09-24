@@ -367,11 +367,10 @@ const DRIVEWAY_KINDS: [&str; 2] = ["service_road", "private_road"];
 /// street, or the file is refused -- a number whose provenance is lost reads
 /// as a survey.
 fn facility_segments(
-    p: &str,
-    rid: &str,
+    who: &str,
     raw_segments: &[RawSegment],
 ) -> Result<Vec<LocalGeometrySegment>, DataError> {
-    let bad = |what: &str| DataError::value(format!("{p} facility approach {rid} {what}"));
+    let bad = |what: &str| DataError::value(format!("{who} {what}"));
     let mut segments = Vec::with_capacity(raw_segments.len());
     for raw_segment in raw_segments {
         let segment_road = s(&raw_segment.road);
@@ -419,8 +418,7 @@ fn facility_segments(
 }
 
 fn facility_driveway(
-    p: &str,
-    rid: &str,
+    who: &str,
     raw: Option<&RawDriveway>,
     total_miles: f64,
 ) -> Result<Option<Driveway>, DataError> {
@@ -433,9 +431,7 @@ fn facility_driveway(
         || !(-90.0..=90.0).contains(&raw.lat)
         || !(-180.0..=180.0).contains(&raw.lon)
     {
-        return Err(DataError::value(format!(
-            "{p} facility approach {rid} has an invalid driveway"
-        )));
+        return Err(DataError::value(format!("{who} has an invalid driveway")));
     }
     Ok(Some(Driveway {
         at_mi: raw.at_mi,
@@ -444,6 +440,37 @@ fn facility_driveway(
         kind: raw.kind.clone(),
         source: s(&raw.source),
     }))
+}
+
+fn exit_chains(who: &str, raw: &[RawExitChain]) -> Result<Vec<ExitChain>, DataError> {
+    let mut out = Vec::with_capacity(raw.len());
+    for chain in raw {
+        let segments = facility_segments(who, &chain.segments)?;
+        if chain.terminal_node <= 0 || segments.is_empty() {
+            return Err(DataError::value(format!(
+                "{who} has a chain with no ramp terminal or streets"
+            )));
+        }
+        let total_miles = round_py_n(chain.total_miles, 2);
+        out.push(ExitChain {
+            terminal_node: chain.terminal_node,
+            total_miles,
+            driveway: facility_driveway(who, chain.driveway.as_ref(), total_miles)?,
+            segments,
+        });
+    }
+    Ok(out)
+}
+
+/// Street chains from ramp terminals stored on another record (a road
+/// stop's ``approach_chains``), validated as a facility's exit chains are.
+pub(crate) fn parse_exit_chains(
+    who: &str,
+    value: &serde_json::Value,
+) -> Result<Vec<ExitChain>, DataError> {
+    let raw: Vec<RawExitChain> = serde_json::from_value(value.clone())
+        .map_err(|e| DataError::value(format!("{who} has unreadable street chains: {e}")))?;
+    exit_chains(who, &raw)
 }
 
 #[derive(Deserialize)]
@@ -796,26 +823,11 @@ pub fn load_facility_approaches(
                 "{p} facility approach {rid} is fallback without reason"
             )));
         }
-        let p = p.to_string();
-        let segments = facility_segments(&p, &rid, &entry.segments)?;
+        let who = format!("{p} facility approach {rid}");
+        let segments = facility_segments(&who, &entry.segments)?;
         let total_miles = round_py_n(entry.total_miles, 2);
-        let driveway = facility_driveway(&p, &rid, entry.driveway.as_ref(), total_miles)?;
-        let mut exit_chains = Vec::with_capacity(entry.exit_chains.len());
-        for chain in &entry.exit_chains {
-            let segments = facility_segments(&p, &rid, &chain.segments)?;
-            if chain.terminal_node <= 0 || segments.is_empty() {
-                return Err(DataError::value(format!(
-                    "{p} facility approach {rid} has an exit chain with no terminal or streets"
-                )));
-            }
-            let total_miles = round_py_n(chain.total_miles, 2);
-            exit_chains.push(ExitChain {
-                terminal_node: chain.terminal_node,
-                total_miles,
-                driveway: facility_driveway(&p, &rid, chain.driveway.as_ref(), total_miles)?,
-                segments,
-            });
-        }
+        let driveway = facility_driveway(&who, entry.driveway.as_ref(), total_miles)?;
+        let exit_chains = exit_chains(&who, &entry.exit_chains)?;
         if entry.turn_level && segments.is_empty() {
             return Err(DataError::value(format!(
                 "{p} facility approach {rid} has no turn segments"

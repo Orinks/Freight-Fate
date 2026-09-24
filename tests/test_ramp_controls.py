@@ -298,3 +298,78 @@ def test_a_ramp_that_ends_in_a_merge_has_no_street_terminal():
     system = m.build_ramp_link_graph([([1, 2, 4], "yes")], motorway_node_ids={1, 4})
     length, node = m.ramp_end(system, locs, 1)
     assert node is None and length > 0
+
+
+def test_only_a_public_road_ends_a_ramp_mid_link():
+    """Baltimore, node 9879536272: a two-node service stub touching a ramp
+    before its real terminal became "the terminal", and the street chain
+    from it had no street to start on."""
+    m = _topo_tools()
+    assert m.is_public_crossroad("residential")
+    assert m.is_public_crossroad("trunk")
+    assert not m.is_public_crossroad("service")
+    assert not m.is_public_crossroad("track")
+    assert not m.is_public_crossroad("footway")
+    assert not m.is_public_crossroad("tertiary", "private")
+
+
+def _leg_with_saved_control(m, monkeypatch, at_mi):
+    graph = m.build_ramp_link_graph(
+        [([1, 2, 3], "yes")], motorway_node_ids={1}, crossroad_node_ids={3}
+    )
+    topo = {
+        "graph": graph,
+        "toll": set(),
+        "roundabout": set(),
+        "node_locs": {3: (40.0503, -80.0)},
+        "control_grid": m._GoreGrid([(40.0503, -80.0, "signal")]),
+        "grid": m._GoreGrid([(40.05, -80.0, 1)]),
+    }
+    geom = [(40.0, -80.0, 0.0), (40.05, -80.0, 3.45), (40.1, -80.0, 6.9)]
+    monkeypatch.setattr(m, "leg_corridor_geometry", lambda _leg, _rate: geom)
+    ix = {
+        "at_mi": at_mi,
+        "name": "Test",
+        "ramp_control": "stop",
+        "ramp_control_source": "an older bake",
+        "ramp_far_end": "surface",
+    }
+    return {"miles": 6.9, "corridor": {"interchanges": [ix]}}, topo, ix
+
+
+def test_every_run_rejudges_an_exit_from_the_evidence(monkeypatch):
+    """--force and a plain run disagreed on 40 exits: the plain run kept any
+    exit that already had a control and a far end, whatever bake made it."""
+    m = _topo_tools()
+    leg, topo, ix = _leg_with_saved_control(m, monkeypatch, 3.45)
+    m.bake_ramp_controls_for_leg(leg, [], 1.0, junction_refs={}, topo=topo, stats={})
+    assert ix["ramp_control"] == "signal"
+    assert ix["ramp_control_source"] == m.RAMP_CONTROL_TERMINAL_SOURCE
+    assert ix["ramp_far_end"] == "surface"
+
+
+def test_an_unpinned_exit_on_a_drifted_leg_gets_no_new_verdict(monkeypatch):
+    m = _topo_tools()
+    leg, topo, ix = _leg_with_saved_control(m, monkeypatch, 3.45)
+    stats: dict[str, int] = {}
+    m.bake_ramp_controls_for_leg(
+        leg, [], 1.0, junction_refs={}, topo=topo, stats=stats, withhold_unpinned=True
+    )
+    assert ix["ramp_control"] == "stop" and stats["withheld"] == 1
+
+
+def test_exit_mileage_is_measured_against_its_own_junctions():
+    import exit_position_screen as screen
+
+    geom = [(40.0 + i * 0.01, -80.0, i * 0.69) for i in range(11)]
+    refs = {"1": [(40.01, -80.0)], "2": [(40.05, -80.0)], "3": [(40.09, -80.0)]}
+    on_time = [
+        {"exit_ref": "1", "at_mi": 0.69},
+        {"exit_ref": "2", "at_mi": 3.45},
+        {"exit_ref": "3", "at_mi": 6.21},
+    ]
+    assert screen.leg_position_drift_mi(geom, on_time, 6.9, refs, 500.0) == 0.0
+    shifted = [{**ix, "at_mi": ix["at_mi"] + 2.0} for ix in on_time]
+    assert screen.leg_position_drift_mi(geom, shifted, 6.9, refs, 500.0) > 1.9
+    # Too few matches to judge.
+    assert screen.leg_position_drift_mi(geom, on_time[:2], 6.9, refs, 500.0) is None

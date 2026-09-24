@@ -156,7 +156,15 @@ def annotate(
     junctions = sorted(
         {k for k in range(1, n) if street_deg.get(path_nodes[k], 0) >= 3} | boundaries
     )
-    counts = {"intersections": len(junctions), "controlled": 0, "ambiguous": 0, "conflicts": 0}
+    counts = {
+        "intersections": len(junctions),
+        "controlled": 0,
+        "ambiguous": 0,
+        "conflicts": 0,
+        # Edges on a public street (not service, not private): zero is a ramp
+        # that leads straight into a lot.
+        "street_edges": edge_kinds.count("street"),
+    }
     kinds_at: dict[int, set[str]] = defaultdict(set)
     along = [0.0]
     for miles in edge_miles:
@@ -256,6 +264,10 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         return {
             "chains": 0,
             "chains_unmeasured": 0,
+            "unmeasured_why": {},
+            # Kept chains whose path was read back off the map by their own
+            # street names and miles (chain_match.py), not re-routed.
+            "chains_matched_to_osm": 0,
             "limit_miles": {LIMIT_READ: 0.0, LIMIT_STATUTORY: 0.0, LIMIT_ASSUMED: 0.0},
             "screen_read_limit_not_multiple_of_5": 0,
             "turns": 0,
@@ -273,7 +285,13 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         out["chains"] += 1
         if not any("limit_source" in seg for seg in segments):
             out["chains_unmeasured"] += 1
+            why = chain.get("street_match_failure") or (
+                "stale_endpoint" if chain.get("stale_endpoint") else "not_matched_yet"
+            )
+            out["unmeasured_why"][why] = out["unmeasured_why"].get(why, 0) + 1
             return
+        if chain.get("street_detail") == "matched":
+            out["chains_matched_to_osm"] += 1
         for i, seg in enumerate(segments):
             source = seg.get("limit_source", "")
             out["limit_miles"][source] = out["limit_miles"].get(source, 0.0) + seg["miles"]
