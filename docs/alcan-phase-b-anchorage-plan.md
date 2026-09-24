@@ -1,6 +1,6 @@
 # ALCAN Phase B plan — Anchorage on the continuous AK truck graph
 
-Status: **PLAN ONLY** (this tip). No `world_data` / city / leg JSON. Phase A continuous Lower-48 → Fairbanks remains **KEEP**. Ruth cuts this plan before any Phase B data lands; owner GO after Ruth.
+Status: **PLAN ONLY** (Ruth FIX tip). No `world_data` / city / leg JSON. Phase A continuous Lower-48 → Fairbanks remains **KEEP**. Both corridors + B1-then-B2 order **KEEP**. Owner GO after this FIX cut lands.
 
 Parent scaffold: [`docs/alcan-corridor-scaffold-plan.md`](./alcan-corridor-scaffold-plan.md) (sequence A corridor → **B Alaska map** → C rest of Canada → D Europe).
 
@@ -21,29 +21,29 @@ Phase B hangs Anchorage off this AK tip. It does **not** reopen Canada cabotage,
 
 ---
 
-## 1. Route choice (with rationale)
+## 1. Route choice (with rationale) — KEEP
 
 ### Options
 
-| Corridor | Highways | From | To | Public Valhalla **truck** (2026-09-24, estimate) | MILEPOST / published |
+| Corridor | Highways | From | To | Published / milepost | Valhalla truck (2026-09-24) |
 | --- | --- | --- | --- | --- | --- |
-| **Tok Cutoff + Glenn** | AK-1 Tok Cutoff → short Richardson link → AK-1 Glenn | `tok_ak_us` | Anchorage | **~318 mi** direct; segmented ~139 + ~138 + ~43 | ~328 mi (Tok→ANC principal route) |
-| **Parks** | AK-3 Parks (shared Glenn south of Glenn–Parks interchange) | `fairbanks_ak_us` | Anchorage | **~361 mi** direct; segmented ~57 + ~58 + ~43 + ~169 + ~44 | ~358–362 mi Fairbanks↔Anchorage |
+| **Tok Cutoff + Glenn** | AK-1 Tok Cutoff → short Richardson → AK-1 Glenn | `tok_ak_us` | Anchorage | **~328 mi** Tok→ANC (Bell's / MILEPOST) | Direct ~318 — **do not ship**; see §3 B1 reconcile |
+| **Parks** | AK-3 Parks (shared Glenn south of Glenn–Parks interchange) | `fairbanks_ak_us` | Anchorage | ~358–362 mi Fairbanks↔Anchorage | Direct ~361 |
 
 Passes / grades of note:
 
-- **Glenn / Tok Cutoff:** Mentasta Summit (~2,434 ft) on Tok Cutoff; **Eureka Summit (~3,322 ft, Glenn MP ~129.5)** — highest point on Glenn; winter ice/glaze reported; not a seasonal closure by default (paved all-weather), but check Alaska 511.
-- **Parks:** **Broad Pass (~2,409 ft)** south of Cantwell; generally milder summit than Eureka; Parks is the Denali / Interior tourist + rail-parallel freight spine between Fairbanks and Mat-Su.
+- **Glenn / Tok Cutoff:** Mentasta Summit (~2,434 ft) on Tok Cutoff; **Eureka Summit (~3,322 ft, Glenn MP ~129.3)** — highest point on Glenn; winter ice/glaze reported; paved all-weather, but check Alaska 511.
+- **Parks:** **Broad Pass (~2,409 ft)** south of Cantwell; milder summit than Eureka; Parks is the Denali / Interior tourist + rail-parallel freight spine between Fairbanks and Mat-Su.
 
-### Recommendation — **both**, land **Tok Cutoff + Glenn first**
+### Recommendation — **both**, land **Tok Cutoff + Glenn first** (KEEP)
 
 **Primary (lands first):** Tok Cutoff (AK-1) + Glenn Highway (AK-1) from `tok_ak_us` → `glennallen_ak_us` → `palmer_ak_us` → `anchorage_ak_us`.
 
-**Secondary (lands second, after primary CI green):** Parks Highway (AK-3) from `fairbanks_ak_us` → pass-through fuel towns → `wasilla_ak_us` → `anchorage_ak_us` (shared Glenn south of the Glenn–Parks interchange).
+**Secondary (lands second, after primary CI green):** Parks Highway (AK-3) from `fairbanks_ak_us` → pass-through towns → `wasilla_ak_us` → `anchorage_ak_us` (shared Glenn south of the Glenn–Parks interchange).
 
-**Rationale (one paragraph):** Anchorage-bound overland freight that already entered Alaska on the ALCAN at Tok does **not** detour to Fairbanks then south on Parks; The MILEPOST and Interior freight planning treat the **Glenn Highway / Tok Cutoff as the principal paved Tok→Anchorage connection (~328 mi)**. Fairbanks remains the ALCAN / Richardson terminus for Interior and North Slope staging; Fairbanks↔Anchorage freight uses Parks (and/or rail from Port of Alaska). Most Anchorage consumer freight arrives by **sea via Port of Alaska**, not by ALCAN tractor — Phase B still needs the continuous road filament so through-freight and AK domestic legs are honest, but Anchorage must not be sold as “the ALCAN destination.” Parks is required for a real AK highway graph (Fairbanks–Mat-Su–Anchorage) and should follow once the Tok→Anchorage filament is green. Eureka Summit is steeper/higher than Broad Pass and deserves HGV winter notes; it does not justify skipping the primary freight path.
+**Rationale:** Anchorage-bound overland freight that already entered Alaska on the ALCAN at Tok does **not** detour to Fairbanks then south on Parks; published road logs treat the **Glenn Highway / Tok Cutoff as the principal paved Tok→Anchorage connection (~328 mi)**. Fairbanks remains the ALCAN / Richardson terminus for Interior and North Slope staging; Fairbanks↔Anchorage freight uses Parks (and/or rail from Port of Alaska). Most Anchorage consumer freight arrives by **sea via Port of Alaska**, not by ALCAN tractor — Phase B still needs the continuous road filament so through-freight and AK domestic legs are honest, but Anchorage must not be sold as “the ALCAN destination.” Parks is required for a real AK highway graph (Fairbanks–Mat-Su–Anchorage) and should follow once the Tok→Anchorage filament is green. Eureka Summit is steeper/higher than Broad Pass and deserves HGV winter notes; it does not justify skipping the primary freight path.
 
-Order locked unless Ruth flips it: **B1 Tok Cutoff/Glenn → B2 Parks**.
+Order locked: **B1 Tok Cutoff/Glenn → B2 Parks**.
 
 ---
 
@@ -56,107 +56,126 @@ Key shape: `{name}_{region}_{country}` (e.g. `tok_ak_us`).
 | Role | Proposed key | Approx pin | Role detail |
 | --- | --- | --- | --- |
 | Exists (KEEP) | `tok_ak_us` | 63.3367, −142.9856 | Phase A entry; do not re-mint |
-| Junction / full node | `glennallen_ak_us` | ~62.11, −145.55 | Glenn × Richardson junction; Copper River region service hub |
-| Mat-Su / pass-through→full | `palmer_ak_us` | ~61.60, −149.11 | Glenn corridor agricultural / staging node before Anchorage |
-| Phase B destination / full node | `anchorage_ak_us` | ~61.22, −149.90 | Port-fed market; continuous-drive end of B1 |
+| Full node | `glennallen_ak_us` | ~62.11, −145.55 | Glenn corridor at Glennallen (community ~MP 187; Hub of Alaska fuel at Glenn×Richardson ~MP 189). Copper River region service hub |
+| **Mat-Su market (full)** | `palmer_ak_us` | ~61.60, −149.11 | Glenn MP ~42; **the one Mat-Su market in B1** |
+| Phase B destination / full node | `anchorage_ak_us` | ~61.22, −149.90 | Port-fed market; fuel pin ≠ delivery end (see §4) |
 
-Optional B1 pass-through (Ruth may cut): none required. **Do not** mint `gakona_ak_us` unless Glennallen pin honesty fails (Gakona is the Tok Cutoff / Richardson junction hamlet a few miles north of Glennallen services).
+**CUT:** do **not** mint `gakona_ak_us` (or any Gakona city key). Tok Cutoff meets Richardson at Gakona Junction ~14 mi north of Glennallen; that junction is highway geometry only, not a career city. Glennallen covers the Copper River service hub.
 
 ### B2 — Parks (after B1)
 
 | Role | Proposed key | Approx pin | Role detail |
 | --- | --- | --- | --- |
 | Exists (KEEP) | `fairbanks_ak_us` | 64.8378, −147.7167 | Phase A terminus |
-| Pass-through fuel | `nenana_ak_us` | ~64.56, −149.09 | Parks fuel / Yukon River town |
-| Pass-through fuel | `healy_ak_us` | ~63.87, −148.97 | Parks / Denali gateway; small truck lot |
-| Pass-through fuel | `cantwell_ak_us` | ~63.39, −148.95 | Parks × Denali Hwy; Broad Pass approach |
-| Mat-Su / full or strong pass-through | `wasilla_ak_us` | ~61.58, −149.44 | Parks corridor; near Glenn–Parks interchange |
+| Pass-through (no pin unless verified) | `nenana_ak_us` | ~64.56, −149.09 | Town on graph; fuel/parking pin only if §4 verifies |
+| **Thin pass-through — not a market** | `healy_ak_us` | ~63.87, −148.97 | Parks / Denali gateway only; no career skyline / market board |
+| Conditionally omitted | `cantwell_ak_us` | ~63.39, −148.95 | Mint **only** if diesel **and** real tractor parking verify (§4). Otherwise **no city** — collapse Healy→Wasilla |
+| Pass-through (Mat-Su) | `wasilla_ak_us` | ~61.58, −149.44 | Parks corridor near Glenn–Parks interchange; **not** a second Mat-Su market |
 | Exists after B1 | `anchorage_ak_us` | — | Shared destination |
 
-`healy_ak_us` may stay a thin fuel pin (Fisher Fuel ~3 truck spaces) rather than a career skyline — Ruth decides full vs pass-through.
+### Mat-Su market rule (one market)
+
+- **B1:** `palmer_ak_us` is the **full Mat-Su market**.
+- **B2:** when `wasilla_ak_us` lands, **Wasilla stays a pass-through**; Palmer remains the Mat-Su market. (Pick locked here: demote Wasilla, keep Palmer.)
+- `palmer_ak_us` ↔ `wasilla_ak_us` connector (~11 mi published / ~13 Valhalla truck) is **KEEP** — author as a real leg when both cities exist (see §3).
 
 ### Explicitly not Phase B cities
 
+- `gakona_ak_us` (CUT — never)
 - Haines / Skagway / any ferry POE as drive nodes
 - Kenai / Soldotna / Homer / Seward / Whittier (peninsula / tunnel) unless Ruth expands scope
 - Prudhoe Bay / Deadhorse / Dalton Hwy
 - Valdez (Richardson south) — separate filament, not required to join Anchorage from ALCAN
-- Tourism lodges as cities (Eureka Lodge, Sheep Mountain Lodge, etc.)
+- Tourism lodges as cities (Eureka Lodge, Sheep Mountain Lodge, Mentasta Lodge, etc.)
 
 ---
 
-## 3. Ordered leg list (estimates)
+## 3. Ordered leg list
 
-Direction shown Anchorage-bound; expect matching reverse edges when data lands. Miles are **estimates** from public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options, 2026-09-24) unless noted. Round to whole miles at data tip (±5 mi band, Phase A practice). Auto profile matched truck mileage on these corridors in the same probe (no Blaine-style truck detour observed).
+Direction shown Anchorage-bound; expect matching reverse edges when data lands. Round to whole miles at data tip.
 
-### B1 — Tok Cutoff + Glenn (lands first)
+### B1 — Tok Cutoff + Glenn (lands first) — mile reconcile
 
-| # | Leg | Est. mi | Highway | Source |
+**Pin placement**
+
+| City | Pin target | Milepost / published anchor |
+| --- | --- | --- |
+| `glennallen_ak_us` | Hub of Alaska (diesel + truck parking) at Glenn × Richardson | Glenn Hwy **MP ~189** junction; Glennallen community listed at **MP 187** (Bell's Glenn Hwy log) |
+| `palmer_ak_us` | Town / Glenn access near Arctic Ave / Old Glenn | Glenn Hwy **MP 42** |
+| `anchorage_ak_us` | Fuel at Essential One; delivery end separate (§4) | Glenn Hwy **MP 0** |
+
+**Tok→Anchorage published path (Bell's / MILEPOST):** Tok Cutoff **125 mi** + Richardson **~14 mi** to Glenn junction + Glenn **189 mi** = **~328 mi**.
+
+| # | Leg | Milepost / published | Valhalla truck (2026-09-24) | **Data tip pays** |
 | --- | --- | --- | --- | --- |
-| 1 | `tok_ak_us` → `glennallen_ak_us` | **~139** | Tok Cutoff AK-1 (+ short Richardson to Glennallen services) | Public Valhalla truck 2026-09-24 |
-| 2 | `glennallen_ak_us` → `palmer_ak_us` | **~138** | Glenn Hwy AK-1 via Eureka Summit | Public Valhalla truck 2026-09-24 |
-| 3 | `palmer_ak_us` → `anchorage_ak_us` | **~43** | Glenn Hwy AK-1 | Public Valhalla truck 2026-09-24 |
-| — | `tok_ak_us` → `anchorage_ak_us` (checksum) | **~318** | Combined | Public Valhalla truck; MILEPOST ~328 |
+| 1 | `tok_ak_us` → `glennallen_ak_us` | **~139** (125 Tok Cutoff + ~14 Richardson to Glenn jct) | ~139 (tok→Hub / town) | **~139** — Valhalla matches published |
+| 2 | `glennallen_ak_us` → `palmer_ak_us` | **145** (Glenn **MP 187 → MP 42**) | ~138 (Hub/town → Palmer MP42 area) | **145** — milepost; Valhalla undercounts ~7 mi |
+| 3 | `palmer_ak_us` → `anchorage_ak_us` | **42** (Glenn **MP 42 → MP 0**) | ~43 | **42** — milepost (Valhalla within ±5) |
+| — | B1 checksum | MILEPOST Tok→ANC **328** | Valhalla direct **~318** | **~326** (139+145+42) — **do not ship 318** |
+
+**Why pay milepost on leg 2:** Glenn Hwy mileposts from Anchorage are the corridor’s published truth (Bell's road log: MP 187 Glennallen, MP 42 Palmer → **145 mi**). Public Valhalla truck on OSM returns ~138 from Hub/Glennallen pins to Palmer-area pins — consistently short across pin variants, not fixed by moving the pin from town (MP 187) to Hub (MP 189). Data tip still **densifies geometry with Valhalla truck** along Glenn through Eureka Summit, but **paid miles for glennallen→palmer = 145**. Do not adopt the ~318 direct Valhalla checksum; published Tok→ANC is **328**, plan segment sum **~326** (2 mi residual = Hub at MP 189 vs community MP 187 used in the 145 arithmetic).
 
 No Tok→Anchorage skip that omits Glennallen. No Fairbanks detour on B1.
 
 ### B2 — Parks (lands second)
 
-| # | Leg | Est. mi | Highway | Source |
+Default list assumes Cantwell parking **does not** verify (current status: unverified — see §4). Healy is a thin pass-through, not a market.
+
+| # | Leg | Est. mi | Highway | Source / note |
 | --- | --- | --- | --- | --- |
 | 1 | `fairbanks_ak_us` → `nenana_ak_us` | **~57** | Parks AK-3 | Public Valhalla truck 2026-09-24 |
 | 2 | `nenana_ak_us` → `healy_ak_us` | **~58** | Parks AK-3 | Public Valhalla truck 2026-09-24 |
-| 3 | `healy_ak_us` → `cantwell_ak_us` | **~43** | Parks AK-3 | Public Valhalla truck 2026-09-24 |
-| 4 | `cantwell_ak_us` → `wasilla_ak_us` | **~169** | Parks AK-3 via Broad Pass | Public Valhalla truck 2026-09-24 |
-| 5 | `wasilla_ak_us` → `anchorage_ak_us` | **~44** | Parks → Glenn–Parks interchange → Glenn AK-1 | Public Valhalla truck 2026-09-24 |
-| — | `fairbanks_ak_us` → `anchorage_ak_us` (checksum) | **~361** | Combined | Public Valhalla truck |
+| 3 | `healy_ak_us` → `wasilla_ak_us` | **~207** | Parks AK-3 via Broad Pass | Public Valhalla truck 2026-09-24 (**Cantwell collapsed**) |
+| 4 | `wasilla_ak_us` → `anchorage_ak_us` | **~44** | Parks → Glenn–Parks interchange → Glenn AK-1 | Public Valhalla truck 2026-09-24 |
+| 5 | `palmer_ak_us` ↔ `wasilla_ak_us` | **~11** published / ~13 Valhalla | Mat-Su connector | **KEEP** — author both directions when Wasilla lands; pay routed truck miles at data tip |
+| — | Fairbanks→Anchorage checksum (via collapsed Parks) | — | ~57+58+207+44 ≈ **366** | Valhalla direct Fairbanks→ANC still ~361; ±5 band OK |
 
-Ruth may collapse Nenana/Healy/Cantwell into fewer pins if fuel honesty still holds; do **not** invent short-hop miles.
+**Cantwell conditional (only if diesel AND tractor parking verify at data tip):**
 
-Cross-link (optional later, not required for B1 GO): `palmer_ak_us` ↔ `wasilla_ak_us` short Mat-Su connector — only if both cities exist and a real highway path is densified; not a teleport.
+| Replace leg 3 with | Est. mi | Note |
+| --- | --- | --- |
+| `healy_ak_us` → `cantwell_ak_us` | **~43** | Valhalla truck |
+| `cantwell_ak_us` → `wasilla_ak_us` | **~169** | Valhalla truck (~43+169 ≈ 212 vs collapsed 207) |
+
+If Cantwell stays unverified: **no `cantwell_ak_us` city**, no Cantwell pin, single Healy→Wasilla leg ~207.
+
+Nenana stays on the graph as a pass-through town even without a fuel pin (no invented capacity).
 
 ---
 
-## 4. Truck stops / parking (real diesel + truck parking only)
+## 4. Truck stops / parking
 
-Prefer `parking` / `travel_center`-class location types for public lots — **not** `company_yard` (carry soft type debt from Phase A; fix on new pins). Tourism lodges are on the kill list even when AllStays lists “truck parking.”
+Prefer `parking` / `travel_center`-class types for public lots — **not** `company_yard`. Tourism lodges stay rejected. **Pin only when diesel AND real tractor parking both verify.** Do not invent capacity. Unverified ⇒ town may exist as pass-through with **no** fuel/parking location pin.
 
-### B1 corridor candidates
+### Status table
 
-| Area | Candidate | Notes (capacity from public directories; verify at data tip) | Verdict |
-| --- | --- | --- | --- |
-| Tok (exists) | Young's Chevron (Alaska Hwy & E 4th) | ~25 truck spaces; diesel; Phase A pin KEEP | **KEEP** |
-| Glennallen | **Hub of Alaska** (Glenn @ Richardson / ~MP 189 Glenn) | ~20–25 truck spaces; diesel; 24h listings | **Primary Glennallen pin** |
-| Glennallen | Glennallen Fuel & Service (~187 Glenn Hwy) | ~10 truck spaces; diesel | Alternate / second lot OK |
-| Tok Cutoff mid | Mentasta Lodge | Lodging / tourism first; do not treat as tractor stop | **REJECT** |
-| Glenn mid | Eureka Lodge / Sheep Mountain Lodge / Grand View | Tourism / RV | **REJECT** |
-| Palmer | Chevron on Glenn (~MP 42 class listings) | ~18 truck spaces claimed in secondary directories — **verify via Overpass/OSM + site honesty before pin** | Candidate |
-| Anchorage | **Essential One** (9250 King St) — Petro 49 / Shoreside | High-flow diesel, cardlock, DEF; AllStays ~**3** truck spaces in dirt lot | **Candidate with capacity honesty debt** |
-| Anchorage | Many Holiday / in-town pumps | Often **no** tractor parking | Do not pin as truck stops |
-
-Anchorage honest parking is thin in public truck-stop directories. Data tip must re-verify (Overpass `amenity=parking`+`hgv`, operator sites, daytime street imagery). Do not invent a 40-space Tesoro lot without a primary source.
-
-### B2 corridor candidates
-
-| Area | Candidate | Notes | Verdict |
-| --- | --- | --- | --- |
-| Nenana | A-Frame SVC / Parks Hwy fuel | Diesel claimed; **truck parking capacity unverified** | Fuel pin only if parking/diesel confirmed |
-| Healy | Fisher Fuel (Parks MM ~249.5) | Diesel; AllStays ~**3** truck spaces | Thin pass-through OK |
-| Cantwell | Vitus / Cantwell Food Mart (Parks MM ~210) | Diesel + on-site parking; capacity TBD | Candidate fuel pin |
-| Wasilla / Big Lake | Holiday / Three Bears Travel Center / Fishers Fuel (Big Lake) | Secondary directories claim ~25 spaces at Holiday Parks Hwy and Fishers Big Lake — **verify before pin** | Prefer verified travel_center |
-| Wasilla | Tourism / RV-only parks | — | **REJECT** |
+| Area | Candidate | Diesel | Tractor parking | Status | Plan action |
+| --- | --- | --- | --- | --- | --- |
+| Tok | Young's Chevron (Alaska Hwy & E 4th) | Yes | Yes (~25; AllStays / Phase A) | **Verified** (Phase A + AllStays) | **KEEP** existing pin |
+| Glennallen | **Hub of Alaska** (Glenn × Richardson ~MP 189) | Yes | Yes (~20–25; truckstopsandservices / AllStays) | **Verified** | **Primary Glennallen pin** |
+| Glennallen | Glennallen Fuel & Service (~Glenn MP 187) | Yes | Yes (~10; truckstopsandservices / AllStays) | **Verified** | Alternate / second lot OK |
+| Tok Cutoff mid | Mentasta Lodge | — | Lodge / tourism | **REJECT** | No pin |
+| Glenn mid | Eureka Lodge / Sheep Mountain / Grand View | — | Tourism / RV | **REJECT** | No pin |
+| Palmer | Chevron on Glenn (~MP 42 claims) | Unverified | Unverified (~18 claimed in secondary directory only) | **Unverified** | **No pin** — Palmer is pass-through for parking until verified; city remains Mat-Su **market** node |
+| Anchorage fuel | **Essential One** (9250 King St; Petro 49 / Shoreside) | Yes (high-flow, cardlock, DEF) | Yes but thin (~**3** dirt-lot spaces; AllStays) | **Verified** with capacity debt | **Anchorage fuel pin**; keep 3-space honesty debt |
+| Anchorage delivery | Port of Alaska / Ship Creek industrial / consignee drop | N/A | Consignee / industrial, not a truck stop | **Delivery end** | Model as **consignee or industrial drop**, not a big travel center |
+| Anchorage other | Holiday / in-town pumps | Often yes | Often **no** tractor parking | Reject as truck stops | Do not pin |
+| Nenana | A-Frame SVC / Parks fuel | Unverified | Unverified | **Unverified** | **No pin** — Nenana pass-through town only |
+| Healy | Fisher Fuel (Parks MM ~249.5) | Yes (GasBuddy / listings) | Thin (~3; AllStays) | **Verified thin** | Optional thin fuel pin on a **pass-through, not a market**; capacity 3 named, not inflated |
+| Cantwell | Vitus / Cantwell Food Mart (Parks MM ~210) | Likely (listings claim diesel) | Tractor parking **unverified** | **Unverified** | **No pin / no city** unless both verify; else collapse Healy→Wasilla ~207 |
+| Wasilla / Big Lake | Holiday Parks Hwy / Three Bears / Fishers Big Lake | Unverified | Unverified (secondary ~25 claims only) | **Unverified** | **No pin** — Wasilla pass-through until verified |
 
 ---
 
 ## 5. HGV notes (Alaska)
 
-- **Default CMV speed (13 AAC 03.275):** commercial motor vehicles default to **55 mph** on roadways unless a different limit is posted under 13 AAC 03.280. Rural NHS segments of Parks / Glenn / Richardson / Alaska Hwy may post **65 mph** where signed — use **posted**, not assumed 65, in speed contexts. Prefer `hgv:true` contexts on AK NHS legs when densifying.
-- **Size/weight (17 AAC 25):** typical legal envelope includes 53 ft cargo unit / combination rules per MSCVC; overweight/oversize by permit. Overweight permits may impose lower max speeds (e.g. 45→25 mph bands by overload %).
-- **Spring breakup:** seasonal axle-load restrictions (often 85% / 75% / 50% of legal) on Northern and Central Region routes including Tok Cutoff, Glenn (selected MPs), Parks approaches, and local Glennallen/Tok roads — see DOT&PF MSCVC weight-restriction bulletins (e.g. Northern Region notices into 2026). Model as named honesty / seasonal modifier later; do not silently ignore in career copy.
+- **Speed limits — use posted; cite the general rule:** Alaska’s unposted regulatory maximums are in **13 AAC 02.275** (Chapter 02, Rules of the Road) — **15 mph alley / 20 business / 25 residential / 55 mph any other roadway** — applying to drivers generally, not as a CMV-only special case. DOT&PF speed-zone policy cites the same 13 AAC 02.275 regulatory maximums and notes altered limits become effective when **posted** (13 AAC 02.280). Parallel CMV text exists at **13 AAC 03.275 / 03.280**, but do **not** describe 55 mph as “CMV-only.” On Parks / Glenn / Richardson / Alaska Hwy NHS segments, **posted** limits (commonly 55 or 65 where signed) control speed contexts. Prefer densify from posted values; do not assume 65 unsigned.
+- **Size/weight (17 AAC 25):** typical legal envelope per MSCVC; overweight/oversize by permit (permit speed caps may apply).
+- **Spring breakup:** seasonal axle-load restrictions (often 85% / 75% / 50% of legal) appear on Northern/Central Region routes (Tok Cutoff, Glenn segments, Parks approaches, local Glennallen/Tok roads) per DOT&PF MSCVC bulletins. **Breakup axle limits are not modeled** in Phase B (or Phase A). Do **not** promise year-round legal GVW, and do not imply the sim enforces breakup cuts.
 - **Chains / traction:** follow posted / 511 / trooper direction; Eureka Summit and Mentasta Summit ice glaze are real winter hazards (not automatic seasonal closures).
-- **Steep / summit grades:** Eureka Summit (Glenn) primary concern for B1; Mentasta Summit on Tok Cutoff; Broad Pass (Parks) milder for B2. Atigun Pass (Dalton) is **out of scope**.
-- **Public Valhalla truck vs auto (2026-09-24 probe):** Tok→ANC and Fairbanks→ANC truck and auto profiles returned **matching** mileages on these corridors (unlike Blaine POE Phase A debt). Still densify with **truck** costing at data tip; re-check if OSM truck restrictions appear.
-- **Routing APIs:** prefer public Valhalla truck; OSRM car as cross-check only. Overpass for fuel/parking tags. AKDOT&PF 511 + MSCVC for restrictions — not as geometry source.
+- **Steep / summit grades:** Eureka Summit (Glenn) primary B1 concern; Mentasta Summit on Tok Cutoff; Broad Pass (Parks) milder for B2. Atigun Pass (Dalton) is **out of scope**.
+- **Public Valhalla truck vs auto (2026-09-24 probe):** truck and auto mileages matched on these corridors (unlike Blaine POE). Still densify with **truck** costing; re-check if OSM truck restrictions appear. Paid miles follow §3 (milepost on glennallen→palmer).
+- **Routing APIs:** prefer public Valhalla truck for shape; OSRM car as cross-check; Overpass for fuel/parking tags; AKDOT&PF 511 + MSCVC for restriction notices — not as geometry source.
 
 ---
 
@@ -175,13 +194,14 @@ Anchorage honest parking is thin in public truck-stop directories. Data tip must
 ### New Phase B debts
 
 1. **Anchorage is sea-fed:** Port of Alaska dominates inbound consumer freight; ALCAN through-freight is secondary. Career copy / market sizing must not imply Anchorage “is” the ALCAN destination.
-2. **Anchorage tractor parking scarcity:** public directories show few high-capacity truck stops inside Anchorage; Essential One ~3 spaces. Pin honesty may need port-adjacent / industrial lots researched at data tip.
+2. **Essential One 3-space parking debt:** verified diesel fuel pin with only ~3 tractor spaces; delivery end is consignee / Port–Ship Creek industrial drop, not a big truck stop.
 3. **Ferry later:** Haines / Skagway remain ferry — never continuous-drive substitutes for ALCAN or Phase B.
 4. **Kenai / Seward / Whittier out of scope** unless Ruth expands (Whittier tunnel / ferry adjacency is a footgun).
 5. **Dalton / Prudhoe out of scope** for this phase.
-6. **Spring breakup not simulated** yet — name it; do not fake year-round legal GVW on restricted weeks.
-7. **Parks mid-corridor thin lots:** Healy/Cantwell/Nenana parking capacity poorly documented — fuel pins may be thinner than Lower-48 travel centers.
+6. **Spring breakup axle limits are not modeled** — no GVW promise; named debt only.
+7. **Unverified Parks / Mat-Su lots:** Nenana, Cantwell, Wasilla/Big Lake, Palmer Chevron stay unpinned until diesel + tractor parking verify; Cantwell collapse is the default.
 8. **Valdez / Richardson south** not required for Anchorage join — do not sneak Valdez in as “almost Anchorage.”
+9. **Glennallen→Palmer Valhalla undercount (~138 vs milepost 145):** paid miles follow milepost; shape from router — named geometry/miles tension until a future bake or OSM fix closes the gap.
 
 ---
 
@@ -190,24 +210,28 @@ Anchorage honest parking is thin in public truck-stop directories. Data tip must
 - Ferry-as-drive (Haines, Skagway, any AMHS hop labeled as highway miles)
 - Teleport Lower 48 → Anchorage or Tok → Anchorage skip of Glennallen
 - Short-hop / straight-line / guessed miles
+- Shipping Valhalla Tok→ANC **~318** as B1 truth (use milepost-aligned ~326–328)
 - Cabotage fantasy inside Canada (unchanged)
 - Tourism lodges as tractor stops (Mentasta Lodge, Eureka Lodge, Sheep Mountain, etc.)
+- Minting `gakona_ak_us`
+- Second Mat-Su market (Wasilla full alongside Palmer)
 - Full Canada board (Phase C)
 - Europe (#195) (Phase D)
 - Dalton Hwy / Deadhorse / Prudhoe
 - Kenai Peninsula / Seward / Whittier unless separately argued and Ruth-cut
 - Overnight PBF / Valhalla tile bake for this plan tip
 - Any `world_data` / `world_source` city or leg edits in the plan tip
+- Modeling spring-breakup axle cuts or promising year-round legal GVW
 
 ---
 
 ## 8. GO gates
 
-1. **Ruth cuts this plan** (route order B1 then B2; city keys; kill list; parking honesty).
+1. Ruth FIX cut on this tip (mile reconcile; stop verify table; Cantwell collapse; Mat-Su one-market; speed cite; breakup plain).
 2. **Owner GO** after Ruth.
-3. **First data tip = B1 only:** `glennallen_ak_us`, `palmer_ak_us`, `anchorage_ak_us` + three legs both directions; public Valhalla truck densify; parking/travel_center types; CI green.
-4. **Second data tip = B2 Parks** only after B1 KEEP — Nenana/Healy/Cantwell/Wasilla + Parks legs.
-5. Still **no** rest-of-Canada bulk, no ferry nodes, no Dalton.
+3. **First data tip = B1 only:** `glennallen_ak_us`, `palmer_ak_us`, `anchorage_ak_us` + three legs both directions; glennallen→palmer **paid 145**; Essential One fuel + consignee/industrial delivery end; CI green.
+4. **Second data tip = B2 Parks** after B1 KEEP — Nenana + Healy (thin pass-through) + Wasilla (pass-through) + collapsed Healy→Wasilla ~207 unless Cantwell verifies; Palmer↔Wasilla connector; still one Mat-Su market (Palmer).
+5. Still **no** rest-of-Canada bulk, no ferry nodes, no Dalton, no Phase C.
 
 Ops: daytime public Overpass / Valhalla / regional Geofabrik only. Escalate to overnight bake only if APIs fail honesty — and ask before any overnight machine leave-on.
 
@@ -215,10 +239,16 @@ Ops: daytime public Overpass / Valhalla / regional Geofabrik only. Escalate to o
 
 ## 9. Suggested verification checklist (data tip, not this tip)
 
-- [ ] Re-run Valhalla truck per leg; store paid miles + shape
-- [ ] Overpass confirm diesel + HGV parking tags (or operator primary source) for each pin
-- [ ] Reject any lodge-only amenity
-- [ ] AK `hgv` speed contexts from posted/statutory defaults
-- [ ] Lat ceiling / lon floor already raised for Fairbanks; confirm Anchorage (~61.2°N, ~−149.9°) inside integrity bounds
+- [ ] Pay B1 miles per §3 table (145 on glennallen→palmer; checksum ≠ 318)
+- [ ] Densify Valhalla truck shapes; do not silently replace milepost-paid leg 2 with 138
+- [ ] Overpass / operator confirm diesel **and** HGV tractor parking before any new pin
+- [ ] Palmer / Nenana / Cantwell / Wasilla: leave unpinned if still unverified
+- [ ] Cantwell default collapsed (Healy→Wasilla ~207) unless both checks pass
+- [ ] Healy = thin pass-through, not a market
+- [ ] Wasilla = pass-through; Palmer = sole Mat-Su market; author Palmer↔Wasilla ~11–13 mi
+- [ ] Anchorage: Essential One fuel pin + Port/Ship Creek consignee or industrial drop
+- [ ] Speed contexts from **posted** limits; cite 13 AAC 02.275 / 02.280 — not “CMV-only 55”
+- [ ] No breakup GVW modeling; no `gakona_ak_us`; reject lodges
+- [ ] Lat/lon integrity includes Anchorage (~61.2°N, ~−149.9°)
 - [ ] Both directions authored; no CA cabotage unlock
-- [ ] Changelog / `[skip changelog]` policy followed for docs vs data tips
+- [ ] Docs tips carry `[skip changelog]` as required
