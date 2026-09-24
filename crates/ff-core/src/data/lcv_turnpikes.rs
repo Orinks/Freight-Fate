@@ -4,19 +4,25 @@
 //! that authorize LCVs, and they make up / break down at staging lots at the
 //! turnpike exits -- the combination itself stays on the permitted road.
 //! World data does not tag "LCV permitted" on legs, so this module matches
-//! highway IDs against the classic ISTEA-era turnpike systems in the states
-//! that freeze those networks (23 CFR 658 Appendix C), plus short staging
-//! stubs at either end of a route.
+//! an explicit allowlist of city-pair legs drawn from the shipped world graph
+//! against the classic ISTEA-era turnpike systems (23 CFR 658 Appendix C),
+//! plus short staging stubs at either end of a route.
 //!
 //! Honesty debts:
 //! * Florida's Turnpike is mostly not Interstate-numbered in world data, so
 //!   FL turnpike doubles are not offered under this approximation.
 //! * Western LCV corridors (Rocky Mountain doubles and similar) are not
-//!   modeled; only the classic turnpike highway list counts.
+//!   modeled; only the classic turnpike corridor list counts.
 //! * Staging lots are approximated as same-city locals / end `local_cue` /
 //!   short end stubs, not curated break-bulk yards.
+//! * No LCV driver certification or carrier permit gate (49 CFR 380).
+//! * Hazmat in doubles is not modeled -- `turnpike_doubles` never carries
+//!   placarded freight.
+//! * World-graph gaps: Ohio Turnpike east of Toledo toward the PA line has
+//!   no city-pair that stays on I-80 without a Cleveland endpoint; Kansas
+//!   Turnpike I-70 Topeka to Kansas City has no shipped leg (and KC sits in
+//!   Missouri, outside the board's LCV-state endpoints).
 
-use crate::data::national_network::city_key_state_country;
 use crate::data::world_models::{Leg, Route};
 
 /// Soft staging-lot stub at a turnpike exit (miles). Same federal-floor
@@ -29,63 +35,87 @@ pub const LCV_TURNPIKE_ROUTE_REFUSAL: &str = "Dispatch only clears long doubles 
 /// Spoken when dispatch drops a non-turnpike option for long doubles.
 pub const LCV_TURNPIKE_REROUTE_NOTE: &str = "Dispatch dropped a lane that leaves the turnpike.";
 
-/// Classic LCV turnpike systems identifiable by Interstate (or spur) ID in
-/// world data: `(state_code, highway)`.
+/// Per-state LCV GVW caps on the classic turnpike systems, in pounds.
+/// Recorded for FIX 5; not enforced by routing or the job board yet.
 ///
-/// NY Thruway (I-90), Massachusetts Turnpike (I-90), Ohio Turnpike (I-80 /
-/// I-90), Indiana Toll Road (I-80 / I-90), Kansas Turnpike (I-35 / I-335 /
-/// I-70). Florida's Turnpike is omitted -- it is not carried as an
-/// Interstate highway ID in the shipped legs.
-pub const LCV_TURNPIKE_HIGHWAYS: &[(&str, &str)] = &[
-    ("NY", "I-90"),
-    ("MA", "I-90"),
-    ("OH", "I-80"),
-    ("OH", "I-90"),
-    ("IN", "I-80"),
-    ("IN", "I-90"),
-    ("KS", "I-35"),
-    ("KS", "I-335"),
-    ("KS", "I-70"),
+/// OH / IN / MA: 127,400 lb. NY: 143,000 lb. KS: 120,000 lb.
+pub const LCV_TURNPIKE_GVW_CAP_LB: &[(&str, u32)] = &[
+    ("OH", 127_400),
+    ("IN", 127_400),
+    ("MA", 127_400),
+    ("NY", 143_000),
+    ("KS", 120_000),
+];
+
+/// Allowed turnpike corridor legs as undirected city pairs plus highway,
+/// taken from shipped `data/world_data/us/legs/*.json`.
+///
+/// Corridors covered:
+/// * NY Thruway: I-90 Buffalo–Albany chain; Berkshire Section toward MA
+///   (`albany`–`worcester` / `springfield`–`albany`); I-87 NYC–Albany;
+///   I-90 Buffalo–PA line (`buffalo`–`erie`).
+/// * Mass Pike: I-90 Boston–Worcester–Springfield (and the Albany link).
+/// * Ohio Turnpike: I-80/I-90 from the IN line through Toledo
+///   (`toledo`–`elkhart`). Cleveland and I-90 east of the Elyria split are
+///   not listed (see exclusions in tests).
+/// * Indiana Toll Road: I-80/I-90 Elkhart–South Bend–Gary.
+/// * Kansas Turnpike: I-35 Wichita–Emporia, I-335 Emporia–Topeka. I-70
+///   Topeka–KC is a documented world-data gap; I-70 west of Topeka is
+///   intentionally omitted.
+pub const LCV_TURNPIKE_LEGS: &[(&str, &str, &str)] = &[
+    // NY Thruway I-90 Buffalo ↔ Albany
+    ("buffalo_ny_us", "rochester_ny_us", "I-90"),
+    ("rochester_ny_us", "syracuse_ny_us", "I-90"),
+    ("syracuse_ny_us", "utica_ny_us", "I-90"),
+    ("utica_ny_us", "albany_ny_us", "I-90"),
+    ("syracuse_ny_us", "albany_ny_us", "I-90"),
+    ("syracuse_ny_us", "buffalo_ny_us", "I-90"),
+    // NY Thruway Berkshire Section ↔ MA line / Mass Pike link
+    ("albany_ny_us", "worcester_ma_us", "I-90"),
+    ("springfield_ma_us", "albany_ny_us", "I-90"),
+    // NY Thruway I-87 NYC ↔ Albany
+    ("new_york_ny_us", "albany_ny_us", "I-87"),
+    // NY Thruway I-90 Buffalo ↔ PA line
+    ("buffalo_ny_us", "erie_pa_us", "I-90"),
+    // Massachusetts Turnpike I-90
+    ("boston_ma_us", "worcester_ma_us", "I-90"),
+    ("springfield_ma_us", "worcester_ma_us", "I-90"),
+    // Ohio Turnpike west (IN line ↔ Toledo); east-of-Elyria I-90 omitted
+    ("toledo_oh_us", "elkhart_in_us", "I-80"),
+    // Indiana Toll Road I-80 / I-90
+    ("elkhart_in_us", "south_bend_in_us", "I-80"),
+    ("gary_in_us", "south_bend_in_us", "I-90"),
+    // Kansas Turnpike I-35 / I-335 (Wichita–Emporia–Topeka)
+    ("emporia_ks_us", "wichita_ks_us", "I-35"),
+    ("topeka_ks_us", "emporia_ks_us", "I-335"),
 ];
 
 fn normalize_highway(highway: &str) -> String {
     highway.trim().to_uppercase().replace(' ', "")
 }
 
-/// Whether `highway` is a listed LCV turnpike road inside `state_code`.
-pub fn highway_is_lcv_turnpike(state_code: &str, highway: &str) -> bool {
+fn cities_match(leg: &Leg, a: &str, b: &str) -> bool {
+    (leg.a == a && leg.b == b) || (leg.a == b && leg.b == a)
+}
+
+/// GVW cap in pounds for a turnpike state, when one is recorded for FIX 5.
+pub fn lcv_turnpike_gvw_cap_lb(state_code: &str) -> Option<u32> {
     let state = state_code.trim().to_uppercase();
-    let hwy = normalize_highway(highway);
-    LCV_TURNPIKE_HIGHWAYS
+    LCV_TURNPIKE_GVW_CAP_LB
         .iter()
-        .any(|(st, listed)| *st == state && normalize_highway(listed) == hwy)
+        .find(|(st, _)| *st == state)
+        .map(|(_, lb)| *lb)
 }
 
-fn endpoint_states(leg: &Leg) -> Vec<String> {
-    let mut out = Vec::new();
-    for key in [&leg.a, &leg.b] {
-        if let Some((state, country)) = city_key_state_country(key) {
-            if country.eq_ignore_ascii_case("us") {
-                let state = state.to_ascii_uppercase();
-                if !out.iter().any(|s| s == &state) {
-                    out.push(state);
-                }
-            }
-        }
-    }
-    out
-}
-
-/// Whether a corridor leg sits on a listed LCV turnpike for one of its
-/// endpoint states.
+/// Whether a corridor leg is on the explicit LCV turnpike allowlist.
 pub fn leg_on_lcv_turnpike(leg: &Leg) -> bool {
     let hwy = normalize_highway(&leg.highway);
     if hwy.is_empty() {
         return false;
     }
-    endpoint_states(leg)
+    LCV_TURNPIKE_LEGS
         .iter()
-        .any(|state| highway_is_lcv_turnpike(state, &leg.highway))
+        .any(|(a, b, listed)| normalize_highway(listed) == hwy && cities_match(leg, a, b))
 }
 
 fn leg_is_staging_access(leg: &Leg) -> bool {
@@ -136,11 +166,11 @@ mod tests {
     use super::*;
     use crate::data::world_models::Leg;
 
-    fn ohio_turnpike_leg() -> Leg {
+    fn ohio_west_turnpike_leg() -> Leg {
         Leg::new(
-            "cleveland_oh_us",
             "toledo_oh_us",
-            100.0,
+            "elkhart_in_us",
+            139.0,
             "I-80",
             "flat",
             Vec::new(),
@@ -159,19 +189,131 @@ mod tests {
     }
 
     #[test]
-    fn listed_turnpike_highways_match_by_state() {
-        assert!(highway_is_lcv_turnpike("OH", "I-80"));
-        assert!(highway_is_lcv_turnpike("NY", "I-90"));
-        assert!(highway_is_lcv_turnpike("KS", "I-335"));
-        assert!(!highway_is_lcv_turnpike("OH", "I-71"));
-        assert!(!highway_is_lcv_turnpike("CA", "I-5"));
-        assert!(!highway_is_lcv_turnpike("FL", "I-95"));
+    fn allowed_corridor_legs_match_city_pairs() {
+        assert!(leg_on_lcv_turnpike(&ohio_west_turnpike_leg()));
+        assert!(leg_on_lcv_turnpike(&Leg::new(
+            "new_york_ny_us",
+            "albany_ny_us",
+            145.0,
+            "I-87",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(leg_on_lcv_turnpike(&Leg::new(
+            "albany_ny_us",
+            "new_york_ny_us",
+            145.0,
+            "I-87",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(leg_on_lcv_turnpike(&Leg::new(
+            "emporia_ks_us",
+            "wichita_ks_us",
+            90.0,
+            "I-35",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(!leg_on_lcv_turnpike(&plain_interstate_leg()));
+        // Same cities on the wrong highway never count.
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "toledo_oh_us",
+            "elkhart_in_us",
+            139.0,
+            "I-90",
+            "flat",
+            Vec::new(),
+        )));
     }
 
     #[test]
-    fn turnpike_leg_is_allowed_and_non_turnpike_is_refused() {
-        assert!(leg_on_lcv_turnpike(&ohio_turnpike_leg()));
-        assert!(!leg_on_lcv_turnpike(&plain_interstate_leg()));
+    fn ohio_i90_east_of_elyria_and_cleveland_are_refused() {
+        // I-90 Cleveland ↔ Toledo spans the Elyria split into Cleveland.
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "cleveland_oh_us",
+            "toledo_oh_us",
+            114.0,
+            "I-90",
+            "flat",
+            Vec::new(),
+        )));
+        // I-90 Erie ↔ Cleveland is east of Elyria (Cleveland and east).
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "erie_pa_us",
+            "cleveland_oh_us",
+            102.0,
+            "I-90",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(!route_allows_lcv_turnpike(&Route::from_legs(
+            vec!["cleveland_oh_us".into(), "toledo_oh_us".into()],
+            vec![Leg::new(
+                "cleveland_oh_us",
+                "toledo_oh_us",
+                114.0,
+                "I-90",
+                "flat",
+                Vec::new(),
+            )],
+        )));
+    }
+
+    #[test]
+    fn kansas_i70_west_of_topeka_is_refused() {
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "topeka_ks_us",
+            "junction_city_ks_us",
+            65.0,
+            "I-70",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "salina_ks_us",
+            "hays_ks_us",
+            98.0,
+            "I-70",
+            "flat",
+            Vec::new(),
+        )));
+        assert!(!leg_on_lcv_turnpike(&Leg::new(
+            "colby_ks_us",
+            "burlington_co_us",
+            69.0,
+            "I-70",
+            "flat",
+            Vec::new(),
+        )));
+    }
+
+    #[test]
+    fn ny_i87_nyc_to_albany_is_allowed() {
+        let leg = Leg::new(
+            "new_york_ny_us",
+            "albany_ny_us",
+            145.0,
+            "I-87",
+            "flat",
+            Vec::new(),
+        );
+        assert!(leg_on_lcv_turnpike(&leg));
+        assert!(route_allows_lcv_turnpike(&Route::from_legs(
+            vec!["new_york_ny_us".into(), "albany_ny_us".into()],
+            vec![leg],
+        )));
+    }
+
+    #[test]
+    fn gvw_caps_are_recorded_for_fix_five() {
+        assert_eq!(lcv_turnpike_gvw_cap_lb("OH"), Some(127_400));
+        assert_eq!(lcv_turnpike_gvw_cap_lb("IN"), Some(127_400));
+        assert_eq!(lcv_turnpike_gvw_cap_lb("MA"), Some(127_400));
+        assert_eq!(lcv_turnpike_gvw_cap_lb("NY"), Some(143_000));
+        assert_eq!(lcv_turnpike_gvw_cap_lb("KS"), Some(120_000));
+        assert_eq!(lcv_turnpike_gvw_cap_lb("FL"), None);
+        assert_eq!(lcv_turnpike_gvw_cap_lb("CA"), None);
     }
 
     #[test]
@@ -186,7 +328,7 @@ mod tests {
     #[test]
     fn turnpike_route_with_staging_stub_is_allowed() {
         let stub = Leg::local(
-            "cleveland_oh_us",
+            "toledo_oh_us",
             0.6,
             "Staging Lot Road",
             "right onto Staging Lot Road",
@@ -194,11 +336,11 @@ mod tests {
         );
         let route = Route::from_legs(
             vec![
-                "cleveland_oh_us".into(),
-                "cleveland_oh_us".into(),
                 "toledo_oh_us".into(),
+                "toledo_oh_us".into(),
+                "elkhart_in_us".into(),
             ],
-            vec![stub, ohio_turnpike_leg()],
+            vec![stub, ohio_west_turnpike_leg()],
         );
         assert!(route_allows_lcv_turnpike(&route));
     }
@@ -207,14 +349,14 @@ mod tests {
     fn mid_route_connector_never_counts_as_staging() {
         let route = Route::from_legs(
             vec![
-                "cleveland_oh_us".into(),
+                "toledo_oh_us".into(),
                 "mid_oh_us".into(),
                 "elmore_oh_us".into(),
-                "toledo_oh_us".into(),
+                "elkhart_in_us".into(),
             ],
             vec![
                 Leg::new(
-                    "cleveland_oh_us",
+                    "toledo_oh_us",
                     "mid_oh_us",
                     40.0,
                     "I-80",
@@ -231,7 +373,7 @@ mod tests {
                 ),
                 Leg::new(
                     "elmore_oh_us",
-                    "toledo_oh_us",
+                    "elkhart_in_us",
                     40.0,
                     "I-80",
                     "flat",
@@ -239,15 +381,15 @@ mod tests {
                 ),
             ],
         );
-        // Middle leg is not a turnpike highway and is not an end stub.
+        // Middle leg is not an allowlisted city pair and is not an end stub.
         assert!(!route_allows_lcv_turnpike(&route));
     }
 
     #[test]
     fn filter_keeps_turnpike_options_only() {
         let ok = Route::from_legs(
-            vec!["cleveland_oh_us".into(), "toledo_oh_us".into()],
-            vec![ohio_turnpike_leg()],
+            vec!["toledo_oh_us".into(), "elkhart_in_us".into()],
+            vec![ohio_west_turnpike_leg()],
         );
         let bad = Route::from_legs(
             vec!["columbus_oh_us".into(), "cincinnati_oh_us".into()],
