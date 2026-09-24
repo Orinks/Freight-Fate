@@ -141,9 +141,16 @@ These steps remain open even where a related implementation bullet is checked:
       rework left the Vercel build deploying a backend only on `dev`,
       so `main` would have shipped the new site against production's old
       Convex functions. Fixed in orinks-net `9925714` first.
-- [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
-      the place-callouts ladder rides the release merge to dev.
-- [ ] **The 1.9 stable-release path.** OWNER RULING 2026-09-20: 1.8 gets
+- [x] The place-callouts ladder is on dev (`e340995e`): `place_callouts`
+      is off, sparse or all, sparse by default, and split from the
+      sitting-budget chatter.
+- [ ] The radio stream sweep (`--recheck-dead`) runs before the release.
+- [x] **The 1.9 stable-release path is written; pushing a `v*.*.*` tag
+      cuts the release** (`9bbe8f12`). The tag push drops `--prerelease`,
+      takes the version and tag from the tag, and writes the notes with
+      `tools/release_notes.py stable`; CI never creates, moves or deletes a
+      stable tag. `main`'s copy of `build-career-1.9.yml` matches `dev`'s.
+      OWNER RULING 2026-09-20: 1.8 gets
       no further releases of any kind, and the next stable is 1.9. So
       `build.yml` was deleted rather than retired in stages -- it built
       the Python game (no `rustup` step, no `fetch_bass.py`, and
@@ -152,19 +159,13 @@ These steps remain open even where a related implementation bullet is checked:
       nightly could not succeed against a Rust `dev`, and its tag trigger
       would have handed a `v1.9.0` to Nuitka. `build-career-1.9.yml` is
       the only workflow that builds the game now.
-      * What is left to build: that workflow only cuts PRERELEASES today
-        (`--prerelease`, `1.9-tester-*` tags, version from the date). A
-        stable release needs the version and tag to come from a `v*.*.*`
-        push, the prerelease flag dropped, and stable release notes.
-      * Deliberately not written yet. Nothing can exercise it short of
-        tagging a real release, and 1.9 is not close to stable. Write it
-        when it is, against a workflow that has been running nightly by
-        then rather than against guesses now.
       * [x] Also freed by the ruling, and DONE in the Python sunset
         (2026-09-21): `tools/build_release.py`'s Python/Nuitka mode,
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
+- [ ] The owner pushes the `v1.9.0` tag on the commit to ship, last, after
+      every other gate here is closed.
 - [x] The owner voice pass over seven achievement titles (2026-09-22).
       The category-description cut landed and the owner accepted all
       seven titles as-is. The physical-Mac VoiceOver listening pass was
@@ -427,12 +428,6 @@ endpoints behind miles of private road.
       sweeping junction is now genuinely faster than a square one and a
       switchback slower. The local-geometry layer still reports 0 read; it
       serves the retired city-service rows and nothing the game drives.
-- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
-      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
-      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
-      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
-      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
-      in: 29 states carry live construction now, 15 of them new that day.
 
 #### Owner decisions
 
@@ -482,13 +477,13 @@ its status or release decision.
       `freightfate --playtest-road --find <feature>` and
       `freightfate --playtest-sandbox --launch`; `tools/playtest_watch.py`
       still follows their logs.
-- [ ] `av` and `scipy` are imported by `tools/encode_music_opus.py`,
-      `tools/patch_loop_transients.py` and the `sound-test/` scripts but
-      declared nowhere in `pyproject.toml`. Add them to a group (`tooling`
-      fits) so a fresh checkout can run those tools.
-- [ ] `sound-test/` carries old ruff lint and format debt, so the
-      pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
-      Clean it up and drop the exclude.
+- [x] `av` and `scipy`, imported by `tools/encode_music_opus.py`,
+      `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
+      declared in the `tooling` group and locked, so a fresh checkout runs
+      them with `uv run --group tooling ...`.
+- [x] `sound-test/` is ruff-clean (lint and format) and the pre-commit ruff
+      hooks no longer exclude it. CI's lint step still covers only `tests`
+      and `tools`.
 - [ ] Port the "bear is CB voice only" source sweep. The Python game had a
       test that failed on the word outside a CB clause in any player-facing
       string; the Rust
@@ -1236,9 +1231,11 @@ against.
       cannot hold it were deliberately NOT written. They stay as the profile
       left them for the load screen to clamp, because baking a bridge deck in
       as a grade would put it beyond the one rule that catches it.
-- [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
-      out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
-      reader that trusts the status stores that string as an elevation.
+- [x] USGS answers an out-of-coverage point with HTTP 200 and the text
+      `Call failed.`, so a reader that trusts the status stores that string
+      as an elevation. `tools/screen_grades_3dep.py` refuses any non-JSON
+      body (pinned by `tests/test_screen_grades_3dep.py`), and the gotcha is
+      written up in `docs/data-sources.md` for the next USGS reader.
 - [x] California reads Caltrans's Lane Closure System, fetching only the
       districts a leg crosses. Counties come from the Census 1:20M outlines,
       widened by their measured 3.24 mi error against the 1:500k file, and
@@ -1250,11 +1247,9 @@ against.
       dropped as stale: that day's feeds held a full closure of I-5 through
       Los Angeles "under investigation" since June. No state's feed is
       fetched twice at once any more.
-- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
-      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
-      feed, and EIA fuel prices. Not in the registry at all: Alabama,
-      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
-      Tennessee, West Virginia, Wyoming, DC.
+- The keyed feeds (Colorado and the other states that want a registered
+  key, and EIA fuel prices) moved to the 1.10 section, under "Deferred from
+  1.9: live feeds that need a key".
 - [x] The National Highway System and FHWA toll facility datasets were
       checked and left: the route graph already carries truck-restricted
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
@@ -1334,6 +1329,68 @@ gate, turned up these on dev's own code.
       eases in the last 0.07 mile at about 0.3 g. Hold the lower number
       when the next turn is inside the keeper's own build-and-shed
       distance.
+
+### September 24 realistic interstate exit
+
+A tester said the drive off the highway, the speeds and the slowing for the
+ramp, was unrealistic. The owner approved a redesign built on NCHRP Research
+Report 1081 (2024) and the Green Book 2018 over the old ramp-speed-on-the-
+mainline behaviour.
+
+- [x] **Mainline.** Cruise and exit speed assistance ease at most 10 mph
+      under road speed before the gore (`EXIT_MAINLINE_EASE_MPH`, TxDOT RDM
+      9.4.4, read); the old floor was the ramp's own number, about 44 mph in
+      a 70 lane for the last half mile. The countdown and lane-prep lines ask
+      for the lane and the signal only; the gore line and its "Stay under" are
+      gone.
+- [x] **Deceleration lane.** Crossing the gore starts a lane of Green Book
+      Table 10-6 length (all four curve columns now, 40 mph fixed to 320 and
+      45 mph added at 385) with the book's own deceleration grade factors
+      (0.9, 1.2, 0.8, 1.35), keyed on the corridor limit and the ramp's
+      speed. Speed control pauses there, "Exit speed N." is said once, and
+      exit speed assistance (or route-transition assistance) brakes to it by
+      the curve.
+- [x] **Ramp curve and run to the bar.** The ramp's curvature applies only
+      in its curve (45 degrees, assumed, at the ramp speed's AASHTO minimum
+      radius), which now feeds the load and the tank the way a mapped bend
+      does. The ramp past the lane is level (assumed). Gore-to-bar length
+      comes from `Trip::ramp_length_mi`: lane, curve, a derived 590 ft climb
+      and an assumed 200 ft queue, about 1,200 to 2,000 ft where the flat
+      unsourced half mile was 2,640.
+- [x] **Per-exit ramp length from OSM.** Each exit carries its ramp length
+      per direction, measured along the ramp from where it leaves the
+      motorway to where it meets the surface road (or the merge on a
+      freeway-to-freeway ramp). It covers 16,882 of 18,165 exits (92.9%),
+      median 1,474 ft (5th percentile 735, 95th 3,456); 172 values under
+      300 ft and 47 over 1.5 miles were dropped. The OSM length starts at
+      the gore, so `Trip::ramp_length_mi` adds the deceleration lane in
+      front of it; exits without a length keep the derived default.
+- [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
+      assumed level because nothing records its climb or drop. Needs an
+      elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
+- [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
+      can run the truck wide, but nothing models the rollover a loaded truck
+      meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+- [x] **Every assist follows the exit rules.** One matrix
+      (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
+      by seven ramp kinds, from two miles out to the stop or the gate) found
+      and fixed: facility stopping assistance ignoring the ramp curve; the
+      run to the entrance on the compressed clock; a clear yield leaving the
+      terminal servo's last press held (stopped 270 ft short) and a gap at a
+      held yield never released; exit speed assistance pausing cruise for
+      0.3 mph over; the street pull-ahead aiming at the mainline's limit; the
+      steering lean bending the whole ramp; "oncoming lane" on a one-way
+      ramp; the yield unnamed in the take line.
+- [x] **A yield's gap is judged at the crossroad** (fix/yield-at-the-line,
+      2026-09-24). It was judged about 100 ft past the line, so a gap clear
+      at the line could read as "forced". The crossroad now starts 17 ft past
+      the yield line (the middle of MUTCD 11th ed. 3B.19's 4 to 30 ft,
+      assumed), is two 12 ft lanes (assumed), and a WB-67 (73.5 ft, Green
+      Book Table 2-1a, read) must get across it on Long's truck acceleration;
+      a gap that holds for that whole crossing is clean, one that closes
+      during it is forced (`CrossTraffic::conflict_between`). The same timing
+      decides when a yield or roundabout is clear to roll or to pull out
+      from a stop. Stop signs still use the four-second look.
 
 ## 1.10 planned -- the working week and home
 
@@ -1448,6 +1505,23 @@ onto exit signalling.
 ### World and narration
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#world-and-narration).
+
+### Deferred from 1.9: live feeds that need a key
+
+Moved here 2026-09-24. Both need a registered API key, and a key shipped in
+a public build leaks.
+
+- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
+      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
+      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
+      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
+      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
+      in: 29 states carry live construction now, 15 of them new that day.
+- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
+      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
+      feed, and EIA fuel prices. Not in the registry at all: Alabama,
+      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
+      Tennessee, West Virginia, Wyoming, DC.
 
 ## Shipped in 1.6.0
 

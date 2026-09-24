@@ -292,11 +292,19 @@ impl DrivingState {
         } else {
             0.0
         };
+        // The exit assists' deceleration-lane servo, by the same rule. It
+        // stands itself down (to zero) the frame the lane is behind the truck.
+        let decel_lane_brake = if self.in_deceleration_lane() {
+            self.decel_lane_brake
+        } else {
+            0.0
+        };
         let assist_floor = self
             .keeper_snub
             .max(self.aeb_brake)
             .max(self.destination_assist_brake)
             .max(ramp_terminal_brake)
+            .max(decel_lane_brake)
             .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
             .clamp(0.0, 1.0);
         {

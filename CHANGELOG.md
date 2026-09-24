@@ -39,6 +39,12 @@
 
 ### Changed
 
+- **Taking an exit keeps road speed until the gore.** You brake for the ramp after it.
+
+- **The exit speed is now said as you enter the deceleration lane.** A ramp curve taken faster than that shifts the load.
+
+- **Exit ramps are now as long as the real ones.** A short ramp gives you less room to stop at the bottom.
+
 - **A loaded delivery's deadline now covers a legal sleep forced by your current hours.** Dispatch checks again at departure and tells you when it adjusts the time.
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.
@@ -111,6 +117,16 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
+
+- **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
+
+- **Facility stopping assistance now slows for the exit ramp's curve.** The whole ramp also runs in real time.
+
+- **The steering lean on an exit ramp now leans only for its curve.** Running wide there no longer says you crossed into oncoming traffic.
+
+- **Exit speed assistance no longer takes over from cruise for a fraction of a mile per hour.**
 
 - **Adaptive cruise no longer damages the freight when it brakes downhill for traffic, a ramp, or a lower limit.**
 

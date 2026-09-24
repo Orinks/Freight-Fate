@@ -401,7 +401,29 @@ fn test_safe_speed_key_answers_for_the_ramp() {
     d.ramp_mi = Some(d.trip.position_mi); // on the ramp now
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::D));
-    assert_eq!(last(&app), "Safe speed 45 miles per hour for the ramp.");
+    assert_eq!(last(&app), "Safe speed 45 miles per hour, the exit speed.");
+}
+
+#[test]
+fn test_safe_speed_key_says_nothing_of_the_ramp_before_the_gore() {
+    // The gore takes road speed; the exit speed is braked for past it, so an
+    // armed exit ahead does not lower the mainline answer (realistic exit,
+    // 2026-09-24).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.weather.current = WeatherKind::Clear;
+    d.trip.position_mi = d.trip.total_miles() / 2.0;
+    d.exit_stop = Some(ff_core::sim::trip_models::RoadStop::new(
+        "Test Plaza",
+        d.trip.position_mi + 1.0,
+        "truck_stop",
+    ));
+    d.exit_signal_on = true;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::D));
+    let said = last(&app);
+    assert!(!said.contains("ramp") && !said.contains("exit"), "{said}");
+    assert!(said.starts_with("Safe speed "), "{said}");
 }
 
 #[test]

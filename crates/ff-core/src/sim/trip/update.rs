@@ -275,7 +275,10 @@ impl Trip {
         self.truck.water_mm = effects.water_mm;
         self.truck.surface = effects.surface.to_string();
         self.truck.drag_mult = effects.drag_mult;
-        self.truck.grade = self.grade_at(self.position_mi);
+        self.truck.grade = match self.ramp_grade {
+            Some(grade) if self.on_ramp => grade,
+            _ => self.grade_at(self.position_mi),
+        };
         self.truck.fuel_burn_mult = scale;
 
         let moved_mi = self.truck.velocity_mps * dt * scale / 1609.344;

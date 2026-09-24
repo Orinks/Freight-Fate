@@ -29,8 +29,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import numpy as np
 import cand_common as C
+import numpy as np
 from scipy.signal import butter, sosfilt, sosfiltfilt
 
 KEY = "hybrid"
@@ -39,6 +39,7 @@ rng = np.random.default_rng(7)
 
 
 # --- filters -----------------------------------------------------------------
+
 
 def lp(x, fc, order=4):
     sos = butter(order, fc / (SR / 2), btype="low", output="sos")
@@ -59,8 +60,8 @@ def norm(x):
     return x / (np.sqrt(np.mean(np.asarray(x, float) ** 2)) or 1.0)
 
 
-BODY_FC = 1600.0   # bed low-pass: carries body + bottom, load fills above
-BODY_HP = 50.0     # tame sub-rumble so low_db matches the real idle
+BODY_FC = 1600.0  # bed low-pass: carries body + bottom, load fills above
+BODY_HP = 50.0  # tame sub-rumble so low_db matches the real idle
 
 
 def _body(x):
@@ -68,6 +69,7 @@ def _body(x):
 
 
 # --- real steady windows (idle + cruise beds, native fullness) ---------------
+
 
 def _real_window(source_key, rpm, dur_s=3.0):
     x = C.load_wav(C.LICENSED[source_key])
@@ -78,6 +80,7 @@ def _real_window(source_key, rpm, dur_s=3.0):
 
 
 # --- grain bed (rev retime, formant-fixed) -----------------------------------
+
 
 def _idle_window():
     return _real_window("int_idle_low", 660, dur_s=3.0)
@@ -106,8 +109,11 @@ def _grains(glen_s=0.07):
     glen += glen % 2
     half = glen // 2
     win = np.hanning(glen)
-    grains = [w[m - half:m - half + glen] * win
-              for m in marks if m - half >= 0 and m - half + glen <= len(w)]
+    grains = [
+        w[m - half : m - half + glen] * win
+        for m in marks
+        if m - half >= 0 and m - half + glen <= len(w)
+    ]
     return grains, glen
 
 
@@ -119,7 +125,7 @@ def _grain_bed(grains, glen, rpm_of_t, dur_s):
     while pos < n:
         rpm = rpm_of_t(pos / SR)
         a = max(0, int(pos) - half)
-        out[a:a + glen] += grains[gi % len(grains)][: len(out) - a]
+        out[a : a + glen] += grains[gi % len(grains)][: len(out) - a]
         gi += 1
         pos += SR * 20.0 / rpm
     return _body(out[:n])
@@ -127,7 +133,7 @@ def _grain_bed(grains, glen, rpm_of_t, dur_s):
 
 # --- Layer 2: synth load -----------------------------------------------------
 
-LOAD_FLOOR = 0.22          # knock/tick presence even at idle (keeps rev honest)
+LOAD_FLOOR = 0.22  # knock/tick presence even at idle (keeps rev honest)
 
 
 def _load_of_rpm(rpm):
@@ -144,14 +150,16 @@ def _knock(rpm_of_t, dur_s):
     while pos < n:
         rpm = rpm_of_t(pos / SR)
         a = int(pos)
-        raw[a:a + blen] += rng.standard_normal(blen) * bwin * _load_of_rpm(rpm)
+        raw[a : a + blen] += rng.standard_normal(blen) * bwin * _load_of_rpm(rpm)
         pos += SR * 20.0 / rpm
     raw = raw[:n]
     # fixed resonances, weighted low so the knock centre sits near the body's
-    return (0.80 * bp(raw, 300, 550)
-            + 1.20 * bp(raw, 550, 900)
-            + 0.50 * bp(raw, 1000, 1500)
-            + 0.22 * bp(raw, 1700, 2100))
+    return (
+        0.80 * bp(raw, 300, 550)
+        + 1.20 * bp(raw, 550, 900)
+        + 0.50 * bp(raw, 1000, 1500)
+        + 0.22 * bp(raw, 1700, 2100)
+    )
 
 
 def _turbo(rpm_of_t, dur_s):
@@ -161,11 +169,11 @@ def _turbo(rpm_of_t, dur_s):
     grid = np.linspace(0, dur_s, 200)
     rpm_t = np.interp(t, grid, [rpm_of_t(g) for g in grid])
     boost = np.clip((rpm_t - 650.0) / 1150.0, 0.0, 1.0)
-    fw = 3200.0 + boost * 3300.0          # 3.2 -> 6.5 kHz glide
+    fw = 3200.0 + boost * 3300.0  # 3.2 -> 6.5 kHz glide
     phase = 2 * np.pi * np.cumsum(fw) / SR
     tone = np.sin(phase) + 0.45 * np.sin(2.0 * phase)
     breath = bp(rng.standard_normal(n), 3200, 6800)
-    return (0.62 * tone + 0.38 * norm(breath)) * boost ** 1.5
+    return (0.62 * tone + 0.38 * norm(breath)) * boost**1.5
 
 
 def _tick(rpm_of_t, dur_s):
@@ -178,7 +186,7 @@ def _tick(rpm_of_t, dur_s):
     while pos < n:
         rpm = rpm_of_t(pos / SR)
         a = int(pos)
-        raw[a:a + tlen] += rng.standard_normal(tlen) * twin * _load_of_rpm(rpm)
+        raw[a : a + tlen] += rng.standard_normal(tlen) * twin * _load_of_rpm(rpm)
         pos += SR * 20.0 / rpm
     return hp(raw[:n], 3800)
 
@@ -188,11 +196,11 @@ def _load(rpm_of_t, dur_s, gain):
     # aircraft, not a diesel). Knock and tick stay at their original weights, so
     # the load layer gets QUIETER (no turbo term) and the real recorded body
     # carries proportionally more of the working character -- which is the point.
-    return gain * (0.60 * norm(_knock(rpm_of_t, dur_s))
-                   + 0.12 * norm(_tick(rpm_of_t, dur_s)))
+    return gain * (0.60 * norm(_knock(rpm_of_t, dur_s)) + 0.12 * norm(_tick(rpm_of_t, dur_s)))
 
 
 # --- deliverables ------------------------------------------------------------
+
 
 def main():
     grains, glen = _grains()
@@ -231,8 +239,14 @@ def main():
 
     metrics = C.score(idle_loop, rev)
     print("KEY:", KEY)
-    print("rms  idle:", round(rms(idle_tiled), 4),
-          " rev:", round(rms(rev), 4), " cruise:", round(rms(cruise_tiled), 4))
+    print(
+        "rms  idle:",
+        round(rms(idle_tiled), 4),
+        " rev:",
+        round(rms(rev), 4),
+        " cruise:",
+        round(rms(cruise_tiled), 4),
+    )
     print("grains:", len(grains), " glen_ms:", round(glen / SR * 1000, 1))
     for f in files:
         print("  ", f)

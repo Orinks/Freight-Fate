@@ -670,13 +670,19 @@ fn test_realistic_cruise_eases_for_destination_exit_without_speeding_fine() {
     let text = result.transcript_text();
     assert!(!text.contains("Lights and siren"), "{text}");
     assert!(text.contains("destination exit"), "{text}");
-    // The line names the ramp's own number now, and says when the ease
-    // happens rather than implying it starts at the callout.
+    // The line names the exit's own floor, says when the ease happens rather
+    // than implying it starts at the callout, and says where speed control
+    // lets go (realistic exit, 2026-09-24).
     assert!(
-        text.contains("Adaptive cruise holds road speed, then eases to"),
+        text.contains("Adaptive cruise holds road speed, eases to"),
         "{text}"
     );
-    assert!(text.contains("at the ramp"), "{text}");
+    assert!(
+        text.contains("for the exit, and pauses on the ramp"),
+        "{text}"
+    );
+    // The exit speed is named once the truck is in the deceleration lane.
+    assert!(text.contains("Exit speed "), "{text}");
     // The exit key is a turn signal now: "Signal on for ..." replaced the
     // older "Signaling for ..." callout when the cancel/confirm model landed.
     assert!(text.contains("Signal on for"), "{text}");

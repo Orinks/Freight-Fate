@@ -105,7 +105,7 @@ impl DrivingState {
             if let Some(stop) = self.exit_stop.clone() {
                 let ahead = stop.at_mi - self.trip.position_mi;
                 if ahead > 0.0 && (self.exit_signal_on || ctx.settings.lane_is_automated()) {
-                    self.cruise_exit_mph = Some(set.min(self.armed_ramp_cruise_mph(None)));
+                    self.cruise_exit_mph = Some(set.min(self.exit_approach_floor_mph(None)));
                 }
             }
         }
@@ -131,8 +131,11 @@ impl DrivingState {
             Some(exit) => set.min(exit),
             None => set,
         };
+        // "for the exit", not "for the ramp": the cap is the mainline's exit
+        // floor, ten under road speed at most, and the ramp's own number is
+        // braked for past the gore (realistic exit, 2026-09-24).
         let mut exit_note = if self.cruise_exit_mph.is_some() {
-            " for the ramp".to_string()
+            " for the exit".to_string()
         } else {
             String::new()
         };

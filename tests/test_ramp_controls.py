@@ -181,7 +181,7 @@ def test_controls_are_read_at_the_walked_terminal_itself():
         "graph": graph,
         "toll": set(),
         "roundabout": set(),
-        "terminal_locs": {3: (40.0, -80.0)},
+        "node_locs": {3: (40.0, -80.0)},
         # one signal ~50 m north of the terminal, one stop 3 km away
         "control_grid": m._GoreGrid([(40.00045, -80.0, "signal"), (40.027, -80.0, "stop")]),
         "grid": m._GoreGrid([(40.001, -80.001, 1)]),
@@ -200,9 +200,88 @@ def test_a_roundabout_terminal_reads_as_yieldish():
         "graph": graph,
         "toll": set(),
         "roundabout": {3},
-        "terminal_locs": {3: (40.0, -80.0)},
+        "node_locs": {3: (40.0, -80.0)},
         "control_grid": m._GoreGrid([]),
         "grid": m._GoreGrid([(40.001, -80.001, 1)]),
     }
     _, _, ends = m.classify_exit_far_end(40.001, -80.001, topo, 500.0)
     assert m.controls_at_terminals(ends, topo) == {"roundabout"}
+
+
+def _path_m(m, locs, ids):
+    return sum(m._gore_distance_m(*locs[a], *locs[b]) for a, b in zip(ids, ids[1:], strict=False))
+
+
+def test_ramp_length_is_measured_along_the_way_to_the_surface_end():
+    """The length follows the bent ramp, not the straight line, and a surface
+    terminal wins over a nearer merge (a C-D branch rejoining the mainline)."""
+    m = _topo_tools()
+    locs = {
+        1: (40.0, -80.0),  # gore
+        2: (40.002, -80.0),
+        3: (40.002, -80.002),  # crossroad
+        4: (40.0025, -80.0),  # merge back onto the mainline, nearer than 3
+    }
+    graph = m.build_ramp_link_graph(
+        [([1, 2, 3], "yes"), ([2, 4], "yes")],
+        motorway_node_ids={1, 4},
+        crossroad_node_ids={3},
+    )
+    length = m.ramp_length_m(graph, locs, 1)
+    assert abs(length - _path_m(m, locs, [1, 2, 3])) < 1e-6
+    assert length > m._gore_distance_m(*locs[1], *locs[3]) + 50.0
+    # With no surface end at all, the merge is the terminal.
+    system = m.build_ramp_link_graph([([1, 2, 4], "yes")], motorway_node_ids={1, 4})
+    assert abs(m.ramp_length_m(system, locs, 1) - _path_m(m, locs, [1, 2, 4])) < 1e-6
+
+
+def test_ramp_length_screen_drops_and_counts_contradictions():
+    m = _topo_tools()
+    stats: dict[str, int] = {}
+    assert m.screen_ramp_length_ft(299.0, stats) is None
+    assert m.screen_ramp_length_ft(1.5 * 5280.0 + 1.0, stats) is None
+    assert m.screen_ramp_length_ft(None, stats) is None
+    assert m.screen_ramp_length_ft(1200.0, stats) == 1200.0
+    assert stats == {"length_too_short": 1, "length_too_long": 1, "length_unmeasured": 1}
+
+
+def test_ramp_lengths_bake_per_direction_from_the_nearest_gore():
+    """Northbound leg: a ramp leaving northward is the forward exit, one
+    leaving southward the backward one. A farther forward gore in range loses
+    to the nearer, and a too-short ramp bakes nothing for its direction."""
+    m = _topo_tools()
+    locs = {
+        10: (40.049, -80.0),  # forward gore
+        11: (40.051, -80.0005),
+        12: (40.053, -80.001),  # crossroad
+        20: (40.0515, -80.0002),  # backward gore
+        21: (40.0495, -80.0007),
+        22: (40.048, -80.001),  # crossroad
+        30: (40.045, -80.0),  # farther forward gore (a neighbor's)
+        31: (40.0452, -80.0003),  # crossroad after ~35 m
+    }
+    graph = m.build_ramp_link_graph(
+        [([10, 11, 12], "yes"), ([20, 21, 22], "yes"), ([30, 31], "yes")],
+        motorway_node_ids={10, 20, 30},
+        crossroad_node_ids={12, 22, 31},
+    )
+    topo = {
+        "graph": graph,
+        "node_locs": locs,
+        "grid": m._GoreGrid([(*locs[g], g) for g in (10, 20, 30)]),
+    }
+    geom = [(40.0, -80.0, 0.0), (40.05, -80.0, 3.45), (40.1, -80.0, 6.9)]
+    leg = {"miles": 6.9, "corridor": {"interchanges": [{"at_mi": 3.45, "name": "Test"}]}}
+    stats: dict[str, int] = {}
+    assert m.bake_ramp_lengths_for_leg(leg, topo, geom, {}, stats) == 1
+    ix = leg["corridor"]["interchanges"][0]
+    assert ix["ramp_length_ft_forward"] == round(_path_m(m, locs, [10, 11, 12]) * m.M_TO_FT, 1)
+    assert ix["ramp_length_ft_backward"] == round(_path_m(m, locs, [20, 21, 22]) * m.M_TO_FT, 1)
+    assert ix["ramp_length_source"].startswith("derived from OpenStreetMap geometry")
+    # The neighbor's short ramp alone: its direction bakes nothing, counted.
+    lone = {**topo, "grid": m._GoreGrid([(*locs[30], 30)])}
+    leg2 = {"miles": 6.9, "corridor": {"interchanges": [{"at_mi": 3.45, "name": "Test"}]}}
+    stats2: dict[str, int] = {}
+    assert m.bake_ramp_lengths_for_leg(leg2, lone, geom, {}, stats2) == 0
+    assert "ramp_length_ft_forward" not in leg2["corridor"]["interchanges"][0]
+    assert stats2["length_too_short"] == 1

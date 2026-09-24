@@ -262,8 +262,10 @@ def rumble_lane_change(
         print(f"    {label}:")
         for dist, onset, dur, gain in rows:
             db = 20 * np.log10(max(gain, 1e-9))
-            print(f"      axle {dist:5.2f}m back -> hits {onset:5.3f}s, "
-                  f"{dur * 1000:4.0f}ms long, {db:+5.1f} dB at the ear")
+            print(
+                f"      axle {dist:5.2f}m back -> hits {onset:5.3f}s, "
+                f"{dur * 1000:4.0f}ms long, {db:+5.1f} dB at the ear"
+            )
     return out
 
 
@@ -299,26 +301,32 @@ def main() -> None:
     print("\nrumble strip, steady (riding the edge)")
     for mph in (35, 55, 70):
         ms = mph * 0.44704
-        write_wav(f"rumble_steady_{mph}mph_{ms / GROOVE_SPACING_M:.0f}hz.wav",
-                  rumble_steady(ms))
+        write_wav(f"rumble_steady_{mph}mph_{ms / GROOVE_SPACING_M:.0f}hz.wav", rumble_steady(ms))
 
     print("\nrumble strip, lane change (per-axle bursts, cab perspective)")
     for mph in (55, 70):
         ms = mph * 0.44704
-        write_wav(f"rumble_lanechange_truck_{mph}mph.wav",
-                  rumble_lane_change(ms, TRUCK_AXLES, label=f"truck {mph} mph"))
-    write_wav("rumble_lanechange_car_65mph.wav",
-              rumble_lane_change(65 * 0.44704, CAR_AXLES, label="car 65 mph"))
-    write_wav("rumble_lanechange_truck_fast_swerve.wav",
-              rumble_lane_change(70 * 0.44704, TRUCK_AXLES, lane_change_s=1.2,
-                                 label="truck fast swerve"))
+        write_wav(
+            f"rumble_lanechange_truck_{mph}mph.wav",
+            rumble_lane_change(ms, TRUCK_AXLES, label=f"truck {mph} mph"),
+        )
+    write_wav(
+        "rumble_lanechange_car_65mph.wav",
+        rumble_lane_change(65 * 0.44704, CAR_AXLES, label="car 65 mph"),
+    )
+    write_wav(
+        "rumble_lanechange_truck_fast_swerve.wav",
+        rumble_lane_change(70 * 0.44704, TRUCK_AXLES, lane_change_s=1.2, label="truck fast swerve"),
+    )
 
     print("\ncurve tone ladder (flat pitch, one timbre)")
     for name, freq in (("entry_low", 392.0), ("warning_mid", 523.25), ("center_high", 784.0)):
         write_wav(f"tone_{name}_{freq:.0f}hz.wav", tone(freq))
     gap = np.zeros(int(0.45 * SR))
-    write_wav("tone_ladder_sequence.wav", np.concatenate([
-        tone(523.25), gap, tone(392.0), gap, tone(784.0)]))
+    write_wav(
+        "tone_ladder_sequence.wav",
+        np.concatenate([tone(523.25), gap, tone(392.0), gap, tone(784.0)]),
+    )
 
     print(f"\nwrote to {OUT}")
 

@@ -39,11 +39,11 @@ import cand_common as C  # noqa: E402
 
 OUT = Path(r"C:\temp\ffsound\shifts")
 SRC = Path(r"C:\temp\ffsound\splice\Samples\packs\Large Vehicles\SemiTruckMac_S08IN.896.wav")
-ANCHORS_S = [32.0, 33.5, 37.0, 57.5]   # Norm's mapped shifts (all land on transients)
-REGION_S = (15.0, 65.0)                # the shifting stretch; excludes the ~108 s stop
-MANUAL_PRE, MANUAL_LEN = 0.22, 1.00    # clutch squeak (before the clunk) + clunk + settle
-AUTO_PRE, AUTO_LEN = 0.05, 0.26        # just the disengage -- faster, for the auto
-KEEP = 12                              # cap each bank; Norm's ear culls
+ANCHORS_S = [32.0, 33.5, 37.0, 57.5]  # Norm's mapped shifts (all land on transients)
+REGION_S = (15.0, 65.0)  # the shifting stretch; excludes the ~108 s stop
+MANUAL_PRE, MANUAL_LEN = 0.22, 1.00  # clutch squeak (before the clunk) + clunk + settle
+AUTO_PRE, AUTO_LEN = 0.05, 0.26  # just the disengage -- faster, for the auto
+KEEP = 12  # cap each bank; Norm's ear culls
 
 
 def hp(x: np.ndarray, fc: float) -> np.ndarray:
@@ -53,13 +53,15 @@ def hp(x: np.ndarray, fc: float) -> np.ndarray:
 
 def write(name: str, x: np.ndarray, target_rms: float = 0.10) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -72,22 +74,24 @@ def transient_env(x: np.ndarray, fc: float = 800.0) -> np.ndarray:
 
 def local_floor(env: np.ndarray, med_s: float = 2.0) -> np.ndarray:
     """Running median: the engine bed drifts, so a fixed threshold won't do."""
-    w = int(med_s * C.SR); step = w // 4
+    w = int(med_s * C.SR)
+    step = w // 4
     centres = np.arange(0, len(env), step)
-    meds = np.array([np.median(env[max(0, c - w // 2):c + w // 2]) or 0.0 for c in centres])
+    meds = np.array([np.median(env[max(0, c - w // 2) : c + w // 2]) or 0.0 for c in centres])
     return np.maximum(np.interp(np.arange(len(env)), centres, meds), 1e-9)
 
 
 def snap(env: np.ndarray, t_s: float, win_s: float = 0.6) -> int:
     """Snap an approximate anchor time to the nearest local energy peak."""
-    c = int(t_s * C.SR); w = int(win_s * C.SR)
+    c = int(t_s * C.SR)
+    w = int(win_s * C.SR)
     lo, hi = max(0, c - w), min(len(env), c + w)
     return lo + int(np.argmax(env[lo:hi]))
 
 
 def cut(x: np.ndarray, center: int, pre_s: float, len_s: float) -> np.ndarray:
     a = max(0, center - int(pre_s * C.SR))
-    seg = x[a:a + int(len_s * C.SR)].copy()
+    seg = x[a : a + int(len_s * C.SR)].copy()
     if len(seg) < 8:
         return seg
     atk = int(0.004 * C.SR)
@@ -105,7 +109,8 @@ def hf_share(seg: np.ndarray) -> float:
 
 def decay_s(seg: np.ndarray) -> float:
     e = np.convolve(np.abs(seg), np.ones(int(0.004 * C.SR)) / int(0.004 * C.SR), "same")
-    pk = int(np.argmax(e)); after = e[pk:]
+    pk = int(np.argmax(e))
+    after = e[pk:]
     below = after < e[pk] * 0.25
     return (int(np.argmax(below)) if below.any() else len(after)) / C.SR
 
@@ -137,7 +142,7 @@ def main() -> None:
     anchors = sorted({snap(env, t) for t in ANCHORS_S})
     extras = [k for k in picked if all(abs(k - a) > int(0.3 * C.SR) for a in anchors)]
     extras.sort(key=lambda e: ratio[e], reverse=True)
-    merged = sorted(anchors + extras[:max(0, KEEP - len(anchors))])
+    merged = sorted(anchors + extras[: max(0, KEEP - len(anchors))])
 
     print(f"  {'#':>2s} {'at':>7s} {'ratio':>6s} {'hf':>5s} {'decay':>6s}   guess")
     manuals: list[np.ndarray] = []
@@ -146,11 +151,16 @@ def main() -> None:
         man = cut(x, e, MANUAL_PRE, MANUAL_LEN)
         aut = cut(x, e, AUTO_PRE, AUTO_LEN)
         hf, dec = hf_share(man), decay_s(man)
-        guess = ("squeak-rich (manual)" if hf > 0.35 and dec > 0.18
-                 else "clunk / disengage" if dec < 0.14
-                 else "shift (mixed)")
+        guess = (
+            "squeak-rich (manual)"
+            if hf > 0.35 and dec > 0.18
+            else "clunk / disengage"
+            if dec < 0.14
+            else "shift (mixed)"
+        )
         print(f"  {n:2d} {e / C.SR:6.2f}s {ratio[e]:6.1f} {hf:5.2f} {dec * 1000:5.0f}ms   {guess}")
-        manuals.append(man); autos.append(aut)
+        manuals.append(man)
+        autos.append(aut)
 
     for i, m in enumerate(manuals, 1):
         write(f"shift_manual_{i:02d}.wav", m)
@@ -161,13 +171,15 @@ def main() -> None:
         if not bank:
             return np.zeros(1)
         g = np.zeros(int(gap_s * C.SR))
-        return np.concatenate([np.concatenate([b / (np.abs(b).max() or 1) * 0.7, g])
-                               for b in bank])
+        return np.concatenate([np.concatenate([b / (np.abs(b).max() or 1) * 0.7, g]) for b in bank])
+
     write("shift_manual_demo.wav", demo(manuals, 0.4))
     write("shift_auto_demo.wav", demo(autos, 0.3))
 
-    print(f"\n  manual bank: {len(manuals)}   auto bank: {len(autos)}   "
-          f"+ shift_manual_demo / shift_auto_demo")
+    print(
+        f"\n  manual bank: {len(manuals)}   auto bank: {len(autos)}   "
+        f"+ shift_manual_demo / shift_auto_demo"
+    )
     print(f"  wrote to {OUT}")
 
 
