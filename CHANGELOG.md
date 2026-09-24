@@ -122,6 +122,8 @@
 
 ### Fixed
 
+- **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
+
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
