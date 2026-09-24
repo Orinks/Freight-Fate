@@ -632,6 +632,15 @@ its status or release decision.
       `ZETA_LATERAL` equals the smooth-bore value whatever the baffles,
       matching FMCSA's Cargo Tank Incidents Study -- "in all cases, tank
       structure does not control side-to-side sloshing".
+- [x] Adaptive cruise's own closing snub -- following a lead, easing to a
+      lower posted limit, or shedding for a ramp -- stacked on top of
+      whatever engine-brake stage a downgrade had already raised (2026-09-24).
+      The snub was sized as though it were the only thing slowing the truck;
+      on a steep, loaded descent with the retarder doing real work, the two
+      together crossed the freight's hard-brake line the same way an
+      emergency stop does, for an ordinary approach. The snub now nets out
+      the retarder's own deceleration first, so the two share one planned
+      stop instead of compounding.
 - [ ] A part-filled tank is priced as a FULL one by the roll models, not as
       worse than one. `roll_load_fraction` stops a half-empty tank reading as
       a light load, which was the bug; the truth is that the half-empty tank
