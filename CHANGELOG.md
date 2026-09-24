@@ -110,6 +110,8 @@
 
 ### Fixed
 
+- **Adaptive cruise no longer damages the freight when it brakes downhill for traffic, a ramp, or a lower limit.**
+
 - **The Map Route line no longer repeats the deadhead city.** A facility approach that used the same city on every local leg is spoken once. (#205)
 
 - **Holding the cruise target key no longer races the set speed.** Only a fresh press steps it; the operating system's key-repeat is ignored.
