@@ -68,6 +68,13 @@ pub struct DrivingRecord {
     pub fines_paid: f64,
     /// Times this driver ran off the road asleep.
     pub fatigue_events: i64,
+    /// Career game hours of each fatigue event since this field existed.
+    /// `fatigue_events` stays the lifetime tally; the safety record a scale
+    /// reads counts a window, like a real carrier score.
+    pub fatigue_times: Vec<f64>,
+    /// Career game hours of each out-of-service order since this field
+    /// existed. The lifetime count is `Profile::out_of_service_events`.
+    pub out_of_service_times: Vec<f64>,
     /// The trust band the driver has already been told about, so a change is
     /// spoken once when it happens and never repeated on a timer.
     pub trust_band_heard: String,
@@ -134,22 +141,29 @@ impl DrivingRecord {
         (game_hours - days as f64 * HOURS_PER_DAY).max(self.review_started_h)
     }
 
+    fn count_within(&self, times: &[f64], game_hours: f64, days: i64) -> i64 {
+        let cutoff = self.cutoff_days_back(game_hours, days);
+        times.iter().filter(|&&at| at >= cutoff).count() as i64
+    }
+
     /// Citations inside the last `days`, since the review began.
     pub fn citations_within(&self, game_hours: f64, days: i64) -> i64 {
-        let cutoff = self.cutoff_days_back(game_hours, days);
-        self.citation_times
-            .iter()
-            .filter(|&&at| at >= cutoff)
-            .count() as i64
+        self.count_within(&self.citation_times, game_hours, days)
     }
 
     /// Serious violations inside the last `days`, since the review began.
     pub fn serious_within(&self, game_hours: f64, days: i64) -> i64 {
-        let cutoff = self.cutoff_days_back(game_hours, days);
-        self.serious_violations
-            .iter()
-            .filter(|&&at| at >= cutoff)
-            .count() as i64
+        self.count_within(&self.serious_violations, game_hours, days)
+    }
+
+    /// Fatigue events inside the last `days`, since the review began.
+    pub fn fatigue_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.fatigue_times, game_hours, days)
+    }
+
+    /// Out-of-service orders inside the last `days`, since the review began.
+    pub fn out_of_service_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.out_of_service_times, game_hours, days)
     }
 
     /// Citations still inside the window a carrier reviews.
@@ -286,6 +300,7 @@ impl DrivingRecord {
     /// serious-violation ladder like any other.
     pub fn record_fatigue_event(&mut self, game_hours: f64) -> (i64, i64) {
         self.fatigue_events += 1;
+        self.fatigue_times.push(game_hours);
         let mut serious = 0;
         if self.fatigue_events >= FATIGUE_EVENTS_BEFORE_SERIOUS {
             serious = self.record_serious_violation(game_hours);

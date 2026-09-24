@@ -1501,6 +1501,7 @@ fn test_the_safety_record_line_says_a_band_and_never_a_trade_acronym() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }
@@ -1541,6 +1542,7 @@ fn test_a_clean_record_is_waved_through_and_a_dirty_one_is_not() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }

@@ -37,6 +37,10 @@
 
 ### Changed
 
+- **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
+
+- **A driver's public profile counts their out-of-service orders.** The safety record row names how many, never why.
+
 - **A loaded delivery's deadline now covers a legal sleep forced by your current hours.** Dispatch checks again at departure and tells you when it adjusts the time.
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.
