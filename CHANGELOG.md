@@ -112,6 +112,8 @@
 
 ### Fixed
 
+- Job board distance uses the tighter of the level cap and the carrier run-band max; the run-band minimum is not applied on the board yet (saved for later lane-area work).
+
 - Phase A ALCAN: BC↔YT `state_crossings` on Fort Nelson–Watson Lake Alaska Highway legs (corridor metadata completeness).
 - **Deleting or resetting a career now always takes effect.** A save whose file was renamed or copied said it was deleted and stayed. (Jerry)
 

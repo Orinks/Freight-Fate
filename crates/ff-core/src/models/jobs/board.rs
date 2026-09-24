@@ -136,7 +136,6 @@ impl<'w> JobBoard<'w> {
         self.candidates(&city)
             .iter()
             .filter(|c| c.1 >= MIN_JOB_DISTANCE_MI && c.1 <= cap)
-            .filter(|c| Self::run_band_allows(carrier_key, c.1))
             .count()
     }
 
@@ -165,13 +164,6 @@ impl<'w> JobBoard<'w> {
         MAX_DISPATCH_DISTANCE_MI.min(base + LEVEL_DISTANCE_CAP_STEP_MI * (level - 5) as f64)
     }
 
-    fn run_band_allows(carrier_key: &str, miles: f64) -> bool {
-        match carrier(carrier_key) {
-            Some(c) => c.run_band_allows(miles),
-            None => true,
-        }
-    }
-
     /// `board.offers(city, endorsements, count=, level=, market=,
     /// carrier_key=, direct_freight=)`.
     pub fn offers<S: AsRef<str>>(
@@ -195,11 +187,12 @@ impl<'w> JobBoard<'w> {
             .filter(|c| self.city_has_freight_receiver(&c.0))
             .collect();
         let cap = Self::distance_cap_for_carrier(level, carrier_key);
-        let mut reachable: Vec<Candidate> = candidates
-            .iter()
-            .filter(|c| c.1 <= cap && Self::run_band_allows(carrier_key, c.1))
-            .cloned()
-            .collect();
+        // Run-band *max* is already folded into `cap` (tighter of level cap and
+        // carrier max). The run-band *min* is stored on the carrier for slice 4
+        // lane-area enforcement; applying it here would wipe short national
+        // boards (Northstar 400–3000) that rookies still need.
+        let mut reachable: Vec<Candidate> =
+            candidates.iter().filter(|c| c.1 <= cap).cloned().collect();
         if reachable.is_empty() && !candidates.is_empty() {
             // remote terminals (long legs all around): offer the nearest few
             let mut sorted = candidates.clone();
