@@ -1237,6 +1237,38 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
+
+### Twin parcel / STAA doubles (Track A)
+
+STAA twin 28-foot pups (`parcel_doubles`) on the National Network. FIX 2–5
+are intentionally not started here.
+
+- [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
+      offered and routed only on legs the game treats as National Network or
+      reasonable access. Approximation: Interstate designation
+      (`data::grades::road_class`) plus same-city locals and first/last
+      facility approaches or terminal stubs ≤ 1.0 mi (23 CFR 658.19 floor).
+      Mid-route connectors never count. Spoken refusal when no twin-legal
+      lane remains; a dropped off-network option is announced as a reroute.
+- [x] **Lower-48 corridor policy (landed).** Twin loads are refused on
+      ALCAN, Canada, and Alaska lanes (origin, destination, or any leg
+      outside the lower-48 US), with a distinct spoken line.
+- [ ] **Honesty debt: designated federal-aid primary routes.** Stay
+      Interstate-only for now. Designated US and state NN segments come
+      later as explicit per-segment flags checked against the FHWA National
+      Network map, not by road class.
+- [ ] **Honesty debt: reasonable-access distance.** Cap is the federal
+      1.0 mi floor (23 CFR 658.19); access distance varies by state and
+      those extensions are not modeled. Mid-route connectors never count
+      unless later flagged under the FHWA map work.
+- [ ] **Honesty debt: Twin parcel loads are not offered on ALCAN, Canada,
+      or Alaska lanes until provincial and Alaska doubles rules are
+      modeled.**
+- [ ] **FIX 2: LCV turnpike trailer** (not started).
+- [ ] **FIX 3: Dual hook time** (not started).
+- [ ] **FIX 4: Pup handling** (not started).
+- [ ] **FIX 5: Twin tare and GVW** (not started).
+
 ### Reefer, APU, and fuel-island hotel power (2.0 candidates)
 
 Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked

@@ -34,6 +34,10 @@ pub struct CargoType {
     /// Longer-combination-vehicle freight: only offered when both endpoint
     /// states are on the frozen LCV network (23 CFR 658 Appendix C).
     pub lcv_lanes: bool,
+    /// STAA twin 28s (`parcel_doubles`): only offered / routed on the
+    /// National Network approximation plus reasonable access (see
+    /// `data::national_network`).
+    pub national_network: bool,
 }
 
 impl CargoType {
@@ -56,6 +60,7 @@ impl CargoType {
             tank: false,
             baffled: false,
             lcv_lanes: false,
+            national_network: false,
         }
     }
 
@@ -81,6 +86,13 @@ impl CargoType {
     const fn lcv_lanes(self) -> Self {
         CargoType {
             lcv_lanes: true,
+            ..self
+        }
+    }
+
+    const fn national_network(self) -> Self {
+        CargoType {
+            national_network: true,
             ..self
         }
     }
@@ -228,9 +240,10 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
         )
         .fragile(),
         // Twin 28-foot trailers: the parcel networks' linehaul workhorse.
-        // STAA doubles are legal on the National Network in every state --
-        // the freeze only bites the longer combinations -- so the T
-        // endorsement alone opens this freight coast to coast.
+        // STAA doubles are federally guaranteed on the National Network
+        // (and reasonable access off it); the freeze only bites longer
+        // combinations. The T endorsement opens the freight, and the
+        // National Network route gate keeps it on legal lanes.
         CargoType::plain(
             "parcel_doubles",
             "twin-trailer parcel freight",
@@ -238,7 +251,8 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
             (10.0, 22.0),
             &["doubles_triples"],
         )
-        .min_level(8),
+        .min_level(8)
+        .national_network(),
         // Placarded loads: the freight the H endorsement exists for. The
         // catalog's plain "chemicals" class stays non-placarded packaged
         // goods; this is the tanker-adjacent dry side -- drums, cylinders,

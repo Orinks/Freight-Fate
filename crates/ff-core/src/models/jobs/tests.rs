@@ -313,6 +313,110 @@ fn turnpike_doubles_never_leave_the_frozen_network() {
 }
 
 #[test]
+fn parcel_doubles_board_skips_alaska_and_canada_lanes() {
+    use crate::data::national_network::STAA_DOUBLES_CORRIDOR_REFUSAL;
+    assert_eq!(
+        STAA_DOUBLES_CORRIDOR_REFUSAL,
+        "Dispatch doesn't run twins on that lane."
+    );
+    let b = board(1);
+    // Alaska and Canada endpoints are outside the lower 48 by policy.
+    assert!(!b.national_network_lane("fairbanks_ak_us", "tok_ak_us"));
+    assert!(!b.national_network_lane("tok_ak_us", "anchorage_ak_us"));
+    assert!(!b.national_network_lane("surrey_bc_ca", "whitehorse_yt_ca"));
+    // A lower-48 Interstate corridor still clears the lane check.
+    assert!(
+        b.national_network_lane("chicago_il_us", "gary_in_us")
+            || b.national_network_lane("denver_co_us", "colorado_springs_co_us")
+            || b.national_network_lane("seattle_wa_us", "tacoma_wa_us"),
+        "expected at least one lower-48 Interstate pair to clear the twin lane"
+    );
+}
+
+#[test]
+fn parcel_doubles_never_offered_from_alaska() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    for seed in 0..4 {
+        let jobs = board(seed).offers(
+            "Fairbanks",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        assert!(
+            jobs.iter().all(|j| j.cargo.key != "parcel_doubles"),
+            "seed {seed} offered parcel_doubles out of Fairbanks"
+        );
+    }
+}
+
+#[test]
+fn parcel_doubles_require_the_national_network_flag() {
+    let doubles = cargo_type("parcel_doubles").expect("catalog");
+    assert!(doubles.national_network);
+    assert!(!cargo_type("general").unwrap().national_network);
+    assert!(!cargo_type("turnpike_doubles").unwrap().national_network);
+    assert!(!cargo_type("parcel").unwrap().national_network);
+}
+
+#[test]
+fn parcel_doubles_board_skips_lanes_off_the_national_network() {
+    use crate::data::national_network::route_allows_staa_doubles;
+    // Every seeded board at a senior T-endorsed level must either skip
+    // parcel_doubles or place it on a twin-legal corridor option.
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    for seed in 0..8 {
+        let jobs = board(seed).offers(
+            "Chicago",
+            &every_credential,
+            OfferOptions {
+                count: 10,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        for job in &jobs {
+            if job.cargo.key != "parcel_doubles" {
+                continue;
+            }
+            let routes = world()
+                .supported_route_options(&job.origin, &job.destination, 3)
+                .expect("route options");
+            assert!(
+                routes.iter().any(route_allows_staa_doubles),
+                "seed {seed} offered parcel_doubles {} -> {} with no NN route",
+                job.origin,
+                job.destination
+            );
+        }
+    }
+}
+
+#[test]
+fn single_trailer_jobs_are_unaffected_by_the_national_network_gate() {
+    // Plain freight still posts even when the corridor is not all Interstate.
+    let jobs = board(2).offers(
+        "Chicago",
+        NONE,
+        OfferOptions {
+            count: 8,
+            level: 5,
+            ..Default::default()
+        },
+    );
+    assert!(
+        jobs.iter().any(|j| !j.cargo.national_network),
+        "expected at least one single-trailer offer"
+    );
+    for job in &jobs {
+        assert_ne!(job.cargo.key, "parcel_doubles");
+    }
+}
+
+#[test]
 fn test_payout_on_time_window_beats_late() {
     let job = Job::new(general(), 15.0, "A", "Loc", "B", 300.0, 700.0, 9.0);
     let early = job.payout_default(5.0, 0.0);

@@ -10,6 +10,7 @@ pub mod curves;
 pub mod data_resources;
 pub mod grades;
 pub mod legacy_aliases;
+pub mod national_network;
 pub mod regions;
 pub mod state_welcome;
 pub mod stop_twins;
