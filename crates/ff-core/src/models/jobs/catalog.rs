@@ -426,6 +426,8 @@ pub fn market_tag_cargo_bonus(tag: &str) -> &'static [&'static str] {
 
 pub const FACILITY_SELECTION_WEIGHTS: &[(&str, f64)] = &[
     ("company_yard", 0.45),
+    ("travel_center", 0.55),
+    ("truck_parking", 0.40),
     ("cross_dock", 1.15),
     ("dry_warehouse", 1.0),
     ("grocery_retail_dc", 1.05),

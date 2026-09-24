@@ -379,6 +379,9 @@ class World(WorldServiceMixin):
         for location in city_obj.locations:
             if location.type == "company_yard":
                 return HomeTerminal(location.name, city_obj.name, city_obj.state, "company_yard")
+        for location in city_obj.locations:
+            if location.type in ("travel_center", "truck_parking"):
+                return HomeTerminal(location.name, city_obj.name, city_obj.state, location.type)
         return HomeTerminal(
             f"{city_obj.name} Company Yard", city_obj.name, city_obj.state, "company_yard"
         )

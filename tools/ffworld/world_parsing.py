@@ -122,12 +122,16 @@ def _expand_market_locations(
     # own freight is never a stand-in. Kept in step with the Rust runtime,
     # which is what players run; this copy is what the build tools read.
     #
-    # Exception (ALCAN Phase A FIX 3): a listed stand-in may curate a real
-    # truck lot / company yard without unlocking the four-template skyline.
+    # Exception (ALCAN Phase A FIX 3 / Phase B retype): a listed stand-in may
+    # curate real truck lots (company_yard, travel_center, truck_parking, or
+    # terminal) without unlocking the four-template skyline.
     # Stand-ins that already curate ordinary freight still expand fully.
     listed_stand_in = city_key in STAND_IN_MARKET_CITY_KEYS
     if listed_stand_in and explicit_locations:
-        parking_only = all(loc.type in ("company_yard", "terminal") for loc in explicit_locations)
+        parking_only = all(
+            loc.type in ("company_yard", "terminal", "travel_center", "truck_parking")
+            for loc in explicit_locations
+        )
         if parking_only:
             return tuple(explicit_locations)
     stand_in = listed_stand_in and not explicit_locations

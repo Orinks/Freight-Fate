@@ -189,7 +189,7 @@ Prefer `parking` / `travel_center`-class types for public lots — **not** `comp
 4. No CAD purse / FX.
 5. Border gameplay stub only (`border_crossing` data).
 6. Stand-in markets on corridor pass-throughs.
-7. Soft location-type debt (`company_yard` where `parking` / `travel_center` fits).
+7. Soft location-type debt for public lots **resolved**: ALCAN public stops use `travel_center` / `truck_parking`; invented pass-through stand-ins may remain `company_yard`.
 
 ### New Phase B debts
 
@@ -249,6 +249,7 @@ Ops: daytime public Overpass / Valhalla / regional Geofabrik only. Escalate to o
 - [ ] Wasilla = pass-through; Palmer = sole Mat-Su market; author Palmer↔Wasilla ~11–13 mi
 - [ ] Anchorage: Essential One fuel pin + Port/Ship Creek consignee or industrial drop
 - [ ] Speed contexts from **posted** limits; cite 13 AAC 02.275 / 02.280 — not “CMV-only 55”
+- [x] Public ALCAN lots retyped to `travel_center` / `truck_parking`
 - [ ] No breakup GVW modeling; no `gakona_ak_us`; reject lodges
 - [ ] Lat/lon integrity includes Anchorage (~61.2°N, ~−149.9°)
 - [ ] Both directions authored; no CA cabotage unlock

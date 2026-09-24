@@ -215,16 +215,20 @@ pub fn expand_market_locations(
     // endpoint sweep found: those locations were authored by hand, and the
     // market types that go with them are owed too.
     //
-    // Exception (ALCAN Phase A FIX 3): a stand-in market may curate one real
-    // truck lot / company yard without unlocking the four-template skyline.
+    // Exception (ALCAN Phase A FIX 3 / Phase B retype): a stand-in market may
+    // curate real truck lots (company_yard, travel_center, truck_parking, or
+    // terminal) without unlocking the four-template skyline.
     // Stand-ins that already curate ordinary freight (Winona, Port Huron, …)
     // still expand like any other curated city. Empty stand-ins still get the
     // single company_yard stamp.
     let listed_stand_in = is_stand_in_market(city_key);
     if listed_stand_in && !explicit_locations.is_empty() {
-        let parking_only = explicit_locations
-            .iter()
-            .all(|loc| loc.facility_type == "company_yard" || loc.facility_type == "terminal");
+        let parking_only = explicit_locations.iter().all(|loc| {
+            matches!(
+                loc.facility_type.as_str(),
+                "company_yard" | "terminal" | "travel_center" | "truck_parking"
+            )
+        });
         if parking_only {
             return explicit_locations.to_vec();
         }

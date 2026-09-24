@@ -3557,10 +3557,10 @@
       "locations": [
         {
           "name": "TA Express Blaine",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 48.99126,
           "lon": -122.73412,
-          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach)."
+          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ],
       "lat": 48.9881108,
@@ -8004,10 +8004,10 @@
       "locations": [
         {
           "name": "City of Surrey Truck Parking (17768 96 Avenue)",
-          "type": "company_yard",
+          "type": "truck_parking",
           "lat": 49.176804,
           "lon": -122.7300234,
-          "source_note": "City of Surrey commercial truck parking site at 17768 96 Avenue (Anniedale-Tynehead), Hwy 15 / Pacific Highway corridor. City news and corporate reports advance this City-owned lot (~41 truck spaces) under Temporary Use Permit / licence with Prudential Transportation. Pin matches the Phase A Surrey stand-in coordinates."
+          "source_note": "City of Surrey commercial truck parking site at 17768 96 Avenue (Anniedale-Tynehead), Hwy 15 / Pacific Highway corridor. City news and corporate reports advance this City-owned lot (~41 truck spaces) under Temporary Use Permit / licence with Prudential Transportation. Pin matches the Phase A Surrey stand-in coordinates. Retyped from company_yard to truck_parking (ALCAN public lot class)."
         }
       ],
       "lat": 49.176804,
@@ -8023,10 +8023,10 @@
       "locations": [
         {
           "name": "Husky / Esso Travel Centre (1148 Pacific Street)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 53.8722547,
           "lon": -122.7361198,
-          "source_note": "Husky/Esso travel centre at 1148 Pacific Street, Prince George BC (Hwy 97 corridor). Truck-stop directories list ~20\u201325 truck parking spaces, diesel, and 24/7 amenities. Stand-in fuel/parking pin for ALCAN Phase A through-freight (no CA domestic career board)."
+          "source_note": "Husky/Esso travel centre at 1148 Pacific Street, Prince George BC (Hwy 97 corridor). Truck-stop directories list ~20\u201325 truck parking spaces, diesel, and 24/7 amenities. Stand-in fuel/parking pin for ALCAN Phase A through-freight (no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8040,10 +8040,10 @@
       "locations": [
         {
           "name": "Husky (1700 Alaska Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 55.766161,
           "lon": -120.2510583,
-          "source_note": "Husky fuel at 1700 Alaska Highway, Dawson Creek BC, near Mile 0 of the Alaska Highway. City pin is the Alaska Highway Mile 0 milepost on 102 Avenue. Stand-in fuel/parking for ALCAN Phase A Mile 0 (through-freight only; no CA domestic career board)."
+          "source_note": "Husky fuel at 1700 Alaska Highway, Dawson Creek BC, near Mile 0 of the Alaska Highway. City pin is the Alaska Highway Mile 0 milepost on 102 Avenue. Stand-in fuel/parking for ALCAN Phase A Mile 0 (through-freight only; no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8057,10 +8057,10 @@
       "locations": [
         {
           "name": "Smith Fuel Services (9516 78 Street)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 56.2418833,
           "lon": -120.8066055,
-          "source_note": "Smith Fuel Services commercial fuel at 9516 78 Street / Northern Lights Drive, Fort St. John BC, on the Alaska Highway approach. Stand-in fuel/parking pass-through north of Dawson Creek Mile 0 for ALCAN Phase A through-freight (no CA domestic career board)."
+          "source_note": "Smith Fuel Services commercial fuel at 9516 78 Street / Northern Lights Drive, Fort St. John BC, on the Alaska Highway approach. Stand-in fuel/parking pass-through north of Dawson Creek Mile 0 for ALCAN Phase A through-freight (no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8074,10 +8074,10 @@
       "locations": [
         {
           "name": "Esso / Ft Nelson Bulk Sales (5303 48th Avenue)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 58.802163,
           "lon": -122.7036488,
-          "source_note": "Esso / Ft Nelson Bulk Sales cardlock and diesel at 5303 48th Avenue, Fort Nelson BC (Alaska Highway corridor; operator also lists Mile 293 Gasoline Alley). Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board)."
+          "source_note": "Esso / Ft Nelson Bulk Sales cardlock and diesel at 5303 48th Avenue, Fort Nelson BC (Alaska Highway corridor; operator also lists Mile 293 Gasoline Alley). Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8091,10 +8091,10 @@
       "locations": [
         {
           "name": "Petro-Canada (137 Frank Trail)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 60.0524072,
           "lon": -128.6662836,
-          "source_note": "Petro-Canada / Petro-Pass fuel on Hwy 1 at 137 Frank Trail, Watson Lake YT (Alaska Highway). Truck-stop directories list ~5 truck parking spaces and diesel. Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board)."
+          "source_note": "Petro-Canada / Petro-Pass fuel on Hwy 1 at 137 Frank Trail, Watson Lake YT (Alaska Highway). Truck-stop directories list ~5 truck parking spaces and diesel. Stand-in fuel/parking for ALCAN Phase A through-freight (no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8108,10 +8108,10 @@
       "locations": [
         {
           "name": "McCrae Petro-Canada (91007 Alaska Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 60.6387178,
           "lon": -135.0021221,
-          "source_note": "McCrae Petro-Canada at 91007 Alaska Highway, Whitehorse YT (south approach / McRae). Truck-stop directories list ~10 truck parking spaces, diesel, and driver amenities. City pin stays downtown Whitehorse; lot pin is the ALCAN stand-in fuel/parking for Phase A through-freight (no CA domestic career board)."
+          "source_note": "McCrae Petro-Canada at 91007 Alaska Highway, Whitehorse YT (south approach / McRae). Truck-stop directories list ~10 truck parking spaces, diesel, and driver amenities. City pin stays downtown Whitehorse; lot pin is the ALCAN stand-in fuel/parking for Phase A through-freight (no CA domestic career board). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8125,10 +8125,10 @@
       "locations": [
         {
           "name": "Young's Chevron (Alaska Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 63.3353228,
           "lon": -142.985827,
-          "source_note": "Young's Chevron fuel on the Alaska Highway in Tok AK (Unorganized Borough). OSM amenity=fuel pin; stand-in fuel/parking for ALCAN Phase A Alaska entry (through-freight only; no Anchorage / Phase B graph)."
+          "source_note": "Young's Chevron fuel on the Alaska Highway in Tok AK (Unorganized Borough). OSM amenity=fuel pin; stand-in fuel/parking for ALCAN Phase A Alaska entry (through-freight only; no Anchorage / Phase B graph). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8142,10 +8142,10 @@
       "locations": [
         {
           "name": "Sourdough Fuel (1688 Airport Way)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 64.8371392,
           "lon": -147.7505063,
-          "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B)."
+          "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8159,17 +8159,17 @@
       "locations": [
         {
           "name": "Hub of Alaska (Glenn Hwy / Richardson Hwy)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 62.1083455,
           "lon": -145.4779829,
-          "source_note": "Hub of Alaska travel center at the Glenn Highway / Richardson Highway junction, Glennallen AK (Unorganized Borough). Nominatim geocode 2026-09-24 (Hub of Alaska, Glenn Highway, Glennallen). Public directories (AllStays / truckstopsandservices) list diesel and ~20\u201325 truck parking spaces. Primary Glennallen fuel/parking pin for ALCAN Phase B1. City location type is company_yard because FREIGHT_LOCATION_TYPES has no travel_center/parking class (same soft type debt as Phase A corridor pins)."
+          "source_note": "Hub of Alaska travel center at the Glenn Highway / Richardson Highway junction, Glennallen AK (Unorganized Borough). Nominatim geocode 2026-09-24 (Hub of Alaska, Glenn Highway, Glennallen). Public directories (AllStays / truckstopsandservices) list diesel and ~20\u201325 truck parking spaces. Primary Glennallen fuel/parking pin for ALCAN Phase B1. City location type is company_yard because FREIGHT_LOCATION_TYPES has no travel_center/parking class (same soft type debt as Phase A corridor pins). Retyped from company_yard to travel_center (ALCAN public lot class)."
         },
         {
           "name": "Glennallen Fuel & Service (Glenn Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 62.1077746,
           "lon": -145.5368658,
-          "source_note": "Glennallen Fuel & Service on the Glenn Highway, Glennallen AK. Nominatim geocode 2026-09-24. Public directories list diesel and ~10 truck parking spaces. Verified alternate Glennallen lot (Hub of Alaska remains primary)."
+          "source_note": "Glennallen Fuel & Service on the Glenn Highway, Glennallen AK. Nominatim geocode 2026-09-24. Public directories list diesel and ~10 truck parking spaces. Verified alternate Glennallen lot (Hub of Alaska remains primary). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8200,10 +8200,10 @@
       "locations": [
         {
           "name": "Essential One (9250 King Street)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 61.1370513,
           "lon": -149.8790685,
-          "source_note": "Essential One / Petro 49 / Shoreside high-flow diesel and cardlock at 9250 King Street, Anchorage AK 99515. Nominatim address geocode 2026-09-24. AllStays lists ~3 truck parking spaces in a dirt lot \u2014 capacity debt recorded honestly; not a large travel center. Anchorage fuel pin for ALCAN Phase B1. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+          "source_note": "Essential One / Petro 49 / Shoreside high-flow diesel and cardlock at 9250 King Street, Anchorage AK 99515. Nominatim address geocode 2026-09-24. AllStays lists ~3 truck parking spaces in a dirt lot \u2014 capacity debt recorded honestly; not a large travel center. Anchorage fuel pin for ALCAN Phase B1. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class). Retyped from company_yard to travel_center (ALCAN public lot class)."
         },
         {
           "name": "Port of Alaska / Ship Creek industrial drop",
@@ -8241,10 +8241,10 @@
       "locations": [
         {
           "name": "Fisher Fuel (Parks Highway MM 249.5)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 63.875976,
           "lon": -149.01869,
-          "source_note": "Fisher Fuel at Parks Highway MM 249.5, Healy AK 99743. Coordinates from truckstopsandservices.com directory map pin (63.875976, -149.01869), cross-checked to MM 249.5 / AllStays / GasBuddy listings 2026-09-24. Diesel; AllStays lists ~3 truck parking spaces \u2014 capacity recorded honestly, not inflated. Thin pass-through fuel pin only; Healy is not a job-board market. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+          "source_note": "Fisher Fuel at Parks Highway MM 249.5, Healy AK 99743. Coordinates from truckstopsandservices.com directory map pin (63.875976, -149.01869), cross-checked to MM 249.5 / AllStays / GasBuddy listings 2026-09-24. Diesel; AllStays lists ~3 truck parking spaces \u2014 capacity recorded honestly, not inflated. Thin pass-through fuel pin only; Healy is not a job-board market. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },

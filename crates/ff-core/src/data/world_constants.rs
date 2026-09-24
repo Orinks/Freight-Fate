@@ -412,6 +412,8 @@ pub const FREIGHT_LOCATION_TYPES: &[&str] = &[
     "retail_distribution",
     "steel_industrial",
     "terminal",
+    "travel_center",
+    "truck_parking",
     "warehouse",
 ];
 
@@ -450,6 +452,8 @@ pub const LOCATION_TYPE_LABELS: &[(&str, &str)] = &[
     ("retail_distribution", "retail distribution hub"),
     ("steel_industrial", "steel and industrial plant"),
     ("terminal", "freight terminal"),
+    ("travel_center", "travel center"),
+    ("truck_parking", "truck parking"),
     ("warehouse", "warehouse"),
 ];
 
@@ -482,6 +486,8 @@ pub const FACILITY_APPROACH_MILES: &[(&str, f64)] = &[
     ("retail_distribution", 4.0),
     ("steel_industrial", 5.5),
     ("terminal", 3.0),
+    ("travel_center", 1.5),
+    ("truck_parking", 1.0),
     ("warehouse", 3.5),
 ];
 
@@ -523,6 +529,8 @@ pub const FACILITY_APPROACH_ROADS: &[(&str, &str)] = &[
     ("retail_distribution", "retail distribution access road"),
     ("steel_industrial", "industrial plant access road"),
     ("terminal", "terminal access road"),
+    ("travel_center", "travel center access road"),
+    ("truck_parking", "truck parking lot access"),
     ("warehouse", "warehouse access road"),
 ];
 
@@ -753,6 +761,20 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
         &["electronics", "general", "retail", "parcel"],
     ),
     (
+        // Public travel centers / fuel+parking lots used as city pins (ALCAN
+        // corridor). Same soft freight roles as company_yard so stand-in
+        // markets that only curate a real truck stop stay job-board capable.
+        "travel_center",
+        &["general", "retail", "parcel"],
+        &["general", "retail", "parcel", "fuel_bulk"],
+    ),
+    (
+        // Public tractor parking lots (no travel-center amenities required).
+        "truck_parking",
+        &["general", "retail", "parcel"],
+        &["general", "retail", "parcel"],
+    ),
+    (
         "warehouse",
         &["bulk", "general", "machinery", "retail", "construction"],
         &["bulk", "general", "machinery", "retail", "construction"],
@@ -798,6 +820,8 @@ pub const FACILITY_SOURCE_NOTES: &[(&str, &str)] = &[
     ("retail_distribution", "Curated representative retail distribution facility in the metro freight market."),
     ("steel_industrial", "Representative steel or industrial facility; guided by FAF commodity framing."),
     ("terminal", "Curated representative freight terminal in the metro freight market."),
+    ("travel_center", "Public travel center or commercial diesel stop with tractor parking."),
+    ("truck_parking", "Public truck parking lot (may lack full travel-center amenities)."),
     ("warehouse", "Curated representative warehouse in the metro freight market."),
 ];
 
@@ -997,6 +1021,8 @@ pub const FACILITY_NAME_TEMPLATES: &[(&str, &str)] = &[
     ("chemical_petroleum_terminal", "{city} Energy Terminal"),
     ("cold_storage", "{city} Cold Storage"),
     ("company_yard", "{city} Company Yard"),
+    ("travel_center", "{city} Travel Center"),
+    ("truck_parking", "{city} Truck Parking"),
     ("construction_materials_yard", "{city} Materials Yard"),
     ("cross_dock", "{city} Cross-Dock"),
     ("dry_warehouse", "{city} Dry Warehouse"),

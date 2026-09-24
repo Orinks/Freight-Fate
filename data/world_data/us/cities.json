@@ -3557,10 +3557,10 @@
       "locations": [
         {
           "name": "TA Express Blaine",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 48.99126,
           "lon": -122.73412,
-          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach)."
+          "source_note": "TravelCenters of America TA Express #0917 at 1300 Boblett Street, Blaine WA (I-5 Exit 275); operator page lists overnight truck parking (~34 spaces), diesel, and driver amenities. Real lot for the Blaine stand-in service pin (city pin stays near the Pacific Highway POE for corridor attach). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ],
       "lat": 48.9881108,
@@ -8006,10 +8006,10 @@
       "locations": [
         {
           "name": "Young's Chevron (Alaska Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 63.3353228,
           "lon": -142.985827,
-          "source_note": "Young's Chevron fuel on the Alaska Highway in Tok AK (Unorganized Borough). OSM amenity=fuel pin; stand-in fuel/parking for ALCAN Phase A Alaska entry (through-freight only; no Anchorage / Phase B graph)."
+          "source_note": "Young's Chevron fuel on the Alaska Highway in Tok AK (Unorganized Borough). OSM amenity=fuel pin; stand-in fuel/parking for ALCAN Phase A Alaska entry (through-freight only; no Anchorage / Phase B graph). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8023,10 +8023,10 @@
       "locations": [
         {
           "name": "Sourdough Fuel (1688 Airport Way)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 64.8371392,
           "lon": -147.7505063,
-          "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B)."
+          "source_note": "Sourdough Fuel at 1688 Airport Way, Fairbanks AK (Slaterville). OSM amenity=fuel pin on the Richardson / Airport Way approach. Stand-in fuel/parking for ALCAN Phase A Fairbanks terminus (through-freight only; Anchorage deferred to Phase B). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8040,17 +8040,17 @@
       "locations": [
         {
           "name": "Hub of Alaska (Glenn Hwy / Richardson Hwy)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 62.1083455,
           "lon": -145.4779829,
-          "source_note": "Hub of Alaska travel center at the Glenn Highway / Richardson Highway junction, Glennallen AK (Unorganized Borough). Nominatim geocode 2026-09-24 (Hub of Alaska, Glenn Highway, Glennallen). Public directories (AllStays / truckstopsandservices) list diesel and ~20\u201325 truck parking spaces. Primary Glennallen fuel/parking pin for ALCAN Phase B1. City location type is company_yard because FREIGHT_LOCATION_TYPES has no travel_center/parking class (same soft type debt as Phase A corridor pins)."
+          "source_note": "Hub of Alaska travel center at the Glenn Highway / Richardson Highway junction, Glennallen AK (Unorganized Borough). Nominatim geocode 2026-09-24 (Hub of Alaska, Glenn Highway, Glennallen). Public directories (AllStays / truckstopsandservices) list diesel and ~20\u201325 truck parking spaces. Primary Glennallen fuel/parking pin for ALCAN Phase B1. City location type is company_yard because FREIGHT_LOCATION_TYPES has no travel_center/parking class (same soft type debt as Phase A corridor pins). Retyped from company_yard to travel_center (ALCAN public lot class)."
         },
         {
           "name": "Glennallen Fuel & Service (Glenn Highway)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 62.1077746,
           "lon": -145.5368658,
-          "source_note": "Glennallen Fuel & Service on the Glenn Highway, Glennallen AK. Nominatim geocode 2026-09-24. Public directories list diesel and ~10 truck parking spaces. Verified alternate Glennallen lot (Hub of Alaska remains primary)."
+          "source_note": "Glennallen Fuel & Service on the Glenn Highway, Glennallen AK. Nominatim geocode 2026-09-24. Public directories list diesel and ~10 truck parking spaces. Verified alternate Glennallen lot (Hub of Alaska remains primary). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },
@@ -8081,10 +8081,10 @@
       "locations": [
         {
           "name": "Essential One (9250 King Street)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 61.1370513,
           "lon": -149.8790685,
-          "source_note": "Essential One / Petro 49 / Shoreside high-flow diesel and cardlock at 9250 King Street, Anchorage AK 99515. Nominatim address geocode 2026-09-24. AllStays lists ~3 truck parking spaces in a dirt lot \u2014 capacity debt recorded honestly; not a large travel center. Anchorage fuel pin for ALCAN Phase B1. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+          "source_note": "Essential One / Petro 49 / Shoreside high-flow diesel and cardlock at 9250 King Street, Anchorage AK 99515. Nominatim address geocode 2026-09-24. AllStays lists ~3 truck parking spaces in a dirt lot \u2014 capacity debt recorded honestly; not a large travel center. Anchorage fuel pin for ALCAN Phase B1. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class). Retyped from company_yard to travel_center (ALCAN public lot class)."
         },
         {
           "name": "Port of Alaska / Ship Creek industrial drop",
@@ -8122,10 +8122,10 @@
       "locations": [
         {
           "name": "Fisher Fuel (Parks Highway MM 249.5)",
-          "type": "company_yard",
+          "type": "travel_center",
           "lat": 63.875976,
           "lon": -149.01869,
-          "source_note": "Fisher Fuel at Parks Highway MM 249.5, Healy AK 99743. Coordinates from truckstopsandservices.com directory map pin (63.875976, -149.01869), cross-checked to MM 249.5 / AllStays / GasBuddy listings 2026-09-24. Diesel; AllStays lists ~3 truck parking spaces \u2014 capacity recorded honestly, not inflated. Thin pass-through fuel pin only; Healy is not a job-board market. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class)."
+          "source_note": "Fisher Fuel at Parks Highway MM 249.5, Healy AK 99743. Coordinates from truckstopsandservices.com directory map pin (63.875976, -149.01869), cross-checked to MM 249.5 / AllStays / GasBuddy listings 2026-09-24. Diesel; AllStays lists ~3 truck parking spaces \u2014 capacity recorded honestly, not inflated. Thin pass-through fuel pin only; Healy is not a job-board market. company_yard type per FREIGHT_LOCATION_TYPES (no travel_center city location class). Retyped from company_yard to travel_center (ALCAN public lot class)."
         }
       ]
     },

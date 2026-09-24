@@ -1539,6 +1539,50 @@ fn test_alcan_phase_b2_parks_to_anchorage() {
 }
 
 #[test]
+fn test_alcan_public_lots_use_travel_center_or_truck_parking() {
+    let world = world();
+    let cases = [
+        ("blaine_wa_us", "TA Express", "travel_center"),
+        ("surrey_bc_ca", "Truck Parking", "truck_parking"),
+        ("tok_ak_us", "Chevron", "travel_center"),
+        ("fairbanks_ak_us", "Sourdough", "travel_center"),
+        ("glennallen_ak_us", "Hub of Alaska", "travel_center"),
+        ("anchorage_ak_us", "Essential One", "travel_center"),
+        ("healy_ak_us", "Fisher Fuel", "travel_center"),
+    ];
+    for (city, needle, want) in cases {
+        let c = world.city(city).unwrap_or_else(|_| panic!("{city}"));
+        let loc = c
+            .locations
+            .iter()
+            .find(|l| l.name.contains(needle))
+            .unwrap_or_else(|| panic!("{city} missing {needle}"));
+        assert_eq!(loc.facility_type, want, "{city} {needle} type");
+    }
+    // Stand-in placeholders stay company_yard; Port stays terminal.
+    let palmer = world.city("palmer_ak_us").expect("palmer");
+    assert!(palmer
+        .locations
+        .iter()
+        .all(|l| l.facility_type == "company_yard"));
+    let anc = world.city("anchorage_ak_us").expect("anchorage");
+    assert!(anc
+        .locations
+        .iter()
+        .any(|l| { l.name.contains("Port of Alaska") && l.facility_type == "terminal" }));
+    // Stand-in ALCAN cities with only public-lot types must not grow a skyline.
+    let tok = world.city("tok_ak_us").expect("tok");
+    assert_eq!(
+        tok.locations.len(),
+        1,
+        "Tok stand-in must keep a single curated lot, got {}",
+        tok.locations.len()
+    );
+    let surrey = world.city("surrey_bc_ca").expect("surrey");
+    assert_eq!(surrey.locations.len(), 1);
+}
+
+#[test]
 fn test_legs_are_sane_and_unique() {
     let world = world();
     let mut seen: HashSet<(String, String)> = HashSet::new();

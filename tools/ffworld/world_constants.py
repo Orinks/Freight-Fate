@@ -182,6 +182,8 @@ FREIGHT_LOCATION_TYPES = {
     "retail_distribution",
     "steel_industrial",
     "terminal",
+    "travel_center",
+    "truck_parking",
     "warehouse",
     "metro_market",
 }
@@ -215,6 +217,8 @@ LOCATION_TYPE_LABELS = {
     "retail_distribution": "retail distribution hub",
     "steel_industrial": "steel and industrial plant",
     "terminal": "freight terminal",
+    "travel_center": "travel center",
+    "truck_parking": "truck parking",
     "warehouse": "warehouse",
 }
 
@@ -247,6 +251,8 @@ FACILITY_APPROACH_MILES = {
     "retail_distribution": 4.0,
     "steel_industrial": 5.5,
     "terminal": 3.0,
+    "travel_center": 1.5,
+    "truck_parking": 1.0,
     "warehouse": 3.5,
 }
 
@@ -288,6 +294,8 @@ FACILITY_APPROACH_ROADS = {
     "retail_distribution": "retail distribution access road",
     "steel_industrial": "industrial plant access road",
     "terminal": "terminal access road",
+    "travel_center": "travel center access road",
+    "truck_parking": "truck parking lot access",
     "warehouse": "warehouse access road",
 }
 
@@ -404,6 +412,14 @@ FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
         "ships": ("electronics", "general", "retail", "parcel"),
         "receives": ("electronics", "general", "retail", "parcel"),
     },
+    "travel_center": {
+        "ships": ("general", "retail", "parcel"),
+        "receives": ("general", "retail", "parcel", "fuel_bulk"),
+    },
+    "truck_parking": {
+        "ships": ("general", "retail", "parcel"),
+        "receives": ("general", "retail", "parcel"),
+    },
     "warehouse": {
         "ships": ("bulk", "general", "machinery", "retail", "construction"),
         "receives": ("bulk", "general", "machinery", "retail", "construction"),
@@ -439,6 +455,8 @@ FACILITY_SOURCE_NOTES = {
     "retail_distribution": "Curated representative retail distribution facility in the metro freight market.",
     "steel_industrial": "Representative steel or industrial facility; guided by FAF commodity framing.",
     "terminal": "Curated representative freight terminal in the metro freight market.",
+    "travel_center": "Public travel center or commercial diesel stop with tractor parking.",
+    "truck_parking": "Public truck parking lot (may lack full travel-center amenities).",
     "warehouse": "Curated representative warehouse in the metro freight market.",
 }
 
@@ -962,6 +980,8 @@ FACILITY_NAME_TEMPLATES = {
     "chemical_petroleum_terminal": "{city} Energy Terminal",
     "cold_storage": "{city} Cold Storage",
     "company_yard": "{city} Company Yard",
+    "travel_center": "{city} Travel Center",
+    "truck_parking": "{city} Truck Parking",
     "construction_materials_yard": "{city} Materials Yard",
     "cross_dock": "{city} Cross-Dock",
     "dry_warehouse": "{city} Dry Warehouse",

@@ -686,6 +686,8 @@ impl World {
         let locations = &city_obj.locations;
         const PREFERRED: &[&str] = &[
             "company_yard",
+            "travel_center",
+            "truck_parking",
             "terminal",
             "dry_warehouse",
             "warehouse",
@@ -735,6 +737,18 @@ impl World {
                 &city_obj.name,
                 &city_obj.state,
                 "company_yard",
+            ));
+        }
+        if let Some(location) = city_obj
+            .locations
+            .iter()
+            .find(|l| l.facility_type == "travel_center" || l.facility_type == "truck_parking")
+        {
+            return Ok(HomeTerminal::new(
+                &location.name,
+                &city_obj.name,
+                &city_obj.state,
+                &location.facility_type,
             ));
         }
         Ok(HomeTerminal::new(
