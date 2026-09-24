@@ -64,5 +64,30 @@
         }
       }
     }
+  },
+  "ramp_length_bake": {
+    "kind": "derived",
+    "measure": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+    "starts_at": "the OSM node where the motorway_link way leaves the motorway way: at or near the gore (painted-gore start to physical nose, by mapper). The deceleration lane or taper lies before it and is not included.",
+    "ends_at": "the nearest surface-road node or dead end along the link ways, else the merge onto another motorway",
+    "exits": 18165,
+    "exits_with_length": 16882,
+    "coverage_ratio": 0.9294,
+    "directional_lengths": 21577,
+    "percentiles_ft": {
+      "p5": 735.1,
+      "p25": 1144.2,
+      "p50": 1473.8,
+      "p75": 1897.6,
+      "p95": 3456.3
+    },
+    "screen": {
+      "min_ft": 300.0,
+      "max_ft": 7920.0,
+      "gores_measured": 21796,
+      "dropped_too_short": 172,
+      "dropped_too_long": 47,
+      "no_terminal_reached": 0
+    }
   }
 }
