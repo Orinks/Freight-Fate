@@ -1464,8 +1464,8 @@ fn test_alcan_phase_b2_parks_to_anchorage() {
         .find(|leg| leg.a == "fairbanks_ak_us" && leg.b == "nenana_ak_us")
         .expect("fairbanks->nenana");
     assert!(
-        (fbx_nen.miles - 57.0).abs() < 0.5,
-        "Fairbanks–Nenana must be ~57, got {}",
+        (fbx_nen.miles - 53.0).abs() < 0.5,
+        "Fairbanks–Nenana must be Parks milepost ~53 (MP358→MP305), got {}",
         fbx_nen.miles
     );
     let nen_hea = world
@@ -1474,8 +1474,8 @@ fn test_alcan_phase_b2_parks_to_anchorage() {
         .find(|leg| leg.a == "nenana_ak_us" && leg.b == "healy_ak_us")
         .expect("nenana->healy");
     assert!(
-        (nen_hea.miles - 58.0).abs() < 0.5,
-        "Nenana–Healy must be ~58, got {}",
+        (nen_hea.miles - 56.0).abs() < 0.5,
+        "Nenana–Healy must be Parks milepost ~56 (MP305→MP249), got {}",
         nen_hea.miles
     );
     let hea_was = world
@@ -1494,8 +1494,8 @@ fn test_alcan_phase_b2_parks_to_anchorage() {
         .find(|leg| leg.a == "wasilla_ak_us" && leg.b == "anchorage_ak_us")
         .expect("wasilla->anchorage");
     assert!(
-        (was_anc.miles - 44.0).abs() < 0.5,
-        "Wasilla–Anchorage must be ~44, got {}",
+        (was_anc.miles - 42.0).abs() < 0.5,
+        "Wasilla–Anchorage must be Parks milepost ~42 (MP42→MP0), got {}",
         was_anc.miles
     );
     let pal_was = world

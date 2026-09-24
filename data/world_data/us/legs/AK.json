@@ -91,7 +91,7 @@
     {
       "from": "anchorage_ak_us",
       "to": "wasilla_ak_us",
-      "miles": 44,
+      "miles": 42,
       "highway": "George Parks Highway / Glenn Highway",
       "terrain": "hills",
       "divided": false,
@@ -106,17 +106,17 @@
             "lon": -149.90035
           },
           {
-            "at_mi": 15.14,
+            "at_mi": 14.45,
             "lat": 61.30572,
             "lon": -149.58628
           },
           {
-            "at_mi": 32.7,
+            "at_mi": 31.21,
             "lat": 61.46479,
             "lon": -149.32484
           },
           {
-            "at_mi": 44.0,
+            "at_mi": 42.0,
             "lat": 61.58227,
             "lon": -149.44257
           }
@@ -128,17 +128,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 15.14,
+            "at_mi": 14.45,
             "elevation_ft": 357.6,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 32.7,
+            "at_mi": 31.21,
             "elevation_ft": 23.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 44.0,
+            "at_mi": 42.0,
             "elevation_ft": 341.2,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -146,7 +146,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 44.0,
+            "end_mi": 42.0,
             "avg_grade_pct": 0.1,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -156,10 +156,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 44.0
+            "miles": 42.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks/Glenn milepost Anchorage MP0 \u2192 Wasilla~MP42). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 42. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -179,7 +179,7 @@
     {
       "from": "fairbanks_ak_us",
       "to": "nenana_ak_us",
-      "miles": 57,
+      "miles": 53,
       "highway": "George Parks Highway",
       "terrain": "hills",
       "divided": false,
@@ -194,17 +194,17 @@
             "lon": -147.71674
           },
           {
-            "at_mi": 18.53,
+            "at_mi": 17.23,
             "lat": 64.78855,
             "lon": -148.21124
           },
           {
-            "at_mi": 40.31,
+            "at_mi": 37.48,
             "lat": 64.6982,
             "lon": -148.76766
           },
           {
-            "at_mi": 57.0,
+            "at_mi": 53.0,
             "lat": 64.56353,
             "lon": -149.09584
           }
@@ -216,17 +216,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 18.53,
+            "at_mi": 17.23,
             "elevation_ft": 1414.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 40.31,
+            "at_mi": 37.48,
             "elevation_ft": 958.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 57.0,
+            "at_mi": 53.0,
             "elevation_ft": 357.6,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -234,7 +234,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 57.0,
+            "end_mi": 53.0,
             "avg_grade_pct": -0.03,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -244,10 +244,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 57.0
+            "miles": 53.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Fairbanks~MP358 \u2192 Nenana~MP305). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. fairbanks_ak_us pin is Sourdough Fuel on Airport Way (west of the Parks/Richardson junction / Parks terminus ~MP358) \u2014 city-to-city router distance can exceed the pure Parks MP delta; paid miles follow milepost. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -611,7 +611,7 @@
     {
       "from": "healy_ak_us",
       "to": "nenana_ak_us",
-      "miles": 58,
+      "miles": 56,
       "highway": "George Parks Highway",
       "terrain": "hills",
       "divided": false,
@@ -626,17 +626,17 @@
             "lon": -149.01974
           },
           {
-            "at_mi": 17.43,
+            "at_mi": 16.83,
             "lat": 64.0741,
             "lon": -149.20051
           },
           {
-            "at_mi": 36.64,
+            "at_mi": 35.38,
             "lat": 64.30252,
             "lon": -149.07409
           },
           {
-            "at_mi": 58.0,
+            "at_mi": 56.0,
             "lat": 64.56353,
             "lon": -149.09584
           }
@@ -648,17 +648,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 17.43,
+            "at_mi": 16.83,
             "elevation_ft": 1059.7,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 36.64,
+            "at_mi": 35.38,
             "elevation_ft": 538.1,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 58.0,
+            "at_mi": 56.0,
             "elevation_ft": 357.6,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -666,7 +666,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 58.0,
+            "end_mi": 56.0,
             "avg_grade_pct": -0.35,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -676,10 +676,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 58.0
+            "miles": 56.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Healy~MP249 \u2192 Nenana~MP305). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 56. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -807,7 +807,7 @@
             "miles": 207.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206).",
+        "source": "Paid miles confirmed Parks milepost Healy~MP249 \u2194 Wasilla~MP42 = 207. Shape unchanged from prior public Valhalla truck densify. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -827,7 +827,7 @@
     {
       "from": "nenana_ak_us",
       "to": "fairbanks_ak_us",
-      "miles": 57,
+      "miles": 53,
       "highway": "George Parks Highway",
       "terrain": "hills",
       "divided": false,
@@ -842,17 +842,17 @@
             "lon": -149.09584
           },
           {
-            "at_mi": 16.69,
+            "at_mi": 15.52,
             "lat": 64.6982,
             "lon": -148.76766
           },
           {
-            "at_mi": 38.47,
+            "at_mi": 35.77,
             "lat": 64.78855,
             "lon": -148.21124
           },
           {
-            "at_mi": 57.0,
+            "at_mi": 53.0,
             "lat": 64.83803,
             "lon": -147.71674
           }
@@ -864,17 +864,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 16.69,
+            "at_mi": 15.52,
             "elevation_ft": 958.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 38.47,
+            "at_mi": 35.77,
             "elevation_ft": 1414.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 57.0,
+            "at_mi": 53.0,
             "elevation_ft": 449.5,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -882,7 +882,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 57.0,
+            "end_mi": 53.0,
             "avg_grade_pct": 0.03,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -892,10 +892,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 57.0
+            "miles": 53.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Nenana~MP305 \u2192 Fairbanks~MP358). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. fairbanks_ak_us pin is Sourdough Fuel on Airport Way (west of the Parks/Richardson junction / Parks terminus ~MP358) \u2014 city-to-city router distance can exceed the pure Parks MP delta; paid miles follow milepost. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -915,7 +915,7 @@
     {
       "from": "nenana_ak_us",
       "to": "healy_ak_us",
-      "miles": 58,
+      "miles": 56,
       "highway": "George Parks Highway",
       "terrain": "hills",
       "divided": false,
@@ -930,17 +930,17 @@
             "lon": -149.09584
           },
           {
-            "at_mi": 21.36,
+            "at_mi": 20.62,
             "lat": 64.30252,
             "lon": -149.07409
           },
           {
-            "at_mi": 40.57,
+            "at_mi": 39.17,
             "lat": 64.0741,
             "lon": -149.20051
           },
           {
-            "at_mi": 58.0,
+            "at_mi": 56.0,
             "lat": 63.87619,
             "lon": -149.01974
           }
@@ -952,17 +952,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 21.36,
+            "at_mi": 20.62,
             "elevation_ft": 538.1,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 40.57,
+            "at_mi": 39.17,
             "elevation_ft": 1059.7,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 58.0,
+            "at_mi": 56.0,
             "elevation_ft": 1443.6,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -970,7 +970,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 58.0,
+            "end_mi": 56.0,
             "avg_grade_pct": 0.35,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -980,10 +980,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 58.0
+            "miles": 56.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Nenana~MP305 \u2192 Healy~MP249). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 56. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 55.6 mi; paid miles 58. George Parks Highway (AK-3). Parks Highway Nenana to Healy (Fisher Fuel pin); ALCAN Phase B2; paid ~58 plan/Valhalla band (router ~55.6 at Fisher pin).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -1267,7 +1267,7 @@
             "miles": 13.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2.",
+        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2.",
         "landmarks": [],
         "speed_limits": [
           {
@@ -1754,7 +1754,7 @@
     {
       "from": "wasilla_ak_us",
       "to": "anchorage_ak_us",
-      "miles": 44,
+      "miles": 42,
       "highway": "George Parks Highway / Glenn Highway",
       "terrain": "hills",
       "divided": false,
@@ -1769,17 +1769,17 @@
             "lon": -149.44257
           },
           {
-            "at_mi": 11.3,
+            "at_mi": 10.79,
             "lat": 61.46479,
             "lon": -149.32484
           },
           {
-            "at_mi": 28.86,
+            "at_mi": 27.55,
             "lat": 61.30572,
             "lon": -149.58628
           },
           {
-            "at_mi": 44.0,
+            "at_mi": 42.0,
             "lat": 61.21832,
             "lon": -149.90035
           }
@@ -1791,17 +1791,17 @@
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 11.3,
+            "at_mi": 10.79,
             "elevation_ft": 23.0,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 28.86,
+            "at_mi": 27.55,
             "elevation_ft": 357.6,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           },
           {
-            "at_mi": 44.0,
+            "at_mi": 42.0,
             "elevation_ft": 111.5,
             "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-09-24."
           }
@@ -1809,7 +1809,7 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 44.0,
+            "end_mi": 42.0,
             "avg_grade_pct": -0.1,
             "terrain": "hills",
             "source": "Coarse grade from Open-Meteo elevation samples along public Valhalla truck-costing route geometry (development-time, valhalla1.openstreetmap.de), sampled 2026-09-24."
@@ -1819,10 +1819,10 @@
         "state_miles": [
           {
             "state": "Alaska",
-            "miles": 44.0
+            "miles": 42.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks/Glenn milepost Wasilla~MP42 \u2192 Anchorage MP0). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 42. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 43.6 mi; paid miles 44. George Parks Highway / Glenn Highway (AK-3 / AK-1). Parks to Glenn\u2013Parks interchange to Glenn; ALCAN Phase B2; paid ~44 (public Valhalla truck ~43.6).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -1950,7 +1950,7 @@
             "miles": 207.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Paid miles confirmed Parks milepost Healy~MP249 \u2194 Wasilla~MP42 = 207. Shape unchanged from prior public Valhalla truck densify. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 206.0 mi; paid miles 207. George Parks Highway (AK-3). Parks Highway Healy to Wasilla via Broad Pass; Cantwell collapsed (diesel claimed at Vitus/Food Mart, tractor parking unverified 2026-09-24); paid ~207 (public Valhalla truck ~206). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -2038,7 +2038,7 @@
             "miles": 13.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {

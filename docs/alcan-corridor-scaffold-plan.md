@@ -1,6 +1,6 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage** and **B2 Parks** (nenana/healy/wasilla; Cantwell collapsed) world_data landed. No full Canada board.
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage** and **B2 Parks** (nenana/healy/wasilla; Cantwell collapsed; Parks milepost-paid checksum 358) world_data landed. No full Canada board.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
