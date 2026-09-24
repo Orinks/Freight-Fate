@@ -400,7 +400,14 @@ impl<'w> JobBoard<'w> {
     /// stays on a listed LCV turnpike (plus staging stubs). See
     /// `data::lcv_turnpikes`.
     pub(crate) fn lcv_lane(&self, origin: &str, destination: &str) -> bool {
-        use crate::data::lcv_turnpikes::filter_lcv_turnpike_routes;
+        use crate::data::lcv_turnpikes::{
+            city_allows_lcv_turnpike_endpoint, filter_lcv_turnpike_routes,
+        };
+        if !city_allows_lcv_turnpike_endpoint(origin)
+            || !city_allows_lcv_turnpike_endpoint(destination)
+        {
+            return false;
+        }
         let state_of = |key: &str| {
             self.world
                 .cities

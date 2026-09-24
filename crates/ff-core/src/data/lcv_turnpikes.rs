@@ -18,10 +18,15 @@
 //! * No LCV driver certification or carrier permit gate (49 CFR 380).
 //! * Hazmat in doubles is not modeled -- `turnpike_doubles` never carries
 //!   placarded freight.
-//! * World-graph gaps: Ohio Turnpike east of Toledo toward the PA line has
-//!   no city-pair that stays on I-80 without a Cleveland endpoint; Kansas
-//!   Turnpike I-70 Topeka to Kansas City has no shipped leg (and KC sits in
-//!   Missouri, outside the board's LCV-state endpoints).
+//! * World-data gap (pending map work): Ohio Turnpike east of Toledo to the
+//!   PA line -- no I-80 city-pair that avoids Cleveland, and no Elyria node.
+//! * World-data gap (pending map work): Kansas Turnpike I-70 Topeka to
+//!   Kansas City -- no shipped leg (KC is in Missouri).
+//! * NY I-87 Albany–Yonkers Thruway is not modeled as a city-pair: tandems
+//!   cannot leave the Thruway onto public NY roads (TAP-602), the southern
+//!   staging lot is Exit 6A Yonkers, and `new_york_ny_us` is refused as an
+//!   origin or destination, so the coarse `new_york`–`albany` I-87 world leg
+//!   is omitted rather than faked.
 
 use crate::data::world_models::{Leg, Route};
 
@@ -52,8 +57,10 @@ pub const LCV_TURNPIKE_GVW_CAP_LB: &[(&str, u32)] = &[
 ///
 /// Corridors covered:
 /// * NY Thruway: I-90 Buffalo–Albany chain; Berkshire Section toward MA
-///   (`albany`–`worcester` / `springfield`–`albany`); I-87 NYC–Albany;
-///   I-90 Buffalo–PA line (`buffalo`–`erie`).
+///   (`albany`–`worcester` / `springfield`–`albany`). Buffalo–Erie (PA) is
+///   refused -- the Thruway ends at the PA line and Pennsylvania allows no
+///   turnpike doubles. I-87 Albany–NYC is omitted: NYC is a forbidden
+///   endpoint (TAP-602 / Exit 6A Yonkers), and no Yonkers city node exists yet.
 /// * Mass Pike: I-90 Boston–Worcester–Springfield (and the Albany link).
 /// * Ohio Turnpike: I-80/I-90 from the IN line through Toledo
 ///   (`toledo`–`elkhart`). Cleveland and I-90 east of the Elyria split are
@@ -73,10 +80,6 @@ pub const LCV_TURNPIKE_LEGS: &[(&str, &str, &str)] = &[
     // NY Thruway Berkshire Section ↔ MA line / Mass Pike link
     ("albany_ny_us", "worcester_ma_us", "I-90"),
     ("springfield_ma_us", "albany_ny_us", "I-90"),
-    // NY Thruway I-87 NYC ↔ Albany
-    ("new_york_ny_us", "albany_ny_us", "I-87"),
-    // NY Thruway I-90 Buffalo ↔ PA line
-    ("buffalo_ny_us", "erie_pa_us", "I-90"),
     // Massachusetts Turnpike I-90
     ("boston_ma_us", "worcester_ma_us", "I-90"),
     ("springfield_ma_us", "worcester_ma_us", "I-90"),
@@ -90,12 +93,54 @@ pub const LCV_TURNPIKE_LEGS: &[(&str, &str, &str)] = &[
     ("topeka_ks_us", "emporia_ks_us", "I-335"),
 ];
 
+/// City keys that must never be a turnpike-doubles origin or destination.
+/// Thruway tandems cannot leave the Thruway onto public NY roads (TAP-602);
+/// the southernmost staging lot is Exit 6A in Yonkers, so neither end-stub
+/// staging nor same-city locals can reach an NYC dock.
+pub const LCV_TURNPIKE_FORBIDDEN_ENDPOINTS: &[&str] = &["new_york_ny_us"];
+
 fn normalize_highway(highway: &str) -> String {
     highway.trim().to_uppercase().replace(' ', "")
 }
 
 fn cities_match(leg: &Leg, a: &str, b: &str) -> bool {
     (leg.a == a && leg.b == b) || (leg.a == b && leg.b == a)
+}
+
+/// Whether a city key may be a turnpike-doubles origin or destination.
+pub fn city_allows_lcv_turnpike_endpoint(city_key: &str) -> bool {
+    !LCV_TURNPIKE_FORBIDDEN_ENDPOINTS.contains(&city_key)
+}
+
+fn route_has_forbidden_endpoint(route: &Route) -> bool {
+    if route
+        .cities
+        .first()
+        .is_some_and(|c| !city_allows_lcv_turnpike_endpoint(c))
+        || route
+            .cities
+            .last()
+            .is_some_and(|c| !city_allows_lcv_turnpike_endpoint(c))
+    {
+        return true;
+    }
+    // End stubs / same-city locals: a forbidden city as either end of the
+    // first or last leg means the combination would stage at that dock.
+    if let Some(first) = route.legs.first() {
+        if !city_allows_lcv_turnpike_endpoint(&first.a)
+            || !city_allows_lcv_turnpike_endpoint(&first.b)
+        {
+            return true;
+        }
+    }
+    if let Some(last) = route.legs.last() {
+        if !city_allows_lcv_turnpike_endpoint(&last.a)
+            || !city_allows_lcv_turnpike_endpoint(&last.b)
+        {
+            return true;
+        }
+    }
+    false
 }
 
 /// GVW cap in pounds for a turnpike state, when one is recorded for FIX 5.
@@ -133,6 +178,9 @@ fn leg_is_staging_access(leg: &Leg) -> bool {
 pub fn route_allows_lcv_turnpike(route: &Route) -> bool {
     let n = route.legs.len();
     if n == 0 {
+        return false;
+    }
+    if route_has_forbidden_endpoint(route) {
         return false;
     }
     route.legs.iter().enumerate().all(|(i, leg)| {
@@ -192,18 +240,10 @@ mod tests {
     fn allowed_corridor_legs_match_city_pairs() {
         assert!(leg_on_lcv_turnpike(&ohio_west_turnpike_leg()));
         assert!(leg_on_lcv_turnpike(&Leg::new(
-            "new_york_ny_us",
-            "albany_ny_us",
-            145.0,
-            "I-87",
-            "flat",
-            Vec::new(),
-        )));
-        assert!(leg_on_lcv_turnpike(&Leg::new(
-            "albany_ny_us",
-            "new_york_ny_us",
-            145.0,
-            "I-87",
+            "buffalo_ny_us",
+            "syracuse_ny_us",
+            149.0,
+            "I-90",
             "flat",
             Vec::new(),
         )));
@@ -289,8 +329,32 @@ mod tests {
     }
 
     #[test]
-    fn ny_i87_nyc_to_albany_is_allowed() {
+    fn buffalo_to_erie_is_refused() {
+        // Thruway ends at the PA line; Pennsylvania allows no turnpike doubles.
         let leg = Leg::new(
+            "buffalo_ny_us",
+            "erie_pa_us",
+            94.0,
+            "I-90",
+            "flat",
+            Vec::new(),
+        );
+        assert!(!leg_on_lcv_turnpike(&leg));
+        assert!(!route_allows_lcv_turnpike(&Route::from_legs(
+            vec!["buffalo_ny_us".into(), "erie_pa_us".into()],
+            vec![leg],
+        )));
+    }
+
+    #[test]
+    fn nyc_endpoints_are_refused_for_turnpike_doubles() {
+        // TAP-602: tandems stay on the Thruway; Exit 6A Yonkers is the
+        // southern lot -- NYC docks are not reachable by end-stub or
+        // same-city staging. The coarse I-87 new_york–albany world leg is
+        // not on the allowlist.
+        assert!(!city_allows_lcv_turnpike_endpoint("new_york_ny_us"));
+        assert!(city_allows_lcv_turnpike_endpoint("albany_ny_us"));
+        let i87 = Leg::new(
             "new_york_ny_us",
             "albany_ny_us",
             145.0,
@@ -298,10 +362,33 @@ mod tests {
             "flat",
             Vec::new(),
         );
-        assert!(leg_on_lcv_turnpike(&leg));
-        assert!(route_allows_lcv_turnpike(&Route::from_legs(
+        assert!(!leg_on_lcv_turnpike(&i87));
+        assert!(!route_allows_lcv_turnpike(&Route::from_legs(
             vec!["new_york_ny_us".into(), "albany_ny_us".into()],
-            vec![leg],
+            vec![i87],
+        )));
+        assert!(!route_allows_lcv_turnpike(&Route::from_legs(
+            vec!["albany_ny_us".into(), "new_york_ny_us".into()],
+            vec![Leg::new(
+                "albany_ny_us",
+                "new_york_ny_us",
+                145.0,
+                "I-87",
+                "flat",
+                Vec::new(),
+            )],
+        )));
+        // Same-city NYC stub alone never clears the gate.
+        let stub = Leg::local(
+            "new_york_ny_us",
+            0.4,
+            "Dock Road",
+            "right onto Dock Road",
+            25.0,
+        );
+        assert!(!route_allows_lcv_turnpike(&Route::from_legs(
+            vec!["new_york_ny_us".into(), "new_york_ny_us".into()],
+            vec![stub],
         )));
     }
 

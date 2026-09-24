@@ -318,12 +318,44 @@ fn turnpike_doubles_never_leave_the_frozen_network() {
         "OH I-90 into Cleveland is east of Elyria and must not clear"
     );
     assert!(
+        !b.lcv_lane("buffalo_ny_us", "erie_pa_us"),
+        "Buffalo–Erie leaves the Thruway into Pennsylvania"
+    );
+    assert!(
+        !b.lcv_lane("new_york_ny_us", "albany_ny_us")
+            && !b.lcv_lane("albany_ny_us", "new_york_ny_us"),
+        "NYC docks are not turnpike-doubles endpoints"
+    );
+    assert!(
         b.lcv_lane("toledo_oh_us", "elkhart_in_us")
             || b.lcv_lane("buffalo_ny_us", "syracuse_ny_us")
-            || b.lcv_lane("gary_in_us", "south_bend_in_us")
-            || b.lcv_lane("new_york_ny_us", "albany_ny_us"),
+            || b.lcv_lane("gary_in_us", "south_bend_in_us"),
         "expected an allowlisted turnpike city pair to clear the LCV lane"
     );
+}
+
+#[test]
+fn turnpike_doubles_never_start_or_end_in_nyc() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    let b = board(1);
+    assert!(!b.lcv_lane("new_york_ny_us", "albany_ny_us"));
+    assert!(!b.lcv_lane("albany_ny_us", "new_york_ny_us"));
+    assert!(!b.lcv_lane("new_york_ny_us", "buffalo_ny_us"));
+    for seed in 0..6 {
+        let jobs = board(seed).offers(
+            "New York",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        assert!(
+            jobs.iter().all(|j| j.cargo.key != "turnpike_doubles"),
+            "seed {seed} offered turnpike doubles out of NYC"
+        );
+    }
 }
 
 #[test]
