@@ -151,7 +151,7 @@ impl DrivingState {
         if self.update_selected_stop_assist(ctx) {
             return;
         }
-        if !self.ramp_terminal_done && ramp_mi <= RAMP_ACCESS_MI {
+        if !self.ramp_terminal_done && (ramp_mi <= RAMP_ACCESS_MI || self.stopped_at_the_bar()) {
             self.update_ramp_terminal(ctx);
         }
         if ramp_mi > 0.0 {
@@ -549,6 +549,9 @@ impl DrivingState {
             }
             format!("{exit_speed} {take} {ramp} of ramp, {ending}.")
         };
+        // On the ramp from this line on: a mainline line it cuts is not
+        // handed back (see `speak_plain_route_event`).
+        self.refresh_live_facts();
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(message, opts);

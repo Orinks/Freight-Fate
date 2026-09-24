@@ -16,6 +16,13 @@ use crate::app::GameContext;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
+/// The arrival estimate's pace for a truck not yet moving on the highway:
+/// the same typical pace the stop list's estimate names.
+const HIGHWAY_PACE_MPH: f64 = crate::states::driving_stop_detail::FALLBACK_MPH;
+/// The same for the road into the facility. Assumed, not measured: the
+/// street-limit bake's own fallback for a street it has no statute for.
+const STREET_PACE_MPH: f64 = ff_core::data::street_limits::FALLBACK_MPH;
+
 impl DrivingState {
     /// The spoken clock is anchored to the computer when Real time is
     /// selected.  Calling that initial wall-clock reading a route timezone
@@ -131,7 +138,19 @@ impl DrivingState {
         } else {
             0.0
         };
-        let eta = self.trip.eta_game_hours(self.trip.truck.speed_mph()) + highway_hours;
+        // Off the highway the road left is the gate's, not the frozen mainline
+        // remainder, and a truck stopped at a ramp's stop bar is not a truck
+        // doing 1 mph for the rest of the trip: "arrival in 8.6 hours at a
+        // typical highway pace" two miles from the gate (agent drive B,
+        // 2026-09-24). The fallback pace was the truck's own crawl, not the
+        // typical pace the readout names.
+        let speed = self.trip.truck.speed_mph();
+        let moving = speed >= ff_core::sim::trip::ETA_MIN_MPH;
+        let gate_mi = self.gate_distance_mi(ctx);
+        let eta = match gate_mi {
+            Some(gate) => gate / if moving { speed } else { STREET_PACE_MPH },
+            None => self.trip.eta_game_hours(HIGHWAY_PACE_MPH),
+        } + highway_hours;
         if remaining <= 0.0 {
             ctx.say(&format!(
                 "{now} {:.1} hours past the deadline. The pay is shrinking.{tail}",
@@ -152,10 +171,10 @@ impl DrivingState {
         }
         // With the highway still ahead the estimate is mostly the route's
         // pace, whatever the streets are doing right now.
-        let basis = if self.trip.truck.speed_mph() >= ff_core::sim::trip::ETA_MIN_MPH
-            && highway_hours == 0.0
-        {
+        let basis = if moving && highway_hours == 0.0 {
             "at this pace"
+        } else if gate_mi.is_some() && highway_hours == 0.0 {
+            "at a typical street pace"
         } else {
             "at a typical highway pace"
         };

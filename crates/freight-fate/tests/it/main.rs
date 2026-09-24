@@ -93,6 +93,7 @@ mod states_driving_approach_sweep;
 mod states_driving_arrival_gate;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
+mod states_driving_cat_scale;
 mod states_driving_chain_law;
 mod states_driving_controls;
 mod states_driving_core;

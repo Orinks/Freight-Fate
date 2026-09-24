@@ -423,16 +423,17 @@ fn test_a_line_cut_before_it_started_is_handed_back_whatever_its_age() {
 }
 
 /// The stale-flush path drops a mostly-heard safety call the same way,
-/// rather than restarting it behind the flush.
+/// rather than restarting it behind the flush -- when there is a stale
+/// backlog behind it to flush at all.
 #[test]
 fn test_a_stale_flush_drops_a_safety_call_in_its_last_words() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
     let brake = "Brake now! Stopped traffic ahead in both lanes, and a trooper on the shoulder.";
     pacer.note_interrupt(brake, EventPriority::Critical, None, None);
+    // Chatter queued behind it: a real backlog.
+    pacer.note_queued(CHATTER, EventPriority::Ambient, None, None);
     heard(&clock, brake, 0.8);
-    // Still over a second from finishing by the projection, so a queued
-    // ROUTE line starting behind it is past its budget and flushes.
     assert!(flush_at(
         &mut pacer,
         "Merge onto US-40 west toward Salt Lake City.",
@@ -440,6 +441,56 @@ fn test_a_stale_flush_drops_a_safety_call_in_its_last_words() {
     ));
     assert_eq!(pacer.take_flush_cut(), None);
     assert_eq!(pacer.take_mostly_heard(), Some(brake.to_string()));
+}
+
+/// With nothing queued behind it, a line still speaking is not a backlog.
+/// "Light red." used to flush the take line in its last words and drop its
+/// tail, and a route confirmation flushed it in its first words and had it
+/// said again from the top ahead of itself -- "Exit speed 49. You take exit
+/// 113" twice (agent drives, 2026-09-24). The new line waits its turn.
+#[test]
+fn test_a_route_line_waits_out_the_one_line_still_speaking() {
+    for fraction in [0.1, 0.8] {
+        let clock = FakeClock::at(0.0);
+        let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+        let take = "Exit speed 49. You take exit 113 for Casa Grande. A quarter mile of ramp, \
+                    traffic light at the end.";
+        pacer.note_interrupt(take, EventPriority::Critical, None, None);
+        heard(&clock, take, fraction);
+        assert!(
+            !flush_at(&mut pacer, "Light red.", EventPriority::Route),
+            "at {fraction} the take line was cut for a line that could wait"
+        );
+        assert_eq!(pacer.take_flush_cut(), None, "at {fraction}");
+        assert_eq!(pacer.take_mostly_heard(), None, "at {fraction}");
+        // It starts where the take line ends, not after a replay of it.
+        assert!(pacer.busy());
+        heard(&clock, take, 1.0 - fraction);
+        clock.advance(EventSpeechPacer::duration_s("Light red.") + 0.01);
+        assert!(!pacer.busy(), "at {fraction}");
+    }
+}
+
+/// A line the road has since made untrue is not worth waiting for: the
+/// gap came, so "assistance is holding for your gap" is flushed and dropped,
+/// never handed back to land right before "Gap in traffic" (agent drive,
+/// yield at exit 255, 2026-09-24).
+#[test]
+fn test_a_superseded_line_is_flushed_and_never_handed_back() {
+    let clock = FakeClock::at(0.0);
+    let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+    let waiting = Rc::new(Cell::new(true));
+    let hold = "Stopped at the yield. A car crossing from the left; assistance is holding for \
+                your gap.";
+    pacer.should_flush(hold, EventPriority::Route, always(Rc::clone(&waiting)));
+    clock.advance(0.1);
+    waiting.set(false); // the gap came
+    assert!(flush_at(
+        &mut pacer,
+        "Gap in traffic. Clear; pull ahead onto the streets.",
+        EventPriority::Route
+    ));
+    assert_eq!(pacer.take_flush_cut(), None);
 }
 
 #[test]
@@ -590,8 +641,9 @@ fn test_a_stale_flush_still_discards_an_aged_route_backlog() {
 
     let stop = "Next stop in 5 miles: service plaza."; // ~3.2 s spoken
     pacer.note_queued(stop, EventPriority::Route, None, None);
-    // Well past the pre-utterance pause: the voice has been reading this
-    // line aloud, and it is still mid-sentence when the flush lands.
+    pacer.note_queued(CHATTER, EventPriority::Ambient, None, None); // and chatter behind it
+                                                                    // Well past the pre-utterance pause: the voice has been reading this
+                                                                    // line aloud, and it is still mid-sentence when the flush lands.
     clock.advance(2.0);
     assert!(
         flush_at(

@@ -402,6 +402,33 @@ fn test_pre_gate_warning_names_a_target_speed() {
     assert_eq!(app.event_lines().len(), 1); // said once, not every frame
 }
 
+/// Agent drive A (2026-09-24): "Facility gate in 0.2 miles. Slow to 15
+/// miles per hour." and the warning tone, while the keeper already held 15
+/// and facility stopping assistance was on. An assist doing the job is not
+/// told to do it.
+#[test]
+fn test_no_pre_gate_warning_when_an_assist_has_the_gate() {
+    for assist in [true, false] {
+        let mut app = TestApp::new();
+        let mut d = a_drive(&mut app);
+        app.ctx.settings.destination_approach_assist = assist;
+        if !assist {
+            // The keeper, already holding the gate's number.
+            d.keeper_mph = Some(25.0);
+            d.keeper_held_mph = Some(15.0);
+        }
+        app.clear_speech();
+        d.destination_exit_taken = true;
+        d.trip.position_mi = d.trip.total_miles() - 0.3;
+        d.trip.truck.engine_on = true;
+        d.trip.truck.velocity_mps = 16.0 / 2.23694;
+        d.check_gate_approach_warning(&mut app.ctx, 0.016);
+        assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
+        drop(d);
+        drop(app);
+    }
+}
+
 #[test]
 fn test_no_instant_miss_inside_the_reaction_window() {
     let mut app = TestApp::new();

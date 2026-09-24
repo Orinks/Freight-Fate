@@ -347,13 +347,9 @@ impl DrivingState {
                 self.pause_speed_control(ctx, true);
                 // ROUTE, not the ambient default: names an automation taking
                 // the pedals (automation-handoff sweep, 2026-08-20, the
-                // deferred 2026-08-15 audit).
-                ctx.say_event_with(
-                    "Route-transition assistance slowing.",
-                    SayEvent::queued()
-                        .priority(EventPriority::Route)
-                        .category(SpeechCategory::Confirmation),
-                );
+                // deferred 2026-08-15 audit). Named for the terminal where
+                // there is one; see `say_ramp_lift`.
+                self.say_ramp_lift(ctx);
             }
         } else if self.transition_assist_active && !self.ramp_terminal_owns_the_stop() {
             // ROUTE, not the ambient default: names the automation handing the

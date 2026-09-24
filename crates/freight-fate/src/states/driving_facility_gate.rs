@@ -169,6 +169,19 @@ impl DrivingState {
         if remaining > self.gate_warning_window_mi() {
             return;
         }
+        let keeper_holds_the_gate = self.keeper_mph.is_some()
+            && self
+                .keeper_held_mph
+                .is_some_and(|held| held <= FACILITY_GATE_LIMIT_MPH);
+        if ctx.settings.destination_approach_assist || keeper_holds_the_gate {
+            // Facility stopping assistance takes the truck to the gate, or
+            // the keeper is already holding the gate's number: the warning
+            // and its tone told a driver to do what an assist was doing
+            // (agent drive A, 2026-09-24). No warning means no miss clock
+            // either; a driver who takes over and runs the gate still gets
+            // the gate's own window (`seed_gate_grace_at_gate`).
+            return;
+        }
         self.gate_speed_warned = true;
         self.gate_warning_spoken = true;
         let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);

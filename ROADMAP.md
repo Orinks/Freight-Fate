@@ -1226,11 +1226,30 @@ against.
       September 12 sweep missed. Oklahoma answers (60 zones) but publishes its
       access token inside the URL, which is still a key; New Mexico still
       answers 503, a week on, so it is dead rather than briefly down.
-- [ ] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
-      each axle group weighs before a scale house tells them. 2,127 of them
-      are mapped and branded, and the truck already knows its mass and axle
-      load. Needs the owner's call on what a weigh costs and what the readout
-      says.
+- [x] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
+      each axle group weighs before a scale house tells them. The stop menu's
+      Weigh on the CAT Scale row costs CAT's published 15.25 dollars, 5.25 for
+      a reweigh at the same scale within 24 hours (read from catscale.com's
+      FAQ, 2026-09-24; company drivers bill the carrier), takes ten minutes on
+      duty (assumed), and reads the ticket: steer, drive and trailer axles and
+      gross in pounds, then legal or which groups are over the 34,000 lb
+      tandem and 80,000 lb gross limits. The split comes from a lever model
+      on the mass model's own parts (`sim/vehicle/axles.rs`), derived per
+      truck so a full legal load scales 12,000 / 34,000 / 34,000; the one
+      assumed number is a bare tractor's 55 percent on its steer axle. Which
+      stops have one is read: `tools/cat_scales.py` snapshots the 2,127
+      CAT-branded OpenStreetMap weighbridges and gives the `scale` service to
+      1,667 truck-stop records within 0.25 mi of one (calibrated: 844 of 1,102
+      travel centers within 0.1 mi, 868 within 0.25, 880 within 0.5), on top
+      of the 176 read from brand pages. Stop details now say "CAT Scale".
+- [ ] An axle cannot go over while the gross is legal: the game has no load
+      placement, fifth-wheel slide or tandem slide, so the axle model is fixed
+      per truck and a state scale still judges gross only. Real drivers weigh
+      mostly to catch a heavy drive tandem at a legal gross; that needs load
+      placement and an axle check at the scale house.
+- [ ] 234 travel-center records with a coordinate have no mapped CAT Scale
+      within 0.25 mi, and records with no coordinate are never matched. CAT
+      Scale's own locator is the check on both.
 - [ ] Where the state scale houses are is still unsolved. 78 of 1,283 legs
       carry one, every one of them found off an exit sign rather than looked
       for, and no keyless national source beats that -- OpenStreetMap's
@@ -1474,6 +1493,33 @@ mainline behaviour.
       during it is forced (`CrossTraffic::conflict_between`). The same timing
       decides when a yield or roundabout is clear to roll or to pull out
       from a stop. Stop signs still use the four-second look.
+- [x] **The exit drives' speech and sounds** (fix/exit-drive-speech,
+      2026-09-24, from six agent drives through signal, stop, yield,
+      roundabout and truck-stop exits). The stop-bar ticks and held tone stay
+      quiet on a green. The pacer no longer flushes a ROUTE or CRITICAL line
+      the player is part way through when nothing else is queued behind it:
+      the next line waits, so the take line is not said twice or cut by
+      "Light red." A line about a hold at the bar is dropped once the gap or
+      the green comes rather than replayed before the release. A mainline
+      limit change at the gore is not spoken over the take line. A stop inside
+      the held tone counts as a stop at the sign, and "Stopped N short" always
+      names N and is said once per stop. Route-transition assistance says one
+      line for one approach. U names the destination exit and reads the gate,
+      not its zone; C estimates the approach from the road left to the gate.
+      The pre-gate warning is silent when facility stopping assistance or the
+      keeper already holds the gate's 15; the keeper says "easing" only when
+      it is actually slowing; billboards wait out the last mile of an exit;
+      the descent advice does not tell a driver with the jake on to press J;
+      the jake growl holds through a gap instead of restarting. Adaptive
+      cruise holding five over a lowered limit is the documented design
+      (`ACC_LIMIT_OFFSET_MPH`, and the driving help: "never holds more than
+      five over the posted limit"), left as is.
+- [ ] **"Live weather unavailable. Simulated weather in use." repeats every
+      few minutes** on a drive with no live source (agent drive, 2026-09-24).
+      Said once per drive would do; the V key already answers.
+- [ ] **Air ready went false at 62 mph on the mainline** in the truck-stop
+      drive (agent drive D, 2026-09-24) with no brake use logged around it.
+      Needs a log of the pressure trace to say whether it is real.
 
 ## 1.10 planned -- the working week and home
 

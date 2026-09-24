@@ -55,6 +55,19 @@ impl DrivingState {
         if self.corner_already_called(event) {
             return;
         }
+        if self.limit_change_of_road_left(ctx, event) {
+            return;
+        }
+        if matches!(
+            event.kind,
+            TripEventKind::Billboard | TripEventKind::Landmark
+        ) && self.in_exit_approach()
+        {
+            // Roadside colour waits out the last mile to an exit being taken:
+            // a billboard read 0.3 miles before the gore talked over the
+            // countdown and the take line (agent drive B, 2026-09-24).
+            return;
+        }
         let kind = event.kind;
         // The route's own call counts as telling the driver about the turn,
         // so the turn chimes as the truck takes it. Only the turn's approach
@@ -749,6 +762,13 @@ impl DrivingState {
         }
         let mut opts = SayEvent::queued().priority(priority);
         opts.category = category;
+        if event.data.limit_change.unwrap_or(false) {
+            // A mainline limit cut by the take line is about a road the truck
+            // has just left: "Speed limit raised to 75." came back after "You
+            // take exit 167" (agent drive, Edwards, 2026-09-24).
+            self.refresh_live_facts();
+            opts = opts.valid(|| !live::on_ramp());
+        }
         ctx.say_event_with(message, opts);
         // Any spoken route line pushes spaced ambient chatter back, so
         // an informational notice never lands on top of a navigation

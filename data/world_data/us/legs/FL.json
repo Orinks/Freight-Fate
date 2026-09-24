@@ -1351,7 +1351,7 @@
           "name": "Pilot Travel Center Punta Gorda",
           "type": "travel_center",
           "at_mi": 29.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1364,7 +1364,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.8938437,
           "lon": -82.0090788,
@@ -2640,7 +2641,7 @@
           "name": "Pilot Travel Center Punta Gorda",
           "type": "travel_center",
           "at_mi": 26.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2653,7 +2654,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.89384,
           "lon": -82.00908,
@@ -4269,7 +4271,7 @@
           "name": "Pilot Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 90.7,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4282,7 +4284,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 27.4142312,
           "lon": -80.4000025,
@@ -4295,7 +4298,7 @@
           "name": "Flying J Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 94.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 94.8 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 94.8 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -4308,7 +4311,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.449374,
@@ -4352,7 +4356,7 @@
           "name": "TA Travel Center Vero Beach",
           "type": "travel_center",
           "at_mi": 110.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 110.8 of this leg (1.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 110.8 of this leg (1.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4365,7 +4369,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.637389,
@@ -7089,7 +7094,7 @@
           "name": "Love's Travel Stop Mossy Head",
           "type": "travel_center",
           "at_mi": 14.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 561 at Mossy Head; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 561 at Mossy Head; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7102,7 +7107,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.7339651,
           "lon": -86.348269,
@@ -7152,7 +7158,7 @@
           "name": "Flying J Travel Center Dothan",
           "type": "travel_center",
           "at_mi": 110.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dothan_al_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Alabama extract dated 2026-06-22, read 2026-09-17): Flying J store at Dothan; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dothan_al_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Alabama extract dated 2026-06-22, read 2026-09-17): Flying J store at Dothan; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7165,7 +7171,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 31.19184,
           "lon": -85.39989,
@@ -9715,7 +9722,7 @@
           "name": "Love's Travel Stop Ormond Beach",
           "type": "travel_center",
           "at_mi": 17.7,
-          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 17.7 of this leg (2.7 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 17.7 of this leg (2.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -9728,7 +9735,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -10620,7 +10628,7 @@
           "name": "Pilot Travel Center Jacksonville",
           "type": "travel_center",
           "at_mi": 54.05,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by position, the only Pilot within 5 mi of mile 54.05 of this leg (2.7 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by position, the only Pilot within 5 mi of mile 54.05 of this leg (2.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -10633,7 +10641,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 30.283859,
@@ -11550,7 +11559,7 @@
           "name": "Pilot Travel Center Ocala",
           "type": "travel_center",
           "at_mi": 28.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 424 at Ocala; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 28.8 of this leg (3.1 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 424 at Ocala; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 28.8 of this leg (3.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11563,7 +11572,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 29.266939,
@@ -13460,7 +13470,7 @@
           "name": "Pilot Travel Center Ocala",
           "type": "travel_center",
           "at_mi": 28.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 424 at Ocala; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 28.7 of this leg (3.2 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 424 at Ocala; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 28.7 of this leg (3.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13473,7 +13483,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 29.266939,
@@ -13486,7 +13497,7 @@
           "name": "Pilot Travel Center Wildwood",
           "type": "travel_center",
           "at_mi": 57.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 4556 at Wildwood; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store 4556 at Wildwood; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13499,7 +13510,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 28.87408,
           "lon": -82.09031,
@@ -15992,7 +16004,7 @@
           "name": "Petro Stopping Center Kingsland",
           "type": "travel_center",
           "at_mi": 34.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Petro store 344 at Kingsland; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Petro store 344 at Kingsland; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16005,7 +16017,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.79481,
           "lon": -81.66612,
@@ -16781,7 +16794,7 @@
           "name": "Pilot Travel Center Jacksonville",
           "type": "travel_center",
           "at_mi": 16.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16794,7 +16807,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.28396,
           "lon": -81.98422,
@@ -20116,7 +20130,7 @@
           "name": "Flying J Travel Center Saint Augustine",
           "type": "travel_center",
           "at_mi": 46.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20129,7 +20143,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 29.75016,
           "lon": -81.34483,
@@ -20160,7 +20175,7 @@
           "name": "Love's Travel Stop Ormond Beach",
           "type": "travel_center",
           "at_mi": 75.1,
-          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 75.1 of this leg (2.6 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 75.1 of this leg (2.6 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -20173,7 +20188,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -20221,7 +20237,7 @@
           "name": "TA Travel Center Vero Beach",
           "type": "travel_center",
           "at_mi": 204.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 204.1 of this leg (1.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 204.1 of this leg (1.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20234,7 +20250,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.637389,
@@ -20278,7 +20295,7 @@
           "name": "Flying J Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 220.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 220.3 of this leg (0.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 220.3 of this leg (0.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20291,7 +20308,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.449374,
@@ -20304,7 +20322,7 @@
           "name": "Pilot Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 223.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20317,7 +20335,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 27.4142312,
           "lon": -80.4000025,
@@ -21598,7 +21617,7 @@
           "name": "Pilot Travel Center Jacksonville",
           "type": "travel_center",
           "at_mi": 22.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jacksonville; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21611,7 +21630,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.2839636,
           "lon": -81.9842211,
@@ -21641,7 +21661,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 97.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 363; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 363; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21654,7 +21674,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 29.2682916,
           "lon": -82.1978336,
@@ -22576,7 +22597,7 @@
           "name": "Pilot Travel Center Jasper",
           "type": "travel_center",
           "at_mi": 31.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jasper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Jasper; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22589,7 +22610,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.51587,
           "lon": -83.0584,
@@ -22602,7 +22624,7 @@
           "name": "Flying J Travel Center Lake Park",
           "type": "travel_center",
           "at_mi": 46.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Flying J store at Lake Park; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Georgia extract dated 2026-06-22, read 2026-09-17): Flying J store at Lake Park; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22615,7 +22637,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.64109,
           "lon": -83.18961,
@@ -22699,7 +22722,7 @@
           "name": "Pilot Travel Center Okeechobee",
           "type": "travel_center",
           "at_mi": 76.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Okeechobee; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Okeechobee; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22712,7 +22735,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 27.69957,
           "lon": -80.90141,
@@ -27299,7 +27323,7 @@
           "name": "Pilot Travel Center Punta Gorda",
           "type": "travel_center",
           "at_mi": 27.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-75S truck parking near Punta Gorda with 32 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Punta Gorda; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-75S truck parking near Punta Gorda with 32 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -27312,7 +27336,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.89384,
           "lon": -82.00908,
@@ -27326,7 +27351,7 @@
           "name": "Love's Travel Stop North Fort Myers",
           "type": "travel_center",
           "at_mi": 41.25,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -27339,7 +27364,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.71297,
           "lon": -81.81492,
@@ -28691,7 +28717,7 @@
           "name": "Pilot Travel Center Wildwood",
           "type": "travel_center",
           "at_mi": 25.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Wildwood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Wildwood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28704,7 +28730,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 28.87394,
           "lon": -82.09596,
@@ -30633,7 +30660,7 @@
           "name": "Love's Travel Stop Ormond Beach",
           "type": "travel_center",
           "at_mi": 62.3,
-          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 62.3 of this leg (0.7 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 316 in Ormond Beach, FL on I-95, exit 273; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 316 at Ormond Beach; matched by position, the only Love's within 5 mi of mile 62.3 of this leg (0.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -30646,7 +30673,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -30664,7 +30692,7 @@
           "name": "Flying J Travel Center Saint Augustine",
           "type": "travel_center",
           "at_mi": 94.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30677,7 +30705,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 29.75016,
           "lon": -81.34483,
@@ -32318,7 +32347,7 @@
           "name": "Love's Travel Stop Auburndale",
           "type": "travel_center",
           "at_mi": 38.8,
-          "source": "Love's official store feed lists store 228 in Auburndale, FL on I-4, exit 44; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 228 at Auburndale; matched by position, the only Love's within 5 mi of mile 38.8 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 228 in Auburndale, FL on I-4, exit 44; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 228 at Auburndale; matched by position, the only Love's within 5 mi of mile 38.8 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -32331,7 +32360,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -32374,7 +32404,7 @@
           "name": "Love's Travel Stop Davenport",
           "type": "travel_center",
           "at_mi": 80.2,
-          "source": "Love's official store feed lists store 627 in Davenport, FL on I-4, exit 55 @ Hwy 27 NB; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 627 at Davenport; matched by position, the only Love's within 5 mi of mile 80.2 of this leg (0.9 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 627 in Davenport, FL on I-4, exit 55 @ Hwy 27 NB; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 627 at Davenport; matched by position, the only Love's within 5 mi of mile 80.2 of this leg (0.9 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -32387,7 +32417,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -35986,7 +36017,7 @@
           "name": "Flying J Travel Center Saint Augustine",
           "type": "travel_center",
           "at_mi": 15.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Saint Augustine; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -35999,7 +36030,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 29.75016,
           "lon": -81.34483,
@@ -42401,7 +42433,7 @@
           "name": "Pilot Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 13.2,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42414,7 +42446,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 27.4142312,
           "lon": -80.4000025,
@@ -42427,7 +42460,7 @@
           "name": "Flying J Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 16.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 16.3 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 16.3 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -42440,7 +42473,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.449374,
@@ -42481,7 +42515,7 @@
           "name": "TA Travel Center Vero Beach",
           "type": "travel_center",
           "at_mi": 32.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 32.5 of this leg (1.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 32.5 of this leg (1.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42494,7 +42528,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.637389,
@@ -44972,7 +45007,7 @@
           "name": "Pilot Travel Center Belleview",
           "type": "travel_center",
           "at_mi": 58.43,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Belleview; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Belleview; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44985,7 +45020,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 29.02461,
           "lon": -82.1591,
@@ -47661,7 +47697,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 75.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 453; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 453; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -47674,7 +47710,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.74955,
           "lon": -85.38211,
@@ -49388,7 +49425,7 @@
           "name": "Love's Travel Stop Lee",
           "type": "travel_center",
           "at_mi": 66.99,
-          "source": "Love's official store feed lists store 379 in Lee, FL on I-10, exit 262; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 379 at Lee; matched by position, the only Love's within 5 mi of mile 66.99 of this leg (0.4 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 379 in Lee, FL on I-10, exit 262; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 379 at Lee; matched by position, the only Love's within 5 mi of mile 66.99 of this leg (0.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -49401,7 +49438,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -50736,7 +50774,7 @@
           "name": "Love's Travel Stop Lee",
           "type": "travel_center",
           "at_mi": 67.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 379 at Lee; town as this map's curated record of the same store names it; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 379 at Lee; town as this map's curated record of the same store names it; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50749,7 +50787,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.3774,
           "lon": -83.2980187,
@@ -50782,7 +50821,7 @@
           "name": "Busy Bee Truck Stop",
           "type": "travel_center",
           "at_mi": 88.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=parking for HGVs; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50795,7 +50834,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.3322969,
           "lon": -82.9601701,
@@ -53455,7 +53495,7 @@
           "name": "Love's Travel Stop North Fort Myers",
           "type": "travel_center",
           "at_mi": 110.14,
-          "source": "Love's official store feed lists store 495 in North Fort Myers, FL on I-75, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; matched by name, the only Love's the map has at North Fort Myers within 40 mi of mile 110.14 of this leg (38.9 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 495 in North Fort Myers, FL on I-75, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (12.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; matched by name, the only Love's the map has at North Fort Myers within 40 mi of mile 110.14 of this leg (38.9 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -53468,7 +53508,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -53483,7 +53524,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 159.02,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 683; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 683; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -53496,7 +53537,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.8352135,
           "lon": -81.1320866,
@@ -54580,7 +54622,7 @@
           "name": "Pilot Travel Center South Bay",
           "type": "travel_center",
           "at_mi": 49.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at South Bay; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at South Bay; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -54593,7 +54635,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 26.6670177,
           "lon": -80.7163298,
@@ -54603,7 +54646,7 @@
           "name": "Love's Travel Stop North Fort Myers",
           "type": "travel_center",
           "at_mi": 122.0,
-          "source": "Love's official store feed lists store 495 in North Fort Myers, FL on I-75, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; matched by position, the only Love's within 5 mi of mile 122 of this leg (3.6 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 495 in North Fort Myers, FL on I-75, exit 143; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Love's store 495 at North Fort Myers; matched by position, the only Love's within 5 mi of mile 122 of this leg (3.6 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -54616,7 +54659,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -57450,7 +57494,7 @@
           "name": "Pilot Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 55.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 55 of this leg (2.7 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Pilot store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Pilot within 5 mi of mile 55 of this leg (2.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -57463,7 +57507,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.414293,
@@ -57473,7 +57518,7 @@
           "name": "Flying J Travel Center Fort Pierce",
           "type": "travel_center",
           "at_mi": 61.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 61.7 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): Flying J store at Fort Pierce; town read from the mapped site's branch name; matched by position, the only Flying J within 5 mi of mile 61.7 of this leg (0.5 mi); coordinates read from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95S truck parking near Fort Pierce with 43 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about. Derived: the inventory's paired directional record I-95N truck parking near Fort Pierce lists 44 truck parking spaces, and the larger lot's count is kept. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -57486,7 +57531,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.449374,
@@ -57530,7 +57576,7 @@
           "name": "TA Travel Center Vero Beach",
           "type": "travel_center",
           "at_mi": 77.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 77.7 of this leg (1.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Florida extract dated 2026-06-22, read 2026-09-17): TA store 197 at Vero Beach; town read from the mapped site's address; matched by position, the only TA within 5 mi of mile 77.7 of this leg (1.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -57543,7 +57589,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 27.637389,

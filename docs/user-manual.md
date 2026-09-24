@@ -1236,6 +1236,7 @@ context.
 Stop actions depend on that stop's data. A stop may offer:
 
 - Fuel.
+- A CAT Scale weigh.
 - Meals, drinks, and showers.
 - A 30-minute break.
 - 10-hour sleep or sleeper-berth splits.
@@ -1253,6 +1254,15 @@ the same visit. Rig care such as lube work and tire checks is truck
 work, so the carrier covers it for company drivers; food and showers
 are always your own money. Different stop brands are good at what they
 are really known for.
+
+A truck stop with a CAT Scale lists it among its services, and its menu
+has a Weigh on the CAT Scale row. The weigh takes ten minutes on duty and
+reads the ticket: steer axle, drive axles, trailer axles and gross, in
+pounds, then either that you are legal on every axle or which ones are over
+and by how much. The federal limit is 34,000 pounds on each tandem and
+80,000 gross. A weigh costs what CAT Scale charges, 15 dollars and 25
+cents, and a reweigh at the same scale within 24 hours costs 5 dollars and
+25 cents. Company drivers bill the carrier.
 
 Not every stop offers every action. A public rest area usually does not offer
 fuel or repair. A weigh station is for inspection, not food or sleep: slow

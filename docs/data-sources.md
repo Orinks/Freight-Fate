@@ -222,8 +222,10 @@ survey's one shipped change is maintenance on a layer players already had.
 real branded locations, a driver-elected activity the game does not have, on
 top of a mass model that already exists. Then the 3DEP grade screen below,
 because a wrong grade is something a driver hears as a wrong advisory. Neither
-is a data drop; both are features, and the first one needs a design call about
-what a weigh costs and what the readout says.
+is a data drop; both are features. The CAT Scale layer is built:
+`tools/cat_scales.py` keeps a committed snapshot of the 2,127 points and gives
+the `scale` service to the truck stops within 0.25 mi of one; the weigh reads
+the axle model in `crates/ff-core/src/sim/vehicle/axles.rs`.
 
 **Adopted as a screen.** 3DEP through the ImageServer, and it has now been
 run: `tools/screen_grades_3dep.py` read 9,484 elevations over every grade span

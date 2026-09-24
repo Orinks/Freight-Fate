@@ -280,9 +280,24 @@ impl DrivingState {
     /// box gives them: brake, and the transmission holds a lower gear for
     /// them (`auto_shift` picks the tallest gear landing in the 1050-1700
     /// band while braking, and never upshifts off the pedal).
+    ///
+    /// And in terms of the state they are in: with the jake already on (or
+    /// the automatic jake armed), J turns it OFF, so "Set the engine brake
+    /// with J" told the driver to switch off the thing the hill needs (agent
+    /// drive, Silverthorne to Edwards, 2026-09-24). Then the jake clause
+    /// goes, and on an automatic nothing is left to advise.
     pub fn descend_advice(&self, ctx: &GameContext) -> String {
+        let jake_set = self.trip.truck.engine_brake() || self.auto_jake;
+        let automatic = self.trip.truck.transmission.automatic;
+        if jake_set {
+            return if automatic {
+                String::new()
+            } else {
+                "Pick your gear before it starts.".to_string()
+            };
+        }
         let jake = ctx.control_hint("engine_brake");
-        if self.trip.truck.transmission.automatic {
+        if automatic {
             return format!("Set the engine brake with {jake} before it starts.");
         }
         format!("Pick your gear and set the engine brake with {jake} before it starts.")
@@ -395,7 +410,9 @@ impl DrivingState {
             format!(
                 "{:.1} percent {direction} ahead{length}. {advice}",
                 pct.abs()
-            ),
+            )
+            .trim_end()
+            .to_string(),
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation),

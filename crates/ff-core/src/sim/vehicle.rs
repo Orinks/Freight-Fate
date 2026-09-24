@@ -16,6 +16,7 @@ use crate::sim::surge::LiquidLoad;
 use crate::sim::transmission::Transmission;
 
 mod air;
+mod axles;
 mod condition;
 mod forces;
 mod mass;
@@ -23,6 +24,7 @@ mod roll;
 mod shifting;
 mod updates;
 
+pub use axles::{AxleLoads, TANDEM_LIMIT_LB};
 pub use mass::DIESEL_KG_PER_GAL;
 pub use roll::ROLL_WARN_SHARE;
 
