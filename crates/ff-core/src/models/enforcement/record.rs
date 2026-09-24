@@ -20,7 +20,8 @@ use crate::models::save_migration::{json_f64, json_i64};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct RecordEntry {
-    /// `RECORD_CITATION`, `RECORD_SERIOUS`, `RECORD_MAJOR` or `RECORD_FATIGUE`.
+    /// `RECORD_CITATION`, `RECORD_SERIOUS`, `RECORD_MAJOR`, `RECORD_FATIGUE`
+    /// or `RECORD_CRASH`.
     pub kind: String,
     pub reason: String,
     pub fine: f64,
@@ -32,6 +33,8 @@ pub const RECORD_CITATION: &str = "citation";
 pub const RECORD_SERIOUS: &str = "serious";
 pub const RECORD_MAJOR: &str = "major";
 pub const RECORD_FATIGUE: &str = "fatigue";
+/// A crash on the accident register (49 CFR 390.15), such as a rollover.
+pub const RECORD_CRASH: &str = "crash";
 
 /// How many explained entries the record keeps; the oldest fall off first.
 pub const RECORD_ENTRIES_KEPT: usize = 60;
@@ -75,6 +78,11 @@ pub struct DrivingRecord {
     /// Career game hours of each out-of-service order since this field
     /// existed. The lifetime count is `Profile::out_of_service_events`.
     pub out_of_service_times: Vec<f64>,
+    /// Crashes on the accident register (49 CFR 390.15), lifetime.
+    pub crashes: i64,
+    /// Career game hours of each crash, newest last: the safety record and
+    /// reputation count a window, like the other serious events.
+    pub crash_times: Vec<f64>,
     /// The trust band the driver has already been told about, so a change is
     /// spoken once when it happens and never repeated on a timer.
     pub trust_band_heard: String,
@@ -256,7 +264,7 @@ impl DrivingRecord {
         let explained = self
             .entries
             .iter()
-            .filter(|e| e.kind != RECORD_FATIGUE)
+            .filter(|e| e.kind != RECORD_FATIGUE && e.kind != RECORD_CRASH)
             .count() as i64;
         (self.citations - explained).max(0)
     }
@@ -290,6 +298,21 @@ impl DrivingRecord {
             );
         }
         count
+    }
+
+    /// Book a crash at career hour `game_hours`: the accident register a
+    /// motor carrier keeps under 49 CFR 390.15, which lists every accident
+    /// (390.5: an occurrence involving a commercial vehicle on a highway that
+    /// results in a fatality, an injury treated away from the scene, or a
+    /// vehicle towed away). A truck that rolls over is towed away.
+    pub fn record_crash(&mut self, game_hours: f64) {
+        self.crashes += 1;
+        self.crash_times.push(game_hours);
+    }
+
+    /// Crashes inside the last `days`, since the review began.
+    pub fn crashes_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.crash_times, game_hours, days)
     }
 
     /// Log running off the road asleep. Returns (fatigue events, serious).

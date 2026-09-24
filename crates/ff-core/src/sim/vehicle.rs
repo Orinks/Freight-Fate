@@ -20,11 +20,13 @@ mod axles;
 mod condition;
 mod forces;
 mod mass;
+mod roll;
 mod shifting;
 mod updates;
 
 pub use axles::{AxleLoads, TANDEM_LIMIT_LB};
 pub use mass::DIESEL_KG_PER_GAL;
+pub use roll::ROLL_WARN_SHARE;
 
 #[cfg(test)]
 mod damage_band_tests;
@@ -204,9 +206,11 @@ pub const DAMAGE_BAND_OUT_OF_SERVICE: i32 = 4;
 //
 // So: braking bites only past what a full service application can produce,
 // which leaves the emergency application, a grade adding its own g to the
-// stop, and collisions. Cornering bites from a shade under the rollover
-// threshold, where the load is working against its straps well before the
-// truck is in trouble.
+// stop, and collisions. Cornering bites below the rollover threshold, where
+// the load is working against its straps before the truck is in trouble: the
+// roll model's warning share of THIS load's threshold (`ROLL_WARN_SHARE`,
+// `vehicle/roll.rs`), so a full van, a tank and an empty trailer each start
+// moving freight where their own rollover ladder begins.
 /// Decel past which freight starts moving.
 pub const CARGO_HARD_BRAKE_G: f64 = 0.45;
 /// Per g of excess, per real second.
@@ -216,9 +220,9 @@ pub const CARGO_BRAKE_PCT_PER_G_S: f64 = 6.0;
 // advisory, which ranked bends backwards -- a hairpin and a sweeper taken the
 // same margin over their signs are not the same manoeuvre, and the hairpin,
 // which throws the load half again as hard, was costing it a third as much
-// because a short bend is over sooner.
-/// Lateral pull past which freight starts moving.
-pub const CARGO_CORNER_LAT_G: f64 = 0.40;
+// because a short bend is over sooner. It was also a flat 0.40 g, past the
+// 0.35 g a full trailer rolls over at, so a full load never shifted before it
+// would have gone over.
 /// Per g of excess, per real second.
 pub const CARGO_CORNER_PCT_PER_G_S: f64 = 12.0;
 // What a posted advisory is worth in lateral g, for bends whose data carries
@@ -579,6 +583,10 @@ pub struct TruckState {
     /// than the advisory, because what moves a pallet is the sideways pull, and
     /// that is a fact about the corner rather than about the sign beside it.
     pub corner_radius_ft: f64,
+    /// The bank the bend is built with, as a slope, set with the radius. The
+    /// share of the pull the bank carries never reaches the truck's own
+    /// frame, so the roll model reads what is left.
+    pub corner_bank: f64,
 
     /// The liquid aboard, if this is a tank load. None for every other kind of
     /// freight, and every surge term short-circuits on that -- a driver hauling
@@ -654,6 +662,7 @@ impl TruckState {
             corner_overspeed_mph: 0.0,
             corner_advisory_mph: 0.0,
             corner_radius_ft: 0.0,
+            corner_bank: 0.0,
             liquid: None,
             speed_cap_mph: None,
             stalled: false,

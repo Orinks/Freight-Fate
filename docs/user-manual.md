@@ -1679,7 +1679,7 @@ Predictive cruise sits outside the presets. It lets cruise read the road about a
 
 #### Lane keeping
 
-Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs your turn signal set and the exit lane held.
+Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel, bends included, and every exit needs your turn signal set and the exit lane held.
 
 On partial or off, with lane-departure warning on, the engine leans back toward lane center when you drift, and you steer the way it leans; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. The road noise underneath leans to where you sit in your lane whichever way you are drifting, so it tells you position, not direction. On full the engine still leans for the bends and corners ahead, and the road noise stays centered because the truck is.
 

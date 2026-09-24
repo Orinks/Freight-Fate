@@ -360,7 +360,7 @@ impl DrivingState {
             chains_fast_active: false,
             chain_law_warned: HashSet::new(),
             chain_law_cited: HashSet::new(),
-            curve_slip_active: false,
+            curve_warned_mi: None,
             speeding_tickets: 0,
             ticket_fines_paid: 0.0,
             jake_zone_fines: 0,

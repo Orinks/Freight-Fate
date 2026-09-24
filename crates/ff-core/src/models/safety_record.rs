@@ -147,6 +147,10 @@ pub trait SafetyRecordProfile {
     fn record_fatigue_events(&self) -> i64 {
         0
     }
+    /// Crashes on the accident register inside the window.
+    fn record_crashes(&self) -> i64 {
+        0
+    }
     /// `achievement_stats.get("inspections_passed", 0)`.
     fn inspections_passed(&self) -> i64 {
         0
@@ -172,7 +176,9 @@ pub fn score_for_profile<P: SafetyRecordProfile + ?Sized>(profile: &P, damage_pc
     selection_score(&SelectionInputs {
         reputation,
         citations: profile.record_citations(),
-        serious_violations: profile.record_serious_violation_count(),
+        // A crash on the accident register (49 CFR 390.15) weighs as a serious
+        // event does (owner ruling, 2026-09-24).
+        serious_violations: profile.record_serious_violation_count() + profile.record_crashes(),
         out_of_service_events: profile.out_of_service_events(),
         fatigue_events: profile.record_fatigue_events(),
         clean_inspections: profile.inspections_passed(),

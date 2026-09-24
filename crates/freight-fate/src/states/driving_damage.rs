@@ -178,19 +178,28 @@ impl DrivingState {
         // ramp's own curve past its deceleration lane. The ramp is the same
         // corner to the freight -- the exit speed is its advisory and its
         // radius is that speed's AASHTO minimum -- so a ramp curve taken hot
-        // moves the load exactly as a mainline bend would. A loaded truck
-        // rolls before it skids on ramp curves (TRB CTBSSP Synthesis 3), and
-        // this is the cost that stands in for it.
-        let (advisory_mph, radius_ft) = if self.ramp_mi.is_some() {
-            match (self.ramp_curve_radius_ft(), self.ramp_layout) {
-                (Some(radius), Some(layout)) => (Some(layout.curve_mph), radius),
-                _ => (None, 0.0),
+        // moves the load, and rolls the truck, exactly as a mainline bend
+        // would (`driving_rollover`).
+        let (advisory_mph, radius_ft, bank) = if self.ramp_mi.is_some() {
+            match (
+                self.ramp_curve_radius_ft(),
+                self.ramp_layout,
+                self.ramp_curve_geometry(),
+            ) {
+                (Some(radius), Some(layout), Some((_, bank))) => {
+                    (Some(layout.curve_mph), radius, bank)
+                }
+                _ => (None, 0.0, 0.0),
             }
         } else {
             let curve = self.trip.curve_at(self.trip.position_mi);
             match curve.filter(|curve| !curve.connector) {
-                Some(bend) => (Some(bend.advisory_mph as f64), bend.min_radius_ft as f64),
-                None => (None, 0.0),
+                Some(bend) => (
+                    Some(bend.advisory_mph as f64),
+                    bend.min_radius_ft as f64,
+                    self.bend_bank(&bend),
+                ),
+                None => (None, 0.0, 0.0),
             }
         };
         let speed_mph = self.trip.truck.speed_mph();
@@ -204,7 +213,9 @@ impl DrivingState {
         // And the geometry, for dry freight: a pallet is moved by the sideways
         // pull, which comes from the radius rather than from the sign.
         t.corner_radius_ft = radius_ft;
-        let condition = t.cargo_damage_pct;
+        t.corner_bank = bank;
+        self.update_rollover(ctx);
+        let condition = self.trip.truck.cargo_damage_pct;
         // The HIGHEST rung crossed, not the next one up. A collision can put a
         // load through all three at once, and walking them a frame apart would
         // fire three interrupting warnings inside a tenth of a second; the

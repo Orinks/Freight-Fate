@@ -650,14 +650,20 @@ its status or release decision.
       emergency stop does, for an ordinary approach. The snub now nets out
       the retarder's own deceleration first, so the two share one planned
       stop instead of compounding.
-- [ ] A part-filled tank is priced as a FULL one by the roll models, not as
-      worse than one. `roll_load_fraction` stops a half-empty tank reading as
-      a light load, which was the bug; the truth is that the half-empty tank
-      is the worst case of all, because the liquid climbs as it goes to the
-      outside of the turn. Needs a fill-level curve for the rollover
-      threshold: FMCSA's 2007 Cargo Tank Roll Stability Study is the place to
-      look, and its PDF refuses a plain fetch (403), so it wants a proper
-      read rather than a guessed de-rating.
+- [x] A part-filled tank rolls over first where the liquid is moving
+      (2026-09-24). FMCSA's 2007 Cargo Tank Roll Stability Study still
+      refuses every fetch (403), so the read is NTSB HAR-11/01 2.3.4, which
+      cites UMTRI-85-35: in a steady curve an 80 percent and a full tank
+      "would not differ significantly", and in a transient the liquid swings
+      "twice the level of the steady-state amplitude". So a tank is priced
+      full in a steady bend at any fill (read at 80, assumed below it), and
+      the lateral wave running past its steady place takes back the stability
+      its lower weight would have bought (derived, `vehicle/roll.rs`). The
+      wave is fed each bend over a 2.0 s transition (Green Book Table 3-21,
+      read), so entering a 250 ft bend a half-full tank goes over at 34.6 mph
+      and a full one at 36.2; held long enough to settle, both at the same
+      speed. Curve and exit speed assistance plan against the half-full
+      figure.
 - [x] The map stops inventing freight where it cannot see any (2026-09-20).
       Of 623 markets, 137 had no facility whose endpoint the freight-site
       screen accepts -- Nevada 11 of 15, Montana 9 of 15, Arizona 12 of 22 --
@@ -1417,9 +1423,55 @@ mainline behaviour.
 - [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
       assumed level because nothing records its climb or drop. Needs an
       elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
-- [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
-      can run the truck wide, but nothing models the rollover a loaded truck
-      meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+- [x] **Truck rollover, on ramp curves and mapped bends alike**
+      (feat/rollover-model, 2026-09-24). One model (`vehicle/roll.rs`): the
+      bend's pull in the truck's own frame, `v^2/gR` less the bank, against
+      the static rollover threshold of the load aboard (0.35 g full, 0.70 g
+      empty; a ramp curve credited the 6 percent roads are built to, its
+      radius having been derived at 8). The ladder is shares of that
+      threshold: from 0.857 (0.30 g, the most any advisory is established
+      at per FHWA-SA-11-22 3.7, over a full trailer's 0.35) the freight
+      shifts, replacing the flat 0.40 g that sat past
+      where a full trailer rolls; at 1.0 the truck goes over, the load is
+      scrap, and `recover_out_of_service` runs as for any truck that may not
+      be driven. The too-fast warning names the speed that costs nothing,
+      inside the curve or on the approach once the road left is the Green
+      Book's 2.5 s and 11.2 ft/s2 (read), and is heard before any cost; it
+      replaced the flat 15 over the sign. Curve and exit speed assistance
+      hold under that speed, and the exit assist matrix stays green.
+      Also fixed from the same agent drive: leaving the pavement was free
+      with the lane-departure warning off, and the ramp curve's engine lean
+      went silent with it (the curve is a turn now, like a mapped bend).
+- [x] **Partial lane keeping steers through the road's bends** (owner
+      ruling, 2026-09-24). The steering cap (`MAX_STEER_LATERAL_G`, 0.2 g)
+      bound lane keeping's own correction as well as the driver's key, so
+      with curve assistance off a bend ran wide at its own advisory under
+      partial lane keeping. Partial now supplies the road's wheel the way
+      curve assistance does (`Settings::road_steers_the_bend`); lane changes
+      and speed stay the driver's, and lane keeping off stays manual.
+- [x] **A rollover goes on the driving record as a crash** (owner ruling,
+      2026-09-24). 49 CFR 390.15's accident register lists every accident,
+      and 390.5 counts a vehicle towed away; `DrivingRecord::crashes` and
+      `crash_times` (nested in `driving_record`, so the cloud validator
+      accepts it with no invariants regen) weigh on reputation and the
+      safety record as a serious event does, and age out on the same
+      window. The Citations and violations list names it "Crash".
+- [x] **orinks.net: the public crash count** (orinks-net `743fa38`, live on
+      staging and production 2026-09-24). The snapshot carries `crashes` from
+      `driving_record.crashes`, the profile page lists "N crash(es)" after the
+      out-of-service orders, and the validator checks `crash_times` against
+      the career clock like `out_of_service_times`.
+- [ ] **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
+      every advisory at 0.30 g plus bank, so a full trailer at the number the
+      cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
+      2C.59's ball-bank criteria read as 0.26 / 0.21 / 0.18 g
+      (FHWA-SA-11-22) and leave it 14 and 20. Repricing that way (stacked
+      branch `feat/mutcd-advisories`) calls an interstate slowdown every 25
+      miles against the owner's floor of 100 (2026-08-23): the bake's
+      minimum radii read low on flat interstates (I-94 Billings to Miles
+      City, 1,323 ft, posted 65 in an 80). It needs the radius re-measured,
+      or calibrated against OSM `maxspeed:advisory` or HPMS curve class,
+      before it can ship.
 - [x] **Every assist follows the exit rules.** One matrix
       (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
       by seven ramp kinds, from two miles out to the stop or the gate) found

@@ -223,6 +223,7 @@ pub fn record_lines(ctx: &GameContext) -> Vec<String> {
                 enforcement::RECORD_SERIOUS => "Serious violation",
                 enforcement::RECORD_MAJOR => "Major offense",
                 enforcement::RECORD_FATIGUE => "Safety incident",
+                enforcement::RECORD_CRASH => "Crash",
                 _ => "Citation",
             };
             let day = (entry.game_hours / 24.0).floor() as i64 + 1;

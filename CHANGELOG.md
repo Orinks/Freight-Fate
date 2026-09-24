@@ -39,11 +39,23 @@
 
 - **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
 
+- **Taking a bend or ramp curve too fast can roll the truck over.** A full trailer or part-filled tank goes first, and the load is lost.
+
 ### Security
 
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **The too-fast warning for a bend now comes before it costs you anything.** It names the speed your load can take the bend at.
+
+- **Curve and exit speed assistance slow below the sign when your load needs it.** A heavy load or part-filled tank takes some curves slower.
+
+- **A bend is never called faster than your load can take it.** Where the sign asks too much of a heavy load or part-filled tank, you hear a lower number.
+
+- **Partial lane keeping now steers the truck through bends.** Lane changes and speed stay yours; with lane keeping off, bends are still yours to steer.
+
+- **A rollover goes on your driving record as a crash.** It counts against your safety record and reputation like a serious violation.
 
 - **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
 
@@ -128,6 +140,9 @@
 
 ### Fixed
 
+- **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.
+
+- **The engine lean leads you through an exit ramp's curve with lane-departure warning off.**
 - **Adaptive cruise and the speed assists no longer drain the air tanks by pumping the brakes.** They hold the pedal steady while they slow you.
 
 - **Losing live weather is announced once.** You no longer hear that simulated weather is in use every minute while it stays that way.

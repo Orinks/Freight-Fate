@@ -260,9 +260,9 @@ pub struct DrivingState {
     pub chains_fast_active: bool, // spoken chains-over-speed warning edge tracking
     pub chain_law_warned: HashSet<(i64, i64)>, // (area, level) spoken warnings
     pub chain_law_cited: HashSet<(i64, i64)>, // checkpoint rolls already taken
-    // Curve management: whether a hot-entry slip warning has been spoken
-    // for the current curve.
-    pub curve_slip_active: bool,
+    // Curve management: the curve the too-fast warning has been spoken for
+    // (its start milepost; the ramp curve has its own id), `driving_rollover`.
+    pub curve_warned_mi: Option<f64>,
 
     // ---- driving.py: enforcement counters and the live stop (driving_updates) ----------
     // Trooper pull-overs: a strike inside a patrol window may get you stopped

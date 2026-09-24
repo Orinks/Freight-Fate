@@ -15,13 +15,14 @@
 //! two bends (2026-09-01). Ruling that night: assists should handle curves
 //! better to avoid load shifting damage.
 //!
-//! The target is the advisory itself, not the advisory plus a margin. The
-//! cargo model moves freight past 0.40 g of lateral pull, geometric from the
-//! bend's own radius, and the shipped advisories bake out near 0.30 g -- so
-//! on a typical bend the load starts moving about fifteen percent over the
-//! sign, and on a bend tighter than its sign (the owner's, 197 feet at 35)
-//! the sign IS the line. A chain's tightest number wins, exactly as cruise's
-//! easing cap already reasons (Darren's NY-12 pair, 2026-08-23).
+//! The target is the advisory itself, not the advisory plus a margin -- or
+//! less, where the bend would cost this load something at its advisory. The
+//! freight starts moving, and the rollover ladder starts, at the share of the
+//! load's own rollover threshold a posted advisory asks of a full trailer
+//! (`ROLL_WARN_SHARE`); a bend whose sign rounds up, or a part-filled tank,
+//! is held under that instead (`driving_rollover::curve_safe_mph`, applied
+//! where the chain is armed). A chain's tightest number wins, exactly as
+//! cruise's easing cap already reasons (Darren's NY-12 pair, 2026-08-23).
 //!
 //! The controller is the arrival assist's, not a new one: the uniform shed
 //! `(v^2 - t^2) / 2d`, net of what the road already takes off, mapped onto
