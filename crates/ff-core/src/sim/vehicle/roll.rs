@@ -51,6 +51,8 @@
 use super::{TruckState, G, MPS_TO_MPH, M_PER_FT};
 use crate::data::corners::{rollover_threshold_g, TRUCK_ROLLOVER_G};
 use crate::data::curves::ADVISORY_ACCEPTABLE_MAX_G;
+use crate::sim::lane::{MAX_CREDITED_BANK, MAX_ROAD_LATERAL_G, MAX_STEER_LATERAL_G};
+use crate::sim::surge::lateral_accel_mps2;
 
 /// The share of its rollover threshold a bend may ask of the load before it
 /// costs anything. DERIVED from two readings: 0.30 g is the most lateral any
@@ -84,7 +86,13 @@ impl TruckState {
     /// The threshold this moment, in g: the static one, less what the tank's
     /// sideways wave is costing right now.
     pub fn live_roll_threshold_g(&self) -> f64 {
-        let overshoot = self.liquid.as_ref().map_or(0.0, |l| l.lateral_overshoot());
+        // The pull the bend under the truck asks this moment, on the wave's
+        // own scale -- the same one `update_liquid` drives it with.
+        let pull = lateral_accel_mps2(self.speed_mph(), self.corner_advisory_mph);
+        let overshoot = self
+            .liquid
+            .as_ref()
+            .map_or(0.0, |l| l.lateral_overshoot(pull));
         self.roll_threshold_g() - self.tank_roll_penalty_g() * overshoot
     }
 
@@ -118,6 +126,40 @@ impl TruckState {
     pub fn roll_safe_mph(&self, radius_ft: f64, bank: f64) -> f64 {
         let lateral_g = ROLL_WARN_SHARE * self.planning_roll_threshold_g() + bank.max(0.0);
         (lateral_g * G * radius_ft.max(0.0) * M_PER_FT).sqrt() * MPS_TO_MPH
+    }
+
+    /// The fastest the truck takes a curve before it costs anything, in mph:
+    /// [`Self::roll_safe_mph`] and, with the lane work the driver's
+    /// (`lane_steers` Some), the speed past which the lane model cannot hold
+    /// the curve and the truck runs wide.
+    ///
+    /// That second speed is the lane model's own ceiling, read rather than
+    /// restated: the tires' `MAX_ROAD_LATERAL_G` plus the credited bank when
+    /// something supplies the wheel the curve wants (`lane_steers` true:
+    /// curve assistance or partial lane keeping), and the steering cap
+    /// `MAX_STEER_LATERAL_G` when only the driver steers; both scaled by grip
+    /// (`LaneKeeping::update`).
+    pub fn curve_safe_mph(
+        &self,
+        radius_ft: f64,
+        roll_bank: f64,
+        lane_bank: f64,
+        lane_steers: Option<bool>,
+    ) -> f64 {
+        let roll = self.roll_safe_mph(radius_ft, roll_bank);
+        let Some(road_steers) = lane_steers else {
+            return roll;
+        };
+        let grip = self.effective_grip().clamp(0.0, 1.0);
+        let road_g = MAX_ROAD_LATERAL_G + lane_bank.clamp(0.0, MAX_CREDITED_BANK);
+        let steer_g = if road_steers {
+            road_g
+        } else {
+            MAX_STEER_LATERAL_G.min(road_g)
+        };
+        let hold_g = steer_g * grip;
+        let drift = (hold_g * G * radius_ft.max(0.0) * M_PER_FT).sqrt() * MPS_TO_MPH;
+        roll.min(drift)
     }
 }
 
@@ -188,6 +230,52 @@ mod tests {
         assert!((full - 0.3482).abs() < 0.001, "full plans at {full}");
     }
 
+    /// Drive a tank at `mph` through a bend signed `advisory` (0: a straight)
+    /// for `seconds`, the way `update_liquid` feeds the wave.
+    fn hold_bend(t: &mut TruckState, mph: f64, advisory: f64, seconds: f64) {
+        const DT: f64 = 0.02;
+        t.velocity_mps = mph * MPS_PER_MPH;
+        t.corner_advisory_mph = advisory;
+        let pull = lateral_accel_mps2(mph, advisory);
+        let mut time = 0.0;
+        while time < seconds {
+            t.liquid.as_mut().unwrap().update(DT, 0.0, pull);
+            time += DT;
+        }
+    }
+
+    #[test]
+    fn a_tank_between_two_bends_is_priced_by_the_next_bends_pull() {
+        // Bend sweep, 2026-09-24. A half-full tank carried the last bend's
+        // swing into the next and was priced at its floor on the first foot:
+        // the wave judged against a drive only just begun (Siskiyou, went
+        // over at 50), and against a gentle bend's tiny steady shift after a
+        // tight one (US-62, went over at 23). A leftover swing costs what the
+        // liquid is really carrying past where this bend holds it.
+        let floor = |t: &TruckState| t.roll_threshold_g() - t.tank_roll_penalty_g();
+        // Out of a 50 bend, a second on the straight, into the next.
+        let mut t = tanker(0.5);
+        hold_bend(&mut t, 50.0, 50.0, 10.0);
+        hold_bend(&mut t, 50.0, 0.0, 1.0);
+        t.corner_advisory_mph = 50.0;
+        let live = t.live_roll_threshold_g();
+        assert!(
+            live > floor(&t) + 0.5 * t.tank_roll_penalty_g(),
+            "next bend's first foot priced at {live:.3} g, floor {:.3}",
+            floor(&t)
+        );
+        // Out of a 35 bend at 20 and straight into a 60 bend.
+        let mut t = tanker(0.5);
+        hold_bend(&mut t, 20.0, 35.0, 10.0);
+        hold_bend(&mut t, 20.0, 60.0, 0.02);
+        let live = t.live_roll_threshold_g();
+        assert!(
+            live > floor(&t) + 0.5 * t.tank_roll_penalty_g(),
+            "gentle bend after a tight one priced at {live:.3} g, floor {:.3}",
+            floor(&t)
+        );
+    }
+
     /// The slowest speed at which a bend of `radius_ft` puts a tank filled to
     /// `fill` over, entered from a straight and held for `hold_s`; and the
     /// same once the wave has long settled. Wave only: speed is held.
@@ -226,7 +314,11 @@ mod tests {
         // The roadmap question, answered from the reading: in a steady bend
         // the two go over at the same speed (NTSB HAR-11/01 2.3.4); entering
         // one, the half-full tank's wave runs past its steady place and takes
-        // it over first. Pinned so a change to either is deliberate.
+        // it over first. Pinned so a change to either is deliberate. The half
+        // figure was 34.6 until the wave was judged against the bend's own
+        // pull rather than the drive still building toward it (2026-09-24):
+        // while the pull is being built the liquid sits short of where the
+        // bend holds it, which is steadier than the steady price, not less.
         let radius = 250.0;
         let (half_entry, half_steady) = tank_rolls_at(0.5, radius);
         let (full_entry, full_steady) = tank_rolls_at(0.97, radius);
@@ -239,7 +331,7 @@ mod tests {
             "steady: half {half_steady:.1}, full {full_steady:.1}"
         );
         assert!(
-            (half_entry - 34.6).abs() <= 0.3,
+            (half_entry - 35.1).abs() <= 0.3,
             "half full entered at {half_entry:.1}"
         );
         assert!(

@@ -59,6 +59,9 @@
 
 use std::f64::consts::PI;
 
+use crate::data::corners::TRUCK_ROLLOVER_G;
+use crate::data::curves::ADVISORY_ACCEPTABLE_MAX_G;
+
 pub const G: f64 = 9.81;
 
 // A road tanker is about forty feet of shell on a two-metre bore. Both feed
@@ -116,6 +119,16 @@ pub const TRAVEL_FRACTION: f64 = 0.14;
 // a bend taken at its advisory pulls about this much and one taken faster
 // pulls with the square of the ratio.
 pub const CURVE_DESIGN_LAT_G: f64 = 0.12;
+
+/// The pull, on the scale above, at which a tank priced full goes over in a
+/// bend whose sign is priced the way the game prices signs. DERIVED: the
+/// wave is driven at `CURVE_DESIGN_LAT_G` where the bend asks the sign's
+/// 0.30 g (`ADVISORY_ACCEPTABLE_MAX_G`), and the truck goes over at 0.35 g
+/// (`TRUCK_ROLLOVER_G`), so the same ratio on this scale. It is the pull the
+/// "twice the steady amplitude" reading is about; see
+/// [`LiquidLoad::lateral_overshoot`].
+pub const ROLLOVER_SURGE_PULL_G: f64 =
+    CURVE_DESIGN_LAT_G * TRUCK_ROLLOVER_G / ADVISORY_ACCEPTABLE_MAX_G;
 
 // Below this the wave is no longer worth a driver's attention: the load has
 // settled. Expressed as a share of the travel limit so it means the same thing
@@ -391,28 +404,46 @@ impl LiquidLoad {
         self.lateral.step(dt, self.lateral_drive_mps2);
     }
 
-    /// How far the sideways wave has run PAST where a steady bend would hold
-    /// it, as a share of that steady shift: 0 when it sits where the bend
-    /// puts it (or has swung back toward the inside), 1 at twice the steady
-    /// shift or more.
+    /// How far the sideways wave has run PAST where the bend asking
+    /// `pull_mps2` (on the [`lateral_accel_mps2`] scale) would hold it, as a
+    /// share of the steady shift: 0 when it sits where the bend puts it (or
+    /// has swung back toward the inside), 1 at twice the steady shift or more.
     ///
     /// Twice is the ceiling because that is what the reading gives: in a
     /// transient manoeuvre the liquid moves "with an amplitude ... that is
     /// twice the level of the steady-state amplitude" (NTSB HAR-11/01 2.3.4,
     /// citing Winkler et al., SAE RR-004). An undamped wave kicked by a step
     /// reaches exactly that, so the oscillator and the report agree.
-    pub fn lateral_overshoot(&self) -> f64 {
+    ///
+    /// Two things this is careful about, both found by the bend sweep
+    /// (2026-09-24), where a half-full tank went over at 50 in a gentle bend
+    /// on the Siskiyou and at 23 on US-62 with every assist holding it under
+    /// its number:
+    ///
+    /// - The pull is the one the bend under the truck asks NOW, passed in,
+    ///   not the drive still being built toward it or the last frame's bend:
+    ///   either read a bend's first foot as the whole overshoot.
+    /// - The reading is about pulls where the tank goes over. Far below
+    ///   that, a leftover swing from the last bend is a small shift of the
+    ///   liquid in absolute terms, but as a share of a gentle bend's tiny
+    ///   steady shift it read as the whole overshoot and halved the
+    ///   threshold. So the share is taken of the steady shift at
+    ///   [`ROLLOVER_SURGE_PULL_G`] wherever the bend asks less; at and past
+    ///   it, of the bend's own, exactly as the reading is written.
+    pub fn lateral_overshoot(&self, pull_mps2: f64) -> f64 {
         let axis = &self.lateral;
         if axis.omega <= 0.0 {
             return 0.0;
         }
-        // The spring's rest point under this drive: x'' = -a - w^2 x.
-        let steady = -self.lateral_drive_mps2 / (axis.omega * axis.omega);
+        // The spring's rest point under the bend's pull: x'' = -a - w^2 x.
+        let w2 = axis.omega * axis.omega;
+        let steady = -pull_mps2 / w2;
         if steady.abs() < 1e-9 {
             return 0.0;
         }
+        let reference = steady.abs().max(ROLLOVER_SURGE_PULL_G * G / w2);
         let outward = axis.x * steady.signum();
-        ((outward - steady.abs()) / steady.abs()).clamp(0.0, 1.0)
+        ((outward - steady.abs()) / reference).clamp(0.0, 1.0)
     }
 
     /// The overshoot a bend entered along its transition leaves behind: what

@@ -4,7 +4,7 @@
 //! `trip.py`).
 
 use crate::data::billboards::{corridor_signs, random_billboard, regional_genre_signs, SignAnchor};
-use crate::data::curves::{route_curves, RouteCurve};
+use crate::data::curves::{bend_bank, route_curves, superelevation_at, RouteCurve};
 use crate::pyfmt::{fmt_f, py_str_float};
 use crate::pyrandom::PyRandom;
 use crate::sim::road_event_pacing::CHATTER_GAP_REAL_S;
@@ -663,6 +663,41 @@ impl Trip {
         None
     }
 
+    /// The fastest the truck takes this bend before it costs anything
+    /// (`TruckState::curve_safe_mph`: the load, with the bank the bend's sign
+    /// was priced with, and the lane, with the bank the lane model credits).
+    pub fn bend_costs_above_mph(&self, cr: &RouteCurve) -> f64 {
+        let radius_ft = (cr.min_radius_ft as f64).max(1.0);
+        let design = self.leg_design_speed_mph();
+        self.truck.curve_safe_mph(
+            radius_ft,
+            bend_bank(radius_ft, Some(design)),
+            superelevation_at(radius_ft, design),
+            self.lane_steers,
+        )
+    }
+
+    /// The speed past which a bend is called, and the speed the call's lead
+    /// is sized to shed to.
+    ///
+    /// The sign plus a margin, so the words stay quiet on bends an ordinary
+    /// truck takes at road speed -- but never past where the bend starts
+    /// costing THIS load. The margins predate the rollover model: a full
+    /// trailer goes over 1.2 mph past a 15 mph sign and about 4 past a 65
+    /// (`roll.rs`), so a sharp bend's 3 and a gentle one's 8 let it roll
+    /// without a word, and a driver obeying every number the cab spoke went
+    /// over on US-550 and the Salt River Canyon (bend sweep, 2026-09-24).
+    pub fn curve_call_mph(&self, cr: &RouteCurve) -> (f64, f64) {
+        let margin = if cr.severity() == "gentle" {
+            PACENOTE_GENTLE_MARGIN_MPH
+        } else {
+            PACENOTE_MARGIN_MPH
+        };
+        let advisory = cr.advisory_mph as f64;
+        let costs = self.bend_costs_above_mph(cr);
+        ((advisory + margin).min(costs), advisory.min(costs))
+    }
+
     /// The next curve ahead that deserves a spoken approach warning.
     pub fn next_curve_approach(&self) -> Option<RouteCurve> {
         let speed = self.truck.speed_mph();
@@ -677,16 +712,11 @@ impl Trip {
             if cr.connector {
                 continue;
             }
-            let margin = if cr.severity() == "gentle" {
-                PACENOTE_GENTLE_MARGIN_MPH
-            } else {
-                PACENOTE_MARGIN_MPH
-            };
-            let advisory = cr.advisory_mph as f64;
-            if speed <= advisory + margin {
+            let (call_above, target) = self.curve_call_mph(cr);
+            if speed <= call_above {
                 continue;
             }
-            if ahead > Self::curve_pacenote_lead_mi(speed, advisory) {
+            if ahead > Self::curve_pacenote_lead_mi(speed, target) {
                 continue;
             }
             return Some(*cr);
@@ -710,16 +740,11 @@ impl Trip {
             if cr.connector {
                 continue;
             }
-            let margin = if cr.severity() == "gentle" {
-                PACENOTE_GENTLE_MARGIN_MPH
-            } else {
-                PACENOTE_MARGIN_MPH
-            };
-            let advisory = cr.advisory_mph as f64;
-            if speed <= advisory + margin {
+            let (call_above, target) = self.curve_call_mph(cr);
+            if speed <= call_above {
                 continue;
             }
-            let window = Self::curve_pacenote_lead_mi(speed, advisory) * 1.5;
+            let window = Self::curve_pacenote_lead_mi(speed, target) * 1.5;
             if ahead <= window {
                 return true;
             }

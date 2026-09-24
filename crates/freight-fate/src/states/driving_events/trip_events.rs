@@ -1,7 +1,6 @@
 //! `_handle_trip_event` and everything that decides whether a trip event
 //! speaks at all, in what category, and at what priority.
 
-use ff_core::data::curves::RouteCurve;
 use ff_core::data::state_welcome::welcome_sign;
 use ff_core::data::world_parsing::crc32;
 use ff_core::models::trailer_yard::pickup_plan;
@@ -18,7 +17,6 @@ use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_turns::{is_judged_turn, TURN_COMMIT_TAIL_MI};
-use crate::states::driving_updates::curve_servo::CURVE_SERVO_HOLD_BAND_MPH;
 use crate::states::driving_updates::live;
 
 use super::ambient::Ambient;
@@ -544,16 +542,12 @@ impl DrivingState {
         // an advisory is built for a full trailer at 0.30 g, so on a bend
         // whose sign rounds up, or with a part-filled tank, the sign asks more
         // than the load can give (`driving_rollover`). A servo band under it,
-        // so the hold's own band stays clear too.
-        let under_the_cost =
-            |bend: &RouteCurve| self.bend_safe_mph(ctx, bend) - CURVE_SERVO_HOLD_BAND_MPH;
+        // so the hold's own band stays clear too (`curve_hold_mph`).
         let chain = curve.as_ref().map(|curve| {
-            let mut hold_mph = advisory.min(under_the_cost(curve));
+            let mut hold_mph = self.curve_hold_mph(ctx, curve);
             let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
             if let Some(linked) = self.pacenote_linked(curve) {
-                hold_mph = hold_mph
-                    .min(linked.advisory_mph as f64)
-                    .min(under_the_cost(&linked));
+                hold_mph = hold_mph.min(self.curve_hold_mph(ctx, &linked));
                 hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
             }
             (hold_mph, hold_to_mi)

@@ -140,6 +140,16 @@
 
 ### Fixed
 
+- **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
+
+- **The cab calls a bend whenever it would move your load.** You hear the number to slow to before the freight shifts, not after.
+
+- **Adaptive cruise stops pushing against curve assistance in a bend.** It no longer holds the throttle while the brakes slow you.
+
+- **A half-full tank no longer rolls over entering a bend right after another.**
+
+- **The too-fast warning covers the next bend while you are still in one.** Downhill, it comes before the load moves.
+
 - **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.
 
 - **The engine lean leads you through an exit ramp's curve with lane-departure warning off.**
