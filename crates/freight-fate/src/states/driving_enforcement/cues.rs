@@ -76,14 +76,21 @@ impl DrivingState {
     /// Fire a pass earcon for every post the truck has just gone by.
     pub fn update_marked_unit_passes(&mut self, ctx: &mut GameContext, previous_mi: f64) {
         let position = self.trip.position_mi;
-        let posts: Vec<EnforcementPost> = self.trip.posts.clone();
-        for post in &posts {
+        let crossed: Vec<usize> = self
+            .trip
+            .posts
+            .iter()
+            .enumerate()
+            .filter(|(_, post)| {
+                let trigger = post.at_mi + PASS_TRIGGER_MI;
+                previous_mi < trigger && trigger <= position
+            })
+            .map(|(i, _)| i)
+            .collect();
+        for i in crossed {
+            let post = &self.trip.posts[i];
             let id = post.id();
             if self.passed_post_ids.contains(&id) {
-                continue;
-            }
-            let trigger = post.at_mi + PASS_TRIGGER_MI;
-            if !(previous_mi < trigger && trigger <= position) {
                 continue;
             }
             self.passed_post_ids.insert(id);
@@ -106,7 +113,8 @@ impl DrivingState {
             if post.is_scale() {
                 continue; // the scale bed already covers the approach
             }
-            self.play_marked_unit_pass(ctx, post);
+            let post = post.clone();
+            self.play_marked_unit_pass(ctx, &post);
         }
     }
 
@@ -199,25 +207,30 @@ impl DrivingState {
             return;
         }
         let position = self.trip.position_mi;
-        let posts: Vec<EnforcementPost> = self.trip.posts.clone();
-        for post in &posts {
-            if !post.tableau || post.declined {
-                continue;
-            }
+        let crosses = |trigger: f64| previous_mi < trigger && trigger <= position;
+        let crossed: Vec<(usize, bool, bool)> = self
+            .trip
+            .posts
+            .iter()
+            .enumerate()
+            .filter(|(_, post)| post.tableau && !post.declined)
+            .map(|(i, post)| {
+                (
+                    i,
+                    crosses(post.at_mi - TABLEAU_SIREN_LEAD_MI),
+                    crosses(post.at_mi + PASS_TRIGGER_MI),
+                )
+            })
+            .filter(|&(_, siren, pass)| siren || pass)
+            .collect();
+        for (i, siren, pass) in crossed {
+            let post = self.trip.posts[i].clone();
             let id = post.id();
-            let siren_trigger = post.at_mi - TABLEAU_SIREN_LEAD_MI;
-            if !self.tableau_siren_ids.contains(&id)
-                && previous_mi < siren_trigger
-                && siren_trigger <= position
-            {
+            if siren && !self.tableau_siren_ids.contains(&id) {
                 self.tableau_siren_ids.insert(id.clone());
-                self.play_tableau_siren_pass(ctx, post);
+                self.play_tableau_siren_pass(ctx, &post);
             }
-            let pass_trigger = post.at_mi + PASS_TRIGGER_MI;
-            if !self.tableau_pass_ids.contains(&id)
-                && previous_mi < pass_trigger
-                && pass_trigger <= position
-            {
+            if pass && !self.tableau_pass_ids.contains(&id) {
                 self.tableau_pass_ids.insert(id);
                 self.play_tableau_pass(ctx);
             }
@@ -238,19 +251,19 @@ impl DrivingState {
     /// rather than hidden information.
     pub fn update_scale_bed(&mut self, ctx: &mut GameContext) {
         let position = self.trip.position_mi;
-        let mut nearest: Option<(f64, EnforcementPost)> = None;
-        for post in &self.trip.posts {
+        let mut nearest: Option<(f64, usize)> = None;
+        for (i, post) in self.trip.posts.iter().enumerate() {
             if !post.is_scale() {
                 continue;
             }
             let ahead = post.at_mi - position;
             if (-0.3..=SCALE_BED_START_MI).contains(&ahead)
-                && nearest.as_ref().is_none_or(|(best, _)| ahead < *best)
+                && nearest.is_none_or(|(best, _)| ahead < best)
             {
-                nearest = Some((ahead, post.clone()));
+                nearest = Some((ahead, i));
             }
         }
-        let Some((ahead, post)) = nearest else {
+        let Some((ahead, index)) = nearest else {
             if !self.scale_bed_key.is_empty() {
                 self.scale_bed_key = String::new();
                 self.scale_bed_volume = 0.0;
@@ -258,6 +271,7 @@ impl DrivingState {
             }
             return;
         };
+        let post = &self.trip.posts[index];
         let closeness = 1.0 - (ahead.max(0.0) / SCALE_BED_START_MI).clamp(0.0, 1.0);
         let mut ceiling = if post.kind == KIND_FIXED_SCALE {
             SCALE_BED_OPEN_MAX_VOLUME
@@ -266,7 +280,7 @@ impl DrivingState {
         };
         ceiling *= self.ambience_scale();
         let volume = SCALE_BED_MIN_VOLUME + (ceiling - SCALE_BED_MIN_VOLUME).max(0.0) * closeness;
-        self.scale_bed_key = post.id();
+        post.write_id(&mut self.scale_bed_key);
         self.scale_bed_volume = volume;
         // start_loop dedupes on a running key, so this doubles as the level
         // update and self-heals if anything stopped the channel.

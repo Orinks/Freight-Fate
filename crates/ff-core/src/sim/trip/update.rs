@@ -690,8 +690,11 @@ impl Trip {
         let mut candidates: Vec<(f64, usize, f64)> = Vec::new();
         for i in 0..self.posts.len() {
             let ahead = self.posts[i].watch_start_mi() - self.position_mi;
+            if !(0.0 < ahead && ahead <= lookahead) {
+                continue;
+            }
             let id = self.posts[i].id();
-            if !(0.0 < ahead && ahead <= lookahead) || self.heads_up_seen.contains(&id) {
+            if self.heads_up_seen.contains(&id) {
                 continue;
             }
             self.heads_up_seen.insert(id);

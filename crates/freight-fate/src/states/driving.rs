@@ -373,6 +373,8 @@ pub struct DrivingState {
     pub held_observation: Option<(Observation, f64)>,
     // Miles each pacing unit has held station behind the truck.
     pub pacing_mi: HashMap<String, f64>,
+    // Reused buffer for per-frame post-id lookups into the sets above.
+    pub post_id_scratch: String,
     pub rescue_offered: bool,
 
     // ---- driving_damage.py --------------------------------------------------------------
