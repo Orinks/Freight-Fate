@@ -44,14 +44,25 @@ impl DrivingState {
     }
 
     /// Whether the truck is still on the lane or in the curve of the ramp it
-    /// took at the gore. The clock runs real over this stretch on every exit
-    /// (`update_exit_with_input`), because both are real lengths of road
-    /// braked over in real seconds.
+    /// took at the gore.
     pub fn short_of_ramp_curve_end(&self) -> bool {
         match (self.ramp_layout, self.ramp_travelled_mi()) {
             (Some(layout), Some(travelled)) => travelled < layout.decel_mi + layout.curve_mi,
             _ => false,
         }
+    }
+
+    /// Whether the truck is on a ramp it took at a gore, anywhere from the
+    /// gore to the stop at its end. The clock runs real over all of it on
+    /// every exit (`update_exit_with_input`): the lane, the curve and the stop
+    /// at the entrance are all braked for in real seconds. Real time only to
+    /// the curve's end left a free-flowing ramp's run to the entrance on the
+    /// compressed clock, and at five times facility stopping assistance met
+    /// the entrance at 33 mph (every-assist audit, 2026-09-24). Not on the
+    /// facility's streets, which keep `ramp_mi` set and have their own clock
+    /// rules (`dock_run_in`, the turns).
+    pub fn on_laid_out_ramp(&self) -> bool {
+        self.ramp_mi.is_some() && self.ramp_layout.is_some() && !self.surface_chain
     }
 
     /// The radius of the ramp curve, in feet, while the truck is in it.
@@ -92,9 +103,15 @@ impl DrivingState {
             (Some(_), Some(layout)) if !self.in_deceleration_lane() => Some(layout.grade),
             _ => None,
         };
+        // Facility stopping assistance too: it takes the pedals for the stop
+        // at the ramp's end from the gore on, and a profile to that stop
+        // alone carried the truck into the ramp curve at 62 against 49
+        // (every-assist audit, 2026-09-24). Whatever has the pedals on the
+        // ramp answers to the exit speed first.
         let assisting = ctx.settings.exit_speed_assist
             || ctx.settings.route_transition_assist
-            || ctx.settings.curve_speed_assist;
+            || ctx.settings.curve_speed_assist
+            || ctx.settings.destination_approach_assist;
         let Some(left_mi) = self.deceleration_lane_left_mi().filter(|_| assisting) else {
             self.decel_lane_brake = 0.0;
             return;
@@ -135,8 +152,10 @@ impl DrivingState {
             "Exit speed assistance"
         } else if ctx.settings.route_transition_assist {
             "Route-transition assistance"
-        } else {
+        } else if ctx.settings.curve_speed_assist {
             "Curve assistance"
+        } else {
+            "Facility stopping assistance"
         };
         ctx.say_event_with(
             format!("{who} slowing for the ramp."),

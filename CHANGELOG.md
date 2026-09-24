@@ -116,6 +116,14 @@
 
 ### Fixed
 
+- **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
+
+- **Facility stopping assistance now slows for the exit ramp's curve.** The whole ramp also runs in real time.
+
+- **The steering lean on an exit ramp now leans only for its curve.** Running wide there no longer says you crossed into oncoming traffic.
+
+- **Exit speed assistance no longer takes over from cruise for a fraction of a mile per hour.**
+
 - **The Map Route line no longer repeats the deadhead city.** A facility approach that used the same city on every local leg is spoken once. (#205)
 
 - **Holding the cruise target key no longer races the set speed.** Only a fresh press steps it; the operating system's key-repeat is ignored.

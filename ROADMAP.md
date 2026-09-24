@@ -1359,6 +1359,20 @@ mainline behaviour.
 - [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
       can run the truck wide, but nothing models the rollover a loaded truck
       meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+- [x] **Every assist follows the exit rules.** One matrix
+      (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
+      by seven ramp kinds, from two miles out to the stop or the gate) found
+      and fixed: facility stopping assistance ignoring the ramp curve; the
+      run to the entrance on the compressed clock; a clear yield leaving the
+      terminal servo's last press held (stopped 270 ft short) and a gap at a
+      held yield never released; exit speed assistance pausing cruise for
+      0.3 mph over; the street pull-ahead aiming at the mainline's limit; the
+      steering lean bending the whole ramp; "oncoming lane" on a one-way
+      ramp; the yield unnamed in the take line.
+- [ ] **A yield's gap is judged past the line.** `cross_yield` rules on the
+      crossing once the truck is the grace distance (about 100 ft) beyond
+      the line, so a gap that was clear at the line can read as "forced".
+      Judge it at the line.
 
 ## 1.10 planned -- the working week and home
 

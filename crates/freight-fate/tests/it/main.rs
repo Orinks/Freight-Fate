@@ -102,6 +102,7 @@ mod states_driving_engine_audio;
 mod states_driving_engine_lean;
 mod states_driving_events;
 mod states_driving_events_chains;
+mod states_driving_exit_assist_matrix;
 mod states_driving_exit_windows;
 mod states_driving_exits;
 mod states_driving_facility;

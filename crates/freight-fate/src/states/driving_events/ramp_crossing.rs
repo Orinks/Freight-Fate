@@ -92,37 +92,7 @@ impl DrivingState {
                 // instead of a stop, and lets go once the truck is under it -- a
                 // measured application, never the held service floor that
                 // spent reservoir air on the way down (Joshua, 2026-08-28).
-                let roll_mph = GREEN_ROLL_MPH - 5.0;
-                if speed <= roll_mph {
-                    self.ramp_assist_brake = 0.0;
-                    return;
-                }
-                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck) {
-                    self.trip.truck.throttle = 0.0;
-                }
-                let gap_m = 0.5f64.max(gap_mi * 1609.344);
-                let v_mps = 0.0f64.max(self.trip.truck.velocity_mps);
-                let roll_mps = roll_mph / MPH_PER_MPS;
-                let needed = (v_mps * v_mps - roll_mps * roll_mps).max(0.0) / (2.0 * gap_m);
-                let idle = self.ramp_assist_brake <= 0.0;
-                if needed < RAMP_ASSIST_DECEL_RELEASE_MPS2
-                    || (idle && needed < RAMP_ASSIST_DECEL_START_MPS2)
-                {
-                    self.ramp_assist_brake = 0.0;
-                    return;
-                }
-                self.ramp_assist_brake =
-                    assist_servo_brake(self.ramp_assist_brake, needed, &self.trip.truck);
-                self.trip.truck.throttle = 0.0;
-                self.trip.truck.brake = self.trip.truck.brake.max(self.ramp_assist_brake);
-                if !self.ramp_green_roll_said {
-                    self.ramp_green_roll_said = true;
-                    self.pause_speed_control(ctx, true);
-                    self.say_route_confirmation(
-                        ctx,
-                        "Route-transition assistance slowing for the green light.",
-                    );
-                }
+                self.roll_the_terminal(ctx, GREEN_ROLL_MPH - 5.0, gap_mi, "the green light");
                 return;
             }
         }
@@ -131,16 +101,24 @@ impl DrivingState {
                 .cross_bubble
                 .as_ref()
                 .is_none_or(|bubble| bubble.clear_to_cross());
-            if clear {
-                // A clear yield is rolled, not stopped: the assist lifts to
-                // roll speed and the gap verdict lands at the line. Braking
-                // to a dead stop on a clear yield is the
+            // Already stopped at the line waiting for a gap, the gap is the
+            // hold's to announce and release ("Gap in traffic."), below. The
+            // roll here used to catch it first: the gap came, nothing was
+            // said, the terminal never counted as honored, and the truck sat
+            // at the line under a promise that "assistance is holding for
+            // your gap" (every-assist audit, 2026-09-24).
+            if clear && !self.ramp_waiting_at_sign {
+                // A clear yield is rolled, not stopped: the gap verdict lands
+                // at the line. Braking to a dead stop on a clear yield is the
                 // rear-end setup the roadmap warns the LEAD car will pull.
-                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
-                    && speed > YIELD_ROLL_MPH - 3.0
-                {
-                    self.trip.truck.throttle = 0.0;
-                }
+                //
+                // Rolled at the yield's own speed, the way a green is: the
+                // lift alone let a truck that came off the ramp curve at 19
+                // reach the line over it, and it left the stop profile's last
+                // press held by the frame's pedal floor, so a gap opening on
+                // the approach braked the truck to a stand 270 feet short of
+                // an empty line (every-assist audit, 2026-09-24).
+                self.roll_the_terminal(ctx, YIELD_ROLL_MPH - 3.0, gap_mi, "the yield");
                 return;
             }
             // Not clear: fall through and brake for the line like a stop.
@@ -243,9 +221,58 @@ impl DrivingState {
                 "roundabout" => "roundabout",
                 _ => "stop sign",
             };
+            // A yield whose gap closed on the roll is the same approach the
+            // roll line already named: "slowing for the yield" then "braking
+            // for the yield" back to back said one thing twice. A light is
+            // different -- red after green is a new take and says so.
+            let rolled_here = self.ramp_green_roll_said
+                && matches!(self.ramp_control.as_str(), "yield" | "roundabout");
+            if !rolled_here {
+                self.say_route_confirmation(
+                    ctx,
+                    &format!("Route-transition assistance braking for the {what}."),
+                );
+            }
+        }
+    }
+
+    /// Take the truck through a terminal it may roll -- a green, or a yield
+    /// with its gap -- at `roll_mph` or under by the bar.
+    ///
+    /// The servo meets a roll target at the bar instead of a stop, and lets
+    /// go once the truck is under it: a measured application, never the held
+    /// service floor that spent reservoir air on the way down (Joshua,
+    /// 2026-08-28). Said once per roll (`ramp_green_roll_said`, which names
+    /// the green it was first written for).
+    fn roll_the_terminal(&mut self, ctx: &mut GameContext, roll_mph: f64, gap_mi: f64, what: &str) {
+        if self.trip.truck.speed_mph() <= roll_mph {
+            self.ramp_assist_brake = 0.0;
+            return;
+        }
+        if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck) {
+            self.trip.truck.throttle = 0.0;
+        }
+        let gap_m = 0.5f64.max(gap_mi * 1609.344);
+        let v_mps = 0.0f64.max(self.trip.truck.velocity_mps);
+        let roll_mps = roll_mph / MPH_PER_MPS;
+        let needed = (v_mps * v_mps - roll_mps * roll_mps).max(0.0) / (2.0 * gap_m);
+        let idle = self.ramp_assist_brake <= 0.0;
+        if needed < RAMP_ASSIST_DECEL_RELEASE_MPS2
+            || (idle && needed < RAMP_ASSIST_DECEL_START_MPS2)
+        {
+            self.ramp_assist_brake = 0.0;
+            return;
+        }
+        self.ramp_assist_brake =
+            assist_servo_brake(self.ramp_assist_brake, needed, &self.trip.truck);
+        self.trip.truck.throttle = 0.0;
+        self.trip.truck.brake = self.trip.truck.brake.max(self.ramp_assist_brake);
+        if !self.ramp_green_roll_said {
+            self.ramp_green_roll_said = true;
+            self.pause_speed_control(ctx, true);
             self.say_route_confirmation(
                 ctx,
-                &format!("Route-transition assistance braking for the {what}."),
+                &format!("Route-transition assistance slowing for {what}."),
             );
         }
     }

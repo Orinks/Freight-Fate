@@ -627,7 +627,26 @@ impl DrivingState {
             };
         }
         if self.ramp_mi.is_some() {
-            return RAMP_GUIDE_DEMAND;
+            // The exit ramp bends only in its curve now (realistic exit,
+            // 2026-09-24), so the engine leans for the curve, leading into it
+            // the way it leads into a street turn, and rides centred down the
+            // deceleration lane and the run to the bar. A lean for the whole
+            // ramp asked a driver steering for themselves to turn on straight
+            // road. A ramp the game put the truck on with no layout behind it
+            // (the loop-back to a missed terminal) keeps the old whole-ramp
+            // lean.
+            if self.ramp_layout.is_none() {
+                return RAMP_GUIDE_DEMAND;
+            }
+            if self.ramp_curve_radius_ft().is_some() {
+                return RAMP_GUIDE_DEMAND;
+            }
+            return match self.deceleration_lane_left_mi() {
+                Some(left) if left < TURN_GUIDE_LEAD_MI => {
+                    RAMP_GUIDE_DEMAND * (1.0 - left / TURN_GUIDE_LEAD_MI)
+                }
+                _ => 0.0,
+            };
         }
         let Some(cue) = self.turn_cue_in_play_read() else {
             return 0.0;

@@ -1631,8 +1631,9 @@ Interactive is a descent-control level, not a preset.
 
 Exit speed assistance brakes in the deceleration lane of an already-selected
 exit, so the truck reaches the exit speed by the ramp curve. On the highway it
-only slows a truck the gore would refuse. Route-transition assistance or
-curve assistance does the same braking when exit speed assistance is off. Facility stopping
+only slows a truck the gore would refuse. Route-transition, curve, or
+facility stopping assistance does the same braking when exit speed assistance
+is off. Facility stopping
 assistance (the destination approach assistance row) slows and stops at the
 selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
 cleared stop or green light at the end of the destination ramp, it also pulls

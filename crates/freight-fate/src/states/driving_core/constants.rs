@@ -158,6 +158,10 @@ pub const EXIT_HOLD_MAX_THROTTLE: f64 = 0.45;
 // 58 to 70 mph at 70 mph sites. The ramp's own number is reached past the
 // gore, in the deceleration lane.
 pub const EXIT_MAINLINE_EASE_MPH: f64 = 10.0;
+// How far over what the gore accepts adaptive cruise or the keeper may be
+// before exit speed assistance takes the pedals from it: the cruise loop's
+// own two-mph brake deadband, which it answers inside anyway.
+pub const EXIT_ASSIST_CONTROLLER_MARGIN_MPH: f64 = 2.0;
 // A ramp's length is not a constant any more: `Trip::ramp_length_mi`.
 // Ramp terminals: where the off-ramp meets the surface road there is usually
 // a light or a stop sign (diamond interchanges), occasionally free flow

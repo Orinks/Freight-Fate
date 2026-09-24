@@ -786,6 +786,15 @@ impl DrivingState {
     /// log, same night). The honest number is the zone at the bar itself: the
     /// street being entered.
     pub fn approach_limit_text(&mut self, ctx: &GameContext) -> String {
+        match self.street_limit_past_bar_mph() {
+            Some(limit) => ctx.settings.speed_text(limit),
+            None => String::new(),
+        }
+    }
+
+    /// The limit on the road past the ramp's stop bar, or None when the probe
+    /// can only see the mainline's own number through the gap (see below).
+    pub fn street_limit_past_bar_mph(&mut self) -> Option<f64> {
         let mut bar_mi = self.trip.position_mi;
         if let Some(ramp_mi) = self.ramp_mi {
             bar_mi += 0.0f64.max(ramp_mi - RAMP_ACCESS_MI);
@@ -807,9 +816,9 @@ impl DrivingState {
         let position = self.trip.position_mi;
         let (corridor_limit, _) = self.trip.speed_limit_at(position);
         if limit >= corridor_limit && corridor_limit > RAMP_MAX_MPH {
-            return String::new();
+            return None;
         }
-        ctx.settings.speed_text(limit)
+        Some(limit)
     }
 
     /// Mid-ramp callout naming the control at the terminal.
