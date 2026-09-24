@@ -94,6 +94,9 @@ impl DrivingState {
             None
         };
         truck.cargo_fragility = cargo_fragility(delivery_cargo);
+        // Profile fuel (and wear) must land before the reefer auto-start, or a
+        // saved empty tank looks full and the TRU comes on with nothing to burn.
+        profile_of(ctx).load_truck_condition(&mut truck);
         truck.set_cargo_needs_reefer(delivery_cargo.is_some_and(|c| c.needs_reefer()));
         // A tank load is the only freight that keeps moving after the truck
         // stops. How full the shell is comes straight from the load's weight,
@@ -104,7 +107,6 @@ impl DrivingState {
             delivery_cargo.map(|cargo| cargo as &dyn LiquidCargo),
             job.weight_tons,
         );
-        profile_of(ctx).load_truck_condition(&mut truck);
         truck.set_cold_air_start();
 
         let start_damage = profile_of(ctx).truck_damage_pct();
