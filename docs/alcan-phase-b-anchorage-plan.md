@@ -123,7 +123,7 @@ Default list assumes Cantwell parking **does not** verify (current status: unver
 
 | # | Leg | Est. mi | Highway | Source / note |
 | --- | --- | --- | --- | --- |
-| 1 | `fairbanks_ak_us` → `nenana_ak_us` | **53** | Parks AK-3 | Parks milepost from Anchorage: Fairbanks~MP358 → Nenana~MP305. `fairbanks_ak_us` pin is Sourdough Fuel on Airport Way (west of Parks/Richardson junction terminus); paid follows milepost, not Airport Way approach. Shape from prior Valhalla densify. |
+| 1 | `fairbanks_ak_us` → `nenana_ak_us` | **53** | Parks AK-3 | Parks milepost from Anchorage: Fairbanks~MP358 → Nenana~MP305. Fairbanks pin on Airport Way at about MP 358, 4 mi short of the Parks terminus at MP 362; paid miles match the pin. Shape from prior Valhalla densify. |
 | 2 | `nenana_ak_us` → `healy_ak_us` | **56** | Parks AK-3 | Parks milepost Nenana~MP305 → Healy~MP249 |
 | 3 | `healy_ak_us` → `wasilla_ak_us` | **207** | Parks AK-3 via Broad Pass | Parks milepost Healy~MP249 → Wasilla~MP42 (**Cantwell collapsed**) |
 | 4 | `wasilla_ak_us` → `anchorage_ak_us` | **42** | Parks → Glenn–Parks interchange → Glenn AK-1 | Parks/Glenn milepost Wasilla~MP42 → Anchorage MP0 |
@@ -201,9 +201,8 @@ Prefer `parking` / `travel_center`-class types for public lots — **not** `comp
 6. **Spring breakup axle limits are not modeled** — no GVW promise; named debt only.
 7. **Unverified Parks / Mat-Su lots:** Nenana, Cantwell, Wasilla/Big Lake, Palmer Chevron stay unpinned until diesel + tractor parking verify; Cantwell collapse is the default.
 8. **Valdez / Richardson south** not required for Anchorage join — do not sneak Valdez in as “almost Anchorage.”
-9. **Palmer–Wasilla connector paid 13 vs planned ~11:** Valhalla densify miles kept; milepost-style ~11 not forced — named debt.
+9. **Palmer–Wasilla connector paid 13 vs planned ~11:** Valhalla densify miles kept; named debt. Retrace onto the Palmer–Wasilla Highway (~11) the next time that corridor is touched.
 10. **Glennallen→Palmer Valhalla undercount (~138 vs milepost 145):** paid miles follow milepost; shape from router — named geometry/miles tension until a future bake or OSM fix closes the gap.
-11. **Fairbanks Airport Way pin vs Parks MP358 terminus:** `fairbanks_ak_us` is Sourdough Fuel on Airport Way (west of Parks/Richardson junction); Fairbanks→Nenana paid 53 follows Parks MP358→MP305, not the Airport Way approach.
 
 ---
 

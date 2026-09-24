@@ -1166,7 +1166,7 @@
             "miles": 53.0
           }
         ],
-        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Fairbanks~MP358 \u2192 Nenana~MP305). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. fairbanks_ak_us pin is Sourdough Fuel on Airport Way (west of the Parks/Richardson junction / Parks terminus ~MP358) \u2014 city-to-city router distance can exceed the pure Parks MP delta; paid miles follow milepost. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Fairbanks~MP358 \u2192 Nenana~MP305). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. Fairbanks pin on Airport Way at about MP 358, 4 mi short of the Parks terminus at MP 362; paid miles match the pin. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -1254,7 +1254,7 @@
             "miles": 53.0
           }
         ],
-        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Nenana~MP305 \u2192 Fairbanks~MP358). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. fairbanks_ak_us pin is Sourdough Fuel on Airport Way (west of the Parks/Richardson junction / Parks terminus ~MP358) \u2014 city-to-city router distance can exceed the pure Parks MP delta; paid miles follow milepost. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Paid miles re-set to Parks Highway milepost arithmetic from Anchorage (Parks milepost Nenana~MP305 \u2192 Fairbanks~MP358). Shape (route_points lat/lon) unchanged from prior public Valhalla truck densify; at_mi rescaled to paid 53. Fairbanks pin on Airport Way at about MP 358, 4 mi short of the Parks terminus at MP 362; paid miles match the pin. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 56.5 mi; paid miles 57. George Parks Highway (AK-3). Parks Highway Fairbanks to Nenana; ALCAN Phase B2; paid ~57 (public Valhalla truck ~56.5). Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
@@ -1950,7 +1950,7 @@
             "miles": 13.0
           }
         ],
-        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2.",
+        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11; retrace onto the Palmer\u2013Wasilla Highway (~11) the next time that corridor is touched. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2.",
         "landmarks": [],
         "speed_limits": [
           {
@@ -2038,7 +2038,7 @@
             "miles": 13.0
           }
         ],
-        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
+        "source": "Palmer\u2013Wasilla connector: paid miles kept at 13 from public Valhalla truck densify (planned/published ~11). Named honesty debt vs ~11; retrace onto the Palmer\u2013Wasilla Highway (~11) the next time that corridor is touched. Shape unchanged. Prior: Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-09-24. Router reported 13.5 mi; paid miles 13. Mat-Su Parks/Glenn local connector. Mat-Su Palmer\u2013Wasilla connector KEEP; published ~11 mi, Valhalla truck ~13.3 \u2014 paid 13 Valhalla (within \u00b15 of published); ALCAN Phase B2. Reverse edge mirrored from forward densify (Phase A ALCAN pattern).",
         "landmarks": [],
         "speed_limits": [
           {
