@@ -485,14 +485,14 @@ its status or release decision.
       `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
       declared in the `tooling` group and locked, so a fresh checkout runs
       them with `uv run --group tooling ...`.
-- [x] `sound-test/` is ruff-clean (lint and format) and the pre-commit ruff
-      hooks no longer exclude it. CI's lint step still covers only `tests`
-      and `tools`.
-- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
-      test that failed on the word outside a CB clause in any player-facing
-      string; the Rust
-      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
-      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
+- [x] `sound-test/` is ruff-clean (lint and format); the pre-commit ruff
+      hooks no longer exclude it and CI's lint step covers it too.
+- [x] The "bear is CB voice only" source sweep is ported (2026-09-24).
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` reads every
+      string literal in both crates, multi-line and raw strings included, and
+      fails on "bear" or "bears" in any case outside a line that names the
+      CB; the song title "Black Bear Road" is the one exception. It lands
+      green: today's hits are all CB chatter.
 
 ### September 11 trucking corrections
 
