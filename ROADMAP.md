@@ -1273,11 +1273,12 @@ not started here.
       and **117 ft** overall, separate from STAA `double_van` pups.
       Requires the doubles endorsement and the LCV certificate. Never
       offered as hazmat. Offered and routed only on an explicit allowlist
-      of classic turnpike city-pair legs (NY Thruway I-90 / I-87, Mass
-      Pike I-90, Ohio Turnpike west of the Elyria split, Indiana Toll
-      Road, Kansas Turnpike Wichita–Emporia–Topeka) plus short staging
-      stubs. Spoken refusal: "Dispatch only clears long doubles on the
-      turnpike."
+      of classic turnpike city-pair legs (NY Thruway I-90 Buffalo–Albany
+      and Berkshire/MA links, Mass Pike I-90, Ohio Turnpike west of the
+      Elyria split, Indiana Toll Road, Kansas Turnpike
+      Wichita–Emporia–Topeka) plus short staging stubs. Buffalo–Erie and
+      NYC endpoints are refused. Spoken refusal: "Dispatch only clears
+      long doubles on the turnpike."
 - [ ] **Honesty debt: Florida's Turnpike and Western LCV corridors.** FL
       Turnpike is not Interstate-numbered in world data, so FL turnpike
       doubles are not offered. Rocky Mountain / other Western LCV routes
@@ -1291,6 +1292,19 @@ not started here.
       permits are not modeled.
 - [ ] **Honesty debt: hazmat in doubles not modeled.** Placarded freight
       never uses `turnpike_double`; twin hazmat rules are not simulated.
+- [ ] **Honesty debt / world-data gap: Ohio Turnpike east of Toledo to
+      the PA line.** No I-80 city-pair that avoids Cleveland, and no
+      Elyria node in world data. Pending map work; not faked.
+- [ ] **Honesty debt / world-data gap: Kansas Turnpike I-70 Topeka to
+      Kansas City.** No shipped leg (KC is in Missouri). Pending map
+      work; not faked.
+- [ ] **Honesty debt: NY I-87 Albany–Yonkers Thruway not modeled as a
+      city-pair.** Thruway tandems cannot leave onto public NY roads
+      (TAP-602); southern staging is Exit 6A Yonkers. `new_york_ny_us`
+      is refused as origin/destination, and the coarse world
+      `new_york`–`albany` I-87 leg is omitted rather than treated as a
+      legal turnpike-doubles lane. A Yonkers (or Exit 6A) node would be
+      needed before that corridor can be offered honestly.
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
 - [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
