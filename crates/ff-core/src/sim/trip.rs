@@ -38,6 +38,7 @@ mod update;
 mod zones;
 
 pub use lookups::LaneRun;
+pub use streets::{is_gate_zone_reason, STREET_ZONE, YARD_ZONE};
 
 /// A stop is announced ("stop ahead") when it first comes within this many
 /// miles ahead; `restore` seeds this SAME window as already-announced so a

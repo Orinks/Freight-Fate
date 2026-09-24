@@ -223,7 +223,11 @@ impl DrivingState {
     pub fn turn_speed_mph(&self, cue: &NavigationCue) -> f64 {
         let index = self.turn_leg_index(cue);
         let leg = self.trip.route.legs.get(index);
-        let posted = leg.map(|leg| leg.local_speed_mph).unwrap_or(0.0);
+        // The street's own posted limit where the chain carries it -- the
+        // same number its zone posts -- else the bake's street speed.
+        let posted = leg
+            .map(|leg| leg.street_limit_mph().unwrap_or(leg.local_speed_mph))
+            .unwrap_or(0.0);
         let street = if posted != 0.0 {
             posted
         } else {

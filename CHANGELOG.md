@@ -37,11 +37,23 @@
 
 - **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
 
+- **City streets to a facility have traffic lights and stop signs.** The ones the map shows play like a ramp end, and the assists stop and go for them.
+
+- **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
+
 ### Security
 
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **Each city street keeps its own speed limit.** The cab says the new number when the street changes, and delivery times are planned on them.
+
+- **City streets start on the road your exit ramp meets.** The streets named and the miles to the gate are the ones from that exit.
+
+- **The gate's 15 mph no longer applies on the public street.** The street keeps its limit up to the driveway, which is a turn like any other.
+
+- **The speed keeper holds a corner's speed when the next corner is close.** It no longer speeds up between them and brakes hard.
 
 - **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
 

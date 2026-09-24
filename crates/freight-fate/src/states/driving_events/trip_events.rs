@@ -1022,7 +1022,7 @@ impl DrivingState {
         };
         matches!(
             zone.reason.as_str(),
-            "destination approach" | "facility access road" | "facility gate"
+            "destination approach" | "facility access road" | "facility gate" | "yard"
         )
     }
 

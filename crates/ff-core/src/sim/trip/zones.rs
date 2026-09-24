@@ -189,10 +189,15 @@ impl Trip {
         let gate_start =
             (total - FACILITY_GATE_ZONE_MI.min(total * FACILITY_GATE_MAX_SHARE)).max(0.0);
         if self.is_facility_approach_route() {
-            // ONE posted limit for the whole chain, and the gate at the end
-            // (owner playtest, 2026-08-21): the access road takes the state's
-            // own statutory business-district limit, else the highest limit
-            // the legs offer.
+            if self.has_street_detail() {
+                // Every street at its own posted limit, and the yard past the
+                // driveway (`street_zones`).
+                return self.street_zones();
+            }
+            // A chain baked before the street detail: ONE posted limit for
+            // the whole chain, and the gate at the end (owner playtest,
+            // 2026-08-21): the access road takes the state's own statutory
+            // business-district limit, else the highest limit the legs offer.
             if self.route.legs.iter().any(|leg| leg.local_speed_mph > 0.0) {
                 let chain_limit = self.statutory_street_mph().unwrap_or_else(|| {
                     self.route

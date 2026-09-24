@@ -480,6 +480,14 @@ pub struct DrivingState {
     // cancel holds for the rest of this ramp.
     pub approach_pull_ahead: bool,
     pub approach_pull_ahead_canceled: bool,
+    // A street control on a facility chain, played through the ramp
+    // terminal's own state above (`driving_events/street_controls.rs`): the
+    // route mile of its stop bar while it is live, its baked kind, and the
+    // bars this trip has already played, by trip generation.
+    pub street_bar_mi: Option<f64>,
+    pub street_control_kind: String,
+    pub street_controls_played: HashSet<i64>,
+    pub street_controls_trip: u64,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,

@@ -102,11 +102,18 @@ fn local_cue_direction(cue: &str) -> &'static str {
 }
 
 /// A baked facility chain as a drivable same-city route, one leg a street,
-/// each carrying its spoken cue, turn angle and street detail.
-fn local_chain_route(city: &str, segments: &[LocalGeometrySegment]) -> Route {
+/// each carrying its spoken cue, turn angle and street detail. The streets
+/// from the chain's driveway on are its yard (`Leg::local_yard`).
+fn local_chain_route(
+    city: &str,
+    segments: &[LocalGeometrySegment],
+    driveway: Option<&Driveway>,
+) -> Route {
+    let yard_from = driveway.and_then(|driveway| driveway_leg_index(segments, driveway.at_mi));
     let legs: Vec<Leg> = segments
         .iter()
-        .map(|segment| {
+        .enumerate()
+        .map(|(i, segment)| {
             Leg::local(
                 city,
                 segment.miles,
@@ -116,10 +123,25 @@ fn local_chain_route(city: &str, segments: &[LocalGeometrySegment]) -> Route {
             )
             .with_turn_deg(segment.turn_deg)
             .with_street(segment.limit.clone(), segment.controls.clone())
+            .with_yard(yard_from.is_some_and(|from| i >= from))
         })
         .collect();
     let cities = vec![city.to_string(); legs.len() + 1];
     Route::from_legs(cities, legs)
+}
+
+/// The leg a chain's driveway starts, when it stands on a leg boundary (the
+/// bake's segments and its driveway are both rounded to the hundredth), and
+/// never the first leg: a chain that starts in the yard has no street.
+fn driveway_leg_index(segments: &[LocalGeometrySegment], at_mi: f64) -> Option<usize> {
+    let mut start = 0.0;
+    for (i, segment) in segments.iter().enumerate() {
+        if i > 0 && (start - at_mi).abs() <= 0.015 {
+            return Some(i);
+        }
+        start += segment.miles;
+    }
+    None
 }
 
 /// The same street chain driven outbound: leg order reversed, and each
@@ -152,7 +174,13 @@ fn reversed_local_legs(city: &str, legs: &[std::sync::Arc<Leg>]) -> Vec<Leg> {
                 // outbound corner was priced and leaned from its neighbour's
                 // shape, a "Continue onto" inherited a corner's angle, and the
                 // last corner of every departure read as unmeasured.
-                .with_turn_deg(inbound.map_or(0.0, |inbound| inbound.local_turn_deg)),
+                .with_turn_deg(inbound.map_or(0.0, |inbound| inbound.local_turn_deg))
+                // A street's limit and the yard are the same whichever way
+                // they are driven; its READ controls face one direction of
+                // travel and are not carried (a stop sign facing the inbound
+                // truck says nothing about the outbound one).
+                .with_street(src.local_limit.clone(), Vec::new())
+                .with_yard(src.local_yard),
         );
     }
     out
@@ -345,7 +373,7 @@ impl World {
                     .iter()
                     .find(|chain| chain.terminal_node == terminal_node)
             })
-            .map(|chain| local_chain_route(&city, &chain.segments)))
+            .map(|chain| local_chain_route(&city, &chain.segments, chain.driveway.as_ref())))
     }
 
     /// Where a facility's street chain leaves the public street: the chain
@@ -403,7 +431,11 @@ impl World {
         let location = self.facility_location(&city, location_name)?;
         if let Some(source_approach) = self.facility_approaches()?.get(&location.id) {
             if source_approach.turn_level && !source_approach.segments.is_empty() {
-                return Ok(local_chain_route(&city, &source_approach.segments));
+                return Ok(local_chain_route(
+                    &city,
+                    &source_approach.segments,
+                    source_approach.driveway.as_ref(),
+                ));
             }
         }
         let endpoint = self.facility_endpoints()?.get(&location.id);

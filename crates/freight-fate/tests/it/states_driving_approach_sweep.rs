@@ -292,6 +292,13 @@ fn regrade_chain(d: &mut DrivingState, grade_pct: f64) {
     d.trip.route = Route::from_legs(cities, legs);
 }
 
+/// Take the traffic controls off the chain under the truck.
+pub fn clear_street_controls(d: &mut DrivingState) {
+    for leg in d.trip.route.legs.iter_mut() {
+        std::sync::Arc::make_mut(leg).local_controls.clear();
+    }
+}
+
 /// [`arrive`], with the facility's street chain re-laid on a constant grade.
 pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> Arrival {
     arrive_with(destination, chain_grade_pct, None, 18.0)
@@ -445,6 +452,10 @@ fn arrive_with(
         }
         let now_on_chain = harness.read_drive(|d| d.surface_chain);
         if now_on_chain && !on_chain {
+            // The streets' own lights and signs have an assist of their own
+            // and their own suite (`states_driving_street_controls.rs`), the
+            // way the ramp's terminal does: cleared for the same reason.
+            harness.with_drive(|d, _| clear_street_controls(d));
             if let Some(grade_pct) = chain_grade_pct {
                 harness.with_drive(move |d, _| regrade_chain(d, grade_pct));
             }

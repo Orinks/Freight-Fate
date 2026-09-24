@@ -137,7 +137,15 @@ fn test_chain_swaps_to_streets_and_keeps_the_clock() {
         .zones
         .iter()
         .any(|zone| zone.reason == "facility access road"));
-    assert!(d
+    // The yard behind a driveway, or no gate stretch at all on a chain that
+    // ends on the public street -- never the old 15 on the street.
+    // (A chain baked before the street detail keeps its old gate zone.)
+    assert!(d.trip.has_street_detail());
+    assert_eq!(
+        d.trip.zones.iter().any(|zone| zone.reason == "yard"),
+        d.trip.driveway_mi().is_some()
+    );
+    assert!(!d
         .trip
         .zones
         .iter()

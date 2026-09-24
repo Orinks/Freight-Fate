@@ -148,8 +148,27 @@ impl DrivingState {
     /// Set up the terminal control state for the ramp just taken.
     pub fn begin_ramp_terminal(&mut self, ctx: &GameContext, stop: &RoadStop) {
         let mut rng = self.ramp_rng(stop);
-        self.ramp_control = self.ramp_control_for(ctx, stop, Some(&mut rng));
-        let mut profile_rng = PyRandom::new_from_str(&self.ramp_terminal_timing_key(stop));
+        let control = self.ramp_control_for(ctx, stop, Some(&mut rng));
+        let timing_key = self.ramp_terminal_timing_key(stop);
+        self.begin_terminal_control(control, &mut rng, &timing_key, stop.at_mi, true);
+    }
+
+    /// Set up the control state for a terminal about to be met: a ramp's
+    /// end, or a light or sign on a facility's streets
+    /// (`driving_events/street_controls.rs`). `rng` is the control's own
+    /// seeded stream, `timing_key` fixes its light's timing plan, and
+    /// `at_mi` seeds its crossroad; `cross_traffic` false builds no crossroad
+    /// (an all-way stop, where the cross street stops too).
+    pub(crate) fn begin_terminal_control(
+        &mut self,
+        control: String,
+        rng: &mut PyRandom,
+        timing_key: &str,
+        at_mi: f64,
+        cross_traffic: bool,
+    ) {
+        self.ramp_control = control;
+        let mut profile_rng = PyRandom::new_from_str(timing_key);
         self.ramp_light_profile = profile_rng.randrange(RAMP_LIGHT_PROFILE_COUNT) as u8;
         self.ramp_light_timer = 0.0;
         self.ramp_light_offset_s = rng.random() * self.ramp_light_cycle_s();
@@ -170,10 +189,11 @@ impl DrivingState {
         // simulate it. Seeded like the control itself so the same terminal
         // always carries the same traffic day; the near-city split reuses the
         // same urban/rural judgment the control dice already trust.
-        self.cross_bubble = if matches!(
-            self.ramp_control.as_str(),
-            "signal" | "stop" | "yield" | "roundabout"
-        ) {
+        self.cross_bubble = if cross_traffic
+            && matches!(
+                self.ramp_control.as_str(),
+                "signal" | "stop" | "yield" | "roundabout"
+            ) {
             // A roundabout entry is gap acceptance against circulating
             // traffic: yield rates, spoken as a roundabout.
             let control = if self.ramp_control == "roundabout" {
@@ -182,9 +202,9 @@ impl DrivingState {
                 self.ramp_control.as_str()
             };
             let mut bubble = CrossTraffic::new(
-                (self.trip_seed << 16) ^ (stop.at_mi * 100.0) as i64 ^ 0x5AFE,
+                (self.trip_seed << 16) ^ (at_mi * 100.0) as i64 ^ 0x5AFE,
                 control,
-                self.trip.near_city(stop.at_mi),
+                self.trip.near_city(at_mi),
             );
             if self.ramp_control == "signal" && self.ramp_light_holds_cross_traffic() {
                 // The pre-roll above begins with the cross street flowing. If
@@ -282,11 +302,11 @@ impl DrivingState {
         // green, red, or stop sign -- carried it through the rest of the run
         // and out into the menus (Shane, 2026-08-03).
         self.update_ramp_bar_ticks(ctx, dt);
-        if self.ramp_mi.is_some() && !self.ramp_terminal_done && self.ramp_control == "signal" {
+        if self.terminal_live() && !self.ramp_terminal_done && self.ramp_control == "signal" {
             self.ramp_light_timer += dt;
         }
         self.update_cross_bubble(ctx, dt);
-        if self.ramp_mi.is_none() || self.ramp_terminal_done {
+        if !self.terminal_live() || self.ramp_terminal_done {
             return;
         }
         if matches!(self.ramp_control.as_str(), "stop" | "yield" | "roundabout") {
@@ -411,7 +431,7 @@ impl DrivingState {
         if self.cross_bubble.is_none() {
             return;
         }
-        if self.ramp_mi.is_none() || self.ramp_terminal_done {
+        if !self.terminal_live() || self.ramp_terminal_done {
             // The terminal released the driver; the crossroad is behind them.
             self.cross_bubble = None;
             return;
@@ -426,7 +446,7 @@ impl DrivingState {
                 bubble.player_has_green = green;
             }
         }
-        let ramp_mi = self.ramp_mi.unwrap_or(0.0);
+        let ramp_mi = self.terminal_gap_mi().unwrap_or(0.0) + RAMP_ACCESS_MI;
         // The crossroad fades in down the ramp: nothing until the terminal
         // callout distance, full presence at the bar.
         let closeness = 1.0 - 1.0f64.min(0.0f64.max(ramp_mi) / RAMP_CONTROL_ANNOUNCE_MI);
@@ -472,10 +492,7 @@ impl DrivingState {
     /// question, so a blown light meets whatever that road carries.
     pub fn cross_violation_meets(&mut self) -> (CrossMeeting, Option<CrossVehicle>) {
         if self.cross_bubble.is_none() {
-            let at_mi = self
-                .ramp_stop
-                .as_ref()
-                .map_or(self.trip.position_mi, |stop| stop.at_mi);
+            let at_mi = self.terminal_seed_mi();
             let control = match self.ramp_control.as_str() {
                 "roundabout" => "yield",
                 "signal" | "stop" | "yield" => self.ramp_control.as_str(),
@@ -539,10 +556,10 @@ impl DrivingState {
         if !self.ramp_light_announced || self.ramp_waiting_at_light {
             return;
         }
-        let Some(ramp_mi) = self.ramp_mi else {
+        let Some(gap_mi) = self.terminal_gap_mi() else {
             return;
         };
-        if ramp_mi <= RAMP_ACCESS_MI {
+        if gap_mi <= 0.0 {
             return;
         }
         if self.trip.truck.speed_mph() > RED_STOP_MPH {
@@ -555,7 +572,6 @@ impl DrivingState {
         // Name the gap: "creep" for a real 600-foot gap takes minutes and
         // reads as a light stuck in a loop. Far back is a drive, and the red
         // phase is exactly the time to make it.
-        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         if ctx.settings.route_transition_assist && gap_mi <= RAMP_ASSIST_HOLD_MI {
             // Inside the hold window the assist owns the stop and says so
             // itself. This runs first in the frame, so it used to say
@@ -621,19 +637,18 @@ impl DrivingState {
     /// 2026-07-19). Rolling milestone calls give the bar a position the same
     /// way the exit countdown gives the exit one.
     pub fn update_ramp_gap_countdown(&mut self, ctx: &mut GameContext) {
-        if !self.ramp_light_announced || self.ramp_waiting_at_light {
+        if !self.ramp_light_announced || self.ramp_waiting_at_light || !self.bar_cues_owed() {
             return;
         }
-        let Some(ramp_mi) = self.ramp_mi else {
+        let Some(gap_mi) = self.terminal_gap_mi() else {
             return;
         };
-        if ramp_mi <= RAMP_ACCESS_MI {
+        if gap_mi <= 0.0 {
             return;
         }
         if self.trip.truck.speed_mph() <= RED_STOP_MPH {
             return;
         }
-        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         let thresholds = self.ramp_bar_milestones(ctx);
         let imperial = ctx.settings.imperial_units;
         let unit_mi = if imperial {
@@ -685,11 +700,11 @@ impl DrivingState {
     /// written into the manual 2026-07-27): at the solid tone you had better
     /// be close to stopped.
     pub fn update_ramp_bar_ticks(&mut self, ctx: &mut GameContext, dt: f64) {
-        if !self.ramp_light_announced || self.ramp_waiting_at_light {
+        if !self.ramp_light_announced || self.ramp_waiting_at_light || !self.bar_cues_owed() {
             self.set_bar_solid(ctx, false);
             return;
         }
-        let Some(ramp_mi) = self.ramp_mi else {
+        let Some(gap_mi) = self.terminal_gap_mi() else {
             self.set_bar_solid(ctx, false);
             return;
         };
@@ -701,7 +716,6 @@ impl DrivingState {
             self.set_bar_solid(ctx, false);
             return;
         }
-        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         // Both distances come from what this truck can actually stop in, with
         // the old constants as their floors: a load that stops longer -- hot
         // brakes, ice, a downgrade, liquid running forward in a tank -- hears
@@ -736,11 +750,10 @@ impl DrivingState {
     /// sighted driver reads it off the windshield, so speech must answer the
     /// same question whenever the driver asks (owner ask, 2026-07-19).
     pub fn ramp_light_query_text(&mut self, ctx: &GameContext) -> Option<String> {
-        let ramp_mi = self.ramp_mi?;
+        let gap_mi = self.terminal_gap_mi()?;
         if !matches!(self.ramp_control.as_str(), "signal" | "stop") || self.ramp_terminal_done {
             return None;
         }
-        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         if self.ramp_control == "stop" {
             if gap_mi <= 0.0 {
                 return Some("At the stop bar. Stop sign.".to_string());
@@ -796,8 +809,8 @@ impl DrivingState {
     /// can only see the mainline's own number through the gap (see below).
     pub fn street_limit_past_bar_mph(&mut self) -> Option<f64> {
         let mut bar_mi = self.trip.position_mi;
-        if let Some(ramp_mi) = self.ramp_mi {
-            bar_mi += 0.0f64.max(ramp_mi - RAMP_ACCESS_MI);
+        if let Some(gap_mi) = self.terminal_gap_mi() {
+            bar_mi += 0.0f64.max(gap_mi);
         }
         // Probe just PAST the bar, not at it: the entered road's zone (the
         // facility access 25, the street's 35) begins on the far side, so a

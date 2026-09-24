@@ -9,6 +9,8 @@
 //! 2. At or under the exit speed where the ramp curve begins.
 //! 3. A clean terminal: nothing run, nothing crossed "far too fast".
 //! 4. An arrival: no missed exit, no strand, no crawl far from the stop.
+//!    On the streets, the light and the stop sign are stops too: nothing
+//!    run there either, and the assists drive on from them.
 //! 5. No line naming an assist that is off, or a key this lane keeping
 //!    does not give the driver.
 //!
@@ -28,7 +30,7 @@
 
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{
-    CorridorDetail, GradeSegment, Interchange, Leg, Route, SpeedLimitSample,
+    CorridorDetail, GradeSegment, Interchange, Leg, Route, SpeedLimitSample, StreetControl,
 };
 use ff_core::settings::Settings;
 use ff_core::sim::trip::{Trip, TripOptions};
@@ -88,9 +90,13 @@ enum Kind {
     FreeFlow5x,
     ShortMeasured,
     DestinationChain,
+    /// The destination's streets with a traffic light (red until the truck
+    /// is stopped at it) and a stop sign on them, played through the ramp
+    /// terminal's own rules.
+    StreetChain,
 }
 
-const KINDS: [Kind; 7] = [
+const KINDS: [Kind; 8] = [
     Kind::SignalRed,
     Kind::SignalGreen,
     Kind::StopSign,
@@ -98,6 +104,7 @@ const KINDS: [Kind; 7] = [
     Kind::FreeFlow5x,
     Kind::ShortMeasured,
     Kind::DestinationChain,
+    Kind::StreetChain,
 ];
 
 impl Preset {
@@ -142,8 +149,12 @@ impl Kind {
             Kind::SignalRed | Kind::SignalGreen => "signal",
             Kind::StopSign | Kind::ShortMeasured => "stop",
             Kind::Yield => "yield",
-            Kind::FreeFlow5x | Kind::DestinationChain => "none",
+            Kind::FreeFlow5x | Kind::DestinationChain | Kind::StreetChain => "none",
         }
+    }
+
+    fn chain(self) -> bool {
+        matches!(self, Kind::DestinationChain | Kind::StreetChain)
     }
 
     fn time_scale(self) -> f64 {
@@ -224,7 +235,7 @@ fn bench(d: &mut DrivingState, kind: Kind) {
 
 fn start(preset: Preset, kind: Kind) -> PlaytestHarness {
     let mut harness = PlaytestHarness::new();
-    if kind == Kind::DestinationChain {
+    if kind.chain() {
         let world = get_world();
         let (chain, _) = destinations(world, 1);
         let destination = chain.first().expect("a chain facility").clone();
@@ -290,6 +301,9 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
     let assist_braking = d.truck().brake > 0.01;
     let Some(ramp_mi) = d.ramp_mi else {
         if d.surface_chain || d.trip.is_facility_approach_route() {
+            if let Some(keys) = street_bar_keys(d, preset, braking) {
+                return keys;
+            }
             // The streets: the posted number, the corner's advise speed, and
             // a stop at the gate, braked for late.
             if d.destination_arrival_active || d.keeper_mph.is_some() || d.cruise_mph.is_some() {
@@ -364,7 +378,7 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
             creep = true;
         }
     } else {
-        let continues = kind == Kind::DestinationChain;
+        let continues = kind.chain();
         if continues {
             // The ramp's end hands off to the streets: no stop there.
             cruise_to = 20.0;
@@ -393,6 +407,82 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
         && speed < cruise_to - 3.0
         && (d.ramp_terminal_done || bar_mi > 0.03);
     (brake, go)
+}
+
+/// The driver at a light or sign on the streets, or None when there is none
+/// to stop for: a green is driven like the street. With route-transition
+/// assistance on the assist makes the stop and the driver stays off the
+/// pedals unless it is late; on their own they brake late for the bar, wait
+/// out a red or a gap, and pull away.
+fn street_bar_keys(d: &mut DrivingState, preset: Preset, braking: bool) -> Option<(bool, bool)> {
+    if d.street_bar_mi.is_none() || d.ramp_terminal_done || !d.ramp_light_announced {
+        return None;
+    }
+    let gap = d.terminal_gap_mi()?;
+    let speed = d.truck().speed_mph();
+    let assist_braking = d.truck().brake > 0.01;
+    let control = d.ramp_control.clone();
+    let phase = d.ramp_light_phase();
+    let clear = if control == "yield" {
+        d.yield_gap_clear()
+    } else {
+        d.cross_bubble
+            .as_ref()
+            .is_none_or(|bubble| bubble.clear_to_cross())
+    };
+    if control == "signal" && phase == "green" {
+        return None;
+    }
+    let demand = needed(speed, 0.0, gap.max(0.0));
+    if speed <= RED_STOP_MPH && gap < 0.03 {
+        let waiting = match control.as_str() {
+            "signal" => true,
+            "yield" => !clear,
+            _ => d.ramp_waiting_at_sign && !clear,
+        };
+        if waiting || (preset.transition() && d.ramp_assist_said) {
+            return Some((!assist_braking && !preset.transition(), false));
+        }
+        return Some((
+            false,
+            speed < 2.0 && !assist_braking && !d.approach_pull_ahead,
+        ));
+    }
+    let brake = demand > DRIVER_LATE_MPS2 || (braking && demand > 0.5);
+    // Up to the bar on a gentle stop profile, and off the throttle once an
+    // assist has said it is braking for it.
+    let terminal_owned = d.ramp_assist_said && speed > RED_STOP_MPH;
+    let gentle = (2.0 * 0.8 * gap.max(0.0) * 1609.344).sqrt() * MPH_PER_MPS;
+    let go = !brake
+        && !assist_braking
+        && !terminal_owned
+        && gap > 0.03
+        && speed < gentle.min(driver_target_mph(d)) - 3.0;
+    Some((brake, go))
+}
+
+/// Put a traffic light and a stop sign on the destination's streets, in
+/// place of whatever the map has there, so every run meets the same two.
+fn lay_street_controls(d: &mut DrivingState) {
+    let streets: Vec<usize> = (1..d.trip.route.legs.len())
+        .filter(|i| !d.trip.route.legs[*i].local_yard)
+        .collect();
+    for leg in d.trip.route.legs.iter_mut() {
+        std::sync::Arc::make_mut(leg).local_controls.clear();
+    }
+    let (light, sign) = match streets.as_slice() {
+        [] => return,
+        [only] => ((*only, 0.0), (*only, d.trip.route.legs[*only].miles / 2.0)),
+        [first, second, ..] => ((*first, 0.0), (*second, 0.0)),
+    };
+    for ((leg, at_mi), kind) in [(light, "signal"), (sign, "stop")] {
+        std::sync::Arc::make_mut(&mut d.trip.route.legs[leg])
+            .local_controls
+            .push(StreetControl {
+                at_mi,
+                kind: kind.to_string(),
+            });
+    }
 }
 
 fn hold(harness: &mut PlaytestHarness, brake: bool, go: bool) {
@@ -427,7 +517,8 @@ fn drive(preset: Preset, kind: Kind) -> Run {
     let mut braking = false;
     let mut on_ramp_seen = false;
     let mut stopped_s = 0.0;
-    let budget = if kind == Kind::DestinationChain {
+    let mut laid = false;
+    let budget = if kind.chain() {
         30 * 60 * 25
     } else {
         30 * 60 * 8
@@ -466,6 +557,23 @@ fn drive(preset: Preset, kind: Kind) -> Run {
             harness.with_drive(|d, _| {
                 if !d.ramp_terminal_done {
                     d.ramp_light_offset_s = d.ramp_light_red_s() + 1.0;
+                    d.ramp_light_timer = 0.0;
+                }
+            });
+        }
+        if kind == Kind::StreetChain {
+            if !laid && harness.read_drive(|d| d.surface_chain) {
+                laid = true;
+                harness.with_drive(|d, _| lay_street_controls(d));
+            }
+            harness.with_drive(|d, _| {
+                // The street light: red until the truck is stopped at it.
+                if d.street_bar_mi.is_some()
+                    && d.ramp_control == "signal"
+                    && !d.ramp_waiting_at_light
+                    && !d.ramp_terminal_done
+                {
+                    d.ramp_light_offset_s = 0.0;
                     d.ramp_light_timer = 0.0;
                 }
             });
@@ -565,6 +673,10 @@ fn drive(preset: Preset, kind: Kind) -> Run {
                 let stop_left = match d.ramp_mi {
                     Some(mi) if !d.ramp_terminal_done => mi - RAMP_ACCESS_MI,
                     Some(mi) => mi,
+                    // A light or sign on the streets is a stop too.
+                    None if d.street_bar_mi.is_some() && !d.ramp_terminal_done => {
+                        d.terminal_gap_mi().unwrap_or(0.0)
+                    }
                     None => d.trip.remaining_miles(),
                 };
                 (

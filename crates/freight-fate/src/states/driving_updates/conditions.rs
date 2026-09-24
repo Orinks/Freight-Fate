@@ -458,6 +458,13 @@ impl DrivingState {
     /// release stays the driver's. A driver who braked the pull-ahead off has
     /// said no for this ramp.
     pub(crate) fn approach_pull_ahead_available(&mut self, ctx: &GameContext) -> bool {
+        if self.on_street_control() {
+            // A light or sign on the streets: the speed keeper is what drives
+            // on from it, so the same promise needs the keeper.
+            return ctx.settings.destination_approach_assist
+                && ctx.settings.speed_keeper
+                && !self.approach_pull_ahead_canceled;
+        }
         if !ctx.settings.destination_approach_assist
             || self.ramp_stop.is_none()
             || self.approach_pull_ahead_canceled

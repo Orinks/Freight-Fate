@@ -26,10 +26,23 @@ impl DrivingState {
 
     /// The destination facility's tier-1 street chain, or None.
     ///
-    /// Only a genuine multi-segment turn-level route makes a chain; a single
-    /// synthetic leg would just be the old teleport with extra steps, so those
-    /// facilities keep the scripted arrival.
+    /// The chain from the end of the ramp this delivery takes, when the bake
+    /// has one from that terminal: it starts on the street the ramp meets.
+    /// Otherwise the facility's default chain, routed from the city centre,
+    /// and only a genuine multi-segment turn-level route makes one of those;
+    /// a single synthetic leg would just be the old teleport with extra
+    /// steps, so those facilities keep the scripted arrival.
     pub fn surface_chain_route(&self, ctx: &GameContext) -> Option<Route> {
+        if let Some(node) = self.destination_terminal_node(ctx) {
+            let exit_chain = ctx
+                .world
+                .facility_exit_route(&self.job.destination, &self.job.destination_location, node)
+                .ok()
+                .flatten();
+            if let Some(route) = exit_chain.filter(|route| !route.legs.is_empty()) {
+                return Some(route);
+            }
+        }
         let route = ctx
             .world
             .facility_approach_route(&self.job.destination, &self.job.destination_location)
@@ -41,6 +54,32 @@ impl DrivingState {
             return None;
         }
         Some(route)
+    }
+
+    /// The OSM node the destination exit's ramp ends at, for the direction
+    /// this delivery arrives in: the key of the street chain from there. Read
+    /// off the highway trip, which is parked aside once the streets begin.
+    pub fn destination_terminal_node(&self, ctx: &GameContext) -> Option<i64> {
+        if self.phase != DRIVE_PHASE_DELIVERY {
+            return None;
+        }
+        let highway = if self.surface_chain {
+            self.highway_trip.as_ref()?
+        } else {
+            &self.trip
+        };
+        let exit_mi = match self.ramp_stop.as_ref() {
+            Some(stop) if stop.stop_type == "delivery_destination" => {
+                stop.interchange_mi.unwrap_or(stop.at_mi)
+            }
+            _ => {
+                crate::states::driving_events::destination_exit::scan_destination_exit(
+                    ctx.world, highway, true,
+                )?
+                .0
+            }
+        };
+        highway.ramp_terminal_node_at(exit_mi)
     }
 
     /// Whether this delivery's ramp hands off to a street chain.

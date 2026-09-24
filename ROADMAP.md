@@ -1353,11 +1353,13 @@ gate, turned up these on dev's own code.
       Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
       miles off this road by its own source note. Move it to an I-20
       Abilene leg and re-bake.
-- [ ] **The speed keeper between close street turns.** It builds back to
+- [x] **The speed keeper between close street turns.** It built back to
       the zone limit between turns a quarter mile apart (9 to 21 mph), then
-      eases in the last 0.07 mile at about 0.3 g. Hold the lower number
-      when the next turn is inside the keeper's own build-and-shed
-      distance.
+      eased in the last 0.07 mile at about 0.3 g. It now holds the next
+      turn's advise speed when that turn is inside its own build-and-shed
+      distance (`keeper_build_and_shed_mi`; build rate 0.4 m/s2, under the
+      0.49 measured with 18 t aboard and 0.94 empty). Pinned: peak between
+      the corners at or under the second's number, under 0.2 g into it.
 
 ### September 24 realistic interstate exit
 
@@ -1423,7 +1425,7 @@ mainline behaviour.
 
 Streets from the ramp to the facility (owner order 2026-09-24). The data is
 baked (`tools/street_chain.py`, `facility_approaches.json` coverage
-`streets`); the driving side does not read any of it yet.
+`streets`), and the drive reads all of it (below).
 
 - [x] **Ramp terminal per exit.** Each exit carries the OSM node its ramp
       ends at, per direction (`Trip::ramp_terminal_node_at`): 19,882 of the
@@ -1447,9 +1449,40 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       node with no direction were left out as ambiguous.
 - [x] **Driveway** (`World::facility_driveway`): where the chain leaves the
       public street for a service or private way, on 1,875 exit chains.
-- [ ] **Wire the street data into driving**: per-street zones, stops and
-      signals at corners, the yard limit from the driveway, and the arrival
-      picking its chain by `ramp_terminal_node_at`.
+- [x] **Per-street limits in driving** (`Trip::street_zones`): one zone
+      per street at its baked limit, joined where neighbours agree; the
+      keeper, enforcement, corner advise speeds and the assists read the same
+      number. A change is said as "Speed limit raised to 40"; only a drop of
+      10 or more is warned, at the highway pacenote's lead. Chains with no
+      street detail keep the old single zone and gate zone.
+- [x] **The arrival picks its chain by the exit taken**
+      (`DrivingState::destination_terminal_node`): the exit chain from that
+      ramp terminal when one is baked, the city-centre chain otherwise.
+- [x] **The yard from the driveway** (`Leg::local_yard`, `YARD_LIMIT_MPH`
+      15, industry practice, assumed for any one yard): no 15 on a public
+      street; the driveway is a judged turn at corner speed; the gate
+      warning waits for the yard, and a gate standing on the street is
+      warned at the braking distance or six seconds, whichever is longer.
+- [x] **Street lights and signs** (`driving_events/street_controls.rs`):
+      each READ signal, stop, all-way stop and yield plays through the ramp
+      terminal's own state (`terminal_gap_mi`): light cycle, cross traffic,
+      bar countdown, route-transition assistance, and the keeper pulling
+      ahead when facility stopping assistance is on. A green is driven at
+      street speed and not spoken past; an all-way stop has no crossroad
+      traffic; the ramp terminal's own node is not played twice. Deadlines
+      and pickup ETAs plan each street at its limit (`route_planning_limit`).
+      The exit matrix gained a street chain with a red light and a stop sign.
+- [ ] **Street controls outbound.** A departure chain drops the READ
+      controls, which face the inbound truck. Bake the controls facing the
+      other way and play them on the way out.
+- [ ] **Truck stops, rest areas and scales still end at the ramp.** No
+      driveway or lot position is baked for them, so the crossroad stretch
+      from the ramp terminal to the lot cannot be derived honestly. Bake the
+      distance from the terminal node to the POI's entrance (read, or derived
+      from the POI coordinates and labelled so), then run it as a street.
+- [ ] **Gate and dock are one point (NOT built; owner has not decided).**
+      A real arrival stops at the check-in, drives the yard at 5 to 15 and
+      backs into a door. Recorded only; not to be built unasked.
 - [ ] **Ramp terminals on service stubs.** The ramp walk stops at any
       crossroad, so a service stub touching a ramp mid-link can stand in for
       the real terminal (Baltimore node 9879536272); such chains fail as

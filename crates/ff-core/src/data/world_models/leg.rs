@@ -137,6 +137,11 @@ pub struct Leg {
     /// highways, on chains baked before the street detail, and outbound.
     pub local_limit: Option<StreetLimit>,
     pub local_controls: Vec<StreetControl>,
+    /// The leg lies past the facility's driveway, on its own service or
+    /// private way: the yard, not a public street. Derived from the chain's
+    /// baked driveway (`Driveway`), which is a leg boundary on 1,872 of 1,875
+    /// exit chains; a driveway inside a leg marks nothing.
+    pub local_yard: bool,
     /// Whether the leg runs on a divided carriageway, baked from real OSM
     /// oneway-pair geometry (Track D2). None where the bake was mixed or
     /// thin -- honest absence; the runtime infers from road class instead.
@@ -178,6 +183,7 @@ impl Leg {
             local_turn_deg: 0.0,
             local_limit: None,
             local_controls: Vec::new(),
+            local_yard: false,
             divided: None,
             meta_complete: None,
             corridor: OnceCell::new(),
@@ -214,6 +220,23 @@ impl Leg {
         self.local_limit = limit;
         self.local_controls = controls;
         self
+    }
+
+    /// Mark this local leg as past the driveway (see `local_yard`).
+    pub fn with_yard(mut self, yard: bool) -> Self {
+        self.local_yard = yard;
+        self
+    }
+
+    /// The posted limit of this facility street, when the chain carries the
+    /// street detail: the yard's own limit past the driveway, else the
+    /// street's baked limit whatever its kind (read, statutory or assumed).
+    /// None on a highway leg and on a chain baked before the street detail.
+    pub fn street_limit_mph(&self) -> Option<f64> {
+        if self.local_yard {
+            return Some(crate::sim::trip_models::YARD_LIMIT_MPH);
+        }
+        self.local_limit.as_ref().map(|limit| limit.mph)
     }
 
     /// A leg whose corridor detail is parsed from `source` on first read.
@@ -425,6 +448,7 @@ impl Clone for Leg {
             local_turn_deg: self.local_turn_deg,
             local_limit: self.local_limit.clone(),
             local_controls: self.local_controls.clone(),
+            local_yard: self.local_yard,
             divided: self.divided,
             meta_complete: self.meta_complete,
             corridor,

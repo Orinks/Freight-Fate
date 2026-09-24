@@ -276,6 +276,16 @@ pub const DESTINATION_APPROACH_LIMIT_MPH: f64 = RAMP_MAX_MPH;
 /// private facility, so this is the game's number, chosen at the top of the
 /// observed 5-15 range.
 pub const FACILITY_GATE_LIMIT_MPH: f64 = 15.0;
+/// The yard limit: past the driveway, on the facility's own way, up to the
+/// check-in stop at the gate. INDUSTRY PRACTICE, ASSUMED for any one yard: no
+/// public law reaches inside a private gate, and operators post their own --
+/// New Orleans Terminal "15 MPH in the yard" (notml.com/trucker-information),
+/// Northwest Seaport Alliance terminals 10-15 (nwseaportalliance.com terminal
+/// safety rules), Port Houston Bayport 20 (HSSE SAF401 driver manual), the
+/// Amazon carrier SOP 10 mph on site (Pan-EU/GB, Dec 2025; not US). 15 is the
+/// middle of that spread, and the gate's own number, so the check-in rules
+/// and the yard agree.
+pub const YARD_LIMIT_MPH: f64 = FACILITY_GATE_LIMIT_MPH;
 pub const FACILITY_GATE_ZONE_MI: f64 = 0.5;
 /// ...but never more than this share of the approach.
 pub const FACILITY_GATE_MAX_SHARE: f64 = 0.35;

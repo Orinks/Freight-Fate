@@ -481,8 +481,16 @@ pub fn route_planning_limit(
 ) -> f64 {
     let route_miles = route.miles();
     let mut limit;
+    // A chain with the street detail plans each street at the limit the drive
+    // will post on it, the yard included (`Trip::street_zones`); a chain
+    // without it keeps the flat access-road number and the gate stretch.
+    let street_detail = is_facility_approach
+        && route
+            .legs
+            .iter()
+            .any(|leg| leg.local_limit.is_some() || leg.local_yard);
     if is_facility_approach {
-        limit = FACILITY_ACCESS_LIMIT_MPH;
+        limit = leg.street_limit_mph().unwrap_or(FACILITY_ACCESS_LIMIT_MPH);
     } else {
         let baked = leg_speed_limit_at(leg, offset_mi);
         let toward_city = &route.cities[(leg_index + 1).min(route.cities.len() - 1)];
@@ -505,7 +513,7 @@ pub fn route_planning_limit(
             limit = limit.min(DESTINATION_APPROACH_LIMIT_MPH);
         }
     }
-    if route_mi >= (route_miles - FACILITY_GATE_ZONE_MI).max(0.0) {
+    if !street_detail && route_mi >= (route_miles - FACILITY_GATE_ZONE_MI).max(0.0) {
         limit = limit.min(FACILITY_GATE_LIMIT_MPH);
     }
     limit * DEADLINE_PLANNING_SPEED_FACTOR

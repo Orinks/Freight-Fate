@@ -72,6 +72,16 @@ impl Trip {
                 self.speed_value(zone.limit_mph)
             );
         }
+        if self.street_zone_before(zone).is_some() {
+            // The next street's lower number, the way the limit pacenote says
+            // it on a highway; "facility access road ahead" was the road the
+            // truck is already on.
+            return format!(
+                "Speed limit drops to {} in {}.",
+                self.speed_value(zone.limit_mph),
+                self.ahead_text(ahead)
+            );
+        }
         if zone.reason == "heavy traffic" && zone.aadt.is_some() {
             return format!(
                 "In {}, {} ahead. Traffic slowing to {}.",
@@ -137,6 +147,22 @@ impl Trip {
                 self.speed_value(zone.limit_mph)
             );
         }
+        if zone.reason == super::streets::YARD_ZONE {
+            return format!(
+                "Into the yard. Yard limit {}.",
+                self.speed_value(zone.limit_mph)
+            );
+        }
+        if let Some(before) = self.street_zone_before(zone) {
+            // A new street's limit, said the way the road signs it: the
+            // number, and which way it went.
+            let verb = if zone.limit_mph < before.limit_mph {
+                "reduced to"
+            } else {
+                "raised to"
+            };
+            return format!("Speed limit {verb} {}.", self.speed_value(zone.limit_mph));
+        }
         // Say you are *in* it, not that it is ahead; pairs with the "End of
         // ... zone" exit.
         format!(
@@ -171,6 +197,27 @@ impl Trip {
         for i in 0..self.zones.len() {
             if self.zones[i].reason == "construction merge" {
                 continue;
+            }
+            // The yard begins at the driveway, which is a turn: its own call
+            // names the corner and its speed, lower than the yard's.
+            if self.zones[i].reason == super::streets::YARD_ZONE {
+                continue;
+            }
+            // A street's change of limit is signed where it changes. Only a
+            // drop big enough to brake for earns a warning ahead, the rule
+            // the highway pacenote keeps (`next_limit_drop`); a rise never.
+            // Only at the pacenote's own lead, and only to a truck over the
+            // new number: a zone warning's reach is sized for the highway, and
+            // "drops to 30 in 2 miles" four streets out named a sign the
+            // driver could do nothing about yet.
+            if let Some(before) = self.street_zone_before(&self.zones[i]) {
+                let speed = self.truck.speed_mph();
+                if before.limit_mph - self.zones[i].limit_mph < LIMIT_DROP_WARN_MIN_DELTA_MPH
+                    || speed <= self.zones[i].limit_mph + PACENOTE_MARGIN_MPH
+                    || self.zones[i].start_mi - pos > self.limit_drop_warning_lead_mi(speed)
+                {
+                    continue;
+                }
             }
             if self
                 .announced_zone_warnings

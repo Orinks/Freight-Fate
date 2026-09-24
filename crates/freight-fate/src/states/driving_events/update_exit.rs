@@ -50,6 +50,7 @@ impl DrivingState {
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
             || self.departure_merge_recovery
             || self.on_laid_out_ramp()
+            || self.street_control_on_real_time()
             || (self.ramp_mi.is_some()
                 && (self
                     .ramp_stop
@@ -105,6 +106,8 @@ impl DrivingState {
             _ => None,
         };
         self.trip.exit_approach_mi = ahead_to_exit.filter(|ahead| *ahead > 0.0);
+        // A facility's own lights and signs, on its streets.
+        self.update_street_controls(ctx, accelerating);
         if self.ramp_mi.is_some() {
             self.update_active_ramp(ctx, moved_mi, dt, accelerating);
             return;
