@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 import pulse_synth
 import soundfile as sf
-from pulse_synth import SR, write_wav
+from pulse_synth import SR
 
 pulse_synth.OUT = Path(r"C:\temp\fftest")
 SRC = Path(r"C:\temp\fftest\splice")
@@ -51,8 +51,10 @@ def bands(x: np.ndarray) -> tuple[float, ...]:
     S = np.abs(np.fft.rfft(x * np.hanning(len(x))))
     f = np.fft.rfftfreq(len(x), 1.0 / SR)
     tot = S.sum() or 1.0
-    return tuple(S[(f >= a) & (f < b)].sum() / tot
-                 for a, b in ((0, 200), (200, 1000), (1000, 4000), (4000, SR / 2)))
+    return tuple(
+        S[(f >= a) & (f < b)].sum() / tot
+        for a, b in ((0, 200), (200, 1000), (1000, 4000), (4000, SR / 2))
+    )
 
 
 # A Mack E7 idles near 600 and redlines around 2100. Constraining the
@@ -81,9 +83,11 @@ def firing_track(x: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     times, hz, strength = [], [], []
     cand = np.arange(RPM_MIN, RPM_MAX, 5.0) / 20.0  # firing freq = rpm/20
     for i in range(0, len(x) - w, hop):
-        seg = x[i:i + w] * np.hanning(w)
-        if np.sqrt(np.mean(seg ** 2)) < 1e-4:
-            times.append(i / SR); hz.append(0.0); strength.append(0.0)
+        seg = x[i : i + w] * np.hanning(w)
+        if np.sqrt(np.mean(seg**2)) < 1e-4:
+            times.append(i / SR)
+            hz.append(0.0)
+            strength.append(0.0)
             continue
         S = np.abs(np.fft.rfft(seg))
         f = np.fft.rfftfreq(w, 1.0 / SR)
@@ -109,7 +113,8 @@ def firing_track(x: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         # typical one, which is scale-free and thresholds cleanly around 1.5.
         med = float(np.median(scores)) or 1.0
         bi = int(np.argmax(scores))
-        times.append(i / SR); hz.append(float(cand[bi]))
+        times.append(i / SR)
+        hz.append(float(cand[bi]))
         strength.append(float(scores[bi] / med))
     return np.array(times), np.array(hz), np.array(strength)
 
@@ -121,9 +126,11 @@ def cycle_repetition(x: np.ndarray, lo: float = 15.0, hi: float = 140.0) -> floa
         n = min((len(x) // p) - 1, 24)
         if n < 6:
             continue
-        cs = [np.corrcoef(x[i * p:(i + 1) * p], x[(i + 1) * p:(i + 2) * p])[0, 1]
-              for i in range(n)
-              if x[i * p:(i + 1) * p].std() > 0 and x[(i + 1) * p:(i + 2) * p].std() > 0]
+        cs = [
+            np.corrcoef(x[i * p : (i + 1) * p], x[(i + 1) * p : (i + 2) * p])[0, 1]
+            for i in range(n)
+            if x[i * p : (i + 1) * p].std() > 0 and x[(i + 1) * p : (i + 2) * p].std() > 0
+        ]
         if cs:
             best = max(best, float(np.mean(cs)))
     return best
@@ -134,21 +141,32 @@ def describe(name: str, x: np.ndarray) -> None:
     dur = len(x) / SR
     # Interior takes are low-dominated; exterior keeps its top end. Duff's
     # in-cab idle measures >4k = 0.07, the shipped synthetic loops 0.52-0.59.
-    verdict = "INTERIOR (low-dominated)" if b[3] < 0.15 else \
-              "exterior or bright" if b[3] > 0.25 else "borderline"
+    verdict = (
+        "INTERIOR (low-dominated)"
+        if b[3] < 0.15
+        else "exterior or bright"
+        if b[3] > 0.25
+        else "borderline"
+    )
     print(f"\n=== {name} ===")
-    print(f"  {dur:.1f}s   <200 {b[0]:.2f}  200-1k {b[1]:.2f}  "
-          f"1k-4k {b[2]:.2f}  >4k {b[3]:.2f}   -> {verdict}")
-    rep = cycle_repetition(x[int(len(x) * 0.4):int(len(x) * 0.4) + int(3 * SR)])
-    print(f"  cycle repetition r={rep:+.3f}  "
-          f"({'REAL take' if rep < 0.90 else 'LOOPED -- do not use as a donor'})")
+    print(
+        f"  {dur:.1f}s   <200 {b[0]:.2f}  200-1k {b[1]:.2f}  "
+        f"1k-4k {b[2]:.2f}  >4k {b[3]:.2f}   -> {verdict}"
+    )
+    rep = cycle_repetition(x[int(len(x) * 0.4) : int(len(x) * 0.4) + int(3 * SR)])
+    print(
+        f"  cycle repetition r={rep:+.3f}  "
+        f"({'REAL take' if rep < 0.90 else 'LOOPED -- do not use as a donor'})"
+    )
 
     t, hz, s = firing_track(x)
     ok = s > 1.6
     if ok.any():
         rpm = hz[ok] * 20.0
-        print(f"  engine present {100 * ok.mean():4.1f}% of the file   "
-              f"rpm range {rpm.min():.0f}-{rpm.max():.0f}  (median {np.median(rpm):.0f})")
+        print(
+            f"  engine present {100 * ok.mean():4.1f}% of the file   "
+            f"rpm range {rpm.min():.0f}-{rpm.max():.0f}  (median {np.median(rpm):.0f})"
+        )
 
     # Coarse timeline: report where the engine speed changes materially.
     print("  timeline (firing freq -> rpm, 'quiet' = no clear engine):")
@@ -159,8 +177,9 @@ def describe(name: str, x: np.ndarray) -> None:
 
     # Windows where the engine is weak but the file is not silent: candidate
     # wind-and-tire bed material.
-    rms = np.array([np.sqrt(np.mean(x[int(a * SR):int(a * SR) + int(WIN_S * SR)] ** 2))
-                    for a in t])
+    rms = np.array(
+        [np.sqrt(np.mean(x[int(a * SR) : int(a * SR) + int(WIN_S * SR)] ** 2)) for a in t]
+    )
     loud = rms > np.median(rms) * 0.55
     quiet_engine = loud & (s < 1.35)
     if quiet_engine.any():
@@ -186,7 +205,7 @@ def main() -> None:
     for path in files:
         x = load(path)
         describe(path.name, x)
-    print(f"\n(excerpts can be cut once you say which windows you want)")
+    print("\n(excerpts can be cut once you say which windows you want)")
 
 
 if __name__ == "__main__":

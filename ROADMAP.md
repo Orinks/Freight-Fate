@@ -482,13 +482,13 @@ its status or release decision.
       `freightfate --playtest-road --find <feature>` and
       `freightfate --playtest-sandbox --launch`; `tools/playtest_watch.py`
       still follows their logs.
-- [ ] `av` and `scipy` are imported by `tools/encode_music_opus.py`,
-      `tools/patch_loop_transients.py` and the `sound-test/` scripts but
-      declared nowhere in `pyproject.toml`. Add them to a group (`tooling`
-      fits) so a fresh checkout can run those tools.
-- [ ] `sound-test/` carries old ruff lint and format debt, so the
-      pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
-      Clean it up and drop the exclude.
+- [x] `av` and `scipy`, imported by `tools/encode_music_opus.py`,
+      `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
+      declared in the `tooling` group and locked, so a fresh checkout runs
+      them with `uv run --group tooling ...`.
+- [x] `sound-test/` is ruff-clean (lint and format) and the pre-commit ruff
+      hooks no longer exclude it. CI's lint step still covers only `tests`
+      and `tools`.
 - [ ] Port the "bear is CB voice only" source sweep. The Python game had a
       test that failed on the word outside a CB clause in any player-facing
       string; the Rust

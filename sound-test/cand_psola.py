@@ -17,18 +17,18 @@ point -- it defeats the micro-engine bug by construction.
 
 from __future__ import annotations
 
+import cand_common as C
 import numpy as np
 from scipy.signal import butter, filtfilt
-
-import cand_common as C
 
 RNG = np.random.default_rng(7)
 SR = C.SR
 KEY = "psola"
 
 
-def tame_clatter(x: np.ndarray, f_lo: float = 1600.0, f_hi: float = 3500.0,
-                 g_hi: float = 0.45) -> np.ndarray:
+def tame_clatter(
+    x: np.ndarray, f_lo: float = 1600.0, f_hi: float = 3500.0, g_hi: float = 0.45
+) -> np.ndarray:
     """One static high-shelf that eases this take's extra injector clatter.
 
     int_idle_low sits ~+10 dB above the reference cab in the 2.5-5 kHz clatter
@@ -40,8 +40,9 @@ def tame_clatter(x: np.ndarray, f_lo: float = 1600.0, f_hi: float = 3500.0,
     """
     n = len(x)
     f = np.fft.rfftfreq(n, 1.0 / SR)
-    t = np.clip((np.log2(np.maximum(f, 1.0)) - np.log2(f_lo))
-                / (np.log2(f_hi) - np.log2(f_lo)), 0.0, 1.0)
+    t = np.clip(
+        (np.log2(np.maximum(f, 1.0)) - np.log2(f_lo)) / (np.log2(f_hi) - np.log2(f_lo)), 0.0, 1.0
+    )
     return np.fft.irfft(np.fft.rfft(x) * (1.0 + (g_hi - 1.0) * t), n)
 
 
@@ -52,7 +53,7 @@ def firing_marks(x: np.ndarray, rpm_local: float) -> np.ndarray:
     local energy peak of the low-passed firing envelope so grains are phase
     coherent (each grain centred on a real combustion event).
     """
-    p0 = SR * 20.0 / rpm_local                      # nominal firing period (samples)
+    p0 = SR * 20.0 / rpm_local  # nominal firing period (samples)
     # firing thump envelope: rectify then smooth over ~half a firing period
     b, a = butter(2, 200.0 / (SR / 2), btype="low")
     env = filtfilt(b, a, np.abs(x))
@@ -83,8 +84,7 @@ def cut_grains(x: np.ndarray, marks: np.ndarray, half: int) -> list[np.ndarray]:
     return grains
 
 
-def ola(grains: list[np.ndarray], half: int, n_out: int,
-        period_fn, gain_fn=None) -> np.ndarray:
+def ola(grains: list[np.ndarray], half: int, n_out: int, period_fn, gain_fn=None) -> np.ndarray:
     """Overlap-add grains at a target firing period, normalised by window sum.
 
     period_fn(sample_index) -> target firing period in samples (may vary for a
@@ -102,8 +102,8 @@ def ola(grains: list[np.ndarray], half: int, n_out: int,
         c = int(centre)
         g = grains[k % ng]
         gain = 1.0 if gain_fn is None else gain_fn(centre)
-        out[c - half:c - half + 2 * half] += g * gain
-        wsum[c - half:c - half + 2 * half] += win
+        out[c - half : c - half + 2 * half] += g * gain
+        wsum[c - half : c - half + 2 * half] += win
         centre += period_fn(centre)
         k += 1
     y = out[:n_out] / np.maximum(wsum[:n_out], 1e-4)
@@ -112,18 +112,18 @@ def ola(grains: list[np.ndarray], half: int, n_out: int,
 
 def main() -> None:
     src = C.load_wav(C.LICENSED["int_idle_low"])
-    src = tame_clatter(src)             # ease the take's extra top-end clatter
+    src = tame_clatter(src)  # ease the take's extra top-end clatter
 
     # --- steady idle window + its measured rpm --------------------------------
     win = C.find_steady_window(src, 660.0, dur_s=4.0, tol=90.0)
-    if win is None:                     # fall back to the low-rpm head of the take
+    if win is None:  # fall back to the low-rpm head of the take
         win = src[: int(6.0 * SR)]
     t, r = C.rpm_track(win)
     good = r[r > 0]
     idle_rpm = float(np.median(good)) if len(good) else 660.0
     idle_rpm = float(np.clip(idle_rpm, 600.0, 720.0))
 
-    half = int(round(SR * 20.0 / idle_rpm))          # one firing period (grain half)
+    half = int(round(SR * 20.0 / idle_rpm))  # one firing period (grain half)
     marks = firing_marks(win, idle_rpm)
     grains = cut_grains(win, marks, half)
     if len(grains) < 6:
@@ -131,10 +131,9 @@ def main() -> None:
 
     # --- IDLE: re-space at the idle period, integer grain count, loop ---------
     period_idle = SR * 20.0 / idle_rpm
-    n_grains_loop = len(grains)                       # use each real firing once
+    n_grains_loop = len(grains)  # use each real firing once
     loop_len = int(round(n_grains_loop * period_idle))
-    idle_raw = ola(grains, half, loop_len,
-                   period_fn=lambda c: period_idle)
+    idle_raw = ola(grains, half, loop_len, period_fn=lambda c: period_idle)
     idle_loop = C.make_seamless_loop(idle_raw)
     idle_tiled = C.tile(idle_loop, 6.0)
 
@@ -169,14 +168,15 @@ def main() -> None:
     p_cru = C.write_wav(f"candidate_{KEY}_cruise1500.wav", cruise_tiled)
 
     metrics = C.score(idle_loop, rev)
-    print("idle_rpm measured:", round(idle_rpm, 1),
-          " grains:", len(grains), " half(samples):", half)
+    print(
+        "idle_rpm measured:", round(idle_rpm, 1), " grains:", len(grains), " half(samples):", half
+    )
     print("files:")
     for p in (p_idle, p_rev, p_cru):
         print("  ", p)
     print("score:", metrics)
     for nm, arr in (("idle", idle_tiled), ("rev", rev), ("cruise", cruise_tiled)):
-        print(f"  rms {nm}:", round(float(np.sqrt(np.mean(arr ** 2))), 4))
+        print(f"  rms {nm}:", round(float(np.sqrt(np.mean(arr**2))), 4))
 
 
 if __name__ == "__main__":
