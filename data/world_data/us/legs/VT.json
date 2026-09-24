@@ -2604,7 +2604,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 157.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2617,7 +2617,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.6349919,
           "lon": -73.7547675,
@@ -11469,7 +11470,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 88.94,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11482,7 +11483,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,

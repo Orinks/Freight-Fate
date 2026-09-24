@@ -6415,7 +6415,7 @@
           "name": "Flying J Travel Center Russellville",
           "type": "travel_center",
           "at_mi": 54.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the russellville_ar_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the russellville_ar_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6428,7 +6428,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.28315,
           "lon": -93.08943,
@@ -8734,7 +8735,7 @@
           "name": "Pilot Travel Center Springdale",
           "type": "travel_center",
           "at_mi": 14.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Springdale; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Springdale; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8747,7 +8748,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 36.17638,
           "lon": -94.19332,
@@ -11557,7 +11559,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 14.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 635; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 635; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11570,7 +11572,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.54106,
           "lon": -94.23542,
@@ -14471,7 +14474,7 @@
           "name": "Love's Travel Stop Clarksville",
           "type": "travel_center",
           "at_mi": 64.8,
-          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 64.8 of this leg (6.4 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 64.8 of this leg (6.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -14484,7 +14487,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -14521,7 +14525,7 @@
           "name": "Flying J Travel Center Russellville",
           "type": "travel_center",
           "at_mi": 85.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14534,7 +14538,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.2831538,
           "lon": -93.0894274,
@@ -20954,7 +20959,7 @@
           "name": "Littlefield Express",
           "type": "travel_center",
           "at_mi": 124.35,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20967,7 +20972,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.3145014,
           "lon": -94.4015506,
@@ -22114,7 +22120,7 @@
           "name": "Love's Travel Stop Little Rock",
           "type": "travel_center",
           "at_mi": 42.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 457 at Little Rock; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 457 at Little Rock; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22127,7 +22133,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.65684,
           "lon": -92.41355,
@@ -23783,7 +23790,7 @@
           "name": "Pilot Travel Center Caddo Valley",
           "type": "travel_center",
           "at_mi": 27.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Caddo Valley; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Caddo Valley; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23796,7 +23803,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.18699,
           "lon": -93.06961,
@@ -34694,7 +34702,7 @@
           "name": "Flying J Travel Center Russellville",
           "type": "travel_center",
           "at_mi": 74.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34707,7 +34715,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.2831538,
           "lon": -93.0894274,
@@ -34722,7 +34731,7 @@
           "name": "Love's Travel Stop Clarksville",
           "type": "travel_center",
           "at_mi": 94.2,
-          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 94.2 of this leg (6.3 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 94.2 of this leg (6.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -34735,7 +34744,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -39032,7 +39042,7 @@
           "name": "Love's Travel Stop Little Rock",
           "type": "travel_center",
           "at_mi": 11.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 457 at Little Rock; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 457 at Little Rock; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39045,7 +39055,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.6568381,
           "lon": -92.4135506,
@@ -39057,7 +39068,7 @@
           "name": "Pilot Travel Center Benton",
           "type": "travel_center",
           "at_mi": 19.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Benton; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Pilot store at Benton; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39070,7 +39081,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.6082509,
           "lon": -92.5329101,
@@ -39106,7 +39118,7 @@
           "name": "JJ's Truck Stop",
           "type": "travel_center",
           "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39119,7 +39131,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.4842625,
           "lon": -92.7272916,
@@ -44369,7 +44382,7 @@
           "name": "Flying J Travel Center Russellville",
           "type": "travel_center",
           "at_mi": 1.14,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the russellville_ar_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the russellville_ar_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Flying J store at Russellville; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44382,7 +44395,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.28315,
           "lon": -93.08943,
@@ -44392,7 +44406,7 @@
           "name": "Love's Travel Stop Clarksville",
           "type": "travel_center",
           "at_mi": 19.3,
-          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 19.3 of this leg (6.4 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 822 in Clarksville, AR on I-40, exit 57/S Crawford St; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 822 at Clarksville; matched by name, the only Love's the map has at Clarksville within 40 mi of mile 19.3 of this leg (6.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -44405,7 +44419,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -47932,7 +47947,7 @@
           "name": "Road Ranger New Boston",
           "type": "travel_center",
           "at_mi": 25.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Road Ranger store at New Boston; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Road Ranger store at New Boston; town DERIVED, not read: the nearest mapped place, 1.2 mi away; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -47945,7 +47960,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.47689,
           "lon": -94.41085,
@@ -47958,7 +47974,7 @@
           "name": "Pilot Travel Center Sulphur Springs",
           "type": "travel_center",
           "at_mi": 102.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Pilot store at Sulphur Springs; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Texas extract dated 2026-06-22, read 2026-09-17): Pilot store at Sulphur Springs; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -47971,7 +47987,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.11696,
           "lon": -95.63422,

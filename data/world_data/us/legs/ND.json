@@ -1657,7 +1657,7 @@
           "name": "Stamart Travel Center",
           "type": "service_plaza",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1670,7 +1670,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 46.82989,
           "lon": -100.72868,
@@ -2948,7 +2949,7 @@
           "name": "Stamart Travel Center",
           "type": "service_plaza",
           "at_mi": 1.02,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2961,7 +2962,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 46.82989,
           "lon": -100.72868,
@@ -4427,7 +4429,7 @@
           "name": "Stamart Travel Center",
           "type": "service_plaza",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the bismarck_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4440,7 +4442,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 46.82989,
           "lon": -100.72868,
@@ -4450,7 +4453,7 @@
           "name": "Flying J Travel Center Minot",
           "type": "travel_center",
           "at_mi": 109.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4463,7 +4466,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 48.22394,
           "lon": -101.35022,
@@ -5120,7 +5124,7 @@
           "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 89.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5133,7 +5137,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 47.88796,
           "lon": -97.09338,
@@ -6775,7 +6780,7 @@
           "name": "Wild Bison Travel Center",
           "type": "travel_center",
           "at_mi": 104.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6788,7 +6793,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 47.80499,
           "lon": -103.6444,
@@ -6880,7 +6886,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 166.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 842; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 842; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6893,7 +6899,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.5114984,
           "lon": -94.2865671,
@@ -6905,7 +6912,7 @@
           "name": "Pilot Travel Center St. Cloud",
           "type": "travel_center",
           "at_mi": 172.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at St. Cloud; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at St. Cloud; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6918,7 +6925,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.4962812,
           "lon": -94.1487305,
@@ -6931,7 +6939,7 @@
           "name": "Petro Stopping Center Clearwater",
           "type": "travel_center",
           "at_mi": 182.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 182.8 of this leg (1.1 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 182.8 of this leg (1.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6944,7 +6952,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 45.412138,
@@ -11480,7 +11489,7 @@
           "name": "Coffee Cup Travel Plaza",
           "type": "travel_center",
           "at_mi": 119.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (derived): the name carries a word the access screen already reads as truck-serving, the OpenStreetMap feature of the same name 0.1 miles away names no toll authority and the leg carries no toll. Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (derived): the name carries a word the access screen already reads as truck-serving, the OpenStreetMap feature of the same name 0.1 miles away names no toll authority and the leg carries no toll. Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11493,7 +11502,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.31163,
           "lon": -97.04742,
@@ -12437,7 +12447,7 @@
           "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12450,7 +12460,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 47.88796,
           "lon": -97.09338,
@@ -13437,7 +13448,7 @@
           "name": "Pilot Travel Center Grand Forks",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the grand_forks_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Pilot store 489 at Grand Forks; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13450,7 +13461,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 47.88796,
           "lon": -97.09338,
@@ -15726,7 +15738,7 @@
           "name": "Flying J Travel Center Minot",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15739,7 +15751,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 48.22394,
           "lon": -101.35022,
@@ -18268,7 +18281,7 @@
           "name": "Flying J Travel Center Minot",
           "type": "travel_center",
           "at_mi": 124.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the minot_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik North Dakota extract dated 2026-06-22, read 2026-09-17): Flying J store at Minot; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18281,7 +18294,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 48.22394,
           "lon": -101.35022,

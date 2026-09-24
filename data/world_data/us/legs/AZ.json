@@ -36,7 +36,7 @@
           "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 30.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49,7 +49,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.46091,
           "lon": -112.20545,
@@ -2026,7 +2027,7 @@
           "name": "Love's Travel Stop Lake Havasu City",
           "type": "travel_center",
           "at_mi": 48.69,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 386 at Lake Havasu City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 386 at Lake Havasu City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -2039,7 +2040,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.7241,
           "lon": -114.31538,
@@ -4898,7 +4900,7 @@
           "name": "Flying J Travel Center Eloy",
           "type": "travel_center",
           "at_mi": 17.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Eloy; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Eloy; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4911,7 +4913,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.73233,
           "lon": -111.54889,
@@ -8795,7 +8798,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -8803,7 +8807,7 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 593 in Tucson, AZ with 83 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=114.0 off_mi=0.73",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 593 in Tucson, AZ with 83 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=114.0 off_mi=0.73 CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "at_mi": 114.0,
           "lat": 32.125744602509016,
           "lon": -110.87417533995057
@@ -11386,84 +11390,7 @@
           "name": "Pilot Travel Center Bellemont",
           "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Bellemont; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.2388012,
-          "lon": -111.8224011,
-          "vehicle_access": "tractor_trailer",
-          "exit_ref": "185",
-          "interchange_mi": 14.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.30 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "Love's Travel Stop Williams",
-          "type": "travel_center",
-          "at_mi": 36.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 553 at Williams; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.263682,
-          "lon": -112.1939996,
-          "vehicle_access": "tractor_trailer",
-          "exit_ref": "163",
-          "interchange_mi": 36.6,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.41 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "Petro Stopping Center Kingman",
-          "type": "travel_center",
-          "at_mi": 133.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Petro store 0315 at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
-          "parking": "likely",
-          "actions": [
-            "park",
-            "save",
-            "fuel",
-            "food",
-            "break",
-            "sleep"
-          ],
-          "services": [
-            "diesel",
-            "food",
-            "parking"
-          ],
-          "lat": 35.1768016,
-          "lon": -113.7866926,
-          "vehicle_access": "tractor_trailer",
-          "exit_ref": "66",
-          "interchange_mi": 132.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
-        },
-        {
-          "name": "TA Travel Center Kingman",
-          "type": "travel_center",
-          "source": "OpenStreetMap/Overpass amenity query centered on Kingman's own coordinates (development-time, accessed 2026-07-06); curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0094 at Kingman; town read from the mapped site's branch name; matched by position, the only TA within 5 mi of mile 147 of this leg (2.9 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Bellemont; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11477,7 +11404,88 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "scale"
+          ],
+          "lat": 35.2388012,
+          "lon": -111.8224011,
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "185",
+          "interchange_mi": 14.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.30 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+        },
+        {
+          "name": "Love's Travel Stop Williams",
+          "type": "travel_center",
+          "at_mi": 36.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 553 at Williams; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "scale"
+          ],
+          "lat": 35.263682,
+          "lon": -112.1939996,
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "163",
+          "interchange_mi": 36.6,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.41 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+        },
+        {
+          "name": "Petro Stopping Center Kingman",
+          "type": "travel_center",
+          "at_mi": 133.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Petro store 0315 at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "scale"
+          ],
+          "lat": 35.1768016,
+          "lon": -113.7866926,
+          "vehicle_access": "tractor_trailer",
+          "exit_ref": "66",
+          "interchange_mi": 132.9,
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+        },
+        {
+          "name": "TA Travel Center Kingman",
+          "type": "travel_center",
+          "source": "OpenStreetMap/Overpass amenity query centered on Kingman's own coordinates (development-time, accessed 2026-07-06); curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0094 at Kingman; town read from the mapped site's branch name; matched by position, the only TA within 5 mi of mile 147 of this leg (2.9 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -13265,7 +13273,7 @@
           "name": "Love's Travel Stop Joseph City",
           "type": "travel_center",
           "at_mi": 51.7,
-          "source": "Love's official store feed lists store 278 in Joseph City, AZ on I-40, exit 277; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; matched by name, the only Love's the map has at Joseph City within 40 mi of mile 51.7 of this leg (28.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 278 in Joseph City, AZ on I-40, exit 277; at_mi estimated by projecting source coordinates onto checked-in route geometry (10.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; matched by name, the only Love's the map has at Joseph City within 40 mi of mile 51.7 of this leg (28.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -13278,7 +13286,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -13295,7 +13304,7 @@
           "name": "Flying J Travel Center Winslow",
           "type": "travel_center",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13308,7 +13317,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.0154,
           "lon": -110.67342,
@@ -15511,7 +15521,7 @@
           "name": "TA Travel Center Holbrook",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15524,7 +15534,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.90502,
           "lon": -110.21063,
@@ -15577,7 +15588,7 @@
           "name": "TA Travel Center Gallup",
           "type": "travel_center",
           "at_mi": 89.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): TA store 0008 at Gallup; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Mexico extract dated 2026-06-22, read 2026-09-17): TA store 0008 at Gallup; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15590,7 +15601,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.5059939,
           "lon": -108.8360036,
@@ -19168,7 +19180,7 @@
           "name": "Flying J Travel Center Kingman",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19181,7 +19193,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.21996,
           "lon": -114.00692,
@@ -19191,7 +19204,7 @@
           "name": "Pride Travel Center",
           "type": "travel_center",
           "at_mi": 24.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19204,7 +19217,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.8633626,
           "lon": -114.1441029,
@@ -19837,7 +19851,7 @@
           "name": "Flying J Travel Center Kingman",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19850,7 +19864,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.21958,
           "lon": -114.00679,
@@ -20591,7 +20606,7 @@
           "name": "Flying J Travel Center Kingman",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the kingman_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Kingman; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -20604,7 +20619,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.21958,
           "lon": -114.00679,
@@ -22045,7 +22061,7 @@
           "name": "Pilot Travel Center White Hills",
           "type": "travel_center",
           "at_mi": 43.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at White Hills; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at White Hills; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22058,7 +22074,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.7002954,
           "lon": -114.4766172,
@@ -23604,7 +23621,7 @@
           "name": "Pilot Travel Center Quartzsite",
           "type": "travel_center",
           "at_mi": 72.97,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Quartzsite; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Quartzsite; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23617,7 +23634,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.6615576,
           "lon": -114.2361097,
@@ -23627,7 +23645,7 @@
           "name": "Love's Travel Stop Yuma",
           "type": "travel_center",
           "at_mi": 154.99,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23640,7 +23658,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.68595,
           "lon": -114.5834,
@@ -23680,7 +23699,7 @@
           "name": "TA Travel Center Holbrook",
           "type": "travel_center",
           "at_mi": 123.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23693,7 +23712,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.9050197,
           "lon": -110.2106268,
@@ -23703,7 +23723,7 @@
           "name": "Love's Travel Stop Joseph City",
           "type": "travel_center",
           "at_mi": 127.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23716,7 +23736,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.95485,
           "lon": -110.31203,
@@ -23726,7 +23747,7 @@
           "name": "Flying J Travel Center Winslow",
           "type": "travel_center",
           "at_mi": 152.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23739,7 +23760,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.0154,
           "lon": -110.67342,
@@ -25696,7 +25718,7 @@
           "name": "Love's Travel Stop Mayer",
           "type": "travel_center",
           "at_mi": 69.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 722 at Mayer; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 722 at Mayer; town as this map's curated record of the same store names it; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25709,7 +25731,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.3353,
           "lon": -112.11755,
@@ -30085,7 +30108,7 @@
           "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 8.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30098,7 +30121,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.46091,
           "lon": -112.20545,
@@ -30163,7 +30187,7 @@
           "name": "Pilot Travel Center Tonopah",
           "type": "travel_center",
           "at_mi": 51.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Tonopah; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Tonopah; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30176,7 +30200,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.49441,
           "lon": -112.93777,
@@ -30191,7 +30216,7 @@
           "name": "Love's Travel Stop Quartzsite",
           "type": "travel_center",
           "at_mi": 129.7,
-          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 286 at Quartzsite; matched by position, the only Love's within 5 mi of mile 129.7 of this leg (1.3 mi); coordinates read from the mapped site.",
+          "source": "Love's Quartzsite travel stop listing and development-time Overpass/OSM corridor review. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 286 at Quartzsite; matched by position, the only Love's within 5 mi of mile 129.7 of this leg (1.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -30203,7 +30228,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -30221,7 +30247,7 @@
           "name": "Flying J Travel Center Ehrenberg",
           "type": "travel_center",
           "at_mi": 142.6,
-          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 142.6 of this leg (2.7 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J Ehrenberg official location page, I-10 Exit 1, confirms truck parking: https://locations.pilotflyingj.com/us/az/ehrenberg/i-10-exit-1-frontage-road-n. Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Ehrenberg; matched by position, the only Flying J within 5 mi of mile 142.6 of this leg (2.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -30233,7 +30259,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "parking": "confirmed",
           "directions": [
@@ -30276,7 +30303,7 @@
           "name": "Love's Travel Stop Coachella",
           "type": "travel_center",
           "at_mi": 242.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 207 at Coachella; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Love's store 207 at Coachella; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30289,7 +30316,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.7174028,
           "lon": -116.1718376,
@@ -30330,7 +30358,7 @@
           "name": "Flying J Travel Center Thousand Palms",
           "type": "travel_center",
           "at_mi": 257.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Thousand Palms; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Flying J store at Thousand Palms; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30343,7 +30371,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.8179587,
           "lon": -116.4037675,
@@ -30355,7 +30384,7 @@
           "name": "Pilot Travel Center North Palm Springs",
           "type": "travel_center",
           "at_mi": 268.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at North Palm Springs; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Pilot store at North Palm Springs; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30368,7 +30397,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.90329,
           "lon": -116.54656,
@@ -30431,7 +30461,7 @@
           "name": "Petro Stopping Center Ontario",
           "type": "travel_center",
           "at_mi": 331.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0026 at Ontario; town read from the mapped site's address; matched by coordinate, 0.06 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik California extract dated 2026-06-22, read 2026-09-17): Petro store 0026 at Ontario; town read from the mapped site's address; matched by coordinate, 0.06 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30444,7 +30474,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.0656009,
           "lon": -117.5550175,
@@ -38192,7 +38223,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -38200,7 +38232,7 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Love's official store feed lists store 722 in Mayer, AZ on I-17; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=35.0 off_mi=0.44",
+          "source": "Love's official store feed lists store 722 in Mayer, AZ on I-17; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=35.0 off_mi=0.44 CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "at_mi": 35.0,
           "lat": 34.334818,
           "lon": -112.117712
@@ -38219,7 +38251,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -38227,7 +38260,7 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer",
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1175 in Mayer, AZ with 25 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=35.0 off_mi=0.24; Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Mayer; matched by position, the only Pilot within 5 mi of mile 35 of this leg (0.3 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1175 in Mayer, AZ with 25 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=35.0 off_mi=0.24; Store coordinates read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Mayer; matched by position, the only Pilot within 5 mi of mile 35 of this leg (0.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "at_mi": 35.0,
           "lat": 34.327168,
           "lon": -112.117856
@@ -38306,7 +38339,7 @@
           "name": "TA Travel Center Holbrook",
           "type": "travel_center",
           "at_mi": 46.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the holbrook_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): TA store 0246 at Holbrook; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -38319,7 +38352,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.90502,
           "lon": -110.21063,
@@ -42541,7 +42575,7 @@
           "name": "Pilot Express",
           "type": "travel_center",
           "at_mi": 19.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42554,7 +42588,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.08419,
           "lon": -110.80307,
@@ -42594,7 +42629,7 @@
           "name": "Flying J Travel Center Winslow",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the winslow_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Winslow; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42607,7 +42642,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 35.0154,
           "lon": -110.67342,
@@ -42620,7 +42656,7 @@
           "name": "Love's Travel Stop Joseph City",
           "type": "travel_center",
           "at_mi": 24.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 278 at Joseph City; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -42633,7 +42669,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.95485,
           "lon": -110.31203,
@@ -44734,7 +44771,7 @@
           "name": "Love's Travel Stop Yuma",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the yuma_az_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Love's store 349 at Yuma; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44747,7 +44784,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.68595,
           "lon": -114.5834,
@@ -44780,7 +44818,7 @@
           "name": "Pilot Travel Center Avondale",
           "type": "travel_center",
           "at_mi": 173.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Avondale; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Pilot store at Avondale; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44793,7 +44831,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.4564712,
           "lon": -112.2742722,
@@ -44803,7 +44842,7 @@
           "name": "Flying J Travel Center Phoenix",
           "type": "travel_center",
           "at_mi": 178.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arizona extract dated 2026-06-22, read 2026-09-17): Flying J store at Phoenix; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -44816,7 +44855,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.4609104,
           "lon": -112.205449,

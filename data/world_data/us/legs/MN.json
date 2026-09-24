@@ -727,7 +727,7 @@
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
           "at_mi": 1.27,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -740,7 +740,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.65972,
           "lon": -93.31555,
@@ -1563,7 +1564,7 @@
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 1 of this leg (14.4 mi); coordinates read from the mapped site. Mile marker moved from 17.9 to 1: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 17.9 is more than 5 mi from the store.",
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 1 of this leg (14.4 mi); coordinates read from the mapped site. Mile marker moved from 17.9 to 1: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 17.9 is more than 5 mi from the store. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -1576,7 +1577,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -7616,7 +7618,7 @@
           "name": "Love's Travel Stop Columbus",
           "type": "travel_center",
           "at_mi": 126.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 832 at Columbus; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 832 at Columbus; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7629,7 +7631,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.2485,
           "lon": -93.02336,
@@ -12795,7 +12798,7 @@
           "name": "TA Travel Center Rogers",
           "type": "travel_center",
           "at_mi": 187.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): TA store 0190 at Rogers; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): TA store 0190 at Rogers; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12808,7 +12811,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.1968713,
           "lon": -93.5493156,
@@ -18879,7 +18883,7 @@
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
           "at_mi": 94.8,
-          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 94.8 of this leg (14.3 mi); coordinates read from the mapped site. Mile marker moved from 80 to 94.8: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 80 is more than 5 mi from the store.",
+          "source": "Love's official store feed lists store 337 in Albert Lea, MN on I-35, exit 11; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; matched by name, the only Love's the map has at Albert Lea within 40 mi of mile 94.8 of this leg (14.3 mi); coordinates read from the mapped site. Mile marker moved from 80 to 94.8: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 80 is more than 5 mi from the store. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -18892,7 +18896,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -18978,7 +18983,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 192.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 426 at Ellsworth; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Iowa extract dated 2026-06-22, read 2026-09-17): Love's store 426 at Ellsworth; town DERIVED, not read: the nearest mapped place, 0.4 mi away; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18991,7 +18996,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.31248,
           "lon": -93.57157,
@@ -19007,7 +19013,7 @@
           "name": "Casey's Truck Stop",
           "type": "service_plaza",
           "at_mi": 236.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19020,7 +19026,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.67852,
           "lon": -93.57307,
@@ -21946,7 +21953,7 @@
           "name": "Love's Travel Stop Albert Lea",
           "type": "travel_center",
           "at_mi": 63.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albert_lea_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 337 at Albert Lea; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21959,7 +21966,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.65972,
           "lon": -93.31555,
@@ -25126,7 +25134,7 @@
           "name": "Pilot Travel Center Inver Grove Heights",
           "type": "travel_center",
           "at_mi": 62.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at Inver Grove Heights; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 62.3 of this leg (1.5 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Pilot store at Inver Grove Heights; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 62.3 of this leg (1.5 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -25139,7 +25147,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 44.780786,
@@ -26113,7 +26122,7 @@
           "name": "Love's Travel Stop Saint Charles",
           "type": "travel_center",
           "at_mi": 26.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 844 at Saint Charles; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by position, the only Love's within 5 mi of mile 26.5 of this leg (2.1 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Love's store 844 at Saint Charles; town DERIVED, not read: the nearest mapped place, 1.1 mi away; matched by position, the only Love's within 5 mi of mile 26.5 of this leg (2.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -26126,7 +26135,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 43.954069,
@@ -28244,7 +28254,7 @@
           "name": "Kwik Trip",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_cloud_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_cloud_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28257,7 +28267,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.55698,
           "lon": -94.12997,
@@ -29651,7 +29662,7 @@
           "name": "Kwik Trip",
           "type": "travel_center",
           "at_mi": 0.1,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_cloud_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the st_cloud_mn_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29664,7 +29675,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.55698,
           "lon": -94.12997,
@@ -29677,7 +29689,7 @@
           "name": "Petro Stopping Center Clearwater",
           "type": "travel_center",
           "at_mi": 16.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 16.4 of this leg (3.3 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Minnesota extract dated 2026-06-22, read 2026-09-17): Petro store 0389 at Clearwater; town read from the store page the mapped site links to; matched by position, the only Petro within 5 mi of mile 16.4 of this leg (3.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -29690,7 +29702,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 45.412138,

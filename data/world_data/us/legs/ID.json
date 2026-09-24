@@ -6778,7 +6778,7 @@
           "name": "TA Travel Center Boise",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6791,7 +6791,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5656,
           "lon": -116.19958,
@@ -6801,7 +6802,7 @@
           "name": "Flying J Travel Center Caldwell",
           "type": "travel_center",
           "at_mi": 28.7,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Caldwell; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Caldwell; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6814,7 +6815,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.66121,
           "lon": -116.65427,
@@ -6855,7 +6857,7 @@
           "name": "Love's Travel Stop Ontario",
           "type": "travel_center",
           "at_mi": 57.4,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ontario with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Ontario with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "confirmed",
           "actions": [
             "park",
@@ -6868,7 +6870,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 44.04538,
           "lon": -116.97604,
@@ -6909,7 +6912,7 @@
           "name": "TA Travel Center Huntington",
           "type": "travel_center",
           "at_mi": 79.1,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): TA store 0276 at Huntington; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): TA store 0276 at Huntington; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6922,7 +6925,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 44.293117,
           "lon": -117.2248081,
@@ -7089,7 +7093,7 @@
           "name": "Flying J Travel Center La Grande",
           "type": "travel_center",
           "at_mi": 167.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the la_grande_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Flying J store at La Grande; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the la_grande_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Flying J store at La Grande; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -7102,7 +7106,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 45.29769,
           "lon": -118.04344,
@@ -7244,7 +7249,7 @@
           "name": "Love's Travel Stop Boardman",
           "type": "travel_center",
           "at_mi": 270.9,
-          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Boardman with 10 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 650 at Boardman; matched by position, the only Love's within 5 mi of mile 270.9 of this leg (0.4 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 650 in Boardman, OR on I-84, exit 159; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Boardman with 10 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 650 at Boardman; matched by position, the only Love's within 5 mi of mile 270.9 of this leg (0.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -7257,7 +7262,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -7345,7 +7351,7 @@
           "name": "Love's Travel Stop Troutdale",
           "type": "travel_center",
           "at_mi": 413.6,
-          "source": "Love's official store feed lists store 449 in Troutdale, OR on I-84, exit 17; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 449 at Troutdale; matched by position, the only Love's within 5 mi of mile 413.6 of this leg (0.9 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 449 in Troutdale, OR on I-84, exit 17; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 449 at Troutdale; matched by position, the only Love's within 5 mi of mile 413.6 of this leg (0.9 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -7358,7 +7364,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -12160,7 +12167,7 @@
           "name": "TA Travel Center Boise",
           "type": "travel_center",
           "at_mi": 3.7,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12173,7 +12180,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5656,
           "lon": -116.19958,
@@ -12189,7 +12197,7 @@
           "name": "Mr Gas Travel Center",
           "type": "travel_center",
           "at_mi": 8.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12202,7 +12210,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5112243,
           "lon": -116.147536,
@@ -12217,7 +12226,7 @@
           "name": "Pilot Travel Center Mountain Home",
           "type": "travel_center",
           "at_mi": 44.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Pilot store at Mountain Home; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Pilot store at Mountain Home; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12230,7 +12239,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.1419207,
           "lon": -115.6634536,
@@ -12271,7 +12281,7 @@
           "name": "Love's Travel Stop Bliss",
           "type": "travel_center",
           "at_mi": 86.4,
-          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 86.4 of this leg (2.9 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 86.4 of this leg (2.9 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -12284,7 +12294,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -12302,7 +12313,7 @@
           "name": "Mr. Gas",
           "type": "travel_center",
           "at_mi": 114.9,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12315,7 +12326,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.7228062,
           "lon": -114.5420893,
@@ -12331,7 +12343,7 @@
           "name": "Flying J Travel Center Jerome",
           "type": "travel_center",
           "at_mi": 125.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 125.1 of this leg (2.4 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 125.1 of this leg (2.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12344,7 +12356,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 42.649343,
@@ -12357,7 +12370,7 @@
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 158.7,
-          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 158.7 of this leg (1.6 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 158.7 of this leg (1.6 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -12370,7 +12383,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -12464,7 +12478,7 @@
           "name": "Love's Travel Stop Brigham City",
           "type": "travel_center",
           "at_mi": 282.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12477,7 +12491,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.5087867,
           "lon": -112.0545176,
@@ -12515,7 +12530,7 @@
           "name": "ONE9 Travel Center Ogden",
           "type": "travel_center",
           "at_mi": 302.2,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12528,7 +12543,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.2457354,
           "lon": -112.0191701,
@@ -14148,7 +14164,7 @@
           "name": "Flying J Travel Center Idaho Falls",
           "type": "travel_center",
           "at_mi": 4.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Idaho Falls; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Idaho Falls; town read from the store page the mapped site links to; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14161,7 +14177,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.4399323,
           "lon": -112.1157389,
@@ -14193,7 +14210,7 @@
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 121.9,
-          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 121.9 of this leg (1.5 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 121.9 of this leg (1.5 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -14206,7 +14223,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -14224,7 +14242,7 @@
           "name": "Flying J Travel Center Jerome",
           "type": "travel_center",
           "at_mi": 155.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 155.5 of this leg (2.3 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 155.5 of this leg (2.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14237,7 +14255,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 42.649343,
@@ -14247,7 +14266,7 @@
           "name": "Mr. Gas",
           "type": "travel_center",
           "at_mi": 165.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14260,7 +14279,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.7228062,
           "lon": -114.5420893,
@@ -14276,7 +14296,7 @@
           "name": "Love's Travel Stop Bliss",
           "type": "travel_center",
           "at_mi": 193.9,
-          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 193.9 of this leg (3.0 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 193.9 of this leg (3.0 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -14289,7 +14309,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -14358,7 +14379,7 @@
           "name": "Mr Gas Travel Center",
           "type": "travel_center",
           "at_mi": 272.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14371,7 +14392,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5112243,
           "lon": -116.147536,
@@ -14412,7 +14434,7 @@
           "name": "TA Travel Center Boise",
           "type": "travel_center",
           "at_mi": 279.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14425,7 +14447,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5656,
           "lon": -116.19958,
@@ -18810,7 +18833,7 @@
           "name": "Maverik",
           "type": "travel_center",
           "at_mi": 49.98,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18823,7 +18846,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.84263,
           "lon": -112.41346,
@@ -18843,7 +18867,7 @@
           "name": "Maverik",
           "type": "travel_center",
           "at_mi": 53.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -18856,7 +18880,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.84263,
           "lon": -112.41346,
@@ -18974,7 +18999,7 @@
           "name": "Love's Travel Stop Brigham City",
           "type": "travel_center",
           "at_mi": 154.1,
-          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 154.1 of this leg (1.6 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 154.1 of this leg (1.6 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -18987,7 +19012,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -19030,7 +19056,7 @@
           "name": "ONE9 Travel Center Ogden",
           "type": "travel_center",
           "at_mi": 174.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogden_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogden_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19043,7 +19069,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.24574,
           "lon": -112.01917,
@@ -22365,7 +22392,7 @@
           "name": "Flying J Travel Center Idaho Falls",
           "type": "travel_center",
           "at_mi": 4.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Idaho Falls; town read from the store page the mapped site links to; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Idaho Falls; town read from the store page the mapped site links to; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22378,7 +22405,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.4405078,
           "lon": -112.1148325,
@@ -22433,7 +22461,7 @@
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 120.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22446,7 +22474,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.5649976,
           "lon": -113.7406865,
@@ -33646,7 +33675,7 @@
           "name": "Love's Travel Stop Ontario",
           "type": "travel_center",
           "at_mi": 106.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ontario_or_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Oregon extract dated 2026-06-22, read 2026-09-17): Love's store 372 at Ontario; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33659,7 +33688,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 44.04538,
           "lon": -116.97604,
@@ -33679,7 +33709,7 @@
           "name": "Maverik",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33692,7 +33722,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.84263,
           "lon": -112.41346,
@@ -33805,7 +33836,7 @@
           "name": "Love's Travel Stop Brigham City",
           "type": "travel_center",
           "at_mi": 105.6,
-          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 105.6 of this leg (1.6 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 105.6 of this leg (1.6 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -33818,7 +33849,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -33864,7 +33896,7 @@
           "name": "ONE9 Travel Center Ogden",
           "type": "travel_center",
           "at_mi": 125.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33877,7 +33909,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.2457354,
           "lon": -112.0191701,
@@ -33984,7 +34017,7 @@
           "name": "Flying J Travel Center Springville",
           "type": "travel_center",
           "at_mi": 208.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the provo_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Flying J store at Springville; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the provo_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Flying J store at Springville; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33997,7 +34030,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 40.18715,
           "lon": -111.64126,
@@ -37528,7 +37562,7 @@
           "name": "Maverik",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37541,7 +37575,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.84263,
           "lon": -112.41346,
@@ -37660,7 +37695,7 @@
           "name": "Love's Travel Stop Brigham City",
           "type": "travel_center",
           "at_mi": 105.1,
-          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 105.1 of this leg (1.7 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; matched by position, the only Love's within 5 mi of mile 105.1 of this leg (1.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -37673,7 +37708,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -37716,7 +37752,7 @@
           "name": "ONE9 Travel Center Ogden",
           "type": "travel_center",
           "at_mi": 126.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -37729,7 +37765,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.2457354,
           "lon": -112.0191701,
@@ -40514,7 +40551,7 @@
           "name": "Maverik",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40527,7 +40564,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.84263,
           "lon": -112.41346,
@@ -40537,7 +40575,7 @@
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 76.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; town read from the mapped site's address; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40550,7 +40588,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.5649976,
           "lon": -113.7406865,
@@ -43436,7 +43475,7 @@
           "name": "Flying J Travel Center Post Falls",
           "type": "travel_center",
           "at_mi": 57.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Post Falls; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Post Falls; town read from the store page the mapped site links to; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43449,7 +43488,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 47.71108,
           "lon": -116.99769,
@@ -43469,7 +43509,7 @@
           "name": "Mr. Gas",
           "type": "travel_center",
           "at_mi": 12.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43482,7 +43522,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.7228062,
           "lon": -114.5420893,
@@ -43495,7 +43536,7 @@
           "name": "Love's Travel Stop Bliss",
           "type": "travel_center",
           "at_mi": 42.1,
-          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 42.1 of this leg (3.0 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 812 at Bliss; matched by position, the only Love's within 5 mi of mile 42.1 of this leg (3.0 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -43508,7 +43549,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -43548,7 +43590,7 @@
           "name": "Pilot Travel Center Mountain Home",
           "type": "travel_center",
           "at_mi": 83.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Pilot store at Mountain Home; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Pilot store at Mountain Home; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43561,7 +43603,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.1419207,
           "lon": -115.6634536,
@@ -43574,7 +43617,7 @@
           "name": "Mr Gas Travel Center",
           "type": "travel_center",
           "at_mi": 119.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43587,7 +43630,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5112243,
           "lon": -116.147536,
@@ -43599,7 +43643,7 @@
           "name": "TA Travel Center Boise",
           "type": "travel_center",
           "at_mi": 124.1,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): TA store 0167 at Boise; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -43612,7 +43656,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 43.5656,
           "lon": -116.19958,
@@ -45545,7 +45590,7 @@
           "name": "Flying J Travel Center Wells",
           "type": "travel_center",
           "at_mi": 115.3,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93; Store coordinates read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Flying J store at Wells; matched by position, the only Flying J within 5 mi of mile 115.3 of this leg (0.8 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 692 in Wells, NV with 91 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/nv/wells/156-us-93; Store coordinates read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Flying J store at Wells; matched by position, the only Flying J within 5 mi of mile 115.3 of this leg (0.8 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -45558,7 +45603,8 @@
             "diesel",
             "food",
             "restrooms",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -50212,7 +50258,7 @@
           "name": "Flying J Travel Center Jerome",
           "type": "travel_center",
           "at_mi": 7.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 7.5 of this leg (2.3 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Flying J store at Jerome; town read from the store page the mapped site links to; matched by position, the only Flying J within 5 mi of mile 7.5 of this leg (2.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50225,7 +50271,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 42.649343,
@@ -50238,7 +50285,7 @@
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 41.1,
-          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 41.1 of this leg (1.5 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Idaho extract dated 2026-06-22, read 2026-09-17): Love's store 334 at Heyburn; matched by position, the only Love's within 5 mi of mile 41.1 of this leg (1.5 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -50251,7 +50298,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -50343,7 +50391,7 @@
           "name": "Love's Travel Stop Brigham City",
           "type": "travel_center",
           "at_mi": 166.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): Love's store 686 at Brigham City; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50356,7 +50404,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.5090153,
           "lon": -112.0547512,
@@ -50397,7 +50446,7 @@
           "name": "ONE9 Travel Center Ogden",
           "type": "travel_center",
           "at_mi": 187.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogden_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ogden_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Utah extract dated 2026-06-22, read 2026-09-17): ONE9 store at Ogden; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -50410,7 +50459,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.24574,
           "lon": -112.01917,
@@ -51766,7 +51816,7 @@
           "name": "Petro Stopping Center Wells",
           "type": "travel_center",
           "at_mi": 115.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wells_nv_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Petro store 0392 at Wells; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the wells_nv_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Nevada extract dated 2026-06-22, read 2026-09-17): Petro store 0392 at Wells; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -51779,7 +51829,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.10021,
           "lon": -114.95445,

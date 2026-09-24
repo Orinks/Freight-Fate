@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
+
 - **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
 - **Hold slash to straighten up.** With lane keeping on partial or off, the truck turns to point down the road and leaves your lane position to you. (Suggested by flight)
 
@@ -137,6 +139,10 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
+
+- **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.
 
 - **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
 
