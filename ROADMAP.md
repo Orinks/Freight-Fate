@@ -1246,7 +1246,7 @@ against.
 ### September 23 flight's driving notes
 
 flight drove with every assist off and sent four notes. All four have
-shipped.
+shipped; the second shipped the second way, below.
 
 - [x] **The drift lean reads the heading, not only the position.** Both
       drift producers (the engine lean and the opt-in tone) lean on
@@ -1259,14 +1259,17 @@ shipped.
       lean went quiet as soon as the settled point was centred, with heading
       still on, and the truck carried on across. `drift_speaks` now keeps
       it awake until the truck is also pointing down the road.
-- [ ] **Truck physics on the clock that moves it** (merged to `dev`
-      2026-09-23, reverted 2026-09-24). Integrating motion on the game
-      clock made the truck pull away at the pace's multiple in real time:
-      a loaded truck reached highway speed in a few real seconds, and the
-      gearbox, run in the same sub-steps, rattled through its gears. Motion
-      and shifting are back on the real clock with the old pace
-      compensations. The coast and downhill-energy problem flight reported
-      stands; fix it without changing how fast speed builds in real time.
+- [x] **A hill pays the same at every pace.** Integrating motion on the
+      game clock (merged to `dev` 2026-09-23, reverted 2026-09-24) made the
+      truck pull away at the pace's multiple in real time and rattled the
+      gearbox through its gears, so motion stays on the real clock. The
+      downhill-energy exploit is closed from the clock's side instead: a
+      grade of `GRADE_CLOCK_MIN` (3%) or steeper, either way, eases the
+      clock to real time over `GRADE_CLOCK_EASE_S`, read far enough ahead
+      that it is real by the crest, and lets go below 2.5%. A loaded coast
+      down a 6% grade now reaches the same speed at 1x, 4x and 20x (it
+      reached 72 mph at 4x against 111 at real time before). Gentler
+      grades and flat coasting still run on the paced clock.
 - [x] **Real time from the brake point, not from the corner call.** The
       call stays time-based; `controlled_turn` now goes on at
       `turn_brake_point_mi` (eight real seconds of reaction and settle plus

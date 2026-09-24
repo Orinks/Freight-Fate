@@ -38,6 +38,7 @@ mod sim_chain_law;
 mod sim_congestion;
 mod sim_enforcement_presence;
 mod sim_facility_approaches;
+mod sim_grade_clock;
 mod sim_interchanges;
 mod sim_lane_straighten;
 mod sim_limit_lookahead;

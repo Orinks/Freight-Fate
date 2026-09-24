@@ -455,6 +455,17 @@ pub const ZONE_WARNING_MAX_MI: f64 = 10.0;
 /// Clock multiplier when stopped or crawling; full pacing resumes at cruise.
 pub const LOW_SPEED_TIME_SCALE: f64 = 4.0;
 pub const FULL_COMPRESSION_MPH: f64 = 50.0;
+/// A grade at least this steep, either way, runs the clock at real time.
+/// Motion integrates on real seconds while the road passes at the pace, so
+/// on a compressed clock a hill does a fraction of its work per mile: a
+/// driver could descend in real time to bank speed and climb compressed to
+/// keep it (flight, 2026-09-23). Real time on the steep grades makes a hill
+/// cost and pay the same at every clock setting.
+pub const GRADE_CLOCK_MIN: f64 = 0.03;
+/// Hysteresis: once on, the grade clock lets go only below this.
+pub const GRADE_CLOCK_RELEASE: f64 = 0.025;
+/// The clock eases to and from real time over this many real seconds.
+pub const GRADE_CLOCK_EASE_S: f64 = 3.0;
 /// Parked with the brake set, waiting runs at double the configured pacing.
 pub const PARKED_TIME_SCALE_MULT: f64 = 2.0;
 pub const CONSTRUCTION_ENFORCEMENT_GRACE_MI: f64 = 1.5;
