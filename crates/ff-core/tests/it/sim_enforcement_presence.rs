@@ -626,9 +626,7 @@ fn test_the_cb_lead_is_sized_in_real_seconds_not_a_flat_distance() {
 
 // --- vocabulary -------------------------------------------------------------
 
-#[test]
-#[ignore = "Python swept the package's source text for CB slang; a source sweep has no Rust test equivalent"]
-fn test_bear_is_cb_voice_only_in_every_player_facing_string() {}
+// `test_bear_is_cb_voice_only_in_every_player_facing_string` is live in `crates/ff-core/tests/it/sim_enforcement_vocabulary.rs`.
 
 #[test]
 #[ignore = "models::safety_record owns safety_record_text; covered by its own tests"]
