@@ -563,7 +563,6 @@ fn test_resetting_the_exit_lane_clears_every_latch() {
     d.exit_lane_alignment = 1.0;
     d.exit_lane_prompt_said = true;
     d.exit_lane_ready_said = true;
-    d.exit_commit_said = true;
     d.exit_cancel_armed = true;
     d.exit_right_taps = 3;
     d.exit_countdown_said.push(2.0);
@@ -573,7 +572,6 @@ fn test_resetting_the_exit_lane_clears_every_latch() {
     assert_eq!(d.exit_lane_alignment, 0.0);
     assert!(!d.exit_lane_prompt_said);
     assert!(!d.exit_lane_ready_said);
-    assert!(!d.exit_commit_said);
     assert!(!d.exit_cancel_armed);
     assert_eq!(d.exit_right_taps, 0);
     assert!(d.exit_countdown_said.is_empty());
@@ -641,13 +639,19 @@ fn test_capping_cruise_for_a_ramp_says_when_not_just_what() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
     let stop = a_stop(d.trip.position_mi + 5.0);
-    d.cruise_mph = Some(65.0);
-    d.trip.truck.velocity_mps = mph_to_mps(65.0);
+    let (road, _) = d.trip.speed_limit_at(stop.at_mi);
+    d.cruise_mph = Some(road);
+    d.trip.truck.velocity_mps = mph_to_mps(road);
 
+    // And where it lets go: speed control pauses on the ramp, where the
+    // exit speed is braked for (realistic exit, 2026-09-24).
     let text = d.cap_cruise_for_ramp(&app.ctx, Some(&stop));
-    assert!(text.contains("holds road speed, then eases to"), "{text}");
+    assert!(
+        text.contains("holds road speed, eases to") && text.ends_with("and pauses on the ramp."),
+        "{text}"
+    );
 
-    // Already at the ramp number: the plain holding line.
+    // Already at the exit floor: the plain holding line.
     d.cruise_exit_mph = None;
     d.trip.truck.velocity_mps = mph_to_mps(20.0);
     let text = d.cap_cruise_for_ramp(&app.ctx, Some(&stop));

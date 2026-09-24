@@ -96,7 +96,10 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 ///
 /// 3: a local segment carries the measured turn angle at the junction onto it
 /// (`local_turn_deg`), which `data::corners` prices the corner from.
-pub const FORMAT_VERSION: u32 = 3;
+///
+/// 4: an interchange carries its OSM-derived ramp length per direction
+/// (`ramp_length_ft_forward/backward`, `ramp_length_source`).
+pub const FORMAT_VERSION: u32 = 4;
 
 const HEADER_LEN: usize = 32;
 

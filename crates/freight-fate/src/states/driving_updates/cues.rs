@@ -93,6 +93,13 @@ impl DrivingState {
     /// classifier's honest inference (interstates are divided by
     /// definition; one lane per side means a centerline).
     pub fn edge_boundary(&self) -> &'static str {
+        // An exit ramp is one way: both of its edges are road edges. Read
+        // off the mainline's divided flag, a truck running wide on the ramp
+        // off an undivided road was told it was "in the oncoming lane"
+        // (every-assist audit, 2026-09-24).
+        if self.on_laid_out_ramp() {
+            return "shoulder";
+        }
         let baked = self.trip.lanes_at(None);
         let leg = &self.trip.route.legs[self.trip.current_leg_index()];
         let divided = match baked {

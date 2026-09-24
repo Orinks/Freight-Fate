@@ -103,7 +103,9 @@ def convolve_circular(sig: np.ndarray, ir: np.ndarray) -> np.ndarray:
     return np.fft.irfft(np.fft.rfft(sig) * np.fft.rfft(pad), n)
 
 
-def combustion_envelope(rpm: float, stroke_frac: float = 0.42, rise_frac: float = 0.12) -> np.ndarray:
+def combustion_envelope(
+    rpm: float, stroke_frac: float = 0.42, rise_frac: float = 0.12
+) -> np.ndarray:
     """The pressure pulse of one power stroke. NOT an impulse.
 
     This is the fix for "it sounds like the jake" (Norm, 2026-07-20), and it
@@ -249,9 +251,11 @@ def engine(
     # Combustion loads the block harder as fuelling rises; knock grows faster
     # than the thump does, which is why a working truck sounds busier. The
     # torque layer scales hardest of all -- that is what lugging sounds like.
-    body = (thump * (0.55 + 0.45 * load)
-            + torque_mix * (0.30 + 0.70 * load) * torque
-            + knock_mix * (0.35 + 0.65 * load) * knock)
+    body = (
+        thump * (0.55 + 0.45 * load)
+        + torque_mix * (0.30 + 0.70 * load) * torque
+        + knock_mix * (0.35 + 0.65 * load) * knock
+    )
 
     # Intake and air rush: broadband floor under everything, rising with revs.
     air = RNG.standard_normal(n) * (0.10 + 0.06 * load) * (rpm / 1500.0) ** 0.5
@@ -273,15 +277,19 @@ def profile(x: np.ndarray, sr: int = SR) -> tuple[float, tuple[float, ...]]:
     S = np.abs(np.fft.rfft(x * np.hanning(len(x))))
     f = np.fft.rfftfreq(len(x), 1.0 / sr)
     total = S.sum() or 1.0
-    bands = tuple(S[(f >= a) & (f < b)].sum() / total for a, b in
-                  ((0, 200), (200, 1000), (1000, 4000), (4000, sr / 2)))
+    bands = tuple(
+        S[(f >= a) & (f < b)].sum() / total
+        for a, b in ((0, 200), (200, 1000), (1000, 4000), (4000, sr / 2))
+    )
     return float((S * f).sum() / total), bands
 
 
 def profile_line(x: np.ndarray, sr: int = SR) -> str:
     cen, b = profile(x, sr)
-    return (f"centroid {cen:6.0f} Hz   <200 {b[0]:.2f}  200-1k {b[1]:.2f}  "
-            f"1k-4k {b[2]:.2f}  >4k {b[3]:.2f}")
+    return (
+        f"centroid {cen:6.0f} Hz   <200 {b[0]:.2f}  200-1k {b[1]:.2f}  "
+        f"1k-4k {b[2]:.2f}  >4k {b[3]:.2f}"
+    )
 
 
 def report(name: str, x: np.ndarray, sr: int = SR) -> None:
@@ -351,14 +359,17 @@ def main() -> None:
         sig, exact = engine(rpm, load=load)
         write_wav(f"engine_{rpm}rpm.wav", sig)
         report(f"engine_{rpm}rpm.wav", sig)
-        print(f"    {'':26} exact {exact:7.2f} rpm   firing {exact / 20:5.1f} Hz   "
-              f"seam {seam_check(sig):.3f} x rms")
+        print(
+            f"    {'':26} exact {exact:7.2f} rpm   firing {exact / 20:5.1f} Hz   "
+            f"seam {seam_check(sig):.3f} x rms"
+        )
 
     print("\nPOWER STROKE DURATION -- the 'sounds like the jake' fix")
     print("  0.00 = impulse excitation (the old model, and correct for a jake).")
     print("  Higher = the gas pushes for longer, cylinders overlap, gaps fill in.")
     try:
         import soundfile as sf
+
         d, sr = sf.read(str(ASSETS / "engine/idle.ogg"), always_2d=True)
         print(f"    {'idle.ogg (Duff, REAL)':28s} fullness {fullness(d.mean(axis=1)):.3f}")
     except Exception:
@@ -367,7 +378,9 @@ def main() -> None:
         sig, _ = engine(1500, load=0.6, stroke_frac=frac)
         tag = "impulse" if frac == 0 else f"{frac:.2f}"
         write_wav(f"engine_1500rpm_stroke_{tag}.wav", sig)
-        print(f"    stroke_frac {frac:4.2f}{'':16s} fullness {fullness(sig):.3f}   {profile_line(sig)}")
+        print(
+            f"    stroke_frac {frac:4.2f}{'':16s} fullness {fullness(sig):.3f}   {profile_line(sig)}"
+        )
 
     print("\nLOAD SWEEP at 1500 rpm -- pulling a grade vs coasting")
     for tag, load in (("light", 0.15), ("cruise", 0.55), ("lugging", 0.95)):

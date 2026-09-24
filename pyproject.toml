@@ -41,12 +41,16 @@ dev = [
     "openrouteservice>=2.3.3",
     "osmium>=4.3.1",
 ]
-# Build-time route-enrichment tooling only (tools/enrich_routes.py --ors-smoke
-# and ORS-backed corridor generation). Never a runtime dependency, so the
-# shipped game stays dependency-light. Run with `uv run --group tooling ...`.
+# Build-time tooling outside the test suite: route enrichment
+# (tools/enrich_routes.py --ors-smoke, ORS-backed corridor generation), and
+# audio work -- av for tools/encode_music_opus.py, scipy for
+# tools/patch_loop_transients.py and the sound-test/ audition scripts. Never a
+# runtime dependency. Run with `uv run --group tooling ...`.
 tooling = [
     "osmium>=4.0.2",
     "openrouteservice>=2.2.0",
+    "av>=14.0",
+    "scipy>=1.13",
 ]
 
 [tool.uv]

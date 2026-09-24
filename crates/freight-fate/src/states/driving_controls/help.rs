@@ -101,8 +101,9 @@ impl DrivingState {
         text.push_str(&format!(
             "{exit} signals for the next announced route exit, by number when "
         ));
-        text.push_str("known, or cancels that signal. Slow to 45 for the ramp and hold ");
-        text.push_str("the exit lane unless lane keeping is on full. Ramps usually end ");
+        text.push_str("known, or cancels that signal. Hold the exit lane unless lane ");
+        text.push_str("keeping is on full, keep road speed to the gore, then brake to the ");
+        text.push_str("exit speed before the ramp curve. Ramps usually end ");
         text.push_str(&format!(
             "at a traffic light or stop sign, called out on the way down. {exit} "
         ));
