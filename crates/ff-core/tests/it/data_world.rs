@@ -1668,19 +1668,13 @@ fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
             "{want} cargo roles"
         );
         let actions = lookup(DEFAULT_POI_ACTIONS, want).expect("poi actions");
-        assert!(
-            actions.iter().any(|a| *a == "park"),
-            "{want} must support parking"
-        );
+        assert!(actions.contains(&"park"), "{want} must support parking");
         assert!(
             actions.iter().any(|a| *a == "break" || *a == "sleep"),
             "{want} must support rest"
         );
         if want == "travel_center" {
-            assert!(
-                actions.iter().any(|a| *a == "fuel"),
-                "travel_center must support fuel"
-            );
+            assert!(actions.contains(&"fuel"), "travel_center must support fuel");
         }
         assert!(
             lookup(FACILITY_APPROACH_MILES, want).is_some(),
