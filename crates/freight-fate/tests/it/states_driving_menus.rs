@@ -138,7 +138,7 @@ fn test_map_route_line_collapses_consecutive_deadhead_city_repeats() {
     let drive = a_drive(&mut app);
     with_drive(&drive, |d| {
         let end = d.route.cities.last().cloned().expect("destination");
-        d.route.cities.extend(std::iter::repeat(end).take(8));
+        d.route.cities.extend(std::iter::repeat_n(end, 8));
     });
     let mut screen = DrivingStatusScreenState::new(drive_ref(&drive), "map");
     let texts = build_labels(&mut screen, &mut app.ctx);
@@ -146,8 +146,8 @@ fn test_map_route_line_collapses_consecutive_deadhead_city_repeats() {
         texts[0], "Route: Buffalo, New York to Rochester, New York",
         "consecutive destination repeats must collapse on the spoken Route line"
     );
-    let portland_mentions = texts[0].matches("Rochester").count();
-    assert_eq!(portland_mentions, 1, "{}", texts[0]);
+    let rochester_mentions = texts[0].matches("Rochester").count();
+    assert_eq!(rochester_mentions, 1, "{}", texts[0]);
 }
 
 #[test]
