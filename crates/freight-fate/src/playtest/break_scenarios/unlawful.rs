@@ -145,10 +145,7 @@ pub fn scale_bypass_to_the_end() -> Outcome {
     rig.prepare(62.0, None);
 
     // Never signal, never slow: the whole point is the driver who ignores
-    // every instruction the scale gives. Cruise holds the road speed; with
-    // hands off the pedals the truck used to coast the four miles on the
-    // real clock, and on the game clock it rolls to a stop well short.
-    rig.drive.engage_cruise(&mut rig.app.ctx, 62.0, false);
+    // every instruction the scale gives.
     rig.step(
         20000,
         DT,

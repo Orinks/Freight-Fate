@@ -41,10 +41,6 @@
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.
 
-- **Speed now builds and fades on the game clock.** At the faster paces the truck pulls away quicker, coasts a realistic distance, and hills pay the same. (Reported by flight.)
-
-- **Holding the brake or accelerator presses harder the longer you hold it.** A quick tap still does what it always did.
-
 - **City street turns keep the game's pace until it is time to brake.** Real time starts just before the turn, not a mile out. (Reported by flight.)
 
 - **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
@@ -111,6 +107,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Trucks build speed at a realistic rate again, loaded or empty.** The automatic shifts through each gear once, with one clunk per shift.
 
 - **Route-transition assistance brakes smoothly to a stop sign.** It slows steadily to the line instead of arriving fast and stopping hard.
 

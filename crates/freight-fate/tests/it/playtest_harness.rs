@@ -606,7 +606,7 @@ fn test_realistic_speed_control_transitions_do_not_issue_speeding_fines() {
     assert!(!text.contains("Lights and siren"), "{text}");
     assert!(!text.contains("Speeding strike"), "{text}");
     assert!(!text.to_lowercase().contains("speeding fines"), "{text}");
-    assert_eq!(result.deliveries, 1, "{text}");
+    assert_eq!(result.deliveries, 1);
     assert!(text.contains("Speed keeper holding"), "{text}");
     assert!(text.contains("Adaptive cruise resuming"), "{text}");
     // At the posted limit, not highway speed. The tolerance covers the cruise
@@ -617,29 +617,19 @@ fn test_realistic_speed_control_transitions_do_not_issue_speeding_fines() {
         .construction_entry_speed_mph
         .expect("the work zone was entered");
     assert!(entry <= 46.0, "{entry}");
-    // The 45 is named once, by whichever automation is holding speed when
-    // it comes into range. Cruise's own lookahead is plain physics since the
-    // truck met the game clock (2026-09-23), so it sees the 45 from inside
-    // the taper, where the keeper already has the 55 -- and the keeper names
-    // it.
-    let eases_to_45 = |who: &str| {
-        text.find(&format!(
-            "Construction zone ahead; {who} easing to 45 miles per hour"
-        ))
-    };
-    let to_45 = eases_to_45("adaptive cruise")
-        .or_else(|| eases_to_45("speed keeper"))
-        .unwrap_or_else(|| panic!("no easing to 45: {text}"));
     assert_eq!(
-        text.matches("easing to 45 miles per hour").count(),
-        1,
-        "{text}"
+        text.matches("Construction zone ahead; adaptive cruise easing to 45 miles per hour")
+            .count(),
+        1
     );
     // Two stages, in the order the warning promised them: the taper's 55
     // first, the work zone's 45 at the barrels.
     let to_55 = text
         .find("Construction zone ahead; adaptive cruise easing to 55 miles per hour")
         .unwrap_or_else(|| panic!("no easing to 55: {text}"));
+    let to_45 = text
+        .find("Construction zone ahead; adaptive cruise easing to 45 miles per hour")
+        .expect("checked above");
     assert!(to_55 < to_45, "{text}");
 }
 

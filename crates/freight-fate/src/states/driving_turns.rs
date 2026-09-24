@@ -281,8 +281,7 @@ impl DrivingState {
     pub fn turn_brake_point_mi(&self, cue: &NavigationCue) -> f64 {
         let speed = self.trip.truck.speed_mph().max(1.0);
         let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0;
-        // At a scale of zero the keeper's ease is its physical shed alone.
-        reaction_mi + self.keeper_ease_mi(self.turn_speed_mph(cue), 0.0)
+        reaction_mi + self.keeper_shed_mi(self.turn_speed_mph(cue), 1.0)
     }
 
     /// Whether a facility street chain has reached the brake point for the
@@ -291,7 +290,7 @@ impl DrivingState {
     pub fn at_the_gates_brake_point(&self) -> bool {
         let speed = self.trip.truck.speed_mph().max(1.0);
         let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0;
-        self.trip.remaining_miles() <= reaction_mi + self.keeper_ease_mi(0.0, 0.0)
+        self.trip.remaining_miles() <= reaction_mi + self.keeper_shed_mi(0.0, 1.0)
     }
 
     /// Pace the clock for a corner `ahead` miles off: real time inside the
