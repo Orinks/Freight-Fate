@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals). Home terminal resolves to a real company yard or terminal within 250 air miles — no synthetic yards.
+- `home_terminal_city` is persisted on the profile; old saves migrate from the current city via the nearest real yard.
+
 - `travel_center` and `truck_parking` city lots are fuel, parking, and rest only (no freight cargo roles); home terminal and default facility pick only `company_yard` or `terminal`.
 
 - City facilities may be typed `travel_center` or `truck_parking` for public tractor lots; ALCAN corridor public stops retyped off `company_yard`.

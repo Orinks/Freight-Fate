@@ -35,6 +35,7 @@ pub(crate) struct FakeProfile {
     pub business_status: String,
     pub start_mode: String,
     pub carrier_key: String,
+    pub home_terminal_city: String,
     pub carrier_name: String,
     pub money: f64,
     pub fines_owed: f64,
@@ -64,6 +65,7 @@ impl Default for FakeProfile {
             business_status: COMPANY_DRIVER.to_string(),
             start_mode: "company_driver".to_string(),
             carrier_key: DEFAULT_START_KEY.to_string(),
+            home_terminal_city: "Chicago".to_string(),
             carrier_name: STARTER_CARRIER_NAME.to_string(),
             money: 5000.0,
             fines_owed: 0.0,
@@ -313,6 +315,9 @@ impl TrailerOwner for FakeProfile {
 impl StartProfile for FakeProfile {
     fn set_carrier_key(&mut self, key: &str) {
         self.carrier_key = key.to_string();
+    }
+    fn set_home_terminal_city(&mut self, city: &str) {
+        self.home_terminal_city = city.to_string();
     }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();

@@ -219,6 +219,9 @@ impl StartProfile for Profile {
     fn set_carrier_key(&mut self, key: &str) {
         self.carrier_key = key.to_string();
     }
+    fn set_home_terminal_city(&mut self, city: &str) {
+        self.home_terminal_city = city.to_string();
+    }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();
     }

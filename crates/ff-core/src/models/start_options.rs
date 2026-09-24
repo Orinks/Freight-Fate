@@ -5,6 +5,7 @@ use serde::Serialize;
 
 use crate::models::career::Career;
 use crate::models::career_ladder::STARTER_CARRIER_NAME;
+use crate::models::carriers::{self, carrier};
 use crate::models::trailers::DEFAULT_TRAILER_PROGRAMS;
 use crate::pyfmt::fmt_f;
 
@@ -133,12 +134,33 @@ impl CareerStartOption {
     }
 
     /// `option.cargo_weight_bonus.get(cargo_key, 0.0)`.
+    /// Company carriers read bonuses from `data/carriers.json`.
     pub fn cargo_weight_bonus_for(&self, cargo_key: &str) -> f64 {
+        if let Some(c) = carrier(self.key) {
+            return c.cargo_weight_bonus_for(cargo_key);
+        }
         self.cargo_weight_bonus
             .iter()
             .find(|(k, _)| *k == cargo_key)
             .map(|(_, bonus)| *bonus)
             .unwrap_or(0.0)
+    }
+
+    /// Dispatch biases: company carriers from `data/carriers.json`.
+    pub fn dispatch_profile(&self) -> DispatchProfile {
+        carrier(self.key)
+            .map(|c| c.dispatch)
+            .unwrap_or(self.dispatch)
+    }
+
+    /// Company pay plan from `data/carriers.json` when present.
+    pub fn pay_plan(&self) -> Option<CompanyPayPlan> {
+        if self.is_owner_operator() {
+            return None;
+        }
+        carrier(self.key)
+            .map(|c| c.company_pay)
+            .or(self.company_pay)
     }
 }
 
@@ -336,7 +358,11 @@ pub fn all_start_options() -> Vec<&'static CareerStartOption> {
 }
 
 pub fn pay_plan_for_key(key: Option<&str>) -> CompanyPayPlan {
-    start_option(key).company_pay.unwrap_or(NORTHSTAR_PAY)
+    let key = match key {
+        Some("") | None => DEFAULT_START_KEY,
+        Some(k) => k,
+    };
+    carriers::pay_plan_for_carrier(key)
 }
 
 /// What `apply_start_option` writes on a freshly created or reset `Profile`.
@@ -345,6 +371,7 @@ pub fn pay_plan_for_key(key: Option<&str>) -> CompanyPayPlan {
 // TODO(lead): implement for models::profile::Profile (wave 2).
 pub trait StartProfile {
     fn set_carrier_key(&mut self, key: &str);
+    fn set_home_terminal_city(&mut self, city: &str);
     fn set_start_mode(&mut self, mode: &str);
     fn set_carrier_name(&mut self, name: &str);
     fn set_money(&mut self, money: f64);
@@ -416,6 +443,11 @@ pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
     profile.set_carrier_key(option.key);
     profile.set_start_mode(option.mode);
     profile.set_carrier_name(option.carrier_name);
+    // Persist the nearest real yard city for this start's default city.
+    let home = crate::data::world::get_world()
+        .resolve_home_terminal_city(option.default_city)
+        .unwrap_or_else(|| option.default_city.to_string());
+    profile.set_home_terminal_city(&home);
     profile.set_money(option.starting_money);
     profile.set_business_status(if option.is_owner_operator() {
         "leased_owner_operator"

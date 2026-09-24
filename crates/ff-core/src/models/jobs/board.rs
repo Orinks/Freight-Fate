@@ -9,6 +9,7 @@ use parking_lot::Mutex;
 use crate::data::world::World;
 use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
+use crate::models::carriers::carrier;
 use crate::models::jobs::{
     cargo_type, dispatch_deadline_hours, facility_cargo, market_tag_cargo_bonus,
     minimum_pay_for_level, plan_hos, CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE,
@@ -121,15 +122,38 @@ impl<'w> JobBoard<'w> {
     /// town's freight offers; a town with one or two is a thin market
     /// however many rows the board fills (see `relay`).
     pub fn destination_choices(&self, city: &str, level: i64) -> usize {
+        self.destination_choices_for_carrier(city, level, DEFAULT_START_KEY)
+    }
+
+    pub fn destination_choices_for_carrier(
+        &self,
+        city: &str,
+        level: i64,
+        carrier_key: &str,
+    ) -> usize {
         let city = self.world.resolve_city_key(city);
-        let cap = Self::distance_cap(level);
+        let cap = Self::distance_cap_for_carrier(level, carrier_key);
         self.candidates(&city)
             .iter()
             .filter(|c| c.1 >= MIN_JOB_DISTANCE_MI && c.1 <= cap)
+            .filter(|c| Self::run_band_allows(carrier_key, c.1))
             .count()
     }
 
     pub fn distance_cap(level: i64) -> f64 {
+        Self::level_distance_cap_only(level)
+    }
+
+    /// Level distance cap combined with the carrier run-band max (tighter wins).
+    pub fn distance_cap_for_carrier(level: i64, carrier_key: &str) -> f64 {
+        let level_cap = Self::level_distance_cap_only(level);
+        match carrier(carrier_key) {
+            Some(c) => c.effective_distance_cap(level_cap),
+            None => level_cap,
+        }
+    }
+
+    fn level_distance_cap_only(level: i64) -> f64 {
         if let Some((_, cap)) = LEVEL_DISTANCE_CAPS.iter().find(|(l, _)| *l == level) {
             return *cap;
         }
@@ -139,6 +163,13 @@ impl<'w> JobBoard<'w> {
             .map(|(_, cap)| *cap)
             .unwrap_or(1200.0);
         MAX_DISPATCH_DISTANCE_MI.min(base + LEVEL_DISTANCE_CAP_STEP_MI * (level - 5) as f64)
+    }
+
+    fn run_band_allows(carrier_key: &str, miles: f64) -> bool {
+        match carrier(carrier_key) {
+            Some(c) => c.run_band_allows(miles),
+            None => true,
+        }
     }
 
     /// `board.offers(city, endorsements, count=, level=, market=,
@@ -163,9 +194,12 @@ impl<'w> JobBoard<'w> {
             .filter(|c| c.1 >= MIN_JOB_DISTANCE_MI)
             .filter(|c| self.city_has_freight_receiver(&c.0))
             .collect();
-        let cap = Self::distance_cap(level);
-        let mut reachable: Vec<Candidate> =
-            candidates.iter().filter(|c| c.1 <= cap).cloned().collect();
+        let cap = Self::distance_cap_for_carrier(level, carrier_key);
+        let mut reachable: Vec<Candidate> = candidates
+            .iter()
+            .filter(|c| c.1 <= cap && Self::run_band_allows(carrier_key, c.1))
+            .cloned()
+            .collect();
         if reachable.is_empty() && !candidates.is_empty() {
             // remote terminals (long legs all around): offer the nearest few
             let mut sorted = candidates.clone();
@@ -368,20 +402,21 @@ impl<'w> JobBoard<'w> {
         let exponent = exponent.unwrap_or(if level <= 2 { 2.0 } else { 1.0 });
         let mut weight = 1.0 / miles.powf(exponent);
         let option = start_option(Some(carrier_key));
-        let cap = Self::distance_cap(level).max(1.0);
-        if option.dispatch.short_haul_bias != 0.0 {
+        let cap = Self::distance_cap_for_carrier(level, carrier_key).max(1.0);
+        let dispatch = option.dispatch_profile();
+        if dispatch.short_haul_bias != 0.0 {
             let short_factor = (1.0 - miles.min(cap) / cap).max(0.0);
-            weight *= 1.0 + option.dispatch.short_haul_bias * short_factor;
+            weight *= 1.0 + dispatch.short_haul_bias * short_factor;
         }
-        if option.dispatch.long_haul_bias != 0.0 {
+        if dispatch.long_haul_bias != 0.0 {
             let long_factor = (miles / cap).min(1.0);
-            weight *= 1.0 + option.dispatch.long_haul_bias * long_factor;
+            weight *= 1.0 + dispatch.long_haul_bias * long_factor;
         }
         if level >= PREMIUM_LANE_LEVEL {
             // Premium-lane seniority: dispatch shows the long freight first.
             weight *= 1.0 + PREMIUM_LANE_LONG_HAUL_BIAS * (miles / cap).min(1.0);
         }
-        if option.dispatch.regional_bias != 0.0 {
+        if dispatch.regional_bias != 0.0 {
             let origin_region = self.world.cities.get(origin).map(|c| c.region.as_str());
             let dest_region = self
                 .world
@@ -389,7 +424,7 @@ impl<'w> JobBoard<'w> {
                 .get(destination)
                 .map(|c| c.region.as_str());
             if origin_region.is_some() && dest_region == origin_region {
-                weight *= 1.0 + option.dispatch.regional_bias;
+                weight *= 1.0 + dispatch.regional_bias;
             }
         }
         weight.max(1e-12)
@@ -778,7 +813,9 @@ impl<'w> JobBoard<'w> {
             route.as_ref(),
             Some(self.world),
             self.hos.as_ref(),
-        ) * start_option(Some(carrier_key)).dispatch.deadline_slack;
+        ) * start_option(Some(carrier_key))
+            .dispatch_profile()
+            .deadline_slack;
         // Speak the stretch when the driver's current clock forces a sleep a
         // fresh clock would not have needed -- the long number is the law.
         let covers_rest = match &self.hos {

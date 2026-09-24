@@ -240,7 +240,7 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
          refusing an assignment goes on your service record. First objective: open the \
          dispatch board, accept the assigned load, and deliver it cleanly.",
         option.carrier_name,
-        option.dispatch.summary()
+        option.dispatch_profile().summary()
     )
 }
 

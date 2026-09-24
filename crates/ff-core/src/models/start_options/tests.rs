@@ -27,7 +27,7 @@ fn test_start_options_are_grounded_and_player_facing() {
         assert!(!option.menu_summary.is_empty());
         assert!(!option.help_text.is_empty());
         if option.mode == START_MODE_COMPANY {
-            assert!(option.company_pay.is_some());
+            assert!(option.pay_plan().is_some());
             assert!(option.owned_trucks.is_empty());
             assert!(option.help_text.to_lowercase().contains("carrier"));
         } else {
@@ -389,11 +389,14 @@ fn test_pay_plan_and_dispatch_summaries_are_spoken_plainly() {
     );
     assert_eq!(
         start_option(Some("great_lakes_training"))
-            .dispatch
+            .dispatch_profile()
             .summary(),
         "more short training loads, more appointment slack"
     );
-    assert_eq!(start_option(None).dispatch.summary(), "balanced dispatch");
+    assert_eq!(
+        start_option(None).dispatch_profile().summary(),
+        "balanced dispatch"
+    );
     assert_eq!(DispatchProfile::default(), DispatchProfile::BALANCED);
 }
 

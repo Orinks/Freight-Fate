@@ -1031,3 +1031,29 @@ fn test_active_buffs_round_trip_through_a_saved_profile() {
         assert_eq!(loaded.active_buffs, p.active_buffs);
     });
 }
+
+#[test]
+fn test_home_terminal_city_migrates_from_current_city() {
+    use serde_json::{json, Map, Value};
+    let mut data: Map<String, Value> = json!({
+        "name": "Pat",
+        "current_city": "healy_ak_us",
+        "carrier_key": "northstar",
+        "version": 5
+    })
+    .as_object()
+    .unwrap()
+    .clone();
+    // No home_terminal_city field — old save.
+    assert!(!data.contains_key("home_terminal_city"));
+    let loaded = Profile::from_dict(&data);
+    assert_eq!(
+        loaded.home_terminal_city, "nenana_ak_us",
+        "Healy migrates home to nearest real yard city"
+    );
+    assert!(loaded.needs_migration_resave);
+
+    data.insert("home_terminal_city".into(), Value::from("healy_ak_us"));
+    let loaded = Profile::from_dict(&data);
+    assert_eq!(loaded.home_terminal_city, "nenana_ak_us");
+}

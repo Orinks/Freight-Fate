@@ -131,6 +131,7 @@ pub const PROFILE_FIELDS: &[&str] = &[
     "name",
     "money",
     "current_city",
+    "home_terminal_city",
     "created_line",
     "migration_notice_pending",
     "integrity_modified",
@@ -358,6 +359,9 @@ pub struct Profile {
     /// honest career as modified. Read it with [`Profile::money`].
     money: f64,
     pub current_city: String,
+    /// Persisted home base city key (Career 2.0). Old saves migrate from
+    /// `current_city` via nearest real company_yard/terminal. Never a fuel lot.
+    pub home_terminal_city: String,
     // The release line this career was created on. New careers stamp the
     // current line; a save without the field is judged by its save version
     // instead (see is_pre_1_9_save), and pre-1.9 saves never get this far --
@@ -483,6 +487,7 @@ impl Default for Profile {
             name: "Driver".to_string(),
             money: STARTING_MONEY,
             current_city: DEFAULT_CITY.to_string(),
+            home_terminal_city: DEFAULT_CITY.to_string(),
             created_line: CREATED_LINE.to_string(),
             migration_notice_pending: false,
             integrity_modified: false,
@@ -565,6 +570,7 @@ impl Profile {
         Profile {
             name: name.to_string(),
             current_city: current_city.to_string(),
+            home_terminal_city: current_city.to_string(),
             ..Self::default()
         }
     }

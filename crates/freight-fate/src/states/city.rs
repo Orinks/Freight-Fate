@@ -212,7 +212,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         ),
         format!("Your assigned truck is parked at {location}."),
         "The carrier covers fuel, repairs, insurance, and trailer support.".to_string(),
-        format!("Dispatch style: {}.", option.dispatch.summary()),
+        format!("Dispatch style: {}.", option.dispatch_profile().summary()),
         "As a new hire, dispatch assigns your load and route, and refusing an assignment \
          goes on your service record."
             .to_string(),

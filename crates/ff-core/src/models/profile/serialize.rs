@@ -61,6 +61,10 @@ impl Profile {
             Value::from(self.current_city.as_str()),
         );
         d.insert(
+            "home_terminal_city".into(),
+            Value::from(self.home_terminal_city.as_str()),
+        );
+        d.insert(
             "created_line".into(),
             Value::from(self.created_line.as_str()),
         );
@@ -198,6 +202,9 @@ impl Profile {
         if !d.contains_key("created_line") {
             migrated = true;
         }
+        if !d.contains_key("home_terminal_city") {
+            migrated = true;
+        }
         d.remove("version");
         d.remove(SIGNATURE_FIELD);
         d.remove(SIGNATURE_VERSION_FIELD);
@@ -295,6 +302,15 @@ impl Profile {
             money,
             money_guard: MoneyGuard::seeded(money),
             current_city: s("current_city", &defaults.current_city),
+            home_terminal_city: {
+                let raw = s("home_terminal_city", "");
+                if raw.is_empty() {
+                    // Old save: derive from current city via nearest real yard.
+                    migrate_home_terminal_city(&s("current_city", &defaults.current_city))
+                } else {
+                    migrate_home_terminal_city(&raw)
+                }
+            },
             created_line: s("created_line", &defaults.created_line),
             migration_notice_pending: b("migration_notice_pending", false),
             integrity_modified: b("integrity_modified", false),
@@ -341,4 +357,16 @@ impl Profile {
             needs_migration_resave: migrated,
         }
     }
+}
+
+/// Resolve a saved home city to a city that owns a real yard/terminal.
+/// Synthetic "{City} Company Yard" homes never existed as a save field; this
+/// catches cities that only have fuel/parking pins by walking to the nearest
+/// offerable yard city (or leaving the key unchanged when already offerable).
+fn migrate_home_terminal_city(city: &str) -> String {
+    use crate::data::world::get_world;
+    let world = get_world();
+    world
+        .resolve_home_terminal_city(city)
+        .unwrap_or_else(|| world.resolve_city_key(city))
 }

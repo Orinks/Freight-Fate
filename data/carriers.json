@@ -1,0 +1,117 @@
+{
+  "northstar": {
+    "name": "Northstar Freight Lines",
+    "tier": "national",
+    "terminal_city_keys": [
+      "chicago_il_us"
+    ],
+    "hiring_radius_mi": null,
+    "home_time_policy": "inert",
+    "run_band_mi": {
+      "min": 400.0,
+      "max": 3000.0
+    },
+    "company_pay": {
+      "pay_share": 0.36,
+      "min_per_mile": 0.82,
+      "stop_pay": 175.0,
+      "on_time_bonus_share": 0.04
+    },
+    "dispatch": {
+      "short_haul_bias": 0.0,
+      "regional_bias": 0.0,
+      "long_haul_bias": 0.0,
+      "deadline_slack": 1.0
+    },
+    "cargo_weight_bonus": {}
+  },
+  "great_lakes_training": {
+    "name": "Great Lakes Training Transport",
+    "tier": "national",
+    "terminal_city_keys": [
+      "milwaukee_wi_us"
+    ],
+    "hiring_radius_mi": null,
+    "home_time_policy": "inert",
+    "run_band_mi": {
+      "min": 400.0,
+      "max": 3000.0
+    },
+    "company_pay": {
+      "pay_share": 0.33,
+      "min_per_mile": 0.74,
+      "stop_pay": 225.0,
+      "on_time_bonus_share": 0.02
+    },
+    "dispatch": {
+      "short_haul_bias": 0.8,
+      "regional_bias": 0.0,
+      "long_haul_bias": 0.0,
+      "deadline_slack": 1.08
+    },
+    "cargo_weight_bonus": {},
+    "solvency_fallback": true
+  },
+  "prairie_link": {
+    "name": "Prairie Link Regional",
+    "tier": "regional",
+    "terminal_city_keys": [
+      "kansas_city_mo_us",
+      "omaha_ne_us",
+      "wichita_ks_us"
+    ],
+    "hiring_radius_mi": 250.0,
+    "home_time_policy": "inert",
+    "run_band_mi": {
+      "min": 150.0,
+      "max": 600.0
+    },
+    "company_pay": {
+      "pay_share": 0.34,
+      "min_per_mile": 0.95,
+      "stop_pay": 130.0,
+      "on_time_bonus_share": 0.03
+    },
+    "dispatch": {
+      "short_haul_bias": 0.0,
+      "regional_bias": 0.7,
+      "long_haul_bias": 0.1,
+      "deadline_slack": 1.0
+    },
+    "cargo_weight_bonus": {
+      "grain": 0.25,
+      "farm_inputs": 0.2,
+      "bulk": 0.15
+    }
+  },
+  "summit_value": {
+    "name": "Summit Value Logistics",
+    "tier": "national",
+    "terminal_city_keys": [
+      "denver_co_us"
+    ],
+    "hiring_radius_mi": null,
+    "home_time_policy": "inert",
+    "run_band_mi": {
+      "min": 400.0,
+      "max": 3000.0
+    },
+    "company_pay": {
+      "pay_share": 0.38,
+      "min_per_mile": 0.78,
+      "stop_pay": 150.0,
+      "on_time_bonus_share": 0.06
+    },
+    "dispatch": {
+      "short_haul_bias": 0.0,
+      "regional_bias": 0.0,
+      "long_haul_bias": 0.35,
+      "deadline_slack": 1.0
+    },
+    "cargo_weight_bonus": {
+      "electronics": 0.2,
+      "automotive": 0.15,
+      "parcel": 0.15
+    }
+  }
+}
