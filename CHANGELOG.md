@@ -10,7 +10,7 @@
 
 ### Added
 
-- **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches. A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run.
+- **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches (up to one mile). A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run. Twins are not run on ALCAN, Canada, or Alaska lanes.
 
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.

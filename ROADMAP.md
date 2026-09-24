@@ -1246,19 +1246,24 @@ are intentionally not started here.
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
       reasonable access. Approximation: Interstate designation
-      (`data::grades::road_class`) plus facility/surface approach legs and
-      short first/last terminal stubs ≤ 1.5 mi. Spoken refusal when no
-      twin-legal lane remains; a dropped off-network option is announced as
-      a reroute.
-- [ ] **Honesty debt: designated federal-aid primary routes.** Real NN
-      includes many US and some state primary routes (23 CFR 658). Without
-      designation flags in world data, those lanes are refused today
-      (under-inclusive). Open call for the realism editor: count `US-`
-      as NN until designation data exists, or keep Interstate-only.
-- [ ] **Honesty debt: reasonable-access distance.** Real access is roughly
-      one mile and varies by state; the game uses approach markers and a
-      1.5 mi end-stub cap, not junction distance. Open call: mileage cap
-      and whether mid-route short connectors may count.
+      (`data::grades::road_class`) plus same-city locals and first/last
+      facility approaches or terminal stubs ≤ 1.0 mi (23 CFR 658.19 floor).
+      Mid-route connectors never count. Spoken refusal when no twin-legal
+      lane remains; a dropped off-network option is announced as a reroute.
+- [x] **Lower-48 corridor policy (landed).** Twin loads are refused on
+      ALCAN, Canada, and Alaska lanes (origin, destination, or any leg
+      outside the lower-48 US), with a distinct spoken line.
+- [ ] **Honesty debt: designated federal-aid primary routes.** Stay
+      Interstate-only for now. Designated US and state NN segments come
+      later as explicit per-segment flags checked against the FHWA National
+      Network map, not by road class.
+- [ ] **Honesty debt: reasonable-access distance.** Cap is the federal
+      1.0 mi floor (23 CFR 658.19); access distance varies by state and
+      those extensions are not modeled. Mid-route connectors never count
+      unless later flagged under the FHWA map work.
+- [ ] **Honesty debt: Twin parcel loads are not offered on ALCAN, Canada,
+      or Alaska lanes until provincial and Alaska doubles rules are
+      modeled.**
 - [ ] **FIX 2: LCV turnpike trailer** (not started).
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
