@@ -115,8 +115,7 @@ impl PauseMenuState {
                 ctx.push_state(state);
             })
             .help(
-                "The how-to-play reference at the driving keys. Left and Right change pages, Up \
-                 and Down read lines.",
+                "The how-to-play reference at the driving keys. Left and Right change pages, Up and Down read lines.",
             ),
             MenuItem::new("Learn game sounds", |_s: &mut Self, ctx: &mut GameContext| {
                 let state = LearnSoundsState::new();
@@ -124,8 +123,7 @@ impl PauseMenuState {
             })
             .help("Plays any sound the road uses and says what it means."),
             MenuItem::new(mechanic_label(d), |s: &mut Self, ctx| s.mechanic(ctx)).help(
-                "A mobile mechanic patches the truck up enough to drive on. Far dearer than a \
-                 garage, an hour and a half, and billed even into debt.",
+                "A mobile mechanic patches the truck up enough to drive on. Far dearer than a garage, an hour and a half, and billed even into debt.",
             ),
             MenuItem::new("Settings", |_s: &mut Self, ctx: &mut GameContext| {
                 let state = SettingsState::new();
@@ -150,9 +148,7 @@ impl PauseMenuState {
                     s.install_chains(ctx)
                 })
                 .help(
-                    "Chains bite snow and ice. Chain speed is about thirty miles per hour. Pull \
-                     them once the road is bare. In the dark, installing takes longer and more \
-                     out of you.",
+                    "Chains bite snow and ice. Chain speed is about thirty miles per hour. Pull them once the road is bare. In the dark, installing takes longer and more out of you.",
                 ),
             );
         }
@@ -162,8 +158,7 @@ impl PauseMenuState {
                 ctx.push_state(state);
             })
             .help(
-                "Who is hauling right now on orinks.net. Viewing the list shares nothing about \
-                 you.",
+                "Who is hauling right now on orinks.net. Viewing the list shares nothing about you.",
             ),
         );
         items.push(
@@ -173,8 +168,7 @@ impl PauseMenuState {
         );
         items.push(
             MenuItem::new("Quit to main menu", |s: &mut Self, ctx| s.quit_to_menu(ctx)).help(
-                "Saves happen only at a stop. The drive resumes from the last stop. Abandon job \
-                 drops the load.",
+                "Saves happen only at a stop. The drive resumes from the last stop. Abandon job drops the load.",
             ),
         );
         if d.emergency_shoulder_sleep_reason(ctx).is_some() {
@@ -184,9 +178,7 @@ impl PauseMenuState {
                     s.emergency_shoulder_sleep(ctx)
                 })
                 .help(
-                    "Poor sleep on the shoulder. Resets hours of service. Fatigue remains, \
-                     possible ticket, possible minor truck damage, and the deadline keeps \
-                     running.",
+                    "Poor sleep on the shoulder. Resets hours of service. Fatigue remains, possible ticket, possible minor truck damage, and the deadline keeps running.",
                 ),
             );
         }
@@ -228,8 +220,7 @@ impl PauseMenuState {
                 )
             };
             let text = format!(
-                "A mobile mechanic patched the truck up to {} percent damage {billing}. Repair \
-                 took an hour and a half. It is {}. {}",
+                "A mobile mechanic patched the truck up to {} percent damage {billing}. Repair took an hour and a half. It is {}. {}",
                 fmt_f(FIELD_REPAIR_DAMAGE_PCT, 0),
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
@@ -493,8 +484,7 @@ impl Menu for QuitWhileMovingConfirmationState {
         let lost = self.lost_text(ctx);
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Still moving, and the game saves only at a stop. Quitting loses {lost} since your \
-             last stop. {current}"
+            "Still moving, and the game saves only at a stop. Quitting loses {lost} since your last stop. {current}"
         ));
     }
 
@@ -507,10 +497,7 @@ impl Menu for QuitWhileMovingConfirmationState {
                 format!("Quit anyway and lose {lost}"),
                 |s: &mut Self, ctx| s.confirm(ctx),
             )
-            .help(
-                "Return to the title. The drive resumes from your last stop, \
-                 not from here.",
-            ),
+            .help("Return to the title. The drive resumes from your last stop, not from here."),
         ]
     }
 }
@@ -546,7 +533,7 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
             format!(
                 "{} tons of {} are assigned for {}.",
                 fmt_f(d.job.weight_tons, 0),
-                d.job.cargo.label,
+                d.job.spoken_cargo_label(),
                 d.job.spoken_destination()
             ),
             d.pickup_progress_summary(ctx),
@@ -558,7 +545,7 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
         format!(
             "Hauling {} tons of {} to {}.",
             fmt_f(d.job.weight_tons, 0),
-            d.job.cargo.label,
+            d.job.spoken_cargo_label(),
             d.job.spoken_destination()
         ),
         d.trip.progress_summary(ctx.settings.imperial_units),
@@ -769,8 +756,7 @@ impl AbandonJobConfirmationState {
             ));
         } else if bobtail {
             ctx.say(&format!(
-                "Reposition called off. No freight, no penalty, the hours still count. Back in \
-                 {where_}."
+                "Reposition called off. No freight, no penalty, the hours still count. Back in {where_}."
             ));
         } else {
             ctx.say(&format!(
@@ -806,15 +792,13 @@ impl Menu for AbandonJobConfirmationState {
         let current = self.current_text(ctx);
         if self.is_assigned_reposition() {
             ctx.say(&format!(
-                "{title} No freight, no fine, but reputation takes a hit. Back to {city}. \
-                 {current}"
+                "{title} No freight, no fine, but reputation takes a hit. Back to {city}. {current}"
             ));
             return;
         }
         if self.is_bobtail() {
             ctx.say(&format!(
-                "{title} Running empty, turning back costs only the time already spent. Back to \
-                 {city}. {current}"
+                "{title} Running empty, turning back costs only the time already spent. Back to {city}. {current}"
             ));
             return;
         }

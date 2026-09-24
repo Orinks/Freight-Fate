@@ -170,32 +170,19 @@ impl SettingsCategoryState {
                     format!("Driving speech: {}", s.driving_speech.replace('_', " "))
                 }),
                 action: adjust(|s, ctx, d| s.cycle_driving_speech(ctx, d)),
-                help: "How much the road tells you. Standard speaks every \
-                       confirmation and status update, and a driving tip once \
-                       per leg. Quiet speaks short confirmations, lane openings, \
-                       and status updates. Urgent only keeps safety warnings \
-                       and directions requiring action, with sounds for road \
-                       heads-ups and confirmations. Suppressed speech stays out \
-                       of the event buffer. Readout keys always answer. \
-                       Billboards, place names, and \
-                       landmarks have their own switches below.",
+                help: "How much the road tells you. Standard speaks every confirmation and status update, and a driving tip once per leg. Quiet speaks short confirmations, lane openings, and status updates. Urgent only keeps safety warnings and directions requiring action, with sounds for road heads-ups and confirmations. Suppressed speech stays out of the event buffer. Readout keys always answer. Billboards, place names, and landmarks have their own switches below.",
             },
             SpeechSpec {
                 label: dyn_label(|s| format!("Roadside chatter: {}", s.chatter_summary())),
                 action: adjust(|s, ctx, d| s.set_all_chatter(ctx, d)),
-                help: "Color between navigation cues: parks, rivers, mountain \
-                       passes, museums, and billboards. Right arrow turns all \
-                       on, Left arrow all off; the switches below pick each \
-                       kind. Safety and navigation are never affected. Town \
-                       names are the Place callouts row below.",
+                help: "Color between navigation cues: parks, rivers, mountain passes, museums, and billboards. Right arrow turns all on, Left arrow all off; the switches below pick each kind. Safety and navigation are never affected. Town names are the Place callouts row below.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
                     format!("Speak parks and forests: {}", on_off(s.chatter_parks))
                 }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_parks")),
-                help: "Callouts entering a national park, national forest, or \
-                       other protected public land.",
+                help: "Callouts entering a national park, national forest, or other protected public land.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
@@ -209,8 +196,7 @@ impl SettingsCategoryState {
                     format!("Speak mountain passes: {}", on_off(s.chatter_passes))
                 }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_passes")),
-                help: "Callouts approaching a named mountain pass, and famous \
-                       highway markers like the Loneliest Road in America.",
+                help: "Callouts approaching a named mountain pass, and famous highway markers like the Loneliest Road in America.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
@@ -225,17 +211,12 @@ impl SettingsCategoryState {
             SpeechSpec {
                 label: dyn_label(|s| format!("Speak billboards: {}", on_off(s.chatter_billboards))),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_billboards")),
-                help: "Roadside billboards, read as you pass them: attorney ads \
-                       and questionable tourist traps.",
+                help: "Roadside billboards, read as you pass them: attorney ads and questionable tourist traps.",
             },
             SpeechSpec {
                 label: dyn_label(|s| format!("Place callouts: {}", s.place_callouts)),
                 action: adjust(|s, ctx, d| s.cycle_place_callouts(ctx, d)),
-                help: "Place names along the road. Sparse speaks only the town \
-                       names that explain a speed limit change, like Entering \
-                       Strawberry before its 35. All adds the towns the route \
-                       passes. Off silences place names; speed limits are never \
-                       affected.",
+                help: "Place names along the road. Sparse speaks only the town names that explain a speed limit change, like Entering Strawberry before its 35. All adds the towns the route passes. Off silences place names; speed limits are never affected.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
@@ -245,8 +226,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 action: adjust(|s, ctx, d| s.toggle_menu_position(ctx, d)),
-                help: "On, menus say the position, like 3 of 10, after each option. \
-                       Off, only the option.",
+                help: "On, menus say the position, like 3 of 10, after each option. Off, only the option.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
@@ -256,29 +236,17 @@ impl SettingsCategoryState {
                     )
                 }),
                 action: adjust(|s, ctx, d| s.cycle_backup_announcements(ctx, d)),
-                help: "How often you hear that a career is backed up to your \
-                       orinks.net account. Every time, after each save. Once a \
-                       session, the first backup of each career after the game \
-                       starts. Never keeps it quiet. Backups keep going either \
-                       way, and a refused backup is always spoken.",
+                help: "How often you hear that a career is backed up to your orinks.net account. Every time, after each save. Once a session, the first backup of each career after the game starts. Never keeps it quiet. Backups keep going either way, and a refused backup is always spoken.",
             },
             SpeechSpec {
                 label: dyn_label(|s| format!("Driving event voice: {}", event_voice_label(s))),
                 action: adjust(|s, ctx, d| s.cycle_event_voice(ctx, d)),
-                help: "Road events through the main voice or a separate SAPI or \
-                       OneCore voice a screen reader cannot cut off. The rate, \
-                       pitch, volume, and voice rows below appear only when the \
-                       voice supports them; with a screen reader running, set \
-                       those in the screen reader.",
+                help: "Road events through the main voice or a separate SAPI or OneCore voice a screen reader cannot cut off. The rate, pitch, volume, and voice rows below appear only when the voice supports them; with a screen reader running, set those in the screen reader.",
             },
             SpeechSpec {
                 label: dyn_label(|s| format!("Output: {}", output_label(s))),
                 action: adjust(|s, ctx, d| s.toggle_braille_only(ctx, d)),
-                help: "Speech and braille speaks every line and, with NVDA or JAWS, \
-                       shows it on your braille display too. Braille only puts \
-                       every line on the display and speaks nothing: menus, \
-                       readouts, and road events alike. It needs NVDA or JAWS; \
-                       with any other voice the game keeps speaking and says so.",
+                help: "Speech and braille speaks every line and, with NVDA or JAWS, shows it on your braille display too. Braille only puts every line on the display and speaks nothing: menus, readouts, and road events alike. It needs NVDA or JAWS; with any other voice the game keeps speaking and says so.",
             },
         ];
         if speech.supports_rate() {
@@ -399,22 +367,12 @@ impl SettingsCategoryState {
                 row(
                     dyn_label(|s| format!("Driving mode: {}", pace_label(s))),
                     adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
-                    "Pacing and pressure. Relaxed gives wider hazard windows, \
-                     gentler damage and fatigue, calmer speech, and the most \
-                     time to respond. Standard keeps balanced pressure and moves \
-                     the clock twice as fast. Real time keeps Standard's \
-                     pressure and runs the driving clock at the speed of a real \
-                     clock, lined up with your computer's date and time; delivery \
-                     time remaining and hours of service do not move. Changeable \
-                     mid-drive from the pause menu.",
+                    "Pacing and pressure. Relaxed gives wider hazard windows, gentler damage and fatigue, calmer speech, and the most time to respond. Standard keeps balanced pressure and moves the clock twice as fast. Real time keeps Standard's pressure and runs the driving clock at the speed of a real clock, lined up with your computer's date and time; delivery time remaining and hours of service do not move. Changeable mid-drive from the pause menu.",
                 ),
                 row(
                     dyn_label(|s| format!("Hours of service: {}", hos_label(s))),
                     adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
-                    "Realistic: full hours rules and normal road hazards. \
-                     Relaxed: the same 11-hour drive, 14-hour window, and \
-                     30-minute break, with lighter fines, fewer inspections, and \
-                     rare road hazards.",
+                    "Realistic: full hours rules and normal road hazards. Relaxed: the same 11-hour drive, 14-hour window, and 30-minute break, with lighter fines, fewer inspections, and rare road hazards.",
                 ),
                 // The overspeed warning no longer has a row. It armed at the
                 // same 5-over pace predictive cruise itself holds, so it
@@ -437,10 +395,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
-                    "Real world uses live city conditions when available, and reads \
-                     the Weather Service's active warnings along your route: dispatch \
-                     plans around a blizzard, ice storm, hurricane or tornado warning, \
-                     and the cab reads a warning out as you drive into it.",
+                    "Real world uses live city conditions when available, and reads the Weather Service's active warnings along your route: dispatch plans around a blizzard, ice storm, hurricane or tornado warning, and the cab reads a warning out as you drive into it.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -454,8 +409,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_traffic(ctx, d)),
-                    "Real time uses live traffic incidents from state 511 \
-                     services when available.",
+                    "Real time uses live traffic incidents from state 511 services when available.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -469,9 +423,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_fuel_prices(ctx, d)),
-                    "This week's national average puts the federal weekly diesel survey \
-                     price at every pump, with each region's usual difference on top. \
-                     Simulated draws a price per region for the session.",
+                    "This week's national average puts the federal weekly diesel survey price at every pump, with each region's usual difference on top. Simulated draws a price per region for the session.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -485,8 +437,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_parking(ctx, d)),
-                    "Real time uses live truck parking availability from \
-                     TPIMS when available.",
+                    "Real time uses live truck parking availability from TPIMS when available.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -496,9 +447,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_live_weather_calendar(ctx, d)),
-                    "On, live weather uses today's real date and season. Off, \
-                     the career date advances at midnight and seasons pass while \
-                     weather still comes from the real world.",
+                    "On, live weather uses today's real date and season. Off, the career date advances at midnight and seasons pass while weather still comes from the real world.",
                 ),
                 back_row(),
             ],
@@ -529,8 +478,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_transmission(ctx, d)),
-                    "Automatic shifts for you. Manual uses the clutch \
-                     with W and Q to shift up and down.",
+                    "Automatic shifts for you. Manual uses the clutch with W and Q to shift up and down.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -540,10 +488,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.cycle_automatic_direction_changes(ctx, d)),
-                    "Both styles change direction with a fresh press at a \
-                     standstill; a brake held through a stop just holds the \
-                     truck. Deliberate requires the release and press \
-                     everywhere. Automatic transmission only.",
+                    "Both styles change direction with a fresh press at a standstill; a brake held through a stop just holds the truck. Deliberate requires the release and press everywhere. Automatic transmission only.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -557,9 +502,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_controller(ctx, d)),
-                    "Game-controller input alongside the keyboard, which \
-                     always stays active. The first connected controller is \
-                     used.",
+                    "Game-controller input alongside the keyboard, which always stays active. The first connected controller is used.",
                 ),
                 row(
                     dyn_label(|s| {
@@ -573,8 +516,7 @@ impl SettingsCategoryState {
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_haptics(ctx, d)),
-                    "Controller rumble for hazards, hard braking, the rumble \
-                     strip, and road seams. Needs a controller connected.",
+                    "Controller rumble for hazards, hard braking, the rumble strip, and road seams. Needs a controller connected.",
                 ),
                 // Enter opens each; Left and Right have nothing to step through,
                 // and the adjust table above stops before these rows.
@@ -585,8 +527,7 @@ impl SettingsCategoryState {
                     },
                 )
                 .help(
-                    "Move any driving key to another key. Enter on a control, then \
-                     press the key you want for it.",
+                    "Move any driving key to another key. Enter on a control, then press the key you want for it.",
                 ),
                 MenuItem::new(
                     "Controller buttons",
@@ -595,8 +536,7 @@ impl SettingsCategoryState {
                     },
                 )
                 .help(
-                    "Move any driving control to another pad button, plain or with \
-                     the right bumper held.",
+                    "Move any driving control to another pad button, plain or with the right bumper held.",
                 ),
                 // The speed keeper moved to Driving assistance: it holds a speed
                 // for you, which is what every other row on that screen does.
@@ -620,8 +560,7 @@ impl SettingsCategoryState {
                     |s: &mut SettingsCategoryState, ctx| s.say_log_location(ctx),
                 )
                 .help(
-                    "The session log records everything the game said out \
-                     loud. Send it with a bug report.",
+                    "The session log records everything the game said out loud. Send it with a bug report.",
                 ),
                 back_row(),
             ],
@@ -666,26 +605,12 @@ impl SettingsCategoryState {
         items.push(row(
             dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
             adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
-            "How much of the lane-holding work the truck does. Full \
-             holds the lane, turns Left and Right into tap lane \
-             changes, and takes your exits, including the destination \
-             exit, without a signal. Partial drifts gently with \
-             generous steering help. Off drifts like a real wheel, and \
-             every exit needs its signal and its exit lane. On partial \
-             or off the road sound leans toward where the wheel should \
-             go, and the road edge answers: a stutter clipping the \
-             rumble strip, a buzz fully on it, gravel off the pavement. \
-             Realistic sets this off, Balanced partial, All assists \
-             full.",
+            "How much of the lane-holding work the truck does. Full holds the lane, turns Left and Right into tap lane changes, and takes your exits, including the destination exit, without a signal. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs its signal and its exit lane. On partial or off the road sound leans toward where the wheel should go, and the road edge answers: a stutter clipping the rumble strip, a buzz fully on it, gravel off the pavement. Realistic sets this off, Balanced partial, All assists full.",
         ));
         items.push(row(
             dyn_label(|s| format!("Following gap: {}", acc_gap_label(s))),
             adjust(|s, ctx, d| s.cycle_acc_gap(ctx, d)),
-            "How much room adaptive cruise leaves to the vehicle \
-             ahead. Close is two and a half seconds, normal three, far \
-             three and a half. Weather widens the gap whichever you \
-             pick. All three stay clear of a following-too-close \
-             citation. The preset above never changes it.",
+            "How much room adaptive cruise leaves to the vehicle ahead. Close is two and a half seconds, normal three, far three and a half. Weather widens the gap whichever you pick. All three stay clear of a following-too-close citation. The preset above never changes it.",
         ));
         // Lane and edge cue volume moved to Audio, next to the Gameplay
         // cues volume it scales. It is a volume, and a second volume
@@ -710,12 +635,7 @@ impl SettingsCategoryState {
             row(
                 dyn_label(|s| format!("Lane and edge cue volume: {}", cue_loudness_label(s))),
                 adjust(|s, ctx, d| s.cycle_cue_loudness(ctx, d)),
-                "How loud the lane and edge cues are next to everything \
-                 else: the rumble-strip and shoulder textures, the lane \
-                 locator on I, and the warning bars before a hairpin. It \
-                 rides on the Gameplay cues volume above and moves those \
-                 cues alone. Quieter sits under the engine, standard \
-                 matches it, louder cuts through.",
+                "How loud the lane and edge cues are next to everything else: the rumble-strip and shoulder textures, the lane locator on I, and the warning bars before a hairpin. It rides on the Gameplay cues volume above and moves those cues alone. Quieter sits under the engine, standard matches it, louder cuts through.",
             ),
             row(
                 dyn_label(|s| {
@@ -729,12 +649,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_steering_guide_inverted(ctx, d)),
-                "Which way to steer when the engine leans. Toward the lean \
-                 is the default: the engine pans the way you have to turn, \
-                 and comes back to the middle as you turn. Away from the \
-                 lean flips it, for drivers who learned the other habit in \
-                 audio racing games. Everything else about the guide is the \
-                 same either way.",
+                "Which way to steer when the engine leans. Toward the lean is the default: the engine pans the way you have to turn, and comes back to the middle as you turn. Away from the lean flips it, for drivers who learned the other habit in audio racing games. Everything else about the guide is the same either way.",
             ),
             row(
                 dyn_label(|s| {
@@ -744,12 +659,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
-                "What leans toward the side to steer. The engine is the \
-                 default: the engine you already hear, moving toward the \
-                 side you need and coming back to the middle once you are \
-                 through. Tone plays a soft note instead, panned the same \
-                 way, for setups where the engine is hard to place. A held \
-                 note is tiring over a long haul.",
+                "What leans toward the side to steer. The engine is the default: the engine you already hear, moving toward the side you need and coming back to the middle once you are through. Tone plays a soft note instead, panned the same way, for setups where the engine is hard to place. A held note is tiring over a long haul.",
             ),
             row(
                 dyn_label(|s| format!("Weather sounds volume: {} percent", pct(s.weather_volume))),
@@ -764,9 +674,7 @@ impl SettingsCategoryState {
             row(
                 dyn_label(|s| format!("Engine voice: {}", s.engine_voice)),
                 adjust(|s, ctx, d| s.toggle_engine_voice(ctx, d)),
-                "Real is the engine recorded from a working truck cab, \
-                 following the rpm. Classic is the original engine sound. \
-                 Changes apply at once, even while driving.",
+                "Real is the engine recorded from a working truck cab, following the rpm. Classic is the original engine sound. Changes apply at once, even while driving.",
             ),
             row(
                 dyn_label(|s| {
@@ -776,9 +684,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_jake_voice(ctx, d)),
-                "Recorded is the real engine brake growl, the jake. \
-                 Classic is the synthesized growl from earlier versions. \
-                 Changes apply at once, even while driving.",
+                "Recorded is the real engine brake growl, the jake. Classic is the synthesized growl from earlier versions. Changes apply at once, even while driving.",
             ),
             row(
                 dyn_label(|s| format!("Music volume: {} percent", pct(s.music_volume))),
@@ -793,10 +699,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_music_source(ctx, d)),
-                "Synthesized plays menu music and the Roadhouse station made by the \
-                 game itself, with no AI-made songs or voices, and takes Freight \
-                 Fate's other stations off the dial. Original plays the full \
-                 soundtrack.",
+                "Synthesized plays menu music and the Roadhouse station made by the game itself, with no AI-made songs or voices, and takes Freight Fate's other stations off the dial. Original plays the full soundtrack.",
             ),
             row(
                 dyn_label(|s| format!("Music seed: {}", s.music_seed)),
@@ -813,11 +716,7 @@ impl SettingsCategoryState {
                     format!("Radio streamer-safe mode: {}", on_off(s.radio_streamer_safe))
                 }),
                 adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
-                "Off plays the full dial, including real public streams and \
-                 personal playlists. On keeps the radio to built-in safe \
-                 stations, for streaming or recording. With Music source set to \
-                 Synthesized, On keeps the radio on the Roadhouse and station \
-                 keys do nothing.",
+                "Off plays the full dial, including real public streams and personal playlists. On keeps the radio to built-in safe stations, for streaming or recording. With Music source set to Synthesized, On keeps the radio on the Roadhouse and station keys do nothing.",
             ),
             row(
                 dyn_label(|s| {
@@ -827,8 +726,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_radio_shuffle_playlists(ctx, d)),
-                "On plays each of your playlists in a random order, every track \
-                 once before any repeats. Off plays the file top to bottom.",
+                "On plays each of your playlists in a random order, every track once before any repeats. Off plays the file top to bottom.",
             ),
             row(
                 dyn_label(|s| {
@@ -838,8 +736,7 @@ impl SettingsCategoryState {
                     )
                 }),
                 adjust(|s, ctx, d| s.toggle_duck_for_speech(ctx, d)),
-                "While the road voice speaks, the engine, weather, and \
-                 radio drop to half volume, then come back.",
+                "While the road voice speaks, the engine, weather, and radio drop to half volume, then come back.",
             ),
             row(
                 dyn_label(|s| format!("Menu and UI sounds volume: {} percent", pct(s.ui_volume))),

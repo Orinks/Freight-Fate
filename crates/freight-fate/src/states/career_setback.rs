@@ -46,8 +46,7 @@ impl CareerSetbackNoticeState {
         };
         Self {
             menu: MenuCore::new(setback_title(&kind)).with_intro_help(
-                "Up and down reread the lines. Enter repeats a line. Continue or Escape \
-                 returns to the terminal.",
+                "Up and down reread the lines. Enter repeats a line. Continue or Escape returns to the terminal.",
             ),
             kind,
             lines,

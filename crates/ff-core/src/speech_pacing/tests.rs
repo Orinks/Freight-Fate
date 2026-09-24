@@ -619,9 +619,7 @@ fn test_a_flush_hands_back_a_route_line_that_never_got_a_word_out() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
-    let briefing = "Off the ramp and onto city streets: start on unnamed \
-                        public road. Then turn right now onto Halleck Street. \
-                        1 mile to the facility gate.";
+    let briefing = "Off the ramp and onto city streets: start on unnamed public road. Then turn right now onto Halleck Street. 1 mile to the facility gate.";
     pacer.note_queued(briefing, EventPriority::Route, None, None);
     // The next route line lands in the same frame.
     clock.advance(0.022);
@@ -649,8 +647,7 @@ fn test_a_handed_back_route_line_is_not_handed_back_twice() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
-    let briefing = "Off the ramp and onto city streets: start on unnamed \
-                        public road. Then turn right now onto Halleck Street.";
+    let briefing = "Off the ramp and onto city streets: start on unnamed public road. Then turn right now onto Halleck Street.";
     pacer.note_queued(briefing, EventPriority::Route, None, None);
     clock.advance(0.02);
     flush_at(

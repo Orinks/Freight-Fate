@@ -20,8 +20,7 @@ fn describe_reposition(ctx: &GameContext, total: usize, job: &Job, index: Option
         None => String::new(),
     };
     format!(
-        "{prefix}Carrier-assigned reposition: drive empty to {}, {}. No cargo. Pays {} \
-         dollars, the empty-mile rate. The {} dispatch board opens on arrival.",
+        "{prefix}Carrier-assigned reposition: drive empty to {}, {}. No cargo. Pays {} dollars, the empty-mile rate. The {} dispatch board opens on arrival.",
         job.spoken_destination(),
         ctx.settings.distance_text(job.distance_mi, false),
         fmt_grouped(job.pay, 0),
@@ -76,8 +75,7 @@ pub fn describe_job(ctx: &GameContext, total: usize, job: &Job, index: Option<us
 }
 
 const JOB_DETAIL_INTRO_HELP: &str =
-    "Up and down review the lines, Home and End jump to the ends. Enter repeats a line, or \
-     accepts on Accept this dispatch. Escape returns to the dispatch board.";
+    "Up and down review the lines, Home and End jump to the ends. Enter repeats a line, or accepts on Accept this dispatch. Escape returns to the dispatch board.";
 
 pub struct JobDetailState {
     menu: MenuCore<Self>,
@@ -130,7 +128,7 @@ impl JobDetailState {
             .map(|city| city_zone(city))
             .unwrap_or(ff_core::sim::timezones::EASTERN);
         let mut lines = vec![
-            format!("Cargo: {}.", job.cargo.label),
+            format!("Cargo: {}.", job.spoken_cargo_label()),
             format!("Origin: {}.", job.origin_facility_text()),
             format!("Destination: {destination_text}."),
             format!("Distance: {}.", s.distance_text(job.distance_mi, false)),

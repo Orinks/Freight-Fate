@@ -44,25 +44,16 @@ impl DrivingState {
         let objective_help = self.objective_help(ctx);
         let automatic_help = if ctx.settings.automatic_direction_changes == "deliberate" {
             format!(
-                "In automatic with deliberate direction changes, stop, release \
-                 {down}, then press and hold it again to reverse. While \
-                 reversing, stop with {up}, release, then press and hold \
-                 again for forward. A quick tap just brakes. "
+                "In automatic with deliberate direction changes, stop, release {down}, then press and hold it again to reverse. While reversing, stop with {up}, release, then press and hold again for forward. A quick tap just brakes. "
             )
         } else {
             format!(
-                "In automatic with simple direction changes, stop, release {down}, \
-                 then press and hold it again to reverse. While reversing, \
-                 stop with {up}, release, then hold it again for forward. A \
-                 brake held through a stop just holds the truck. "
+                "In automatic with simple direction changes, stop, release {down}, then press and hold it again to reverse. While reversing, stop with {up}, release, then hold it again for forward. A brake held through a stop just holds the truck. "
             )
         };
         let latch_help = if ctx.settings.pedal_latch != "off" {
             format!(
-                "Tap the brake, then press again and hold half a second to latch it \
-                 hands-free; a click and a spoken confirmation mark the catch. \
-                 {down} once releases it; the accelerator releases it instantly. The \
-                 throttle key never latches. "
+                "Tap the brake, then press again and hold half a second to latch it hands-free; a click and a spoken confirmation mark the catch. {down} once releases it; the accelerator releases it instantly. The throttle key never latches. "
             )
         } else {
             String::new()
@@ -213,13 +204,11 @@ impl DrivingState {
             n(Action::Cb)
         ));
         text.push_str(
-            "Comma repeats what was just said and keeps stepping back; Period moves \
-             forward again. ",
+            "Comma repeats what was just said and keeps stepping back; Period moves forward again. ",
         );
         text.push_str("Control with Comma or Period jumps to the oldest or newest message. ");
         text.push_str(
-            "The bracket keys switch between all messages, general messages, and driving \
-             events. ",
+            "The bracket keys switch between all messages, general messages, and driving events. ",
         );
         text.push_str("Control C copies the message you are on. ");
         text.push_str(&format!(
@@ -285,8 +274,7 @@ impl DrivingState {
         text.push_str("shifting. Escape pause menu. ");
         if !self.trip.truck.transmission.automatic {
             text.push_str(&format!(
-                "Hold Left Shift for clutch, then {} to shift up or {} to shift down, \
-                 {} for reverse, {} for neutral. ",
+                "Hold Left Shift for clutch, then {} to shift up or {} to shift down, {} for reverse, {} for neutral. ",
                 n(Action::ShiftUp),
                 n(Action::ShiftDown),
                 n(Action::Reverse),
@@ -294,8 +282,7 @@ impl DrivingState {
             ));
         }
         text.push_str(
-            "Any of these keys can be moved under Settings, Gameplay, Controls, \
-             Keyboard shortcuts.",
+            "Any of these keys can be moved under Settings, Gameplay, Controls, Keyboard shortcuts.",
         );
         ctx.say(&text);
     }
@@ -307,23 +294,15 @@ impl DrivingState {
         let manual = !self.trip.truck.transmission.automatic;
         let gears = if manual {
             format!(
-                "Hold the left bumper for the clutch; {} shifts up a gear, \
-                 {} shifts down. ",
+                "Hold the left bumper for the clutch; {} shifts up a gear, {} shifts down. ",
                 n(Action::ShiftUp),
                 n(Action::ShiftDown)
             )
         } else if ctx.settings.automatic_direction_changes == "deliberate" {
-            "In automatic with deliberate direction changes, stop, let the left \
-             trigger return to neutral, then press and hold it again to reverse. \
-             While reversing, stop with the right trigger, let it return to \
-             neutral, then press and hold again for forward. A quick tap just \
-             brakes. "
+            "In automatic with deliberate direction changes, stop, let the left trigger return to neutral, then press and hold it again to reverse. While reversing, stop with the right trigger, let it return to neutral, then press and hold again for forward. A quick tap just brakes. "
                 .to_string()
         } else {
-            "In automatic with simple direction changes, stop, let the left \
-             trigger return to neutral, then press and hold it again to reverse. \
-             While reversing, stop with the right trigger, release, then press it \
-             again for forward. A brake held through a stop just holds the truck. "
+            "In automatic with simple direction changes, stop, let the left trigger return to neutral, then press and hold it again to reverse. While reversing, stop with the right trigger, release, then press it again for forward. A brake held through a stop just holds the truck. "
                 .to_string()
         };
         let objective_help = self.objective_help(ctx);
@@ -393,8 +372,7 @@ impl DrivingState {
         text.push_str("while it is speaking; when nothing is being said, it repeats this help. ");
         text.push_str(&objective_help);
         text.push_str(
-            "Any of these buttons can be moved under Settings, Gameplay, Controls, \
-             Controller buttons.",
+            "Any of these buttons can be moved under Settings, Gameplay, Controls, Controller buttons.",
         );
         ctx.say(&text);
     }

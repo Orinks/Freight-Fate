@@ -71,14 +71,10 @@ impl Clone for DriveRef {
 fn nested_borrow(method: &str, caller: &Location<'_>) {
     debug_assert!(
         false,
-        "DriveRef::{method} at {caller}: the drive is already borrowed further \
-         up this call stack. Pass the drive that outer borrow already holds \
-         down to this code instead of borrowing it again."
+        "DriveRef::{method} at {caller}: the drive is already borrowed further up this call stack. Pass the drive that outer borrow already holds down to this code instead of borrowing it again."
     );
     log::warn!(
-        "DriveRef::{method} at {caller}: the drive is already borrowed further \
-         up this call stack, so this answered with nothing. That is a bug: the \
-         caller should pass the borrowed drive down."
+        "DriveRef::{method} at {caller}: the drive is already borrowed further up this call stack, so this answered with nothing. That is a bug: the caller should pass the borrowed drive down."
     );
 }
 
@@ -224,9 +220,7 @@ pub fn keep_rows<S>(
         None if drive.is_empty() => Vec::new(),
         None => {
             log::warn!(
-                "{}: rebuilding this menu could not reach the drive, so it keeps \
-                 the {} row(s) it already had instead of emptying itself. The \
-                 rows may be one action out of date.",
+                "{}: rebuilding this menu could not reach the drive, so it keeps the {} row(s) it already had instead of emptying itself. The rows may be one action out of date.",
                 Location::caller(),
                 current.len()
             );

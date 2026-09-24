@@ -87,8 +87,7 @@ impl Menu for LoadDriverState {
                     move |s: &mut Self, ctx| s.explain_legacy(ctx, &legacy),
                 )
                 .help(
-                    "This career cannot continue in version 1.9. Enter \
-                     explains and offers a new career; the save is not touched.",
+                    "This career cannot continue in version 1.9. Enter explains and offers a new career; the save is not touched.",
                 ),
             );
         }
@@ -232,10 +231,7 @@ impl Menu for CareerActionsState {
             MenuItem::new("Reset this career", |s: &mut Self, ctx| {
                 s.confirm(ctx, CareerAction::Reset)
             })
-            .help(
-                "Starts over with a fresh truck, money, career stats, market, \
-                 and hours clock.",
-            ),
+            .help("Starts over with a fresh truck, money, career stats, market, and hours clock."),
             MenuItem::new("Delete this career", |s: &mut Self, ctx| {
                 s.confirm(ctx, CareerAction::Delete)
             })
@@ -404,13 +400,11 @@ impl Menu for ConfirmCareerActionState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let detail = match (&self.profile, self.action) {
             (Some(profile), CareerAction::Reset) => format!(
-                "Reset starts over at {} with a fresh truck, starting money, \
-                 no active trip, and no delivery history.",
+                "Reset starts over at {} with a fresh truck, starting money, no active trip, and no delivery history.",
                 ctx.world.spoken_city(&profile.current_city, None)
             ),
             _ if self.has_cloud_backups(ctx) => {
-                "Delete removes this saved career from this computer for good. It also has \
-                 cloud backups on your orinks.net account; choose whether they go too."
+                "Delete removes this saved career from this computer for good. It also has cloud backups on your orinks.net account; choose whether they go too."
                     .to_string()
             }
             _ => "Delete removes this saved career for good.".to_string(),
@@ -441,8 +435,7 @@ impl Menu for ConfirmCareerActionState {
                         |s: &mut Self, ctx| s.delete(ctx, true),
                     )
                     .help(
-                        "Removes the save from this computer and every cloud backup of it \
-                         from your orinks.net account.",
+                        "Removes the save from this computer and every cloud backup of it from your orinks.net account.",
                     ),
                 );
                 items.push(
@@ -451,8 +444,7 @@ impl Menu for ConfirmCareerActionState {
                         |s: &mut Self, ctx| s.delete(ctx, false),
                     )
                     .help(
-                        "The cloud backups stay, and Cloud backup on the Online menu can \
-                         restore the career.",
+                        "The cloud backups stay, and Cloud backup on the Online menu can restore the career.",
                     ),
                 );
             }
@@ -484,11 +476,9 @@ impl Menu for ConfirmCareerActionState {
                 "Every cloud backup of it was removed from your orinks.net account.".to_string()
             }
             "delete_auth_failed" => format!(
-                "{AUTH_HELP} The cloud backups were not removed; Cloud backup on the Online \
-                 menu can remove them once this computer is signed in again."
+                "{AUTH_HELP} The cloud backups were not removed; Cloud backup on the Online menu can remove them once this computer is signed in again."
             ),
-            _ => "The site could not be reached, so the cloud backups are still there; Cloud \
-                  backup on the Online menu can remove them later."
+            _ => "The site could not be reached, so the cloud backups are still there; Cloud backup on the Online menu can remove them later."
                 .to_string(),
         };
         self.finish_delete(ctx, &cloud_line);

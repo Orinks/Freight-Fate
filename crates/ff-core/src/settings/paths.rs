@@ -154,11 +154,7 @@ pub fn refuse_real_save_dir(path: &Path) -> ! {
         .unwrap_or_else(|e| e.into_inner())
         .push(path.display().to_string());
     panic!(
-        "refusing to use the real save directory {}: this process never \
-         called settings::paths::allow_real_save_dir(), so it is not the \
-         game. If this is a test, pin a directory for the thread that asked \
-         -- set_thread_data_dir(Some(dir)) -- and remember a thread you \
-         spawn does NOT inherit the pin.",
+        "refusing to use the real save directory {}: this process never called settings::paths::allow_real_save_dir(), so it is not the game. If this is a test, pin a directory for the thread that asked -- set_thread_data_dir(Some(dir)) -- and remember a thread you spawn does NOT inherit the pin.",
         path.display()
     );
 }
@@ -267,9 +263,7 @@ pub fn save_root() -> PathBuf {
     let fallback = legacy_data_dir();
     if !UNWRITABLE_WARNED.swap(true, Ordering::SeqCst) {
         log::warn!(
-            "Game directory {} is not writable; saving to the per-user folder {} instead. \
-             Move Freight Fate out of a protected location such as Program Files to keep \
-             saves beside the game.",
+            "Game directory {} is not writable; saving to the per-user folder {} instead. Move Freight Fate out of a protected location such as Program Files to keep saves beside the game.",
             root.display(),
             fallback.display()
         );

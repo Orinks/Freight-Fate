@@ -248,9 +248,7 @@ fn test_every_settings_gated_entry_says_when_it_sounds() {
             .unwrap_or_else(|| panic!("{name} is no longer in the catalog; fix this list"));
         assert!(
             !entry.when.trim().is_empty(),
-            "{name} only sounds under some settings, so it must say which. \
-             A player told a cue means one thing, whose settings mean it means \
-             another, has been taught something false."
+            "{name} only sounds under some settings, so it must say which. A player told a cue means one thing, whose settings mean it means another, has been taught something false."
         );
     }
 }
@@ -365,8 +363,7 @@ fn test_the_engine_lean_is_taught_as_a_cue_you_steer_toward() {
     for rung in ["Rumble strip, clipped", "Rumble strip"] {
         assert!(
             entry(rung).meaning.to_lowercase().contains("away"),
-            "{rung} must keep telling the player to steer away from it, \
-             or the two opposite conventions blur together"
+            "{rung} must keep telling the player to steer away from it, or the two opposite conventions blur together"
         );
     }
 }
@@ -397,9 +394,7 @@ fn test_the_weigh_station_bed_demos_louder_than_the_road_plays_it() {
 
     assert!(
         cue.volume > SCALE_BED_OPEN_MAX_VOLUME,
-        "the weigh station bed must demo above the loudest the road ever \
-         plays it ({SCALE_BED_OPEN_MAX_VOLUME}), or the screen teaches the \
-         player that a real cue is silent"
+        "the weigh station bed must demo above the loudest the road ever plays it ({SCALE_BED_OPEN_MAX_VOLUME}), or the screen teaches the player that a real cue is silent"
     );
     // Long enough to register as a sound rather than a blip of hiss.
     assert!(cue.hold_s >= 5.0);

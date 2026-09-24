@@ -376,13 +376,11 @@ impl DrivingState {
         let spoken = ctx.world.spoken_city(city, Some(false));
         let message = if cruise_owns {
             format!(
-                "No engine brake zone in {spoken}. Cruise is holding the engine brake off and \
-                 using the brakes."
+                "No engine brake zone in {spoken}. Cruise is holding the engine brake off and using the brakes."
             )
         } else {
             format!(
-                "No engine brake zone in {spoken}. The curve assist is using the brakes instead \
-                 of the engine brake."
+                "No engine brake zone in {spoken}. The curve assist is using the brakes instead of the engine brake."
             )
         };
         ctx.audio.play_with("ui/notify", 0.6, 0.0);
@@ -489,8 +487,7 @@ impl DrivingState {
         } else {
             let spoken = ctx.world.spoken_city(city, Some(false));
             format!(
-                "A local officer cites you for engine braking in {spoken}, {} dollars under the \
-                 town noise rules, paid on the spot.",
+                "A local officer cites you for engine braking in {spoken}, {} dollars under the town noise rules, paid on the spot.",
                 fmt_grouped(fine, 0)
             )
         };

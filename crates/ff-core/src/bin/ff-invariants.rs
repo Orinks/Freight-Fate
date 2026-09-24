@@ -31,14 +31,13 @@ use std::process::ExitCode;
 
 use ff_core::profile_integrity_invariants::{rendered_invariants, world_data_root, CatalogInputs};
 
-const USAGE: &str = "\
-usage: ff-invariants <output> [--data-dir <dir>] [--check] [--quiet]
+const USAGE: &str = "usage: ff-invariants <output> [--data-dir <dir>] [--check] [--quiet]
 
-  <output>          where to write the invariants JSON
+  <output> where to write the invariants JSON
   --data-dir <dir>  the world data folder (data/ in a checkout); the
-                    shipped data root is used when this is not given
-  --check           do not write: re-render and compare bytes with <output>
-  --quiet           suppress the summary line
+ shipped data root is used when this is not given
+  --check do not write: re-render and compare bytes with <output>
+  --quiet suppress the summary line
 ";
 
 struct Args {

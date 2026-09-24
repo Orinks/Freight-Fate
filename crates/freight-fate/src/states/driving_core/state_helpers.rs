@@ -105,8 +105,7 @@ pub fn wake_air_instruction(
         "Press"
     };
     format!(
-        " Air pressure {:.0} psi. {road_step} {} to start the engine. At air ready, {} releases \
-         the parking brake.",
+        " Air pressure {:.0} psi. {road_step} {} to start the engine. At air ready, {} releases the parking brake.",
         truck.air_pressure_psi(),
         ctx.control_hint("engine"),
         ctx.control_hint("parking_brake")
@@ -155,8 +154,7 @@ pub fn perform_shoulder_sleep(
         p.fatigue = hos::rest_shoulder(p.fatigue);
     }
     let mut parts = vec![format!(
-        "{engine_off}You sleep poorly on the shoulder, woken again and again by passing trucks. \
-         It is {}. Hours of service reset, but you are still tired.{}",
+        "{engine_off}You sleep poorly on the shoulder, woken again and again by passing trucks. It is {}. Hours of service reset, but you are still tired.{}",
         clock_text(driving.trip.local_hour()),
         wake_air_instruction(driving, ctx, false)
     )];

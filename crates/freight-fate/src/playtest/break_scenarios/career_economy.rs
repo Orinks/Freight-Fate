@@ -75,29 +75,24 @@ pub fn settlement_spoken_balance() -> Outcome {
     let delta = money - money_before;
     if collected <= 0.0 {
         findings.push(format!(
-            "a balance of {owed_before:.0} dollars was carried into this settlement and none of \
-             it was collected: working never pays it down"
+            "a balance of {owed_before:.0} dollars was carried into this settlement and none of it was collected: working never pays it down"
         ));
     }
     if delta <= 0.0 {
         findings.push(format!(
-            "the run paid the driver {delta:.0}: a balance owed took the whole settlement, which \
-             is the zero-pay trap -- a driver with a truck, a board, and no reachable state \
-             where working helps"
+            "the run paid the driver {delta:.0}: a balance owed took the whole settlement, which is the zero-pay trap -- a driver with a truck, a board, and no reachable state where working helps"
         ));
     }
     if collected > 0.0 && !text.contains("Balance owed") {
         findings.push(format!(
-            "{collected:.0} dollars came off the balance but no spoken line says so: money \
-             moved silently"
+            "{collected:.0} dollars came off the balance but no spoken line says so: money moved silently"
         ));
     }
     // The floor is the promise: never more than the capped share.
     let gross = delta + collected;
     if gross > 0.0 && collected > ((gross * COLLECTION_SHARE) * 100.0).round() / 100.0 + 1.0 {
         findings.push(format!(
-            "collection took {collected:.0} of {gross:.0}, past the {:.0}% cap the game \
-             promises out loud",
+            "collection took {collected:.0} of {gross:.0}, past the {:.0}% cap the game promises out loud",
             COLLECTION_SHARE * 100.0
         ));
     }
@@ -392,8 +387,7 @@ pub fn credential_ladder_gates() -> Outcome {
     };
     if holds {
         findings.push(
-            "hazmat granted the moment the course was paid: the TSA wait is real \
-             and the endorsement cannot issue until the check clears"
+            "hazmat granted the moment the course was paid: the TSA wait is real and the endorsement cannot issue until the check clears"
                 .to_string(),
         );
     }
@@ -590,10 +584,7 @@ pub fn level_up_at_settlement_boundary() -> Outcome {
         .count() as i64;
     if levels_crossed >= 2 && level_up_count < levels_crossed {
         findings.push(format!(
-            "one delivery pushed career level {level_before_skip} -> {} ({levels_crossed} levels \
-             in one settlement) but only {level_up_count} 'Level up!' line(s) were announced -- \
-             record_delivery's level-up message only ever reports the level it lands on, so \
-             every intermediate rank (and that rank's own unlock text) goes completely unspoken",
+            "one delivery pushed career level {level_before_skip} -> {} ({levels_crossed} levels in one settlement) but only {level_up_count} 'Level up!' line(s) were announced -- record_delivery's level-up message only ever reports the level it lands on, so every intermediate rank (and that rank's own unlock text) goes completely unspoken",
             skip_career.level()
         ));
     }
@@ -647,8 +638,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
             }
             if (money - OWNER_OPERATOR_WORKING_CAPITAL).abs() > 0.01 {
                 findings.push(format!(
-                    "buy-in left {money:.0}, expected exactly the \
-                     {OWNER_OPERATOR_WORKING_CAPITAL:.0} working capital"
+                    "buy-in left {money:.0}, expected exactly the {OWNER_OPERATOR_WORKING_CAPITAL:.0} working capital"
                 ));
             }
         }
@@ -712,8 +702,7 @@ pub fn owner_op_buyin_at_level_18_boundary() -> Outcome {
     outcome_of(
         "owner_op_buyin_at_level_18_boundary",
         findings,
-        "level 18 with exact capital bought in for exactly the working capital left over; \
-         level 17 was refused and named the gate",
+        "level 18 with exact capital bought in for exactly the working capital left over; level 17 was refused and named the gate",
     )
 }
 
@@ -783,9 +772,7 @@ pub fn short_hop_streak_xp_farming() -> Outcome {
         let ceiling = flat_xp + 2.0 * road_xp(short_miles);
         if gained > ceiling + 1e-6 {
             findings.push(format!(
-                "hop {hop} at streak {} earned {gained:.1} XP, more than its flat lesson plus \
-                 twice its road lesson ({ceiling:.1}): the streak is minting XP off the flat \
-                 completion award",
+                "hop {hop} at streak {} earned {gained:.1} XP, more than its flat lesson plus twice its road lesson ({ceiling:.1}): the streak is minting XP off the flat completion award",
                 short_career.on_time_streak
             ));
         }
@@ -808,10 +795,7 @@ pub fn short_hop_streak_xp_farming() -> Outcome {
     };
     if ratio > 2.0 {
         findings.push(format!(
-            "{hops} legal {short_miles:.0}-mile hops earn {short_beyond_flat:.2} XP/mi beyond \
-             their flat lessons versus one {long_miles:.0}-mile haul's {long_beyond_flat:.2} \
-             XP/mi beyond its own -- {ratio:.1}x, more than the doubled road lesson the \
-             streak cap allows"
+            "{hops} legal {short_miles:.0}-mile hops earn {short_beyond_flat:.2} XP/mi beyond their flat lessons versus one {long_miles:.0}-mile haul's {long_beyond_flat:.2} XP/mi beyond its own -- {ratio:.1}x, more than the doubled road lesson the streak cap allows"
         ));
     }
     if short_career.on_time_streak != hops {
@@ -822,10 +806,7 @@ pub fn short_hop_streak_xp_farming() -> Outcome {
     }
     let flat_ratio = (short_xp / short_real_miles) / (long_xp / long_miles);
     let note = format!(
-        "beyond the flat lessons, short hops earn {short_beyond_flat:.2} XP/mi to the long \
-         haul's {long_beyond_flat:.2} ({ratio:.1}x, within the doubled road lesson); counting \
-         the flat lessons the hops are {flat_ratio:.1}x per mile, which is the per-delivery \
-         award by design"
+        "beyond the flat lessons, short hops earn {short_beyond_flat:.2} XP/mi to the long haul's {long_beyond_flat:.2} ({ratio:.1}x, within the doubled road lesson); counting the flat lessons the hops are {flat_ratio:.1}x per mile, which is the per-delivery award by design"
     );
     outcome_of("short_hop_streak_xp_farming", findings, &note)
 }

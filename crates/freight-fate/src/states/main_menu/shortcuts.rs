@@ -35,13 +35,11 @@ impl ShortcutsState {
         let (title, help) = match device {
             ShortcutDevice::Keyboard => (
                 "Keyboard shortcuts",
-                "Up and Down pick a control, Enter then a key press moves it, \
-                 Escape goes back.",
+                "Up and Down pick a control, Enter then a key press moves it, Escape goes back.",
             ),
             ShortcutDevice::Controller => (
                 "Controller buttons",
-                "Up and Down pick a control, Enter then a button press moves it, \
-                 Escape goes back.",
+                "Up and Down pick a control, Enter then a button press moves it, Escape goes back.",
             ),
         };
         Self {
@@ -76,8 +74,7 @@ impl ShortcutsState {
                 action.label()
             ),
             ShortcutDevice::Controller => format!(
-                "Press the new button for {}, with the right bumper held for the \
-                 second layer. Press {current} again to keep it.",
+                "Press the new button for {}, with the right bumper held for the second layer. Press {current} again to keep it.",
                 action.label()
             ),
         };
@@ -191,12 +188,10 @@ impl Menu for ShortcutsState {
                 )
                 .help(match device {
                     ShortcutDevice::Keyboard => {
-                        "Enter, then press the key you want for this control. \
-                         Escape keeps the one it has."
+                        "Enter, then press the key you want for this control. Escape keeps the one it has."
                     }
                     ShortcutDevice::Controller => {
-                        "Enter, then press the button you want for this control, \
-                         with the right bumper held for the second layer."
+                        "Enter, then press the button you want for this control, with the right bumper held for the second layer."
                     }
                 })
             })

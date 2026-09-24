@@ -475,8 +475,7 @@ mod tests {
         let report = inspect(&bad);
         assert_eq!(
             report.spoken_findings(),
-            "tires worn close to the tread limit, visible body damage written up as unsafe \
-             equipment, and brakes close to the adjustment limit"
+            "tires worn close to the tread limit, visible body damage written up as unsafe equipment, and brakes close to the adjustment limit"
         );
         assert_eq!(report.total_fine(), 3.0 * EQUIPMENT_FINE);
     }

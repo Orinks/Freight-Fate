@@ -383,7 +383,7 @@ mod tests {
         assert!(bad(r#"{"settings": 3}"#).contains("settings"));
         let args: Map<String, Value> = serde_json::from_str(
             r#"{"city": "Tonopah", "level": 5, "business": "leased", "endorsements": ["hazmat"],
-                "hour": 6.5, "fuel_pct": 25, "rested": true, "settings": {"real_traffic": true}}"#,
+ "hour": 6.5, "fuel_pct": 25, "rested": true, "settings": {"real_traffic": true}}"#,
         )
         .unwrap();
         let scenario = Scenario::from_json(&args).unwrap();

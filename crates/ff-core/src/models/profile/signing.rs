@@ -381,7 +381,7 @@ mod tests {
             sanitized_stem("Sketchy/Name<>:\"|?*"),
             "Sketchy_Name_______"
         );
-        assert_eq!(sanitized_stem("   "), "Driver");
+        assert_eq!(sanitized_stem(" "), "Driver");
         assert_eq!(sanitized_stem("Driver A"), "Driver A");
     }
 }

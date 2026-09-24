@@ -101,13 +101,7 @@ impl Menu for OnlineOfferState {
         let current = self.current_text(ctx);
         ctx.say_with(
             format!(
-                "Before you set off. You can connect this computer to an \
-                 orinks.net account. That backs your career up so you can bring \
-                 it to another computer, and puts your driver profile and on-duty \
-                 activity on the public site. You can turn either of those off \
-                 afterwards from Online on the main menu. It takes a code and \
-                 your browser, and you can do it any time instead. \
-                 {current}"
+                "Before you set off. You can connect this computer to an orinks.net account. That backs your career up so you can bring it to another computer, and puts your driver profile and on-duty activity on the public site. You can turn either of those off afterwards from Online on the main menu. It takes a code and your browser, and you can do it any time instead. {current}"
             ),
             Say::queued(),
         );
@@ -120,8 +114,7 @@ impl Menu for OnlineOfferState {
             MenuItem::new("Not now", |s: &mut Self, ctx| s.decline(ctx))
                 .help("Start driving. You can connect later from Online."),
             MenuItem::new("Set up now", |s: &mut Self, ctx| s.accept(ctx)).help(
-                "Connect this computer to an orinks.net account, which turns on \
-                 cloud backup and your public driver profile.",
+                "Connect this computer to an orinks.net account, which turns on cloud backup and your public driver profile.",
             ),
         ]
     }

@@ -1258,10 +1258,9 @@ Honesty debts for this v1 slice (do not paper over):
 3. APU-at-pump is soft: reefer and APU are allowed while fueling, and no
    separate rule model enforces or scores that choice beyond the tractor-off
    fuel gate.
-4. One chilled setpoint (2 C) for all reefer freight in v1. Former frozen
-   cargo and facility names (ice cream, frozen foods, etc.) are labeled
-   chilled or refrigerated until a frozen setpoint exists. Multi-temp stays
-   deferred.
+4. One chilled setpoint (2 C) for all reefer freight in v1. Real frozen-food
+   facilities keep their names; their loads are spoken as chilled cargo until
+   a frozen setpoint exists. Multi-temp stays deferred.
 
 ### Personal conveyance and duty-purpose correction
 

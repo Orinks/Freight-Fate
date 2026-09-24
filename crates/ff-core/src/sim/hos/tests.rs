@@ -1450,8 +1450,7 @@ fn split_event_key_is_the_python_repr() {
     let second = HosEvent::new("off_duty", 120.0, 480.0, 780.0, 0.0, "normal");
     assert_eq!(
         split_event_key(&first, &second),
-        "(('sleeper_berth', 'normal', 480.0, 120.0, 300.0, 0.0), \
-         ('off_duty', 'normal', 120.0, 480.0, 780.0, 0.0))"
+        "(('sleeper_berth', 'normal', 480.0, 120.0, 300.0, 0.0), ('off_duty', 'normal', 120.0, 480.0, 780.0, 0.0))"
     );
     // The key a real 8/2 split stores, worked by hand from the ledger. The
     // second event's duty figure is 600, not 1080: the 8-hour berth period
@@ -1464,8 +1463,7 @@ fn split_event_key_is_the_python_repr() {
     assert_eq!(
         c.split_credit_key.as_deref(),
         Some(
-            "(('sleeper_berth', 'normal', 480.0, 300.0, 300.0, 300.0), \
-             ('sleeper_berth', 'normal', 120.0, 600.0, 600.0, 300.0))"
+            "(('sleeper_berth', 'normal', 480.0, 300.0, 300.0, 300.0), ('sleeper_berth', 'normal', 120.0, 600.0, 600.0, 300.0))"
         )
     );
     assert_eq!(py_repr_str("it's"), "\"it's\"");
@@ -1599,8 +1597,7 @@ fn cycle_limit_enforced_in_realistic_and_relaxed_not_debug_off() {
     assert_eq!(c.blown_kinds("realistic"), vec!["cycle"]);
     assert_eq!(
         c.summary("realistic"),
-        "Hours of service: your 70-hour cycle is used up. \
-         Take a 34-hour restart, or wait for hours to age off your 8-day ledger."
+        "Hours of service: your 70-hour cycle is used up. Take a 34-hour restart, or wait for hours to age off your 8-day ledger."
     );
     assert_eq!(c.out_of_service_minutes("realistic"), RESTART_MIN);
     assert!(c
@@ -1633,32 +1630,28 @@ fn check_warnings_speaks_cycle_thresholds() {
     assert_eq!(msgs.len(), 1);
     assert_eq!(
         msgs[0],
-        "Hours of service: 2 hours until your 70-hour cycle is used up. \
-         You need a 34-hour restart."
+        "Hours of service: 2 hours until your 70-hour cycle is used up. You need a 34-hour restart."
     );
     c.drive(45.0); // remaining 55
     let msgs = c.check_warnings("realistic");
     assert_eq!(msgs.len(), 1);
     assert_eq!(
         msgs[0],
-        "Hours of service: 1 hour until your 70-hour cycle is used up. \
-         You need a 34-hour restart."
+        "Hours of service: 1 hour until your 70-hour cycle is used up. You need a 34-hour restart."
     );
     c.drive(30.0); // remaining 25
     let msgs = c.check_warnings("realistic");
     assert_eq!(msgs.len(), 1);
     assert_eq!(
         msgs[0],
-        "Hours of service: 30 minutes until your 70-hour cycle is used up. \
-         You need a 34-hour restart."
+        "Hours of service: 30 minutes until your 70-hour cycle is used up. You need a 34-hour restart."
     );
     c.drive(30.0); // used up
     let msgs = c.check_warnings("realistic");
     assert_eq!(msgs.len(), 1);
     assert_eq!(
         msgs[0],
-        "Hours of service violation: your 70-hour cycle is used up. \
-         You need a 34-hour restart. Driving on risks fines at inspections."
+        "Hours of service violation: your 70-hour cycle is used up. You need a 34-hour restart. Driving on risks fines at inspections."
     );
 }
 

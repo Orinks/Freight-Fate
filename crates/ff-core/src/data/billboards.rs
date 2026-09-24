@@ -73,8 +73,7 @@ use once_cell::sync::Lazy;
 use crate::pyrandom::PyRandom;
 
 pub const BILLBOARDS_SOURCE: &str =
-    "Original parody billboard copy evoking real interstate roadside culture; \
-     real attraction names used nominatively, ad text invented.";
+    "Original parody billboard copy evoking real interstate roadside culture; real attraction names used nominatively, ad text invented.";
 
 pub const GENERIC_BILLBOARDS: &[&str] = &[
     "Did you eat today? Thank a trucker.",

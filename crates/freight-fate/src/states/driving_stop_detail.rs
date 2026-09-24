@@ -16,8 +16,7 @@ use crate::states::driving_menu_states::DriveRef;
 pub const FALLBACK_MPH: f64 = 55.0;
 
 const STOP_DETAIL_INTRO_HELP: &str =
-    "Up and down arrows review each line; Home and End jump to the first and last. Enter repeats \
-     a line or activates a button. Escape returns to the map.";
+    "Up and down arrows review each line; Home and End jump to the first and last. Enter repeats a line or activates a button. Escape returns to the map.";
 
 /// Full details for one upcoming route stop, opened from the Map screen.
 ///
@@ -240,8 +239,8 @@ pub struct ConfirmMovePlanState {
     pub stop: RoadStop,
 }
 
-const MOVE_PLAN_INTRO_HELP: &str = "Use up and down arrows to navigate, Enter to select. \
-                                    Escape keeps your current planned stop.";
+const MOVE_PLAN_INTRO_HELP: &str =
+    "Use up and down arrows to navigate, Enter to select. Escape keeps your current planned stop.";
 
 impl ConfirmMovePlanState {
     pub fn new(driving: DriveRef, stop: RoadStop) -> Self {
@@ -331,8 +330,7 @@ impl Menu for ConfirmMovePlanState {
         let ahead = self.ahead_text(ctx, &stop);
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{title} You already have a planned stop at {where_}. Move your plan to {target}, \
-             {ahead} ahead? {current}"
+            "{title} You already have a planned stop at {where_}. Move your plan to {target}, {ahead} ahead? {current}"
         ));
     }
 }

@@ -737,9 +737,7 @@ fn run_worker(ctx: &WorkerContext, city: &str, lat: f64, lon: f64) -> WorkerOutc
                     let age_min = age_s / 60.0;
                     let limit_min = OBSERVATION_MAX_AGE_S / 60.0;
                     log::info!(
-                        "Real weather for {city}: newest station observation is {age_min:.0} min \
-                         old (limit {limit_min:.0} min) -- holding previous conditions until a \
-                         newer reading arrives"
+                        "Real weather for {city}: newest station observation is {age_min:.0} min old (limit {limit_min:.0} min) -- holding previous conditions until a newer reading arrives"
                     );
                     WorkerOutcome::StaleLogged
                 }

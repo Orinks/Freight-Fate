@@ -239,8 +239,7 @@ impl DrivingState {
         };
         if detailed {
             return format!(
-                "primary {:.0} psi, secondary {:.0} psi, trailer {:.0} psi, {pressure}, {brake}, \
-                 {compressor}, {heat}",
+                "primary {:.0} psi, secondary {:.0} psi, trailer {:.0} psi, {pressure}, {brake}, {compressor}, {heat}",
                 t.primary_air_psi, t.secondary_air_psi, t.trailer_air_psi
             );
         }

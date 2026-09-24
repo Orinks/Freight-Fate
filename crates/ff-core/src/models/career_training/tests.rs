@@ -108,9 +108,7 @@ fn test_first_dispatch_guidance_is_spoken_with_the_carrier_flavor() {
     assert_eq!(guidance.stage.value(), "first_dispatch");
     assert_eq!(
         guidance.spoken_summary(),
-        "First dispatch. Prairie Link Regional has you on real freight with trainer support \
-         close by. Prairie Link Regional likes practical regional mileage. Dispatch starts you \
-         on a short standard load with room on the appointment."
+        "First dispatch. Prairie Link Regional has you on real freight with trainer support close by. Prairie Link Regional likes practical regional mileage. Dispatch starts you on a short standard load with room on the appointment."
     );
     assert_eq!(guidance.recommendation_label, "trainer-recommended");
     assert!(is_company_training_profile(&profile(

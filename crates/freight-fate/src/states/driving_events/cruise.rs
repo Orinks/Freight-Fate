@@ -30,8 +30,7 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "High idle, {rpm:.0} RPM. Plus and minus adjust it; releasing the parking \
-                         brake cancels."
+                        "High idle, {rpm:.0} RPM. Plus and minus adjust it; releasing the parking brake cancels."
                     ),
                 );
             } else {
@@ -300,8 +299,7 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "No adaptive cruise in a {zone_reason} zone. The speed keeper holds speed \
-                     here; turn it on in Settings, Controls."
+                    "No adaptive cruise in a {zone_reason} zone. The speed keeper holds speed here; turn it on in Settings, Controls."
                 ),
             );
             return;

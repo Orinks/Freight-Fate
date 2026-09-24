@@ -184,8 +184,7 @@ impl DrivingState {
             };
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
             let message = format!(
-                "Off the ramp and onto city streets. {street}.{first_corner} {} to the facility \
-                 gate.",
+                "Off the ramp and onto city streets. {street}.{first_corner} {} to the facility gate.",
                 self.trip.distance_text(route.miles())
             );
             if !first_corner.is_empty() {
@@ -278,8 +277,7 @@ impl DrivingState {
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
                 format!(
-                    "Out of the gate and onto city streets. {street}. {distance} to the \
-                     {merge_highway} on-ramp."
+                    "Out of the gate and onto city streets. {street}. {distance} to the {merge_highway} on-ramp."
                 ),
                 opts,
             );

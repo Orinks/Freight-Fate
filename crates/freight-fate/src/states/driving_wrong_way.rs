@@ -91,8 +91,7 @@ impl DrivingState {
             self.wrong_way_said_at = backed;
             ctx.audio.play("ui/warning");
             ctx.say_event_with(
-                "You are backing into traffic. Stop, select a forward gear, and get the truck \
-                 pointed the right way.",
+                "You are backing into traffic. Stop, select a forward gear, and get the truck pointed the right way.",
                 SayEvent::new().category(SpeechCategory::Safety),
             );
             let severity = WRONG_WAY_COLLISION_SEVERITY;
@@ -115,8 +114,7 @@ impl DrivingState {
             let distance = ctx.settings.distance_text(backed, true);
             ctx.say_event_with(
                 format!(
-                    "You are driving the wrong way. Backing on a travelled lane is illegal, and \
-                     you have given up {distance} of the route. Stop and select a forward gear."
+                    "You are driving the wrong way. Backing on a travelled lane is illegal, and you have given up {distance} of the route. Stop and select a forward gear."
                 ),
                 SayEvent::new().category(SpeechCategory::Safety),
             );

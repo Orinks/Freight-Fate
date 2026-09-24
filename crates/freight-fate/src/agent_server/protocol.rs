@@ -72,14 +72,7 @@ fn tools_list() -> Value {
     json!({"tools": [
         tool(
             "press",
-            "Tap a key, as a player would: letters a-z, digits, up, down, left, right, \
-             enter, escape, space, tab, backspace, home, end, pageup, pagedown, f1, f2, \
-             control, plus, minus, comma, period. Use modifiers for chords such as Alt+A, \
-             Shift+K, or Ctrl+Plus. Or name a driving control by its shortcut id \
-             (engine, cruise, take_exit, rest, fuel, ...) to press whatever key this \
-             player has it on, chord included. The game \
-             starts at its real title menu; menus use arrows and enter, and the drive \
-             uses the game's own key bindings. After pressing, wait a beat and listen.",
+            "Tap a key, as a player would: letters a-z, digits, up, down, left, right, enter, escape, space, tab, backspace, home, end, pageup, pagedown, f1, f2, control, plus, minus, comma, period. Use modifiers for chords such as Alt+A, Shift+K, or Ctrl+Plus. Or name a driving control by its shortcut id (engine, cruise, take_exit, rest, fuel, ...) to press whatever key this player has it on, chord included. The game starts at its real title menu; menus use arrows and enter, and the drive uses the game's own key bindings. After pressing, wait a beat and listen.",
             json!({
                 "key": {"type": "string"},
                 "modifiers": {
@@ -94,8 +87,7 @@ fn tools_list() -> Value {
         ),
         tool(
             "hold",
-            "Hold a key down (throttle, brake, steering, and the manual-transmission Shift \
-             clutch are hold keys at the wheel). Pair with release.",
+            "Hold a key down (throttle, brake, steering, and the manual-transmission Shift clutch are hold keys at the wheel). Pair with release.",
             json!({"key": {"type": "string"}}),
             &["key"],
         ),
@@ -107,19 +99,13 @@ fn tools_list() -> Value {
         ),
         tool(
             "wait",
-            "Let the game run for this many real seconds (max 300) with the controls \
-             as they stand, then hear everything from that stretch. This is how road \
-             time passes.",
+            "Let the game run for this many real seconds (max 300) with the controls as they stand, then hear everything from that stretch. This is how road time passes.",
             json!({"seconds": {"type": "number"}}),
             &["seconds"],
         ),
         tool(
             "pedal",
-            "Hold a key for a bounded number of real seconds and let the game itself \
-             lift it -- the throttle (up) or brake (down) for a measured tap. Use this \
-             instead of hold and release for pedals: the round trip between the two \
-             is a second or more, and at standard pacing that is twenty seconds of \
-             road. Replies once the key has lifted, with everything heard meanwhile.",
+            "Hold a key for a bounded number of real seconds and let the game itself lift it -- the throttle (up) or brake (down) for a measured tap. Use this instead of hold and release for pedals: the round trip between the two is a second or more, and at standard pacing that is twenty seconds of road. Replies once the key has lifted, with everything heard meanwhile.",
             json!({
                 "key": {"type": "string", "description": "up (throttle), down (brake), or any key"},
                 "seconds": {"type": "number", "description": "real seconds down, 0.05 to 30"},
@@ -128,12 +114,7 @@ fn tools_list() -> Value {
         ),
         tool(
             "wait_for",
-            "Let the game run until something arrives: a spoken line or sound whose \
-             text contains `text` (case-insensitive), or a menu on screen when `menu` \
-             is true, or `seconds` of real time (max 300), whichever comes first. \
-             Anything heard since the last listen counts, so a line already spoken \
-             answers at once. Replies with everything heard, and says if the clock \
-             ran out. Use it to drive to the next event instead of waiting blind.",
+            "Let the game run until something arrives: a spoken line or sound whose text contains `text` (case-insensitive), or a menu on screen when `menu` is true, or `seconds` of real time (max 300), whichever comes first. Anything heard since the last listen counts, so a line already spoken answers at once. Replies with everything heard, and says if the clock ran out. Use it to drive to the next event instead of waiting blind.",
             json!({
                 "text": {"type": "string", "description": "text to listen for"},
                 "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},
@@ -143,64 +124,43 @@ fn tools_list() -> Value {
         ),
         tool(
             "select",
-            "Choose a menu row by part of its label (case-insensitive): the same \
-             Home, Down and Enter a player presses. Errors with the rows when no row \
-             matches or no menu is up. Wait a moment, then listen.",
+            "Choose a menu row by part of its label (case-insensitive): the same Home, Down and Enter a player presses. Errors with the rows when no row matches or no menu is up. Wait a moment, then listen.",
             json!({"label": {"type": "string"}}),
             &["label"],
         ),
         tool(
             "cruise",
-            "Adaptive cruise, the way a player sets it: K to engage if nothing is \
-             holding speed, then the dial walked one mile per hour at a time to the \
-             target -- a number, \"limit\" for the posted limit enforcement is \
-             reading, or \"off\". Replies with what was heard once the dial settles. \
-             In a zone the speed keeper holds instead, and the reply says so.",
+            "Adaptive cruise, the way a player sets it: K to engage if nothing is holding speed, then the dial walked one mile per hour at a time to the target -- a number, \"limit\" for the posted limit enforcement is reading, or \"off\". Replies with what was heard once the dial settles. In a zone the speed keeper holds instead, and the reply says so.",
             json!({"target": {"description": "a number in miles per hour, \"limit\", or \"off\""}}),
             &["target"],
         ),
         tool(
             "status",
-            "The wheel's readouts in one call -- speed, speed limit, grade, what is \
-             coming up, route status, the clock, fuel -- pressed as a player would \
-             and returned together with anything else heard meanwhile.",
+            "The wheel's readouts in one call -- speed, speed limit, grade, what is coming up, route status, the clock, fuel -- pressed as a player would and returned together with anything else heard meanwhile.",
             json!({}),
             &[],
         ),
         tool(
             "listen",
-            "Everything audible since the last listen: spoken lines on both channels \
-             (exactly what the verbosity setting allowed), earcons and cues with their \
-             stereo side, sound beds, horn, radio, weather, and where the engine pitch \
-             went. This is the whole game; there is no screen.",
+            "Everything audible since the last listen: spoken lines on both channels (exactly what the verbosity setting allowed), earcons and cues with their stereo side, sound beds, horn, radio, weather, and where the engine pitch went. This is the whole game; there is no screen.",
             json!({}),
             &[],
         ),
         tool(
             "menu",
-            "The rows of the menu currently on screen and which has focus, as a screen \
-             reader user would arrow through them. Errors when no menu is up.",
+            "The rows of the menu currently on screen and which has focus, as a screen reader user would arrow through them. Errors when no menu is up.",
             json!({}),
             &[],
         ),
         tool(
             "observe",
-            "INSPECTOR, not ears: a bounded ground-truth snapshot of the drive (mile, \
-             brakes, assists, hazard, damage). For judging and diagnosis. If you \
-             needed this to drive, the spoken surface failed -- report that.",
+            "INSPECTOR, not ears: a bounded ground-truth snapshot of the drive (mile, brakes, assists, hazard, damage). For judging and diagnosis. If you needed this to drive, the spoken surface failed -- report that.",
             json!({}),
             &[],
         ),
         tool(
             "start_at",
-            "Skip the menus: stage a drive at a discovered road feature and take the \
-             wheel right there -- the same finder --playtest-road --find uses. \
-             feature must be one of: downgrade, upgrade, zone, limit-drop, stop, \
-             scale, curve, interchange, toll, chain-law, destination, departure. \
-             Same seed, same road. pick chooses among multiple matches (1-based). \
-             unit plants a staffed enforcement unit unit_ahead_mi up the road (default \
-             3) so an encounter can be staged on purpose; the road's own seeded posts \
-             stay. Listen after staging for the truck's actual starting condition.",
+            "Skip the menus: stage a drive at a discovered road feature and take the wheel right there -- the same finder --playtest-road --find uses. feature must be one of: downgrade, upgrade, zone, limit-drop, stop, scale, curve, interchange, toll, chain-law, destination, departure. Same seed, same road. pick chooses among multiple matches (1-based). unit plants a staffed enforcement unit unit_ahead_mi up the road (default 3) so an encounter can be staged on purpose; the road's own seeded posts stay. Listen after staging for the truck's actual starting condition.",
             json!({
                 "feature": {"type": "string"},
                 "origin": {"type": "string", "description": "search one corridor from this city (fast and thorough)"},
@@ -214,21 +174,7 @@ fn tools_list() -> Value {
         ),
         tool(
             "scenario",
-            "Put the sandbox career in any situation and reopen the terminal on it. \
-             Every field is optional: city (any world city, the career moves there \
-             with no miles driven), level (1 to 30), deliveries, money, reputation, \
-             business (company, leased or independent), endorsements (a list of \
-             credential keys bought outright, replacing what was held), hour (local \
-             clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and \
-             brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
-             out_of_service_events (counts on the record; with damage they set the \
-             safety band that decides who is pulled into the inspection lane), \
-             rested (true takes a full sleep), clear_load (true drops a load in \
-             progress first), market_seed and board_seed (the dispatch board rolls \
-             from them), settings (an object of setting name to value, for this \
-             session), and name (the career created when none is loaded; default \
-             Playtest). Nothing is refused for being unreasonable: this is the \
-             audited sandbox. Listen afterwards for the terminal.",
+            "Put the sandbox career in any situation and reopen the terminal on it. Every field is optional: city (any world city, the career moves there with no miles driven), level (1 to 30), deliveries, money, reputation, business (company, leased or independent), endorsements (a list of credential keys bought outright, replacing what was held), hour (local clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and brake_wear_pct (0 to 100, what a roadside inspection reads), citations and out_of_service_events (counts on the record; with damage they set the safety band that decides who is pulled into the inspection lane), rested (true takes a full sleep), clear_load (true drops a load in progress first), market_seed and board_seed (the dispatch board rolls from them), settings (an object of setting name to value, for this session), and name (the career created when none is loaded; default Playtest). Nothing is refused for being unreasonable: this is the audited sandbox. Listen afterwards for the terminal.",
             json!({
                 "name": {"type": "string"},
                 "city": {"type": "string"},
@@ -255,12 +201,7 @@ fn tools_list() -> Value {
         ),
         tool(
             "operator_keys",
-            "Hand the keyboard to the human at the computer, or take it back. With live \
-             true the game window comes up and their keys reach the game, so they can \
-             drive alongside the agent or take the wheel; with live false the window is \
-             minimized and their keys are dropped again. Only at the owner's request: \
-             while it is live, anything they type anywhere with the game focused is \
-             truck input.",
+            "Hand the keyboard to the human at the computer, or take it back. With live true the game window comes up and their keys reach the game, so they can drive alongside the agent or take the wheel; with live false the window is minimized and their keys are dropped again. Only at the owner's request: while it is live, anything they type anywhere with the game focused is truck input.",
             json!({
                 "live": {"type": "boolean", "description": "true to let the operator's keyboard in, false to shut it out again"},
             }),
@@ -268,8 +209,7 @@ fn tools_list() -> Value {
         ),
         tool(
             "quit_game",
-            "Quit the game and end the session (the sandboxed career saves on the way \
-             out, as a real quit does).",
+            "Quit the game and end the session (the sandboxed career saves on the way out, as a real quit does).",
             json!({}),
             &[],
         ),
@@ -316,15 +256,7 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
                     .unwrap_or(PROTOCOL_VERSION),
                 "capabilities": {"tools": {}},
                 "serverInfo": {"name": SERVER_NAME, "version": env!("CARGO_PKG_VERSION")},
-                "instructions": "Freight Fate, played by ear. No game is running yet: the \
-                    first tool call other than quit_game boots the real game in its \
-                    playtest sandbox (a few seconds), then answers. One game at a \
-                    time, so a human already playing makes that first call fail; \
-                    try again once they quit. At the wheel, drive with pedal (a \
-                    measured tap the game itself lifts), cruise (K and the dial to \
-                    a number, the posted limit, or off) and wait_for (run until a \
-                    line is heard or a menu opens); menus take select by label. \
-                    Raw press, hold and release remain for everything else.",
+                "instructions": "Freight Fate, played by ear. No game is running yet: the first tool call other than quit_game boots the real game in its playtest sandbox (a few seconds), then answers. One game at a time, so a human already playing makes that first call fail; try again once they quit. At the wheel, drive with pedal (a measured tap the game itself lifts), cruise (K and the dial to a number, the posted limit, or off) and wait_for (run until a line is heard or a menu opens); menus take select by label. Raw press, hold and release remain for everything else.",
             }),
             "ping" => json!({}),
             "tools/list" => tools_list(),
@@ -639,9 +571,7 @@ pub(super) fn discover(
     );
     if hits.is_empty() {
         return Err(format!(
-            "No road feature matching {feature:?} was found in the sampled \
-             routes; try another term, another seed, or name an origin \
-             city to search a specific corridor."
+            "No road feature matching {feature:?} was found in the sampled routes; try another term, another seed, or name an origin city to search a specific corridor."
         ));
     }
     let index = pick.saturating_sub(1).min(hits.len() - 1);

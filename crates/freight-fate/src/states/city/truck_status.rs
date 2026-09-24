@@ -20,8 +20,7 @@ impl TruckStatusState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Truck status").with_intro_help(
-                "Up and down review the lines. Enter repeats a line. Escape returns to the \
-                 terminal.",
+                "Up and down review the lines. Enter repeats a line. Escape returns to the terminal.",
             ),
         }
     }
@@ -74,8 +73,7 @@ impl TruckStatusState {
             );
             if slip_seats(p) {
                 assignment.push_str(
-                    " Slip-seating: dispatch matches a yard spare to each load, and each spare \
-                     keeps its own fuel and wear. A dedicated seat comes at level 9.",
+                    " Slip-seating: dispatch matches a yard spare to each load, and each spare keeps its own fuel and wear. A dedicated seat comes at level 9.",
                 );
             }
             let mut lines = vec![assignment];

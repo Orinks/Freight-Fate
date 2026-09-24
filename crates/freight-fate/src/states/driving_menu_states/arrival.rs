@@ -203,8 +203,7 @@ impl ArrivalState {
         self.summary_parts.insert(
             0,
             format!(
-                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}Parked at {}. \
-                 {} dispatch board available. Fuel {} percent.",
+                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}Parked at {}. {} dispatch board available. Fuel {} percent.",
                 job.spoken_destination(),
                 fmt_f(hours, 1),
                 clock_text(to_local(game_hours, destination_timezone)),
@@ -265,8 +264,7 @@ impl ArrivalState {
         }
         if cargo.rejected() {
             return format!(
-                "The receiver refused the load, {} at {} percent. No pay for the haul, {} \
-                 dollars gone, and a freight claim of about {} dollars. {claim_holder}.",
+                "The receiver refused the load, {} at {} percent. No pay for the haul, {} dollars gone, and a freight claim of about {} dollars. {claim_holder}.",
                 cargo_condition_text(cargo.condition_pct, liquid),
                 fmt_f(cargo.condition_pct, 0),
                 fmt_grouped(cargo.pay_loss, 0),
@@ -275,8 +273,7 @@ impl ArrivalState {
         }
         if cargo.outcome == "claim" {
             return format!(
-                "The receiver took the load but wrote it up, {} at {} percent. Freight claim \
-                 about {} dollars. {} dollars comes off this settlement. {claim_holder}.",
+                "The receiver took the load but wrote it up, {} at {} percent. Freight claim about {} dollars. {} dollars comes off this settlement. {claim_holder}.",
                 cargo_condition_text(cargo.condition_pct, liquid),
                 fmt_f(cargo.condition_pct, 0),
                 fmt_grouped(cargo.claim_value, 0),
@@ -284,8 +281,7 @@ impl ArrivalState {
             );
         }
         format!(
-            "Exception on the bill of lading, load arrived {} at {} percent. {} dollars held \
-             back.",
+            "Exception on the bill of lading, load arrived {} at {} percent. {} dollars held back.",
             cargo_condition_text(cargo.condition_pct, liquid),
             fmt_f(cargo.condition_pct, 0),
             fmt_grouped(cargo.pay_loss, 0)
@@ -414,9 +410,7 @@ impl ArrivalState {
                 "preventable_equipment_damage",
             );
             self.summary_parts.push(format!(
-                "Driver-responsibility charges: damage ruled preventable, {damage_reason}. \
-                 Carrier covers the repair. Deductible {} dollars, safety bonus void. \
-                 Reputation down {}, on your record.",
+                "Driver-responsibility charges: damage ruled preventable, {damage_reason}. Carrier covers the repair. Deductible {} dollars, safety bonus void. Reputation down {}, on your record.",
                 fmt_grouped(damage_deductible, 0),
                 fmt_f(damage_reputation_hit, 0)
             ));
@@ -424,8 +418,7 @@ impl ArrivalState {
         if business.uncollected_charges > 0.0 {
             let paid_now = driver_charges - business.uncollected_charges;
             self.summary_parts.push(format!(
-                "This load covered {} dollars of those charges. {} dollars stays owed, paid \
-                 down at a quarter of each settlement at most.",
+                "This load covered {} dollars of those charges. {} dollars stays owed, paid down at a quarter of each settlement at most.",
                 fmt_grouped(paid_now, 0),
                 fmt_grouped(business.uncollected_charges, 0)
             ));
@@ -651,7 +644,7 @@ impl ArrivalState {
             profile_name: profile_of(ctx).name.clone(),
             deliveries: profile_of(ctx).career.deliveries,
             cargo_key: job.cargo.key.to_string(),
-            cargo_label: job.cargo.label.to_string(),
+            cargo_label: job.spoken_cargo_label().to_string(),
             job_origin: job.origin.clone(),
             job_destination: job.destination.clone(),
             distance_mi: job.distance_mi,
@@ -704,14 +697,9 @@ impl ArrivalState {
         self.summary_parts.insert(
             0,
             format!(
-                "Delivered {} tons of {} to {} in {} hours, {}.{receiver_service_clause} It is {}. {} {} dollars. \
-                 Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. \
-                 {accessorial_clause} \
-                 Business status: {}. Business costs {} dollars. Fines carried over {} dollars. \
-                 Net driver pay {} dollars, you now have {}. Parked at {} for the {} service \
-                 area.",
+                "Delivered {} tons of {} to {} in {} hours, {}.{receiver_service_clause} It is {}. {} {} dollars. Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. {accessorial_clause} Business status: {}. Business costs {} dollars. Fines carried over {} dollars. Net driver pay {} dollars, you now have {}. Parked at {} for the {} service area.",
                 fmt_f(job.weight_tons, 0),
-                job.cargo.label,
+                job.spoken_cargo_label(),
                 job.spoken_destination(),
                 fmt_f(hours, 1),
                 if on_time { "on time" } else { "late" },
@@ -904,7 +892,7 @@ impl ArrivalState {
             format!(
                 "Delivered {} tons of {} to {}.",
                 fmt_f(job.weight_tons, 0),
-                job.cargo.label,
+                job.spoken_cargo_label(),
                 job.spoken_destination()
             ),
             format!(
@@ -927,8 +915,7 @@ impl ArrivalState {
                 fmt_grouped(gross_pay, 0)
             ),
             format!(
-                "Carrier-paid or reimbursed charges: {} dollars, including tolls {} and \
-                 accessorials {}.",
+                "Carrier-paid or reimbursed charges: {} dollars, including tolls {} and accessorials {}.",
                 fmt_grouped(carrier_charges, 0),
                 fmt_grouped(toll_expense, 0),
                 charge_summary(&accessorials)
@@ -989,8 +976,7 @@ impl ArrivalState {
         if rung == 0 {
             if was > 0 {
                 self.summary_parts.push(
-                    "Square with your carrier again. Nothing owed, every settlement reaches \
-                     you whole."
+                    "Square with your carrier again. Nothing owed, every settlement reaches you whole."
                         .to_string(),
                 );
             }
@@ -1113,7 +1099,7 @@ impl ArrivalState {
             profile_name: profile_of(ctx).name.clone(),
             deliveries: profile_of(ctx).career.deliveries,
             cargo_key: job.cargo.key.to_string(),
-            cargo_label: job.cargo.label.to_string(),
+            cargo_label: job.spoken_cargo_label().to_string(),
             job_origin: job.origin.clone(),
             job_destination: job.destination.clone(),
             distance_mi: job.distance_mi,

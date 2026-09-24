@@ -62,8 +62,7 @@ pub fn floor_it_through_town() -> Outcome {
     let fines = rig.drive.ticket_fines_paid;
     if money_delta < 0.0 && tickets == 0 {
         findings.push(format!(
-            "money fell {:.0} with no traffic stop on the record: speeding nobody saw is \
-             supposed to cost nothing",
+            "money fell {:.0} with no traffic stop on the record: speeding nobody saw is supposed to cost nothing",
             -money_delta
         ));
     }
@@ -72,8 +71,7 @@ pub fn floor_it_through_town() -> Outcome {
     if tickets != 0 {
         if rig.lines_with("Lights and siren behind you").is_empty() {
             findings.push(format!(
-                "{tickets} ticket(s) written with no lights-and-siren call: the player was \
-                 charged by an officer they never heard"
+                "{tickets} ticket(s) written with no lights-and-siren call: the player was charged by an officer they never heard"
             ));
         }
         if (money_delta + fines).abs() > 0.01 {
@@ -120,8 +118,7 @@ pub fn hairpin_at_70_no_assists() -> Outcome {
     let damage_delta = rig.drive.truck().damage_pct - damage_before;
     if damage_delta == 0.0 {
         findings.push(
-            "blew a 25-advisory hairpin at 70 (assists and lane drift off): zero damage, no \
-             crash, no spoken consequence beyond the warning -- the bend cannot hurt you"
+            "blew a 25-advisory hairpin at 70 (assists and lane drift off): zero damage, no crash, no spoken consequence beyond the warning -- the bend cannot hurt you"
                 .to_string(),
         );
     }
@@ -173,9 +170,7 @@ pub fn reverse_down_the_route() -> Outcome {
     });
     if backed_mi >= 0.5 && !wrongway {
         findings.push(format!(
-            "backed {backed_mi:.1} miles down the interstate (to route mile {:.2}) with no \
-             wrong-way or off-route feedback of any kind after the reverse beep started -- a \
-             blind player has no way to know the trip is unwinding",
+            "backed {backed_mi:.1} miles down the interstate (to route mile {:.2}) with no wrong-way or off-route feedback of any kind after the reverse beep started -- a blind player has no way to know the trip is unwinding",
             rig.drive.trip.position_mi
         ));
     }
@@ -262,22 +257,19 @@ pub fn slam_reverse_at_speed() -> Outcome {
     rig.release(Key::LShift);
     if result.ok {
         findings.push(
-            "reverse engaged at 60 mph forward with only the clutch pressed: no speed guard, \
-             no grind, no driveline damage model"
+            "reverse engaged at 60 mph forward with only the clutch pressed: no speed guard, no grind, no driveline damage model"
                 .to_string(),
         );
     } else if rig.drive.truck().damage_pct <= damage_before {
         findings.push(
-            "reverse at 60 mph was refused but cost the driveline nothing: a real box would \
-             be short some teeth for the attempt"
+            "reverse at 60 mph was refused but cost the driveline nothing: a real box would be short some teeth for the attempt"
                 .to_string(),
         );
     }
     rig.run_frames(900);
     if rig.drive.truck().transmission.in_reverse() && rig.drive.truck().velocity_mps > 1.0 {
         findings.push(format!(
-            "rolling forward at {:.0} mph in reverse gear; over-rev wear is the only \
-             consequence (engine wear {:.1}%)",
+            "rolling forward at {:.0} mph in reverse gear; over-rev wear is the only consequence (engine wear {:.1}%)",
             rig.drive.truck().speed_mph(),
             rig.drive.truck().engine_wear_pct
         ));
@@ -285,8 +277,7 @@ pub fn slam_reverse_at_speed() -> Outcome {
     let redline = rig.said("Redline") + rig.said("taking damage");
     if redline > 0 && rig.drive.truck().damage_pct == 0.0 {
         findings.push(format!(
-            "redline warning says 'taking damage, now {:.0} percent' but over-rev only raises \
-             engine WEAR -- the spoken damage number never moves",
+            "redline warning says 'taking damage, now {:.0} percent' but over-rev only raises engine WEAR -- the spoken damage number never moves",
             rig.drive.truck().damage_pct
         ));
     }
@@ -344,9 +335,7 @@ pub fn neutral_coast_mountain() -> Outcome {
         || !rig.lines_with("Limp mode").is_empty();
     if runaway && !took_damage {
         findings.push(format!(
-            "neutral coast reached {max_mph:.0} mph, past the {RUNAWAY_SPEED_MPH:.0} mph runaway \
-             threshold, and the truck took no damage at all: tires past their rated speed and \
-             an unloaded driveline cost nothing"
+            "neutral coast reached {max_mph:.0} mph, past the {RUNAWAY_SPEED_MPH:.0} mph runaway threshold, and the truck took no damage at all: tires past their rated speed and an unloaded driveline cost nothing"
         ));
     }
     let strike_count = rig.said("Speeding strike");
@@ -359,8 +348,7 @@ pub fn neutral_coast_mountain() -> Outcome {
     );
     if rig.drive.truck().speed_mph() >= 5.0 {
         findings.push(format!(
-            "service brakes could not stop the neutral runaway ({:.0} mph after {:.0}s of full \
-             brake, drums {:.0}C)",
+            "service brakes could not stop the neutral runaway ({:.0} mph after {:.0}s of full brake, drums {:.0}C)",
             rig.drive.truck().speed_mph(),
             stopped as f64 * DT,
             rig.drive.truck().brake_temp_c
@@ -414,9 +402,7 @@ pub fn redline_damage_readout() -> Outcome {
     if wear_gained > 0.1 && damage_pct == 0.0 && redline_lines[0].to_lowercase().contains("damage")
     {
         findings.push(format!(
-            "redline warning says the engine is taking damage, now 0 percent, while the harm \
-             actually lands on engine WEAR (+{wear_gained:.1}%) -- the spoken number will read 0 \
-             forever, telling a blind player the abuse is free"
+            "redline warning says the engine is taking damage, now 0 percent, while the harm actually lands on engine WEAR (+{wear_gained:.1}%) -- the spoken number will read 0 forever, telling a blind player the abuse is free"
         ));
     }
     outcome(

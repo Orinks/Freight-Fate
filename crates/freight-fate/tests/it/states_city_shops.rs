@@ -392,6 +392,22 @@ fn test_garage_refuel_requires_engine_off() {
 }
 
 #[test]
+fn test_garage_help_strings_have_no_double_spaces() {
+    let mut app = TestApp::new();
+    career(&mut app, "Garage Help", "Chicago");
+    profile_mut(&mut app).set_truck_engine_on(true);
+    app.push_state(GarageState::new());
+    let helps = labels_and_help::<GarageState>(&app);
+    assert!(!helps.is_empty());
+    for (label, help) in helps {
+        assert!(
+            !help.contains("  "),
+            "garage help for {label:?} has a double space: {help:?}"
+        );
+    }
+}
+
+#[test]
 fn test_garage_services_tires_and_wash() {
     let mut app = TestApp::new();
     career(&mut app, "Maintenance", "Chicago");

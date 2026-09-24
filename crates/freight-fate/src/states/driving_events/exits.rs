@@ -185,13 +185,11 @@ impl DrivingState {
                 "Exit lane set for you by lane keeping."
             };
             format!(
-                "{head} {ahead_text} ahead. {granted}{lane_hint} {ramp_text} or less for the \
-                 ramp.{ending}{cap}"
+                "{head} {ahead_text} ahead. {granted}{lane_hint} {ramp_text} or less for the ramp.{ending}{cap}"
             )
         } else {
             format!(
-                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then \
-                 {ramp_text} or less for the ramp.{ending}{cap}"
+                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then {ramp_text} or less for the ramp.{ending}{cap}"
             )
         };
         if self.is_selected_stop(Some(&stop)) {
@@ -203,8 +201,7 @@ impl DrivingState {
                     ""
                 };
                 message.push_str(&format!(
-                    " Facility stopping assistance armed. {lane_action}It stops at the entrance \
-                     once the ramp control is clear."
+                    " Facility stopping assistance armed. {lane_action}It stops at the entrance once the ramp control is clear."
                 ));
             } else {
                 message.push_str(" Stop at the entrance.");
@@ -636,8 +633,7 @@ impl DrivingState {
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
                 format!(
-                    "Exit lane in {distance}. Steer right for the exit lane and slow to \
-                     {ramp:.0}.{pressure_text}"
+                    "Exit lane in {distance}. Steer right for the exit lane and slow to {ramp:.0}.{pressure_text}"
                 ),
                 opts,
             );
