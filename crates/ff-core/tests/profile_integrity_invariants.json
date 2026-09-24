@@ -1832,6 +1832,7 @@
     "Company Career Veteran",
     "Freight Fate Company Driver"
   ],
+  "companyRankForkLevel": 18,
   "endorsements": {
     "doubles_triples": {
       "label": "doubles",

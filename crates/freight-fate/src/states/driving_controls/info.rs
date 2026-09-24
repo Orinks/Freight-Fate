@@ -387,6 +387,13 @@ impl DrivingState {
             // calls held (see `DrivingState::descent_is_beaten`).
             let accel_mph_s = truck.net_accel_mph_per_s();
             let stage = truck.engine_brake_stage;
+            // Steady is not held when it is steady far over what descent
+            // control is working to: a runaway at terminal speed stops
+            // gaining, and the G key called one at 106 against a hold of 60
+            // "has it" (sweep, 2026-09-23, once the truck's motion met the game
+            // clock and a faded-brake grade could reach terminal speed).
+            let over_hold = self.descent_control_active
+                && truck.speed_mph() - self.descent_hold_mph() > DESCENT_BEATEN_MPH;
             if grade > 0.005 {
                 if accel_mph_s < -GRADE_HOLDING_MPH_PER_S {
                     parts.push("The hill has the load; expect to lose speed.".to_string());
@@ -400,7 +407,7 @@ impl DrivingState {
                     parts.push(
                         "The jake is sliding the drive wheels; back it off a stage.".to_string(),
                     );
-                } else if accel_mph_s > GRADE_HOLDING_MPH_PER_S {
+                } else if accel_mph_s > GRADE_HOLDING_MPH_PER_S || over_hold {
                     if stage > 0 {
                         let losing = if truck.transmission.automatic {
                             "snub the brakes"
@@ -587,7 +594,19 @@ impl DrivingState {
         // gate in 0 miles", and before that watched it sit on "2 miles" for
         // three minutes while he closed on it (2026-08-23). The bend clause
         // below always asked for precise; the rest did not.
-        if let Some(stop) = self.trip.upcoming_stop(within_mi).cloned() {
+        //
+        // Off the highway there is no next highway stop: on an exit ramp or
+        // the streets, "Coming up: Flying J in 0.1 miles, where the ramp ends
+        // at a traffic light" named a stop the truck had already left the
+        // road for, and a ramp end that was a stop sign (agent drive, exit
+        // 286A, 2026-09-23).
+        let on_the_highway = self.ramp_mi.is_none() && !self.on_local_streets();
+        if let Some(stop) = self
+            .trip
+            .upcoming_stop(within_mi)
+            .cloned()
+            .filter(|_| on_the_highway)
+        {
             // The ramp's ending is part of the plan: a stop sign first heard
             // mid-ramp is too late to brake for.
             let ending = match self.ramp_control_for(ctx, &stop, None).as_str() {

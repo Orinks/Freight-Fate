@@ -62,9 +62,10 @@ impl DrivingState {
         let braking_m = (speed_mps * speed_mps - target_mps * target_mps)
             / (2.0 * ACC_LIMIT_COMFORT_DECEL_MPS2);
         let braking_mi = 0.0f64.max(braking_m / 1609.344);
-        let ramp_real_s = (speed_mph - target_mph) / CRUISE_ACCEL_MPH_PER_S;
+        // Game seconds: the working setpoint ramps on the motion clock.
+        let ramp_s = (speed_mph - target_mph) / CRUISE_ACCEL_MPH_PER_S;
         let mean_mph = (speed_mph + target_mph) / 2.0;
-        let ramp_mi = ramp_real_s * mean_mph * self.trip.effective_time_scale() / 3600.0;
+        let ramp_mi = ramp_s * mean_mph / 3600.0;
         ACC_LIMIT_LOOKAHEAD_MIN_MI.max(
             self.acc_limit_lookahead_max_mi()
                 .min(braking_mi.max(ramp_mi) + 0.25),
@@ -583,7 +584,7 @@ impl DrivingState {
             let speed = self.trip.truck.speed_mph();
             self.cruise_working_mph = Some(CRUISE_MIN_MPH.max(set_mph.min(speed)));
         }
-        let step = CRUISE_ACCEL_MPH_PER_S * dt;
+        let step = CRUISE_ACCEL_MPH_PER_S * self.motion_dt(dt);
         let working = self.cruise_working_mph.expect("set above");
         self.cruise_working_mph = Some(if working < set_mph {
             set_mph.min(working + step)
@@ -823,7 +824,7 @@ impl DrivingState {
         // balances the grade under the wheels, so cruise answers a hill as it
         // arrives. P and I only trim from there.
         let mut hold = self.trip.truck.hold_throttle();
-        let mut trim = (self.cruise_trim + error * CRUISE_I_GAIN * dt)
+        let mut trim = (self.cruise_trim + error * CRUISE_I_GAIN * self.motion_dt(dt))
             .clamp(-CRUISE_TRIM_LIMIT, CRUISE_TRIM_LIMIT);
         if error < 0.0 {
             // Over the target, cruise comes off the fuel: feeding the grade-hold
@@ -878,7 +879,7 @@ impl DrivingState {
             recovery_rate += 0.6f64.min(0.0f64.max(error) / 15.0);
             self.cruise_applied = self
                 .cruise_throttle
-                .min(self.cruise_applied + dt * recovery_rate);
+                .min(self.cruise_applied + self.motion_dt(dt) * recovery_rate);
         } else {
             self.cruise_applied = self.cruise_throttle;
         }

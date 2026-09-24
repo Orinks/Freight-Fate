@@ -27,6 +27,8 @@ pub use mass::DIESEL_KG_PER_GAL;
 #[cfg(test)]
 mod damage_band_tests;
 #[cfg(test)]
+mod motion_clock_tests;
+#[cfg(test)]
 mod physics_bench_tests;
 #[cfg(test)]
 mod realism_tests;
@@ -64,6 +66,10 @@ pub enum BrakeApplication {
 
 /// About 10 mph: backing speed, not road speed.
 pub const MAX_REVERSE_MPS: f64 = 4.5;
+/// The longest game-clock step the motion integrates in one go: one frame
+/// at the 60 fps the game runs, so real time takes exactly the step it
+/// always did and a compressed frame is cut into frame-sized pieces.
+pub const MOTION_STEP_MAX_S: f64 = 1.0 / 60.0;
 
 /// Game cargo "tons" are treated as metric tonnes.
 pub const KG_PER_TON: f64 = 1000.0;
@@ -541,7 +547,11 @@ pub struct TruckState {
     pub surface: String,
     /// Weather aero drag multiplier (headwinds/storms).
     pub drag_mult: f64,
-    /// Trip time compression so mpg stays honest.
+    /// The trip's time compression, set every frame from
+    /// `Trip::effective_time_scale`: game seconds per real second. Named for
+    /// its first job, keeping mpg honest; it is also the clock the motion,
+    /// the brake heat and wear run on, so a game mile costs the same at any
+    /// pacing.
     pub fuel_burn_mult: f64,
     /// Driver-care buff on tread wear (data/buffs.py).
     pub tire_wear_buff_mult: f64,

@@ -302,8 +302,13 @@ pub struct Trip {
     pub dock_run_in: bool,
     /// A police stop is in progress: the clock stops compressing.
     pub pull_over_active: bool,
-    /// True from a street corner's approach call until the corner resolves.
+    /// True from a street corner's brake point until the corner resolves:
+    /// the clock is real time.
     pub controlled_turn: bool,
+    /// 0 to 1: how far the clock has eased toward real time on the approach
+    /// to a corner's brake point. Set every frame by the driving state; 0
+    /// means the trip's own pacing.
+    pub turn_clock: f64,
     /// True while curve assistance is still taking speed off for a bend.
     pub curve_shed_active: bool,
     /// Road left to an exit the driver has signalled for.
@@ -464,6 +469,7 @@ impl Trip {
             dock_run_in: false,
             pull_over_active: false,
             controlled_turn: false,
+            turn_clock: 0.0,
             curve_shed_active: false,
             exit_approach_mi: None,
             exit_approach_release_s: 0.0,
@@ -604,7 +610,11 @@ impl Trip {
         }
         let floor = LOW_SPEED_TIME_SCALE.min(full);
         let ramp = (self.truck.speed_mph() / FULL_COMPRESSION_MPH).min(1.0);
-        floor + (full - floor) * ramp
+        let paced = floor + (full - floor) * ramp;
+        // Easing into a corner's brake point, the mirror of the exit release
+        // above: the clock slides down to real time rather than dropping to it.
+        let real = full.min(1.0);
+        paced + (real - paced) * self.turn_clock.clamp(0.0, 1.0)
     }
 
     pub fn imperial(&self) -> bool {
@@ -948,6 +958,37 @@ impl Trip {
         match self.current_career_hours() {
             None => false,
             Some(hours) => crate::sim::season::is_weekend(hours),
+        }
+    }
+
+    /// Mark the road behind the truck as already driven, for a trip placed
+    /// partway along it (a staged bench drive).
+    ///
+    /// Placed at mile 1175, the first frame found every state line, toll,
+    /// town and roadside callout from mile 0 "just passed" and spoke them:
+    /// Iowa's welcome on a Texas road, a turnpike toll charged, two
+    /// achievements (agent drives, 2026-09-23). The toll, town and callout
+    /// checks only ever fire for road already behind the truck, so running
+    /// them here with their output dropped latches exactly that; navigation
+    /// cues also look ahead, so only the ones behind are marked.
+    pub fn settle_road_behind(&mut self) {
+        let events = self.events.len();
+        let tolls = self.toll_charges.len();
+        self.check_tolls();
+        self.check_cities();
+        self.check_roadside_callouts();
+        self.events.truncate(events);
+        self.toll_charges.truncate(tolls);
+        let position = self.position_mi;
+        let behind: Vec<String> = self
+            .navigation_cues
+            .iter()
+            .filter(|cue| cue.at_mi < position)
+            .map(|cue| cue.key.clone())
+            .collect();
+        for key in behind {
+            self.announced_navigation.insert(format!("{key}:advance"));
+            self.announced_navigation.insert(format!("{key}:near"));
         }
     }
 

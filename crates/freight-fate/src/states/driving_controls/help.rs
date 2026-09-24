@@ -243,6 +243,10 @@ impl DrivingState {
         text.push_str(&format!(
             "across the lane line to change lanes. On full, tap {left} or {right}. "
         ));
+        text.push_str(&format!(
+            "Hold {} to point the truck straight down the road; where it sits in the lane stays yours to fix. ",
+            n(Action::Straighten)
+        ));
         text.push_str("Exits leave from the right lane. Change lanes or brake means a ");
         text.push_str("fixed object in your lane: take the open lane it names, or brake ");
         text.push_str("nearly to a stop and ease around. ");

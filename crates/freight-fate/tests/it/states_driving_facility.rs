@@ -148,6 +148,45 @@ fn a_facility_with_an_early_corner(world: &'static World) -> Option<(String, Str
     None
 }
 
+#[test]
+fn test_the_route_readout_at_a_ramp_with_streets_after_it_counts_to_the_gate() {
+    // Agent drive, exit 286A into Abilene, 2026-09-23: stopped at the ramp's
+    // stop sign, R said "50 feet to the Abilene metro freight market" with
+    // five miles of streets still to drive to the gate.
+    let world = get_world();
+    let Some((city, location)) = a_facility_with_an_early_corner(world) else {
+        return; // no baked chain facility to stand in for Abilene
+    };
+    let streets = world
+        .facility_approach_route(&city, &location)
+        .expect("a chain route")
+        .miles();
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.job.destination = city;
+    d.job.destination_location = location;
+    d.destination_chain_ahead = None;
+    d.destination_exit_taken = true;
+    let mut stop = ff_core::sim::trip_models::RoadStop::new(
+        "destination",
+        d.trip.position_mi,
+        "delivery_destination",
+    );
+    stop.interchange_mi = None;
+    d.ramp_stop = Some(stop);
+    d.ramp_mi = Some(0.01);
+    app.clear_speech();
+
+    d.speak_route_status(&mut app.ctx);
+
+    let line = app.main_lines().pop().expect("R said nothing");
+    assert!(line.contains("to the gate at"), "{line}");
+    assert!(
+        !line.contains("feet") || streets < 0.1,
+        "the ramp's end read as the destination: {line}"
+    );
+}
+
 /// `_at_gate`: put the truck right at the finished route end, rolling at
 /// `mph`.
 fn at_gate(d: &mut DrivingState, mph: f64, warned: bool) {
@@ -1023,10 +1062,31 @@ fn test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back() {
     // Spoken here, so the commitment loop must not raise it again.
     let corner = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.turn_advised.contains(&corner.key));
-    assert!(d.trip.controlled_turn);
+    // The clock goes real at the corner's brake point, which a truck still
+    // at the stop bar has not reached (states_driving_turns pins that).
+    assert_eq!(
+        d.trip.controlled_turn,
+        corner.at_mi - d.trip.position_mi <= d.turn_brake_point_mi(&corner)
+    );
     // And the pause is gone: the next frame may hand the streets to the
     // keeper without waiting on a driver who is off the brake.
     assert!(!d.speed_control_paused_at_stop);
+    // "Then turn left now onto North 1st Street" said it: the route's own
+    // call at the corner is not said again on top (agent drive, exit 286A,
+    // 2026-09-23).
+    if message.contains(" now onto ") {
+        let before = app.event_lines().len();
+        let near = ff_core::sim::trip_models::TripEvent {
+            kind: ff_core::sim::trip_models::TripEventKind::GpsCue,
+            message: ff_core::speech_text::SpokenMessage::new(corner.near_text.clone()),
+            data: ff_core::sim::trip_models::TripEventData {
+                cue: Some(corner.clone()),
+                ..Default::default()
+            },
+        };
+        d.handle_trip_event(&mut app.ctx, &near);
+        assert_eq!(app.event_lines().len(), before, "{:?}", app.event_lines());
+    }
 }
 
 // -- the pickup gate (tests/test_pickup_loading.py, drive half) -----------------------

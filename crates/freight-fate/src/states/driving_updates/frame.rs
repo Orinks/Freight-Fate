@@ -160,17 +160,50 @@ impl DrivingState {
         }
         self.sync_weather_source(ctx);
         self.sync_weather_alerts(ctx);
-        let ramp = dt * 2.2;
+        // The truck moves on the game clock now (see `TruckState::update`), so
+        // a pedal held one real second acts for `pace` game seconds. Travel at
+        // the old rate, a half-second tap at standard pace was seven game
+        // seconds of full brake -- a stop from highway speed where it used to
+        // shed two miles an hour. Pressing divided by the pace, a tap sheds
+        // what it always did, and a held key keeps pressing harder for as long
+        // as it is held (owner, 2026-09-23).
+        //
+        // Letting go is NOT divided: a lifted foot is off the pedal at once.
+        // Released at the pressing rate, a brake held to full took four and a
+        // half real seconds to come off at standard -- a minute and a half of
+        // game time still braking after the driver let go.
+        //
+        // And only where a pedal moves the truck. Held on its brakes, the
+        // throttle moves nothing but the engine, which answers on the real
+        // clock -- and deliberate waiting runs that clock at double pace, so
+        // revving to build air took eighteen real seconds to reach full.
+        let pace = if self.trip.truck.air_brakes_holding() {
+            1.0
+        } else {
+            self.trip.effective_time_scale().max(1.0)
+        };
+        let ramp = dt * 2.2 / pace;
+        let release = dt * 2.2;
         self.brake_lockout_cue_timer = (self.brake_lockout_cue_timer - dt).max(0.0);
         // Controller triggers/clutch are analog held positions blended in below;
         // the keyboard keys keep their ramped behavior so both devices work.
+        // The triggers' pedals follow the trigger at the keys' own travel
+        // rate rather than jumping to it, for the same reason: a trigger
+        // position applied at once would brake twenty times harder per real
+        // second than it did before the pedals met the game clock.
         let pad_on = ctx.controller.active();
+        // Whether a trigger is pulled still reads at once (a cruise cancel, the
+        // emergency pull); only the pedal it presses is slewed.
         let pad_throttle = if pad_on {
             ctx.controller.throttle()
         } else {
             0.0
         };
         let pad_brake = if pad_on { ctx.controller.brake() } else { 0.0 };
+        self.pad_throttle_applied =
+            pedal_toward(self.pad_throttle_applied, pad_throttle, ramp, release * 2.0);
+        self.pad_brake_applied =
+            pedal_toward(self.pad_brake_applied, pad_brake, ramp * 1.5, release * 3.0);
         let key_up = ctx.bindings.pressed(&ctx.input, Action::Accelerate);
         let mut key_down = ctx.bindings.pressed(&ctx.input, Action::Brake);
         let b_held = ctx.bindings.pressed(&ctx.input, Action::EmergencyBrake);
@@ -246,7 +279,7 @@ impl DrivingState {
             t.throttle = 0.45f64.min(t.throttle + ramp);
         } else {
             let t = &mut self.trip.truck;
-            t.throttle = 0.0f64.max(t.throttle - ramp * 2.0);
+            t.throttle = 0.0f64.max(t.throttle - release * 2.0);
         }
         if pad_throttle > 0.05 && !backing && !self.trip.truck.transmission.in_reverse() {
             if self.trip.truck.engine_brake() {
@@ -263,7 +296,7 @@ impl DrivingState {
                 );
             }
             let t = &mut self.trip.truck;
-            t.throttle = t.throttle.max(pad_throttle);
+            t.throttle = t.throttle.max(self.pad_throttle_applied);
         }
         // Keyboard ramps the brake up and down; the analog trigger sets a direct
         // held floor on top of that.
@@ -280,10 +313,23 @@ impl DrivingState {
         // sweep, 2026-09-20). A pedal an assist is holding is not a pedal
         // the driver let go of, so the decay stops there. Their own brake
         // key still cancels the assist, which is what drops the floor.
+        //
+        // The ramp terminal's servo was left out, and it is the one that
+        // presses AFTER physics runs: the truck felt 0.09 of a 0.20 stop,
+        // slowed at 0.43 m/s2 against the 0.6 planned, reached a stop bar at
+        // 15 mph and had to slam the rest (agent drive into Abilene,
+        // 2026-09-23). Only while it still has a terminal to stop at: a press
+        // left over once the ramp is behind the truck held it on its brakes.
+        let ramp_terminal_brake = if self.ramp_mi.is_some() && !self.ramp_terminal_done {
+            self.ramp_assist_brake
+        } else {
+            0.0
+        };
         let assist_floor = self
             .keeper_snub
             .max(self.aeb_brake)
             .max(self.destination_assist_brake)
+            .max(ramp_terminal_brake)
             .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
             .clamp(0.0, 1.0);
         {
@@ -291,10 +337,10 @@ impl DrivingState {
             if braking_ramp {
                 t.brake = 1.0f64.min(t.brake + ramp * 1.5);
             } else {
-                t.brake = assist_floor.max(t.brake - ramp * 3.0);
+                t.brake = assist_floor.max(t.brake - release * 3.0);
             }
             if pad_brake > 0.05 && !backing {
-                t.brake = t.brake.max(pad_brake);
+                t.brake = t.brake.max(self.pad_brake_applied);
             }
         }
         let braking = braking_ramp || (pad_brake > 0.05 && !backing);
@@ -634,5 +680,14 @@ impl DrivingState {
         live::set_hazard_active(self.hazard_deadline.is_some());
         live::set_arrival_menu_open(self.arrival_menu_open);
         live::set_gate_stop_prompted(self.arrival_full_stop_said);
+    }
+}
+
+/// A pedal moved toward `target`, at most `rise` up or `fall` down.
+fn pedal_toward(current: f64, target: f64, rise: f64, fall: f64) -> f64 {
+    if target > current {
+        (current + rise).min(target)
+    } else {
+        (current - fall).max(target)
     }
 }

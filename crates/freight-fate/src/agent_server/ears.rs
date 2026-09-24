@@ -19,6 +19,14 @@ pub struct Ears {
     road_noise_mps: Option<f64>,
     /// The alert currently held, so a per-frame re-assert is heard once.
     held_alert: Option<String>,
+    /// Where the engine and the road bed sit in the stereo field right now.
+    /// The pan lines above report a lean only when it moves a step, so after
+    /// a quiet stretch an agent steering by ear did not know where it stood
+    /// -- a driver hears the pan continuously -- and steered off old news:
+    /// with lane keeping off, even in lockstep, the truck swung lane to lane
+    /// and left the pavement (agent drive, 2026-09-23).
+    engine_lean: i32,
+    road_bed_lean: Option<i32>,
 }
 
 pub type SharedEars = Rc<RefCell<Ears>>;
@@ -207,6 +215,9 @@ impl TeeAudio {
     fn loop_stopped(&mut self, channel: u32) {
         self.loop_keys.remove(&channel);
         self.loop_pan_steps.remove(&channel);
+        if channel == CH_ROAD {
+            self.ears.borrow_mut().road_bed_lean = None;
+        }
     }
 }
 
@@ -292,11 +303,15 @@ impl Audio for TeeAudio {
         if self.loop_pan_steps.insert(channel, step) != Some(step) {
             self.hear(format!("[bed] {key} pans {}", pan_step_text(step)));
         }
+        if channel == CH_ROAD {
+            self.ears.borrow_mut().road_bed_lean = Some(step);
+        }
         self.inner.set_loop_pan(channel, pan);
     }
 
     fn set_engine_pan(&mut self, pan: f64) {
         let step = pan_step(pan);
+        self.ears.borrow_mut().engine_lean = step;
         if step != self.engine_pan_step {
             self.engine_pan_step = step;
             self.hear(format!("[engine] pans {}", pan_step_text(step)));
@@ -543,6 +558,14 @@ pub(super) fn drain_ears(ears: &SharedEars) -> String {
                 "[road] rolling at about {:.0} miles per hour by ear",
                 mps * 2.236_936
             ));
+            // Where the two leans stand at this moment, heard or not.
+            let bed = e
+                .road_bed_lean
+                .map_or_else(|| "silent".to_string(), pan_step_text);
+            lines.push(format!(
+                "[now] engine lean {}, road bed {bed}",
+                pan_step_text(e.engine_lean)
+            ));
         }
     }
     if lines.is_empty() {
@@ -618,6 +641,36 @@ mod tests {
             heard.matches("[bed] vehicle/road pans").count(),
             2,
             "{heard}"
+        );
+    }
+
+    #[test]
+    fn every_listen_says_where_the_leans_stand_now() {
+        // A lean held steady says nothing, so after a quiet stretch an agent
+        // steering by ear did not know where it stood and steered off old
+        // news (agent drive with lane keeping off, 2026-09-23). Each listen
+        // ends with where both stand, whether they moved or not.
+        let ears = Ears::shared();
+        {
+            let mut audio = tee_audio(&ears);
+            audio.set_road_noise(25.0);
+            audio.set_loop_pan(CH_ROAD, 0.26);
+            audio.set_engine_pan(-0.5);
+        }
+        let first = drain_ears(&ears);
+        assert!(
+            first.contains("[now] engine lean left 2, road bed right 1"),
+            "{first}"
+        );
+        {
+            let mut audio = tee_audio(&ears);
+            audio.set_road_noise(25.0);
+        }
+        let quiet = drain_ears(&ears);
+        assert!(!quiet.contains("[engine] pans"), "{quiet}");
+        assert!(
+            quiet.contains("[now] engine lean left 2, road bed right 1"),
+            "held steady, the lean is still reported: {quiet}"
         );
     }
 

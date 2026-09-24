@@ -491,7 +491,15 @@ fn test_analog_trigger_drives_throttle() {
     for _ in 0..20 {
         app.ctx.controller.tick(0.016);
     }
+    // The pedal follows the trigger at the keys' own travel rate rather than
+    // jumping to it (2026-09-23): moving on the first frame, most of the way
+    // down half a second later.
     drive_frame(&mut app, &shared, DT);
+    let first = with_drive(&shared, |d| d.trip.truck.throttle);
+    assert!(first > 0.0 && first < 0.5, "{first}");
+    for _ in 0..30 {
+        drive_frame(&mut app, &shared, DT);
+    }
     assert!(
         with_drive(&shared, |d| d.trip.truck.throttle) > 0.5,
         "{}",

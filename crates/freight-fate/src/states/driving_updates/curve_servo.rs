@@ -117,27 +117,18 @@ impl DrivingState {
         // What the road takes off on its own, m/s2: positive when it slows
         // the truck, negative when gravity is pushing it into the bend.
         let road = self.trip.truck.resistance_force() / self.trip.truck.gross_mass_kg();
-        // The road passes `scale` times faster than the truck slows: the
-        // trip moves the milepost by speed times dt times the compression,
-        // and the physics sheds speed at real dt. A warned bend runs the
-        // clock real (the pacenote's decompression) down to the advisory
-        // plus its margin, so this is 1 for nearly the whole shed -- but
-        // the last few miles an hour, and the hold through the bend, are
-        // back on the compressed clock, and a profile priced in real
-        // metres there arrives over the number. The keeper prices its ease
-        // the same way (`keeper_ease_mi`).
+        // Priced in plain metres and game seconds. The truck sheds speed on
+        // the clock the road passes on now (see `TruckState::update`), so a
+        // profile that lands on the number at real time lands on it at any
+        // pace. It used to be multiplied by the pace, to catch up with a
+        // truck that slowed on the real clock while the road went by on the
+        // compressed one; on the game clock that multiplier braked a 15 mph
+        // bend down to 7 (sweep, 2026-09-23).
         //
-        // Set the flag FIRST, then read the scale, because the flag is one of
-        // the things `effective_time_scale` answers with. Read the other way
-        // round it reported last frame's clock, and on the one frame the
-        // truck crossed back over the number -- flag still false, the
-        // pacenote's own decompression already let go -- the demand was
-        // priced seventeen times too high and the pedal took the rise
-        // (review finding, 2026-09-19). The clock stays real while there is
-        // still speed to take off, so the shed is priced in the same seconds
-        // the truck slows in; see `Trip::effective_time_scale`.
+        // The flag still holds the clock real while there is speed to take
+        // off, for the driver's sake rather than the arithmetic's; see
+        // `Trip::effective_time_scale`.
         self.trip.curve_shed_active = v > target;
-        let scale = self.trip.effective_time_scale().max(1.0);
         let band = CURVE_SERVO_HOLD_BAND_MPH / MPH_PER_MPS;
         let shed: Option<f64> = if position < servo.start_mi {
             // The approach: the uniform shed that lands the truck ON the
@@ -150,7 +141,7 @@ impl DrivingState {
             // for the shortfall as well or the bend arrives over its number
             // (owner, 2026-09-20).
             let surge = self.trip.truck.surge_decel_penalty_mps2();
-            (v > target).then(|| (v * v - target * target) * scale / (2.0 * remaining_m) + surge)
+            (v > target).then(|| (v * v - target * target) / (2.0 * remaining_m) + surge)
         } else if v > target {
             // Inside the chain and over the number: the keeper's own snub
             // rate, net of the grade like everything else here. A profile to
@@ -169,7 +160,7 @@ impl DrivingState {
             // still came round every five seconds. A pedal that answers how
             // far over the truck is settles where the push on it is met and
             // stays there, which is what a foot does.
-            Some(KEEPER_SNUB_DECEL_MPS2 * scale * ((v - target) / band).min(1.0))
+            Some(KEEPER_SNUB_DECEL_MPS2 * ((v - target) / band).min(1.0))
         } else {
             None
         };

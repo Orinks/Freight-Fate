@@ -50,7 +50,22 @@ impl DrivingState {
         if self.should_ignore_unsignalled_exit_pressure(ctx, event) {
             return;
         }
+        if self.corner_already_called(event) {
+            return;
+        }
         let kind = event.kind;
+        // The route's own call counts as telling the driver about the turn,
+        // so the turn chimes as the truck takes it. Only the turn's approach
+        // call used to count, and a truck already under a turn's speed never
+        // gets one: every turn taken at a crawl went by without its chime
+        // (agent drive, Aberdeen yard, 2026-09-23).
+        if kind == TripEventKind::GpsCue
+            && (ctx.settings.speaks(Self::event_category(event)) || !ctx.ladder_applies())
+        {
+            if let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) {
+                self.turn_announced.insert(cue.key.clone());
+            }
+        }
         let sound = route_event_sound(event);
         let mut message = event.message.clone();
         // Cue strings stay "billed to carrier settlement" so trip-cue tests
@@ -725,6 +740,30 @@ impl DrivingState {
             tuning_for_time_scale(self.trip.time_scale).ambient_spacing_s;
     }
 
+    /// The route's quarter-mile lead for a street turn whose own approach
+    /// call has already been spoken: that call named the side, the street,
+    /// the distance and the advise speed, so the lead only says the same
+    /// thing again a few seconds later (owner, Abilene streets, 2026-09-23:
+    /// "announced at least twice before the turn. Necessary?").
+    ///
+    /// And the route's call AT the turn, when the turn's own call already
+    /// said "now": the street chain's briefing ends "Then turn left now onto
+    /// North 1st Street", and "Turn left onto North 1st Street" followed it
+    /// straight away (agent drive, exit 286A, 2026-09-23).
+    fn corner_already_called(&self, event: &TripEvent) -> bool {
+        if event.kind != TripEventKind::GpsCue {
+            return false;
+        }
+        let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) else {
+            return false;
+        };
+        if event.data.advance.unwrap_or(false) {
+            self.turn_advised.contains(&cue.key)
+        } else {
+            self.turn_called_now.contains(&cue.key)
+        }
+    }
+
     /// `_should_ignore_destination_exit_gps_cue(event)`.
     pub fn should_ignore_destination_exit_gps_cue(
         &mut self,
@@ -930,6 +969,14 @@ impl DrivingState {
         }
         if event.kind == TripEventKind::GpsCue {
             if event.data.zone.is_some() {
+                return EventPriority::Route;
+            }
+            // A limit change is what enforcement reads, and each one is said
+            // once: the advance "drops to 55" marks 55 as announced, so when
+            // the pacer dropped it as stale chatter the boundary stayed silent
+            // too and the truck ran a 55 it never heard of (agent drive, exit
+            // 286A into Abilene, 2026-09-23).
+            if event.data.limit_change.unwrap_or(false) {
                 return EventPriority::Route;
             }
             let cue_kind = event

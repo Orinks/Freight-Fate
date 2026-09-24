@@ -37,22 +37,25 @@ impl DrivingState {
         ctx: &mut GameContext,
         accelerating: bool,
     ) {
-        if !ctx.settings.route_transition_assist {
+        // Standing down lets go of its own application. The frame holds the
+        // pedal at this servo's last press (`assist_floor`), so a press left
+        // behind when the terminal ended -- crossed, run, or the ramp left --
+        // held the truck on its brakes for good (merge bench, 2026-09-23).
+        let owns_terminal = ctx.settings.route_transition_assist
+            && self.ramp_mi.is_some()
+            && !self.ramp_terminal_done
+            && matches!(
+                self.ramp_control.as_str(),
+                "signal" | "stop" | "yield" | "roundabout"
+            )
+            && self.ramp_light_announced;
+        if !owns_terminal {
+            self.ramp_assist_brake = 0.0;
             return;
         }
         let Some(ramp_mi) = self.ramp_mi else {
             return;
         };
-        if self.ramp_terminal_done {
-            return;
-        }
-        if !matches!(
-            self.ramp_control.as_str(),
-            "signal" | "stop" | "yield" | "roundabout"
-        ) || !self.ramp_light_announced
-        {
-            return;
-        }
         if accelerating {
             // Clear only this assist's held application. The input layer owns
             // the pedals; never erase a driver's brake or another assist's.
@@ -245,6 +248,17 @@ impl DrivingState {
                 &format!("Route-transition assistance braking for the {what}."),
             );
         }
+    }
+
+    /// The terminal's servo has a stop still to make at the bar: a sign, or
+    /// a light it is braking for or holding at.
+    pub(crate) fn ramp_terminal_owns_the_stop(&self) -> bool {
+        self.ramp_mi.is_some()
+            && !self.ramp_terminal_done
+            && self.ramp_light_announced
+            && (self.ramp_assist_brake > 0.0
+                || self.ramp_waiting_at_light
+                || self.ramp_control == "stop")
     }
 
     /// "A semi crossing from the left", or "Cross traffic" with nothing near.

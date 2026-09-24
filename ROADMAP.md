@@ -38,8 +38,10 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [x] Ramp-end traffic lights keep one seeded 60 to 78 second plan per
-      intersection, with a 7 second all-red so cross traffic clears before green.
+- [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
+      intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
+      call eats the first second and a half) and a 7 second all-red so cross
+      traffic clears before green.
 
 - [x] Quiet speech keeps concise lane openings, confirmations, and status transitions; Urgent only omits routine costs and status, and suppressed categories skip review.
 
@@ -462,8 +464,10 @@ its status or release decision.
       missing from `--list-speech-backends`.
 - [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
       every backend unless linked whole. Reported with a standalone
-      reproduction as ethindp/prism#130; drop the whole-archive link in
-      `crates/freight-fate/build.rs` once a fix ships.
+      reproduction as ethindp/prism#130, fixed upstream 2026-09-22 by
+      ethindp/prism#135 (anchors for GCC and Clang). Waiting on a `prismer`
+      release that vendors it (0.1.3 does not); then drop the whole-archive
+      link in `crates/freight-fate/build.rs` and dry-run the nightly.
 
 ### September 21 the Python sunset
 
@@ -1239,6 +1243,85 @@ against.
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
       pays, which the toll inventory does not.
 
+### September 23 flight's driving notes
+
+flight drove with every assist off and sent four notes. All four have
+shipped.
+
+- [x] **The drift lean reads the heading, not only the position.** Both
+      drift producers (the engine lean and the opt-in tone) lean on
+      `lane_guidance::settled_offset`: the offset plus the heading's lateral
+      stopping distance, from a two-choice reaction time plus the lean's own
+      slew, and the driver's yaw authority in `sim::lane`. In a closed-loop
+      test, a driver who follows the old position-only lean out of a 0.6
+      drift ends up 1.5 past centre, off the other edge. With the new lean
+      it is 0.05. The agent drive that checked it found one more gap: the
+      lean went quiet as soon as the settled point was centred, with heading
+      still on, and the truck carried on across. `drift_speaks` now keeps
+      it awake until the truck is also pointing down the road.
+- [x] **Truck physics on the clock that moves it** (merged to `dev`
+      2026-09-23 after two agent drives). `TruckState`
+      integrates motion, freight and brake heat on the game clock in
+      one-frame sub-steps, so a coast or a downhill covers the same road at
+      any pace. The pedals press at their old rate divided by the pace and
+      release on the real clock; cruise, the keeper and the curve servo run
+      their integrators on `motion_dt`, and the old multiply-by-the-pace
+      compensations in the servo, the keeper's ease and cruise's limit
+      lookahead are gone. A cruise pause for a bend under cruise's floor now
+      lifts at the bend's end, because a hands-off truck used to stall in
+      the tail.
+- [ ] **Controller triggers as a rate.** The pedal now slews toward the
+      trigger at the keys' travel rate; pad players have not tried it yet.
+- [x] **Real time from the brake point, not from the corner call.** The
+      call stays time-based; `controlled_turn` now goes on at
+      `turn_brake_point_mi` (eight real seconds of reaction and settle plus
+      the shed to the advise speed at the keeper's 0.4 m/s²), and
+      `Trip::turn_clock` slides the pace down over the three real seconds
+      before it, the exit release run backwards. A 30 mph approach that
+      crawled four real minutes from a two-mile call now runs real time for
+      its last fifth of a mile. The agent drive that found it also found the
+      automatic hunting on the new clock (the torque interruption was still
+      real time); the gearbox timers now run in the motion sub-steps.
+- [x] **A straighten-up key.** Slash, held, applies only the heading half
+      of partial lane keeping's steering law (`LaneKeeping::straighten`), so
+      the truck points down the road and keeps its place in the lane. A
+      bindings-table row, keyboard only: a pad steers on the stick.
+
+### September 23 agent drive into Abilene
+
+An agent drive of `feat/momentum-game-clock`, Aberdeen yard to the Abilene
+gate, turned up these on dev's own code.
+
+- [x] **The ramp stop sign.** The terminal servo presses after physics and
+      was missing from the frame's `assist_floor`, so the pedal decayed under
+      it: 0.43 m/s² against the 0.6 planned, 13 mph sixty feet out, then half
+      a pedal. The cap's "released" line is held while the terminal owns the
+      stop.
+- [x] **Music source.** `roadhouse_synth_state` read the Roadhouse off the
+      radio state `with_radio_backend` had swapped out, so Synthesized to
+      Original never restarted the rotation.
+- [x] **Limit changes ride ROUTE.** The advance "drops to 55" marks the
+      limit announced; dropped as stale, it silenced the boundary too.
+- [x] **One call per street turn.** The route lead is dropped for a turn
+      already called, and a call after the lead keeps only its advise speed.
+- [x] **A flushed line's hand-back plays first.** `should_flush` handed
+      back a route line not a word of which had been heard, and it was
+      requeued behind the line that flushed it, so the road played
+      backwards. The hand-back is now spoken ahead of that line
+      (`EventSpeechPacer::note_ahead` keeps the newcomer the protected one).
+- [x] **Ramp readouts.** The route readout on a destination ramp adds the
+      street chain to the gate; U drops highway stops off the highway; the
+      unrecorded ramp control is seeded by the exit, not by each stop.
+- [ ] **Data: the Flying J listed at exit 286A** on the Wichita Falls to
+      Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
+      miles off this road by its own source note. Move it to an I-20
+      Abilene leg and re-bake.
+- [ ] **The speed keeper between close street turns.** It builds back to
+      the zone limit between turns a quarter mile apart (9 to 21 mph), then
+      eases in the last 0.07 mile at about 0.3 g. Hold the lower number
+      when the next turn is inside the keeper's own build-and-shed
+      distance.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
@@ -1317,9 +1400,9 @@ onto exit signalling.
       signals a street corner. The map is not the blocker -- baked tier-1
       maneuvers already carry direction and distance, which is what feeds
       the `events/turn_left` and `turn_right` earcons. What is missing is
-      the turn as a continuous act: `LaneKeeping` has a lateral offset and
-      a lane index and no heading, the same gap that killed the quick-time
-      turn in July. Needs a held tick that self-cancels at the corner and a
+      the turn as a continuous act. `LaneKeeping` has carried a heading
+      since 2026-09-18, which closes the gap that killed the quick-time
+      turn in July. Still needs a held tick that self-cancels at the corner and a
       rule about signalling before one, alongside whatever turn geometry
       the surface-intersection work (1.9, `docs/surface-roads-plan.md`
       phase 4) leaves behind. The self-cancel half of that now exists:

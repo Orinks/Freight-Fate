@@ -162,10 +162,14 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   build is shared). Integration tests live in `crates/<crate>/tests/it/*.rs`,
   wired in through that directory's `main.rs` -- one test binary named `it`
   per crate, deliberately, so add a `mod` line there rather than a new
-  top-level file. The three exceptions: `crates/ff-core/tests/data_baked.rs`
+  top-level file. The exceptions: `crates/ff-core/tests/data_baked.rs`
   and `data_map_correction.rs` each point the process at a different data
   root, and `crates/freight-fate/tests/classic_startup.rs` needs a process
   where the 1.5 classics are not yet registered, so each keeps its own binary.
+  `crates/freight-fate/tests/agent_server.rs` is agent tooling, not the game:
+  `test = false` in the crate's Cargo.toml keeps it out of a plain
+  `cargo test`, so run it by name (`cargo test -p freight-fate --test
+  agent_server`) after touching the agent server. CI runs it as its own step.
 - One test: `cargo test -p freight-fate --test it <name_filter> -- --nocapture`
   (`--test it` skips the unit-test and doc-test binaries; the filter is a
   substring of the test path).
@@ -206,7 +210,11 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   any situation first (city, level, business status, cash, credentials,
   clock, fuel, damage, rest, seeds, any setting) and reopens the terminal;
   `start_at` stages a drive at a road feature. Neither is limited: the
-  sandbox is a throwaway copy. Check spoken readouts and event output
+  sandbox is a throwaway copy. `lockstep` (on) freezes the world between
+  tool calls, so time passes only inside `wait`, `pedal` and `wait_for`.
+  Use it wherever a round trip would cost road, such as steering with lane
+  keeping off or braking for a hazard. Leave it off when the owner is
+  driving alongside. Check spoken readouts and event output
   for the changed behavior, then end the session with `quit_game`. Treat
   `observe` as diagnostic state, and record any information the driver needed
   but could not hear. By default the window is minimized and the operator's

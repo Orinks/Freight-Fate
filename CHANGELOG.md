@@ -5,6 +5,7 @@
 ### Added
 
 - **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
+- **Hold slash to straighten up.** With lane keeping on partial or off, the truck turns to point down the road and leaves your lane position to you. (Suggested by flight)
 
 - **Bananavision channels are on the dial.** Nine HTTPS Icecast mounts from bananavision.tv — Main, Bananalodeon 80s, Bananalodeon, Bananarang, Educational, Brain, Star Trek Vision, MST3K, and Over the Edge — and they come in anywhere you drive.
 
@@ -39,6 +40,16 @@
 - **A loaded delivery's deadline now covers a legal sleep forced by your current hours.** Dispatch checks again at departure and tells you when it adjusts the time.
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.
+
+- **Speed now builds and fades on the game clock.** At the faster paces the truck pulls away quicker, coasts a realistic distance, and hills pay the same. (Reported by flight.)
+
+- **Holding the brake or accelerator presses harder the longer you hold it.** A quick tap still does what it always did.
+
+- **City street turns keep the game's pace until it is time to brake.** Real time starts just before the turn, not a mile out. (Reported by flight.)
+
+- **About twenty billboards were rewritten so they make sense read aloud.** Jokes that relied on a picture or trucker shorthand now say what the sign is selling.
+
+- **Yellow lights at the end of a ramp last longer.** A yellow now holds six seconds, enough to hear it and brake.
 
 - **Each ramp-end traffic light keeps its own steady cycle.** Lights run about a minute or more, and cross traffic clears before your green.
 
@@ -100,6 +111,32 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Route-transition assistance brakes smoothly to a stop sign.** It slows steadily to the line instead of arriving fast and stopping hard.
+
+- **Switching the music source during a drive now changes the radio straight away.** Choosing Original ends the synthesized playlist.
+
+- **A lower speed limit is always announced.** The warning and the new limit no longer go unspoken when the road is busy.
+
+- **Street turns are called once.** After the quarter-mile notice, the turn's own call adds only the advise speed.
+
+- **A turn right after another is called before you reach it.** Turns taken slowly chime as you make them, too.
+
+- **The end of an acceleration lane says you have merged.** You hear "Lane ended" instead of being told to merge left into the passing lane.
+
+- **City streets to a delivery keep the game's pace.** Real time starts near the gate, not for the whole drive in from the ramp.
+
+- **Announcements made at the same moment are spoken in order.** An older line no longer plays after the newer one that replaced it.
+
+- **The route readout on an exit ramp counts to the facility gate.** When streets follow the ramp, it no longer reads the ramp's end as the destination.
+
+- **The upcoming readout stops listing highway stops once you leave the highway.**
+
+- **Every stop at one exit agrees on how its ramp ends.** You no longer hear a traffic light and a stop sign for the same ramp.
+
+- **Following the engine lean out of a drift no longer swings you across the lane.** It centres as the truck straightens, not once it reaches the middle. (Reported by flight.)
+
+- **Back-to-back sleeps at one stop count as one rest.** After 3 hours and 3 more, the menu offers the last 4 to finish your 10-hour reset. (Reported by Vol4life.)
 
 - **Right at the destination exit, the cab no longer announces a second one further on.** The exit you are taking is the only destination exit you hear.
 

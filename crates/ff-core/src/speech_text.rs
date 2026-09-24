@@ -390,7 +390,11 @@ pub fn stop_callout(parts: &StopCalloutParts<'_>) -> SpokenMessage {
         "{planned_prefix}{typed_name}{exit_part} in {distance}."
     )];
     if !parking_normal.is_empty() {
-        normal_parts.push(format!("{parking_normal}."));
+        // Its own sentence, so it opens like one: "in 5 miles. confirmed truck
+        // parking." read as a run-on (agent drive, exit 286A, 2026-09-23).
+        let mut chars = parking_normal.chars();
+        let first = chars.next().map(|c| c.to_uppercase().collect::<String>());
+        normal_parts.push(format!("{}{}.", first.unwrap_or_default(), chars.as_str()));
     }
     if !exit_hint.is_empty() {
         normal_parts.push(format!("Press {exit_hint} to signal for the exit."));
@@ -865,7 +869,7 @@ mod tests {
         assert_eq!(
             pair.normal,
             "travel center: Flying J Travel Center Corfu at exit 48A in 5 miles. \
-             confirmed truck parking. Press X to signal for the exit."
+             Confirmed truck parking. Press X to signal for the exit."
         );
         assert_eq!(
             pair.terse.as_deref(),
@@ -945,7 +949,7 @@ mod tests {
         assert!(!retired.normal.contains("signal for the exit"));
         // The route facts survive either way.
         assert!(retired.normal.contains("Flying J"));
-        assert!(retired.normal.contains("confirmed truck parking"));
+        assert!(retired.normal.contains("Confirmed truck parking"));
     }
 
     #[test]

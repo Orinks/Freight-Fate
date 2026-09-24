@@ -409,6 +409,52 @@ fn operator_keys_parse_as_a_boolean_and_refuse_anything_else() {
 }
 
 #[test]
+fn lockstep_holds_the_world_between_calls_and_lets_a_wait_run() {
+    // The agent's thinking time is a round trip of a second or two; with
+    // lane keeping off that was the truck across half a lane before its
+    // answer to a cue landed (agent drive, 2026-09-23). Lockstep holds the
+    // world whenever no call is working, and a wait still runs its frames.
+    let script = [
+        call(1, "lockstep", r#"{"on":true}"#),
+        call(2, "wait", r#"{"seconds":0.1}"#),
+    ]
+    .join("\n");
+    let mut app = TestApp::new();
+    let (tx, server, mut agent) = wake(script);
+    let mut held = Vec::new();
+    app.run_with_player_input(Some(600), |input, _dt| {
+        let running = agent.step(input, FRAME);
+        held.push(input.world_is_held());
+        running
+    });
+    drop(tx);
+    let answered = results(&server.join().unwrap());
+    assert_eq!(answered.len(), 2, "both calls answered: {answered:?}");
+    assert!(held[0], "idle after switching on: the world waits");
+    let ran = held.iter().filter(|h| !**h).count();
+    assert!(
+        (5..=7).contains(&ran),
+        "a 0.1 s wait runs about six frames; ran {ran}"
+    );
+    assert!(held[held.len() - 1], "and the world waits again after it");
+}
+
+#[test]
+fn lockstep_parses_as_a_boolean_and_is_listed() {
+    let on = |args: &str| {
+        let args = serde_json::from_str(args).unwrap();
+        match build_command("lockstep", &args) {
+            Ok(Command::Lockstep { on }) => Ok(on),
+            Ok(_) => panic!("not a lockstep command"),
+            Err(text) => Err(text),
+        }
+    };
+    assert_eq!(on(r#"{"on":true}"#), Ok(true));
+    assert_eq!(on(r#"{"on":false}"#), Ok(false));
+    assert!(on(r#"{}"#).is_err());
+}
+
+#[test]
 fn pedal_and_wait_for_refuse_a_missing_duration() {
     let args = serde_json::from_str(r#"{"key":"up"}"#).unwrap();
     assert!(build_command("pedal", &args).is_err());
@@ -438,6 +484,7 @@ fn the_tool_list_carries_the_driving_tools() {
         "cruise",
         "status",
         "operator_keys",
+        "lockstep",
     ] {
         assert!(names.iter().any(|n| n == name), "{name} in {names:?}");
     }

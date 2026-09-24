@@ -1099,29 +1099,29 @@ fn test_cruise_target_can_be_adjusted_while_keeper_is_active() {
     assert_eq!(last(&harness), "Open-road cruise target 25 miles per hour.");
 }
 
-/// The posted-limit scan sees a drop further out under time compression:
-/// the working setpoint walks down in REAL seconds, so at twenty times the
-/// truck covers twenty times the road while cruise eases.
+/// The posted-limit scan sees a drop at the same distance at any pace. The
+/// truck and cruise's working setpoint both move on the game clock
+/// (2026-09-23), so the road cruise needs to ease is plain physics. It used
+/// to be stretched twenty times at standard to catch a setpoint that walked
+/// down in real seconds while the road passed on the compressed clock.
 #[test]
-fn test_cruise_sees_a_limit_drop_further_out_under_time_compression() {
-    // 70 posted, dropping to 30 three miles out.
-    let mut harness = bench_drive_with("Compressed Drop", &[(0.0, 70.0), (3.0, 30.0)], 0.0);
-    harness.with_drive(|d, _| {
-        d.truck_mut().transmission.gear = 10;
-        d.truck_mut().velocity_mps = 31.3; // ~70 mph
-    });
-    // Real time: three miles is well past the physics lookahead.
-    assert_eq!(
-        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
-        (70.0, None)
-    );
-    // Twenty times: the same drop is inside the window.
-    harness.app.ctx.settings.time_scale = 20.0;
-    harness.with_drive(|d, _| d.trip.time_scale = 20.0);
-    assert_eq!(
-        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
-        (30.0, None)
-    );
+fn test_cruise_sees_a_limit_drop_at_the_same_distance_at_any_pace() {
+    for (drop_mi, seen) in [(0.4, 30.0), (3.0, 70.0)] {
+        for pace in [1.0, 20.0] {
+            let mut harness = bench_drive_with("Paced Drop", &[(0.0, 70.0), (drop_mi, 30.0)], 0.0);
+            harness.app.ctx.settings.time_scale = pace;
+            harness.with_drive(|d, _| {
+                d.trip.time_scale = pace;
+                d.truck_mut().transmission.gear = 10;
+                d.truck_mut().velocity_mps = 31.3; // ~70 mph
+            });
+            assert_eq!(
+                harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)).0,
+                seen,
+                "a drop {drop_mi} miles out at {pace}x"
+            );
+        }
+    }
 }
 
 /// Once cruise has eased for a drop it keeps aiming at it. The scan's window
@@ -1132,7 +1132,7 @@ fn test_cruise_sees_a_limit_drop_further_out_under_time_compression() {
 /// 2026-09-02).
 #[test]
 fn test_cruise_keeps_aiming_at_a_limit_drop_once_it_has_eased_for_it() {
-    let mut harness = bench_drive_with("Held Drop", &[(0.0, 70.0), (3.0, 30.0)], 0.0);
+    let mut harness = bench_drive_with("Held Drop", &[(0.0, 70.0), (0.4, 30.0)], 0.0);
     harness.app.ctx.settings.time_scale = 20.0;
     harness.with_drive(|d, _| {
         d.trip.time_scale = 20.0;
@@ -1143,7 +1143,7 @@ fn test_cruise_keeps_aiming_at_a_limit_drop_once_it_has_eased_for_it() {
         harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
         (30.0, None)
     );
-    // Eased to 35: the braking window no longer reaches three miles out.
+    // Eased to 35: the braking window no longer reaches the drop.
     harness.with_drive(|d, _| d.truck_mut().velocity_mps = 15.6);
     assert_eq!(
         harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
@@ -1151,7 +1151,7 @@ fn test_cruise_keeps_aiming_at_a_limit_drop_once_it_has_eased_for_it() {
         "the drop is held, not rediscovered"
     );
     // Past the drop the hold is spent; the road under the wheels answers.
-    harness.with_drive(|d, _| d.trip.position_mi = 3.2);
+    harness.with_drive(|d, _| d.trip.position_mi = 0.6);
     assert_eq!(
         harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
         (30.0, None)

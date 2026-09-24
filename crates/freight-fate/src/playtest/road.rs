@@ -1367,6 +1367,24 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     let total = driving.trip.total_miles();
     let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
     driving.trip.position_mi = start_mi;
+    // The road behind the start is driven, not passed on the first frame:
+    // unset, the jump from mile 0 spoke every state line and toll on the way
+    // and played a trooper pass for every post (agent drives, 2026-09-23).
+    driving.trip.settle_road_behind();
+    driving.enforcement_prev_mi = start_mi;
+    // And a post wholly behind the start has nothing left to watch, so it is
+    // heard-and-passed without its marker: every one of them played at once.
+    // Not `announced` -- that stays "this post made a noise" -- and a post
+    // whose reach covers the start still sounds, since it can act.
+    let behind: Vec<String> = driving
+        .trip
+        .posts
+        .iter()
+        .filter(|post| post.at_mi + post.reach_mi < start_mi)
+        .map(|post| post.id())
+        .collect();
+    driving.marked_post_ids.extend(behind.iter().cloned());
+    driving.passed_post_ids.extend(behind);
     if let Some((kind, ahead_mi)) = &opts.unit {
         // Staffed and alert, but not yet announced: the marker cue still
         // has to play before it may look, the same contract every seeded

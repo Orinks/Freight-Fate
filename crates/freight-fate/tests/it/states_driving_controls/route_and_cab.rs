@@ -429,7 +429,11 @@ fn test_a_hand_held_key_still_stands_the_assists_down() {
     drive_frames(&mut d, &mut app, &clock, 2.0);
 
     assert!(d.cruise_mph.is_some()); // engaged, waiting for the key to lift
-    assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle); // the hand owns the pedal
+    // The hand owns the pedal: cruise, five over its number, wants it off,
+    // and the held key is still pressing it down. (How far down depends on
+    // the pace since the pedals met the game clock; that it is the hand's
+    // does not.)
+    assert!(d.trip.truck.throttle > 0.1, "{}", d.trip.truck.throttle);
 }
 
 #[test]
@@ -551,12 +555,14 @@ fn test_the_brake_latch_still_holds_hands_free() {
         audio.borrow().played
     );
 
-    // Hands off: the blended brake latch must keep the pedal down.
+    // Hands off: the blended brake latch must keep the pedal down -- still
+    // pressing, the way the held key it stands in for would, never easing.
+    let at_the_latch = d.trip.truck.brake;
     drive_frames(&mut d, &mut app, &clock, 1.0);
     assert!(d.brake_latch.latched);
     assert!(
-        d.trip.truck.brake > 0.5,
-        "latched brake did not stay applied: {}",
+        d.trip.truck.brake > at_the_latch,
+        "latched brake did not stay applied: {} after {at_the_latch}",
         d.trip.truck.brake
     );
 }
@@ -580,7 +586,8 @@ fn test_a_hand_held_key_stands_the_keeper_down() {
     drive_frames(&mut d, &mut app, &clock, 2.0);
 
     assert!(d.keeper_mph.is_some()); // engaged, waiting for the key to lift
-    assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle); // the hand owns the pedal
+    // The hand owns the pedal: the keeper, over its 25, wants it off.
+    assert!(d.trip.truck.throttle > 0.1, "{}", d.trip.truck.throttle);
 }
 
 // `test_rolling_t_plans_exact_sleep_stop_without_silently_selecting_exit`,

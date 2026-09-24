@@ -187,7 +187,7 @@ pub const RAMP_CONTROL_ANNOUNCE_MI: f64 = 0.38; // where the terminal callout fi
 
 // Game tuning, not a claim about any field signal plan. FHWA's planning-level
 // examples commonly begin at 60-second cycles; these four seeded profiles run
-// 60, 66, 72, or 78 real seconds so every terminal does not feel metronomic.
+// 62, 68, 74, or 80 real seconds so every terminal does not feel metronomic.
 // https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter3.htm
 pub const RAMP_LIGHT_RED_S: f64 = 30.0; // shortest profile; includes clearance below
 pub const RAMP_LIGHT_RED_STEP_S: f64 = 4.0;
@@ -202,8 +202,14 @@ pub const RAMP_LIGHT_PROFILE_COUNT: i64 = 4;
 // https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/part4.pdf#page=120
 pub const RAMP_LIGHT_RED_CLEARANCE_S: f64 = 7.0;
 // MUTCD 4F.17 recommends 3 to 6 seconds and says a timing plan's yellow must
-// not vary cycle by cycle. Four seconds remains fixed for every game profile.
-pub const RAMP_LIGHT_YELLOW_S: f64 = 4.0;
+// not vary cycle by cycle, so one figure serves every game profile. The ITE
+// kinematic interval, y = t + v / 2a, at a 35 mph ramp approach (51 ft/s)
+// with a loaded truck's 8 ft/s2 is 1 + 3.2 = 4.2 s -- but this driver learns
+// of the change by ear, and "Light yellow." takes about 1.5 s to say, so the
+// perception term is 2.5 s and the interval 5.7. Four seconds put the red on
+// the end of the spoken yellow (owner, exit 286A, 2026-09-23: "the light
+// transitions seem way too short"). Rounded to the MUTCD ceiling.
+pub const RAMP_LIGHT_YELLOW_S: f64 = 6.0;
 pub const RED_STOP_MPH: f64 = 3.0; // at or under this you have honored a red or a stop sign
                                    // The stop bar's continuous tone level (BAR_SOLID_VOLUME) is re-exported from
                                    // ff_core::sound_catalog by the prelude, so the road and the Learn game

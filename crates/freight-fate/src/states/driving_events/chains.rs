@@ -168,11 +168,14 @@ impl DrivingState {
                 let call = self.turn_approach_text(ctx, &corner, ahead);
                 first_corner = format!(" Then {}", lower_first(&call));
                 self.turn_advised.insert(corner.key.clone());
-                self.trip.controlled_turn = true;
+                self.pace_clock_for_turn(&corner, ahead);
                 // Spoken inside this line, so the corner counts as told;
                 // its earcon sounds when the truck actually turns, not here
                 // (see `resolve_turn`).
                 self.turn_announced.insert(corner.key.clone());
+                if ahead <= crate::states::driving_turns::TURN_NOW_MI {
+                    self.turn_called_now.insert(corner.key.clone());
+                }
             }
         }
         if announce {
@@ -194,6 +197,7 @@ impl DrivingState {
             let mut opts = SayEvent::queued().priority(EventPriority::Route);
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(message, opts);
+            self.mark_start_cue_said();
         }
         true
     }
@@ -283,8 +287,21 @@ impl DrivingState {
                 ),
                 opts,
             );
+            self.mark_start_cue_said();
         }
         true
+    }
+
+    /// The briefing names the street the chain starts on, so the route's own
+    /// start cue would say it a second time a moment later: "Start on 4th
+    /// Avenue Southeast." straight after "...onto city streets. Start on 4th
+    /// Avenue Southeast." (agent drives, Aberdeen and Abilene, 2026-09-23).
+    fn mark_start_cue_said(&mut self) {
+        for half in ["advance", "near"] {
+            self.trip
+                .announced_navigation
+                .insert(format!("local:start:{half}"));
+        }
     }
 
     /// End of the streets: up the on-ramp and onto the highway trip.
@@ -431,8 +448,15 @@ impl DrivingState {
                 ctx.settings.speed_text(speed),
                 ctx.settings.speed_text(limit)
             )
+        } else if self.lane_count_here() > 1 {
+            // Said as done, because it is: the truck is already in the
+            // mainline's right lane here. "Merge left" asked for a move the
+            // game had made, and a driver who obeyed it went on into the
+            // passing lane -- or, on a one-lane road, heard "No lane to your
+            // left here" (agent drives out of Aberdeen, 2026-09-23).
+            "Lane ended. In the right lane.".to_string()
         } else {
-            "Lane ending. Merge left.".to_string()
+            "Lane ended.".to_string()
         };
         ctx.audio.play_with("vehicle/signal_tone", 0.6, -0.6);
         let mut opts = SayEvent::queued().priority(EventPriority::Route);

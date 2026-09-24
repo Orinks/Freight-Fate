@@ -68,7 +68,15 @@ impl DrivingState {
         // seconds. Measured over fifty destinations: every plain facility
         // docked at a crawl, while street-chain facilities crossed their own
         // gate at up to 24.7 miles an hour with the brake on the floor.
-        self.trip.dock_run_in = self.surface_chain
+        //
+        // That was the old physics, speed changing on the real clock while
+        // the road passed on the compressed one. Now the truck brakes on the
+        // clock that moves it, so a chain needs real time only where a turn
+        // does: from the gate's brake point in. Pinned for all of it, five
+        // miles of Abilene streets took ten real minutes at 30 (owner,
+        // 2026-09-23: "Are we moving? Real-time is so slow at this speed").
+        // Its turns pace themselves (`pace_clock_for_turn`).
+        self.trip.dock_run_in = (self.surface_chain && self.at_the_gates_brake_point())
             || (self.ramp_mi.is_some()
                 && self
                     .ramp_stop

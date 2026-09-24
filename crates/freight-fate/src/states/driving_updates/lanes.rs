@@ -34,6 +34,7 @@ impl DrivingState {
             steer = ctx.controller.steering();
         }
         self.lane.steering = steer;
+        self.lane.straighten = ctx.bindings.pressed(&ctx.input, Action::Straighten);
         // The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane_before_narrow = Some(self.lane.lane);
         let count = if self.ramp_mi.is_some() {
@@ -376,10 +377,16 @@ impl DrivingState {
                         .category(SpeechCategory::Confirmation),
                 );
             }
-        } else if self.transition_assist_active {
+        } else if self.transition_assist_active && !self.ramp_terminal_owns_the_stop() {
             // ROUTE, not the ambient default: names the automation handing the
             // pedals back (automation-handoff sweep, 2026-08-20, the deferred
             // 2026-08-15 audit).
+            //
+            // Not while the terminal still has a stop to make. The cap lets go
+            // five under its number, but the terminal's servo is still braking
+            // for the bar, so "released" at 15 mph with the stop sign ahead was
+            // untrue (agent drive into Abilene, 2026-09-23). The terminal's own
+            // "Stopped at the sign" is the release there.
             ctx.say_event_with(
                 "Route-transition assistance released.",
                 SayEvent::queued()
