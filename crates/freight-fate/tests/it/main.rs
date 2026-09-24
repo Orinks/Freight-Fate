@@ -49,6 +49,7 @@ mod audio_speech_audio;
 mod audio_speech_ducking;
 mod badge_moments_career;
 mod badge_moments_places;
+mod badge_moments_road;
 mod badge_moments_runs;
 mod bench_drive;
 mod browser_guard;
