@@ -31,6 +31,8 @@
 
 - **Radio playlists can play tracker modules.** Music made in OpenMPT and similar trackers plays like any other file in your playlist.
 
+- **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
+
 ### Security
 
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.

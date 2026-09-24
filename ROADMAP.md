@@ -1239,9 +1239,17 @@ against.
 - [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
       out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
       reader that trusts the status stores that string as an elevation.
-- [ ] California stays dark until a route-to-district lookup exists. Caltrans
-      publishes lane closures per district with no key, but district 7 alone
-      is 17.6 MB against an 8-second feed budget.
+- [x] California reads Caltrans's Lane Closure System, fetching only the
+      districts a leg crosses. Counties come from the Census 1:20M outlines,
+      widened by their measured 3.24 mi error against the 1:500k file, and
+      map to districts through Caltrans's own county layer (Kern also gets
+      District 9, which files eastern Kern's closures). The CSV feed is the
+      size fix: District 7 is 2.2 MB and arrived in 4.5 to 5.0 seconds on
+      2026-09-24, where its 13.6 MB JSON took 11 to 16. Only mainline closures
+      in effect now are kept, and an incident closure open over a week is
+      dropped as stale: that day's feeds held a full closure of I-5 through
+      Los Angeles "under investigation" since June. No state's feed is
+      fetched twice at once any more.
 - [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
       Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
       feed, and EIA fuel prices. Not in the registry at all: Alabama,
