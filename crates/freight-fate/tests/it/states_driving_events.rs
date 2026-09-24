@@ -1430,14 +1430,12 @@ fn test_the_limit_lookahead_grows_with_the_speed_to_shed() {
     );
 }
 
-/// The road cruise needs to ease for a drop is the same at any pace: the
-/// truck and the working setpoint both move on the game clock (2026-09-23).
-/// It used to be stretched twenty times at standard, to catch a setpoint
-/// that walked down in real seconds while the road passed on the compressed
-/// clock. The scan's ceiling still opens with the pace, bounded by the
-/// spoken warning's own reach.
+/// The working setpoint walks down in REAL seconds, so under time
+/// compression the truck covers more road while cruise eases than the
+/// physics alone says (roadmap, "Adaptive cruise's own limit lookahead
+/// ignores time compression").
 #[test]
-fn test_the_limit_lookahead_is_the_same_at_any_pace() {
+fn test_the_limit_lookahead_opens_up_with_time_compression() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
     // At road speed, so the low-speed floor is not what the scale reads.
@@ -1448,10 +1446,8 @@ fn test_the_limit_lookahead_is_the_same_at_any_pace() {
     assert_eq!(d.acc_limit_lookahead_max_mi(), ACC_LIMIT_LOOKAHEAD_MAX_MI);
     d.trip.time_scale = 20.0;
     let compressed = d.acc_limit_lookahead_mi(70.0, 35.0);
-    assert!(
-        (compressed - real).abs() < 1e-9,
-        "{compressed} against {real}"
-    );
+    assert!(compressed > 3.0, "{compressed}");
+    assert!(compressed <= d.acc_limit_lookahead_max_mi());
     // The scan never reaches past the spoken warning's own ceiling.
     assert_eq!(d.acc_limit_lookahead_max_mi(), LIMIT_WARNING_MAX_LEAD_MI);
     // Nothing to shed: still the floor.

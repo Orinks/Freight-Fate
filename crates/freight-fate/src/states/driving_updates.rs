@@ -155,12 +155,6 @@ pub const SHIFT_DISENGAGE_DUCK: f64 = 0.65;
 // The gear taking at the end of an auto shift: a soft pick from the shift
 // bank, quieter than the interrupt clunk (0.65) that opened the shift.
 pub const SHIFT_END_CLUNK_VOLUME: f64 = 0.4;
-// ...but only for a shift heard long enough to BE two sounds. The truck
-// shifts on the game clock, so at a compressed pace a whole shift fits in a
-// frame or two and the pair landed as one doubled click -- a launch rattled
-// (agent drive, 2026-09-23). Just under the quickest shift at real time
-// (`SHIFT_TIME_LOW`, 0.25 s), so every shift at real pace keeps its pair.
-pub const SHIFT_CLUNK_PAIR_MIN_S: f64 = 0.2;
 // When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
 // this window. The curve (a key into audio_fades.CURVES) shapes the return: an
 // ease-out leaves the shift level quickly -- so the engine doesn't sit soft --

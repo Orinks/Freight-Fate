@@ -1259,19 +1259,14 @@ shipped.
       lean went quiet as soon as the settled point was centred, with heading
       still on, and the truck carried on across. `drift_speaks` now keeps
       it awake until the truck is also pointing down the road.
-- [x] **Truck physics on the clock that moves it** (merged to `dev`
-      2026-09-23 after two agent drives). `TruckState`
-      integrates motion, freight and brake heat on the game clock in
-      one-frame sub-steps, so a coast or a downhill covers the same road at
-      any pace. The pedals press at their old rate divided by the pace and
-      release on the real clock; cruise, the keeper and the curve servo run
-      their integrators on `motion_dt`, and the old multiply-by-the-pace
-      compensations in the servo, the keeper's ease and cruise's limit
-      lookahead are gone. A cruise pause for a bend under cruise's floor now
-      lifts at the bend's end, because a hands-off truck used to stall in
-      the tail.
-- [ ] **Controller triggers as a rate.** The pedal now slews toward the
-      trigger at the keys' travel rate; pad players have not tried it yet.
+- [ ] **Truck physics on the clock that moves it** (merged to `dev`
+      2026-09-23, reverted 2026-09-24). Integrating motion on the game
+      clock made the truck pull away at the pace's multiple in real time:
+      a loaded truck reached highway speed in a few real seconds, and the
+      gearbox, run in the same sub-steps, rattled through its gears. Motion
+      and shifting are back on the real clock with the old pace
+      compensations. The coast and downhill-energy problem flight reported
+      stands; fix it without changing how fast speed builds in real time.
 - [x] **Real time from the brake point, not from the corner call.** The
       call stays time-based; `controlled_turn` now goes on at
       `turn_brake_point_mi` (eight real seconds of reaction and settle plus
@@ -1279,9 +1274,7 @@ shipped.
       `Trip::turn_clock` slides the pace down over the three real seconds
       before it, the exit release run backwards. A 30 mph approach that
       crawled four real minutes from a two-mile call now runs real time for
-      its last fifth of a mile. The agent drive that found it also found the
-      automatic hunting on the new clock (the torque interruption was still
-      real time); the gearbox timers now run in the motion sub-steps.
+      its last fifth of a mile.
 - [x] **A straighten-up key.** Slash, held, applies only the heading half
       of partial lane keeping's steering law (`LaneKeeping::straighten`), so
       the truck points down the road and keeps its place in the lane. A

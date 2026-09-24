@@ -299,18 +299,7 @@ impl DrivingState {
             // this used to be a disarm. Past it, the resume below re-engages
             // at the remembered target and says so, exactly as after a
             // hazard.
-            //
-            // Out of the bend but under cruise's floor, the pause lifts at the
-            // bend's end instead of the tail's. What comes back there is the
-            // keeper's gentle build, never cruise winding up, so the tail
-            // guards nothing -- and a truck left to coast it comes to rest in
-            // about that distance now that coasting runs on the game clock,
-            // stranded under a line that promised cruise would come back
-            // (2026-09-23).
-            let out_of_the_bend = self.trip.position_mi
-                > after_mi - crate::states::driving_turns::TURN_COMMIT_TAIL_MI
-                && self.trip.truck.speed_mph() < CRUISE_MIN_MPH;
-            if self.trip.position_mi <= after_mi && !out_of_the_bend {
+            if self.trip.position_mi <= after_mi {
                 return;
             }
             self.cruise_resume_after_mi = None;
@@ -565,10 +554,10 @@ impl DrivingState {
     /// `_keeper_ease_mi(target_mph, scale)`: how much road the keeper needs to
     /// be down to `target_mph` in time.
     ///
-    /// The reaction budget is sized in real seconds and converted to miles at
-    /// `scale`, so time compression cannot spend the window before the driver
-    /// has heard it. The physical shed is the floor, in plain game-clock
-    /// miles: a big drop buys more road however relaxed the clock is. A settling tail on top puts the truck at the
+    /// Sized in real seconds and converted to miles at `scale`, so time
+    /// compression cannot spend the window before the truck can use it. The
+    /// physical shed time is the floor: a big drop buys more road however
+    /// relaxed the clock is. A settling tail on top puts the truck at the
     /// number ahead of the point rather than exactly on it.
     ///
     /// Where the shed is what the window is for, its seconds are priced at the
@@ -584,33 +573,10 @@ impl DrivingState {
     /// The reaction budget underneath is untouched, and stays priced at today's
     /// speed: those seconds are spent hearing and deciding, before any slowing
     /// starts, so that is the road they really cost.
-    /// `dt` on the clock the truck moves on (see `TruckState::update`).
-    ///
-    /// What an automation's integrators and rate limits run on, so cruise,
-    /// the keeper and the servos drive the truck the same at any pace. Their
-    /// speech cooldowns and confirm timers stay on `dt`: those are for the
-    /// driver, who lives on the real clock.
-    pub fn motion_dt(&self, dt: f64) -> f64 {
-        dt * self.trip.truck.fuel_burn_mult
-    }
-
     pub fn keeper_ease_mi(&self, target_mph: f64, scale: f64) -> f64 {
         let speed = self.trip.truck.speed_mph().max(1.0);
-        let target = 1.0f64.max(target_mph.min(speed));
         let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed * scale / 3600.0;
-        // Net of the surge, for the reason the facility arrival is: a tank
-        // the liquid can move in gives some of the rate back at the worst
-        // moment, so the ease has to start further out to make the number.
-        let decel = (KEEPER_EASE_DECEL_MPS2 - self.trip.truck.surge_decel_penalty_mps2())
-            .max(MIN_STOPPING_DECEL_MPS2);
-        let shed_s = (speed - target) / MPH_PER_MPS / decel;
-        // The mean of the two ends through the shed, then the settling tail
-        // down at the new number, because that is where the truck spends it.
-        // Game seconds, unscaled: the truck sheds on the clock the road
-        // passes on (see `TruckState::update`), so the shed is plain physics.
-        // Only the reaction budget above is spoken time, and keeps the pace.
-        let mut shed_mi = shed_s * (speed + target) / 2.0 / 3600.0;
-        shed_mi += KEEPER_SETTLE_REAL_S * target / 3600.0;
+        let shed_mi = self.keeper_shed_mi(target_mph, scale);
         // The cap trims the discretionary reaction budget, never the physical
         // shed -- the docstring above promises the shed is a floor, and the old
         // min() clipped it anyway: on long-route draws the ramped time scale
@@ -620,6 +586,23 @@ impl DrivingState {
         // quietly overshooting posted drops on high-compression trips, not a
         // test artifact).
         shed_mi.max(KEEPER_EASE_MAX_MI.min(reaction_mi.max(shed_mi)))
+    }
+
+    /// The physical half of `keeper_ease_mi`: the road the keeper's shed
+    /// down to `target_mph`, and its settling tail, cover at `scale`.
+    pub fn keeper_shed_mi(&self, target_mph: f64, scale: f64) -> f64 {
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let target = 1.0f64.max(target_mph.min(speed));
+        // Net of the surge, for the reason the facility arrival is: a tank
+        // the liquid can move in gives some of the rate back at the worst
+        // moment, so the ease has to start further out to make the number.
+        let decel = (KEEPER_EASE_DECEL_MPS2 - self.trip.truck.surge_decel_penalty_mps2())
+            .max(MIN_STOPPING_DECEL_MPS2);
+        let shed_s = (speed - target) / MPH_PER_MPS / decel;
+        // The mean of the two ends through the shed, then the settling tail
+        // down at the new number, because that is where the truck spends it.
+        let shed_mi = shed_s * (speed + target) / 2.0 * scale / 3600.0;
+        shed_mi + KEEPER_SETTLE_REAL_S * target * scale / 3600.0
     }
 
     /// `_keeper_turn_ease_scale()`: the clock the keeper will actually ease a

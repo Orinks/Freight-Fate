@@ -1923,3 +1923,55 @@ fn test_a_stronger_engine_rev_matches_faster() {
         base.rpm
     );
 }
+
+/// Floor a loaded automatic from rest on the flat at time compression `pace`
+/// until it reaches `to_mph`. Returns (real seconds, upshifts, downshifts).
+fn loaded_launch(pace: f64, to_mph: f64) -> (f64, u32, u32) {
+    let mut truck = TruckState {
+        fuel_burn_mult: pace,
+        cargo_kg: 18_000.0,
+        ..Default::default()
+    };
+    truck.transmission.automatic = true;
+    truck.set_air_ready(false);
+    truck.start_engine();
+    truck.throttle = 1.0;
+    let (mut real_s, mut up, mut down) = (0.0, 0, 0);
+    while truck.speed_mph() < to_mph {
+        assert!(real_s < 600.0, "{pace}x never reached {to_mph} mph");
+        let before = truck.transmission.gear;
+        if let Some(gear) = truck.auto_shift() {
+            if gear > before {
+                up += 1;
+            } else if gear < before {
+                down += 1;
+            }
+        }
+        truck.update(DT);
+        real_s += DT;
+    }
+    (real_s, up, down)
+}
+
+#[test]
+fn test_a_loaded_truck_builds_speed_in_real_seconds_at_every_pace() {
+    // Speed builds on the real clock whatever the pace: a loaded tractor
+    // takes most of a minute to reach 50, and the box shifts through its
+    // gears once each. On the game clock it reached 50 in a few real seconds
+    // at standard pace and rattled through the gears.
+    let (real_s, real_up, real_down) = loaded_launch(1.0, 50.0);
+    assert!(real_s > 30.0, "a loaded truck reached 50 in {real_s:.1} s");
+    assert_eq!(real_down, 0, "the real-time launch must not hunt");
+    for pace in [4.0, 14.0, 20.0] {
+        let (s, up, down) = loaded_launch(pace, 50.0);
+        assert!(
+            (s - real_s).abs() < 0.5,
+            "{pace}x reached 50 in {s:.1} real s where real time takes {real_s:.1}"
+        );
+        assert_eq!(
+            (up, down),
+            (real_up, real_down),
+            "{pace}x shifted differently"
+        );
+    }
+}

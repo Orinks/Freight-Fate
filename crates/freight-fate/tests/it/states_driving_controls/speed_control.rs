@@ -264,10 +264,12 @@ fn test_speed_keeper_ease_window_follows_the_driving_mode() {
     assert!(d.keeper_ease_mi(20.0, 10.0) > d.keeper_ease_mi(20.0, 4.0));
     assert!(d.keeper_ease_mi(20.0, 4.0) > d.keeper_ease_mi(20.0, 1.0));
     // The ceiling trims the discretionary reaction budget so a long access
-    // road is not crawled. The PHYSICAL shed is plain game-clock miles now
-    // that the truck moves on that clock (2026-09-23), so the pace no longer
-    // stretches it past the cap: at 40x the 25-to-20 window is the ceiling.
-    assert!((d.keeper_ease_mi(20.0, 40.0) - KEEPER_EASE_MAX_MI).abs() < 1e-9);
+    // road is not crawled -- but never the PHYSICAL shed, which the window's
+    // docstring promises is a floor. At 40x the 25-to-20 shed alone outruns
+    // the cap, so the window follows the physics (clamping it was how the
+    // keeper arrived at 15.47 over a 15 sign on long-route draws -- the
+    // one-in-four flake, fixed 2026-08-20).
+    assert!(d.keeper_ease_mi(20.0, 40.0) > KEEPER_EASE_MAX_MI);
     // The cap still binds where reaction, not physics, is the bigger ask: a
     // one-mph trim at 30x wants little shed road, and the six-plus seconds of
     // hearing-and-deciding it would otherwise buy are what the ceiling exists

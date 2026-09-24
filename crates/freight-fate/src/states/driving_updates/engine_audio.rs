@@ -15,8 +15,8 @@ use crate::states::driving_updates::{
     shift_recovery_curve, AIR_FILL_REARM_PSI, AIR_FILL_VOLUME, AUTO_JAKE_OVER_MPH,
     AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S,
     JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX, JAKE_RATE_MIN, JAKE_STAGE_GAIN,
-    JAKE_VOICE_NATIVE_RPM, SHIFT_CLUNK_PAIR_MIN_S, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME,
-    SHIFT_LOAD_CAP, SHIFT_LOAD_RECOVERY_S,
+    JAKE_VOICE_NATIVE_RPM, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
+    SHIFT_LOAD_RECOVERY_S,
 };
 
 impl DrivingState {
@@ -206,10 +206,6 @@ impl DrivingState {
             cap = SHIFT_LOAD_CAP;
             duck = SHIFT_DISENGAGE_DUCK;
             if automatic {
-                if self.shift_hold_rpm.is_none() {
-                    self.shift_heard_s = 0.0;
-                }
-                self.shift_heard_s += dt.max(0.0);
                 // Marker only: an auto shift is in flight. The voice follows
                 // the live physics rpm, which already sighs down toward the
                 // new gear's road speed through the interrupt (vehicle
@@ -232,14 +228,12 @@ impl DrivingState {
                 // Engagement: the gear takes. The interrupt's clunk played a
                 // second ago at shift START, so without this the actual
                 // moment the truck picks the load back up was silent.
-                if self.shift_heard_s >= SHIFT_CLUNK_PAIR_MIN_S {
-                    ctx.audio.play_bank_with(
-                        "vehicle/shift_auto",
-                        "vehicle/gear_shift",
-                        SHIFT_END_CLUNK_VOLUME,
-                        0.0,
-                    );
-                }
+                ctx.audio.play_bank_with(
+                    "vehicle/shift_auto",
+                    "vehicle/gear_shift",
+                    SHIFT_END_CLUNK_VOLUME,
+                    0.0,
+                );
                 self.shift_hold_rpm = None;
             }
         } else {

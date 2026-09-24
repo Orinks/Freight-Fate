@@ -431,13 +431,8 @@ fn the_readout_and_the_descent_control_agree_about_the_road() {
                     "{pct}% {level}: warned while the readout says it is held: {g} | {}",
                     at.line()
                 );
-                // Not slowing -- gaining, or steady far over the hold. Since
-                // the truck met the game clock (2026-09-23) a faded-brake
-                // grade reaches terminal speed inside the sweep, and a runaway
-                // there stops gaining at 46 over its hold: the warning is
-                // true, the truck is simply not accelerating any more.
                 assert!(
-                    at.accel_mph_s > -GRADE_HOLDING_MPH_PER_S,
+                    at.accel_mph_s > GRADE_HOLDING_MPH_PER_S,
                     "{pct}% {level}: warned while the truck was slowing: {}",
                     at.line()
                 );

@@ -561,8 +561,7 @@ impl DrivingState {
             // above its own target waiting for the drums.
             hold *= 0.0f64.max(1.0 + error / KEEPER_SNUB_OVER_MPH);
         }
-        let trim = (self.keeper_throttle + error * 0.1 * self.motion_dt(dt))
-            .clamp(0.0, KEEPER_MAX_THROTTLE);
+        let trim = (self.keeper_throttle + error * 0.1 * dt).clamp(0.0, KEEPER_MAX_THROTTLE);
         // A restricted zone is a steady-speed job and keeps the keeper's
         // gentle trim. An acceleration lane is time-limited pavement: while
         // materially below its target, use the whole real drivetrain so the
