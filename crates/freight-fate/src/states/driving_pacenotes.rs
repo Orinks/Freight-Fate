@@ -105,9 +105,12 @@ impl DrivingState {
         // on, so they are what terse keeps; the distance goes, because the
         // call only fires inside the lookahead anyway.
         let mut terse = self.pacenote_phrase(curve);
-        if speed_mph > curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH {
-            call += &format!(" Advise {}.", s.speed_text(curve.advisory_mph as f64));
-            terse += &format!(", {}", s.speed_text(curve.advisory_mph as f64));
+        // The number this load can take the bend at, which is the sign's
+        // except where the sign asks more than the load gives (`driving_rollover`).
+        let advisory = self.spoken_advisory_mph(curve);
+        if speed_mph > advisory as f64 + PACENOTE_MARGIN_MPH {
+            call += &format!(" Advise {}.", s.speed_text(advisory as f64));
+            terse += &format!(", {}", s.speed_text(advisory as f64));
         }
         if let Some(linked) = self.pacenote_linked(curve) {
             // The tail is the follower's ONLY call (the trip suppresses its
@@ -117,8 +120,9 @@ impl DrivingState {
             if matches!(linked.severity(), "hairpin" | "sharp") {
                 tail = format!("{} {tail}", linked.severity());
             }
-            if linked.advisory_mph < curve.advisory_mph {
-                tail += &format!(", advise {}", s.speed_text(linked.advisory_mph as f64));
+            let linked_advisory = self.spoken_advisory_mph(&linked);
+            if linked_advisory < advisory {
+                tail += &format!(", advise {}", s.speed_text(linked_advisory as f64));
             }
             call += &format!(" Then {tail}.");
             terse += &format!(", then {}", direction_word(linked.direction));

@@ -469,8 +469,13 @@ impl DrivingState {
         // 31 percent across two bends before anyone knew (agent drive,
         // 2026-09-01, the owner's own settings).
         let announce = ctx.settings.curve_callouts;
-        let advisory = event.data.advisory_mph.unwrap_or(0.0);
         let curve = event.data.curve;
+        // The number spoken for this load, as the pacenote speaks it.
+        let advisory = curve
+            .as_ref()
+            .map_or(event.data.advisory_mph.unwrap_or(0.0), |c| {
+                self.spoken_advisory_mph(c) as f64
+            });
         let ahead = event.data.ahead_mi.unwrap_or(0.0);
         let speed = self.trip.truck.speed_mph();
         let message = match curve.as_ref() {

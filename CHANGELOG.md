@@ -49,6 +49,12 @@
 
 - **Curve and exit speed assistance slow below the sign when your load needs it.** A heavy load or part-filled tank takes some curves slower.
 
+- **A bend is never called faster than your load can take it.** Where the sign asks too much of a heavy load or part-filled tank, you hear a lower number.
+
+- **Partial lane keeping now steers the truck through bends.** Lane changes and speed stay yours; with lane keeping off, bends are still yours to steer.
+
+- **A rollover goes on your driving record as a crash.** It counts against your safety record and reputation like a serious violation.
+
 - **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
 
 - **A driver's public profile counts their out-of-service orders.** The safety record row names how many, never why.

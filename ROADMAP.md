@@ -1410,8 +1410,9 @@ mainline behaviour.
       the static rollover threshold of the load aboard (0.35 g full, 0.70 g
       empty; a ramp curve credited the 6 percent roads are built to, its
       radius having been derived at 8). The ladder is shares of that
-      threshold: from 0.857 (what a posted advisory asks of a full trailer,
-      derived) the freight shifts, replacing the flat 0.40 g that sat past
+      threshold: from 0.857 (0.30 g, the most any advisory is established
+      at per FHWA-SA-11-22 3.7, over a full trailer's 0.35) the freight
+      shifts, replacing the flat 0.40 g that sat past
       where a full trailer rolls; at 1.0 the truck goes over, the load is
       scrap, and `recover_out_of_service` runs as for any truck that may not
       be driven. The too-fast warning names the speed that costs nothing,
@@ -1422,19 +1423,37 @@ mainline behaviour.
       Also fixed from the same agent drive: leaving the pavement was free
       with the lane-departure warning off, and the ramp curve's engine lean
       went silent with it (the curve is a turn now, like a mapped bend).
-- [ ] **Partial or no lane keeping without curve assistance cannot hold a
-      bend at its sign.** The steering cap (`MAX_STEER_LATERAL_G`, 0.2 g)
-      binds the lane keeping's own correction as well as the driver's key,
-      and only curve assistance supplies the wheel the road asks for, so a
-      bend posted 0.30 g plus bank runs wide at its advisory in those modes.
-      The too-fast warning now says so ("Slow to 37" on a 45 bend); whether
-      partial lane keeping should supply the road's wheel too is the owner's
-      call.
-- [ ] **A rollover leaves nothing on the driving record.** It runs the
-      out-of-service path, the preventable-damage charge and, for a company
-      driver, the equipment event; a crash with no citation behind it is not
-      a record entry today, and whether a rollover should be is a design
-      ruling.
+- [x] **Partial lane keeping steers through the road's bends** (owner
+      ruling, 2026-09-24). The steering cap (`MAX_STEER_LATERAL_G`, 0.2 g)
+      bound lane keeping's own correction as well as the driver's key, so
+      with curve assistance off a bend ran wide at its own advisory under
+      partial lane keeping. Partial now supplies the road's wheel the way
+      curve assistance does (`Settings::road_steers_the_bend`); lane changes
+      and speed stay the driver's, and lane keeping off stays manual.
+- [x] **A rollover goes on the driving record as a crash** (owner ruling,
+      2026-09-24). 49 CFR 390.15's accident register lists every accident,
+      and 390.5 counts a vehicle towed away; `DrivingRecord::crashes` and
+      `crash_times` (nested in `driving_record`, so the cloud validator
+      accepts it with no invariants regen) weigh on reputation and the
+      safety record as a serious event does, and age out on the same
+      window. The Citations and violations list names it "Crash".
+- [ ] **orinks.net: the public crash count.** The site does not publish or
+      validate it yet: the snapshot needs `crashes` from
+      `driving_record.crashes`, the profile page a "N crash(es)" row beside
+      the out-of-service orders, and the validator `crash_times` checked
+      against the career clock like `out_of_service_times`. The in-game
+      driver profile already reads `crashes` when the site sends it.
+- [ ] **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
+      every advisory at 0.30 g plus bank, so a full trailer at the number the
+      cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
+      2C.59's ball-bank criteria read as 0.26 / 0.21 / 0.18 g
+      (FHWA-SA-11-22) and leave it 14 and 20. Repricing that way (stacked
+      branch `feat/mutcd-advisories`) calls an interstate slowdown every 38
+      miles against the owner's floor of 100 (2026-08-23): the bake's
+      minimum radii read low on flat interstates (I-94 Billings to Miles
+      City, 1,323 ft, posted 65 in an 80). It needs the radius re-measured,
+      or calibrated against OSM `maxspeed:advisory` or HPMS curve class,
+      before it can ship.
 - [x] **Every assist follows the exit rules.** One matrix
       (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
       by seven ramp kinds, from two miles out to the stop or the gate) found

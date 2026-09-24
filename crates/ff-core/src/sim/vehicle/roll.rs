@@ -36,22 +36,29 @@
 //! **The ladder** is shares of that threshold, so it follows the load:
 //!
 //! - below [`ROLL_WARN_SHARE`], nothing: the bend asks no more of this load
-//!   than a posted advisory asks of a full one;
+//!   than the most any advisory is ever set at would ask of a full one;
 //! - from there, the freight works against its straps (`update_cargo`) and
 //!   the driver is warned;
 //! - at the threshold itself, the truck goes over.
+//!
+//! **The margin over the number the cab speaks** is pinned per load in
+//! `tests::the_margin_over_the_spoken_advisory`. The game's signs are priced
+//! at 0.30 g plus bank (`data::curves::ADVISORY_LATERAL_G`), so a full trailer
+//! at its advisory sits at this warning share and goes over a few miles an
+//! hour past it; the cab never speaks a number above the load's own safe
+//! speed (the game layer's `spoken_advisory_mph`).
 
 use super::{TruckState, G, MPS_TO_MPH, M_PER_FT};
 use crate::data::corners::{rollover_threshold_g, TRUCK_ROLLOVER_G};
-use crate::data::curves::ADVISORY_LATERAL_G;
+use crate::data::curves::ADVISORY_ACCEPTABLE_MAX_G;
 
 /// The share of its rollover threshold a bend may ask of the load before it
-/// costs anything. DERIVED: the curve bake prices an advisory at 0.30 g in the
-/// truck's own frame (`ADVISORY_LATERAL_G`, bank credited on top) for a full
-/// trailer whose threshold is 0.35 g, so a posted advisory is built to ask
-/// 0.857 of a full load's threshold. The same share of any other load's
-/// threshold is what that advisory would have asked of it.
-pub const ROLL_WARN_SHARE: f64 = ADVISORY_LATERAL_G / TRUCK_ROLLOVER_G;
+/// costs anything. DERIVED from two readings: 0.30 g is the most lateral any
+/// advisory is established at (FHWA-SA-11-22 3.7), and 0.35 g is where a full
+/// trailer goes over, so a full load starts to pay exactly where it is being
+/// taken faster than any sign would ever have posted. The same share of any
+/// other load's threshold is that point for it.
+pub const ROLL_WARN_SHARE: f64 = ADVISORY_ACCEPTABLE_MAX_G / TRUCK_ROLLOVER_G;
 
 impl TruckState {
     /// The static rollover threshold of the load aboard, in g: a steady bend.
@@ -239,6 +246,52 @@ mod tests {
             (full_entry - 36.2).abs() <= 0.3,
             "full entered at {full_entry:.1}"
         );
+    }
+
+    /// How far over the number the cab speaks each load goes over, in mph, on
+    /// a bend whose sign is priced the way the game prices it (0.30 g plus
+    /// bank). The spoken number is the sign's, or the load's own safe speed
+    /// where that is lower (the cab rounds that down to a 5 mph step, so the
+    /// real margin is at least this). Recorded so a change to the pricing or
+    /// the ladder is deliberate; these are the "few mph" of the lead's check
+    /// (2026-09-24).
+    #[test]
+    fn the_margin_over_the_spoken_advisory() {
+        use crate::data::curves::ADVISORY_LATERAL_G;
+        let speed =
+            |lateral: f64, radius_ft: f64| (lateral * G * radius_ft * M_PER_FT).sqrt() * MPS_TO_MPH;
+        let over = |t: &TruckState, advisory: f64, bank: f64| {
+            let radius_ft = advisory * advisory / (15.0 * (ADVISORY_LATERAL_G + bank));
+            let threshold = t.planning_roll_threshold_g();
+            let spoken = advisory.min(speed(ROLL_WARN_SHARE * threshold + bank, radius_ft));
+            speed(threshold + bank, radius_ft) - spoken
+        };
+        let loads = [
+            ("empty", truck(0.0)),
+            ("half load", truck(0.5)),
+            ("full trailer", truck(1.0)),
+            ("tank half full", tanker(0.5)),
+            ("tank nearly full", tanker(0.97)),
+        ];
+        // (advisory, bank, [roll margin per load]): low-speed bends are on
+        // unbanked roads, and 35 and up carry the 6 percent roads are built to.
+        let pinned: [(f64, f64, [f64; 5]); 4] = [
+            (15.0, 0.0, [7.9, 4.8, 1.2, 1.2, 1.2]),
+            (25.0, 0.0, [13.1, 8.0, 2.0, 1.9, 2.0]),
+            (45.0, 0.06, [20.3, 12.3, 3.0, 2.9, 3.0]),
+            (65.0, 0.06, [29.3, 17.8, 4.4, 4.2, 4.3]),
+        ];
+        for (advisory, bank, rolls) in pinned {
+            for ((name, t), want) in loads.iter().zip(rolls) {
+                let roll = over(t, advisory, bank);
+                assert!(roll > 0.0, "{name} goes over at the spoken {advisory}");
+                assert!(
+                    (roll - want).abs() <= 0.2,
+                    "{name} at a {advisory} sign rolls {roll:.1} over the spoken number, \
+                     pinned {want}"
+                );
+            }
+        }
     }
 
     #[test]

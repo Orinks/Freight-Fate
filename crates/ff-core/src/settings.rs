@@ -690,6 +690,16 @@ impl Settings {
         !self.lane_is_automated()
     }
 
+    /// Whether something supplies the wheel a bend asks for, so the truck
+    /// follows the road's curve without the driver steering it: curve
+    /// assistance, or partial lane keeping, which steers through the road's
+    /// curve the same way while lane changes and speed stay the driver's
+    /// (owner ruling, 2026-09-24). Lane keeping off leaves the bend to the
+    /// driver's own wheel; full holds the lane outright.
+    pub fn road_steers_the_bend(&self) -> bool {
+        self.curve_speed_assist || self.lane_keeping == "partial"
+    }
+
     /// The spoken value with the clause that says what it costs you.
     pub fn lane_keeping_label(&self) -> &'static str {
         lane_keeping_label_for(&self.lane_keeping).unwrap_or_else(|| {

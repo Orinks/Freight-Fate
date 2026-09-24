@@ -23,15 +23,19 @@
 //! operator, a grounded tractor and a yard spare for a company driver. The
 //! receiver refuses the load at the dock, as it refuses any load in that state.
 
-use ff_core::data::curves::{min_radius_ft, superelevation_at, RouteCurve, SUPERELEVATION_BUILT};
+use ff_core::data::curves::{
+    bend_bank, min_radius_ft, superelevation_at, RouteCurve, SUPERELEVATION_BUILT,
+};
 use ff_core::models::cargo_condition::{cargo_condition_text, CARGO_REJECT_PCT};
+use ff_core::models::enforcement::RECORD_CRASH;
 use ff_core::sim::lane::{MAX_CREDITED_BANK, MAX_ROAD_LATERAL_G, MAX_STEER_LATERAL_G};
-use ff_core::sim::vehicle::{BrakeApplication, G, MPS_TO_MPH, M_PER_FT};
+use ff_core::sim::vehicle::{BrakeApplication, G, MPS_TO_MPH, M_PER_FT, ROLL_WARN_SHARE};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_rest_states::record_hours;
 
 /// Seconds between a warning and the brakes going on. READ: the brake
 /// reaction time the Green Book's stopping sight distance is built on (AASHTO
@@ -60,13 +64,74 @@ struct CurveInPlay {
 }
 
 impl DrivingState {
-    /// The bank a mapped bend is built with: the same `superelevation_at` the
-    /// advisory was priced with and the lane model credits.
+    /// The bank the roll model credits a mapped bend: the same bank its
+    /// advisory was posted with (`curves::bend_bank`, none on roads designed
+    /// under 50 mph).
     pub fn bend_bank(&self, bend: &RouteCurve) -> f64 {
+        bend_bank(
+            (bend.min_radius_ft as f64).max(1.0),
+            Some(self.trip.leg_design_speed_mph()),
+        )
+    }
+
+    /// The bank the lane model credits a mapped bend (`update_lane`).
+    fn lane_bank(&self, bend: &RouteCurve) -> f64 {
         superelevation_at(
             (bend.min_radius_ft as f64).max(1.0),
             self.trip.leg_design_speed_mph(),
         )
+    }
+
+    /// The advisory the cab speaks for a bend: the sign's, or the load's own
+    /// number where the sign asks more than the load aboard takes without
+    /// cost -- a sign the bake rounded up, a part-filled tank, a bend too
+    /// tight for the lowest plaque. Never a number the truck cannot hold.
+    pub fn spoken_advisory_mph(&self, curve: &RouteCurve) -> i64 {
+        if curve.min_radius_ft <= 0 {
+            return curve.advisory_mph;
+        }
+        self.load_holds_mph(
+            curve.advisory_mph,
+            curve.min_radius_ft as f64,
+            self.bend_bank(curve),
+        )
+    }
+
+    /// The exit speed the cab speaks, by the same rule as
+    /// [`Self::spoken_advisory_mph`] for the ramp curve it governs.
+    pub fn spoken_exit_mph(&self, exit_mph: f64) -> f64 {
+        let posted = exit_mph.round() as i64;
+        let held = self.load_holds_mph(
+            posted,
+            min_radius_ft(exit_mph).max(1.0),
+            SUPERELEVATION_BUILT,
+        );
+        if held < posted {
+            held as f64
+        } else {
+            exit_mph
+        }
+    }
+
+    /// `posted`, or the fastest multiple of 5 below it this load takes a
+    /// curve of `radius_ft` built with `bank` at without cost.
+    ///
+    /// Judged in the sign's own formula, the manual's `V^2 / 15R - e`, so a
+    /// sign priced exactly at the warning share is kept rather than lost to
+    /// the 15's rounding of g; and in 5 mph steps, because an advisory plaque
+    /// "shall be a multiple of 5 mph" (MUTCD 11th ed. 2C.59, read). Floored at
+    /// 5: a bend no plaque holds is still called with the slowest number.
+    fn load_holds_mph(&self, posted: i64, radius_ft: f64, bank: f64) -> i64 {
+        let takes = ROLL_WARN_SHARE * self.trip.truck.planning_roll_threshold_g();
+        let asks = |mph: i64| (mph * mph) as f64 / (15.0 * radius_ft.max(1.0)) - bank.max(0.0);
+        if asks(posted) <= takes + 1e-9 {
+            return posted;
+        }
+        let mut mph = (posted - 1) / 5 * 5;
+        while mph > 5 && asks(mph) > takes + 1e-9 {
+            mph -= 5;
+        }
+        mph.max(5)
     }
 
     /// The ramp curve's radius and the bank the roll model credits it.
@@ -91,9 +156,9 @@ impl DrivingState {
     ///
     /// That second speed is the lane model's own ceiling, read rather than
     /// restated: the tires' `MAX_ROAD_LATERAL_G` plus the credited bank when
-    /// curve assistance supplies the wheel the curve wants, and the steering
-    /// cap `MAX_STEER_LATERAL_G` when only the driver and lane keeping's
-    /// correction steer; both scaled by grip (`LaneKeeping::update`).
+    /// curve assistance or partial lane keeping supplies the wheel the curve
+    /// wants, and the steering cap `MAX_STEER_LATERAL_G` when only the driver
+    /// steers; both scaled by grip (`LaneKeeping::update`).
     pub fn curve_safe_mph(
         &self,
         ctx: &GameContext,
@@ -108,7 +173,7 @@ impl DrivingState {
         }
         let grip = truck.effective_grip().clamp(0.0, 1.0);
         let road_g = MAX_ROAD_LATERAL_G + lane_bank.clamp(0.0, MAX_CREDITED_BANK);
-        let steer_g = if ctx.settings.curve_speed_assist {
+        let steer_g = if ctx.settings.road_steers_the_bend() {
             road_g
         } else {
             MAX_STEER_LATERAL_G.min(road_g)
@@ -120,8 +185,12 @@ impl DrivingState {
 
     /// [`Self::curve_safe_mph`] for a mapped bend.
     pub fn bend_safe_mph(&self, ctx: &GameContext, bend: &RouteCurve) -> f64 {
-        let bank = self.bend_bank(bend);
-        self.curve_safe_mph(ctx, bend.min_radius_ft as f64, bank, bank)
+        self.curve_safe_mph(
+            ctx,
+            bend.min_radius_ft as f64,
+            self.bend_bank(bend),
+            self.lane_bank(bend),
+        )
     }
 
     /// [`Self::curve_safe_mph`] for the ramp curve, or None off a laid-out
@@ -190,13 +259,12 @@ impl DrivingState {
                 (ahead, bend)
             }
         };
-        let bank = self.bend_bank(&bend);
         Some(CurveInPlay {
             id: bend.start_mi,
             ahead_mi,
             radius_ft: bend.min_radius_ft as f64,
-            roll_bank: bank,
-            lane_bank: bank,
+            roll_bank: self.bend_bank(&bend),
+            lane_bank: self.lane_bank(&bend),
             phrase: self.pacenote_phrase(&bend),
         })
     }
@@ -258,12 +326,23 @@ impl DrivingState {
         let liquid = self.trip.truck.liquid.is_some();
         let words = cargo_condition_text(self.trip.truck.cargo_damage_pct, liquid);
         let place = if on_ramp { "ramp curve" } else { "bend" };
+        let recorded = self.record_crash(ctx, place);
         let message = if self.terse_speech(ctx) {
-            format!("Rolled over in the {place}. Load {words}.")
+            let record = if recorded {
+                " A crash on your record."
+            } else {
+                ""
+            };
+            format!("Rolled over in the {place}. Load {words}.{record}")
         } else {
+            let record = if recorded {
+                " It goes on your driving record as a crash."
+            } else {
+                ""
+            };
             format!(
                 "The truck rolled over in the {place}. The load is {words}, and the receiver \
-                 will refuse it."
+                 will refuse it.{record}"
             )
         };
         ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
@@ -273,5 +352,31 @@ impl DrivingState {
         self.worst_damage_band = self.worst_damage_band.max(DAMAGE_BAND_OUT_OF_SERVICE);
         self.damage_band = DAMAGE_BAND_OUT_OF_SERVICE;
         self.recover_out_of_service(ctx);
+    }
+
+    /// Book the rollover on the driving record as a crash (owner ruling,
+    /// 2026-09-24). A motor carrier lists every accident on its register
+    /// (49 CFR 390.15), and 390.5 counts one where a vehicle is towed away,
+    /// which a truck on its side always is. It weighs on the safety record and
+    /// on reputation as a serious event does (`record_reputation_penalty`,
+    /// `score_for_profile`). Returns whether it was booked: not without a
+    /// career, and not with hours of service off, where the record is not
+    /// kept for the fatigue event either.
+    fn record_crash(&mut self, ctx: &mut GameContext, place: &str) -> bool {
+        if ctx.profile.is_none() || self.enforcement_bypassed(ctx) {
+            return false;
+        }
+        let hours = record_hours(ctx, self);
+        let where_ = self.record_place(ctx);
+        let record = &mut profile_mut_of(ctx).driving_record;
+        record.record_crash(hours);
+        record.note(
+            RECORD_CRASH,
+            &format!("Rolled the truck over in a {place}"),
+            0.0,
+            hours,
+            &where_,
+        );
+        true
     }
 }

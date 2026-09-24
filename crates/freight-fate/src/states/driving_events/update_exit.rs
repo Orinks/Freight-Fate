@@ -514,10 +514,12 @@ impl DrivingState {
         // number governs the curve at the end of this lane, and the lane is
         // where a truck at road speed sheds to it. It LEADS the line: a
         // driver doing their own braking has a few seconds of lane, and the
-        // number is what they brake on (review, 2026-09-24).
+        // number is what they brake on (review, 2026-09-24). Never a number
+        // the load aboard cannot take the ramp curve at (`spoken_exit_mph`).
         let exit_speed = format!(
             "Exit speed {}.",
-            ctx.settings.speed_value(self.armed_ramp_mph(Some(stop)))
+            ctx.settings
+                .speed_value(self.spoken_exit_mph(self.armed_ramp_mph(Some(stop))))
         );
         let message = if self.terse_speech(ctx) {
             let mut terminal = match self.ramp_control.as_str() {

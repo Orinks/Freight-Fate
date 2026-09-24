@@ -22,7 +22,9 @@ where the wheel should go, never a new tone, and silence-is-centered.
 Curve steering only exists when **lane keeping** is not on full. Partial is
 the default since 2026-09-18 (Settings, Driving assistance, Lane keeping):
 full means the truck holds the lane itself and takes your exits, partial is
-gentle drift with steering help, off is the real wheel. For honest testing
+gentle drift with steering help and, since 2026-09-24 (owner ruling), steers
+through the road's bends the way curve assistance does, off is the real
+wheel. For honest curve steering use off; for honest testing
 use off, and turn
 **Curve assistance off** — with it on, the truck brakes for the
 bends itself and you'll wonder why nothing is happening. That is not a

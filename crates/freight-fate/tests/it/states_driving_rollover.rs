@@ -34,6 +34,8 @@ struct CurveRun {
     wide: usize,
     /// At the end: the load's condition, the speed, the deepest damage band.
     after: (f64, f64, i32),
+    /// Crashes on the career's driving record, and the newest entry's kind.
+    crashes: (i64, String),
     text: String,
 }
 
@@ -157,6 +159,19 @@ fn through_the_curve(take: Take) -> CurveRun {
             d.worst_damage_band,
         )
     });
+    run.crashes = harness
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .map_or((0, String::new()), |p| {
+            let record = &p.driving_record;
+            let newest = record
+                .entries
+                .last()
+                .map_or(String::new(), |e| e.kind.clone());
+            (record.crashes, newest)
+        });
     run.text = harness.transcript_text();
     run
 }
@@ -184,6 +199,12 @@ fn test_a_hot_ramp_curve_with_a_full_load_rolls_the_truck() {
     );
     // The rollover line names the load; the condition cue must not repeat it.
     assert!(!text.contains("The load has shifted hard"), "{text}");
+    // And it is a crash on the driving record (owner ruling, 2026-09-24).
+    assert_eq!(run.crashes, (1, "crash".to_string()), "{text}");
+    assert!(
+        text.contains("goes on your driving record as a crash"),
+        "{text}"
+    );
 }
 
 #[test]

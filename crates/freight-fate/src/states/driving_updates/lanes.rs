@@ -383,7 +383,13 @@ impl DrivingState {
         // wind, and the two are separate settings because they are separate
         // jobs: feed-forward off the road's shape, feedback off the driver's
         // error.
-        let takes_the_bend = ctx.settings.curve_speed_assist;
+        //
+        // Partial lane keeping supplies the bend's wheel too (owner ruling,
+        // 2026-09-24): its correction was capped with the driver's key at the
+        // steering limit, so a bend at its own advisory ran wide under
+        // partial lane keeping whenever curve assistance was off. Lane changes
+        // and speed stay the driver's; lane keeping off stays manual.
+        let takes_the_bend = ctx.settings.road_steers_the_bend();
         // The bank the bend is built with, which is load the tires do not
         // carry -- the same `superelevation_at` the advisory was priced with,
         // so the ceiling and the number the cab speaks agree about the road.
