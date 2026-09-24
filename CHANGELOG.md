@@ -126,6 +126,10 @@
 
 ### Fixed
 
+- **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
+
+- **Refusing a bad trailer at pickup no longer earns Somebody Else's Turn at delivery.** You hauled the sound replacement, not the bad trailer.
+
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.

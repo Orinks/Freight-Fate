@@ -558,10 +558,19 @@ its status or release decision.
       A test now asserts every catalog badge is either awarded in shipping
       code or named as retired, and that a retired one is never awarded
       again. It reads source, so it proves REACHABILITY, not correctness.
-- [ ] 130 of the 177 wired badges have no test naming them individually, so
-      nothing proves they fire at the right MOMENT rather than merely being
-      reachable. The trigger sites are concentrated (one arrival pass, one
-      rest-stop pass), so this is a readable job, not an endless one.
+- [x] Every wired badge has a moment test (2026-09-24). The 131 no test
+      named, plus 24 only named in a catalog check or as a truck key, each
+      take their real trigger step (a settled delivery, a trip event, a menu
+      row) and are checked absent on the step before or the near miss
+      (`crates/freight-fate/tests/it/badge_moments_*.rs`). Two fired at the
+      wrong moment and are fixed: "hooked_a_bad_one" was awarded at the hook,
+      announcing the defect before the walk-around its copy names, and
+      "dropped_the_bad_one" read the origin yard's trailer, so a driver who
+      refused it at pickup still earned it at the receiver.
+- [ ] `weather_collector`'s copy names eight skies (sun, cloud, rain,
+      downpour, thunder, snow, fog, wind) but the award needs all nine
+      weather kinds, ice included. Either the copy or the count is wrong;
+      changing the copy moves the catalog digest and the invariants export.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
