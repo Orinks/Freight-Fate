@@ -11,6 +11,9 @@
 
 ### Added
 
+- **Turnpike doubles pull their own long trailers.** `turnpike_doubles` now uses twin 53-foot vans on the classic LCV turnpikes, separate from the 28-foot parcel pups. Dispatch only clears them on the turnpike.
+
+
 - **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches (up to one mile). A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run. Twins are not run on ALCAN, Canada, or Alaska lanes.
 
 

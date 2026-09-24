@@ -1240,8 +1240,9 @@ instead of a spawn point.
 
 ### Twin parcel / STAA doubles (Track A)
 
-STAA twin 28-foot pups (`parcel_doubles`) on the National Network. FIX 2–5
-are intentionally not started here.
+STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
+LCV turnpike doubles on permitted toll roads. FIX 3–5 are intentionally
+not started here.
 
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
@@ -1264,10 +1265,25 @@ are intentionally not started here.
 - [ ] **Honesty debt: Twin parcel loads are not offered on ALCAN, Canada,
       or Alaska lanes until provincial and Alaska doubles rules are
       modeled.**
-- [ ] **FIX 2: LCV turnpike trailer** (not started).
+- [x] **FIX 2: LCV turnpike trailer (landed).** `turnpike_doubles` uses its
+      own `turnpike_double` program (two 53-foot vans, ~130 ft overall
+      combination), separate from STAA `double_van` pups. Offered and
+      routed only on listed classic LCV turnpike highways (NY/MA I-90;
+      OH/IN I-80 and I-90; KS I-35 / I-335 / I-70) plus short staging
+      stubs. Spoken refusal: "Dispatch only clears long doubles on the
+      turnpike."
+- [ ] **Honesty debt: Florida's Turnpike and Western LCV corridors.** FL
+      Turnpike is not Interstate-numbered in world data, so FL turnpike
+      doubles are not offered. Rocky Mountain / other Western LCV routes
+      outside the classic turnpike list are not modeled.
+- [ ] **Honesty debt: staging lots.** Break-bulk yards at turnpike exits
+      are approximated as same-city locals / end approaches / ≤ 1.0 mi
+      stubs, not curated LCV staging facilities.
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
-- [ ] **FIX 5: Twin tare and GVW** (not started).
+- [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
+      shares the stock trailer tare / legal-GVW clamp; dedicated LCV mass
+      is owed here.
 
 ### Reefer, APU, and fuel-island hotel power (2.0 candidates)
 
