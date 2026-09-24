@@ -659,6 +659,11 @@ pub const SPECIALIZED_FREIGHT_WEIGHT: f64 = 1.25;
 // favoured when it ships something the driver is credentialed for.
 pub const HELD_CREDENTIAL_CARGO_WEIGHT: f64 = 4.0;
 pub const HELD_CREDENTIAL_FACILITY_BONUS: f64 = 1.5;
+
+/// Origin-selection multiplier for facilities tagged `thin_outbound`.
+/// Keeps inbound (destination) weight unchanged while cutting how often the
+/// pin is chosen as a shipper so inbound clearly outweighs outbound.
+pub const THIN_OUTBOUND_ORIGIN_WEIGHT: f64 = 0.25;
 pub const PREMIUM_LANE_LEVEL: i64 = 12;
 pub const PREMIUM_LANE_LONG_HAUL_BIAS: f64 = 0.5;
 

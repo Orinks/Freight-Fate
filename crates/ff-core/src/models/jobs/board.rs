@@ -11,9 +11,10 @@ use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
 use crate::models::carriers::carrier;
 use crate::models::jobs::{
-    cargo_type, dispatch_deadline_hours, facility_cargo, market_tag_cargo_bonus,
+    cargo_type, dispatch_deadline_hours, market_tag_cargo_bonus,
     minimum_pay_for_level, plan_hos, CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE,
     FACILITY_SELECTION_WEIGHTS, HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS,
+    THIN_OUTBOUND_ORIGIN_WEIGHT,
     HOOKUP_FEE, LEVEL_DISTANCE_CAPS, LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES,
     MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI, PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS,
     SPECIALIZED_FREIGHT_LEVEL, SPECIALIZED_FREIGHT_WEIGHT,
@@ -574,6 +575,11 @@ impl<'w> JobBoard<'w> {
             .iter()
             .map(|location| {
                 let mut weight = Self::facility_weight(city, location, carrier_key);
+                // Thin-outbound cross-docks (Fairbanks Carlile): inbound should
+                // outweigh outbound, so origin selection down-weights the ship role.
+                if location.traits.iter().any(|t| t == "thin_outbound") {
+                    weight *= THIN_OUTBOUND_ORIGIN_WEIGHT;
+                }
                 // A shipper of freight this driver is credentialed for is
                 // where dispatch sends this driver first.
                 if Self::cargo_for_location(location, "ships", Some(level))
@@ -633,6 +639,10 @@ impl<'w> JobBoard<'w> {
     }
 
     /// `_cargo_for_location(location, role, level)`.
+    ///
+    /// Trusts the parsed `ships` / `receives` lists. An explicit empty list
+    /// (receive-only / fuel-only) must not re-inflate from the facility-type
+    /// cargo table — that would make receive-only overrides ship again.
     pub fn cargo_for_location(
         location: &Location,
         role: &str,
@@ -642,20 +652,6 @@ impl<'w> JobBoard<'w> {
             location.ships.clone()
         } else {
             location.receives.clone()
-        };
-        let role_values = if role_values.is_empty() {
-            let typed: Vec<String> = facility_cargo(&location.facility_type)
-                .unwrap_or_default()
-                .into_iter()
-                .map(str::to_string)
-                .collect();
-            if typed.is_empty() {
-                location.cargo.clone()
-            } else {
-                typed
-            }
-        } else {
-            role_values
         };
         let mut allowed: Vec<&'static str> = Vec::new();
         for key in &role_values {

@@ -16,6 +16,8 @@
 
 ### Added
 
+- **Fairbanks has real freight pins for Alaska job boards.** Costco and Fred Meyer receive grocery and retail (including refrigerated), Spenard Builders Supply receives construction materials, and Carlile's Aurora Drive terminal cross-docks general freight with thin outbound so inbound stays heavier. Sourdough Fuel remains the travel center.
+
 - **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches (up to one mile). A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run. Twins are not run on ALCAN, Canada, or Alaska lanes.
 
 

@@ -351,9 +351,22 @@ fn test_each_metro_expands_to_representative_facilities() {
                     templates
                 );
                 assert!(templates.iter().all(|kind| *kind == "company_yard"));
-            } else {
+            } else if city.locations.iter().any(|loc| loc.template) {
                 // Stand-in list + ordinary curated freight (Winona, …): full market.
                 assert!(city.locations.len() >= 5);
+            } else {
+                // Curated-complete stand-in (Fairbanks job-board pins): authored
+                // freight only — no invented warehouse skyline.
+                assert!(
+                    city.locations.iter().all(|loc| !loc.template),
+                    "{}: curated-complete stand-in must not stamp templates",
+                    city.name
+                );
+                assert!(
+                    city.locations.len() >= 2,
+                    "{}: curated-complete stand-in should keep authored pins",
+                    city.name
+                );
             }
         } else {
             assert!(city.locations.len() >= 5);
@@ -368,7 +381,16 @@ fn test_each_metro_expands_to_representative_facilities() {
                 )
             })
             && !city.locations.iter().any(|loc| loc.template);
-        if !parking_only_curated {
+        let curated_complete_stand_in = is_stand_in_market(&city.key)
+            && curated
+            && !city.locations.iter().any(|loc| loc.template)
+            && city.locations.iter().any(|loc| {
+                !matches!(
+                    loc.facility_type.as_str(),
+                    "company_yard" | "terminal" | "travel_center" | "truck_parking"
+                )
+            });
+        if !parking_only_curated && !curated_complete_stand_in {
             assert!(city.locations.iter().any(|loc| loc.template));
         }
         assert!(city.locations.iter().any(|loc| {
@@ -1701,6 +1723,110 @@ fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
         );
     }
 }
+
+
+#[test]
+fn test_fairbanks_has_curated_freight_job_endpoints() {
+    use ff_core::models::jobs::JobBoard;
+    let world = world();
+    let fb = world.city("fairbanks_ak_us").expect("fairbanks");
+    let by_name = |needle: &str| {
+        fb.locations
+            .iter()
+            .find(|l| l.name.contains(needle))
+            .unwrap_or_else(|| panic!("Fairbanks missing {needle}"))
+    };
+
+    let costco = by_name("Costco");
+    assert_eq!(costco.facility_type, "retail_distribution");
+    assert!(costco.ships.is_empty(), "Costco must be receive-only");
+    assert!(
+        JobBoard::cargo_for_location(costco, "ships", None).is_empty(),
+        "board must not re-inflate Costco ships from type defaults"
+    );
+    assert!(!JobBoard::cargo_for_location(costco, "receives", None).is_empty());
+    assert!(costco.roles.iter().all(|r| r == "receiver"));
+    for key in ["food", "retail", "refrigerated", "general"] {
+        assert!(costco.receives.iter().any(|k| k == key), "Costco receives {key}");
+    }
+    assert!(!costco.receives.iter().any(|k| k == "frozen"));
+
+    let fred = by_name("Fred Meyer");
+    assert_eq!(fred.facility_type, "retail_distribution");
+    assert!(fred.ships.is_empty(), "Fred Meyer must be receive-only");
+    assert!(fred.roles.iter().all(|r| r == "receiver"));
+    for key in ["food", "retail", "refrigerated", "general"] {
+        assert!(fred.receives.iter().any(|k| k == key), "Fred Meyer receives {key}");
+    }
+
+    let sbs = by_name("Spenard");
+    assert_eq!(sbs.facility_type, "construction_materials_yard");
+    assert!(sbs.ships.is_empty(), "SBS must be receive-only");
+    for key in ["construction", "lumber_paper", "steel"] {
+        assert!(sbs.receives.iter().any(|k| k == key), "SBS receives {key}");
+    }
+    assert!(
+        !sbs.receives.iter().any(|k| k == "bulk"),
+        "SBS must not receive bulk"
+    );
+
+    let carlile = by_name("Carlile");
+    assert_eq!(carlile.facility_type, "cross_dock");
+    assert!(carlile.roles.iter().any(|r| r == "shipper"));
+    assert!(carlile.roles.iter().any(|r| r == "receiver"));
+    for key in ["general", "retail", "parcel", "container"] {
+        assert!(carlile.ships.iter().any(|k| k == key), "Carlile ships {key}");
+        assert!(carlile.receives.iter().any(|k| k == key), "Carlile receives {key}");
+    }
+    assert!(
+        carlile.traits.iter().any(|t| t == "thin_outbound"),
+        "Carlile must carry thin_outbound"
+    );
+    assert!(
+        !JobBoard::cargo_for_location(carlile, "ships", None).is_empty(),
+        "Carlile must remain a board shipper"
+    );
+    assert!(
+        !JobBoard::cargo_for_location(carlile, "receives", None).is_empty(),
+        "Carlile must remain a board receiver"
+    );
+
+    let sourdough = by_name("Sourdough");
+    assert_eq!(sourdough.facility_type, "travel_center");
+    assert!(sourdough.ships.is_empty() && sourdough.receives.is_empty());
+
+    assert!(
+        !fb.locations.iter().any(|l| l.template),
+        "Fairbanks must not stamp invented template warehouses"
+    );
+    assert!(
+        !fb.locations.iter().any(|l| l.name.contains("Petro Star")),
+        "Petro Star Fairbanks Terminal is held; must not land yet"
+    );
+
+    // Pass-through / fuel-only corridor towns stay without freight endpoints.
+    for city_key in [
+        "healy_ak_us",
+        "tok_ak_us",
+        "glennallen_ak_us",
+        "blaine_wa_us",
+        "dawson_creek_bc_ca",
+        "fort_st_john_bc_ca",
+        "fort_nelson_bc_ca",
+        "watson_lake_yt_ca",
+        "whitehorse_yt_ca",
+        "prince_george_bc_ca",
+    ] {
+        let city = world.city(city_key).unwrap_or_else(|_| panic!("{city_key}"));
+        assert!(
+            city.locations
+                .iter()
+                .all(|loc| loc.ships.is_empty() && loc.receives.is_empty()),
+            "{city_key} must stay empty of freight roles"
+        );
+    }
+}
+
 
 #[test]
 fn test_legs_are_sane_and_unique() {
