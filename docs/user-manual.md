@@ -1206,6 +1206,15 @@ keeper drives on from it: "Stopped at the sign. Clear. Speed keeper pulling
 ahead." A green light is driven at the street's own speed, and nothing is said
 as you cross it. An intersection the map shows no light or sign for has none.
 
+The lights along one street are timed together the way a city times an
+arterial: hold the street's speed limit and the next light is usually green
+when you reach it. The first light you meet on a street is wherever its cycle
+happens to be, and a truck well under or over the limit, or pulling away from
+a stop, drifts out of step and meets more reds. Lights on different streets
+are not timed together. Where your route turns at a light, you are the side
+street there, and its green is shorter: about 25 seconds in a 90-second
+cycle, against about 53 for the street you are driving along.
+
 The facility's driveway is a turn like any other, called with its advise
 speed. Past it you are in the yard, "Into the yard. Yard limit 15", and the
 gate where you stop to check in is at the end of the yard. Facilities post

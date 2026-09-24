@@ -14,6 +14,7 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
+use crate::states::driving_events::street_controls::StreetLightPlan;
 use crate::states::driving_stops::{bar_solid_zone_mi, bar_tick_range_mi};
 
 /// What a terminal violation met: a vehicle in the conflict window, one
@@ -150,7 +151,7 @@ impl DrivingState {
         let mut rng = self.ramp_rng(stop);
         let control = self.ramp_control_for(ctx, stop, Some(&mut rng));
         let timing_key = self.ramp_terminal_timing_key(stop);
-        self.begin_terminal_control(control, &mut rng, &timing_key, stop.at_mi, true);
+        self.begin_terminal_control(control, &mut rng, &timing_key, stop.at_mi, true, None);
     }
 
     /// Set up the control state for a terminal about to be met: a ramp's
@@ -166,12 +167,15 @@ impl DrivingState {
         timing_key: &str,
         at_mi: f64,
         cross_traffic: bool,
+        street_light: Option<StreetLightPlan>,
     ) {
         self.ramp_control = control;
         let mut profile_rng = PyRandom::new_from_str(timing_key);
         self.ramp_light_profile = profile_rng.randrange(RAMP_LIGHT_PROFILE_COUNT) as u8;
         self.ramp_light_timer = 0.0;
-        self.ramp_light_offset_s = rng.random() * self.ramp_light_cycle_s();
+        self.street_light_split = street_light.map(|plan| (plan.red_s, plan.green_s));
+        let random_offset = rng.random() * self.ramp_light_cycle_s();
+        self.ramp_light_offset_s = street_light.map_or(random_offset, |plan| plan.offset_s);
         self.ramp_light_announced = false;
         self.ramp_light_last_phase = String::new();
         self.ramp_terminal_done = self.ramp_control == "none";
@@ -249,13 +253,20 @@ impl DrivingState {
         )
     }
 
-    /// This terminal's fixed red interval in real seconds.
+    /// This terminal's fixed red interval in real seconds (a street signal's
+    /// own split, `street_controls.rs`).
     pub fn ramp_light_red_s(&self) -> f64 {
+        if let Some((red_s, _)) = self.street_light_split.filter(|_| self.on_street_control()) {
+            return red_s;
+        }
         RAMP_LIGHT_RED_S + f64::from(self.ramp_light_profile) * RAMP_LIGHT_RED_STEP_S
     }
 
     /// This terminal's fixed green interval in real seconds.
     pub fn ramp_light_green_s(&self) -> f64 {
+        if let Some((_, green_s)) = self.street_light_split.filter(|_| self.on_street_control()) {
+            return green_s;
+        }
         RAMP_LIGHT_GREEN_S + f64::from(self.ramp_light_profile) * RAMP_LIGHT_GREEN_STEP_S
     }
 
@@ -303,7 +314,14 @@ impl DrivingState {
         // and out into the menus (Shane, 2026-08-03).
         self.update_ramp_bar_ticks(ctx, dt);
         if self.terminal_live() && !self.ramp_terminal_done && self.ramp_control == "signal" {
-            self.ramp_light_timer += dt;
+            // A street signal runs on the trip's own clock, the one its
+            // coordination is planned on (`street_controls.rs`); a ramp end
+            // on real seconds, the way it always has.
+            self.ramp_light_timer += if self.on_street_control() {
+                dt * self.trip.effective_time_scale()
+            } else {
+                dt
+            };
         }
         self.update_cross_bubble(ctx, dt);
         if !self.terminal_live() || self.ramp_terminal_done {

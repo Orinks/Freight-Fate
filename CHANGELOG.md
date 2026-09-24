@@ -39,7 +39,7 @@
 
 - **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
 
-- **City streets to a facility have traffic lights and stop signs.** The ones the map shows play like a ramp end, and the assists stop and go for them.
+- **City streets to a facility have traffic lights and stop signs.** Lights along one street are timed so a truck at the speed limit meets mostly greens.
 
 - **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
 

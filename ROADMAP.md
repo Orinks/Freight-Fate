@@ -1492,6 +1492,23 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       traffic; the ramp terminal's own node is not played twice. Deadlines
       and pickup ETAs plan each street at its limit (`route_planning_limit`).
       The exit matrix gained a street chain with a red light and a stop sign.
+- [x] **Street signal timing and progression** (`street_light_plan`): a
+      90 s cycle (read range 60-150, assumed), 53 s through green (derived:
+      the coordinated phase takes what the side street leaves), 25 s side
+      street green (read range 20-40, assumed) where the chain turns at the
+      light. Signals along one street share the cycle and are offset for its
+      posted limit with a 21 s band (derived from the TTI handbook's worked
+      two-way example, 0.23 of the cycle); the light runs on the trip clock.
+      Mapped nodes within 0.03 mile are one intersection. Synthetic 10-signal
+      arterial, 5 seeds: 0-2 reds at the limit (mean 0.8), 3-5 at half of it
+      (mean 4.2). Real Dallas to Abilene Company Yard streets (exit 292B, 14
+      mapped signals), every assist on, 20 seeds: 2.55 red stops before, 2.20
+      after; most of what is left is the first light of each street and the
+      side-street turn. Sourced from FHWA-HOP-08-024 and TTI 0-6402-P1.
+- [ ] **Check the street signal numbers against the Signal Timing Manual
+      2nd ed. (NCHRP 812).** Its text could not be fetched (the PDF is past
+      the fetch limit, the NAP reader serves page images); the cycle, splits
+      and band come from the two documents it builds on.
 - [ ] **Street controls outbound.** A departure chain drops the READ
       controls, which face the inbound truck. Bake the controls facing the
       other way and play them on the way out.

@@ -35,6 +35,57 @@ pub const STREET_BAR_BEFORE_NODE_MI: f64 =
 /// A control this close to the start of a chain is the corner the ramp's own
 /// terminal already played: the chain starts at that node.
 pub const STREET_CONTROL_START_SKIP_MI: f64 = 0.02;
+/// Mapped controls this close together are one intersection. ASSUMED: wider
+/// than a divided road's median crossing (the bake's closest pairs are 0.01
+/// mile, 53 ft), narrower than a city block.
+pub const STREET_INTERSECTION_SPAN_MI: f64 = 0.03;
+
+// -- street signal timing ------------------------------------------------------
+//
+// Sources. The Signal Timing Manual 2nd ed. (NCHRP Report 812, 2015) is the
+// reference the owner named; its text could not be retrieved here (the
+// 322-page PDF is past the fetch limit and the NAP reader serves page
+// images), so the numbers below are READ from the two documents it builds
+// on, which say the same things in print: FHWA's Traffic Signal Timing
+// Manual (FHWA-HOP-08-024, 2008, chapter 6) and TxDOT/TTI's Traffic Signal
+// Operations Handbook, 2nd ed. (FHWA/TX-11/0-6402-P1, 2011, chapters 2-3).
+
+/// The shared cycle of a street's signals. READ: "Minor arterial streets: 60
+/// to 120 s; Major arterial streets: 90 to 150 s" (Handbook p. 3-6; its
+/// Table 3-2 gives 90 to 100 s for a major arterial with 1,500 to 2,500 ft
+/// between signals and no left-turn phases), and cycles for four-legged
+/// intersections should preferably "not exceed 120 seconds" (FHWA 2008,
+/// 6.6.2). ASSUMED at 90, the value both ranges share, for every street.
+pub const STREET_CYCLE_S: f64 = 90.0;
+/// The side street's green. READ range: 20 to 40 s maximum green on a minor
+/// approach (Handbook Table 2-5); ASSUMED at 25.
+pub const STREET_MINOR_GREEN_S: f64 = 25.0;
+/// The through street's green. DERIVED: "the coordinated phase receives the
+/// time within the cycle that is unused by the other phases" (FHWA 2008,
+/// 6.6.3), so the cycle less the side street's green and both changes: 53 s,
+/// inside the 30 to 60 s the Handbook's Table 2-5 gives a major approach.
+pub const STREET_MAJOR_GREEN_S: f64 =
+    STREET_CYCLE_S - STREET_MINOR_GREEN_S - 2.0 * RAMP_LIGHT_YELLOW_S;
+/// The progression band a truck at the limit stays green in. DERIVED from
+/// the Handbook's worked time-space diagram (Figures 3-3 to 3-5): a 14 s band
+/// each way in a 60 s cycle once both directions are served, 0.23 of the
+/// cycle, applied to this cycle.
+pub const STREET_BAND_S: f64 = STREET_CYCLE_S * 14.0 / 60.0;
+
+/// A street signal's timing: its red and green, and where in its cycle it
+/// stands on the trip's clock when it is armed.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StreetLightPlan {
+    pub red_s: f64,
+    pub green_s: f64,
+    pub offset_s: f64,
+}
+
+/// A chain cue that turns onto its street, rather than continuing onto it.
+fn is_turn_cue(cue: &str) -> bool {
+    let cue = cue.trim().to_lowercase();
+    cue.starts_with("turn left") || cue.starts_with("turn right")
+}
 
 impl DrivingState {
     /// Whether a stop bar is live: a ramp terminal, or a street control.
@@ -181,6 +232,18 @@ impl DrivingState {
         let Some((node_mi, kind)) = next else {
             return false;
         };
+        // One intersection can be two mapped nodes -- a divided road's two
+        // carriageways, or the end of one street and the start of the next --
+        // and it is one light or sign: the rest of it is played with this one.
+        let span: Vec<f64> = self
+            .trip
+            .street_controls_between(node_mi, node_mi + STREET_INTERSECTION_SPAN_MI)
+            .into_iter()
+            .map(|(mi, _)| mi)
+            .collect();
+        for mi in &span {
+            self.street_controls_played.insert(street_control_key(*mi));
+        }
         let bar_mi = node_mi - STREET_BAR_BEFORE_NODE_MI;
         let control = match kind.as_str() {
             "signal" => "signal",
@@ -199,16 +262,72 @@ impl DrivingState {
         // At an all-way stop the cross street stops too: the truck's turn
         // comes after its own stop, with no gap to wait for.
         let cross_traffic = kind != "all_way_stop";
+        let light = (kind == "signal").then(|| self.street_light_plan(node_mi, &span));
+        // On the bar first: the terminal's setup reads the light's split.
+        self.street_bar_mi = Some(bar_mi);
         self.begin_terminal_control(
             control.to_string(),
             &mut rng,
             &timing_key,
             node_mi,
             cross_traffic,
+            light,
         );
-        self.street_bar_mi = Some(bar_mi);
         self.street_control_kind = kind;
         true
+    }
+
+    /// The timing of a street signal at route mile `node_mi`, and where in
+    /// its cycle it stands on the trip's clock now.
+    ///
+    /// The truck turning at this node is the minor movement there, and gets
+    /// the side street's split with its own offset. Anywhere else along a
+    /// street it is on the through movement, and the signals of that street
+    /// share one cycle, offset for a truck at the street's posted limit: each
+    /// one's green opens a travel time later than the one before, less a
+    /// seeded slide within its green that leaves the band `STREET_BAND_S`
+    /// wide. A truck held well under or over the limit, or starting from a
+    /// stop, drifts out of it. Streets are not coordinated with each other.
+    fn street_light_plan(&self, node_mi: f64, span: &[f64]) -> StreetLightPlan {
+        let (leg_i, leg_start) = self.trip.leg_at_mile(node_mi);
+        let leg = &self.trip.route.legs[leg_i];
+        // Turning here: a node of this intersection starts a street the
+        // chain turns onto.
+        let turning = span.iter().any(|mi| {
+            let (i, start) = self.trip.leg_at_mile(*mi);
+            i > 0 && mi - start < 0.01 && is_turn_cue(&self.trip.route.legs[i].local_cue)
+        });
+        let key = street_control_key(node_mi);
+        let mut own = PyRandom::new_from_i64((self.trip_seed << 16) ^ key ^ 0x0FF5E7);
+        let now_s = self.trip.game_minutes * 60.0;
+        let cycle = STREET_CYCLE_S;
+        if turning {
+            let red_s = cycle - STREET_MINOR_GREEN_S - RAMP_LIGHT_YELLOW_S;
+            let into = own.random() * cycle;
+            return StreetLightPlan {
+                red_s,
+                green_s: STREET_MINOR_GREEN_S,
+                offset_s: into,
+            };
+        }
+        let green_s = STREET_MAJOR_GREEN_S;
+        let red_s = cycle - green_s - RAMP_LIGHT_YELLOW_S;
+        // The street's own clock origin, seeded by the chain and the street.
+        let mut street = PyRandom::new_from_i64((self.trip_seed << 16) ^ (leg_i as i64) ^ 0xA27E);
+        let anchor_s = street.random() * cycle;
+        let limit_mph = leg
+            .street_limit_mph()
+            .unwrap_or(leg.local_speed_mph)
+            .max(5.0);
+        let travel_s = (node_mi - leg_start) * 3600.0 / limit_mph;
+        let slide_s = own.random() * (green_s - STREET_BAND_S);
+        let green_starts_at = anchor_s + travel_s - slide_s;
+        // The cycle begins with red: green opens `red_s` in.
+        StreetLightPlan {
+            red_s,
+            green_s,
+            offset_s: (now_s - (green_starts_at - red_s)).rem_euclid(cycle),
+        }
     }
 
     /// The call for a street control, on the route channel like the ramp's.

@@ -278,7 +278,8 @@ fn test_the_assists_stop_for_a_red_street_light_hold_it_and_drive_on_at_green() 
     }
     let heard = harness.transcript_text();
     assert!(stopped, "never held at the red\n{heard}");
-    assert!(heard.contains("Traffic light ahead. Light red."), "{heard}");
+    // Named in whatever phase it was in; pinned red from the next frame on.
+    assert!(heard.contains("Traffic light ahead. Light"), "{heard}");
     assert!(
         heard.contains("Route-transition assistance braking for the light."),
         "{heard}"
@@ -486,6 +487,159 @@ fn test_the_ramp_terminals_own_corner_is_not_played_again() {
     }
     assert!(harness.read_drive(|d| d.street_bar_mi.is_none()));
     assert!(!harness.transcript_text().contains("Traffic light"));
+}
+
+// -- coordinated street signals -------------------------------------------------------
+
+/// A 35 mph arterial three miles long with ten signals a quarter mile apart,
+/// driven at `mph` with route-transition assistance making the stops, from
+/// trip seed `seed`. Returns how many reds the truck stopped at.
+fn reds_on_the_arterial(seed: i64, mph: f64) -> usize {
+    let mut harness = start_drive("Arterial");
+    release_keys(&mut harness);
+    {
+        let s = &mut harness.app.ctx.settings;
+        s.time_scale = 1.0;
+        s.automatic_transmission = true;
+        s.automatic_emergency_braking = false;
+        s.route_transition_assist = true;
+        s.destination_approach_assist = false;
+        s.speed_keeper = false;
+        s.lane_keeping = "full".to_string();
+    }
+    harness.with_drive(move |d, _| {
+        let city = d.trip.route.cities[0].clone();
+        let signals = (0..10)
+            .map(|i| control(0.3 + 0.25 * i as f64, "signal"))
+            .collect();
+        let legs = vec![Leg::local(
+            &city,
+            3.0,
+            "South 1st Street",
+            "Start on South 1st Street.",
+            35.0,
+        )
+        .with_street(limit(35.0, "read"), signals)];
+        let route = Route::from_legs(vec![city.clone(), city], legs);
+        let truck = d.trip.truck.clone();
+        let mut weather = WeatherSystem::new("heartland", Some(3), None, None, true);
+        weather.current = WeatherKind::Clear;
+        let mut trip = Trip::new(
+            route,
+            truck,
+            weather,
+            TripOptions {
+                seed: Some(3),
+                time_scale: 1.0,
+                ..Default::default()
+            },
+        );
+        quiet(&mut trip);
+        d.trip = trip;
+        d.reset_turn_state_for_trip();
+        d.destination_exit_taken = true;
+        d.trip_seed = seed;
+        d.tutorial = None;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 7;
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().velocity_mps = mph * MPS_PER_MPH;
+        d.trip.position_mi = 0.02;
+    });
+    let mut reds = 0;
+    let mut was_waiting = false;
+    for _ in 0..(60 * 60 * 15) {
+        let (at, waiting, owned, speed, braking) = harness.read_drive(|d| {
+            (
+                d.trip.position_mi,
+                d.ramp_waiting_at_light,
+                d.ramp_assist_said && !d.ramp_terminal_done,
+                d.truck().speed_mph(),
+                d.truck().brake > 0.01,
+            )
+        });
+        if at > 2.9 {
+            break;
+        }
+        if waiting && !was_waiting {
+            reds += 1;
+        }
+        was_waiting = waiting;
+        // The driver holds `mph` and leaves a stop to the assist.
+        let go = !waiting && !owned && !braking && speed < mph - 1.0;
+        hold(&mut harness, if go { &[Key::Up] } else { &[] });
+        harness.with_drive(|d, _| {
+            let cut_out = d.truck().specs.air_governor_cut_out_psi;
+            d.truck_mut().set_air_pressure_psi(cut_out);
+        });
+        frame(&mut harness, DT);
+    }
+    release_keys(&mut harness);
+    assert!(
+        harness.read_drive(|d| d.trip.position_mi) > 2.9,
+        "never drove the arterial\n{}",
+        harness.transcript_text()
+    );
+    reds
+}
+
+#[test]
+fn test_a_truck_at_the_limit_rides_the_green_band_down_an_arterial() {
+    // Arterial signals are coordinated: offset so a truck at the posted limit
+    // arrives on green. The band is not a promise -- the first light is met
+    // wherever its cycle is, and a stop drops the truck out of step -- but it
+    // is at most a stop or two in ten signals.
+    let seeds = [11, 12, 13, 14, 15];
+    let at_limit: Vec<usize> = seeds
+        .iter()
+        .map(|s| reds_on_the_arterial(*s, 35.0))
+        .collect();
+    // At half the limit the truck falls out of the band and meets several.
+    let crawling: Vec<usize> = seeds
+        .iter()
+        .map(|s| reds_on_the_arterial(*s, 17.5))
+        .collect();
+    eprintln!("reds at the limit {at_limit:?}, at half of it {crawling:?}");
+    assert!(at_limit.iter().all(|reds| *reds <= 2), "{at_limit:?}");
+    let total: usize = crawling.iter().sum();
+    assert!(
+        total >= 3 * seeds.len() && total > at_limit.iter().sum::<usize>() * 2,
+        "at the limit {at_limit:?}, crawling {crawling:?}"
+    );
+}
+
+#[test]
+fn test_a_turn_at_a_signal_gets_the_side_streets_split() {
+    use freight_fate::states::driving_events::street_controls::{
+        STREET_MAJOR_GREEN_S, STREET_MINOR_GREEN_S,
+    };
+    // The left onto North Michigan Street is made at a signal: there the
+    // truck is the side street's movement. The light further down North
+    // Michigan is the through movement's.
+    let mut harness = on_the_streets(
+        "Turn Split",
+        Vec::new(),
+        vec![control(0.0, "signal"), control(0.5, "signal")],
+        false,
+        0.6,
+        20.0,
+    );
+    run_until(&mut harness, 60 * 60, |d| d.street_bar_mi.is_some());
+    assert_eq!(
+        harness.read_drive(|d| d.street_light_split.map(|(_, green)| green)),
+        Some(STREET_MINOR_GREEN_S)
+    );
+    harness.with_drive(|d, _| {
+        d.trip.position_mi = 1.1;
+        d.street_bar_mi = None;
+        d.ramp_terminal_done = true;
+    });
+    run_until(&mut harness, 60 * 60, |d| d.street_bar_mi.is_some());
+    assert_eq!(
+        harness.read_drive(|d| d.street_light_split.map(|(_, green)| green)),
+        Some(STREET_MAJOR_GREEN_S)
+    );
 }
 
 // -- the speed keeper between close corners ------------------------------------------

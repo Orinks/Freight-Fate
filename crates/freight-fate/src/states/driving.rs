@@ -488,6 +488,9 @@ pub struct DrivingState {
     pub street_control_kind: String,
     pub street_controls_played: HashSet<i64>,
     pub street_controls_trip: u64,
+    // The live street signal's (red, green) seconds; None at a ramp end,
+    // which keeps its own timing profile. It cycles on the trip's clock.
+    pub street_light_split: Option<(f64, f64)>,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,

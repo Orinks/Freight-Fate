@@ -481,6 +481,7 @@ impl DrivingState {
             street_control_kind: String::new(),
             street_controls_played: HashSet::new(),
             street_controls_trip: 0,
+            street_light_split: None,
             critical_curve: None,
             critical_call_age_s: 0.0,
             critical_respeak_at: None,
