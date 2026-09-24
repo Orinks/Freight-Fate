@@ -47,6 +47,7 @@ from typing import Any
 from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chain_match  # noqa: E402
 import street_chain  # noqa: E402
 from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa: E402
 
@@ -224,6 +225,8 @@ def build_facility_approaches(
     # the failure code, for every terminal a delivery can arrive at.
     exit_routes: dict[tuple[str, int], Any] = {}
     exit_attempted: set[str] = set()
+    legacy = chain_match.legacy_chains(existing)
+    matched: dict[str, Any] = {}
     # Why each unrouted target failed, straight from the path search.
     failures: dict[str, str] = {}
     # Facilities a state extract was actually searched for; a missing extract
@@ -234,6 +237,7 @@ def build_facility_approaches(
         extract = local_geometry.state_extract_path(cache_dir, state)
         sources.append(local_geometry.source_record(state, extract))
         in_state = [target for target in routable if target.state == state]
+        screened_in_state = in_state
         refused = 0
         if extract.exists() and in_state and endpoint_screen:
             tags = local_geometry.read_object_tags(
@@ -262,7 +266,16 @@ def build_facility_approaches(
             + ("" if extract.exists() else " (extract missing, skipped)"),
             flush=True,
         )
-        if extract.exists() and state_targets:
+        # Chains baked before the street detail are read back off the same
+        # graphs; one refused by today's endpoint screen is still a chain the
+        # merge keeps, so it gets a graph for the match alone.
+        routed_ids = {target.facility_id for target in in_state}
+        match_only = [
+            _geometry_target(local_geometry, target)
+            for target in screened_in_state
+            if target.facility_id in legacy and target.facility_id not in routed_ids
+        ]
+        if extract.exists() and (state_targets or match_only):
             attempted.update(target.target_id for target in state_targets)
             exit_attempted.update(target.target_id for target in state_targets)
             starts = {
@@ -271,18 +284,25 @@ def build_facility_approaches(
                 )
                 for target in state_targets
             }
-            routed.update(
-                local_geometry.route_state_targets(
-                    extract,
-                    state_targets,
-                    failures,
-                    yard_roads=True,
-                    truck_legal=truck_legal,
-                    street_detail=True,
-                    exit_starts=starts,
-                    exit_routes=exit_routes,
-                )
+            batch_failures: dict[str, str] = {}
+            fresh = local_geometry.route_state_targets(
+                extract,
+                state_targets + match_only,
+                batch_failures,
+                yard_roads=True,
+                truck_legal=truck_legal,
+                street_detail=True,
+                exit_starts=starts,
+                exit_routes=exit_routes,
+                match_chains={
+                    target.target_id: legacy[target.target_id]
+                    for target in state_targets + match_only
+                    if target.target_id in legacy
+                },
+                matched=matched,
             )
+            routed.update({k: v for k, v in fresh.items() if k in routed_ids})
+            failures.update({k: v for k, v in batch_failures.items() if k in routed_ids})
             for target in state_targets:
                 path = routed.get(target.target_id)
                 if path is not None and path.yard_miles:
@@ -314,6 +334,8 @@ def build_facility_approaches(
                     float("inf") if owner_allowed else MAX_YARD_STRETCH_MI,
                 )
             )
+    for facility_id, found in matched.items():
+        approaches[facility_id]["_matched"] = chain_match.detail_of(found, clean_segment)
     payload = {
         "version": 1,
         "generated": {
@@ -338,6 +360,8 @@ def build_facility_approaches(
         "approaches": approaches,
     }
     if existing is None:
+        for record in approaches.values():
+            record.pop("_matched", None)
         return payload
     return merge_existing(existing, payload, attempted, accessed=accessed)
 
@@ -375,6 +399,7 @@ def merge_existing(
     rebuilt = stale = demoted = 0
     approaches: dict[str, Any] = {}
     for facility_id, record in fresh["approaches"].items():
+        match = record.pop("_matched", None)
         old = prior.get(facility_id)
         if old is None:
             approaches[facility_id] = record
@@ -413,6 +438,8 @@ def merge_existing(
                     "exit_chains": record["exit_chains"],
                     "exit_chains_failed": record["exit_chains_failed"],
                 }
+            if match is not None:
+                old = chain_match.apply_match(old, match)
             approaches[facility_id] = old
             summary["kept_turn_level"] += 1
         elif facility_id in attempted or (

@@ -251,3 +251,133 @@ def test_exit_terminals_follow_the_games_destination_exit_rule():
     # Arriving at a (travel b->a): exit 1, backward ramp.
     assert [t["node"] for t in found["a"]] == [12]
     assert found["a"][0]["exit"]["direction"] == "backward"
+
+
+def test_a_kept_chain_gets_its_detail_by_matching_its_own_streets(baked, tmp_path):
+    """A chain from an earlier bake carries names and miles, not geometry.
+    Its path is read back off the map by those, never re-routed."""
+    _payload, record = baked
+    tool = sys.modules["build_facility_approaches"]
+    local_geometry = tool._load_local_geometry_tool()
+    import chain_match
+
+    recorded = [
+        {k: seg[k] for k in ("road", "miles", "cue", "speed_mph", "turn_deg")}
+        for seg in record["segments"]
+    ]
+    target = local_geometry.Target(
+        target_id="fixture:warehouse",
+        target_type="facility",
+        city="fixture_city",
+        state="Illinois",
+        name="Real Warehouse",
+        lat=41.0080,
+        lon=-86.9950,
+        start_lat=41.0,
+        start_lon=-87.0,
+        role="warehouse",
+        estimated=False,
+        fallback_reason="",
+        approach_road="Terminal Road",
+        approach_miles=0.8,
+        source_note="fixture",
+    )
+    osm_path = tmp_path / "match.osm"
+    osm_path.write_text(FIXTURE, encoding="utf-8")
+    renamed = [{**recorded[0], "road": "Elsewhere Road"}, recorded[1]]
+    matched: dict = {}
+    local_geometry.route_state_targets(
+        osm_path,
+        [target],
+        yard_roads=True,
+        street_detail=True,
+        match_chains={"fixture:warehouse": recorded},
+        matched=matched,
+    )
+    found = matched["fixture:warehouse"]
+    assert [seg["limit_source"] for seg in found.segments] == ["statutory", "assumed"]
+    kept = chain_match.apply_match(
+        {"turn_level": True, "segments": recorded},
+        chain_match.detail_of(found, tool.clean_segment),
+    )
+    assert kept["street_detail"] == "matched"
+    assert [seg["road"] for seg in kept["segments"]] == ["Terminal Road", "Warehouse Drive"]
+    assert kept["segments"][0]["controls"][0]["kind"] == "stop"
+    assert kept["driveway"]["node"] == 4
+    local_geometry.route_state_targets(
+        osm_path,
+        [target],
+        yard_roads=True,
+        street_detail=True,
+        match_chains={"fixture:warehouse": renamed},
+        matched=matched,
+    )
+    assert matched["fixture:warehouse"] == chain_match.MATCH_NO_PATH
+
+
+def test_a_street_split_under_two_refs_is_matched_as_one_run():
+    import chain_match
+
+    recorded = [
+        {"road": "13th Street (I 35 Business)", "miles": 0.05},
+        {"road": "13th Street", "miles": 0.89},
+        {"road": "a service road", "miles": 0.2},
+    ]
+    assert chain_match.groups(recorded, chain_match.GENERIC_LABELS) == [[0, 1], [2]]
+    fresh = [
+        {
+            "road": "13th Street (I 35 Business)",
+            "miles": 0.94,
+            "limit_mph": 30.0,
+            "limit_source": "read",
+            "controls": [{"at_mi": 0.5, "kind": "signal"}],
+        },
+        {
+            "road": "a service road",
+            "miles": 0.2,
+            "limit_mph": 15.0,
+            "limit_source": "assumed",
+            "controls": [],
+        },
+    ]
+    assert chain_match.same_chain(fresh, recorded, chain_match.GENERIC_LABELS)
+    out = chain_match.adopt(recorded, fresh)
+    assert [seg["limit_mph"] for seg in out] == [30.0, 30.0, 15.0]
+    assert out[0]["controls"] == [] and out[1]["controls"] == [{"at_mi": 0.45, "kind": "signal"}]
+
+
+def test_the_generic_labels_are_the_builders_own():
+    import chain_match
+
+    tool = _load_tool()
+    assert chain_match.GENERIC_LABELS == tool._load_local_geometry_tool().GENERIC_ROADS
+
+
+def test_the_first_street_is_aligned_at_the_junction_it_shares():
+    import chain_match
+
+    recorded = [{"road": "A Street", "miles": 0.5}, {"road": "B Street", "miles": 0.3}]
+    fresh = [
+        {
+            "road": "A Street",
+            "miles": 0.54,
+            "limit_mph": 30.0,
+            "limit_source": "read",
+            "controls": [{"at_mi": 0.24, "kind": "stop"}],
+        },
+        {
+            "road": "B Street",
+            "miles": 0.3,
+            "limit_mph": 25.0,
+            "limit_source": "statutory",
+            "controls": [{"at_mi": 0.0, "kind": "signal"}],
+        },
+    ]
+    # The first street's length is not evidence; the second's is.
+    assert chain_match.same_chain(fresh, recorded, chain_match.GENERIC_LABELS)
+    assert not chain_match.same_chain(
+        [fresh[0], {**fresh[1], "miles": 0.4}], recorded, chain_match.GENERIC_LABELS
+    )
+    out = chain_match.adopt(recorded, fresh)
+    assert out[0]["controls"] == [{"at_mi": 0.2, "kind": "stop"}]
+    assert out[1]["controls"] == [{"at_mi": 0.0, "kind": "signal"}]

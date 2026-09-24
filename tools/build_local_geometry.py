@@ -24,6 +24,7 @@ import osmium
 from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chain_match  # noqa: E402
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
 from street_chain import annotate, control_of  # noqa: E402
 from yard_roads import (  # noqa: E402
@@ -463,6 +464,8 @@ def route_state_targets(
     street_detail: bool = False,
     exit_starts: dict[str, list[dict[str, Any]]] | None = None,
     exit_routes: dict[tuple[str, int], GeometryPath | str] | None = None,
+    match_chains: dict[str, list[dict[str, Any]]] | None = None,
+    matched: dict[str, GeometryPath | str] | None = None,
 ) -> dict[str, GeometryPath]:
     """Route every target over its own clipped graph.
 
@@ -479,7 +482,9 @@ def route_state_targets(
     to extra start points (``node``, ``lat``, ``lon``, ``budget_mi``) -- the
     ramp terminals -- each routed over the same graph, whole (never cut to
     ``MAX_SPOKEN_SEGMENTS``), into ``exit_routes[(target_id, node)]``: the
-    path, or its failure code."""
+    path, or its failure code. ``match_chains`` maps a target to the
+    segments of a chain baked before the street detail; its path is read
+    back off the same graph (``chain_match.py``) into ``matched``."""
     barriers: set[int] = set()
     controls: dict[int, tuple[str, str]] = {}
     graphs = {
@@ -580,7 +585,40 @@ def route_state_targets(
                 exit_routes[(target.target_id, start["node"])] = (
                     found if found is not None else why.get(target.target_id, "")
                 )
+        recorded = (match_chains or {}).get(target.target_id)
+        if recorded and matched is not None:
+            matched[target.target_id] = match_recorded_chain(target, graph, recorded)
     return routed
+
+
+def match_recorded_chain(
+    target: Target, graph: RouteGraph, recorded: list[dict[str, Any]]
+) -> GeometryPath | str:
+    """A baked chain's own path, recovered by its street names and miles, with
+    its street detail; or why it could not be (``chain_match.MATCH_*``)."""
+    every_node = {**graph.yard_nodes, **graph.nodes}
+    end = None
+    for ref, (lat, lon) in every_node.items():
+        miles = haversine_mi(target.lat, target.lon, lat, lon)
+        if end is None or miles < end[1]:
+            end = (ref, miles)
+    if end is None or end[1] > TARGET_SNAP_RADIUS_MI:
+        return chain_match.MATCH_NO_END
+    found = chain_match.match_path(
+        graph, end[0], recorded, GENERIC_ROADS, JUNCTION_LINK, UNNAMED_SERVICE
+    )
+    if isinstance(found, str):
+        return found
+    path_nodes, raw_edges, kinds = found
+    coords = [every_node[ref] for ref in path_nodes]
+    segments = collapse_segments(raw_edges, coords, None)
+    if not chain_match.same_chain(segments, recorded, GENERIC_ROADS):
+        return chain_match.MATCH_SHAPE
+    total = round(sum(segment["miles"] for segment in segments), 2)
+    yard = round(
+        sum(edge[1] for edge, kind in zip(raw_edges, kinds, strict=True) if kind == "private"), 2
+    )
+    return _finish(target, graph, segments, path_nodes, coords, raw_edges, kinds, total, yard)
 
 
 # Why `shortest_geometry` returned nothing. Four different facts used to share
