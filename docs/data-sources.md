@@ -150,6 +150,14 @@ and 12 all answered 200. The catch is size: 1.1 MB for district 11 and
 only if the fetch is scoped to the districts a route actually crosses, which needs a
 district lookup the map does not have yet.
 
+*Adopted 2026-09-24* (`crates/ff-core/src/sim/real_traffic/caltrans.rs`). The
+same rows ship as CSV at `.../lcsStatusD<NN>.csv`, and all twelve districts
+answered: District 7 is 2.2 MB and arrived in 4.5 to 5.0 seconds, the rest
+38 KB to 780 KB. The county-to-district table is read from the `DISTRICT` field
+of Caltrans's `CHboundary/County_Boundaries` layer on caltrans-gis.dot.ca.gov;
+county outlines are the Census 2023 1:20,000,000 cartographic boundary file
+(public domain), written by `tools/build_ca_county_outlines.py`.
+
 Still needing a key, and so deferred: Colorado, Illinois, Massachusetts,
 Michigan, Ohio, Oregon, Pennsylvania, Virginia, California's WZDx feed, and
 Texas statewide. Not in the registry at all: Alabama, Arkansas, Montana,

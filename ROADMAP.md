@@ -1252,9 +1252,17 @@ against.
       as an elevation. `tools/screen_grades_3dep.py` refuses any non-JSON
       body (pinned by `tests/test_screen_grades_3dep.py`), and the gotcha is
       written up in `docs/data-sources.md` for the next USGS reader.
-- [ ] California stays dark until a route-to-district lookup exists. Caltrans
-      publishes lane closures per district with no key, but district 7 alone
-      is 17.6 MB against an 8-second feed budget.
+- [x] California reads Caltrans's Lane Closure System, fetching only the
+      districts a leg crosses. Counties come from the Census 1:20M outlines,
+      widened by their measured 3.24 mi error against the 1:500k file, and
+      map to districts through Caltrans's own county layer (Kern also gets
+      District 9, which files eastern Kern's closures). The CSV feed is the
+      size fix: District 7 is 2.2 MB and arrived in 4.5 to 5.0 seconds on
+      2026-09-24, where its 13.6 MB JSON took 11 to 16. Only mainline closures
+      in effect now are kept, and an incident closure open over a week is
+      dropped as stale: that day's feeds held a full closure of I-5 through
+      Los Angeles "under investigation" since June. No state's feed is
+      fetched twice at once any more.
 - The keyed feeds (Colorado and the other states that want a registered
   key, and EIA fuel prices) moved to the 1.10 section, under "Deferred from
   1.9: live feeds that need a key".

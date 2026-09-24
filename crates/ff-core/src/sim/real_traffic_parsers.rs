@@ -20,6 +20,8 @@
 //!   `list511` — The 511 sites' own list-page JSON rows joined with the
 //!              map-pin locations (Florida FL511 and New York 511NY
 //!              incidents).  Lives in `real_traffic_list511`.
+//!   `caltrans_lcs` — Caltrans's Lane Closure System, one CSV per
+//!              district (California lane closures).
 //!
 //! Port of `freight_fate/sim/real_traffic_parsers.py`. The Python parsers
 //! are a mixin on the provider; here they are free functions over
@@ -627,6 +629,10 @@ pub use wzdx::{
     extract_wzdx_coordinates, parse_wzdx_construction_events, parse_wzdx_events,
     wzdx_impact_to_closure, wzdx_prop,
 };
+
+// ---- Caltrans Lane Closure System (per-district CSV) -----------------
+mod caltrans_lcs;
+pub use caltrans_lcs::parse_lcs_csv;
 
 // ---- Shared construction-field helpers -------------------------------
 
