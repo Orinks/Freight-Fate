@@ -301,6 +301,9 @@ from the words, and synonyms cost them a re-read.
 | Being pulled to the shoulder by one | pull-over | stop (already the POI, the act of stopping, and the command) | `_pull_over` |
 | The checkpoint watching for chain-law compliance on a graded climb | chain control | chain checkpoint, chain law stop, chain station | `EnforcementPost` (`KIND_CHAIN`), `REASON_BY_KIND` |
 | The inspection facility | weigh station; "the scale" in short cues | scale house, weigh point, chicken coop | `RoadStop(type="weigh_station")` |
+| The certified commercial scale on a truck stop's lot a driver pays to weigh on | CAT Scale; always named, never "the scale" | truck scale, Cat scale, public scale, weighbridge | `RoadStop.services` `scale`, `rest_stop/cat_scale.rs`, `tools/cat_scales.py` |
+| The printed result of a weigh, read aloud | CAT Scale ticket | weight ticket, scale ticket, weigh slip | `AxleLoads::ticket_text` |
+| The axle groups a ticket names | steer axle, drive axles, trailer axles, gross | front axle, drives, tandems, rear axles, GVW | `TruckState::axle_loads`, `AxleLoads` |
 | Whether it is working today | open / closed | active, manned, staffed, live | `KIND_FIXED_SCALE` vs `KIND_SCALE_APRON` |
 | The fleet or self-purchased equipment that gets a weigh-in-motion verdict before an open scale, instead of every truck being demanded in | transponder | PrePass, bypass reader, weigh-in-motion unit | `business.has_weigh_station_transponder`, `business.WEIGH_STATION_TRANSPONDER_LEVEL` |
 | The transponder's verdict clearing a truck to keep rolling past an open scale | Scale green light | bypass cleared, waved through | `events/scale_green`, `_resolve_transponder_verdict` |

@@ -1976,7 +1976,7 @@
           "name": "Petro Stopping Center Carlisle",
           "type": "travel_center",
           "at_mi": 112.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): Petro store 0336 at Carlisle; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1989,7 +1989,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 40.23098,
           "lon": -77.14084,
@@ -6189,7 +6190,7 @@
           "name": "Pilot Travel Center Hagerstown",
           "type": "travel_center",
           "at_mi": 71.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6202,7 +6203,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.62906,
           "lon": -77.78268,

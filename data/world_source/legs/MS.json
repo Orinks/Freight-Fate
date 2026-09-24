@@ -3072,7 +3072,7 @@
           "name": "Love's Travel Stop West Point",
           "type": "travel_center",
           "at_mi": 16.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 677 at West Point; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 677 at West Point; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3085,7 +3085,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.58376,
           "lon": -88.65755,
@@ -4312,7 +4313,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 564; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the columbus_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 564; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -4325,7 +4326,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.5186,
           "lon": -88.37694,
@@ -5279,7 +5281,7 @@
           "name": "Love's Travel Stop Indianola",
           "type": "travel_center",
           "at_mi": 22.06,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 559 at Indianola; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 559 at Indianola; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5292,7 +5294,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.45693,
           "lon": -90.6307,
@@ -8639,7 +8642,7 @@
           "name": "Love's Travel Stop Flowood",
           "type": "travel_center",
           "at_mi": 113.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8652,7 +8655,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27966,
           "lon": -90.15441,
@@ -9596,7 +9600,7 @@
           "name": "Flying J Travel Center Gulfport",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9609,7 +9613,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.42108,
           "lon": -89.13832,
@@ -12008,7 +12013,7 @@
           "name": "Flying J Travel Center Gulfport",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12021,7 +12026,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.42108,
           "lon": -89.13832,
@@ -12054,7 +12060,7 @@
           "name": "Love's Travel Stop Magee",
           "type": "travel_center",
           "at_mi": 118.9,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 699 at Magee; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 699 at Magee; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12067,7 +12073,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 31.87552,
           "lon": -89.75558,
@@ -12080,7 +12087,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 160.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12093,7 +12100,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -13248,7 +13256,7 @@
           "name": "Flying J Travel Center Gulfport",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13261,7 +13269,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.42108,
           "lon": -89.13832,
@@ -13271,7 +13280,7 @@
           "name": "Pilot Travel Center Moss Point",
           "type": "travel_center",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store at Moss Point; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store at Moss Point; town read from the mapped site's address; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13284,7 +13293,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.43833,
           "lon": -88.52925,
@@ -13319,7 +13329,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 56.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Alabama extract dated 2026-06-22, read 2026-09-17): Love's store 846; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Alabama extract dated 2026-06-22, read 2026-09-17): Love's store 846; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -13332,7 +13342,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.53179,
           "lon": -88.23869,
@@ -14343,7 +14354,7 @@
           "name": "Flying J Travel Center Gulfport",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the gulfport_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Gulfport; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14356,7 +14367,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.42108,
           "lon": -89.13832,
@@ -15736,7 +15748,7 @@
           "name": "TA Travel Center Slidell",
           "type": "travel_center",
           "at_mi": 86.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): TA store 0180 at Slidell; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): TA store 0180 at Slidell; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15749,7 +15761,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.28672,
           "lon": -89.75046,
@@ -15799,7 +15812,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -15812,7 +15825,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -15824,7 +15838,7 @@
           "name": "Love's Travel Stop McComb",
           "type": "travel_center",
           "at_mi": 81.5,
-          "source": "Love's official store feed lists store 393 in McComb, MS on I-55, exit 13; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 393 at McComb; matched by position, the only Love's within 5 mi of mile 81.5 of this leg (0.1 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 393 in McComb, MS on I-55, exit 13; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 393 at McComb; matched by position, the only Love's within 5 mi of mile 81.5 of this leg (0.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -15837,7 +15851,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -19772,7 +19787,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19785,7 +19800,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -19797,7 +19813,7 @@
           "name": "Love's Travel Stop Magee",
           "type": "travel_center",
           "at_mi": 45.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 699 at Magee; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 699 at Magee; town DERIVED, not read: the nearest mapped place, 1.4 mi away; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19810,7 +19826,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 31.87552,
           "lon": -89.75558,
@@ -21391,7 +21408,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21404,7 +21421,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -21416,7 +21434,7 @@
           "name": "Love's Travel Stop Flowood",
           "type": "travel_center",
           "at_mi": 4.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21429,7 +21447,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27966,
           "lon": -90.15441,
@@ -21444,7 +21463,7 @@
           "name": "Flying J Travel Center Pearl",
           "type": "travel_center",
           "at_mi": 7.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 678 in Pearl, MS with 175 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ms/pearl/685-us-80 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Pearl; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (3.2 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 678 in Pearl, MS with 175 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ms/pearl/685-us-80 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Pearl; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (3.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -21457,7 +21476,8 @@
             "diesel",
             "food",
             "restrooms",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -21496,7 +21516,7 @@
           "name": "Love's Travel Stop Lake",
           "type": "travel_center",
           "at_mi": 53.3,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 639 at Lake; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by position, the only Love's within 5 mi of mile 53.3 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 639 at Lake; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by position, the only Love's within 5 mi of mile 53.3 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21509,7 +21529,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 32.321908,
@@ -21525,7 +21546,7 @@
           "name": "Mr. Fuel Travel Center",
           "type": "travel_center",
           "at_mi": 86.4,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21538,7 +21559,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.3438569,
           "lon": -88.7985616,
@@ -21587,7 +21609,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21600,7 +21622,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -21633,7 +21656,7 @@
           "name": "Love's Travel Stop McComb",
           "type": "travel_center",
           "at_mi": 81.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 393 at McComb; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 393 at McComb; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21646,7 +21669,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 31.1903685,
           "lon": -90.4865984,
@@ -21659,7 +21683,7 @@
           "name": "Pilot Travel Center Hammond",
           "type": "travel_center",
           "at_mi": 131.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Hammond; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): Pilot store at Hammond; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21672,7 +21696,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.477707,
           "lon": -90.4559515,
@@ -21682,7 +21707,7 @@
           "name": "TA Express Laplace",
           "type": "travel_center",
           "at_mi": 159.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): TA Express store 0479 at Laplace; town read from the mapped site's branch name; matched by position, the only TA Express within 5 mi of mile 159.5 of this leg (1.1 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): TA Express store 0479 at Laplace; town read from the mapped site's branch name; matched by position, the only TA Express within 5 mi of mile 159.5 of this leg (1.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -21695,7 +21720,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 30.085641,
@@ -24076,7 +24102,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24089,7 +24115,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -24101,7 +24128,7 @@
           "name": "Love's Travel Stop Flowood",
           "type": "travel_center",
           "at_mi": 4.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24114,7 +24141,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27966,
           "lon": -90.15441,
@@ -24129,7 +24157,7 @@
           "name": "Flying J Travel Center Pearl",
           "type": "travel_center",
           "at_mi": 7.2,
-          "source": "Pilot Flying J official locator lists Flying J Travel Center store 678 in Pearl, MS with 175 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ms/pearl/685-us-80 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Pearl; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (3.2 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 678 in Pearl, MS with 175 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (9.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ms/pearl/685-us-80 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Pearl; matched by position, the only Flying J within 5 mi of mile 7.2 of this leg (3.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -24142,7 +24170,8 @@
             "diesel",
             "food",
             "restrooms",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -24183,7 +24212,7 @@
           "name": "Love's Travel Stop Lake",
           "type": "travel_center",
           "at_mi": 53.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 639 at Lake; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by position, the only Love's within 5 mi of mile 53.1 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 639 at Lake; town DERIVED, not read: the nearest mapped place, 1.9 mi away; matched by position, the only Love's within 5 mi of mile 53.1 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24196,7 +24225,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 32.321908,
@@ -24209,7 +24239,7 @@
           "name": "Mr. Fuel Travel Center",
           "type": "travel_center",
           "at_mi": 86.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Type corrected from service_plaza to travel_center (read): the OpenStreetMap feature at the record's coordinate carries hgv=yes on the services area; amenity=fuel with HGV lanes or HGV diesel; amenity=parking for HGVs; a truck scale (amenity=weighbridge). Geofabrik extract, accessed 2026-09-17. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -24222,7 +24252,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.3438569,
           "lon": -88.7985616,
@@ -24263,7 +24294,7 @@
           "name": "Love's Travel Stop Toomsuba",
           "type": "travel_center",
           "at_mi": 104.4,
-          "source": "Love's official store feed lists store 343 in Toomsuba, MS on I-20, exit 165; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 343 at Toomsuba; matched by position, the only Love's within 5 mi of mile 104.4 of this leg (0.1 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 343 in Toomsuba, MS on I-20, exit 165; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 343 at Toomsuba; matched by position, the only Love's within 5 mi of mile 104.4 of this leg (0.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -24276,7 +24307,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -28611,7 +28643,7 @@
           "name": "Pilot Travel Center Meridian",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -28624,7 +28656,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.34634,
           "lon": -88.72823,
@@ -30426,7 +30459,7 @@
           "name": "Pilot Travel Center Meridian",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30439,7 +30472,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.34634,
           "lon": -88.72823,
@@ -30449,7 +30483,7 @@
           "name": "Love's Travel Stop West Point",
           "type": "travel_center",
           "at_mi": 93.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 677 at West Point; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 677 at West Point; town DERIVED, not read: the nearest mapped place, 1.7 mi away; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -30462,7 +30496,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 33.583757,
           "lon": -88.657546,
@@ -31962,7 +31997,7 @@
           "name": "Pilot Travel Center Meridian",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the meridian_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store 388 at Meridian; town read from the mapped site's address; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31975,7 +32010,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.34634,
           "lon": -88.72823,
@@ -31985,7 +32021,7 @@
           "name": "Love's Travel Stop Toomsuba",
           "type": "travel_center",
           "at_mi": 13.2,
-          "source": "Love's official store feed lists store 343 in Toomsuba, MS on I-20, exit 165; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 343 at Toomsuba; matched by position, the only Love's within 5 mi of mile 13.2 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 343 in Toomsuba, MS on I-20, exit 165; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 343 at Toomsuba; matched by position, the only Love's within 5 mi of mile 13.2 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -31998,7 +32034,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -33326,7 +33363,7 @@
           "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 91.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baton_rouge_la_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): Love's store 240; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baton_rouge_la_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Louisiana extract dated 2026-06-22, read 2026-09-17): Love's store 240; no town is mapped for it, so the record keeps the chain's name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -33339,7 +33376,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 30.4455,
           "lon": -91.24251,
@@ -36570,7 +36608,7 @@
           "name": "Flying J Travel Center Olive Branch",
           "type": "travel_center",
           "at_mi": 56.95,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Olive Branch; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Olive Branch; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -36583,7 +36621,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.9283,
           "lon": -89.79356,
@@ -39339,7 +39378,7 @@
           "name": "Pilot Travel Center New Albany",
           "type": "travel_center",
           "at_mi": 26.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store at New Albany; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Pilot store at New Albany; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39352,7 +39391,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.46774,
           "lon": -89.00594,
@@ -39365,7 +39405,7 @@
           "name": "Flying J Travel Center Olive Branch",
           "type": "travel_center",
           "at_mi": 78.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Olive Branch; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Flying J store at Olive Branch; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -39378,7 +39418,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 34.9283,
           "lon": -89.79356,
@@ -40256,7 +40297,7 @@
           "name": "Petro Stopping Center Jackson",
           "type": "travel_center",
           "at_mi": 42.8,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Petro store 0328 at Jackson; town read from the mapped site's branch name; matched by coordinate, 0.04 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40269,7 +40310,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27951,
           "lon": -90.19802,
@@ -40282,7 +40324,7 @@
           "name": "Love's Travel Stop Flowood",
           "type": "travel_center",
           "at_mi": 44.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jackson_ms_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Mississippi extract dated 2026-06-22, read 2026-09-17): Love's store 420 at Flowood; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -40295,7 +40337,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 32.27966,
           "lon": -90.15441,

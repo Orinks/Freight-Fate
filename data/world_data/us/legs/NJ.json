@@ -3581,7 +3581,7 @@
           "name": "Pilot Travel Center Bloomsbury",
           "type": "travel_center",
           "at_mi": 55.1,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Bloomsbury; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 55.1 of this leg (3.2 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Bloomsbury; town read from the mapped site's address; matched by position, the only Pilot within 5 mi of mile 55.1 of this leg (3.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3594,7 +3594,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 40.659527,

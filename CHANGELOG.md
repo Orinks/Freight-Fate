@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
+
 - **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
 - **Hold slash to straighten up.** With lane keeping on partial or off, the truck turns to point down the road and leaves your lane position to you. (Suggested by flight)
 
