@@ -108,6 +108,8 @@
 
 ### Fixed
 
+- **Trucks build speed at a realistic rate again, loaded or empty.** The automatic shifts through each gear once, with one clunk per shift.
+
 - **Route-transition assistance brakes smoothly to a stop sign.** It slows steadily to the line instead of arriving fast and stopping hard.
 
 - **Switching the music source during a drive now changes the radio straight away.** Choosing Original ends the synthesized playlist.
