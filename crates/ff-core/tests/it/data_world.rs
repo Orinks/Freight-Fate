@@ -232,19 +232,34 @@ fn test_home_terminal_prefers_explicit_terminal_and_falls_back_to_yard() {
 
 #[test]
 fn test_home_terminal_never_picks_travel_center_or_truck_parking() {
+    use ff_core::data::world_constants::HOME_TERMINAL_SEARCH_RADIUS_MI;
     let world = world();
     // Healy's only curated pin is Fisher Fuel (travel_center). Home terminal
-    // must announce a synthetic company yard, never the fuel stop.
+    // resolves to the nearest real yard (Nenana stand-in), never the fuel
+    // stop and never a synthetic "Healy Company Yard".
+    assert!(
+        world.is_offerable_home_city("healy_ak_us"),
+        "Nenana yard is within {HOME_TERMINAL_SEARCH_RADIUS_MI} air mi of Healy"
+    );
+    let yard_city = world
+        .resolve_home_terminal_city("healy_ak_us")
+        .expect("nearest yard city");
+    assert_eq!(yard_city, "nenana_ak_us");
     let healy = world.home_terminal("healy_ak_us").expect("healy");
     assert_eq!(healy.kind, "company_yard");
-    assert_eq!(healy.name, "Healy Company Yard");
+    assert!(
+        healy.name.contains("Nenana"),
+        "expected Nenana yard, got {}",
+        healy.name
+    );
     assert!(!healy.name.to_lowercase().contains("fisher"));
+    assert!(!healy.name.contains("Healy Company Yard"));
     assert_ne!(healy.kind, "travel_center");
     assert_ne!(healy.kind, "truck_parking");
 
     let err = world
         .default_facility("healy_ak_us")
-        .expect_err("Healy has no company_yard/terminal");
+        .expect_err("Healy has no company_yard/terminal on its own pin");
     assert!(
         err.to_string().contains("no freight facilities"),
         "unexpected default_facility error: {err}"

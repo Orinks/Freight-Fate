@@ -1,5 +1,8 @@
 from .stand_in_markets import STAND_IN_MARKET_CITY_KEYS  # noqa: F401
 
+# Max air miles to search for a real company_yard/terminal home.
+HOME_TERMINAL_SEARCH_RADIUS_MI = 250.0
+
 STOP_TYPE_LABELS = {
     "truck_stop": "truck stop",
     "travel_center": "travel center",
