@@ -83,7 +83,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "exit_speed_assist",
         "Exit speed assistance",
-        "Slows for a signalled exit; you still take it.",
+        "Brakes past the exit gore to reach the exit speed by the ramp curve; you still take the exit.",
     ),
     (
         "destination_approach_assist",

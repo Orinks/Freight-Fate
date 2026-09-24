@@ -151,11 +151,18 @@ pub const RAMP_CRUISE_TARGET_MPH: f64 = RAMP_MAX_MPH - RAMP_CRUISE_HEADROOM_MPH;
 // once it has slowed the truck to it. Deliberately small: the assist is keeping
 // a truck rolling to its own gore, not driving it.
 pub const EXIT_HOLD_MAX_THROTTLE: f64 = 0.45;
-pub const RAMP_LENGTH_MI: f64 = 0.5; // deceleration lane plus ramp to the stop
-                                     // Ramp terminals: where the off-ramp meets the surface road there is usually
-                                     // a light or a stop sign (diamond interchanges), occasionally free flow
-                                     // (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
-                                     // on the ramp links when available, else a seeded urban/rural heuristic.
+// READ: the most automatic control eases below road speed on the MAINLINE for
+// an armed exit. TxDOT Roadway Design Manual 9.4.4 accepts up to 10 mph of
+// slowing in the through lanes where the full deceleration length is
+// impractical; NCHRP Research Report 1081 (2024) measured diverge speeds of
+// 58 to 70 mph at 70 mph sites. The ramp's own number is reached past the
+// gore, in the deceleration lane.
+pub const EXIT_MAINLINE_EASE_MPH: f64 = 10.0;
+// A ramp's length is not a constant any more: `Trip::ramp_length_mi`.
+// Ramp terminals: where the off-ramp meets the surface road there is usually
+// a light or a stop sign (diamond interchanges), occasionally free flow
+// (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
+// on the ramp links when available, else a seeded urban/rural heuristic.
 pub const RAMP_ACCESS_MI: f64 = 0.12; // terminal-to-driveway stretch at the ramp's end
                                       // Rolling stop-bar countdown milestones (spoken as each is crossed while
                                       // moving): the bar needs a position the way an exit does, or a driver

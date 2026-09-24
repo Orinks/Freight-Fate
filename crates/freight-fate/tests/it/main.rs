@@ -90,6 +90,7 @@ mod states_driving_chain_law;
 mod states_driving_controls;
 mod states_driving_core;
 mod states_driving_damage;
+mod states_driving_decel_lane;
 mod states_driving_departure_merge;
 mod states_driving_departure_sweep;
 mod states_driving_descent_truth;

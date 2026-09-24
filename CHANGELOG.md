@@ -37,6 +37,10 @@
 
 ### Changed
 
+- **Taking an exit keeps road speed until the gore.** Braking for the ramp comes after it, and cruise eases 10 miles per hour at most.
+
+- **The exit speed is now said as you enter the deceleration lane.** A ramp curve taken faster than that shifts the load.
+
 - **A loaded delivery's deadline now covers a legal sleep forced by your current hours.** Dispatch checks again at departure and tells you when it adjusts the time.
 
 - **Sleep choices now read your projected driving hours, fatigue, and delivery time before you commit.** Press Enter again to rest.

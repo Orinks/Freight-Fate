@@ -48,7 +48,7 @@ use ff_core::sim::lane::LaneKeeping;
 use ff_core::sim::lane_guidance::LaneGuidance;
 use ff_core::sim::pedal_latch::PedalLatch;
 use ff_core::sim::trip::Trip;
-use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::trip_models::{ExitRampLayout, RoadStop};
 use ff_core::sim::turn_guide::TurnGuide;
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherSystem;
@@ -426,7 +426,6 @@ pub struct DrivingState {
     /// How long the exit lane has been lost since "Exit lane set." was said.
     /// Debounces the line that takes it back; see `update_exit_preparation`.
     pub exit_lane_lost_s: f64,
-    pub exit_commit_said: bool,
     pub exit_cancel_armed: bool,
     pub exit_right_hold_s: f64,
     pub exit_right_taps: i64,
@@ -434,6 +433,13 @@ pub struct DrivingState {
     /// `set[float]` of the `EXIT_COUNTDOWN_MILESTONES_MI` already spoken.
     pub exit_countdown_said: Vec<f64>,
     pub ramp_mi: Option<f64>, // ramp distance left, once taken
+    /// The ramp taken at the gore, piece by piece: the deceleration lane, the
+    /// curve, the run to the stop bar. See `driving_events/decel_lane.rs`.
+    pub ramp_layout: Option<ExitRampLayout>,
+    /// The exit assists' held application in the deceleration lane, a pedal
+    /// floor like the terminal servo's (`ramp_assist_brake`).
+    pub decel_lane_brake: f64,
+    pub decel_lane_assist_said: bool,
     pub ramp_stop: Option<RoadStop>,
     pub ramp_end_said: bool,
     pub ramp_arrival_grace_s: f64,

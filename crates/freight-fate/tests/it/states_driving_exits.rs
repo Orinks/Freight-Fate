@@ -27,7 +27,9 @@ use freight_fate::app::testing::AudioLog;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::{DESTINATION_EXIT_SCAN_WINDOW_MI, DOCKING_MAX_MPH};
+use freight_fate::states::driving_core::{
+    DESTINATION_EXIT_SCAN_WINDOW_MI, DOCKING_MAX_MPH, RAMP_ACCESS_MI,
+};
 use freight_fate::states::driving_rest_states::{ParkingFullState, RestStopState};
 
 use crate::transcript_cruise_support::{
@@ -70,6 +72,13 @@ fn played(log: &AudioLog) -> Vec<(String, f64)> {
 
 fn said_any(harness: &PlaytestHarness, needle: &str) -> bool {
     spoken(harness).iter().any(|line| line.contains(needle))
+}
+
+/// Where a freshly taken ramp starts counting down from: this exit's own
+/// gore-to-bar length, then the stretch to the driveway.
+fn ramp_starts_at(harness: &PlaytestHarness, stop: &RoadStop) -> f64 {
+    let stop = stop.clone();
+    harness.read_drive(move |d| d.trip.ramp_length_mi(&stop)) + RAMP_ACCESS_MI
 }
 
 fn said_count(harness: &PlaytestHarness, needle: &str) -> usize {
@@ -464,9 +473,10 @@ fn test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup() {
     frame(&mut harness, DT);
 
     let ramp = harness.read_drive(|d| d.ramp_mi);
+    let start = ramp_starts_at(&harness, &stop);
     assert!(
-        ramp.is_some_and(|mi| (mi - 0.5).abs() < 1e-6),
-        "the ramp starts at half a mile: {ramp:?}"
+        ramp.is_some_and(|mi| (mi - start).abs() < 1e-6),
+        "the ramp starts at its own length, {start}: {ramp:?}"
     );
     assert!(harness.read_drive(|d| d.destination_exit_taken));
     assert!(
@@ -535,7 +545,8 @@ fn test_destination_exit_no_longer_requires_x_to_take_ramp() {
     frame(&mut harness, DT);
 
     let ramp = harness.read_drive(|d| d.ramp_mi);
-    assert!(ramp.is_some_and(|mi| (mi - 0.5).abs() < 1e-6), "{ramp:?}");
+    let start = ramp_starts_at(&harness, &stop);
+    assert!(ramp.is_some_and(|mi| (mi - start).abs() < 1e-6), "{ramp:?}");
     assert!(
         !said_any(&harness, "Press X to take"),
         "{:?}",
@@ -588,7 +599,8 @@ fn test_relaxed_lane_drift_infers_destination_exit_intent() {
     frame(&mut harness, DT);
 
     let ramp = harness.read_drive(|d| d.ramp_mi);
-    assert!(ramp.is_some_and(|mi| (mi - 0.5).abs() < 1e-6), "{ramp:?}");
+    let start = ramp_starts_at(&harness, &stop);
+    assert!(ramp.is_some_and(|mi| (mi - start).abs() < 1e-6), "{ramp:?}");
     assert!(said_any(&harness, "You take"), "{:?}", spoken(&harness));
 }
 
@@ -1190,7 +1202,10 @@ fn test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap() {
         d.truck_mut().velocity_mps = 53.0 * MPS_PER_MPH;
     });
 
-    let expected = harness.read_drive(move |d| d.armed_ramp_cruise_mph(Some(&stop)));
+    // The exit's floor for the mainline, ten under road speed at most, or the
+    // 53 the driver set if that is lower (realistic exit, 2026-09-24).
+    let expected =
+        harness.with_drive(move |d, _| 53.0f64.min(d.exit_approach_floor_mph(Some(&stop))));
     harness.with_drive(|d, ctx| d.engage_cruise(ctx, 53.0, false));
 
     assert_eq!(
@@ -1217,17 +1232,18 @@ fn test_the_ramp_cruise_line_says_when_the_ease_happens() {
         let stop = RoadStop::new("Test Plaza", d.trip.position_mi + 5.0, "travel_center");
 
         let line = d.cap_cruise_for_ramp(ctx, Some(&stop));
-        // Rolling well above ramp speed: the line must place the ease at the
-        // ramp, not imply it starts now.
+        // Rolling at road speed: the line must place the ease at the exit,
+        // not imply it starts now, and say where speed control lets go.
         assert!(line.contains("holds road speed"), "{line}");
-        assert!(line.contains("at the ramp"), "{line}");
+        assert!(line.contains("for the exit"), "{line}");
+        assert!(line.contains("pauses on the ramp"), "{line}");
         assert!(!line.contains("will ease to"), "{line}");
     });
 
     // And the cap itself proves the claim: road speed stands miles out.
     harness.with_drive(|d, _| {
         let stop = RoadStop::new("Test Plaza", 100.0, "travel_center");
-        let ramp = d.armed_ramp_cruise_mph(Some(&stop));
+        let ramp = 65.0f64.min(d.exit_approach_floor_mph(Some(&stop)));
         d.exit_stop = Some(stop);
         d.cruise_exit_mph = Some(ramp);
         d.trip.position_mi = 95.0;

@@ -803,7 +803,7 @@ impl DrivingState {
         self.cruise_held_reason = if following {
             "for the traffic ahead".to_string()
         } else if exit_capped {
-            "for the ramp".to_string()
+            "for the exit".to_string()
         } else if curve_capped {
             "for the bend".to_string()
         } else if limit_capped {

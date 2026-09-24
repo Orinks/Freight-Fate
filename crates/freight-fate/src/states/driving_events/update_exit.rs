@@ -114,7 +114,14 @@ impl DrivingState {
     ) {
         let ramp_mi = self.ramp_mi.expect("checked by the caller") - moved_mi;
         self.ramp_mi = Some(ramp_mi);
-        if !self.ramp_light_announced && ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI {
+        // Not in the deceleration lane: the gore line has just named the
+        // terminal, the exit speed is the job there, and the terminal's
+        // servo (which waits for this callout) must not brake for a bar
+        // while the lane's own braking is under way.
+        if !self.ramp_light_announced
+            && ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI
+            && !self.in_deceleration_lane()
+        {
             self.announce_ramp_terminal(ctx);
         }
         self.update_ramp_terminal_assist_with_input(ctx, accelerating);
@@ -409,7 +416,14 @@ impl DrivingState {
     fn take_the_ramp(&mut self, ctx: &mut GameContext, stop: &ff_core::sim::trip_models::RoadStop) {
         self.reset_exit_lane_state();
         self.exit_signal_on = false;
-        self.ramp_mi = Some(RAMP_LENGTH_MI);
+        // Gore to stop bar, then the terminal-to-driveway stretch: the
+        // deceleration lane, the ramp curve and the run to the bar, laid out
+        // from the Green Book (see `driving_events/decel_lane.rs`).
+        let layout = self.trip.exit_ramp_layout(stop);
+        self.ramp_layout = Some(layout);
+        self.decel_lane_brake = 0.0;
+        self.decel_lane_assist_said = false;
+        self.ramp_mi = Some(layout.length_mi() + RAMP_ACCESS_MI);
         self.ramp_stop = Some(stop.clone());
         self.ramp_end_said = false;
         self.ramp_arrival_grace_s = 0.0;
@@ -459,15 +473,24 @@ impl DrivingState {
         };
         let scale_ramp = stop.stop_type == "weigh_station";
         // In the driver's units: a metric cab heard "half a mile" here in
-        // an otherwise all-kilometer run (agent drive, 2026-09-01).
+        // an otherwise all-kilometer run (agent drive, 2026-09-01). The
+        // length is this ramp's, gore to bar, not a flat half mile.
         let ramp = {
-            let text = ctx.settings.short_distance_text(0.5);
+            let text = ctx.settings.short_distance_text(layout.length_mi());
             let mut chars = text.chars();
             match chars.next() {
                 Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
                 None => text,
             }
         };
+        // The exit speed, once, where its sign stands: along the deceleration
+        // lane the truck has just entered (MUTCD 11th ed. 2C.12, W13-2). The
+        // number governs the curve at the end of this lane, and the lane is
+        // where a truck at road speed sheds to it.
+        let exit_speed = format!(
+            "Exit speed {}.",
+            ctx.settings.speed_value(self.armed_ramp_mph(Some(stop)))
+        );
         let message = if self.terse_speech(ctx) {
             let mut terminal = match self.ramp_control.as_str() {
                 "signal" => " Traffic light at the end.",
@@ -477,7 +500,7 @@ impl DrivingState {
             if scale_ramp {
                 terminal = " The scale is at the end.";
             }
-            format!("{take} {ramp} of ramp.{terminal}")
+            format!("{take} {exit_speed} {ramp} of ramp.{terminal}")
         } else {
             let mut ending = match self.ramp_control.as_str() {
                 "signal" => "traffic light at the end",
@@ -487,7 +510,7 @@ impl DrivingState {
             if scale_ramp {
                 ending = "the scale at the end, stop at the bar";
             }
-            format!("{take} {ramp} of ramp, {ending}.")
+            format!("{take} {exit_speed} {ramp} of ramp, {ending}.")
         };
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
@@ -518,7 +541,12 @@ impl DrivingState {
     pub fn destination_terminal_retry_mi(&self) -> f64 {
         let speed = self.trip.truck.speed_mph().max(self.armed_ramp_mph(None));
         let miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale() / 3600.0;
-        RAMP_ACCESS_MI.max(miles.min(RAMP_LENGTH_MI))
+        let ramp_mi = match (self.ramp_layout, self.ramp_stop.as_ref()) {
+            (Some(layout), _) => layout.length_mi(),
+            (None, Some(stop)) => self.trip.ramp_length_mi(stop),
+            (None, None) => 0.0,
+        } + RAMP_ACCESS_MI;
+        RAMP_ACCESS_MI.max(miles.min(ramp_mi))
     }
 
     /// Blown the destination terminal at speed: the scripted loop-back.
@@ -541,6 +569,9 @@ impl DrivingState {
         self.trip.game_minutes += RAMP_TERMINAL_MISS_LOOP_MIN;
         self.charge_scripted_loop(ctx, RAMP_TERMINAL_MISS_LOOP_MIN);
         self.ramp_mi = Some(self.destination_terminal_retry_mi());
+        // The turnaround comes back on surface road: no deceleration lane or
+        // ramp curve lies between it and the entrance.
+        self.ramp_layout = None;
         // The say-once latch must never swallow the reposition: when the
         // missed-exit loop let it, a second miss stranded the trip with
         // nothing left to aim at. The arrival line speaks fresh instead.

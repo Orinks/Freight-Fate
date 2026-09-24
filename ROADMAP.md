@@ -1318,6 +1318,43 @@ gate, turned up these on dev's own code.
       when the next turn is inside the keeper's own build-and-shed
       distance.
 
+### September 24 realistic interstate exit
+
+A tester said the drive off the highway, the speeds and the slowing for the
+ramp, was unrealistic. The owner approved a redesign built on NCHRP Research
+Report 1081 (2024) and the Green Book 2018 over the old ramp-speed-on-the-
+mainline behaviour.
+
+- [x] **Mainline.** Cruise and exit speed assistance ease at most 10 mph
+      under road speed before the gore (`EXIT_MAINLINE_EASE_MPH`, TxDOT RDM
+      9.4.4, read); the old floor was the ramp's own number, about 44 mph in
+      a 70 lane for the last half mile. The countdown and lane-prep lines ask
+      for the lane and the signal only; the gore line and its "Stay under" are
+      gone.
+- [x] **Deceleration lane.** Crossing the gore starts a lane of Green Book
+      Table 10-6 length (all four curve columns now, 40 mph fixed to 320 and
+      45 mph added at 385) with the book's own deceleration grade factors
+      (0.9, 1.2, 0.8, 1.35), keyed on the corridor limit and the ramp's
+      speed. Speed control pauses there, "Exit speed N." is said once, and
+      exit speed assistance (or route-transition assistance) brakes to it by
+      the curve.
+- [x] **Ramp curve and run to the bar.** The ramp's curvature applies only
+      in its curve (45 degrees, assumed, at the ramp speed's AASHTO minimum
+      radius), which now feeds the load and the tank the way a mapped bend
+      does. The ramp past the lane is level (assumed). Gore-to-bar length
+      comes from `Trip::ramp_length_mi`: lane, curve, a derived 590 ft climb
+      and an assumed 200 ft queue, about 1,200 to 2,000 ft where the flat
+      unsourced half mile was 2,640.
+- [ ] **Per-exit ramp length from OSM.** `Trip::ramp_length_mi` returns the
+      default until the interchange record carries a measured gore-to-
+      terminal distance (bake in progress); prefer the record once it lands.
+- [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
+      assumed level because nothing records its climb or drop. Needs an
+      elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
+- [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
+      can run the truck wide, but nothing models the rollover a loaded truck
+      meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily

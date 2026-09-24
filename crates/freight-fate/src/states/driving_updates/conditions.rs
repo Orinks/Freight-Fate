@@ -82,8 +82,8 @@ impl DrivingState {
         // parked while the truck is on the ramp: the harness showed it reading
         // 3.200 mi with the truck crawling yards from the market, so the cap
         // came out at 215 mph and the assist waved the truck through. The
-        // arrival lives on the ramp instead -- ramp_mi counts down from
-        // RAMP_LENGTH_MI to the stop, and the dock opens when it reaches zero
+        // arrival lives on the ramp instead -- ramp_mi counts down from the
+        // ramp's own length to the stop, and the dock opens when it reaches zero
         // at docking speed; anything faster is a blown stop and the driver is
         // told they drove past (owner, three runs, 2026-08-19/20).
         //

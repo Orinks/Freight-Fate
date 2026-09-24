@@ -2,7 +2,7 @@
 //! changes, crossings, a road that narrows under the truck, coned-off lanes,
 //! and keep-right pressure.
 
-use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft, superelevation_at};
+use ff_core::data::curves::{advisory_with_bank_mph, superelevation_at};
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -92,11 +92,12 @@ impl DrivingState {
             }
             None => curve = 0.0,
         }
-        if self.ramp_mi.is_some() && !self.surface_chain {
-            // A ramp peels off the mainline and keeps bending. Its radius is
-            // DERIVED from the speed it is posted at, through the same AASHTO
-            // point-mass control the curve bake uses, rather than a flat push
-            // invented for the old model.
+        if let Some(ramp_radius) = self.ramp_curve_radius_ft() {
+            // The ramp's controlling curve, past its deceleration lane. Its
+            // radius is DERIVED from the speed it is posted at, through the
+            // same AASHTO point-mass control the curve bake uses, rather than
+            // a flat push invented for the old model; see
+            // `ramp_curve_radius_ft`.
             //
             // NOT on the facility street chain, which keeps `ramp_mi` set long
             // after the ramp is behind the truck: a ramp's curvature held over
@@ -104,8 +105,7 @@ impl DrivingState {
             // steering it walked the truck into the median and wrote it off
             // (every chain destination in the approach sweep, first run of the
             // heading model).
-            let ramp_radius = min_radius_ft(self.armed_ramp_mph(None));
-            curve += 1.0 / ramp_radius.max(1.0);
+            curve += 1.0 / ramp_radius;
         }
         if active.is_none() && self.curve_slip_active {
             self.curve_slip_active = false;
@@ -353,8 +353,13 @@ impl DrivingState {
         } else {
             ramp_cap_mph
         };
+        // Not in the deceleration lane: the truck arrives there at road speed
+        // by design, and the lane's own servo brakes it to the exit speed by
+        // the curve (`update_deceleration_lane`). Lifting there as well only
+        // announced a second assist for the same slowing.
         let transition_assisting = ctx.settings.route_transition_assist
             && self.ramp_mi.is_some()
+            && !self.in_deceleration_lane()
             && self.trip.truck.speed_mph() > ramp_hold_mph;
         if transition_assisting {
             // A ramp cap is sustained speed control, not the bar's stop.
