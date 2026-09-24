@@ -312,19 +312,7 @@ impl Trip {
         // Now that a braking vehicle's label is read off these zones, a queue
         // injected into a jam and updated before the jam was handed over lost
         // its brake lights on the spot.
-        self.traffic_manager.braking_zones = self
-            .zones
-            .iter()
-            .filter(|zone| zone.reason == "heavy traffic" || zone.reason == "construction")
-            .map(|zone| {
-                BrakingZone::new(
-                    (zone.start_mi - 1.0).max(0.0),
-                    zone.end_mi,
-                    &zone.reason,
-                    Some(zone.limit_mph),
-                )
-            })
-            .collect();
+        self.sync_braking_zones();
         self.traffic_manager
             .update(dt, self.position_mi, time_scale, Some(hour), Some(weekend));
         self.check_zones();
@@ -366,6 +354,44 @@ impl Trip {
             );
         }
         self.events.clone()
+    }
+
+    /// Hand the braking zones to the traffic manager, rebuilding the list only
+    /// when the zones it is derived from no longer match it. `zones` is a
+    /// public field that tests and the density model edit in place, so the
+    /// list is compared against its source rather than trusting a flag.
+    fn sync_braking_zones(&mut self) {
+        let source = self
+            .zones
+            .iter()
+            .filter(|zone| zone.reason == "heavy traffic" || zone.reason == "construction");
+        let mut current = self.traffic_manager.braking_zones.iter();
+        let mut in_sync = true;
+        for zone in source.clone() {
+            let matches = current.next().is_some_and(|braking| {
+                braking.start_mi == (zone.start_mi - 1.0).max(0.0)
+                    && braking.end_mi == zone.end_mi
+                    && braking.reason == zone.reason
+                    && braking.pace_mph == Some(zone.limit_mph)
+            });
+            if !matches {
+                in_sync = false;
+                break;
+            }
+        }
+        if in_sync && current.next().is_none() {
+            return;
+        }
+        self.traffic_manager.braking_zones = source
+            .map(|zone| {
+                BrakingZone::new(
+                    (zone.start_mi - 1.0).max(0.0),
+                    zone.end_mi,
+                    &zone.reason,
+                    Some(zone.limit_mph),
+                )
+            })
+            .collect();
     }
 
     // -- event checks -----------------------------------------------------------------
@@ -420,14 +446,15 @@ impl Trip {
                 );
             }
         }
-        let stops = self.stops.clone();
-        for stop in stops {
-            let ahead = stop.at_mi - self.position_mi;
-            if 0.0 < ahead
-                && ahead <= STOP_AHEAD_LOOKAHEAD_MI
-                && !self.announced_stops.contains(&stop.key())
-            {
-                self.announced_stops.insert(stop.key());
+        for i in 0..self.stops.len() {
+            let ahead = self.stops[i].at_mi - self.position_mi;
+            if !(0.0 < ahead && ahead <= STOP_AHEAD_LOOKAHEAD_MI) {
+                continue;
+            }
+            let key = self.stops[i].key();
+            if !self.announced_stops.contains(&key) {
+                self.announced_stops.insert(key);
+                let stop = self.stops[i].clone();
                 let typed = self.name_facility(&stop.name, &stop.spoken_name());
                 let distance = self.ahead_text(ahead);
                 let parking_normal = stop.parking_text();
@@ -474,6 +501,9 @@ impl Trip {
             // drive, Aberdeen yard, 2026-09-23). One still ahead keeps the
             // floor, or the turn after it is announced over it.
             let ahead = cue.at_mi - self.position_mi;
+            if ahead < -0.1 {
+                continue;
+            }
             if ahead <= 0.0
                 && self
                     .announced_navigation
@@ -481,13 +511,13 @@ impl Trip {
             {
                 continue;
             }
-            if ahead >= -0.1 && next_turn_ahead.is_none_or(|best| ahead < best) {
+            if next_turn_ahead.is_none_or(|best| ahead < best) {
                 next_turn_key = Some(cue.key.clone());
                 next_turn_ahead = Some(ahead);
             }
         }
-        let cues = self.navigation_cues.clone();
-        for cue in cues {
+        for i in 0..self.navigation_cues.len() {
+            let cue = &self.navigation_cues[i];
             let ahead = cue.at_mi - self.position_mi;
             if cue.kind == "interchange" {
                 continue;
@@ -496,8 +526,12 @@ impl Trip {
                 continue;
             }
             if cue.kind == "continue" || cue.kind == "onramp" {
+                if !(-0.5..=0.5).contains(&ahead) {
+                    continue;
+                }
                 let key = format!("{}:near", cue.key);
-                if (-0.5..=0.5).contains(&ahead) && !self.announced_navigation.contains(&key) {
+                if !self.announced_navigation.contains(&key) {
+                    let cue = cue.clone();
                     self.announced_navigation.insert(key);
                     let text = if cue.near_text.is_empty() {
                         cue.text.clone()
@@ -521,8 +555,12 @@ impl Trip {
                 continue;
             }
             if cue.kind == "traffic" {
+                if !(0.0 < ahead && ahead <= 2.0) {
+                    continue;
+                }
                 let key = format!("{}:advance", cue.key);
-                if 0.0 < ahead && ahead <= 2.0 && !self.announced_navigation.contains(&key) {
+                if !self.announced_navigation.contains(&key) {
+                    let cue = cue.clone();
                     self.announced_navigation.insert(key);
                     let speed = match cue.speed_mph {
                         Some(mph) => format!(" at {} miles per hour", fmt_f(mph, 0)),
@@ -545,9 +583,12 @@ impl Trip {
                 continue;
             }
             if cue.kind == "toll" {
+                if !(0.0 < ahead && ahead <= 2.0) {
+                    continue;
+                }
                 let advance_key = format!("{}:advance", cue.key);
-                if 0.0 < ahead && ahead <= 2.0 && !self.announced_navigation.contains(&advance_key)
-                {
+                if !self.announced_navigation.contains(&advance_key) {
+                    let cue = cue.clone();
                     self.announced_navigation.insert(advance_key);
                     // The heads-up is a preview: terse drops it whole.
                     self.emit(
@@ -561,10 +602,13 @@ impl Trip {
                 }
                 continue;
             }
-            let advance_key = format!("{}:advance", cue.key);
-            let near_key = format!("{}:near", cue.key);
             if cue.kind == "state_crossing" {
-                if ahead <= 0.0 && !self.announced_navigation.contains(&near_key) {
+                if ahead > 0.0 {
+                    continue;
+                }
+                let near_key = format!("{}:near", cue.key);
+                if !self.announced_navigation.contains(&near_key) {
+                    let cue = cue.clone();
                     self.announced_navigation.insert(near_key);
                     self.emit(
                         TripEventKind::StateCrossing,
@@ -583,25 +627,35 @@ impl Trip {
             } else {
                 2.0
             };
-            if NAV_LEAD_MIN_MI < ahead
-                && ahead <= lookahead
-                && !self.announced_navigation.contains(&advance_key)
-            {
-                self.announced_navigation.insert(advance_key);
-                // The ladder never says zero, so the cue is spoken with a
-                // real distance instead of dropped.
-                let message = format!("In {}, {}.", self.ahead_text(ahead), cue.text);
-                self.emit(
-                    TripEventKind::GpsCue,
-                    SpokenMessage::new(message),
-                    TripEventData {
-                        cue: Some(cue.clone()),
-                        advance: Some(true),
-                        ..Default::default()
-                    },
-                );
+            let in_advance_window = NAV_LEAD_MIN_MI < ahead && ahead <= lookahead;
+            let in_near_window = (-0.1..=0.1).contains(&ahead);
+            if !in_advance_window && !in_near_window {
+                continue;
             }
-            if (-0.1..=0.1).contains(&ahead) && !self.announced_navigation.contains(&near_key) {
+            let cue = cue.clone();
+            if in_advance_window {
+                let advance_key = format!("{}:advance", cue.key);
+                if !self.announced_navigation.contains(&advance_key) {
+                    self.announced_navigation.insert(advance_key);
+                    // The ladder never says zero, so the cue is spoken with a
+                    // real distance instead of dropped.
+                    let message = format!("In {}, {}.", self.ahead_text(ahead), cue.text);
+                    self.emit(
+                        TripEventKind::GpsCue,
+                        SpokenMessage::new(message),
+                        TripEventData {
+                            cue: Some(cue.clone()),
+                            advance: Some(true),
+                            ..Default::default()
+                        },
+                    );
+                }
+            }
+            if !in_near_window {
+                continue;
+            }
+            let near_key = format!("{}:near", cue.key);
+            if !self.announced_navigation.contains(&near_key) {
                 self.announced_navigation.insert(near_key);
                 let kind = if cue.kind == "checkpoint" {
                     TripEventKind::Checkpoint
@@ -655,14 +709,14 @@ impl Trip {
     }
 
     pub fn check_traffic_pressures(&mut self) {
-        let pressures = self.traffic_pressures.clone();
-        for pressure in pressures {
-            let key = traffic_pressure_key(&pressure);
-            let ahead = pressure.start_mi - self.position_mi;
-            if 0.0 < ahead
-                && ahead <= TRAFFIC_PRESSURE_LOOKAHEAD_MI
-                && !self.announced_traffic_pressures.contains(&key)
-            {
+        for i in 0..self.traffic_pressures.len() {
+            let ahead = self.traffic_pressures[i].start_mi - self.position_mi;
+            if !(0.0 < ahead && ahead <= TRAFFIC_PRESSURE_LOOKAHEAD_MI) {
+                continue;
+            }
+            let key = traffic_pressure_key(&self.traffic_pressures[i]);
+            if !self.announced_traffic_pressures.contains(&key) {
+                let pressure = self.traffic_pressures[i].clone();
                 if pressure.kind == "construction_merge"
                     && self.zones.iter().any(|zone| {
                         zone.reason == "construction"
@@ -779,31 +833,34 @@ impl Trip {
     /// Route-backed inspections plus rare seeded patrols.
     pub fn check_inspections(&mut self, moved_mi: f64) {
         let previous_mi = self.position_mi - moved_mi;
-        let stops = self.stops.clone();
-        for stop in &stops {
-            let key = format!("weigh:{}:{}", stop.name, fmt_f(stop.at_mi, 1));
-            if stop.stop_type != "weigh_station" || self.announced_enforcement.contains(&key) {
+        for i in 0..self.stops.len() {
+            let stop = &self.stops[i];
+            if stop.stop_type != "weigh_station"
+                || !(previous_mi < stop.at_mi && stop.at_mi <= self.position_mi)
+            {
                 continue;
             }
-            if previous_mi < stop.at_mi && stop.at_mi <= self.position_mi {
-                self.announced_enforcement.insert(key.clone());
-                if self.hos_violation {
-                    self.emit(
-                        TripEventKind::Inspection,
-                        SpokenMessage::new(format!(
-                            "{} is open. Officers wave you in for an ELD check.",
-                            stop.spoken_name()
-                        )),
-                        TripEventData {
-                            key: Some(key),
-                            context: Some("weigh_station".to_string()),
-                            evidence: Some(vec!["HOS/ELD violation".to_string()]),
-                            ..Default::default()
-                        },
-                    );
-                }
-                return;
+            let key = format!("weigh:{}:{}", stop.name, fmt_f(stop.at_mi, 1));
+            if self.announced_enforcement.contains(&key) {
+                continue;
             }
+            let spoken_name = stop.spoken_name();
+            self.announced_enforcement.insert(key.clone());
+            if self.hos_violation {
+                self.emit(
+                    TripEventKind::Inspection,
+                    SpokenMessage::new(format!(
+                        "{spoken_name} is open. Officers wave you in for an ELD check."
+                    )),
+                    TripEventData {
+                        key: Some(key),
+                        context: Some("weigh_station".to_string()),
+                        evidence: Some(vec!["HOS/ELD violation".to_string()]),
+                        ..Default::default()
+                    },
+                );
+            }
+            return;
         }
 
         let (limit, reason) = self.speed_limit_at(self.position_mi);
