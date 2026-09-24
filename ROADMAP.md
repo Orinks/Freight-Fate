@@ -1456,12 +1456,11 @@ mainline behaviour.
       accepts it with no invariants regen) weigh on reputation and the
       safety record as a serious event does, and age out on the same
       window. The Citations and violations list names it "Crash".
-- [ ] **orinks.net: the public crash count.** The site does not publish or
-      validate it yet: the snapshot needs `crashes` from
-      `driving_record.crashes`, the profile page a "N crash(es)" row beside
-      the out-of-service orders, and the validator `crash_times` checked
-      against the career clock like `out_of_service_times`. The in-game
-      driver profile already reads `crashes` when the site sends it.
+- [x] **orinks.net: the public crash count** (orinks-net `743fa38`, live on
+      staging and production 2026-09-24). The snapshot carries `crashes` from
+      `driving_record.crashes`, the profile page lists "N crash(es)" after the
+      out-of-service orders, and the validator checks `crash_times` against
+      the career clock like `out_of_service_times`.
 - [ ] **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
       every advisory at 0.30 g plus bank, so a full trailer at the number the
       cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
