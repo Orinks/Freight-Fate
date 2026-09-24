@@ -92,6 +92,8 @@ mirror!(BakedInterchange => Interchange {
     via: String, highway: String, source: String, ramp_control: String,
     ramp_far_end: String, ramp_advisory_mph_forward: Option<f64>,
     ramp_advisory_mph_backward: Option<f64>, ramp_advisory_source: String,
+    ramp_length_ft_forward: Option<f64>, ramp_length_ft_backward: Option<f64>,
+    ramp_length_source: String,
 });
 
 mirror!(BakedSpeedLimitSample => SpeedLimitSample {

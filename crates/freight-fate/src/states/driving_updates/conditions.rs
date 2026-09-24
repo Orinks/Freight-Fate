@@ -82,8 +82,8 @@ impl DrivingState {
         // parked while the truck is on the ramp: the harness showed it reading
         // 3.200 mi with the truck crawling yards from the market, so the cap
         // came out at 215 mph and the assist waved the truck through. The
-        // arrival lives on the ramp instead -- ramp_mi counts down from
-        // RAMP_LENGTH_MI to the stop, and the dock opens when it reaches zero
+        // arrival lives on the ramp instead -- ramp_mi counts down from the
+        // ramp's own length to the stop, and the dock opens when it reaches zero
         // at docking speed; anything faster is a blown stop and the driver is
         // told they drove past (owner, three runs, 2026-08-19/20).
         //
@@ -126,7 +126,15 @@ impl DrivingState {
             // fought, and a foot on the brake wins outright.
             self.destination_arrival_active = false;
             if let Some(ramp_mi) = self.ramp_mi.filter(|mi| *mi > 0.0) {
-                let (limit_mph, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                // The street's limit past the bar, never the mainline's: the
+                // milepost holds at the gore while the truck is on the ramp,
+                // so the limit "here" was the interstate's, and the assist
+                // wound a truck leaving a stop bar toward 70 on the way into
+                // town (every-assist audit, 2026-09-24). With no street zone
+                // to read, the facility access limit stands in.
+                let limit_mph = self
+                    .street_limit_past_bar_mph()
+                    .unwrap_or(ff_core::sim::trip_models::FACILITY_ACCESS_LIMIT_MPH);
                 let target_mph = limit_mph.max(FACILITY_LANE_ROLL_MPH);
                 self.hold_approach_speed_with(
                     ramp_mi * 1609.344,

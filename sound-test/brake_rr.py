@@ -45,13 +45,15 @@ def hp(x: np.ndarray, fc: float = 200.0) -> np.ndarray:
 
 def write(name: str, x: np.ndarray, target_rms: float = 0.10) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -67,7 +69,9 @@ def chuff(seg: np.ndarray, max_s: float = 0.5) -> np.ndarray:
     return seg
 
 
-def segment_bantam(x: np.ndarray, min_gap_s: float = 0.35, max_events: int = 12) -> list[np.ndarray]:
+def segment_bantam(
+    x: np.ndarray, min_gap_s: float = 0.35, max_events: int = 12
+) -> list[np.ndarray]:
     """Cut the machine loop at its loudest onsets (each valve actuation)."""
     xh = hp(x)
     env = np.abs(xh)
@@ -78,8 +82,8 @@ def segment_bantam(x: np.ndarray, min_gap_s: float = 0.35, max_events: int = 12)
     events = []
     i = 0
     while i < len(env) - int(0.5 * C.SR) and len(events) < max_events:
-        if env[i] > thr and (env[i] >= env[max(0, i - w):i + w].max() - 1e-9):
-            events.append(chuff(x[i:i + int(0.5 * C.SR)]))
+        if env[i] > thr and (env[i] >= env[max(0, i - w) : i + w].max() - 1e-9):
+            events.append(chuff(x[i : i + int(0.5 * C.SR)]))
             i += gap
         else:
             i += 1
@@ -93,11 +97,11 @@ def main() -> None:
     for p in ONE_SHOTS:
         if p.exists():
             x = C.load_wav(p)
-            a = int(np.argmax(np.abs(hp(x))) )  # near the onset peak
+            a = int(np.argmax(np.abs(hp(x))))  # near the onset peak
             a = max(0, a - int(0.02 * C.SR))
-            bank.append(chuff(x[a:a + int(0.5 * C.SR)]))
+            bank.append(chuff(x[a : a + int(0.5 * C.SR)]))
     # drop any near-silent slices
-    bank = [b for b in bank if np.sqrt(np.mean(b ** 2)) > 1e-3]
+    bank = [b for b in bank if np.sqrt(np.mean(b**2)) > 1e-3]
     for i, b in enumerate(bank, 1):
         write(f"brake_rr_{i:02d}.wav", b)
     print(f"  {len(bank)} round-robin releases (high-passed, trimmed)")
@@ -105,7 +109,7 @@ def main() -> None:
     gap = np.zeros(int(0.5 * C.SR))
     demo = np.concatenate([np.concatenate([b / (np.abs(b).max() or 1) * 0.7, gap]) for b in bank])
     write("brake_rr_demo.wav", demo)
-    print(f"  wrote brake_rr_demo.wav ({len(demo)/C.SR:.1f}s) to {OUT}")
+    print(f"  wrote brake_rr_demo.wav ({len(demo) / C.SR:.1f}s) to {OUT}")
 
 
 if __name__ == "__main__":

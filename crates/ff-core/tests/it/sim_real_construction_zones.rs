@@ -416,3 +416,33 @@ fn test_a_zone_with_room_still_gets_its_full_taper() {
     assert!(work.start_mi >= CONSTRUCTION_TAPER_MI);
     assert_eq!(work.start_mi - taper.start_mi, CONSTRUCTION_TAPER_MI);
 }
+
+/// The Caltrans districts a real leg of the map would fetch lane closures
+/// from, at the trip's own 3-mile search radius.
+fn caltrans_districts(from: &str, to: &str) -> Vec<u8> {
+    let route = ff_core::data::world::get_world()
+        .route_from_cities(&[from, to])
+        .unwrap_or_else(|| panic!("{from} to {to} is on the map"));
+    let points: Vec<(f64, f64)> = route.legs[0]
+        .route_points()
+        .iter()
+        .map(|p| (p.lat, p.lon))
+        .collect();
+    ff_core::sim::real_traffic::caltrans::districts_near_route(&points, 3.0)
+}
+
+#[test]
+fn test_a_los_angeles_leg_fetches_only_the_districts_it_crosses() {
+    // US-101 from Oxnard stays in Ventura and Los Angeles counties, both
+    // District 7: the one feed, and none of the other eleven.
+    assert_eq!(
+        caltrans_districts("oxnard_ca_us", "los_angeles_ca_us"),
+        vec![7]
+    );
+    // I-10 east to Indio leaves District 7 for Riverside and San
+    // Bernardino, District 8.
+    assert_eq!(
+        caltrans_districts("los_angeles_ca_us", "indio_ca_us"),
+        vec![7, 8]
+    );
+}

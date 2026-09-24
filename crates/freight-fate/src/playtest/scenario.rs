@@ -345,12 +345,15 @@ pub fn apply(ctx: &mut GameContext, scenario: &Scenario) -> Result<Vec<String>, 
                 }
             }
         }
+        // Dated now, so the safety record's window counts them.
         if let Some(count) = scenario.citations {
             p.driving_record.citations = count;
+            p.driving_record.citation_times = vec![p.game_hours; count.max(0) as usize];
             notes.push(format!("Citations on the record: {count}."));
         }
         if let Some(count) = scenario.out_of_service_events {
             p.out_of_service_events = count;
+            p.driving_record.out_of_service_times = vec![p.game_hours; count.max(0) as usize];
             notes.push(format!("Out-of-service events: {count}."));
         }
         if scenario.rested {

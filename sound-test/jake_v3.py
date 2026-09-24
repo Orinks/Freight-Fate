@@ -57,9 +57,9 @@ def decel_with_downshifts(stage: int = 3) -> tuple[np.ndarray, np.ndarray]:
         g[int(n * 0.75) :] = np.linspace(0.0, 1.0, n - int(n * 0.75))
         gates.append(g)
 
-    run(2.2, 2050, 1320)   # jake pulling the revs down
+    run(2.2, 2050, 1320)  # jake pulling the revs down
     shift()
-    run(2.0, 1880, 1280)   # downshifted, revs jumped back up
+    run(2.0, 1880, 1280)  # downshifted, revs jumped back up
     shift()
     run(2.0, 1830, 1240)
     shift()
@@ -74,8 +74,9 @@ def main() -> None:
 
     print("\nstage comparison at 2000 rpm (a REALISTIC operating point)")
     for stage in (1, 2, 3):
-        write_wav(f"jake3_stage{stage}_2000rpm.wav",
-                  jake(np.full(int(3.5 * SR), 2000.0), stage=stage))
+        write_wav(
+            f"jake3_stage{stage}_2000rpm.wav", jake(np.full(int(3.5 * SR), 2000.0), stage=stage)
+        )
 
     print("\nslowing on the jake, with downshifts -- the pattern you know")
     for stage in (1, 2, 3):

@@ -156,18 +156,13 @@ impl DrivingState {
         // the one thing the driver must not have to infer is that it is
         // happening at all. Said once per run, and terse keeps it: a
         // consequence is exactly what terse verbosity holds on to.
+        // No "slow down for the ramp": the ramp is braked for past the gore,
+        // where taking the exit names its speed (realistic exit, 2026-09-24).
         if self.lane_keeping_takes_exit_said {
-            return if self.terse_speech(ctx) {
-                core
-            } else {
-                format!("{core} Slow down for the ramp.")
-            };
+            return core;
         }
         self.lane_keeping_takes_exit_said = true;
-        if self.terse_speech(ctx) {
-            return format!("{core} Lane keeping will take this exit.");
-        }
-        format!("{core} Lane keeping will take this exit. Slow down for the ramp.")
+        format!("{core} Lane keeping will take this exit.")
     }
 
     /// `_check_destination_exit()`.

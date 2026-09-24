@@ -9,7 +9,7 @@ use crate::app::{GameContext, Say};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-use super::{SAFE_SPEED_CURVE_MI, SAFE_SPEED_EXIT_MI, UPCOMING_MAX_CLAUSES};
+use super::{SAFE_SPEED_CURVE_MI, UPCOMING_MAX_CLAUSES};
 
 impl DrivingState {
     /// `_keeper_holding_text()`: what the speed keeper is holding RIGHT NOW,
@@ -243,15 +243,12 @@ impl DrivingState {
                 context = " for the bend";
             }
         }
-        let ahead = self
-            .exit_stop
-            .as_ref()
-            .map(|stop| stop.at_mi - self.trip.position_mi);
-        let exit_armed = self.exit_signal_on
-            && ahead.is_some_and(|ahead| ahead > 0.0 && ahead <= SAFE_SPEED_EXIT_MI);
-        if self.ramp_mi.is_some() || exit_armed {
+        // On the ramp the exit speed governs. An armed exit still ahead does
+        // not: the gore takes road speed, and the exit speed is braked for
+        // past it (realistic exit, 2026-09-24).
+        if self.ramp_mi.is_some() {
             safe = safe.min(self.armed_ramp_mph(None));
-            context = " for the ramp";
+            context = ", the exit speed";
         }
         let spoken = ctx.settings.speed_text(safe);
         ctx.say(&format!("Safe speed {spoken}{context}."));

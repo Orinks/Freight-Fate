@@ -37,6 +37,7 @@ pub mod arrival;
 pub mod chains;
 pub mod cruise;
 pub mod cruise_loop;
+pub mod decel_lane;
 pub mod destination_exit;
 pub mod exits;
 pub mod pending;
