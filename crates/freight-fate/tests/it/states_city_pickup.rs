@@ -214,10 +214,22 @@ fn test_walking_a_bad_trailer_finds_it_and_offers_the_refusal() {
         .iter()
         .any(|t| t == "Refuse this trailer"));
 
+    app.clear_speech();
     select::<PickupFacilityState>(&mut app, "Walk around the trailer");
-    let said = app.main_lines().last().cloned().unwrap();
-    assert!(said.contains(defect));
-    assert!(said.contains(&unit.number));
+    // What the walk-around found comes first; the badge for finding it after.
+    let lines = app.main_lines();
+    let found = lines
+        .iter()
+        .position(|line| line.starts_with("Walking"))
+        .unwrap_or_else(|| panic!("no walk-around line: {lines:?}"));
+    assert!(lines[found].contains(defect), "{lines:?}");
+    assert!(lines[found].contains(&unit.number));
+    assert!(
+        lines[found + 1..]
+            .iter()
+            .any(|line| line.starts_with("New achievement!")),
+        "{lines:?}"
+    );
     // Only once the driver has actually looked does refusing become an option.
     assert!(labels::<PickupFacilityState>(&app)
         .iter()
