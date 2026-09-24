@@ -10,6 +10,9 @@
 
 ### Added
 
+- **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches. A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run.
+
+
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
 - Phase A ALCAN inland: `prince_george_bc_ca`, `dawson_creek_bc_ca` (Mile 0), and `fort_st_john_bc_ca` pass-throughs with bidirectional Hwy 1/97 / John Hart / Alaska Highway legs (465 / 254 / 45 mi) from public Valhalla truck costing on `feat/career-2.0`.

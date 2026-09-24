@@ -198,6 +198,12 @@ impl<'w> JobBoard<'w> {
             if cargo.lcv_lanes && !self.lcv_lane(&city, &destination) {
                 continue;
             }
+            // STAA twin trailers stay on the National Network approximation
+            // (plus reasonable access). Skip destinations with no twin-legal
+            // corridor option.
+            if cargo.national_network && !self.national_network_lane(&city, &destination) {
+                continue;
+            }
             let Some(dest_location) = self.destination_location(&destination, cargo, level) else {
                 continue;
             };
@@ -266,6 +272,9 @@ impl<'w> JobBoard<'w> {
                 continue;
             }
             if cargo.lcv_lanes && !self.lcv_lane(&city, &destination) {
+                continue;
+            }
+            if cargo.national_network && !self.national_network_lane(&city, &destination) {
                 continue;
             }
             let Some(dest_location) = self.destination_location(&destination, cargo, level) else {
@@ -391,6 +400,17 @@ impl<'w> JobBoard<'w> {
         };
         crate::models::credentials::lcv_state(state_of(origin))
             && crate::models::credentials::lcv_state(state_of(destination))
+    }
+
+    /// Whether any supported corridor option from origin to destination stays
+    /// on the National Network approximation (plus reasonable access) so
+    /// STAA twin trailers may run it. See `data::national_network`.
+    pub(crate) fn national_network_lane(&self, origin: &str, destination: &str) -> bool {
+        use crate::data::national_network::route_allows_staa_doubles;
+        match self.world.supported_route_options(origin, destination, 3) {
+            Ok(routes) => routes.iter().any(route_allows_staa_doubles),
+            Err(_) => false,
+        }
     }
 
     /// `(destination, route miles, route leg count)` for every other city.

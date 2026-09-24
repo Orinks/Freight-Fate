@@ -4,6 +4,10 @@
 use serde_json::{json, Map, Value};
 use std::collections::HashSet;
 
+use ff_core::data::national_network::{
+    cargo_requires_national_network, filter_staa_doubles_routes, STAA_DOUBLES_REROUTE_NOTE,
+    STAA_DOUBLES_ROUTE_REFUSAL,
+};
 use ff_core::data::world::World;
 use ff_core::data::world_models::Route;
 use ff_core::models::business_constants::is_owner_operator;
@@ -738,6 +742,25 @@ impl PickupFacilityState {
             ctx.say("Dispatch cannot find a route for this load.");
             return;
         }
+        // STAA twin trailers: keep only National Network / reasonable-access
+        // lanes. Dropping some options is a reroute; dropping all refuses.
+        let (routes, staa_note) = if cargo_requires_national_network(self.job.cargo.key) {
+            let before = routes.len();
+            let filtered = filter_staa_doubles_routes(&routes);
+            if filtered.is_empty() {
+                ctx.audio.play("ui/error");
+                ctx.say(STAA_DOUBLES_ROUTE_REFUSAL);
+                return;
+            }
+            let note = if filtered.len() < before {
+                Some(STAA_DOUBLES_REROUTE_NOTE)
+            } else {
+                None
+            };
+            (filtered, note)
+        } else {
+            (routes, None)
+        };
         // The world ranks the options by distance; dispatch re-ranks them by
         // the construction the state 511 feeds report on each, the way a
         // dispatcher checks 511 before naming the lane.
@@ -748,6 +771,10 @@ impl PickupFacilityState {
             let construction = dispatch_route_line(&routes, &routing, ctx.world, &ctx.settings);
             let route = routes[routing.pick()].clone();
             let mut lead = String::new();
+            if let Some(note) = staa_note {
+                lead.push_str(note);
+                lead.push(' ');
+            }
             if !construction.is_empty() {
                 lead.push_str(&construction);
                 lead.push(' ');
@@ -771,12 +798,18 @@ impl PickupFacilityState {
             );
             return;
         }
-        ctx.say(&format!(
+        let mut planning = String::new();
+        if let Some(note) = staa_note {
+            planning.push_str(note);
+            planning.push(' ');
+        }
+        planning.push_str(&format!(
             "Route planning to {}. {} route option{}.",
             self.job.destination_facility_text(),
             routes.len(),
             if routes.len() != 1 { "s" } else { "" }
         ));
+        ctx.say(&planning);
         // Dispatch's pick reads as route 1; each option says what 511 has on it.
         let dispatch_note = route_planning_note(&routes, &routing, ctx.world);
         let notes: Vec<String> = routing

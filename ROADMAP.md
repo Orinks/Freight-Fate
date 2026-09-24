@@ -1237,6 +1237,33 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
+
+### Twin parcel / STAA doubles (Track A)
+
+STAA twin 28-foot pups (`parcel_doubles`) on the National Network. FIX 2–5
+are intentionally not started here.
+
+- [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
+      offered and routed only on legs the game treats as National Network or
+      reasonable access. Approximation: Interstate designation
+      (`data::grades::road_class`) plus facility/surface approach legs and
+      short first/last terminal stubs ≤ 1.5 mi. Spoken refusal when no
+      twin-legal lane remains; a dropped off-network option is announced as
+      a reroute.
+- [ ] **Honesty debt: designated federal-aid primary routes.** Real NN
+      includes many US and some state primary routes (23 CFR 658). Without
+      designation flags in world data, those lanes are refused today
+      (under-inclusive). Open call for the realism editor: count `US-`
+      as NN until designation data exists, or keep Interstate-only.
+- [ ] **Honesty debt: reasonable-access distance.** Real access is roughly
+      one mile and varies by state; the game uses approach markers and a
+      1.5 mi end-stub cap, not junction distance. Open call: mileage cap
+      and whether mid-route short connectors may count.
+- [ ] **FIX 2: LCV turnpike trailer** (not started).
+- [ ] **FIX 3: Dual hook time** (not started).
+- [ ] **FIX 4: Pup handling** (not started).
+- [ ] **FIX 5: Twin tare and GVW** (not started).
+
 ### Reefer, APU, and fuel-island hotel power (2.0 candidates)
 
 Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
