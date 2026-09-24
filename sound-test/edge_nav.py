@@ -141,29 +141,52 @@ def main() -> None:
     print("\nrunning wide then recovering")
     # The gesture that matters: drift out, hear it escalate on the side you
     # are drifting toward, correct, and return to silence. Silence is centred.
-    y = np.concatenate([
-        hold(1.2, 1.20),              # tracking the arc, nothing to hear
-        ramp(1.8, 1.20, 1.92),        # running wide, onto the strip
-        hold(0.8, 1.92),              # sitting on it
-        ramp(1.6, 1.92, 1.10),        # correcting back in
-        hold(1.4, 1.10),              # centred again, silent
-    ])
+    y = np.concatenate(
+        [
+            hold(1.2, 1.20),  # tracking the arc, nothing to hear
+            ramp(1.8, 1.20, 1.92),  # running wide, onto the strip
+            hold(0.8, 1.92),  # sitting on it
+            ramp(1.6, 1.92, 1.10),  # correcting back in
+            hold(1.4, 1.10),  # centred again, silent
+        ]
+    )
     left, right = render(y, speed, side=+1.0)
     write_stereo("edge_drift_and_recover_right.wav", left, right)
 
     print("\nover-correcting across to the other edge")
-    y_r = np.concatenate([hold(0.8, 1.20), ramp(1.4, 1.20, 1.88), hold(0.6, 1.88),
-                          ramp(1.2, 1.88, 1.20), hold(1.0, 1.20)])
-    y_l = np.concatenate([hold(0.8, 1.20), hold(1.4, 1.20), hold(0.6, 1.20),
-                          ramp(1.2, 1.20, 1.20), ramp(1.0, 1.20, 1.90)])
+    y_r = np.concatenate(
+        [
+            hold(0.8, 1.20),
+            ramp(1.4, 1.20, 1.88),
+            hold(0.6, 1.88),
+            ramp(1.2, 1.88, 1.20),
+            hold(1.0, 1.20),
+        ]
+    )
+    y_l = np.concatenate(
+        [
+            hold(0.8, 1.20),
+            hold(1.4, 1.20),
+            hold(0.6, 1.20),
+            ramp(1.2, 1.20, 1.20),
+            ramp(1.0, 1.20, 1.90),
+        ]
+    )
     lr, rr = render(y_r, speed, side=+1.0)
     ll, rl = render(y_l, speed, side=-1.0)
     n = min(len(lr), len(ll))
     write_stereo("edge_overcorrect_right_then_left.wav", lr[:n] + ll[:n], rr[:n] + rl[:n])
 
     print("\nall the way off the pavement")
-    y = np.concatenate([hold(0.8, 1.20), ramp(2.2, 1.20, 2.55), hold(1.6, 2.55),
-                        ramp(1.8, 2.55, 1.15), hold(0.8, 1.15)])
+    y = np.concatenate(
+        [
+            hold(0.8, 1.20),
+            ramp(2.2, 1.20, 2.55),
+            hold(1.6, 2.55),
+            ramp(1.8, 2.55, 1.15),
+            hold(0.8, 1.15),
+        ]
+    )
     left, right = render(y, speed, side=+1.0)
     write_stereo("edge_off_onto_shoulder_right.wav", left, right)
 
