@@ -23,6 +23,10 @@
 
 - **A music seed changes every synthesized piece.** Settings, Audio, Music seed rolls a new one and says it, so you can share one you like.
 
+- **You can type in a music seed.** Enter on Music seed opens a field for a seed someone shared; Left or Right rolls a new one.
+
+- **Synthesized music plays more instruments.** Each style adds some of a strummed guitar, an organ, a bell and a harmonica-like reed.
+
 - **The original 1.5 soundtrack is back in Synthesized mode.** Headlights West, Open Road and Night Haul return.
 
 - **Synthesized mode takes Freight Fate's own stations off the radio.** The dial keeps the synthesized Roadhouse, local and web stations, and your playlists.

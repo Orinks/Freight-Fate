@@ -1,5 +1,6 @@
 //! One musical identity per place the synthesized music plays.
 
+use super::compose::Voice;
 use crate::models::business_constants::is_owner_operator;
 use crate::music::{is_night, MenuMusicProfile};
 
@@ -99,6 +100,8 @@ pub struct Style {
     pub swing: f64,
     /// Chance a melody slot is a rest; higher is sparser and calmer.
     pub rest: f64,
+    /// Voices layered over pad, lead, bass and drums (see `compose`).
+    pub extras: &'static [Voice],
 }
 
 const WARM: &[&[usize]] = &[&[0, 4, 5, 3], &[0, 3, 4, 3], &[0, 5, 3, 4], &[0, 3, 0, 4]];
@@ -109,6 +112,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "new_hire",
         title: "New Hire",
+        extras: &[Voice::Bell, Voice::Organ],
         root: 43,
         mode: Mode::Major,
         bpm: (72.0, 80.0),
@@ -121,6 +125,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "first_run",
         title: "First Run",
+        extras: &[Voice::Strum, Voice::Bell],
         root: 45,
         mode: Mode::Major,
         bpm: (84.0, 92.0),
@@ -133,6 +138,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "regional",
         title: "Regional",
+        extras: &[Voice::Strum, Voice::Reed],
         root: 38,
         mode: Mode::Mixolydian,
         bpm: (90.0, 98.0),
@@ -145,6 +151,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "company_senior",
         title: "Senior Driver",
+        extras: &[Voice::Organ, Voice::Bell],
         root: 41,
         mode: Mode::Major,
         bpm: (76.0, 84.0),
@@ -157,6 +164,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "company_top_hand",
         title: "Top Hand",
+        extras: &[Voice::Organ, Voice::Strum],
         root: 43,
         mode: Mode::Major,
         bpm: (80.0, 88.0),
@@ -169,6 +177,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "company_trainer",
         title: "Trainer",
+        extras: &[Voice::Organ, Voice::Reed],
         root: 40,
         mode: Mode::Dorian,
         bpm: (78.0, 86.0),
@@ -181,6 +190,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "company_million_mile",
         title: "Million Mile",
+        extras: &[Voice::Strum, Voice::Organ, Voice::Bell],
         root: 45,
         mode: Mode::Major,
         bpm: (84.0, 92.0),
@@ -193,6 +203,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "owner_fleet",
         title: "Fleet Owner",
+        extras: &[Voice::Strum, Voice::Reed],
         root: 40,
         mode: Mode::Mixolydian,
         bpm: (96.0, 104.0),
@@ -205,6 +216,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "owner_coast_to_coast",
         title: "Coast to Coast",
+        extras: &[Voice::Strum, Voice::Organ, Voice::Bell],
         root: 42,
         mode: Mode::Major,
         bpm: (100.0, 110.0),
@@ -217,6 +229,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "owner_legendary_haul",
         title: "Legendary Haul",
+        extras: &[Voice::Organ, Voice::Reed],
         root: 38,
         mode: Mode::Dorian,
         bpm: (96.0, 106.0),
@@ -229,6 +242,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "owner_road_legend",
         title: "Road Legend",
+        extras: &[Voice::Strum, Voice::Organ, Voice::Reed],
         root: 43,
         mode: Mode::Mixolydian,
         bpm: (104.0, 112.0),
@@ -241,6 +255,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "night_menu",
         title: "Midnight Terminal",
+        extras: &[Voice::Bell, Voice::Organ],
         root: 45,
         mode: Mode::Minor,
         bpm: (64.0, 72.0),
@@ -253,6 +268,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "drive_day",
         title: "Day Drive",
+        extras: &[Voice::Strum, Voice::Reed],
         root: 45,
         mode: Mode::Major,
         bpm: (88.0, 100.0),
@@ -265,6 +281,7 @@ static STYLES: [Style; 14] = [
     Style {
         id: "drive_night",
         title: "Night Drive",
+        extras: &[Voice::Organ, Voice::Bell],
         root: 45,
         mode: Mode::Minor,
         bpm: (66.0, 76.0),
