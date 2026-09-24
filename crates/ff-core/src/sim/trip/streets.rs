@@ -3,11 +3,29 @@
 //! reads along the way (`tools/street_chain.py` bakes both). Data only; what
 //! the drive does with a limit or a control is the driving layer's call.
 
-use crate::data::world_models::StreetLimit;
+use crate::data::world_models::{Route, StreetLimit};
+use crate::data::world_services::local_chain_route;
+use crate::sim::trip_models::RoadStop;
 
 use super::Trip;
 
 impl Trip {
+    /// The streets from the ramp terminal of the exit serving a road stop,
+    /// for this trip's direction of travel, to the stop's driveway; None for
+    /// a stop with no decided exit, one on the mainline, or an exit with no
+    /// chain baked from its terminal this way.
+    pub fn stop_approach_route(&self, stop: &RoadStop) -> Option<Route> {
+        let terminal = self.ramp_terminal_node_at(stop.interchange_mi?)?;
+        self.route.legs.iter().find_map(|leg| {
+            leg.stops
+                .iter()
+                .filter(|record| record.name == stop.name)
+                .flat_map(|record| &record.approach_chains)
+                .find(|chain| chain.terminal_node == terminal)
+                .map(|chain| local_chain_route(&leg.a, &chain.segments))
+        })
+    }
+
     /// The posted limit of the facility street under a route mile, with its
     /// kind (`read`, `statutory` or `assumed`); None off a facility chain, or
     /// on a chain baked before the street detail was.

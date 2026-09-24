@@ -381,3 +381,62 @@ def test_the_first_street_is_aligned_at_the_junction_it_shares():
     out = chain_match.adopt(recorded, fresh)
     assert out[0]["controls"] == [{"at_mi": 0.2, "kind": "stop"}]
     assert out[1]["controls"] == [{"at_mi": 0.0, "kind": "signal"}]
+
+
+def _stop_leg(node, lat, lon):
+    return {
+        "from": "a",
+        "to": "b",
+        "miles": 2.0,
+        "highway": "I-1",
+        "corridor": {
+            "interchanges": [
+                {
+                    "at_mi": 1.0,
+                    "exit_ref": "7",
+                    "ramp_terminal_forward": {"node": node, "lat": lat, "lon": lon},
+                }
+            ],
+            "state_miles": [{"state": "Illinois", "miles": 2.0}],
+        },
+        "stops": [
+            {
+                "name": "Fixture Plaza",
+                "type": "travel_center",
+                "at_mi": 1.0,
+                "interchange_mi": 1.0,
+                "lat": 41.0080,
+                "lon": -86.9950,
+                "source": "fixture",
+            },
+            {"name": "Rest Area", "type": "public_rest_area", "at_mi": 1.5, "source": "x"},
+        ],
+    }
+
+
+def test_a_stop_off_an_exit_gets_the_streets_from_its_ramp(tmp_path, monkeypatch):
+    pytest.importorskip("osmium")
+    import build_stop_approaches as stops
+
+    osm_path = tmp_path / "stop.osm"
+    osm_path.write_text(FIXTURE, encoding="utf-8")
+    lg = stops._local_geometry()
+    monkeypatch.setattr(lg, "state_extract_path", lambda _cache, _state: osm_path)
+    monkeypatch.setattr(stops, "_local_geometry", lambda: lg)
+    legs = [_stop_leg(100, 41.0, -87.01)]
+    work, counts = stops.stop_targets(legs)
+    assert counts["no_serving_exit"] == 1 and len(work) == 1
+    found = stops.route_stops(tmp_path, work, None)[(0, 0)]
+    [chain] = found["approach_chains"]
+    assert [seg["road"] for seg in chain["segments"]] == [
+        "Exit Road",
+        "Terminal Road",
+        "Warehouse Drive",
+    ]
+    assert chain["driveway"]["node"] == 4
+    # A ramp that leads straight into the lot is on the mainline: no chain.
+    legs = [_stop_leg(4, 41.0080, -87.0000)]
+    work, _counts = stops.stop_targets(legs)
+    found = stops.route_stops(tmp_path, work, None)[(0, 0)]
+    assert found["approach_chains"] == []
+    assert found["approach_chains_failed"][0]["route_failure"] == stops.ON_MAINLINE

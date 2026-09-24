@@ -196,3 +196,58 @@ fn the_driveway_is_known_where_the_chain_leaves_the_street() {
     assert!(w.facility_driveway(COLUMBUS, YARD, None).unwrap().is_some());
     assert_eq!(w.facility_driveway(COLUMBUS, YARD, Some(1)).unwrap(), None);
 }
+
+#[test]
+fn a_stop_off_an_exit_has_its_streets_from_the_ramp_that_reaches_it() {
+    // I-65 northbound, exit 16 (Memphis, IN): the ramp ends on Memphis-Blue
+    // Lick Road and the Love's lot is 0.19 mi on. Southbound that exit's ramp
+    // baked no terminal, so there is no chain that way.
+    let w = world();
+    let trip = trip_on(first_route_option(w, LOUISVILLE, COLUMBUS));
+    let stops = trip.place_stops();
+    let loves = stops
+        .iter()
+        .find(|stop| stop.name == "Love's Travel Stop Memphis")
+        .expect("the stop is on the route");
+    let route = trip
+        .stop_approach_route(loves)
+        .expect("a chain from the ramp");
+    assert_eq!(route.legs[0].local_cue, "Start on Memphis-Blue Lick Road.");
+    assert!(route.miles() < 0.5);
+    let back = trip_on(first_route_option(w, COLUMBUS, LOUISVILLE));
+    if let Some(stop) = back
+        .place_stops()
+        .iter()
+        .find(|stop| stop.name == "Love's Travel Stop Memphis")
+    {
+        assert!(back.stop_approach_route(stop).is_none());
+    }
+    // A stop with no decided exit has none.
+    let mut unlinked = loves.clone();
+    unlinked.interchange_mi = None;
+    assert!(trip.stop_approach_route(&unlinked).is_none());
+}
+
+#[test]
+fn stop_chains_without_a_source_are_refused() {
+    use ff_core::data::world_parsing::parse_stop;
+    let chain = serde_json::json!([{
+        "terminal_node": 7, "total_miles": 0.2,
+        "segments": [{"road": "Main Street", "cue": "Start on Main Street.", "miles": 0.2}],
+    }]);
+    let stop = |with_source: bool| {
+        let mut raw = serde_json::json!({
+            "name": "Fixture Stop", "type": "travel_center", "at_mi": 1.0,
+            "source": "OpenStreetMap fixture", "parking": "likely",
+            "actions": ["park"], "services": ["parking"],
+            "approach_chains": chain.clone(),
+        });
+        if with_source {
+            raw["approach_source"] = "derived (fixture)".into();
+        }
+        raw
+    };
+    assert!(parse_stop(&stop(false), 2.0, "A", "B").is_err());
+    let parsed = parse_stop(&stop(true), 2.0, "A", "B").unwrap();
+    assert_eq!(parsed.approach_chains[0].terminal_node, 7);
+}

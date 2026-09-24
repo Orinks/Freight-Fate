@@ -101,9 +101,9 @@ fn local_cue_direction(cue: &str) -> &'static str {
     }
 }
 
-/// A baked facility chain as a drivable same-city route, one leg a street,
-/// each carrying its spoken cue, turn angle and street detail.
-fn local_chain_route(city: &str, segments: &[LocalGeometrySegment]) -> Route {
+/// A baked facility or road-stop chain as a drivable same-city route, one
+/// leg a street, each carrying its spoken cue, turn angle and street detail.
+pub(crate) fn local_chain_route(city: &str, segments: &[LocalGeometrySegment]) -> Route {
     let legs: Vec<Leg> = segments
         .iter()
         .map(|segment| {

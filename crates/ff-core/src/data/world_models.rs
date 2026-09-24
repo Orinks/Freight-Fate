@@ -311,6 +311,10 @@ pub struct Stop {
     /// match exactly, never a mile to search near; None when the leg records
     /// no such exit.
     pub interchange_mi: Option<f64>,
+    /// The streets from each of that exit's ramp terminals to the stop's
+    /// driveway, keyed by terminal node like a facility's exit chains. Empty
+    /// for a stop on the mainline or with no decided exit.
+    pub approach_chains: Vec<ExitChain>,
 }
 
 impl Default for Stop {
@@ -329,6 +333,7 @@ impl Default for Stop {
             vehicle_access: DEFAULT_VEHICLE_ACCESS.to_string(),
             exit_ref: String::new(),
             interchange_mi: None,
+            approach_chains: Vec::new(),
         }
     }
 }

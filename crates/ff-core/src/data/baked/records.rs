@@ -188,12 +188,66 @@ impl From<BakedCorridor> for CorridorDetail {
 
 // --------------------------------------------------------------------- eager
 
-mirror!(BakedStop => Stop {
-    name: String, at_mi: f64, stop_type: String, source: String,
-    actions: Vec<String>, services: Vec<String>, parking: String,
-    directions: Vec<String>, curation: String, parking_spaces: i64,
-    vehicle_access: String, exit_ref: String, interchange_mi: Option<f64>,
-});
+/// Holds `BakedExitChain`s, so it is spelled out.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BakedStop {
+    pub name: String,
+    pub at_mi: f64,
+    pub stop_type: String,
+    pub source: String,
+    pub actions: Vec<String>,
+    pub services: Vec<String>,
+    pub parking: String,
+    pub directions: Vec<String>,
+    pub curation: String,
+    pub parking_spaces: i64,
+    pub vehicle_access: String,
+    pub exit_ref: String,
+    pub interchange_mi: Option<f64>,
+    pub approach_chains: Vec<BakedExitChain>,
+}
+
+impl From<&Stop> for BakedStop {
+    fn from(value: &Stop) -> Self {
+        BakedStop {
+            name: value.name.clone(),
+            at_mi: value.at_mi,
+            stop_type: value.stop_type.clone(),
+            source: value.source.clone(),
+            actions: value.actions.clone(),
+            services: value.services.clone(),
+            parking: value.parking.clone(),
+            directions: value.directions.clone(),
+            curation: value.curation.clone(),
+            parking_spaces: value.parking_spaces,
+            vehicle_access: value.vehicle_access.clone(),
+            exit_ref: value.exit_ref.clone(),
+            interchange_mi: value.interchange_mi,
+            approach_chains: to_mirror(&value.approach_chains),
+        }
+    }
+}
+
+impl From<BakedStop> for Stop {
+    fn from(value: BakedStop) -> Self {
+        Stop {
+            name: value.name,
+            at_mi: value.at_mi,
+            stop_type: value.stop_type,
+            source: value.source,
+            actions: value.actions,
+            services: value.services,
+            parking: value.parking,
+            directions: value.directions,
+            curation: value.curation,
+            parking_spaces: value.parking_spaces,
+            vehicle_access: value.vehicle_access,
+            exit_ref: value.exit_ref,
+            interchange_mi: value.interchange_mi,
+            approach_chains: from_mirror(value.approach_chains),
+        }
+    }
+}
 
 mirror!(BakedLocation => Location {
     name: String, facility_type: String, cargo: Vec<String>, id: String,
