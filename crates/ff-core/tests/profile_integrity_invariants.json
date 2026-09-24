@@ -2041,6 +2041,10 @@
     "tank": {
       "label": "Tank",
       "purchasePrice": 96000
+    },
+    "turnpike_double": {
+      "label": "Turnpike doubles",
+      "purchasePrice": 110000
     }
   },
   "truckConditionFields": [
