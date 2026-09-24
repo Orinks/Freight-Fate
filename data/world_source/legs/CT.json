@@ -12922,7 +12922,54 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "56",
           "interchange_mi": 37.1,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.32 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I95, 0.32 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 1857947065,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.19,
+              "segments": [
+                {
+                  "road": "East Industrial Drive",
+                  "miles": 0.08,
+                  "cue": "Start on East Industrial Drive.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 25.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.11,
+                  "cue": "Continue onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 2
+              },
+              "driveway": {
+                "at_mi": 0.08,
+                "node": 7150570543,
+                "lat": 41.297563,
+                "lon": -72.7597542,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,

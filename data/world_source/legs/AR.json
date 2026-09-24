@@ -3385,7 +3385,54 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "33",
           "interchange_mi": 50.6,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 191919266,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.14,
+              "segments": [
+                {
+                  "road": "Gateway Drive (I 49 Business)",
+                  "miles": 0.09,
+                  "cue": "Start on Gateway Drive (I 49 Business).",
+                  "speed_mph": 55.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 55.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 131.0,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 2
+              },
+              "driveway": {
+                "at_mi": 0.09,
+                "node": 8273263184,
+                "lat": 36.9685188,
+                "lon": -94.4323118,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "caseys",
@@ -11577,7 +11624,54 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "24",
           "interchange_mi": 17.2,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I49, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 877878594,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.41,
+              "segments": [
+                {
+                  "road": "State Highway 282 (AR 282)",
+                  "miles": 0.13,
+                  "cue": "Start on State Highway 282 (AR 282).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.28,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 88.3,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 3
+              },
+              "driveway": {
+                "at_mi": 0.13,
+                "node": 6867734143,
+                "lat": 35.5397296,
+                "lon": -94.2361399,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Brentwood",
@@ -14415,7 +14509,64 @@
           "exit_ref": "37",
           "interchange_mi": 38.5,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.50 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
-          "parking_spaces": 12
+          "parking_spaces": 12,
+          "approach_chains": [
+            {
+              "terminal_node": 5926268439,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.49,
+              "segments": [
+                {
+                  "road": "AR 219",
+                  "miles": 0.37,
+                  "cue": "Start on AR 219.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Airport Road (AR 96)",
+                  "miles": 0.05,
+                  "cue": "Turn right onto Airport Road (AR 96).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 95.9,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 40.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 20
+              },
+              "driveway": {
+                "at_mi": 0.42,
+                "node": 12686726823,
+                "lat": 35.5119173,
+                "lon": -93.8215358,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Love's Travel Stop Clarksville",
@@ -14519,7 +14670,74 @@
           ],
           "exit_ref": "107",
           "interchange_mi": 108.7,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 5926426146,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.32,
+              "segments": [
+                {
+                  "road": "State Highway 95 (AR 95)",
+                  "miles": 0.07,
+                  "cue": "Start on State Highway 95 (AR 95).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Oak Street (AR 95)",
+                  "miles": 0.12,
+                  "cue": "Continue onto Oak Street (AR 95).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "North Oak Street (AR 95)",
+                  "miles": 0.06,
+                  "cue": "Continue onto North Oak Street (AR 95).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 104.7,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 6
+              },
+              "driveway": {
+                "at_mi": 0.25,
+                "node": 116799289,
+                "lat": 35.1728948,
+                "lon": -92.7444409,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,
@@ -25059,7 +25277,54 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "175",
           "interchange_mi": 114.8,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.21 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 5928770846,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.1,
+              "segments": [
+                {
+                  "road": "State Highway 31 (AR 31)",
+                  "miles": 0.05,
+                  "cue": "Start on State Highway 31 (AR 31).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 97.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 3
+              },
+              "driveway": {
+                "at_mi": 0.05,
+                "node": 8272679316,
+                "lat": 34.8061244,
+                "lon": -91.8861777,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "goodstop by Casey's",
@@ -26835,7 +27100,64 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "142",
           "interchange_mi": 16.2,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 118365338,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.43,
+              "segments": [
+                {
+                  "road": "State Highway 365 (AR 365)",
+                  "miles": 0.25,
+                  "cue": "Start on State Highway 365 (AR 365).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Mac Arthur Drive (AR 365)",
+                  "miles": 0.1,
+                  "cue": "Continue onto Mac Arthur Drive (AR 365).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.08,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 71.8,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 19
+              },
+              "driveway": {
+                "at_mi": 0.35,
+                "node": 10277191834,
+                "lat": 34.8867938,
+                "lon": -92.3758395,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Conway East",
@@ -34689,7 +35011,64 @@
           ],
           "exit_ref": "37",
           "interchange_mi": 119.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.50 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.50 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 5926268439,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.49,
+              "segments": [
+                {
+                  "road": "AR 219",
+                  "miles": 0.37,
+                  "cue": "Start on AR 219.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Airport Road (AR 96)",
+                  "miles": 0.05,
+                  "cue": "Turn right onto Airport Road (AR 96).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 95.9,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 40.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 20
+              },
+              "driveway": {
+                "at_mi": 0.42,
+                "node": 12686726823,
+                "lat": 35.5119173,
+                "lon": -93.8215358,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Ed\u2019s Truck Stop",
@@ -35614,7 +35993,54 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "20",
           "interchange_mi": 23.5,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I530, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I530, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 117370642,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.1,
+              "segments": [
+                {
+                  "road": "Sheridan Road (AR 46)",
+                  "miles": 0.05,
+                  "cue": "Start on Sheridan Road (AR 46).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 53.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 2
+              },
+              "driveway": {
+                "at_mi": 0.05,
+                "node": 117402435,
+                "lat": 34.4403974,
+                "lon": -92.1947419,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,
@@ -38991,7 +39417,64 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "121",
           "interchange_mi": 20.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.42 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 260779223,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.6,
+              "segments": [
+                {
+                  "road": "I-30 Frontage Road",
+                  "miles": 0.32,
+                  "cue": "Start on I-30 Frontage Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Alcoa Road",
+                  "miles": 0.19,
+                  "cue": "Turn left onto Alcoa Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 30.2,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.09,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 50.8,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 7,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 29
+              },
+              "driveway": {
+                "at_mi": 0.51,
+                "node": 7025737271,
+                "lat": 34.6076263,
+                "lon": -92.5343353,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Shell",
@@ -39014,7 +39497,128 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "117",
           "interchange_mi": 24.8,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.37 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 452991865,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.38,
+              "segments": [
+                {
+                  "road": "I-30 Frontage Road (AR 5)",
+                  "miles": 0.33,
+                  "cue": "Start on I-30 Frontage Road (AR 5).",
+                  "speed_mph": 45.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 45.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 105.3,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 7
+              },
+              "driveway": {
+                "at_mi": 0.33,
+                "node": 7028453241,
+                "lat": 34.5744378,
+                "lon": -92.5891894,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            },
+            {
+              "terminal_node": 1912718766,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 1.63,
+              "segments": [
+                {
+                  "road": "I-30 Frontage Road (AR 5)",
+                  "miles": 1.05,
+                  "cue": "Start on I-30 Frontage Road (AR 5).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "West Carpenter Street (AR 35)",
+                  "miles": 0.14,
+                  "cue": "Turn right onto West Carpenter Street (AR 35).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 157.9,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "AR 5;AR 35",
+                  "miles": 0.25,
+                  "cue": "Continue onto AR 5;AR 35.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Old Hot Springs Highway (AR 5)",
+                  "miles": 0.11,
+                  "cue": "Turn right onto Old Hot Springs Highway (AR 5).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 122.3,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.08,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 52.8,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 14,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 60
+              },
+              "driveway": {
+                "at_mi": 1.55,
+                "node": 7028453227,
+                "lat": 34.5748316,
+                "lon": -92.5903067,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "JJ's Truck Stop",
@@ -39040,7 +39644,74 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "106",
           "interchange_mi": 35.3,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.39 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.39 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 118698318,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.49,
+              "segments": [
+                {
+                  "road": "US Highway 67 (US 67)",
+                  "miles": 0.12,
+                  "cue": "Start on US Highway 67 (US 67).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a side street",
+                  "miles": 0.2,
+                  "cue": "Turn left onto a side street.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 79.3,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Old Military Road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto Old Military Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 70.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.12,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 88.3,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 5,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 12
+              },
+              "driveway": {
+                "at_mi": 0.37,
+                "node": 118609135,
+                "lat": 34.4830181,
+                "lon": -92.7260684,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Gurdon Rest Area - Eastbound",
@@ -44353,7 +45024,60 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "58",
           "interchange_mi": 24.52,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.19 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.19 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 1222001933,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.24,
+              "segments": [
+                {
+                  "road": "South Rogers Street (AR 103)",
+                  "miles": 0.19,
+                  "cue": "Start on South Rogers Street (AR 103).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 42.7,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 8
+              },
+              "driveway": {
+                "at_mi": 0.19,
+                "node": 117387287,
+                "lat": 35.4538583,
+                "lon": -93.4649696,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources",
+          "approach_chains_failed": [
+            {
+              "terminal_node": 117387287,
+              "route_failure": "on_mainline"
+            }
+          ]
         },
         {
           "name": "Exxon",
@@ -44403,7 +45127,64 @@
           "exit_ref": "37",
           "interchange_mi": 45.63,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.50 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
-          "parking_spaces": 12
+          "parking_spaces": 12,
+          "approach_chains": [
+            {
+              "terminal_node": 5926268439,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.49,
+              "segments": [
+                {
+                  "road": "AR 219",
+                  "miles": 0.37,
+                  "cue": "Start on AR 219.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Airport Road (AR 96)",
+                  "miles": 0.05,
+                  "cue": "Turn right onto Airport Road (AR 96).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 95.9,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 40.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 20
+              },
+              "driveway": {
+                "at_mi": 0.42,
+                "node": 12686726823,
+                "lat": 35.5119173,
+                "lon": -93.8215358,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,
@@ -47860,7 +48641,59 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "201",
           "interchange_mi": 24.0,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.23 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 222248232,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.3,
+              "segments": [
+                {
+                  "road": "North McCoy Boulevard (TX 8)",
+                  "miles": 0.22,
+                  "cue": "Start on North McCoy Boulevard (TX 8).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.14,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.08,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 88.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 1,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 6
+              },
+              "driveway": {
+                "at_mi": 0.22,
+                "node": 12529487665,
+                "lat": 33.4767689,
+                "lon": -94.4093361,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Pilot Travel Center Sulphur Springs",
@@ -47886,7 +48719,64 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "122",
           "interchange_mi": 103.3,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.51 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I30, 0.51 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 225445480,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.46,
+              "segments": [
+                {
+                  "road": "Shannon Road West",
+                  "miles": 0.32,
+                  "cue": "Start on Shannon Road West.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Hillcrest Drive South (TX 11;TX 19)",
+                  "miles": 0.07,
+                  "cue": "Turn right onto Hillcrest Drive South (TX 11;TX 19).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 46.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 87.6,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 5,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 21
+              },
+              "driveway": {
+                "at_mi": 0.39,
+                "node": 9459722889,
+                "lat": 33.1170303,
+                "lon": -95.6351302,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,

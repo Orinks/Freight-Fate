@@ -420,5 +420,50 @@
       ],
       "exits_withheld": 1113
     }
+  },
+  "stop_approach_bake": {
+    "kind": "derived",
+    "source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources",
+    "stops": {
+      "stops": 4591,
+      "no_serving_exit": 3630,
+      "exit_has_no_terminal": 17,
+      "no_read_coordinates": 20
+    },
+    "chains": 1005,
+    "chains_with_driveway": 893,
+    "terminals_failed": {
+      "disconnected": 30,
+      "no_start_road": 5,
+      "on_mainline": 7,
+      "terminal_off_graph": 10
+    },
+    "by_type": {
+      "fuel_station": {
+        "stops": 1126,
+        "with_chain": 111
+      },
+      "public_rest_area": {
+        "stops": 682
+      },
+      "service_plaza": {
+        "stops": 228,
+        "with_chain": 17
+      },
+      "travel_center": {
+        "stops": 2400,
+        "with_chain": 756
+      },
+      "truck_parking": {
+        "stops": 22
+      },
+      "truck_stop": {
+        "stops": 46,
+        "with_chain": 4
+      },
+      "weigh_station": {
+        "stops": 87
+      }
+    }
   }
 }

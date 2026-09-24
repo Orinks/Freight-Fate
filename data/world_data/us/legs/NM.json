@@ -4548,7 +4548,56 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "79",
           "interchange_mi": 80.6,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 141526012,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.45,
+              "segments": [
+                {
+                  "road": "Horizon Boulevard (I 40 Business;NM 615)",
+                  "miles": 0.22,
+                  "cue": "Start on Horizon Boulevard (I 40 Business;NM 615).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Willow Drive",
+                  "miles": 0.18,
+                  "cue": "Turn left onto Willow Drive.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 102.5,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a side street",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a side street.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 85.6,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 7
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,
@@ -10744,7 +10793,181 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "153",
           "interchange_mi": 7.0,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.43 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.43 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 140753144,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.82,
+              "segments": [
+                {
+                  "road": "Arroyo Vista Boulevard Northwest",
+                  "miles": 0.05,
+                  "cue": "Start on Arroyo Vista Boulevard Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "98th Street Northwest",
+                  "miles": 0.53,
+                  "cue": "Continue onto 98th Street Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Avalon Road Northwest",
+                  "miles": 0.11,
+                  "cue": "Turn right onto Avalon Road Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 88.8,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    },
+                    {
+                      "at_mi": 0.01,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.13,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 79.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 4,
+                "controlled": 2,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 16
+              },
+              "driveway": {
+                "at_mi": 0.69,
+                "node": 7590912083,
+                "lat": 35.0783476,
+                "lon": -106.7460896,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            },
+            {
+              "terminal_node": 1720801422,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 1.94,
+              "segments": [
+                {
+                  "road": "Unser Boulevard Northwest (NM 345)",
+                  "miles": 0.39,
+                  "cue": "Start on Unser Boulevard Northwest (NM 345).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Los Volcanes Road Northwest",
+                  "miles": 0.58,
+                  "cue": "Turn right onto Los Volcanes Road Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 88.7,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "90th Street Northwest",
+                  "miles": 0.21,
+                  "cue": "Turn left onto 90th Street Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 96.6,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Bluewater Road Northwest",
+                  "miles": 0.52,
+                  "cue": "Turn right onto Bluewater Road Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 105.4,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Avalon Road Northwest",
+                  "miles": 0.11,
+                  "cue": "Continue onto Avalon Road Northwest.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    },
+                    {
+                      "at_mi": 0.01,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.13,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 79.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 14,
+                "controlled": 3,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 89
+              },
+              "driveway": {
+                "at_mi": 1.81,
+                "node": 7590912083,
+                "lat": 35.0783476,
+                "lon": -106.7460896,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Petro Stopping Center Milan",
@@ -10770,7 +10993,64 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "79",
           "interchange_mi": 80.0,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.18 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 9851463454,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.47,
+              "segments": [
+                {
+                  "road": "Horizon Boulevard",
+                  "miles": 0.27,
+                  "cue": "Start on Horizon Boulevard.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Motel Drive",
+                  "miles": 0.14,
+                  "cue": "Turn left onto Motel Drive.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 88.5,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.06,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 77.7,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 10
+              },
+              "driveway": {
+                "at_mi": 0.41,
+                "node": 7625859947,
+                "lat": 35.1798795,
+                "lon": -107.9045214,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Pilot Travel Center Jamestown",
@@ -10796,7 +11076,64 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "39",
           "interchange_mi": 119.2,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 143148689,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.53,
+              "segments": [
+                {
+                  "road": "a side street",
+                  "miles": 0.11,
+                  "cue": "Start on a side street.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Giant Crossing",
+                  "miles": 0.09,
+                  "cue": "Continue onto Giant Crossing.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.33,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 108.9,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 7
+              },
+              "driveway": {
+                "at_mi": 0.2,
+                "node": 7045901152,
+                "lat": 35.4833312,
+                "lon": -108.4350147,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Flying J Travel Center Jamestown",
@@ -10848,7 +11185,108 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "16",
           "interchange_mi": 142.8,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.33 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 610487986,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.37,
+              "segments": [
+                {
+                  "road": "NM 118;US 66 Hist",
+                  "miles": 0.17,
+                  "cue": "Start on NM 118;US 66 Hist.",
+                  "speed_mph": 50.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 50.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.2,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 124.2,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 6
+              },
+              "driveway": {
+                "at_mi": 0.17,
+                "node": 7510783405,
+                "lat": 35.504862,
+                "lon": -108.8352565,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            },
+            {
+              "terminal_node": 1909519541,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.5,
+              "segments": [
+                {
+                  "road": "I 40 BUS;NM 118;US 66 Hist",
+                  "miles": 0.13,
+                  "cue": "Start on I 40 BUS;NM 118;US 66 Hist.",
+                  "speed_mph": 50.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 50.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "NM 118;US 66 Hist",
+                  "miles": 0.17,
+                  "cue": "Continue onto NM 118;US 66 Hist.",
+                  "speed_mph": 50.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 50.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.2,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 124.2,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 8
+              },
+              "driveway": {
+                "at_mi": 0.3,
+                "node": 7510783405,
+                "lat": 35.504862,
+                "lon": -108.8352565,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Painted Cliffs Rest Area",
@@ -10897,7 +11335,54 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "286",
           "interchange_mi": 231.4,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 174998561,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.16,
+              "segments": [
+                {
+                  "road": "Navajo Boulevard (I 40 BUS;US 66 Hist)",
+                  "miles": 0.11,
+                  "cue": "Start on Navajo Boulevard (I 40 BUS;US 66 Hist).",
+                  "speed_mph": 35.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 90.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 4
+              },
+              "driveway": {
+                "at_mi": 0.11,
+                "node": 5695496464,
+                "lat": 34.916002,
+                "lon": -110.1537199,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "TA Travel Center Holbrook",
@@ -12344,7 +12829,36 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "252",
           "interchange_mi": 28.8,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 469184284,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.14,
+              "segments": [
+                {
+                  "road": "Hagen Road",
+                  "miles": 0.14,
+                  "cue": "Start on Hagen Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 0,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 2
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "La Bajada Rest Area",
@@ -13435,7 +13949,103 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "203",
           "interchange_mi": 21.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 5800740376,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.48,
+              "segments": [
+                {
+                  "road": "Main Street Southwest (NM 6)",
+                  "miles": 0.24,
+                  "cue": "Start on Main Street Southwest (NM 6).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Main Street Northwest (NM 6)",
+                  "miles": 0.09,
+                  "cue": "Continue onto Main Street Northwest (NM 6).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    },
+                    {
+                      "at_mi": 0.08,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "Emilio Lopez Road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto Emilio Lopez Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 84.4,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a side street",
+                  "miles": 0.05,
+                  "cue": "Continue onto a side street.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 58.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 7,
+                "controlled": 4,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 28
+              },
+              "driveway": {
+                "at_mi": 0.43,
+                "node": 5353819691,
+                "lat": 34.8132449,
+                "lon": -106.7563617,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Love's Travel Stop Belen",
@@ -15712,7 +16322,36 @@
           "lon": -104.651148,
           "exit_ref": "277",
           "interchange_mi": 119.4,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 142120481,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.67,
+              "segments": [
+                {
+                  "road": "Historic Route 66 (I 40 BUS;US 54;US 84;US 66 Hist)",
+                  "miles": 0.67,
+                  "cue": "Start on Historic Route 66 (I 40 BUS;US 54;US 84;US 66 Hist).",
+                  "speed_mph": 45.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 45.0,
+                  "limit_source": "read",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 35
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Love's Travel Stop Tucumcari",
@@ -26471,7 +27110,82 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "140B",
           "interchange_mi": 166.1,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 150399309,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.26,
+              "segments": [
+                {
+                  "road": "Southeast Frontage Road",
+                  "miles": 0.08,
+                  "cue": "Start on Southeast Frontage Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Ross Drive (I 10 Bus)",
+                  "miles": 0.07,
+                  "cue": "Turn left onto Ross Drive (I 10 Bus).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 119.4,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Northeast Frontage Road",
+                  "miles": 0.11,
+                  "cue": "Turn left onto Northeast Frontage Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 61.5,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 4
+              }
+            },
+            {
+              "terminal_node": 150408854,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.56,
+              "segments": [
+                {
+                  "road": "Northeast Frontage Road",
+                  "miles": 0.56,
+                  "cue": "Start on Northeast Frontage Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 5,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 9
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Culberson County Safety Rest Area Westbound",
@@ -30547,7 +31261,74 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "139",
           "interchange_mi": 3.0,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.38 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 5698131828,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.38,
+              "segments": [
+                {
+                  "road": "Calle de El Paso (NM 292)",
+                  "miles": 0.12,
+                  "cue": "Start on Calle de El Paso (NM 292).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "North Motel Boulevard",
+                  "miles": 0.15,
+                  "cue": "Continue onto North Motel Boulevard.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "West Amador Avenue",
+                  "miles": 0.06,
+                  "cue": "Turn right onto West Amador Avenue.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 98.7,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 42.6,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 5,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 7
+              },
+              "driveway": {
+                "at_mi": 0.33,
+                "node": 8601643857,
+                "lat": 32.2967889,
+                "lon": -106.8108465,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Love's Travel Stop Las Cruces",
@@ -30573,7 +31354,54 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "132",
           "interchange_mi": 9.4,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 447013394,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.26,
+              "segments": [
+                {
+                  "road": "Crawford Boulevard",
+                  "miles": 0.19,
+                  "cue": "Start on Crawford Boulevard.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 68.0,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 6
+              },
+              "driveway": {
+                "at_mi": 0.19,
+                "node": 7174240054,
+                "lat": 32.2699784,
+                "lon": -106.9212843,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Rest Area I-10 (West Bound)",
@@ -30619,7 +31447,36 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "68",
           "interchange_mi": 73.1,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.34 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 1672911110,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.18,
+              "segments": [
+                {
+                  "road": "NM 418",
+                  "miles": 0.18,
+                  "cue": "Start on NM 418.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 8
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Flying J Travel Center Lordsburg",
@@ -30650,7 +31507,17 @@
           "lon": -108.675928,
           "exit_ref": "24",
           "interchange_mi": 117.0,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I10, 0.16 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains_failed": [
+            {
+              "terminal_node": 142384987,
+              "route_failure": "disconnected"
+            },
+            {
+              "terminal_node": 142395162,
+              "route_failure": "disconnected"
+            }
+          ]
         },
         {
           "name": "Love's Travel Stop Willcox",
@@ -30681,7 +31548,79 @@
           "lon": -109.847284,
           "exit_ref": "340",
           "interchange_mi": 192.1,
-          "exit_source": "exit_ref read: the stop's own source names exit 340; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: the stop's own source names exit 340; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 1656757708,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.29,
+              "segments": [
+                {
+                  "road": "Fort Grant Road",
+                  "miles": 0.14,
+                  "cue": "Start on Fort Grant Road.",
+                  "speed_mph": 35.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "Virgivia Avenue",
+                  "miles": 0.05,
+                  "cue": "Turn left onto Virgivia Avenue.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 109.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "read",
+                  "controls": [
+                    {
+                      "at_mi": 0.0,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "Virginia Avenue",
+                  "miles": 0.05,
+                  "cue": "Continue onto Virginia Avenue.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 25.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 101.8,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 1,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 9
+              },
+              "driveway": {
+                "at_mi": 0.24,
+                "node": 12008950131,
+                "lat": 32.2670541,
+                "lon": -109.8465648,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "corridor": {
@@ -34580,7 +35519,54 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "347",
           "interchange_mi": 3.2,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.31 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 1203877130,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.42,
+              "segments": [
+                {
+                  "road": "North Grand Avenue (I 25 Bus)",
+                  "miles": 0.3,
+                  "cue": "Start on North Grand Avenue (I 25 Bus).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.12,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 71.6,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 16
+              },
+              "driveway": {
+                "at_mi": 0.3,
+                "node": 1686034205,
+                "lat": 35.620126,
+                "lon": -105.2068629,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Fort Union Rest Area",
@@ -34627,7 +35613,74 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "419",
           "interchange_mi": 74.5,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 141634449,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.34,
+              "segments": [
+                {
+                  "road": "State Road 58 (NM 58)",
+                  "miles": 0.05,
+                  "cue": "Start on State Road 58 (NM 58).",
+                  "speed_mph": 55.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 55.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "NM 58",
+                  "miles": 0.11,
+                  "cue": "Continue onto NM 58.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Old French Road",
+                  "miles": 0.13,
+                  "cue": "Turn left onto Old French Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 93.1,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 88.8,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 11
+              },
+              "driveway": {
+                "at_mi": 0.29,
+                "node": 4006770455,
+                "lat": 36.4507365,
+                "lon": -104.5944343,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Maxwell Station",
@@ -34650,7 +35703,76 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "426",
           "interchange_mi": 81.6,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 141657243,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.28,
+              "segments": [
+                {
+                  "road": "NM 445",
+                  "miles": 0.06,
+                  "cue": "Start on NM 445.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Maxwell Avenue (NM 445)",
+                  "miles": 0.05,
+                  "cue": "Continue onto Maxwell Avenue (NM 445).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "2nd Street",
+                  "miles": 0.05,
+                  "cue": "Turn left onto 2nd Street.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 89.3,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.07,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 89.7,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "3rd Street",
+                  "miles": 0.05,
+                  "cue": "Turn left onto 3rd Street.",
+                  "speed_mph": 35.0,
+                  "turn_deg": 90.3,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 4,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 4
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Thaxton Rest Area",
@@ -35272,7 +36394,64 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "11",
           "interchange_mi": 18.1,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I25, 0.20 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 12108091184,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.23,
+              "segments": [
+                {
+                  "road": "a side street",
+                  "miles": 0.05,
+                  "cue": "Start on a side street.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 25.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Santa Fe Trail (CR 69.3)",
+                  "miles": 0.08,
+                  "cue": "Turn right onto Santa Fe Trail (CR 69.3).",
+                  "speed_mph": 45.0,
+                  "turn_deg": 93.2,
+                  "limit_mph": 45.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.1,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 162.5,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 12
+              },
+              "driveway": {
+                "at_mi": 0.13,
+                "node": 9097233136,
+                "lat": 37.1326251,
+                "lon": -104.5208596,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         }
       ],
       "divided": true,
@@ -42238,7 +43417,64 @@
           "vehicle_access": "tractor_trailer",
           "exit_ref": "369",
           "interchange_mi": 38.9,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I40, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 143069075,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.24,
+              "segments": [
+                {
+                  "road": "NM 392",
+                  "miles": 0.07,
+                  "cue": "Start on NM 392.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Quay Road 58.5 (QR 58.5)",
+                  "miles": 0.05,
+                  "cue": "Turn left onto Quay Road 58.5 (QR 58.5).",
+                  "speed_mph": 25.0,
+                  "turn_deg": 89.3,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.12,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 87.6,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 3,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 7
+              },
+              "driveway": {
+                "at_mi": 0.12,
+                "node": 4680847498,
+                "lat": 35.1747406,
+                "lon": -103.1026347,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Westbound Picnic Area",

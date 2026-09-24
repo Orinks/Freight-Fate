@@ -1365,36 +1365,62 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
 `streets`); the driving side does not read any of it yet.
 
 - [x] **Ramp terminal per exit.** Each exit carries the OSM node its ramp
-      ends at, per direction (`Trip::ramp_terminal_node_at`): 19,882 of the
-      21,577 directional ramp lengths; a merge has none.
+      ends at, per direction (`Trip::ramp_terminal_node_at`): 18,764 of the
+      20,531 directional ramp lengths; a merge has none.
+- [x] **Ramp walks end at public roads.** A service stub or driveway
+      touching a ramp mid-link no longer stands in for its crossroad
+      (Baltimore node 9879536272). Of the chains that failed on it, 65 of 404
+      "disconnected" and 74 of 248 "terminal not on the street graph"
+      recovered; 313 of the 340 still disconnected are facilities no route
+      reaches today at all.
+- [x] **One ramp rule with and without --force.** Every exit a run reaches
+      is judged from the evidence alone; the bake is a fixed point.
 - [x] **A chain from each ramp terminal.** For each leg into a city, the
       labelled exit nearest the city end (the game's own destination-exit
       rule) starts a chain at its terminal, kept whole
-      (`World::facility_exit_route`): 2,922 chains; 931 terminal-facility
-      pairs failed (404 disconnected, 248 terminal not on the street graph,
-      219 beyond the 18-mile limit, 51 over budget, 7 yard road too long,
-      2 no road at the endpoint). 1,343 of 2,049 routed facilities have one.
+      (`World::facility_exit_route`): 3,054 chains, 1,386 of 2,049 routed
+      facilities have one; 746 terminal-facility pairs failed (340
+      disconnected, 215 beyond the 18-mile limit, 127 terminal not on the
+      street graph -- a terminal across a state line from the facility's
+      extract, or on a motorroad -- 54 over budget, 8 yard road too long, 2
+      no road at the endpoint).
 - [x] **Posted limit per street, with its kind** (`Trip::street_limit_at`):
-      read from OSM on 48% of exit-chain miles, the state's statutory
-      district default on 41%, assumed on 11% (states with no district
+      read from OSM on 49% of exit-chain miles, the state's statutory
+      district default on 40%, assumed on 11% (states with no district
       default, and past the driveway).
 - [x] **Signals and stop signs along the chain**
-      (`Trip::street_controls_between`), read from OSM only: 24% of passed
-      intersections and 28% of turns have one on the exit chains; the rest
-      are unknown, not free. Signals dominate (32,967 against 1,422 stops,
-      816 all-way stops, 188 yields); 494 stops drawn on an intersection
+      (`Trip::street_controls_between`), read from OSM only: 25% of passed
+      intersections and 29% of turns have one on the exit chains; the rest
+      are unknown, not free. Signals dominate (35,335 against 1,473 stops,
+      880 all-way stops, 203 yields); 531 stops drawn on an intersection
       node with no direction were left out as ambiguous.
 - [x] **Driveway** (`World::facility_driveway`): where the chain leaves the
-      public street for a service or private way, on 1,875 exit chains.
+      public street for a service or private way, on 1,968 exit chains.
+- [x] **Older city-centre chains matched to the map.** 277 of the 671 chains
+      no re-route reproduces got their street detail by reading their own
+      streets back off OSM (`tools/chain_match.py`); 270 name a street the
+      graph no longer offers, 83 match the names but not the miles, 41 lead
+      to a replaced endpoint.
+- [x] **Road stops off an exit** (`Trip::stop_approach_route`): 1,005
+      chains from the serving exit's ramp terminal to 888 stops' lots (756
+      travel centers, 111 fuel stations, 17 service plazas, 4 truck stops),
+      893 with a driveway. Rest areas and weigh stations get none: no exit
+      is linked to them; 7 routes that never touch a public street are
+      recorded on_mainline.
 - [ ] **Wire the street data into driving**: per-street zones, stops and
-      signals at corners, the yard limit from the driveway, and the arrival
-      picking its chain by `ramp_terminal_node_at`.
-- [ ] **Ramp terminals on service stubs.** The ramp walk stops at any
-      crossroad, so a service stub touching a ramp mid-link can stand in for
-      the real terminal (Baltimore node 9879536272); such chains fail as
-      disconnected. Stop the terminal walk at public roads only and re-bake.
-- [ ] **671 older chains carry no street detail**: kept from earlier bakes
-      because this re-route could not reproduce them. Re-route or retire.
+      signals at corners, the yard limit from the driveway, the arrival
+      picking its chain by `ramp_terminal_node_at`, and stop entrances.
+- [ ] **81 legs' exit mileage disagrees with their polyline** (rerouted
+      after their exits were discovered; Charlotte to Knoxville by a median
+      8 miles). Unpinned exits there keep old ramp data and get no terminal
+      (`ramp_length_bake.position_screen`). Re-derive their interchanges.
+- [ ] **Statutory district fill on rural numbered routes.** An untagged
+      state route outside town takes the district default (IA 175 at 20
+      near a Love's); a district statute does not reach it. Needs an
+      urban-area test before the fill.
+- [ ] **3,630 road stops have no decided exit**, among them every travel
+      center the stop snap could not link; they get no street chain.
+- [ ] **394 older chains still carry no street detail** (above).
 
 ## 1.10 planned -- the working week and home
 

@@ -3499,7 +3499,123 @@
           "vehicle_access": "bobtail_only",
           "exit_ref": "43",
           "interchange_mi": 40.28,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I91, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number."
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I91, 0.27 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 61758353,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.17,
+              "segments": [
+                {
+                  "road": "MA 2",
+                  "miles": 0.12,
+                  "cue": "Start on MA 2.",
+                  "speed_mph": 35.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": [
+                    {
+                      "at_mi": 0.11,
+                      "kind": "signal"
+                    }
+                  ]
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 67.0,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 2,
+                "controlled": 1,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 18
+              },
+              "driveway": {
+                "at_mi": 0.12,
+                "node": 9047705251,
+                "lat": 42.5859,
+                "lon": -72.624445,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            },
+            {
+              "terminal_node": 61760929,
+              "exit": {
+                "direction": "backward"
+              },
+              "total_miles": 0.37,
+              "segments": [
+                {
+                  "road": "MA 2",
+                  "miles": 0.22,
+                  "cue": "Start on MA 2.",
+                  "speed_mph": 35.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "Colrain Road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto Colrain Road.",
+                  "speed_mph": 25.0,
+                  "turn_deg": 89.3,
+                  "limit_mph": 30.0,
+                  "limit_source": "statutory",
+                  "controls": []
+                },
+                {
+                  "road": "MA 2",
+                  "miles": 0.05,
+                  "cue": "Turn left onto MA 2.",
+                  "speed_mph": 35.0,
+                  "turn_deg": 89.5,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.05,
+                  "cue": "Turn right onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 67.0,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 4,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 39
+              },
+              "driveway": {
+                "at_mi": 0.32,
+                "node": 9047705251,
+                "lat": 42.5859,
+                "lon": -72.624445,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Roady's Truck Stops",
