@@ -2053,10 +2053,12 @@ fn drive_through_the_bend(
     }
 }
 
+/// Whether the bend's too-fast warning was spoken: the line that comes before
+/// the bend costs the load or the lane anything (`driving_rollover`).
 fn drifted(run: &BendRun) -> bool {
     run.lines
         .iter()
-        .any(|line| line.contains("drifting to the outside"))
+        .any(|line| line.contains(", too fast. Slow to"))
 }
 
 #[test]
@@ -2420,8 +2422,9 @@ fn test_the_last_few_miles_an_hour_are_shed_on_the_real_clock() {
 #[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
-    // driver holding the throttle into the same bend gets the old drift
-    // line, and nothing brakes for them.
+    // driver holding the throttle into the same bend is warned while there
+    // is still road to slow in, nothing brakes for them, and at 60 into a
+    // 35 the truck goes over.
     let mut app = TestApp::new();
     let clock = app.fake_pacer_clock();
     let mut d = a_drive(&mut app);
@@ -2429,19 +2432,31 @@ fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     app.ctx.settings.curve_speed_assist = false;
     app.ctx.input.press(Key::Up, Mods::NONE);
 
-    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+    let mut warned_before_the_bend = false;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |app, d| {
         assert!(
             d.curve_servo.is_none(),
             "the servo armed with the assist off"
         );
+        if d.trip.position_mi < bend.start_mi
+            && app
+                .event_lines()
+                .iter()
+                .any(|l| l.contains(", too fast. Slow to"))
+        {
+            warned_before_the_bend = true;
+        }
     });
 
-    assert!(
-        run.speed_at_start_mph > 35.0 + 15.0,
-        "the throttle-held truck should still be hot: {:.1}",
-        run.speed_at_start_mph
-    );
+    assert!(warned_before_the_bend, "{:#?}", run.lines);
     assert!(drifted(&run), "{:#?}", run.lines);
+    assert!(
+        run.lines
+            .iter()
+            .any(|line| line.contains("rolled over in the bend")),
+        "{:#?}",
+        run.lines
+    );
     assert!(
         !run.lines
             .iter()

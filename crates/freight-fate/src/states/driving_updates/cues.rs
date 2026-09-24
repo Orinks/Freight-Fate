@@ -4,13 +4,13 @@
 
 use crate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_GUIDE_LEAD_MI};
 use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
-use ff_core::data::curves::RouteCurve;
+use ff_core::data::curves::{min_radius_ft, RouteCurve};
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
 use ff_core::sim::lane::OFF_ROAD;
 use ff_core::sim::lane_guidance::{
     classify_boundaries, cue_loudness, edge_rung, GuidanceFrame, CURVE_LEAD_MI, TRANSVERSE_KEY,
 };
-use ff_core::sim::trip_models::highway_class;
+use ff_core::sim::trip_models::{highway_class, RAMP_CURVE_DEFLECTION_RAD};
 use ff_core::sim::turn_guide::{
     TurnInput, TurnShape, TurnSide, SLEW_PER_S as TURN_GUIDE_SLEW_PER_S,
 };
@@ -26,6 +26,9 @@ use crate::states::driving_updates::LANE_GUIDE_TONE_VOLUME;
 /// `TurnInput::turn_id`. A bend's id is the bits of its start milepost, which
 /// is never negative, so an f64's sign bit is the one bit no bend can set.
 const CORNER_ID_BIT: u64 = 1 << 63;
+/// The exit ramp's curve: a corner-side id no street corner's leg index
+/// reaches.
+const RAMP_CURVE_TURN_ID: u64 = CORNER_ID_BIT | (1 << 62);
 
 impl DrivingState {
     /// Stereo pan for the rumble strip: it comes from the side you have
@@ -563,6 +566,31 @@ impl DrivingState {
         if let Some((ahead, curve)) = ahead_of_us {
             if let Some(shape) = bend_shape(&curve) {
                 consider(ahead, bend_id(&curve), shape, 0.0);
+            }
+        }
+
+        // And the exit ramp's curve, which is a turn like any bend: its lean
+        // leads in from the deceleration lane and closes as the curve is used
+        // up. It rode only the lane guide's fallback, which the
+        // lane-departure warning switches off, so with the warning off a
+        // truck running wide on a ramp curve heard a centred engine (agent
+        // drive, 2026-09-24); a turn's lean is never gated ("turns yes, drift
+        // no", 2026-09-19). It claims the engine over a street turn waiting
+        // past the ramp's end by the same claim a bend makes.
+        if let (Some(layout), Some(travelled)) = (self.ramp_layout, self.ramp_travelled_mi()) {
+            let into_mi = travelled - layout.decel_mi;
+            let in_play = -into_mi <= TURN_GUIDE_LEAD_MI && into_mi < layout.curve_mi;
+            if !self.surface_chain && in_play && layout.curve_mi > 0.0 {
+                consider(
+                    -into_mi,
+                    RAMP_CURVE_TURN_ID,
+                    TurnShape {
+                        side: TurnSide::Right,
+                        deflection_deg: RAMP_CURVE_DEFLECTION_RAD.to_degrees(),
+                        radius_ft: min_radius_ft(layout.curve_mph).max(1.0),
+                    },
+                    (into_mi / layout.curve_mi).clamp(0.0, 1.0),
+                );
             }
         }
 

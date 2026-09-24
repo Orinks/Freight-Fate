@@ -40,10 +40,11 @@ impl TruckState {
 
     /// The load fraction the roll models use.
     ///
-    /// A tank with anything at all in it is priced as full. A part-filled
-    /// tank is the WORSE rollover case, not the better one: the liquid runs
-    /// to the outside of the turn and takes its weight with it, which is why
-    /// the tank endorsement is taught around it.
+    /// A tank with anything at all in it is priced as full. In a steady bend
+    /// a part-filled tank is no steadier than a full one: the liquid runs to
+    /// the outside of the turn and gives back what its lower weight would
+    /// have bought (NTSB HAR-11/01 2.3.4, READ for 80 percent against 100).
+    /// What makes it worse is the wave, which `vehicle/roll.rs` prices on top.
     pub fn roll_load_fraction(&self) -> f64 {
         if self.liquid.is_some() && self.cargo_kg > 0.0 {
             1.0

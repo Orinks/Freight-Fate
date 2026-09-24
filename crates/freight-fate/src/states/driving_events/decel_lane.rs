@@ -86,6 +86,26 @@ impl DrivingState {
         Some(min_radius_ft(layout.curve_mph).max(1.0))
     }
 
+    /// Whether an assist brakes the deceleration lane down to the exit speed.
+    ///
+    /// Facility stopping assistance too: it takes the pedals for the stop at
+    /// the ramp's end from the gore on, and a profile to that stop alone
+    /// carried the truck into the ramp curve at 62 against 49 (every-assist
+    /// audit, 2026-09-24). Whatever has the pedals on the ramp answers to the
+    /// exit speed first.
+    pub fn ramp_speed_assisted(ctx: &GameContext) -> bool {
+        ctx.settings.exit_speed_assist
+            || ctx.settings.route_transition_assist
+            || ctx.settings.curve_speed_assist
+            || ctx.settings.destination_approach_assist
+    }
+
+    /// The driver's own foot on the throttle, key or pad.
+    pub fn driver_accelerating(ctx: &GameContext) -> bool {
+        ctx.bindings.pressed(&ctx.input, Action::Accelerate)
+            || (ctx.controller.active() && ctx.controller.throttle() > 0.05)
+    }
+
     /// Work the deceleration lane: publish the ramp's grade, and let the
     /// assists brake to the exit speed by the curve.
     ///
@@ -103,27 +123,26 @@ impl DrivingState {
             (Some(_), Some(layout)) if !self.in_deceleration_lane() => Some(layout.grade),
             _ => None,
         };
-        // Facility stopping assistance too: it takes the pedals for the stop
-        // at the ramp's end from the gore on, and a profile to that stop
-        // alone carried the truck into the ramp curve at 62 against 49
-        // (every-assist audit, 2026-09-24). Whatever has the pedals on the
-        // ramp answers to the exit speed first.
-        let assisting = ctx.settings.exit_speed_assist
-            || ctx.settings.route_transition_assist
-            || ctx.settings.curve_speed_assist
-            || ctx.settings.destination_approach_assist;
-        let Some(left_mi) = self.deceleration_lane_left_mi().filter(|_| assisting) else {
+        let Some(left_mi) = self
+            .deceleration_lane_left_mi()
+            .filter(|_| Self::ramp_speed_assisted(ctx))
+        else {
             self.decel_lane_brake = 0.0;
             return;
         };
         // The driver's own throttle overrides, as it does the terminal's.
-        let accelerating = ctx.bindings.pressed(&ctx.input, Action::Accelerate)
-            || (ctx.controller.active() && ctx.controller.throttle() > 0.05);
-        if accelerating {
+        if Self::driver_accelerating(ctx) {
             self.decel_lane_brake = 0.0;
             return;
         }
-        let target_mps = self.armed_ramp_mph(None) / MPH_PER_MPS;
+        // The exit speed, or less where the ramp curve would cost this load
+        // something at it: a part-filled tank, or a sign the curve cannot
+        // hold for the lane mode in use (`driving_rollover`).
+        let exit_mph = self.armed_ramp_mph(None);
+        let target_mps = self
+            .ramp_curve_safe_mph(ctx)
+            .map_or(exit_mph, |safe| exit_mph.min(safe))
+            / MPH_PER_MPS;
         let v_mps = self.trip.truck.velocity_mps.max(0.0);
         let gap_m = 0.5f64.max(left_mi * METERS_PER_MILE);
         // Priced in the seconds the truck slows in, as the curve servo's

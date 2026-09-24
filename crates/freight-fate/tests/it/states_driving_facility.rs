@@ -1439,7 +1439,12 @@ fn test_the_lateral_hit_has_its_own_voice() {
     let mut truck = a_tank_truck(Some(LiquidLoad::new(0.5, false)), 20.0);
     truck.corner_advisory_mph = 25.0;
     let (mut d, log, clock) = a_tank_drive(&mut app, truck, false);
-    for _ in 0..500 {
+    // A reversal, not one steady bend: the pull builds in over a transition,
+    // so a single bend held hot sets the liquid against the wall without a
+    // slam (NTSB HAR-11/01 2.3.4 -- it is a quick succession of inputs that
+    // throws it). A bend and a straight, a second each.
+    for step in 0..500 {
+        d.trip.truck.corner_advisory_mph = if (step / 50) % 2 == 0 { 25.0 } else { 0.0 };
         clock.advance(0.02);
         d.trip.truck.update(0.02);
         d.update_liquid_cues(&mut app.ctx, 0.02);

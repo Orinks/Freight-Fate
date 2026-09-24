@@ -636,14 +636,20 @@ its status or release decision.
       emergency stop does, for an ordinary approach. The snub now nets out
       the retarder's own deceleration first, so the two share one planned
       stop instead of compounding.
-- [ ] A part-filled tank is priced as a FULL one by the roll models, not as
-      worse than one. `roll_load_fraction` stops a half-empty tank reading as
-      a light load, which was the bug; the truth is that the half-empty tank
-      is the worst case of all, because the liquid climbs as it goes to the
-      outside of the turn. Needs a fill-level curve for the rollover
-      threshold: FMCSA's 2007 Cargo Tank Roll Stability Study is the place to
-      look, and its PDF refuses a plain fetch (403), so it wants a proper
-      read rather than a guessed de-rating.
+- [x] A part-filled tank rolls over first where the liquid is moving
+      (2026-09-24). FMCSA's 2007 Cargo Tank Roll Stability Study still
+      refuses every fetch (403), so the read is NTSB HAR-11/01 2.3.4, which
+      cites UMTRI-85-35: in a steady curve an 80 percent and a full tank
+      "would not differ significantly", and in a transient the liquid swings
+      "twice the level of the steady-state amplitude". So a tank is priced
+      full in a steady bend at any fill (read at 80, assumed below it), and
+      the lateral wave running past its steady place takes back the stability
+      its lower weight would have bought (derived, `vehicle/roll.rs`). The
+      wave is fed each bend over a 2.0 s transition (Green Book Table 3-21,
+      read), so entering a 250 ft bend a half-full tank goes over at 34.6 mph
+      and a full one at 36.2; held long enough to settle, both at the same
+      speed. Curve and exit speed assistance plan against the half-full
+      figure.
 - [x] The map stops inventing freight where it cannot see any (2026-09-20).
       Of 623 markets, 137 had no facility whose endpoint the freight-site
       screen accepts -- Nevada 11 of 15, Montana 9 of 15, Arizona 12 of 22 --
@@ -1384,9 +1390,37 @@ mainline behaviour.
 - [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
       assumed level because nothing records its climb or drop. Needs an
       elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
-- [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
-      can run the truck wide, but nothing models the rollover a loaded truck
-      meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+- [x] **Truck rollover, on ramp curves and mapped bends alike**
+      (feat/rollover-model, 2026-09-24). One model (`vehicle/roll.rs`): the
+      bend's pull in the truck's own frame, `v^2/gR` less the bank, against
+      the static rollover threshold of the load aboard (0.35 g full, 0.70 g
+      empty; a ramp curve credited the 6 percent roads are built to, its
+      radius having been derived at 8). The ladder is shares of that
+      threshold: from 0.857 (what a posted advisory asks of a full trailer,
+      derived) the freight shifts, replacing the flat 0.40 g that sat past
+      where a full trailer rolls; at 1.0 the truck goes over, the load is
+      scrap, and `recover_out_of_service` runs as for any truck that may not
+      be driven. The too-fast warning names the speed that costs nothing,
+      inside the curve or on the approach once the road left is the Green
+      Book's 2.5 s and 11.2 ft/s2 (read), and is heard before any cost; it
+      replaced the flat 15 over the sign. Curve and exit speed assistance
+      hold under that speed, and the exit assist matrix stays green.
+      Also fixed from the same agent drive: leaving the pavement was free
+      with the lane-departure warning off, and the ramp curve's engine lean
+      went silent with it (the curve is a turn now, like a mapped bend).
+- [ ] **Partial or no lane keeping without curve assistance cannot hold a
+      bend at its sign.** The steering cap (`MAX_STEER_LATERAL_G`, 0.2 g)
+      binds the lane keeping's own correction as well as the driver's key,
+      and only curve assistance supplies the wheel the road asks for, so a
+      bend posted 0.30 g plus bank runs wide at its advisory in those modes.
+      The too-fast warning now says so ("Slow to 37" on a 45 bend); whether
+      partial lane keeping should supply the road's wheel too is the owner's
+      call.
+- [ ] **A rollover leaves nothing on the driving record.** It runs the
+      out-of-service path, the preventable-damage charge and, for a company
+      driver, the equipment event; a crash with no citation behind it is not
+      a record entry today, and whether a rollover should be is a design
+      ruling.
 - [x] **Every assist follows the exit rules.** One matrix
       (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
       by seven ramp kinds, from two miles out to the stop or the gate) found
