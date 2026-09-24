@@ -271,8 +271,7 @@ impl DriverAppScreenState {
                     lines.push(format!("ELD route note: {context}"));
                 }
                 lines.push(
-                    "ELD keys: Alt A time at the wheel, Alt S when the break is due, \
-                     Alt D what ends this shift."
+                    "ELD keys: Alt A time at the wheel, Alt S when the break is due, Alt D what ends this shift."
                         .to_string(),
                 );
                 lines

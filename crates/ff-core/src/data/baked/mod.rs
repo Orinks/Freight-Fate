@@ -236,9 +236,7 @@ impl BakedData {
         let version = u32::from_le_bytes(mmap[8..12].try_into().expect("4 bytes"));
         if version != FORMAT_VERSION {
             return Err(DataError::io(format!(
-                "{} is baked data format {version}, this build reads format \
-                 {FORMAT_VERSION}. Re-bake it: cargo run -p ff-core --bin \
-                 ff-bake -- --data-dir data --out {}",
+                "{} is baked data format {version}, this build reads format {FORMAT_VERSION}. Re-bake it: cargo run -p ff-core --bin ff-bake -- --data-dir data --out {}",
                 path.display(),
                 path.display()
             )));

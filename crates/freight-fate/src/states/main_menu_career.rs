@@ -36,10 +36,7 @@ impl CareerStartState {
     pub fn new(driver_name: &str) -> Self {
         Self {
             menu: MenuCore::new("Career start").with_intro_help(
-                "Company starts use assigned carrier equipment; the carrier pays \
-                 fuel, repairs, insurance, and trailer support. The owner-operator \
-                 start is higher risk: you own a brand-new truck and pay business \
-                 costs from day one. Enter selects, Escape goes back.",
+                "Company starts use assigned carrier equipment; the carrier pays fuel, repairs, insurance, and trailer support. The owner-operator start is higher risk: you own a brand-new truck and pay business costs from day one. Enter selects, Escape goes back.",
             ),
             driver_name: driver_name.to_string(),
         }
@@ -130,8 +127,7 @@ impl HomeTerminalState {
             .get(&default_city)
             .map(|c| c.region.clone());
         let mut menu = MenuCore::new("Home region").with_intro_help(
-            "Up and Down, Home and End, or a typed letter pick a region. \
-             Enter opens its cities, Escape goes back.",
+            "Up and Down, Home and End, or a typed letter pick a region. Enter opens its cities, Escape goes back.",
         );
         if let Some(index) = default.and_then(|d| regions.iter().position(|r| *r == d)) {
             menu.index = index;
@@ -222,8 +218,7 @@ impl HomeCityState {
         let option = start_option(Some(start_key));
         let option_default = ctx.world.resolve_city_key(option.default_city);
         let mut menu = MenuCore::new("Home terminal").with_intro_help(
-            "Up and Down, Home and End, or a typed letter pick a city. Enter \
-             confirms your home terminal, Escape goes back.",
+            "Up and Down, Home and End, or a typed letter pick a city. Enter confirms your home terminal, Escape goes back.",
         );
         if let Some(index) = cities.iter().position(|c| *c == option_default) {
             menu.index = index;
@@ -249,10 +244,7 @@ impl HomeCityState {
             if is_pre_1_9_save_file(&same_name) {
                 ctx.audio.play("ui/error");
                 ctx.say(&format!(
-                    "There is already a career named {name} from an earlier \
-                     version of Freight Fate. That save stays as it is, so this \
-                     career needs a different driver name. Escape goes back to \
-                     change it."
+                    "There is already a career named {name} from an earlier version of Freight Fate. That save stays as it is, so this career needs a different driver name. Escape goes back to change it."
                 ));
                 return;
             }

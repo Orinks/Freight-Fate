@@ -395,8 +395,7 @@ pub fn business_path_label<P: BusinessProfile + ?Sized>(profile: &P) -> String {
 pub fn next_business_unlock<P: BusinessProfile + ?Sized>(profile: &P) -> String {
     let status = profile.business_status();
     if status == INDEPENDENT_AUTHORITY {
-        return "Own authority active. Direct freight is available on the dispatch \
-                board, with insurance, compliance, and factoring costs in settlement."
+        return "Own authority active. Direct freight is available on the dispatch board, with insurance, compliance, and factoring costs in settlement."
             .to_string();
     }
     let level = profile.career().level();
@@ -452,7 +451,7 @@ pub fn next_business_unlock<P: BusinessProfile + ?Sized>(profile: &P) -> String 
 /// turned the buy-in down hears in place of the offer.
 fn company_ladder_next(level: i64) -> String {
     match next_company_rank_for_level(level) {
-        None => "You are at the top career rank. The owner-operator buy-in stays open under                  Business status if you ever want it."
+        None => "You are at the top career rank. The owner-operator buy-in stays open under Business status if you ever want it."
             .to_string(),
         Some(next_rank) => format!(
             "Next: level {}, {}. {}",

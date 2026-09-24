@@ -316,8 +316,7 @@ fn template_location(
         .unwrap_or_else(|| panic!("no cargo roles for {facility_type:?}"));
     let cargo = dedupe(ships.iter().chain(receives.iter()).map(|s| s.to_string()));
     let source_note = format!(
-        "{} Generated offline as a representative {spoken_city} metro-market facility; \
-         not a claim about a specific real-world shipper.",
+        "{} Generated offline as a representative {spoken_city} metro-market facility; not a claim about a specific real-world shipper.",
         lookup(FACILITY_SOURCE_NOTES, facility_type).unwrap_or_default()
     );
     let (jitter_lat, jitter_lon) = jittered_coordinates(city_key, facility_type, lat, lon);
@@ -867,7 +866,10 @@ mod tests {
         });
         let loc = parse_location(&raw, "test_city_us", "Test City", 1.0, 2.0)
             .expect("parse receive-only");
-        assert!(loc.ships.is_empty(), "explicit empty ships must clear defaults");
+        assert!(
+            loc.ships.is_empty(),
+            "explicit empty ships must clear defaults"
+        );
         assert_eq!(
             loc.receives,
             vec![
@@ -889,12 +891,15 @@ mod tests {
             "lon": 2.0,
             "source_note": "unit test default roles",
         });
-        let loc = parse_location(&raw, "test_city_us", "Test City", 1.0, 2.0)
-            .expect("parse defaults");
+        let loc =
+            parse_location(&raw, "test_city_us", "Test City", 1.0, 2.0).expect("parse defaults");
         let (ships, receives) = facility_cargo_roles("cross_dock").expect("roles");
         assert!(!ships.is_empty());
         assert!(!receives.is_empty());
-        assert_eq!(loc.ships, ships.iter().map(|s| s.to_string()).collect::<Vec<_>>());
+        assert_eq!(
+            loc.ships,
+            ships.iter().map(|s| s.to_string()).collect::<Vec<_>>()
+        );
         assert_eq!(
             loc.receives,
             receives.iter().map(|s| s.to_string()).collect::<Vec<_>>()

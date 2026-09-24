@@ -1281,13 +1281,29 @@ are intentionally not started here.
 Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
 and unnamed as blockers for the ALCAN corridor.
 
-- [ ] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
-      spoil model (not multi-temp zones).
-- [ ] **APU on/off** as low hotel burn versus idling the tractor.
-- [ ] **Fuel island: tractor-off required** while reefer TRU / APU may stay on.
+- [x] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
+      spoil model (not multi-temp zones). Alt+R. Burns from the tractor tank.
+- [x] **APU on/off** as low hotel burn versus idling the tractor. Alt+U.
+- [x] **Fuel island: tractor-off required** while reefer TRU / APU may stay on
+      ("Shut the engine off before you fuel.").
+- [ ] **Frozen setpoint (-18 C)** for loads to or from frozen-food docks,
+      keyed off `facility_ships_frozen_as_chilled` (the same facility check
+      that drives the chilled spoken cargo label). Drop the chilled relabel
+      once this lands.
 - [ ] *(defer)* Multi-temp compartments, shore power, deep TRU fault trees,
       battery APU, scored idle noise, and HOS accounting driven from reefer
       duty — park until the coarse slice earns its keep.
+
+Honesty debts for this v1 slice (do not paper over):
+1. Cargo temperature is coarse (setpoint band + drift), not a thermal model.
+2. The TRU draws diesel from the tractor tank — a v1 simplification; many
+   real TRUs have their own tank.
+3. APU-at-pump is soft: reefer and APU are allowed while fueling, and no
+   separate rule model enforces or scores that choice beyond the tractor-off
+   fuel gate.
+4. One chilled setpoint (2 C) for all reefer freight in v1. Real frozen-food
+   facilities keep their names; their loads are spoken as chilled cargo until
+   a frozen setpoint exists. Multi-temp stays deferred.
 
 ### Personal conveyance and duty-purpose correction
 

@@ -118,8 +118,7 @@ impl DrivingState {
             None => "the posted limit when the open road begins".to_string(),
         };
         format!(
-            "Automatic speed control is paused; open-road target {target}. It will resume once \
-             the truck is rolling. Press {} to cancel it. ",
+            "Automatic speed control is paused; open-road target {target}. It will resume once the truck is rolling. Press {} to cancel it. ",
             ctx.control_hint("cruise_set")
         )
     }
@@ -219,20 +218,16 @@ impl DrivingState {
             if self.terse_speech(ctx) {
                 let parked = self.parked_entry_status();
                 let text = format!(
-                    "Resuming {drive_name}: {destination}. {progress} {hours_used:.1} of {:.0} \
-                     hours used. {now}. {mode}. {report_lead}. {speed_control}{parked}",
+                    "Resuming {drive_name}: {destination}. {progress} {hours_used:.1} of {:.0} hours used. {now}. {mode}. {report_lead}. {speed_control}{parked}",
                     self.job.deadline_game_h
                 );
                 ctx.say_with(text, Say::queued());
             } else {
                 let engine = self.engine_entry_instruction(ctx);
                 let text = format!(
-                    "Resuming your {drive_name}: {:.0} tons of {} to {destination}. {progress} \
-                     {hours_used:.1} hours used of {:.0}. It is {now}. Transmission is {mode}. \
-                     Weather: {report_lead}. Parked. {speed_control}{engine} At air ready, {} \
-                     releases the parking brake.",
+                    "Resuming your {drive_name}: {:.0} tons of {} to {destination}. {progress} {hours_used:.1} hours used of {:.0}. It is {now}. Transmission is {mode}. Weather: {report_lead}. Parked. {speed_control}{engine} At air ready, {} releases the parking brake.",
                     self.job.weight_tons,
-                    self.job.cargo.label,
+                    self.job.spoken_cargo_label(),
                     self.job.deadline_game_h,
                     ctx.control_hint("parking_brake")
                 );
@@ -260,8 +255,7 @@ impl DrivingState {
                 let engine = self.engine_entry_instruction(ctx);
                 let help = self.help_hint_tail(ctx);
                 let text = format!(
-                    "At the wheel. {objective}It is {now}. Transmission is {mode}. \
-                     Weather: {report_lead}. {engine} {help}"
+                    "At the wheel. {objective}It is {now}. Transmission is {mode}. Weather: {report_lead}. {engine} {help}"
                 );
                 ctx.say_with(text.trim_end().to_string(), Say::queued());
             }
@@ -326,8 +320,7 @@ impl DrivingState {
             })
             .collect();
         log::info!(
-            "driving assists: preset {}, {}, selected_stop_assist={}, speed_keeper={}, \
-             predictive_cruise={}, driving_speech={}",
+            "driving assists: preset {}, {}, selected_stop_assist={}, speed_keeper={}, predictive_cruise={}, driving_speech={}",
             s.driving_assistance_preset,
             fields.join(", "),
             if s.selected_stop_assist { "on" } else { "off" },

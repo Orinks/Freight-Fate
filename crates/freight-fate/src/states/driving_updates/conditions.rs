@@ -506,13 +506,19 @@ impl DrivingState {
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         }
+        if self.trip.truck.reefer_just_starved {
+            self.trip.truck.reefer_just_starved = false;
+            ctx.say_event_with(
+                "Reefer fuel is gone.",
+                SayEvent::new().category(SpeechCategory::Safety),
+            );
+        }
         let chains_fast =
             self.trip.truck.chains_on && self.trip.truck.speed_mph() > CHAIN_SAFE_MPH + 2.0;
         if chains_fast && !self.chains_fast_active {
             ctx.say_event_with(
                 format!(
-                    "The chains are hammering the pavement at this speed. Keep it under \
-                     {CHAIN_SAFE_MPH:.0}."
+                    "The chains are hammering the pavement at this speed. Keep it under {CHAIN_SAFE_MPH:.0}."
                 ),
                 SayEvent::new().category(SpeechCategory::Coaching),
             );
@@ -592,8 +598,7 @@ impl DrivingState {
         // queue instead of an interrupt that could erase one.
         ctx.say_event_with(
             format!(
-                "Chain checkpoint. An officer waves you onto the scale apron and writes a \
-                 chain-law citation, {} dollars.{} You have {} dollars.",
+                "Chain checkpoint. An officer waves you onto the scale apron and writes a chain-law citation, {} dollars.{} You have {} dollars.",
                 fmt_grouped(fine, 0),
                 construction_zone_fine_clause(zone),
                 fmt_grouped(money, 0)

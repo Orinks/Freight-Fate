@@ -107,6 +107,13 @@ impl CargoType {
         self.credentials.first().copied()
     }
 
+    /// Fresh food and refrigerated goods need the trailer TRU.
+    pub fn needs_reefer(&self) -> bool {
+        self.key == "food"
+            || self.key == "refrigerated"
+            || self.credentials.contains(&"refrigerated")
+    }
+
     /// The credentials in `held` still missing for this cargo, in catalog
     /// order.
     pub fn missing_credentials<S: AsRef<str>>(&self, held: &[S]) -> Vec<&'static str> {

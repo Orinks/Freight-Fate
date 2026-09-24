@@ -139,8 +139,7 @@ impl Default for RollingBasicsLesson {
 impl Instructor for RollingBasicsLesson {
     fn begin(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Driving school. The practice road: flat, empty, and none of it counts toward your \
-             career, truck, or money. Lesson one, rolling basics. Press {} to start the engine.",
+            "Driving school. The practice road: flat, empty, and none of it counts toward your career, truck, or money. Lesson one, rolling basics. Press {} to start the engine.",
             ctx.control_hint("engine")
         );
         self.say(ctx, text);
@@ -153,15 +152,13 @@ impl Instructor for RollingBasicsLesson {
         self.advance(1);
         let text = if ctx.settings.automatic_transmission {
             format!(
-                "Engine running. When you hear air ready, press {} to release the parking \
-                 brake, then hold {} to accelerate. The transmission shifts for you.",
+                "Engine running. When you hear air ready, press {} to release the parking brake, then hold {} to accelerate. The transmission shifts for you.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("accelerate")
             )
         } else {
             format!(
-                "Engine running. When you hear air ready, press {} to release the parking \
-                 brake, hold {}, select {} for first gear, and release the clutch.",
+                "Engine running. When you hear air ready, press {} to release the parking brake, hold {}, select {} for first gear, and release the clutch.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("clutch"),
                 ctx.control_hint("gear_first")
@@ -240,8 +237,7 @@ impl Instructor for RollingBasicsLesson {
                     )
                 } else {
                     format!(
-                        "Reminder: wait for air pressure to reach one hundred psi, then press {} \
-                         to release the parking brake.",
+                        "Reminder: wait for air pressure to reach one hundred psi, then press {} to release the parking brake.",
                         ctx.control_hint("parking_brake")
                     )
                 };
@@ -275,8 +271,7 @@ impl LessonKind {
 pub const LESSONS: [(&str, LessonKind, &str); 1] = [(
     "Lesson 1: Rolling basics",
     LessonKind::RollingBasics,
-    "Start the engine, build air, release the parking brake, take the truck to thirty, and brake \
-     to a smooth full stop.",
+    "Start the engine, build air, release the parking brake, take the truck to thirty, and brake to a smooth full stop.",
 )];
 
 /// A practice drive: the real engine, a sandbox profile, an instructor.
@@ -373,8 +368,7 @@ pub struct DrivingSchoolState {
 }
 
 const SCHOOL_INTRO_HELP: &str =
-    "Lessons run on a practice road where nothing counts: no money, no wear, no hours. Escape \
-     returns to the terminal.";
+    "Lessons run on a practice road where nothing counts: no money, no wear, no hours. Escape returns to the terminal.";
 
 impl DrivingSchoolState {
     pub fn new() -> Self {

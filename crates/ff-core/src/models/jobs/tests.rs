@@ -1364,7 +1364,6 @@ fn test_generated_jobs_never_use_travel_center_or_truck_parking_endpoints() {
     );
 }
 
-
 #[test]
 fn thin_outbound_origin_weight_cuts_ship_selection() {
     use crate::models::jobs::THIN_OUTBOUND_ORIGIN_WEIGHT;
@@ -1375,7 +1374,63 @@ fn thin_outbound_origin_weight_cuts_ship_selection() {
     assert!(THIN_OUTBOUND_ORIGIN_WEIGHT > 0.0);
 }
 
+#[test]
+fn frozen_facility_keeps_its_name_while_cargo_is_spoken_chilled() {
+    assert!(facility_ships_frozen_as_chilled(
+        "Blue Bell Ice Cream Distribution"
+    ));
+    assert!(facility_ships_frozen_as_chilled(
+        "Wegmans Food Market Frozen Foods Warehouse"
+    ));
+    assert!(facility_ships_frozen_as_chilled(
+        "Magic Valley Fresh Frozen"
+    ));
+    assert!(!facility_ships_frozen_as_chilled(
+        "Madison Food Processing Plant"
+    ));
 
+    let mut job = Job::new(
+        cargo_type("refrigerated").unwrap(),
+        10.0,
+        "Houston",
+        "Blue Bell Ice Cream Distribution",
+        "Madison",
+        100.0,
+        1200.0,
+        8.0,
+    );
+    job.destination_location = "Madison Food Processing Plant".into();
+    assert!(job
+        .origin_offer_text()
+        .contains("Blue Bell Ice Cream Distribution"));
+    assert_eq!(job.spoken_cargo_label(), "chilled goods");
 
+    let mut food_job = Job::new(
+        cargo_type("food").unwrap(),
+        10.0,
+        "Madison",
+        "Schoep's Ice Cream",
+        "Utica",
+        100.0,
+        1200.0,
+        8.0,
+    );
+    food_job.destination_location = "Maynard Frozen Foods".into();
+    assert_eq!(food_job.spoken_cargo_label(), "chilled food");
+}
 
-
+#[test]
+fn ordinary_reefer_cargo_keeps_catalog_label() {
+    let mut job = Job::new(
+        cargo_type("refrigerated").unwrap(),
+        10.0,
+        "Madison",
+        "Madison Food Processing Plant",
+        "Chicago",
+        100.0,
+        1200.0,
+        8.0,
+    );
+    job.destination_location = "Chicago Cross-Dock".into();
+    assert_eq!(job.spoken_cargo_label(), "refrigerated goods");
+}

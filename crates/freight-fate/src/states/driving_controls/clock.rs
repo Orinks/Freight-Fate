@@ -161,8 +161,7 @@ impl DrivingState {
         };
         let appointment = deadline_appointment(self, ctx);
         ctx.say(&format!(
-            "{now} {verdict}: arrival in {eta:.1} hours {basis}, deadline in {remaining:.1}, due \
-             {appointment}. {hours_used:.1} hours on the road.{tail}"
+            "{now} {verdict}: arrival in {eta:.1} hours {basis}, deadline in {remaining:.1}, due {appointment}. {hours_used:.1} hours on the road.{tail}"
         ));
     }
 
@@ -315,8 +314,7 @@ impl DrivingState {
                         .is_none()
                 {
                     return Some(format!(
-                        "Your next {action} limit is due in {:.1} hours, and no suitable route \
-                         stop is visible before it.",
+                        "Your next {action} limit is due in {:.1} hours, and no suitable route stop is visible before it.",
                         limit.remaining_min / 60.0
                     ));
                 }

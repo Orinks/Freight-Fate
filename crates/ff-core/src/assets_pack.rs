@@ -889,15 +889,12 @@ mod tests {
             .unwrap_or_default();
         if is_lfs_pointer(path) {
             eprintln!(
-                "SKIPPING {}: it is a leftover Git LFS pointer, not the pack. The \
-                 packs are plain files now: `git checkout -- assets/{name}` restores \
-                 sounds.pak, and tools/build_release.py downloads music.pak.",
+                "SKIPPING {}: it is a leftover Git LFS pointer, not the pack. The packs are plain files now: `git checkout -- assets/{name}` restores sounds.pak, and tools/build_release.py downloads music.pak.",
                 path.display()
             );
         } else {
             eprintln!(
-                "SKIPPING {}: not present (sounds.pak is committed; music.pak is \
-                 builder-local and tools/build_release.py downloads it)",
+                "SKIPPING {}: not present (sounds.pak is committed; music.pak is builder-local and tools/build_release.py downloads it)",
                 path.display()
             );
         }

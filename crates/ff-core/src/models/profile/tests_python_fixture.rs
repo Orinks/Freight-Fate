@@ -42,9 +42,7 @@ fn a_save_python_signed_verifies_here() {
     assert_eq!(
         signature_for_with_secret(&data, None, &secret),
         stored,
-        "the port disagrees with Python about a save Python signed -- the \
-         canonical payload it hashes has drifted from json.dumps(..., \
-         sort_keys=True, separators=(',', ':'), ensure_ascii=True)"
+        "the port disagrees with Python about a save Python signed -- the canonical payload it hashes has drifted from json.dumps(..., sort_keys=True, separators=(',', ':'), ensure_ascii=True)"
     );
 }
 
@@ -119,8 +117,7 @@ fn long_json_decimals_parse_to_the_same_float_python_reads() {
         assert_eq!(
             parsed.to_bits(),
             exact.to_bits(),
-            "reading {literal} out of JSON lost a bit -- is serde_json's \
-             float_roundtrip feature still on in the workspace Cargo.toml?"
+            "reading {literal} out of JSON lost a bit -- is serde_json's float_roundtrip feature still on in the workspace Cargo.toml?"
         );
         assert_eq!(crate::pyfmt::py_str_float(parsed), literal);
     }

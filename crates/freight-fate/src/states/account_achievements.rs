@@ -11,9 +11,7 @@ use crate::app::GameContext;
 use crate::impl_state_for_menu;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 
-const CONTROLS: &str = "Enter opens a category. Inside one, Enter repeats the achievement \
-and Escape returns to the categories. From the categories, Escape returns to Online. This \
-read-only collection combines every career on this installation.";
+const CONTROLS: &str = "Enter opens a category. Inside one, Enter repeats the achievement and Escape returns to the categories. From the categories, Escape returns to Online. This read-only collection combines every career on this installation.";
 
 pub struct AccountAchievementsState {
     menu: MenuCore<Self>,

@@ -300,8 +300,7 @@ impl DrivingState {
                         self.say_safety_interrupt(
                             ctx,
                             &format!(
-                                "You ran the red light at the ramp end and {hit}! Total damage \
-                                 {damage:.0} percent."
+                                "You ran the red light at the ramp end and {hit}! Total damage {damage:.0} percent."
                             ),
                         );
                     }
@@ -309,8 +308,7 @@ impl DrivingState {
                         ctx.audio.play_with(&cue, 1.0, pan);
                         self.say_confirmation_interrupt(
                             ctx,
-                            "You ran the red light at the ramp end. Cross traffic brakes hard and \
-                             leans on the horn.",
+                            "You ran the red light at the ramp end. Cross traffic brakes hard and leans on the horn.",
                         );
                     }
                     CrossMeeting::Empty => {
@@ -414,8 +412,7 @@ impl DrivingState {
                     self.say_safety_interrupt(
                         ctx,
                         &format!(
-                            "You blew the stop sign at the ramp end and {hit}! Total damage \
-                             {damage:.0} percent."
+                            "You blew the stop sign at the ramp end and {hit}! Total damage {damage:.0} percent."
                         ),
                     );
                 }
@@ -423,8 +420,7 @@ impl DrivingState {
                     ctx.audio.play_with(&cue, 1.0, pan);
                     self.say_confirmation_interrupt(
                         ctx,
-                        "You blew the stop sign at the ramp end. Cross traffic brakes hard and \
-                         leans on the horn.",
+                        "You blew the stop sign at the ramp end. Cross traffic brakes hard and leans on the horn.",
                     );
                 }
                 CrossMeeting::Empty => {
@@ -563,8 +559,7 @@ impl DrivingState {
             self.say_safety_interrupt(
                 ctx,
                 &format!(
-                    "You rolled the {noun} into cross traffic and {hit}! Total damage \
-                     {damage:.0} percent."
+                    "You rolled the {noun} into cross traffic and {hit}! Total damage {damage:.0} percent."
                 ),
             );
         } else if met == CrossMeeting::Near {
@@ -572,8 +567,7 @@ impl DrivingState {
             self.say_confirmation_interrupt(
                 ctx,
                 &format!(
-                    "You forced the gap at the {noun}. Cross traffic brakes hard and leans on the \
-                     horn."
+                    "You forced the gap at the {noun}. Cross traffic brakes hard and leans on the horn."
                 ),
             );
         } else if speed > YIELD_ROLL_MPH {

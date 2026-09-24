@@ -451,13 +451,11 @@ impl DrivingState {
             // The rolling look found something: the stop is a Level 2
             // walk-around, and the report prices it, not this stop.
             let summary = format!(
-                "A trooper on this {reason} looked the truck over as they passed and saw {}. \
-                 They are pulling you in for a walk-around inspection.",
+                "A trooper on this {reason} looked the truck over as they passed and saw {}. They are pulling you in for a walk-around inspection.",
                 observation.detail
             );
             let lights_message = format!(
-                "Lights and siren behind you. A trooper on this {reason} saw {} and wants a look \
-                 at the truck. Signal with {} and stop on the shoulder.",
+                "Lights and siren behind you. A trooper on this {reason} saw {} and wants a look at the truck. Signal with {} and stop on the shoulder.",
                 observation.detail,
                 ctx.control_hint("take_exit")
             );
@@ -475,8 +473,7 @@ impl DrivingState {
         }
         let (summary, fine, return_message) = self.observed_stop_terms(observation);
         let lights_message = format!(
-            "Lights and siren behind you. A trooper on this {reason} saw {}. Signal with {} and \
-             stop on the shoulder.",
+            "Lights and siren behind you. A trooper on this {reason} saw {}. Signal with {} and stop on the shoulder.",
             observation.what,
             ctx.control_hint("take_exit")
         );
@@ -498,8 +495,7 @@ impl DrivingState {
         if what == WHAT_DAMAGE {
             return (
                 format!(
-                    "A trooper on this {reason} saw visible truck damage at {:.0} percent and \
-                     ordered a roadside safety inspection.",
+                    "A trooper on this {reason} saw visible truck damage at {:.0} percent and ordered a roadside safety inspection.",
                     self.trip.truck.damage_pct
                 ),
                 UNSAFE_DAMAGE_FINE,
@@ -509,8 +505,7 @@ impl DrivingState {
         if what == WHAT_CHAINS {
             return (
                 format!(
-                    "A trooper on this {reason} saw you running the chain control without chains \
-                     on the drives."
+                    "A trooper on this {reason} saw you running the chain control without chains on the drives."
                 ),
                 CHAIN_LAW_FINE,
                 "Back on the highway. Chain up before the next control.".to_string(),

@@ -15,11 +15,7 @@
 // it from the game. The menu item is named as it reads while the identity
 // file is still on disk (which it is, in this failure): the Online hub says
 // "orinks.net account: connected", not "Set up orinks.net account".
-pub const AUTH_HELP: &str = "orinks.net no longer accepts this computer's sign-in. Usually this \
-computer was signed out from the computer list on your driver setup page. To connect it \
-again, open the Online menu, choose orinks.net account, then Set up this computer with \
-orinks.net, and enter the activation code in your browser. If your driver is not on that \
-page at all, the account itself is gone. Make a new account and connect it the same way.";
+pub const AUTH_HELP: &str = "orinks.net no longer accepts this computer's sign-in. Usually this computer was signed out from the computer list on your driver setup page. To connect it again, open the Online menu, choose orinks.net account, then Set up this computer with orinks.net, and enter the activation code in your browser. If your driver is not on that page at all, the account itself is gone. Make a new account and connect it the same way.";
 
 // -- upload failure classification ---------------------------------------------
 //
@@ -134,48 +130,32 @@ pub fn rejection_status(name: &str, reason: Option<&str>) -> String {
     let reason = reason.unwrap_or("");
     if reason == "review_declined" {
         return format!(
-            "{name}: backup declined after review. This career no longer backs \
-up to your orinks.net account. Your local career is safe."
+            "{name}: backup declined after review. This career no longer backs up to your orinks.net account. Your local career is safe."
         );
     }
     if ARITHMETIC_REJECTION_REASONS.contains(&reason) {
         return format!(
-            "{name}: backup not accepted. The numbers in this save do not \
-look like possible play, so the server declined it and flagged \
-it for review. Your local career is safe and nothing public \
-changed. If you think this is wrong, say so in the tester \
-document."
+            "{name}: backup not accepted. The numbers in this save do not look like possible play, so the server declined it and flagged it for review. Your local career is safe and nothing public changed. If you think this is wrong, say so in the tester document."
         );
     }
     if SCHEMA_REJECTION_REASONS.contains(&reason) {
         return format!(
-            "{name}: backup not accepted. Your game and the server \
-disagree about this save's shape, usually a build mismatch, \
-not something you did. Your local career is safe."
+            "{name}: backup not accepted. Your game and the server disagree about this save's shape, usually a build mismatch, not something you did. Your local career is safe."
         );
     }
     if CATALOG_REJECTION_REASONS.contains(&reason) {
         return format!(
-            "{name}: backup not accepted. The server does not recognise the \
-town this career is parked in, which usually means it has not \
-caught up with this build yet. Your local career is safe, and \
-backups start working again on their own once it has."
+            "{name}: backup not accepted. The server does not recognise the town this career is parked in, which usually means it has not caught up with this build yet. Your local career is safe, and backups start working again on their own once it has."
         );
     }
     if SLOTS_FULL_REJECTION_REASONS.contains(&reason) {
         return format!(
-            "{name}: backup not accepted. You have as many careers backed up \
-as the server keeps, so there is no room for this one. Remove a \
-career from the Cloud backup menu and this will back up again. \
-Your local career is safe."
+            "{name}: backup not accepted. You have as many careers backed up as the server keeps, so there is no room for this one. Remove a career from the Cloud backup menu and this will back up again. Your local career is safe."
         );
     }
     if SERVER_FAULT_REJECTION_REASONS.contains(&reason) {
         return format!(
-            "{name}: backup not accepted. The server could not finish signing \
-this backup, which is a problem at our end and not anything about \
-your career. Your local career is safe, and backups start working \
-again on their own once it is fixed."
+            "{name}: backup not accepted. The server could not finish signing this backup, which is a problem at our end and not anything about your career. Your local career is safe, and backups start working again on their own once it is fixed."
         );
     }
     format!(
@@ -187,8 +167,7 @@ again on their own once it is fixed."
 // manual "Save game" announcement so a paused sign-in is always told the same
 // way. AUTH_HELP (above) carries the full recovery path when a menu can offer
 // it; this is the short standing line.
-pub const AUTH_PAUSED_STATUS: &str = "Backups are paused: orinks.net no longer accepts this \
-computer's sign-in. Reconnect from the Online menu.";
+pub const AUTH_PAUSED_STATUS: &str = "Backups are paused: orinks.net no longer accepts this computer's sign-in. Reconnect from the Online menu.";
 
 /// The player-facing line for a slot the server refused to overwrite
 /// because another computer advanced it. Shared by the manual "Save game"
@@ -196,9 +175,7 @@ computer's sign-in. Reconnect from the Online menu.";
 /// so a conflict is always told the same way.
 pub fn conflict_status(name: &str) -> String {
     format!(
-        "{name} needs attention: the cloud copy changed on another \
-computer. Open Restore a cloud backup on the Online menu \
-to choose which copy to keep."
+        "{name} needs attention: the cloud copy changed on another computer. Open Restore a cloud backup on the Online menu to choose which copy to keep."
     )
 }
 

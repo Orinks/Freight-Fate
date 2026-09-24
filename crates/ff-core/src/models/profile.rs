@@ -831,6 +831,17 @@ impl Profile {
         self.set_condition("chains_owned", Value::from(value));
     }
 
+    /// Whether the active tractor's engine was left running. Defaults false
+    /// on older saves so the terminal garage fuel gate stays open.
+    pub fn truck_engine_on(&self) -> bool {
+        self.condition()
+            .and_then(|rec| rec.get("engine_on"))
+            .is_some_and(py_truthy)
+    }
+    pub fn set_truck_engine_on(&mut self, value: bool) {
+        self.set_condition("engine_on", Value::from(value));
+    }
+
     pub fn chain_wear_pct(&self) -> f64 {
         self.condition_f64("chain_wear_pct", 0.0)
     }
@@ -850,6 +861,9 @@ impl Profile {
         truck.engine_wear_pct = self.engine_wear_pct();
         truck.tire_type = self.tire_type();
         truck.chain_wear_pct = self.chain_wear_pct();
+        if self.truck_engine_on() {
+            let _ = truck.start_engine();
+        }
     }
 
     /// Record a delivered from:to lane for dispatch-variety preference.
@@ -873,6 +887,7 @@ impl Profile {
         // Tire type is chosen at the garage, never behind the wheel, so it only
         // flows profile-to-truck. Chain wear accrues while driving chained.
         self.set_chain_wear_pct(truck.chain_wear_pct);
+        self.set_truck_engine_on(truck.engine_on);
     }
 
     /// Fatigue accrual multiplier from the active food or drink buff.

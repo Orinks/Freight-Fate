@@ -307,9 +307,7 @@ pub fn advance_refused_reason<P: StandingProfile + ?Sized>(profile: &P) -> Strin
         return String::new();
     }
     format!(
-        "Dispatch will not front you cash while settlements are paying down what \
-         you owe. You have {} outstanding, and three quarters of each settlement \
-         still reaches you.",
+        "Dispatch will not front you cash while settlements are paying down what you owe. You have {} outstanding, and three quarters of each settlement still reaches you.",
         money_text(debt_owed(profile))
     )
 }
@@ -477,9 +475,7 @@ pub fn ceiling_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> &'s
 // and there is freight on the board in the morning. Nothing here says failed,
 // over, bankrupt, or terminated out loud, and nothing here blames the driver.
 
-pub const KEPT_LINE: &str = "You keep your career level, your experience, your endorsements, your \
-                             driving record, and everything else you own. Nothing about your career \
-                             was reset and no save was lost.";
+pub const KEPT_LINE: &str = "You keep your career level, your experience, your endorsements, your driving record, and everything else you own. Nothing about your career was reset and no save was lost.";
 pub const BACK_TO_WORK_LINE: &str =
     "There is freight waiting. Open the dispatch board whenever you are ready.";
 
@@ -505,15 +501,11 @@ pub fn apply_company_termination<P: SolvencyProfile + ?Sized>(profile: &mut P) -
             "You owed {}, which is more than {former} carries on a driver, and they have ended your employment.",
             money_text(settled)
         ),
-        "That balance is closed. You do not owe it to anyone any more, and \
-         your cash is back to zero."
+        "That balance is closed. You do not owe it to anyone any more, and your cash is back to zero."
             .to_string(),
         KEPT_LINE.to_string(),
         format!(
-            "What changes is the seat. Your assigned tractor goes back to the \
-             {former} yard, and you go on the payroll at \
-             {LAST_CHANCE_CARRIER_NAME}: shorter freight, lower pay, and \
-             equipment to match, until you build back up with them."
+            "What changes is the seat. Your assigned tractor goes back to the {former} yard, and you go on the payroll at {LAST_CHANCE_CARRIER_NAME}: shorter freight, lower pay, and equipment to match, until you build back up with them."
         ),
         BACK_TO_WORK_LINE.to_string(),
     ];
@@ -555,17 +547,14 @@ pub fn apply_repossession<P: SolvencyProfile + ?Sized>(profile: &mut P) -> Vec<S
     profile.clear_dispatch_board_cache();
     let lines = vec![
         format!(
-            "You owed {} against a {label} that would bring about {} at sale, so the loan is no longer \
-             covered by the truck behind it, and the lender has taken it back.",
+            "You owed {} against a {label} that would bring about {} at sale, so the loan is no longer covered by the truck behind it, and the lender has taken it back.",
             money_text(settled),
             money_text(proceeds)
         ),
         "The sale closes the loan. What you owed is settled and your cash is back to zero.".to_string(),
         KEPT_LINE.to_string(),
         format!(
-            "You are a company driver again, on the payroll at {hiring} and in a \
-             carrier tractor. The owner-operator path is still open to you, and \
-             the buy-in gates are the same ones you cleared to get here."
+            "You are a company driver again, on the payroll at {hiring} and in a carrier tractor. The owner-operator path is still open to you, and the buy-in gates are the same ones you cleared to get here."
         ),
         BACK_TO_WORK_LINE.to_string(),
     ];
@@ -636,12 +625,10 @@ pub fn apply_return_to_company_driving<P: SolvencyProfile + ?Sized>(
     };
     vec![
         format!(
-            "{carrier} takes the {label}{more} back for {}. You are a company driver again, \
-             in a carrier tractor, and the carrier pays fuel, repairs, and the trailer.",
+            "{carrier} takes the {label}{more} back for {}. You are a company driver again, in a carrier tractor, and the carrier pays fuel, repairs, and the trailer.",
             money_text(buy_back)
         ),
-        "Settlements are driver wages and bonuses from here. The owner-operator buy-in \
-         stays open under Business status, and the gates are the ones you already cleared."
+        "Settlements are driver wages and bonuses from here. The owner-operator buy-in stays open under Business status, and the gates are the ones you already cleared."
             .to_string(),
     ]
 }
@@ -676,9 +663,7 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
             return format!("Owed {owed}. Held there; a quarter of each settlement pays it down.");
         }
         return format!(
-            "You owe {owed}. Your carrier holds it there and writes off anything \
-             past it. A quarter of each settlement goes to it. \
-             You can also pay it down from cash at any terminal or truck stop."
+            "You owe {owed}. Your carrier holds it there and writes off anything past it. A quarter of each settlement goes to it. You can also pay it down from cash at any terminal or truck stop."
         );
     }
     let ceiling = money_text(debt_ceiling(profile));
@@ -688,9 +673,7 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
             return format!("Owed {owed}. Ceiling {ceiling}.");
         }
         return format!(
-            "You owe {owed}. A quarter of every settlement goes to it. \
-             The ceiling is {ceiling}. \
-             You can also pay it down from cash at any terminal or truck stop."
+            "You owe {owed}. A quarter of every settlement goes to it. The ceiling is {ceiling}. You can also pay it down from cash at any terminal or truck stop."
         );
     }
     if rung == 2 {
@@ -698,18 +681,14 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
             return format!("Owed {owed}, over halfway to a ceiling of {ceiling}.");
         }
         return format!(
-            "You owe {owed}, over halfway to a ceiling of {ceiling}. \
-             A quarter of every settlement is paying it down. \
-             You can also pay it down from cash at any terminal or truck stop."
+            "You owe {owed}, over halfway to a ceiling of {ceiling}. A quarter of every settlement is paying it down. You can also pay it down from cash at any terminal or truck stop."
         );
     }
     if terse {
         return format!("Owed {owed}. At {ceiling}, {consequence}.");
     }
     format!(
-        "You owe {owed}, against a ceiling of {ceiling}. Last warning. At \
-         {ceiling}, {consequence}. Room for a couple more settlements, and a \
-         quarter of each one is paying it down."
+        "You owe {owed}, against a ceiling of {ceiling}. Last warning. At {ceiling}, {consequence}. Room for a couple more settlements, and a quarter of each one is paying it down."
     )
 }
 
@@ -723,16 +702,13 @@ pub fn debt_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
     }
     if hard_capped(profile) {
         return format!(
-            "Owed: {}. Your carrier holds it there and writes \
-             off anything past it. Part of every settlement pays it down. \
-             You can also pay it down from cash at any terminal or truck stop.",
+            "Owed: {}. Your carrier holds it there and writes off anything past it. Part of every settlement pays it down. You can also pay it down from cash at any terminal or truck stop.",
             money_text(owed)
         );
     }
     let ceiling = debt_ceiling(profile);
     format!(
-        "Owed: {} of {}. Past that, {}. \
-         You can also pay it down from cash at any terminal or truck stop.",
+        "Owed: {} of {}. Past that, {}. You can also pay it down from cash at any terminal or truck stop.",
         money_text(owed),
         money_text(ceiling),
         ceiling_consequence_text(profile)

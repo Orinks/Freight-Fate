@@ -73,22 +73,7 @@ impl Default for PollSchedule {
 }
 
 pub const DISCLOSURE: &str =
-    "Connecting an orinks.net account turns Profile sharing on and starts backing your \
-careers up to that account, so your driver profile has career statistics on it from \
-the first delivery. Either one is a single item away in the Online menu whenever you \
-want it off. When Profile sharing is on, orinks.net can \
-publicly show your driver name and broad on-duty board activity; eligible profile \
-details; official achievements you earn; and automatic road-journal posts \
-generated from gameplay. Public updates can also appear in the Freight Fate updates \
-feed. Each post also tells orinks.net which game version you are running, used only \
-for moderation and troubleshooting and never shown publicly. Freight Fate does not \
-publish your real name, full save, coordinates, active cargo details, or precise \
-real-world location. Detailed career statistics come only from your public career's \
-latest accepted private backup -- you choose your public career on the Cloud backup \
-menu -- and include lifetime career earnings, the running total your career \
-has ever earned; the money you currently have is never published. The backups \
-themselves stay private to your account and never appear as public downloads. \
-Turning Profile sharing off hides public details but does not turn cloud backup off.";
+    "Connecting an orinks.net account turns Profile sharing on and starts backing your careers up to that account, so your driver profile has career statistics on it from the first delivery. Either one is a single item away in the Online menu whenever you want it off. When Profile sharing is on, orinks.net can publicly show your driver name and broad on-duty board activity; eligible profile details; official achievements you earn; and automatic road-journal posts generated from gameplay. Public updates can also appear in the Freight Fate updates feed. Each post also tells orinks.net which game version you are running, used only for moderation and troubleshooting and never shown publicly. Freight Fate does not publish your real name, full save, coordinates, active cargo details, or precise real-world location. Detailed career statistics come only from your public career's latest accepted private backup -- you choose your public career on the Cloud backup menu -- and include lifetime career earnings, the running total your career has ever earned; the money you currently have is never published. The backups themselves stay private to your account and never appear as public downloads. Turning Profile sharing off hides public details but does not turn cloud backup off.";
 
 // -- OnlineSetupState -------------------------------------------------------------------------
 
@@ -274,8 +259,7 @@ impl OnlineSetupState {
         let opened = open_url(&activation.verification_uri_complete);
         if opened {
             ctx.say(&format!(
-                "Your activation code is {code}. Your browser is open at {} with the code \
-                 filled in. Sign in there.",
+                "Your activation code is {code}. Your browser is open at {} with the code filled in. Sign in there.",
                 activation.verification_uri
             ));
         } else {
@@ -285,9 +269,7 @@ impl OnlineSetupState {
             // is the one moment the game knows for certain that opening
             // failed, so it is worth naming them here.
             ctx.say(&format!(
-                "The browser could not be opened. Your activation code is {code}. In any \
-                 browser, go to {} and enter it. Say my activation code again spells it, Copy \
-                 my activation code puts it on the clipboard.",
+                "The browser could not be opened. Your activation code is {code}. In any browser, go to {} and enter it. Say my activation code again spells it, Copy my activation code puts it on the clipboard.",
                 activation.verification_uri
             ));
         }
@@ -318,8 +300,7 @@ impl OnlineSetupState {
             ctx.say("Activation code copied to the clipboard.");
         } else {
             ctx.say(
-                "Could not copy to the clipboard. Say my activation code again spells it \
-                 instead.",
+                "Could not copy to the clipboard. Say my activation code again spells it instead.",
             );
         }
     }
@@ -337,9 +318,7 @@ impl OnlineSetupState {
         if save_identity(&identity).is_err() {
             ctx.audio.play("ui/error");
             ctx.say(
-                "The code was accepted, but this computer could not save the driver token \
-                 securely. Nothing was changed. Check your password store, then try Set up \
-                 this computer with orinks.net again.",
+                "The code was accepted, but this computer could not save the driver token securely. Nothing was changed. Check your password store, then try Set up this computer with orinks.net again.",
             );
             return;
         }
@@ -369,8 +348,7 @@ impl OnlineSetupState {
         self.phase = SetupPhase::Sharing;
         self.refresh(ctx, true);
         ctx.say(&format!(
-            "Connected to orinks.net as {display}. Your careers now back up \
-             to that account. Turning Profile sharing on."
+            "Connected to orinks.net as {display}. Your careers now back up to that account. Turning Profile sharing on."
         ));
         let outcome = self.outcome.clone();
         let transport = online_transport();
@@ -400,14 +378,11 @@ impl OnlineSetupState {
             }
             ctx.apply_online_presence();
             ctx.say(
-                "Profile sharing is on. Your driver profile fills in as you drive. Both this \
-                 and cloud backup are single items on the Online menu.",
+                "Profile sharing is on. Your driver profile fills in as you drive. Both this and cloud backup are single items on the Online menu.",
             );
         } else {
             ctx.say(
-                "Your account is connected and backing up, but orinks.net could not turn \
-                 Profile sharing on, so your profile stays private. Profile sharing on the \
-                 Online menu tries again.",
+                "Your account is connected and backing up, but orinks.net could not turn Profile sharing on, so your profile stays private. Profile sharing on the Online menu tries again.",
             );
         }
         ctx.pop_state();
@@ -488,9 +463,7 @@ impl Menu for OnlineSetupState {
                 |s: &mut Self, ctx| s.start_setup(ctx),
             )
             .help(
-                "Asks orinks.net for an activation code, tries to open \
-                 your browser with it filled in, and waits for you to sign \
-                 in there.",
+                "Asks orinks.net for an activation code, tries to open your browser with it filled in, and waits for you to sign in there.",
             ),
             MenuItem::new("Say my activation code again", |s: &mut Self, ctx| {
                 s.repeat_code(ctx)
@@ -526,8 +499,7 @@ impl Menu for OnlineSetupState {
         }
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{}. Connects the game to your orinks.net account, turning Profile sharing on \
-             and backing your careers up. Hear what gets shared has the details. {current}",
+            "{}. Connects the game to your orinks.net account, turning Profile sharing on and backing your careers up. Hear what gets shared has the details. {current}",
             Self::TITLE
         ));
     }
@@ -589,8 +561,7 @@ impl Menu for OnlineSetupState {
                 self.phase = SetupPhase::Expired;
                 self.refresh(ctx, true);
                 ctx.say(
-                    "Your activation code expired. Choose Set up this computer \
-                     with orinks.net again for a new code.",
+                    "Your activation code expired. Choose Set up this computer with orinks.net again for a new code.",
                 );
             }
             SetupOutcome::Error => {
@@ -603,8 +574,7 @@ impl Menu for OnlineSetupState {
                 // reads as a contradiction -- the two halves have to agree, so
                 // this names the fresh code as the fix and leaves it there.
                 ctx.say(
-                    "That activation code cannot be used. Choose Set up this \
-                     computer with orinks.net for a fresh code.",
+                    "That activation code cannot be used. Choose Set up this computer with orinks.net for a fresh code.",
                 );
             }
         }
@@ -687,8 +657,7 @@ impl ProfileSharingSyncState {
         ctx.say(if self.enabled {
             "Turning Profile sharing on."
         } else {
-            "Turning Profile sharing off. Posting has stopped. Public information may stay \
-             visible until orinks.net confirms."
+            "Turning Profile sharing off. Posting has stopped. Public information may stay visible until orinks.net confirms."
         });
         let enabled = self.enabled;
         let outcome = self.outcome.clone();
@@ -756,8 +725,7 @@ impl Menu for ProfileSharingSyncState {
         ctx.say(if self.enabled {
             "Profile sharing is still off. orinks.net could not confirm the change. Try again."
         } else {
-            "Profile sharing may still be public. Posting is stopped, but orinks.net could not \
-             confirm. Turn Profile sharing off retries."
+            "Profile sharing may still be public. Posting is stopped, but orinks.net could not confirm. Turn Profile sharing off retries."
         });
     }
 

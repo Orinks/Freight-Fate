@@ -59,8 +59,7 @@ impl CloseOutCareerState {
         let Some(identity) = load_identity() else {
             self.finish(
                 ctx,
-                "Cloud backup was never set up on this computer, so there were no cloud \
-                 backups to remove.",
+                "Cloud backup was never set up on this computer, so there were no cloud backups to remove.",
             );
             return;
         };
@@ -118,9 +117,7 @@ impl Menu for CloseOutCareerState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Close out {}. This removes the save from this computer and every cloud backup \
-             of it from your orinks.net account, for good. Your achievements and road journal \
-             stay on your profile. {}",
+            "Close out {}. This removes the save from this computer and every cloud backup of it from your orinks.net account, for good. Your achievements and road journal stay on your profile. {}",
             self.name,
             self.current_text(ctx)
         );
@@ -155,14 +152,12 @@ impl Menu for CloseOutCareerState {
                 return self.finish(
                     ctx,
                     &format!(
-                        "{AUTH_HELP} The cloud backups were not removed; the Cloud saves menu \
-                         can remove them once this computer is signed in again."
+                        "{AUTH_HELP} The cloud backups were not removed; the Cloud saves menu can remove them once this computer is signed in again."
                     ),
                 );
             }
             _ => {
-                "The site could not be reached, so the cloud backups are still there; the \
-                  Cloud saves menu can remove them later."
+                "The site could not be reached, so the cloud backups are still there; the Cloud saves menu can remove them later."
             }
         };
         self.finish(ctx, cloud_line);

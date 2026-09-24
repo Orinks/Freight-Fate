@@ -97,8 +97,7 @@ impl DrivingState {
                 let until = record_hours(ctx, self) + DECAL_VALID_HOURS;
                 profile_mut_of(ctx).driving_record.decal_until_h = until;
                 text.push_str(
-                    " The officer puts an inspection decal on the windshield: for the next three \
-                     months an open scale waves you through unless your record is targeted.",
+                    " The officer puts an inspection decal on the windshield: for the next three months an open scale waves you through unless your record is targeted.",
                 );
             }
             self.refresh_roadside_inspection_scale(ctx);
@@ -237,12 +236,10 @@ impl DrivingState {
             ""
         };
         let summary = format!(
-            "Routine roadside inspection, Level 3: licence, medical card, logbook and the \
-             load's paperwork.{blitz}"
+            "Routine roadside inspection, Level 3: licence, medical card, logbook and the load's paperwork.{blitz}"
         );
         let lights = format!(
-            "Lights behind you for a routine inspection. Signal with {} and stop on the \
-             shoulder.",
+            "Lights behind you for a routine inspection. Signal with {} and stop on the shoulder.",
             ctx.control_hint("take_exit")
         );
         self.begin_enforcement_pull_over(

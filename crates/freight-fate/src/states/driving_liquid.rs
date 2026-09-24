@@ -154,8 +154,7 @@ impl DrivingState {
                 let text = if terse {
                     "Load running sideways. Ease off."
                 } else {
-                    "The load is running to the outside of the bend. Ease off now -- baffles do \
-                     nothing about this one."
+                    "The load is running to the outside of the bend. Ease off now -- baffles do nothing about this one."
                 };
                 ctx.say_event_with(text, SayEvent::new().category(SpeechCategory::Safety));
             }

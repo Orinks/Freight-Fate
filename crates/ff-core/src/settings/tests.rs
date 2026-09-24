@@ -107,41 +107,41 @@ fn the_defaults_match_the_python_dataclass() {
     let s = Settings::default();
     let expected: Value = serde_json::from_str(
         r#"{
-        "online_services": true, "imperial_units": true, "engine_voice": "real",
-        "jake_voice": "real", "acc_following_gap": "normal", "automatic_transmission": true,
-        "automatic_direction_changes": "simple", "time_scale": 10.0,
-        "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
-        "real_parking": false, "real_fuel_prices": true,
-        "live_weather_controls_calendar": true,
-        "hos_mode": "realistic", "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
-        "lane_cue_loudness": "standard", "lane_guide_tone": false,
-        "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
-        "lane_departure_warning": true, "stop_and_go_assist": true,
-        "descent_speed_control": "balanced",
-        "exit_speed_assist": true, "destination_approach_assist": true,
-        "selected_stop_assist": false, "curve_speed_assist": true,
-        "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
-        "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
-        "sfx_volume": 0.8, "music_volume": 0.5, "synth_music": false, "music_seed": 48213,
-        "radio_volume": 0.25, "radio_enabled": true,
-        "radio_station_id": "route_playlist", "radio_streamer_safe": false,
-        "radio_shuffle_playlists": false,
-        "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
-        "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
-        "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
-        "chatter_billboards": true, "place_callouts": "sparse",
-        "announce_menu_position": true, "backup_announcements": "every",
-        "sapi_events": true, "event_backend": "SAPI", "braille_only": false,
-        "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
-        "update_channel": "", "skipped_update": "", "discord_presence": true,
-        "online_presence": false, "duty_notifications": false,
-        "profile_sharing_consent_version": 0,
-        "profile_sharing_pending_off": false, "cloud_saves": false,
-        "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
-        "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
-        "settings_version": 3, "settings_layout_notice_from": -1,
-        "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false
-    }"#,
+ "online_services": true, "imperial_units": true, "engine_voice": "real",
+ "jake_voice": "real", "acc_following_gap": "normal", "automatic_transmission": true,
+ "automatic_direction_changes": "simple", "time_scale": 10.0,
+ "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
+ "real_parking": false, "real_fuel_prices": true,
+ "live_weather_controls_calendar": true,
+ "hos_mode": "realistic", "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
+ "lane_cue_loudness": "standard", "lane_guide_tone": false,
+ "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
+ "lane_departure_warning": true, "stop_and_go_assist": true,
+ "descent_speed_control": "balanced",
+ "exit_speed_assist": true, "destination_approach_assist": true,
+ "selected_stop_assist": false, "curve_speed_assist": true,
+ "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
+ "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
+ "sfx_volume": 0.8, "music_volume": 0.5, "synth_music": false, "music_seed": 48213,
+ "radio_volume": 0.25, "radio_enabled": true,
+ "radio_station_id": "route_playlist", "radio_streamer_safe": false,
+ "radio_shuffle_playlists": false,
+ "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
+ "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
+ "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
+ "chatter_billboards": true, "place_callouts": "sparse",
+ "announce_menu_position": true, "backup_announcements": "every",
+ "sapi_events": true, "event_backend": "SAPI", "braille_only": false,
+ "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
+ "update_channel": "", "skipped_update": "", "discord_presence": true,
+ "online_presence": false, "duty_notifications": false,
+ "profile_sharing_consent_version": 0,
+ "profile_sharing_pending_off": false, "cloud_saves": false,
+ "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
+ "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
+ "settings_version": 3, "settings_layout_notice_from": -1,
+ "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false
+ }"#,
     )
     .unwrap();
     let Value::Object(expected) = expected else {
@@ -160,8 +160,7 @@ fn the_file_text_is_what_json_dump_wrote() {
     let text = s.to_file_text();
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
     assert!(text.ends_with(
-        "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \
-         \"steering_assist\": \"light\"\n}"
+        "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \"steering_assist\": \"light\"\n}"
     ));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));

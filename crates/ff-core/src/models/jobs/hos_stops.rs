@@ -39,16 +39,13 @@ impl HosStopAdvice {
     pub fn summary(&self, distance: &str) -> String {
         if self.destination_reachable {
             return format!(
-                "Destination estimated reachable before your next hours limit, about {:.0} \
-                 minutes including access. No HOS stop is needed first. Traffic can change.",
+                "Destination estimated reachable before your next hours limit, about {:.0} minutes including access. No HOS stop is needed first. Traffic can change.",
                 self.destination_travel_min.ceil()
             );
         }
         match &self.stop {
             Some(stop) => format!(
-                "Last reachable {action} stop: {name}, {distance} ahead, about {minutes:.0} \
-                 minutes including access. Includes 5 minutes of planning margin. Traffic and \
-                 parking can change. Plan to stop here.",
+                "Last reachable {action} stop: {name}, {distance} ahead, about {minutes:.0} minutes including access. Includes 5 minutes of planning margin. Traffic and parking can change. Plan to stop here.",
                 action = self.action, name = stop.spoken_name(), minutes = self.travel_min.ceil(),
             ),
             None => format!(

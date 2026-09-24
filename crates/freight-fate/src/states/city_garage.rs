@@ -13,6 +13,7 @@ use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::states::city::{profile, profile_mut};
 use crate::states::city_business::{TrailerProgramState, TruckShopState, UpgradeShopState};
+use crate::states::driving_rest_states::refuel_engine_gate_message;
 
 pub const TERMINAL_FUEL_MIN: f64 = 20.0;
 pub const TERMINAL_REPAIR_MIN: f64 = 60.0;
@@ -160,6 +161,19 @@ impl GarageState {
         )
     }
 
+    /// Shut the tractor off so the island (and this bay) will fuel.
+    pub fn shut_down_engine(&mut self, ctx: &mut GameContext) {
+        if !profile(ctx).truck_engine_on() {
+            ctx.say("The engine is already off.");
+            return;
+        }
+        profile_mut(ctx).set_truck_engine_on(false);
+        ctx.save_profile();
+        ctx.audio.play("ui/notify");
+        ctx.say("Engine off.");
+        self.refresh(ctx, true);
+    }
+
     pub fn refuel(&mut self, ctx: &mut GameContext) {
         let tank = Self::tank_gal(ctx);
         let need = tank - profile(ctx).truck_fuel_gal();
@@ -167,6 +181,12 @@ impl GarageState {
             ctx.say("The tank is already full.");
             return;
         }
+        if let Some(msg) = refuel_engine_gate_message(profile(ctx).truck_engine_on()) {
+            ctx.audio.play("ui/error");
+            ctx.say(msg);
+            return;
+        }
+        // Reefer and APU may stay on; only the tractor must be off.
         if !player_pays_operating_costs(&profile(ctx).business_status) {
             let money = {
                 let p = profile_mut(ctx);
@@ -178,8 +198,7 @@ impl GarageState {
             ctx.save_profile();
             ctx.audio.play("vehicle/fuel_pump");
             ctx.say(&format!(
-                "Tank filled on the carrier fuel account. Fueling took {} minutes. You have {} \
-                 dollars.",
+                "Tank filled on the carrier fuel account. Fueling took {} minutes. You have {} dollars.",
                 fmt_f(TERMINAL_FUEL_MIN, 0),
                 fmt_grouped(money, 0)
             ));
@@ -241,9 +260,7 @@ impl GarageState {
         ctx.save_profile();
         ctx.audio.play("vehicle/fuel_pump");
         ctx.say(&format!(
-            "Partial fuel: added {} gallons for \
-             {} dollars. \
-             You have {} dollars left.",
+            "Partial fuel: added {} gallons for {} dollars. You have {} dollars left.",
             fmt_f(gallons, 0),
             fmt_grouped(cost, 0),
             fmt_grouped(money, 0)
@@ -343,9 +360,7 @@ impl GarageState {
         save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "Partial repairs fixed {} percent damage \
-             for {} dollars. \
-             You have {} dollars left.",
+            "Partial repairs fixed {} percent damage for {} dollars. You have {} dollars left.",
             fmt_f(repairable, 0),
             fmt_grouped(cost, 0),
             fmt_grouped(money, 0)
@@ -420,8 +435,7 @@ impl GarageState {
         }
         if !player_pays_operating_costs(&p.business_status) {
             return format!(
-                "Engine overhaul on assigned company tractor: \
-                 {} percent wear, carrier billed",
+                "Engine overhaul on assigned company tractor: {} percent wear, carrier billed",
                 fmt_f(wear, 0)
             );
         }
@@ -500,9 +514,7 @@ impl GarageState {
             save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
-                "Partial tire service fixed {} percent wear \
-                 for {} dollars. \
-                 You have {} dollars left.",
+                "Partial tire service fixed {} percent wear for {} dollars. You have {} dollars left.",
                 fmt_f(serviceable, 0),
                 fmt_grouped(cost, 0),
                 fmt_grouped(money, 0)
@@ -560,8 +572,7 @@ impl GarageState {
         if profile(ctx).money() < cost {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
-                "A fresh set of {compound} tires \
-                 costs {} dollars.",
+                "A fresh set of {compound} tires costs {} dollars.",
                 fmt_grouped(cost, 0)
             ));
             return;
@@ -585,9 +596,7 @@ impl GarageState {
             "Back to the everyday tire: longer tread life, standard grip."
         };
         ctx.say(&format!(
-            "Fresh {compound} set mounted for \
-             {} dollars. {trade} \
-             You have {} dollars left.",
+            "Fresh {compound} set mounted for {} dollars. {trade} You have {} dollars left.",
             fmt_grouped(cost, 0),
             fmt_grouped(money, 0)
         ));
@@ -671,9 +680,7 @@ impl GarageState {
         save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "A fresh chain set is stowed in the side box for \
-             {} dollars. \
-             You have {} dollars left.",
+            "A fresh chain set is stowed in the side box for {} dollars. You have {} dollars left.",
             fmt_grouped(CHAIN_SET_COST, 0),
             fmt_grouped(money, 0)
         ));
@@ -767,9 +774,7 @@ impl GarageState {
             save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
-                "Partial {} fixed {} percent wear \
-                 for {} dollars. \
-                 You have {} dollars left.",
+                "Partial {} fixed {} percent wear for {} dollars. You have {} dollars left.",
                 service.partial_noun,
                 fmt_f(serviceable, 0),
                 fmt_grouped(cost, 0),
@@ -843,8 +848,7 @@ impl GarageState {
         ctx.save_profile();
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "Truck washed for {} dollars. \
-             You have {} dollars left.",
+            "Truck washed for {} dollars. You have {} dollars left.",
             fmt_grouped(TRUCK_WASH_COST, 0),
             fmt_grouped(money, 0)
         ));
@@ -873,16 +877,26 @@ impl Menu for GarageState {
         &mut self.menu
     }
 
-    fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        vec![
+    fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        let mut items = Vec::new();
+        if profile(ctx).truck_engine_on() {
+            items.push(
+                MenuItem::new("Shut down the engine", |s: &mut Self, ctx| {
+                    s.shut_down_engine(ctx)
+                })
+                .help("The tractor must be off before this bay will fuel."),
+            );
+        }
+        items.push(
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::fuel_label(ctx)),
                 |s: &mut Self, ctx| s.refuel(ctx),
             )
             .help(
-                "Company drivers bill the carrier, owner-operators pay the regional diesel \
-                 price.",
+                "Company drivers bill the carrier, owner-operators pay the regional diesel price. Shut the engine off first.",
             ),
+        );
+        items.extend([
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::repair_label(ctx)),
                 |s: &mut Self, ctx| s.repair(ctx),
@@ -893,40 +907,35 @@ impl Menu for GarageState {
                 |s: &mut Self, ctx| s.service_tires(ctx),
             )
             .help(
-                "Worn tires grip less. Company drivers bill the carrier, owner-operators pay \
-                 the shop.",
+                "Worn tires grip less. Company drivers bill the carrier, owner-operators pay the shop.",
             ),
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::tire_swap_label(ctx)),
                 |s: &mut Self, ctx| s.swap_tire_compound(ctx),
             )
             .help(
-                "Winter tires bite harder on snow and ice, wear faster, and grip a little \
-                 less on warm dry pavement. Company tractors run what the carrier specs.",
+                "Winter tires bite harder on snow and ice, wear faster, and grip a little less on warm dry pavement. Company tractors run what the carrier specs.",
             ),
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::chains_label(ctx)),
                 |s: &mut Self, ctx| s.buy_chains(ctx),
             )
             .help(
-                "Chains go on from the pause menu when stopped in snow or ice. They grind \
-                 apart on bare pavement. Company drivers bill the carrier.",
+                "Chains go on from the pause menu when stopped in snow or ice. They grind apart on bare pavement. Company drivers bill the carrier.",
             ),
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::brake_label(ctx)),
                 |s: &mut Self, ctx| s.service_brakes(ctx),
             )
             .help(
-                "Worn shoes pull weaker and fade sooner. The engine brake costs them \
-                 nothing. Company drivers bill the carrier, owner-operators pay the shop.",
+                "Worn shoes pull weaker and fade sooner. The engine brake costs them nothing. Company drivers bill the carrier, owner-operators pay the shop.",
             ),
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::engine_label(ctx)),
                 |s: &mut Self, ctx| s.service_engine(ctx),
             )
             .help(
-                "A worn engine is down on power and burns more fuel. Over-revving and lugging \
-                 wear it fast. Company drivers bill the carrier, owner-operators pay the shop.",
+                "A worn engine is down on power and burns more fuel. Over-revving and lugging wear it fast. Company drivers bill the carrier, owner-operators pay the shop.",
             ),
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::wash_label(ctx)),
@@ -934,8 +943,7 @@ impl Menu for GarageState {
             )
             .help("Company drivers bill the carrier, owner-operators pay."),
             MenuItem::new("Upgrades", |s: &mut Self, ctx| s.upgrades(ctx)).help(
-                "Performance upgrades for owned tractors: more torque, less drag, a bigger \
-                 tank, stronger brakes.",
+                "Performance upgrades for owned tractors: more torque, less drag, a bigger tank, stronger brakes.",
             ),
             MenuItem::new("Trucks", |s: &mut Self, ctx| s.trucks(ctx))
                 .help("Owner-operators can buy a new truck, or switch between trucks they own."),
@@ -944,7 +952,8 @@ impl Menu for GarageState {
             ),
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx))
                 .help("Return to the terminal menu."),
-        ]
+        ]);
+        items
     }
 }
 

@@ -578,15 +578,13 @@ impl Instructor for Tutorial {
             self.hinted = false;
             let text = if ctx.settings.automatic_transmission {
                 format!(
-                    "At air ready, press {} to release the parking brake, then hold {} to \
-                     accelerate. The transmission shifts for you.",
+                    "At air ready, press {} to release the parking brake, then hold {} to accelerate. The transmission shifts for you.",
                     ctx.control_hint("parking_brake"),
                     ctx.control_hint("accelerate")
                 )
             } else {
                 format!(
-                    "At air ready, press {} to release the parking brake, then hold {}, select \
-                     {} for first gear, and release the clutch.",
+                    "At air ready, press {} to release the parking brake, then hold {}, select {} for first gear, and release the clutch.",
                     ctx.control_hint("parking_brake"),
                     ctx.control_hint("clutch"),
                     ctx.control_hint("gear_first")
@@ -634,8 +632,7 @@ impl Instructor for Tutorial {
         if self.stage == 2 && truck.speed_mph() > 20.0 {
             self.stage = 3;
             let text = format!(
-                "Rolling. {} for your speed, {} for a full report, {} for all the controls. Brake \
-                 hard at a hazard warning; {} stops fast. Safe travels.",
+                "Rolling. {} for your speed, {} for a full report, {} for all the controls. Brake hard at a hazard warning; {} stops fast. Safe travels.",
                 ctx.control_hint("speed"),
                 ctx.control_hint("status_menu"),
                 ctx.control_hint("help"),
@@ -661,8 +658,7 @@ impl Instructor for Tutorial {
                 )
             } else if truck.parking_brake {
                 format!(
-                    "Reminder: wait for air pressure to reach 100 psi, then press {} to release \
-                     the parking brake.",
+                    "Reminder: wait for air pressure to reach 100 psi, then press {} to release the parking brake.",
                     ctx.control_hint("parking_brake")
                 )
             } else {

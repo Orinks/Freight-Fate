@@ -784,7 +784,7 @@ impl PlaytestHarness {
             // where the drive below would have taken it.
             assert!(
                 !setup.arm_speed_control_on_deadhead,
-                "this career's assigned load is staged at the yard; there is no                  deadhead to arm speed control on"
+                "this career's assigned load is staged at the yard; there is no deadhead to arm speed control on"
             );
         } else {
             assert!(self.state_is::<DrivingState>(), "the board did not drive");
@@ -1071,9 +1071,7 @@ impl PlaytestHarness {
             let (position, speed, ramp) =
                 self.read_drive(|d| (d.trip.position_mi, d.truck().speed_mph(), d.ramp_mi));
             panic!(
-                "automatic speed control never completed the destination exit: \
-                 position={position:.2}, speed={speed:.1}, ramp={ramp:?}, \
-                 signaled={signaled}\n{}",
+                "automatic speed control never completed the destination exit: position={position:.2}, speed={speed:.1}, ramp={ramp:?}, signaled={signaled}\n{}",
                 self.transcript_text()
             );
         }

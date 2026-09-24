@@ -28,8 +28,7 @@
 use crate::pyrandom::PyRandom;
 
 pub const BIG_BUCKS_SOURCE: &str =
-    "Original parody of a well-known Texas travel-center chain that bans big \
-     rigs; names and products are invented to keep the joke and drop the mark.";
+    "Original parody of a well-known Texas travel-center chain that bans big rigs; names and products are invented to keep the joke and drop the mark.";
 
 /// Forced trailered attempts *after* the first-offense hint before Big Buck's
 /// bans you. The hint itself is attempt zero; the beaver's patience runs out

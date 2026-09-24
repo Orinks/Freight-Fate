@@ -389,7 +389,7 @@ pub fn describe(sandbox: &Path) -> String {
         );
     } else {
         lines.push("  NOT ISOLATED:".to_string());
-        lines.extend(problems.into_iter().map(|p| format!("    - {p}")));
+        lines.extend(problems.into_iter().map(|p| format!(" - {p}")));
     }
     lines.join("\n")
 }

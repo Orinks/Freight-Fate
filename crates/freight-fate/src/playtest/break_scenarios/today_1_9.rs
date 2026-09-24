@@ -227,8 +227,7 @@ pub fn named_hazards_keep_their_frequency() -> Outcome {
         let total: f64 = family.iter().filter_map(|text| weight_of(text)).sum();
         if (total - expected).abs() > 0.001 {
             findings.push(format!(
-                "{label} now weigh {total:.3} against the {expected} the split promised to \
-                 preserve; the road got busier without anyone deciding to"
+                "{label} now weigh {total:.3} against the {expected} the split promised to preserve; the road got busier without anyone deciding to"
             ));
         }
         // The anonymous fallback is meant to be the rare unidentifiable one,
@@ -240,8 +239,7 @@ pub fn named_hazards_keep_their_frequency() -> Outcome {
         };
         if share > 0.2 {
             findings.push(format!(
-                "{label}: the unnamed fallback is {:.0}% of the family, so 'what is it?' still \
-                 usually has no answer",
+                "{label}: the unnamed fallback is {:.0}% of the family, so 'what is it?' still usually has no answer",
                 share * 100.0
             ));
         }
@@ -305,8 +303,7 @@ pub fn weather_cap_releases_when_the_sky_does() -> Outcome {
     }
     if top > safe + 4.0 {
         findings.push(format!(
-            "holding the cruise-up key through the storm reached {top:.0} mph against a safe \
-             speed of {safe:.0}"
+            "holding the cruise-up key through the storm reached {top:.0} mph against a safe speed of {safe:.0}"
         ));
     }
     if rig.said("easing to") == 0 {
@@ -338,8 +335,7 @@ pub fn weather_cap_releases_when_the_sky_does() -> Outcome {
         ));
     } else if recovered < safe + 5.0 {
         findings.push(format!(
-            "the sky cleared and the truck never got above {recovered:.0} mph, about the \
-             storm's {safe:.0}; the cap looks stuck"
+            "the sky cleared and the truck never got above {recovered:.0} mph, about the storm's {safe:.0}; the cap looks stuck"
         ));
     }
     let note =

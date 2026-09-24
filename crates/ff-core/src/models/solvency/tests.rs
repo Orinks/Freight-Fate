@@ -525,9 +525,7 @@ fn the_spoken_lines_match_the_python_f_strings() {
     );
     assert_eq!(
         debt_line(&p),
-        "Owed: 1,000 dollars of 6,000 dollars. Past that, the carrier ends your \
-         employment and you move to another fleet. You can also pay it down from \
-         cash at any terminal or truck stop."
+        "Owed: 1,000 dollars of 6,000 dollars. Past that, the carrier ends your employment and you move to another fleet. You can also pay it down from cash at any terminal or truck stop."
     );
     let mut owner = owner_operator("highline_sleeper");
     owner.money = -30_000.0;
@@ -540,8 +538,7 @@ fn the_spoken_lines_match_the_python_f_strings() {
     assert_eq!(debt_rung(&owner), 3);
     assert_eq!(
         debt_warning_line(&owner, true),
-        "Owed 45,000 dollars. At 49,200 dollars, the tractor is worth less than \
-         the loan on it and the lender takes it back."
+        "Owed 45,000 dollars. At 49,200 dollars, the tractor is worth less than the loan on it and the lender takes it back."
     );
     assert_eq!(debt_share(&owner), 45_000.0 / 49_200.0);
     assert!(in_debt(&owner));

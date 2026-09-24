@@ -102,13 +102,11 @@ pub fn damage_summary_line(
     let clause = damage_band_clause(settings, truck);
     if clause.is_empty() {
         return Some(format!(
-            "The cargo run added {trip_damage:.0} percent truck damage. Visit the garage when you \
-             can."
+            "The cargo run added {trip_damage:.0} percent truck damage. Visit the garage when you can."
         ));
     }
     Some(format!(
-        "The cargo run added {trip_damage:.0} percent truck damage. The truck is at {:.0} \
-         percent, {clause}. Repair it before the next run.",
+        "The cargo run added {trip_damage:.0} percent truck damage. The truck is at {:.0} percent, {clause}. Repair it before the next run.",
         truck.damage_pct
     ))
 }
@@ -177,7 +175,13 @@ impl DrivingState {
         let curve = self.trip.curve_at(self.trip.position_mi);
         let bend = curve.filter(|curve| !curve.connector);
         let speed_mph = self.trip.truck.speed_mph();
+        let ambient = self
+            .trip
+            .weather
+            .temperature_c()
+            .unwrap_or(ff_core::sim::vehicle::AMBIENT_C);
         let t = &mut self.trip.truck;
+        t.ambient_temp_c = ambient;
         t.corner_overspeed_mph = match &bend {
             Some(bend) => (speed_mph - bend.advisory_mph as f64).max(0.0),
             None => 0.0,
@@ -221,12 +225,10 @@ impl DrivingState {
         } else {
             let consequence = match outcome {
                 "exception" => {
-                    "The receiver will note an exception on the bill of lading and hold back part \
-                     of the pay."
+                    "The receiver will note an exception on the bill of lading and hold back part of the pay."
                 }
                 "claim" => {
-                    "Claim territory now. The receiver will take it, and the carrier pays for \
-                     what you broke."
+                    "Claim territory now. The receiver will take it, and the carrier pays for what you broke."
                 }
                 _ => "The dock will refuse a load in this state.",
             };
@@ -240,8 +242,7 @@ impl DrivingState {
                 " Brake and corner gently from here."
             };
             format!(
-                "The load has shifted hard and is {words}, {cargo_damage_pct:.0} percent. \
-                 {consequence}{tail}"
+                "The load has shifted hard and is {words}, {cargo_damage_pct:.0} percent. {consequence}{tail}"
             )
         };
         self.cargo_coaching_said = true;
@@ -326,8 +327,7 @@ impl DrivingState {
                     format!("Reduced power. Damage {damage:.0} percent.")
                 } else {
                     format!(
-                        "Reduced power. Damage is past {DAMAGE_DERATE_PCT:.0} percent; the engine \
-                         is holding back and burning more fuel."
+                        "Reduced power. Damage is past {DAMAGE_DERATE_PCT:.0} percent; the engine is holding back and burning more fuel."
                     )
                 };
             } else if band == DAMAGE_BAND_LIMP {
@@ -335,8 +335,7 @@ impl DrivingState {
                     format!("Limp mode. Capped at {cap}.")
                 } else {
                     format!(
-                        "Limp mode. Damage is past {DAMAGE_LIMP_PCT:.0} percent; the engine is \
-                         winding down to a {cap} cap."
+                        "Limp mode. Damage is past {DAMAGE_LIMP_PCT:.0} percent; the engine is winding down to a {cap} cap."
                     )
                 };
             } else if band == DAMAGE_BAND_LAST_CALL {
@@ -344,14 +343,11 @@ impl DrivingState {
                 // surprised by the truck stopping was not warned properly.
                 message = if terse {
                     format!(
-                        "Damage {damage:.0} percent. Out of service at \
-                         {DAMAGE_OUT_OF_SERVICE_PCT:.0}."
+                        "Damage {damage:.0} percent. Out of service at {DAMAGE_OUT_OF_SERVICE_PCT:.0}."
                     )
                 } else {
                     format!(
-                        "Damage is past {DAMAGE_LAST_CALL_PCT:.0} percent. At \
-                         {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent the truck goes out of service and \
-                         cannot be driven at all."
+                        "Damage is past {DAMAGE_LAST_CALL_PCT:.0} percent. At {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent the truck goes out of service and cannot be driven at all."
                     )
                 };
             } else {
@@ -374,8 +370,7 @@ impl DrivingState {
                     format!("Reduced power. Damage {damage:.0} percent.")
                 } else {
                     format!(
-                        "Damage {damage:.0} percent. Limp mode is off; the truck is still in \
-                         reduced power."
+                        "Damage {damage:.0} percent. Limp mode is off; the truck is still in reduced power."
                     )
                 };
             } else {
@@ -427,30 +422,24 @@ impl DrivingState {
             );
             if self.terse_speech(ctx) {
                 return format!(
-                    "Out of service. {cause}.{incident_damage} {creep} to clear the lane, then stop. Road service \
-                     must {work}: {}.",
+                    "Out of service. {cause}.{incident_damage} {creep} to clear the lane, then stop. Road service must {work}: {}.",
                     self.recovery_cost_text(ctx)
                 );
             }
             return format!(
-                "Out of service. {cause}.{incident_damage} The truck requires service before it can continue. \
-                 {creep} to clear the lane, then stop on the shoulder. Road service will {work}. \
-                 {}.",
+                "Out of service. {cause}.{incident_damage} The truck requires service before it can continue. {creep} to clear the lane, then stop on the shoulder. Road service will {work}. {}.",
                 self.recovery_cost_text(ctx)
             );
         }
         if self.terse_speech(ctx) {
             return format!(
-                "Out of service. Damage {:.0} percent. {creep} to clear the lane, then brake to a \
-                 stop. Road service is coming: {}.",
+                "Out of service. Damage {:.0} percent. {creep} to clear the lane, then brake to a stop. Road service is coming: {}.",
                 self.trip.truck.damage_pct,
                 self.recovery_cost_text(ctx)
             );
         }
         format!(
-            "Out of service. Damage is past {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent; the truck may \
-             not be driven. {creep} to clear the lane, then stop on the shoulder for road \
-             service. {}.",
+            "Out of service. Damage is past {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent; the truck may not be driven. {creep} to clear the lane, then stop on the shoulder for road service. {}.",
             self.recovery_cost_text(ctx)
         )
     }
@@ -461,8 +450,7 @@ impl DrivingState {
             let cost = self.roadside_service_cost();
             if !self.maintenance_failures().is_empty() && profile_of(ctx).money() < cost {
                 return format!(
-                    "The repair will cost about {} dollars and most of {:.0} hours; any unpaid \
-                     balance becomes debt",
+                    "The repair will cost about {} dollars and most of {:.0} hours; any unpaid balance becomes debt",
                     fmt_grouped(cost, 0),
                     BREAKDOWN_REPAIR_MIN / 60.0
                 );
@@ -474,8 +462,7 @@ impl DrivingState {
             );
         }
         format!(
-            "The carrier covers the bill, but dispatch grounds the tractor and the wait runs \
-             about {:.0} hours",
+            "The carrier covers the bill, but dispatch grounds the tractor and the wait runs about {:.0} hours",
             GROUNDED_SWAP_MIN / 60.0
         )
     }
@@ -651,18 +638,13 @@ impl DrivingState {
             };
             if self.terse_speech(ctx) {
                 format!(
-                    "Road service {work}, {} dollars. {cleared} {cleared_verb} now 0 \
-                     percent.{damage} You have \
-                     {} dollars.",
+                    "Road service {work}, {} dollars. {cleared} {cleared_verb} now 0 percent.{damage} You have {} dollars.",
                     fmt_grouped(cost, 0),
                     fmt_grouped(money, 0)
                 )
             } else {
                 format!(
-                    "Road service {work} for {} dollars. The truck is cleared to continue.{damage} \
-                     {cleared} {cleared_verb} now 0 percent. The work took {:.0} hours and it is \
-                     now {}. You \
-                     have {} dollars. Press {} to restart the engine.",
+                    "Road service {work} for {} dollars. The truck is cleared to continue.{damage} {cleared} {cleared_verb} now 0 percent. The work took {:.0} hours and it is now {}. You have {} dollars. Press {} to restart the engine.",
                     fmt_grouped(cost, 0),
                     BREAKDOWN_REPAIR_MIN / 60.0,
                     clock_text(self.trip.local_hour()),
@@ -672,17 +654,14 @@ impl DrivingState {
             }
         } else if self.terse_speech(ctx) {
             format!(
-                "Roadside repair, {} dollars. Damage {damage_pct:.0} percent, {}. You have {} \
-                 dollars.",
+                "Roadside repair, {} dollars. Damage {damage_pct:.0} percent, {}. You have {} dollars.",
                 fmt_grouped(cost, 0),
                 self.damage_band_clause(ctx),
                 fmt_grouped(money, 0)
             )
         } else {
             format!(
-                "Roadside repair got the truck moving for {} dollars; damage is down to \
-                 {damage_pct:.0} percent, still in reduced power. It took {:.0} hours and it is \
-                 now {}. You have {} dollars. Press {} to restart the engine.",
+                "Roadside repair got the truck moving for {} dollars; damage is down to {damage_pct:.0} percent, still in reduced power. It took {:.0} hours and it is now {}. You have {} dollars. Press {} to restart the engine.",
                 fmt_grouped(cost, 0),
                 BREAKDOWN_REPAIR_MIN / 60.0,
                 clock_text(self.trip.local_hour()),
@@ -727,8 +706,7 @@ impl DrivingState {
                         format!("You are in the {spare}")
                     } else {
                         format!(
-                            "You are in the {spare}; the shop will {shop_work} on the grounded \
-                             tractor"
+                            "You are in the {spare}; the shop will {shop_work} on the grounded tractor"
                         )
                     }
                 } else {
@@ -736,8 +714,7 @@ impl DrivingState {
                         format!("Dispatch put you in the {spare} for the rest of this run")
                     } else {
                         format!(
-                            "Dispatch put you in the {spare} for the rest of this run. The \
-                             grounded tractor goes to the shop to {shop_work}"
+                            "Dispatch put you in the {spare} for the rest of this run. The grounded tractor goes to the shop to {shop_work}"
                         )
                     }
                 }
@@ -773,20 +750,16 @@ impl DrivingState {
                         "Patched to finish the run".to_string()
                     } else {
                         format!(
-                            "Road service {service}; {cleared} {cleared_verb} now 0 percent; \
-                             cleared to finish the run"
+                            "Road service {service}; {cleared} {cleared_verb} now 0 percent; cleared to finish the run"
                         )
                     }
                 } else {
                     if service.is_empty() {
-                        "The road crew put it right enough to finish the run, and the shop takes \
-                         it when you get in"
+                        "The road crew put it right enough to finish the run, and the shop takes it when you get in"
                             .to_string()
                     } else {
                         format!(
-                            "The road crew {service}. The truck is cleared to finish the run, and \
-                             {cleared} {cleared_verb} now 0 percent. The shop checks it again when \
-                             you get in"
+                            "The road crew {service}. The truck is cleared to finish the run, and {cleared} {cleared_verb} now 0 percent. The shop checks it again when you get in"
                         )
                     }
                 }
@@ -795,16 +768,11 @@ impl DrivingState {
         let damage_pct = self.trip.truck.damage_pct;
         let message = if terse {
             format!(
-                "Grounded. The carrier pays. {handover}. Damage {damage_pct:.0} percent. Dispatch \
-                 logged preventable equipment damage."
+                "Grounded. The carrier pays. {handover}. Damage {damage_pct:.0} percent. Dispatch logged preventable equipment damage."
             )
         } else {
             format!(
-                "Dispatch has taken the {grounded} out of service. The carrier covers the bill. \
-                 {handover}. That cost {:.0} hours and it is now {}. Damage on the truck you are \
-                 in is {damage_pct:.0} percent. Dispatch logged preventable equipment damage \
-                 against your record; a pattern of it costs the seat. Press {} to restart the \
-                 engine.",
+                "Dispatch has taken the {grounded} out of service. The carrier covers the bill. {handover}. That cost {:.0} hours and it is now {}. Damage on the truck you are in is {damage_pct:.0} percent. Dispatch logged preventable equipment damage against your record; a pattern of it costs the seat. Press {} to restart the engine.",
                 GROUNDED_SWAP_MIN / 60.0,
                 clock_text(self.trip.local_hour()),
                 ctx.control_hint("engine")

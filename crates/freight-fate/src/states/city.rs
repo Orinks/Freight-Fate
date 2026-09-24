@@ -197,11 +197,9 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
                 "You own a new truck with a full tank and {} dollars of working capital.",
                 fmt_grouped(p.money(), 0)
             ),
-            "Fuel, repairs, truck wear, trailer programs, and business reserves come out \
-             of your cash."
+            "Fuel, repairs, truck wear, trailer programs, and business reserves come out of your cash."
                 .to_string(),
-            "First objective: open the dispatch board and choose an unlocked load with a \
-             deadline you can protect."
+            "First objective: open the dispatch board and choose an unlocked load with a deadline you can protect."
                 .to_string(),
         ];
     }
@@ -216,8 +214,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         "As a new hire, dispatch assigns your load and route, and refusing an assignment \
          goes on your service record."
             .to_string(),
-        "First objective: open the dispatch board, accept the assigned load, and deliver \
-         it cleanly."
+        "First objective: open the dispatch board, accept the assigned load, and deliver it cleanly."
             .to_string(),
     ]
 }
@@ -233,14 +230,12 @@ pub(crate) fn terminal_objective_clause(p: &Profile) -> String {
         };
         if let Some(guidance) = guidance.filter(|g| g.stage == TrainingStage::FirstDispatch) {
             return format!(
-                " First-day objective: open the dispatch board and accept your assigned {} \
-                 load.",
+                " First-day objective: open the dispatch board and accept your assigned {} load.",
                 guidance.recommendation_label
             );
         }
         if !is_company_training_profile(p) {
-            return " First-day objective: open the dispatch board and choose an unlocked load \
-                    that keeps your cash cushion."
+            return " First-day objective: open the dispatch board and choose an unlocked load that keeps your cash cushion."
                 .to_string();
         }
         let objective = career_objective(p);
@@ -754,7 +749,18 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             let next_context = driving
                 .trip
                 .next_navigation_context(ctx.settings.imperial_units);
-            loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context)
+            let mut line =
+                loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context);
+            if driving.trip.truck.reefer_on && driving.trip.truck.cargo_needs_reefer() {
+                line.push(' ');
+                line.push_str(
+                    &driving
+                        .trip
+                        .truck
+                        .reefer_running_announcement(ctx.settings.imperial_units),
+                );
+            }
+            line
         }
     };
     ctx.say(&line);

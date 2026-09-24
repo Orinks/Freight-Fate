@@ -307,9 +307,7 @@ impl DrivingState {
             )
         } else {
             format!(
-                "You carried past the gate at {}, too fast for the entrance. You loop back \
-                 through the next safe turnaround. The gate is ahead again; slow to {target} this \
-                 time. The clock is still running.",
+                "You carried past the gate at {}, too fast for the entrance. You loop back through the next safe turnaround. The gate is ahead again; slow to {target} this time. The clock is still running.",
                 self.destination_facility_text(ctx)
             )
         };
@@ -322,8 +320,7 @@ impl DrivingState {
             );
             if !ctx.settings.destination_approach_assist {
                 message +=
-                    " Facility stopping assistance in Settings, Gameplay, Driving assistance, \
-                     can stop the truck for you.";
+                    " Facility stopping assistance in Settings, Gameplay, Driving assistance, can stop the truck for you.";
             }
         }
         ctx.audio.play("ui/warning");

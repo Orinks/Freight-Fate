@@ -1724,7 +1724,6 @@ fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
     }
 }
 
-
 #[test]
 fn test_fairbanks_has_curated_freight_job_endpoints() {
     use ff_core::models::jobs::JobBoard;
@@ -1747,7 +1746,10 @@ fn test_fairbanks_has_curated_freight_job_endpoints() {
     assert!(!JobBoard::cargo_for_location(costco, "receives", None).is_empty());
     assert!(costco.roles.iter().all(|r| r == "receiver"));
     for key in ["food", "retail", "refrigerated", "general"] {
-        assert!(costco.receives.iter().any(|k| k == key), "Costco receives {key}");
+        assert!(
+            costco.receives.iter().any(|k| k == key),
+            "Costco receives {key}"
+        );
     }
     assert!(!costco.receives.iter().any(|k| k == "frozen"));
 
@@ -1756,7 +1758,10 @@ fn test_fairbanks_has_curated_freight_job_endpoints() {
     assert!(fred.ships.is_empty(), "Fred Meyer must be receive-only");
     assert!(fred.roles.iter().all(|r| r == "receiver"));
     for key in ["food", "retail", "refrigerated", "general"] {
-        assert!(fred.receives.iter().any(|k| k == key), "Fred Meyer receives {key}");
+        assert!(
+            fred.receives.iter().any(|k| k == key),
+            "Fred Meyer receives {key}"
+        );
     }
 
     let sbs = by_name("Spenard");
@@ -1775,8 +1780,14 @@ fn test_fairbanks_has_curated_freight_job_endpoints() {
     assert!(carlile.roles.iter().any(|r| r == "shipper"));
     assert!(carlile.roles.iter().any(|r| r == "receiver"));
     for key in ["general", "retail", "parcel", "container"] {
-        assert!(carlile.ships.iter().any(|k| k == key), "Carlile ships {key}");
-        assert!(carlile.receives.iter().any(|k| k == key), "Carlile receives {key}");
+        assert!(
+            carlile.ships.iter().any(|k| k == key),
+            "Carlile ships {key}"
+        );
+        assert!(
+            carlile.receives.iter().any(|k| k == key),
+            "Carlile receives {key}"
+        );
     }
     assert!(
         carlile.traits.iter().any(|t| t == "thin_outbound"),
@@ -1817,7 +1828,9 @@ fn test_fairbanks_has_curated_freight_job_endpoints() {
         "whitehorse_yt_ca",
         "prince_george_bc_ca",
     ] {
-        let city = world.city(city_key).unwrap_or_else(|_| panic!("{city_key}"));
+        let city = world
+            .city(city_key)
+            .unwrap_or_else(|_| panic!("{city_key}"));
         assert!(
             city.locations
                 .iter()
@@ -1826,7 +1839,6 @@ fn test_fairbanks_has_curated_freight_job_endpoints() {
         );
     }
 }
-
 
 #[test]
 fn test_legs_are_sane_and_unique() {

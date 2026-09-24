@@ -24,7 +24,7 @@ mod rest_stop;
 mod roadside;
 mod shoulder;
 
-pub use fuel_pump::FuelPump;
+pub use fuel_pump::{refuel_engine_gate_message, FuelPump};
 pub use loyalty::LoyaltyRewardsState;
 pub use parking_full::ParkingFullState;
 pub use rest_stop::RestStopState;
@@ -52,9 +52,7 @@ pub fn suspension_text(ctx: &GameContext, hours: f64, verb: &str) -> String {
     let profile = profile_of(ctx);
     let left = enforcement::days_text(profile.driving_record.days_left(hours));
     format!(
-        "Your CDL is {verb} for {left}. Driving jobs are off the dispatch board until it clears, \
-         {}. Your money and your truck are safe; rest, repairs, the garage, and the truck dealer \
-         are still open.",
+        "Your CDL is {verb} for {left}. Driving jobs are off the dispatch board until it clears, {}. Your money and your truck are safe; rest, repairs, the garage, and the truck dealer are still open.",
         enforcement::clears_text(profile)
     )
 }
@@ -62,8 +60,7 @@ pub fn suspension_text(ctx: &GameContext, hours: f64, verb: &str) -> String {
 /// Spoken movement on the serious-violation ladder, consequence attached.
 pub fn serious_violation_text(ctx: &GameContext, count: i64, hours: f64) -> String {
     if count <= 1 {
-        return "That is a serious violation on your record. One more inside three years and your \
-                CDL is suspended for 60 days, and driving jobs stop until it clears."
+        return "That is a serious violation on your record. One more inside three years and your CDL is suspended for 60 days, and driving jobs stop until it clears."
             .to_string();
     }
     let which = enforcement::ordinal_word(count);
@@ -83,20 +80,11 @@ pub fn major_offense_text(ctx: &GameContext, kind: &str, hours: f64) -> String {
     };
     if kind == enforcement::SUSPENSION_LIFETIME {
         return format!(
-            "That is your second major offense. Under federal rules a second major offense \
-             disqualifies a commercial licence for life, so this driver will not drive \
-             commercially again. Nothing is taken away: {name} keeps every dollar, the truck, \
-             and the whole record, and you can open this career any time to look back over it. \
-             Rest, repairs, the garage, and the truck dealer still work here, and the dispatch \
-             board can still be read, but there is no driving work and no date this clears. When \
-             you want the road again, start a new career from the title menu. Everything you \
-             learned still applies."
+            "That is your second major offense. Under federal rules a second major offense disqualifies a commercial licence for life, so this driver will not drive commercially again. Nothing is taken away: {name} keeps every dollar, the truck, and the whole record, and you can open this career any time to look back over it. Rest, repairs, the garage, and the truck dealer still work here, and the dispatch board can still be read, but there is no driving work and no date this clears. When you want the road again, start a new career from the title menu. Everything you learned still applies."
         );
     }
     format!(
-        "Running from a police stop in a commercial vehicle is a felony, and a major offense on \
-         your CDL, which is a one-year disqualification. {} One more major offense is a lifetime \
-         disqualification.",
+        "Running from a police stop in a commercial vehicle is a felony, and a major offense on your CDL, which is a one-year disqualification. {} One more major offense is a lifetime disqualification.",
         suspension_text(ctx, hours, "disqualified")
     )
 }
@@ -190,16 +178,12 @@ impl DrivingState {
         };
         let text = if count < enforcement::FATIGUE_EVENTS_BEFORE_SERIOUS {
             format!(
-                "Running off the road asleep is a preventable safety incident and it goes on \
-                 your record: {} points off your reputation. Do it again and it becomes a \
-                 fatigued-driving violation on your CDL.",
+                "Running off the road asleep is a preventable safety incident and it goes on your record: {} points off your reputation. Do it again and it becomes a fatigued-driving violation on your CDL.",
                 fmt_f(hit, 0)
             )
         } else {
             format!(
-                "That is {} that you have run off the road asleep. Driving impaired by fatigue \
-                 is a federal violation, so this one counts against your licence as well as {} \
-                 points off your reputation. {}",
+                "That is {} that you have run off the road asleep. Driving impaired by fatigue is a federal violation, so this one counts against your licence as well as {} points off your reputation. {}",
                 times_now_text(count),
                 fmt_f(hit, 0),
                 serious_violation_text(ctx, serious, hours)

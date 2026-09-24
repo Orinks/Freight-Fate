@@ -72,7 +72,7 @@ pub trait RoadsideExit: Menu {
         let load = if d.phase == DRIVE_PHASE_DELIVERY && !d.job.bobtail {
             format!(
                 "Dispatch takes the {} load back and reassigns it",
-                d.job.cargo.label
+                d.job.spoken_cargo_label()
             )
         } else {
             "There is no loaded trailer to hand back, and the assignment is canceled".to_string()
@@ -84,14 +84,11 @@ pub trait RoadsideExit: Menu {
             .unwrap_or_else(|_| "the terminal".to_string());
         if profile.driving_record.lifetime_disqualified {
             return format!(
-                " The licence is gone for good, so the truck stays here. {load}, and a relief \
-                 driver takes the truck in. You are released to {terminal}."
+                " The licence is gone for good, so the truck stays here. {load}, and a relief driver takes the truck in. You are released to {terminal}."
             );
         }
         format!(
-            " The licence is pulled as of now, so the truck stays here. {load}, and a relief \
-             driver takes the truck in. You are released to {terminal} to wait the suspension \
-             out."
+            " The licence is pulled as of now, so the truck stays here. {load}, and a relief driver takes the truck in. You are released to {terminal} to wait the suspension out."
         )
     }
 
@@ -188,8 +185,7 @@ impl TrafficStopState {
         let limit_text = ctx.settings.speed_text(self.limit);
         if warning {
             self.outcome_text = format!(
-                "{over_text} over the {limit_text} limit. The trooper lets you off with a \
-                 warning."
+                "{over_text} over the {limit_text} limit. The trooper lets you off with a warning."
             );
             return;
         }
@@ -205,8 +201,7 @@ impl TrafficStopState {
         let waiver_roll = PyRandom::new_from_str(&waiver_key).random();
         if self.clean_stop && waiver_roll < PULL_OVER_CLEAN_STOP_WARN_CHANCE {
             self.outcome_text = format!(
-                "{over_text} over the {limit_text} limit. You pulled over promptly, so the \
-                 trooper lets it go with a warning."
+                "{over_text} over the {limit_text} limit. You pulled over promptly, so the trooper lets it go with a warning."
             );
             return;
         }
@@ -231,8 +226,7 @@ impl TrafficStopState {
         let reason = format!("Speeding, {over_text} over the {limit_text} limit");
         let ladder = d.log_enforcement(ctx, fine, serious, false, &reason);
         self.outcome_text = format!(
-            "{over_text} over the {limit_text} limit. Speeding ticket: {} dollars, paid on the \
-             spot, and a reputation hit.{}",
+            "{over_text} over the {limit_text} limit. Speeding ticket: {} dollars, paid on the spot, and a reputation hit.{}",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(self.construction_zone)
         );
@@ -275,8 +269,7 @@ impl Menu for TrafficStopState {
         let current = self.current_text(ctx);
         ctx.say_with(
             format!(
-                "You stop on the shoulder for a license and logbook check.{polite} {outcome} \
-                 {current}"
+                "You stop on the shoulder for a license and logbook check.{polite} {outcome} {current}"
             ),
             Say::new(),
         );
@@ -438,25 +431,19 @@ impl EnforcementStopState {
             };
             let oos_line = if break_only {
                 format!(
-                    "{lead}{why} Out of service: thirty minutes parked on the shoulder. It is \
-                     {}, the 30-minute break is satisfied, and the delivery deadline kept \
-                     counting.{}",
+                    "{lead}{why} Out of service: thirty minutes parked on the shoulder. It is {}, the 30-minute break is satisfied, and the delivery deadline kept counting.{}",
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
             } else if minutes >= hos::RESTART_MIN {
                 format!(
-                    "{lead}{why} Out of service: thirty-four hours parked on the shoulder. It \
-                     is {}, your 70-hour cycle is fresh, you wake rested, and the delivery \
-                     deadline kept counting.{}",
+                    "{lead}{why} Out of service: thirty-four hours parked on the shoulder. It is {}, your 70-hour cycle is fresh, you wake rested, and the delivery deadline kept counting.{}",
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
             } else {
                 format!(
-                    "{lead}{why} Out of service: ten hours parked on the shoulder. It is {}, \
-                     hours of service reset, you wake rested, and the delivery deadline kept \
-                     counting.{}",
+                    "{lead}{why} Out of service: ten hours parked on the shoulder. It is {}, hours of service reset, you wake rested, and the delivery deadline kept counting.{}",
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
@@ -536,8 +523,7 @@ impl Menu for EnforcementStopState {
         self.stop_announced = true;
         ctx.say_with(
             format!(
-                "You stop on the shoulder for an enforcement inspection.{polite} {summary} \
-                 {outcome} {current}"
+                "You stop on the shoulder for an enforcement inspection.{polite} {summary} {outcome} {current}"
             ),
             Say::new(),
         );
@@ -639,7 +625,7 @@ impl FelonyStopState {
         let load_text = if self.load_lost {
             format!(
                 "Dispatch cancels the {} load. No pay for this run.",
-                d.job.cargo.label
+                d.job.spoken_cargo_label()
             )
         } else {
             "No loaded trailer to lose, but the assignment is canceled.".to_string()
@@ -650,10 +636,7 @@ impl FelonyStopState {
             .map(|t| t.spoken_name())
             .unwrap_or_else(|_| "the terminal".to_string());
         self.summary = format!(
-            "Troopers laid spike strips across the lane after you kept driving with lights and \
-             siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
-             major reputation hit.{} Spike strips added {} percent truck damage, processing \
-             took {} hours. {load_text} You are released back to {terminal}.",
+            "Troopers laid spike strips across the lane after you kept driving with lights and siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a major reputation hit.{} Spike strips added {} percent truck damage, processing took {} hours. {load_text} You are released back to {terminal}.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_f(FAILURE_TO_STOP_DAMAGE_PCT, 0),

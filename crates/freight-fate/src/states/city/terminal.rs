@@ -238,8 +238,7 @@ impl CityMenuState {
         ctx.save_profile();
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "Pay advance approved: {} dollars against your next load, repaid at delivery. You \
-             have {} dollars, {} dollars of advance to repay.",
+            "Pay advance approved: {} dollars against your next load, repaid at delivery. You have {} dollars, {} dollars of advance to repay.",
             fmt_grouped(grant, 0),
             fmt_grouped(money, 0),
             fmt_grouped(advance, 0)
@@ -297,8 +296,7 @@ impl CityMenuState {
         };
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "Walk-around done, 15 minutes. {body} No trailer is hooked yet; walk around it again \
-             at the first stop after pickup."
+            "Walk-around done, 15 minutes. {body} No trailer is hooked yet; walk around it again at the first stop after pickup."
         ));
     }
 
@@ -308,8 +306,7 @@ impl CityMenuState {
             self.confirm_sleep_rested = true;
             ctx.audio.play("ui/warning");
             ctx.say(
-                "You are already rested: fresh hours of service and no fatigue. Sleeping only \
-                 moves the clock forward 10 hours. Enter again to sleep anyway.",
+                "You are already rested: fresh hours of service and no fatigue. Sleeping only moves the clock forward 10 hours. Enter again to sleep anyway.",
             );
             return;
         }
@@ -334,9 +331,7 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You slept 10 hours and woke rested. It is \
-             {}, {}. \
-             Hours of service reset.",
+            "You slept 10 hours and woke rested. It is {}, {}. Hours of service reset.",
             clock_text(hour),
             time_of_day(hour)
         ));
@@ -384,8 +379,7 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch \
-             board is open again. It is {}, {}, and you are rested.",
+            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch board is open again. It is {}, {}, and you are rested.",
             clock_text(hour),
             time_of_day(hour)
         ));
@@ -499,10 +493,7 @@ impl CityMenuState {
         ctx.save_profile();
         ctx.audio.play("ui/error");
         ctx.say(&format!(
-            "{former} has ended your employment. Your safety record is past what their \
-             insurance will carry, so your seat and your assigned truck go back to the yard. \
-             {} will take you on: lower pay, shorter freight, and a fresh start. Your money, \
-             your levels, and everything you own stay as they are.",
+            "{former} has ended your employment. Your safety record is past what their insurance will carry, so your seat and your assigned truck go back to the yard. {} will take you on: lower pay, shorter freight, and a fresh start. Your money, your levels, and everything you own stay as they are.",
             enforcement::LAST_CHANCE_CARRIER_NAME
         ));
     }
@@ -703,11 +694,7 @@ impl Menu for CityMenuState {
                 format!(" {record}")
             };
             format!(
-                "Parked at {} in the {city_name} \
-                 service area, {city_state}. {} with \
-                 level {}, {}.{cdl}{record} \
-                 You have {} dollars. \
-                 {first_day}",
+                "Parked at {} in the {city_name} service area, {city_state}. {} with level {}, {}.{cdl}{record} You have {} dollars. {first_day}",
                 terminal.spoken_name(),
                 crate::states::city::py_capitalize(business),
                 rank.level,
@@ -738,14 +725,12 @@ impl Menu for CityMenuState {
         let mut items: Vec<MenuItem<Self>> =
             vec![
                 MenuItem::new("Dispatch board", |s: &mut Self, ctx| s.job_board(ctx)).help(
-                    "Loads from local freight facilities. New company hires get an assigned \
-                     load, load choice opens with seniority.",
+                    "Loads from local freight facilities. New company hires get an assigned load, load choice opens with seniority.",
                 ),
             ];
         items.push(
             MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
-                "Tractors at the local dealer. Owner-operators buy and switch here, company \
-                 drivers can look.",
+                "Tractors at the local dealer. Owner-operators buy and switch here, company drivers can look.",
             ),
         );
         // Owner-operators only (owner ruling, 2026-08-20): a company
@@ -759,8 +744,7 @@ impl Menu for CityMenuState {
                     s.bobtail(ctx)
                 })
                 .help(
-                    "Drive empty to a nearby city for its dispatch board. Costs fuel and hours \
-                     of service, no load, no pay.",
+                    "Drive empty to a nearby city for its dispatch board. Costs fuel and hours of service, no load, no pay.",
                 ),
             );
         }
@@ -770,8 +754,7 @@ impl Menu for CityMenuState {
                 |s: &mut Self, ctx| s.garage(ctx),
             )
             .help(
-                "Fuel and repairs. Company drivers bill the carrier account, owner-operators \
-                 pay their own.",
+                "Fuel and repairs. Company drivers bill the carrier account, owner-operators pay their own.",
             ),
         );
         items.push(
@@ -782,8 +765,7 @@ impl Menu for CityMenuState {
         );
         items.push(
             MenuItem::new("Career stats", |s: &mut Self, ctx| s.stats(ctx)).help(
-                "Level, reputation, dispatch trust, driving record and CDL, balance and debt, \
-                 endorsements, lifetime numbers, and rest.",
+                "Level, reputation, dispatch trust, driving record and CDL, balance and debt, endorsements, lifetime numbers, and rest.",
             ),
         );
         items.push(
@@ -791,16 +773,13 @@ impl Menu for CityMenuState {
                 s.endorsement_courses(ctx)
             })
             .help(
-                "Carrier certificates, CDL endorsements, the TWIC port card and the LCV \
-                 certificate. Courses cost money and game time, some add a background check \
-                 wait.",
+                "Carrier certificates, CDL endorsements, the TWIC port card and the LCV certificate. Courses cost money and game time, some add a background check wait.",
             ),
         );
         if DRIVING_SCHOOL_ENABLED {
             items.push(
                 MenuItem::new("Driving school", |s: &mut Self, ctx| s.driving_school(ctx)).help(
-                    "Spoken lessons on a practice road where nothing counts: no money, no \
-                     wear, no hours.",
+                    "Spoken lessons on a practice road where nothing counts: no money, no wear, no hours.",
                 ),
             );
         }
@@ -813,8 +792,7 @@ impl Menu for CityMenuState {
                 s.walk_around(ctx)
             })
             .help(
-                "A pre-trip walk-around: what a roadside inspector would find on the tractor. \
-                 Fifteen minutes on duty.",
+                "A pre-trip walk-around: what a roadside inspector would find on the tractor. Fifteen minutes on duty.",
             ),
         );
         items.push(
@@ -865,8 +843,7 @@ impl Menu for CityMenuState {
                     s.wait_out_suspension(ctx)
                 })
                 .help(
-                    "Sits out the suspension in one go. The clock jumps to the day it clears, \
-                     money, truck, and record untouched.",
+                    "Sits out the suspension in one go. The clock jumps to the day it clears, money, truck, and record untouched.",
                 ),
             );
         }
@@ -878,8 +855,7 @@ impl Menu for CityMenuState {
                     s.close_out(ctx)
                 })
                 .help(
-                    "Removes this career's save from this computer and its cloud backups from \
-                     your account, for good. A confirmation follows.",
+                    "Removes this career's save from this computer and its cloud backups from your account, for good. A confirmation follows.",
                 ),
             );
         }

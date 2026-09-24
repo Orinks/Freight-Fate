@@ -81,6 +81,16 @@ pub trait FuelPump: Menu {
             ctx.say("The tank is already full.");
             return;
         }
+        let engine_on = self
+            .drive()
+            .with(ctx, |d, _| d.trip.truck.engine_on)
+            .unwrap_or(false);
+        if let Some(msg) = refuel_engine_gate_message(engine_on) {
+            ctx.audio.play("ui/error");
+            ctx.say(msg);
+            return;
+        }
+        // Reefer and APU may stay on at the island; only the tractor must be off.
         let stop_name = self.stop().name.clone();
         let carrier_card = !player_pays_operating_costs(&profile_of(ctx).business_status);
         let mut cost = 0.0;
@@ -121,16 +131,14 @@ pub trait FuelPump: Menu {
         if carrier_card {
             // the carrier fuel card covers road fuel for company drivers
             ctx.say(&format!(
-                "Refueled {} gallons on the carrier fuel card. Fueling took {} minutes. \
-                 {margin}. {loyalty_text}",
+                "Refueled {} gallons on the carrier fuel card. Fueling took {} minutes. {margin}. {loyalty_text}",
                 fmt_f(need, 0),
                 fmt_f(FUEL_STOP_MIN, 0)
             ));
         } else {
             let money = profile_of(ctx).money();
             ctx.say(&format!(
-                "Refueled {} gallons for {} dollars. You have {} dollars. Fueling took {} \
-                 minutes. {margin}. {loyalty_text}",
+                "Refueled {} gallons for {} dollars. You have {} dollars. Fueling took {} minutes. {margin}. {loyalty_text}",
                 fmt_f(need, 0),
                 fmt_grouped(cost, 0),
                 fmt_grouped(money, 0),
@@ -154,5 +162,33 @@ pub trait FuelPump: Menu {
             let name = self.stop().spoken_name();
             ctx.say(&format!("Saved at {name}."));
         }
+    }
+}
+
+/// Tractor must be off to fuel. Reefer and APU are not part of this gate.
+pub fn refuel_engine_gate_message(engine_on: bool) -> Option<&'static str> {
+    if engine_on {
+        Some("Shut the engine off before you fuel.")
+    } else {
+        None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::refuel_engine_gate_message;
+
+    #[test]
+    fn refuel_refused_with_engine_on() {
+        assert_eq!(
+            refuel_engine_gate_message(true),
+            Some("Shut the engine off before you fuel.")
+        );
+    }
+
+    #[test]
+    fn refuel_allowed_with_engine_off_even_if_hotel_units_run() {
+        // Hotel units are not arguments: the gate only reads the tractor.
+        assert_eq!(refuel_engine_gate_message(false), None);
     }
 }

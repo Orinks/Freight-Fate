@@ -20,6 +20,7 @@
 
 - **Twin-trailer parcel loads stay on the National Network.** Dispatch only offers and routes `parcel_doubles` on Interstate corridors plus short terminal approaches (up to one mile). A lane that leaves the network is dropped, and if none remain you hear that dispatch can't clear twin trailers on that run. Twins are not run on ALCAN, Canada, or Alaska lanes.
 
+- **Reefer and APU hotel power.** Turn the trailer reefer and the APU on or off; a cold pickup starts the reefer at 2 degrees, cargo warms slowly when it is off, and the tractor must be shut down before fueling at a stop or the terminal garage.
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.

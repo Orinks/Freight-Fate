@@ -114,8 +114,7 @@ impl FacilityArrivalState {
                 |s: &mut Self, ctx| s.dock(ctx),
             )
             .help(
-                "The receiver takes the whole trailer. Quicker than a dock, and a write-up \
-                 leaves with the trailer.",
+                "The receiver takes the whole trailer. Quicker than a dock, and a write-up leaves with the trailer.",
             )
         } else {
             MenuItem::new("Dock and deliver", |s: &mut Self, ctx| s.dock(ctx))
@@ -168,7 +167,7 @@ impl FacilityArrivalState {
         }
         let (weight_tons, cargo_label) = self
             .driving
-            .read(|d| (d.job.weight_tons, d.job.cargo.label.to_string()))
+            .read(|d| (d.job.weight_tons, d.job.spoken_cargo_label().to_string()))
             .unwrap_or_default();
         self.driving.read(|d| {
             d.trip.truck.throttle = 0.0;
@@ -215,8 +214,7 @@ impl FacilityArrivalState {
             (
                 "Dropping the trailer",
                 format!(
-                    "Dropping the loaded trailer at {facility}, {} tons of {cargo_label}. \
-                     Hooking an empty.",
+                    "Dropping the loaded trailer at {facility}, {} tons of {cargo_label}. Hooking an empty.",
                     fmt_f(weight_tons, 0)
                 ),
                 "Dropping the trailer.",
@@ -328,13 +326,9 @@ impl FacilityArrivalState {
                 "Those charges do not reduce driver pay."
             };
             format!(
-                "Paperwork for {facility}: {} tons of {}. Rate sheet {} dollars, current gross \
-                 {} dollars. Carrier-paid or reimbursed charges so far {} dollars, tolls {}, \
-                 accessorials {}. {charge_fate} Fines carried over {} dollars. Estimated net \
-                 driver pay {} dollars.{advance_note} {timing}. {cargo_condition} {finish} to \
-                 settle.",
+                "Paperwork for {facility}: {} tons of {}. Rate sheet {} dollars, current gross {} dollars. Carrier-paid or reimbursed charges so far {} dollars, tolls {}, accessorials {}. {charge_fate} Fines carried over {} dollars. Estimated net driver pay {} dollars.{advance_note} {timing}. {cargo_condition} {finish} to settle.",
                 fmt_f(job.weight_tons, 0),
-                job.cargo.label,
+                job.spoken_cargo_label(),
                 fmt_grouped(job.pay, 0),
                 fmt_grouped(estimated_pay, 0),
                 fmt_grouped(carrier_charges, 0),
@@ -356,7 +350,7 @@ impl FacilityArrivalState {
             format!(
                 "At {facility}. {} tons of {}. Speed {}. {}. Stop, then {finish}.",
                 fmt_f(d.job.weight_tons, 0),
-                d.job.cargo.label,
+                d.job.spoken_cargo_label(),
                 ctx.settings.speed_text(d.trip.truck.speed_mph()),
                 if d.trip.truck.engine_on {
                     "Engine running"
@@ -441,7 +435,7 @@ impl Menu for FacilityArrivalState {
             .driving
             .read(|d| {
                 (
-                    d.job.cargo.label.to_string(),
+                    d.job.spoken_cargo_label().to_string(),
                     d.job.spoken_destination().to_string(),
                 )
             })

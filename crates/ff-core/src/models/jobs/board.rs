@@ -11,13 +11,12 @@ use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
 use crate::models::carriers::carrier;
 use crate::models::jobs::{
-    cargo_type, dispatch_deadline_hours, market_tag_cargo_bonus,
-    minimum_pay_for_level, plan_hos, CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE,
-    FACILITY_SELECTION_WEIGHTS, HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS,
-    THIN_OUTBOUND_ORIGIN_WEIGHT,
-    HOOKUP_FEE, LEVEL_DISTANCE_CAPS, LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES,
-    MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI, PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS,
-    SPECIALIZED_FREIGHT_LEVEL, SPECIALIZED_FREIGHT_WEIGHT,
+    cargo_type, dispatch_deadline_hours, market_tag_cargo_bonus, minimum_pay_for_level, plan_hos,
+    CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE, FACILITY_SELECTION_WEIGHTS,
+    HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS, HOOKUP_FEE, LEVEL_DISTANCE_CAPS,
+    LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES, MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI,
+    PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS, SPECIALIZED_FREIGHT_LEVEL,
+    SPECIALIZED_FREIGHT_WEIGHT, THIN_OUTBOUND_ORIGIN_WEIGHT,
 };
 use crate::models::market::Market;
 use crate::models::start_options::{start_option, DEFAULT_START_KEY};

@@ -91,8 +91,7 @@ pub fn glare_ice_full_jake() -> Outcome {
     let dry_decel = rig.drive.truck().full_service_decel_mps2();
     if dry_decel <= ice_decel * 2.0 {
         findings.push(format!(
-            "full-brake decel on ice ({ice_decel:.2}) is not meaningfully worse than dry \
-             ({dry_decel:.2})"
+            "full-brake decel on ice ({ice_decel:.2}) is not meaningfully worse than dry ({dry_decel:.2})"
         ));
     }
     let note =

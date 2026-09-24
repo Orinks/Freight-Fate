@@ -89,8 +89,7 @@ pub fn traffic_stop_logbook_summary(ctx: &GameContext, trip_game_minutes: Option
     let day_start = (now / 24.0).floor() * 24.0;
     let totals = p.duty_log.totals_since(day_start, now);
     format!(
-        "Logbook shows driving {}, on duty not driving {}, off duty {}, sleeper berth {}. \
-         Latest entry: {}",
+        "Logbook shows driving {}, on duty not driving {}, off duty {}, sleeper berth {}. Latest entry: {}",
         duration_text(totals.driving),
         duration_text(totals.on_duty_not_driving),
         duration_text(totals.off_duty),
@@ -111,8 +110,7 @@ impl LogbookState {
     pub fn new(trip_game_minutes: Option<f64>) -> Self {
         Self {
             menu: MenuCore::new("Logbook").with_intro_help(
-                "Use up and down arrows to review logbook lines. Enter repeats the \
-                 current line. Escape goes back.",
+                "Use up and down arrows to review logbook lines. Enter repeats the current line. Escape goes back.",
             ),
             trip_game_minutes,
         }
