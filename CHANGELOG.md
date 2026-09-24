@@ -112,6 +112,8 @@
 
 - **The Map Route line no longer repeats the deadhead city.** A facility approach that used the same city on every local leg is spoken once. (#205)
 
+- **Holding the cruise target key no longer races the set speed.** Only a fresh press steps it; the operating system's key-repeat is ignored.
+
 - **Trucks build speed at a realistic rate again, loaded or empty.** The automatic shifts through each gear once, with one clunk per shift.
 
 - **Route-transition assistance brakes smoothly to a stop sign.** It slows steadily to the line instead of arriving fast and stopping hard.

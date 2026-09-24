@@ -208,13 +208,17 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
     for event in raw {
         match event {
             Event::KeyDown {
-                keycode, keymod, ..
+                keycode,
+                keymod,
+                repeat,
+                ..
             } => {
                 let key = keycode.map(key_from_keycode).unwrap_or(Key::Other(0));
                 out.push(InputEvent::KeyDown {
                     key,
                     mods: mods_from(keymod),
                     text: None,
+                    repeat,
                 });
                 pending_text = Some(out.len() - 1);
                 continue;
@@ -427,7 +431,8 @@ mod tests {
                 InputEvent::KeyDown {
                     key: Key::A,
                     mods: Mods::SHIFT,
-                    text: Some('A')
+                    text: Some('A'),
+                    repeat: false
                 },
                 InputEvent::key(Key::Left),
             ]

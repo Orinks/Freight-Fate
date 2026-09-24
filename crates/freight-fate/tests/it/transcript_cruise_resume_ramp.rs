@@ -170,6 +170,7 @@ fn arm_high_target(opts: HighTarget) -> PlaytestHarness {
                 key: Key::K,
                 mods: Mods::SHIFT,
                 text: None,
+                repeat: false,
             },
         )
     });

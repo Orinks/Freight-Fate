@@ -60,6 +60,7 @@ pub fn key_event(key: Key, text: Option<char>) -> InputEvent {
         key,
         mods: Mods::NONE,
         text,
+        repeat: false,
     }
 }
 

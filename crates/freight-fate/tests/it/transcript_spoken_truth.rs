@@ -133,6 +133,7 @@ fn ask_alt(harness: &mut PlaytestHarness, key: Key) -> String {
                 key,
                 mods: Mods::ALT,
                 text: None,
+                repeat: false,
             },
         )
     });
@@ -606,6 +607,7 @@ fn test_the_status_readout_names_the_speed_cruise_is_actually_holding_on_a_ramp(
                     key: Key::K,
                     mods: Mods::SHIFT,
                     text: None,
+                    repeat: false,
                 },
             )
         });
@@ -705,6 +707,7 @@ fn test_the_readouts_stay_true_while_the_speed_keeper_has_the_truck() {
                 key: Key::K,
                 mods: Mods::SHIFT,
                 text: None,
+                repeat: false,
             },
         )
     });
