@@ -757,6 +757,13 @@ impl Trip {
         PACENOTE_MAX_LEAD_MI.min(floor_mi.max(react_mi + brake_mi))
     }
 
+    /// Whether this bend's approach call has gone out (or it is behind the
+    /// truck): the point from which the clock runs real for it.
+    pub fn curve_called(&self, curve: &RouteCurve) -> bool {
+        let key = format!("curve:{}:{}", fmt_f(curve.start_mi, 3), curve.direction);
+        self.announced_curves.contains(&key)
+    }
+
     /// Emit a CURVE event when approaching a meaningful curve.
     pub fn check_curves(&mut self) {
         if self.is_facility_approach_route() {

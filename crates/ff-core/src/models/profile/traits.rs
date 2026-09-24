@@ -160,6 +160,10 @@ impl SafetyRecordProfile for Profile {
         self.driving_record
             .fatigue_within(self.game_hours, SAFETY_RECORD_WINDOW_DAYS)
     }
+    fn record_crashes(&self) -> i64 {
+        self.driving_record
+            .crashes_within(self.game_hours, SAFETY_RECORD_WINDOW_DAYS)
+    }
     fn inspections_passed(&self) -> i64 {
         json_i64(self.achievement_stats.get("inspections_passed"), 0)
     }

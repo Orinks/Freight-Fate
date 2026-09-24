@@ -538,8 +538,13 @@ impl DrivingState {
                     );
                     let safe_target = self.cruise_mph.unwrap_or(0.0).min(DESCENT_SAFE_MAX_MPH);
                     let speed = self.trip.truck.speed_mph();
-                    if speed > safe_target + 8.0 {
-                        let brake = 0.7f64.min((speed - safe_target) / 25.0);
+                    if speed > safe_target + 7.0 {
+                        // Faded in across the mile an hour under the old
+                        // +8 edge, which switched straight to a third of
+                        // the pedal and pumped it on a grade the retarder
+                        // could not hold: air is charged per application.
+                        let feather = (speed - safe_target - 7.0).min(1.0);
+                        let brake = feather * 0.7f64.min((speed - safe_target) / 25.0);
                         self.trip.truck.brake = self.trip.truck.brake.max(brake);
                     }
                 }
@@ -974,7 +979,7 @@ impl DrivingState {
         let over = -error;
         self.cruise_jake_cooldown_s = 0.0f64.max(self.cruise_jake_cooldown_s - dt);
         if closing {
-            if over > 2.0 {
+            if over > CRUISE_CLOSE_FEATHER_FROM_MPH {
                 let weather_brake: f64 = if self.trip.weather.effects().grip < 0.7 {
                     0.45
                 } else {
@@ -992,7 +997,15 @@ impl DrivingState {
                 let jake_decel_mps2 =
                     self.trip.truck.jake_brake_force() / self.trip.truck.gross_mass_kg().max(1.0);
                 let jake_fraction = jake_decel_mps2 / assist_full_decel_mps2(&self.trip.truck);
-                let wanted = weather_brake.min(over / 30.0) - jake_fraction;
+                // Feathered in over the mile an hour below the old 2 mph
+                // edge. Switched on at 2 over, the snub started at a
+                // fifteenth of the pedal, so a target sliding down ahead of
+                // the truck (an exit's glide, a closing lead) held it on the
+                // edge and cruise pumped the brake ten times a second: each
+                // new application costs air, and the tanks lost the race to
+                // the compressor on the mainline (agent drive D, 2026-09-24).
+                let feather = (over - CRUISE_CLOSE_FEATHER_FROM_MPH).min(1.0);
+                let wanted = feather * weather_brake.min(over / 30.0) - jake_fraction;
                 if wanted > 0.0 {
                     self.trip.truck.brake = self.trip.truck.brake.max(wanted);
                 }

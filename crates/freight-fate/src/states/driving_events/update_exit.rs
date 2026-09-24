@@ -154,7 +154,7 @@ impl DrivingState {
         if self.update_selected_stop_assist(ctx) {
             return;
         }
-        if !self.ramp_terminal_done && ramp_mi <= RAMP_ACCESS_MI {
+        if !self.ramp_terminal_done && (ramp_mi <= RAMP_ACCESS_MI || self.stopped_at_the_bar()) {
             self.update_ramp_terminal(ctx);
         }
         if ramp_mi > 0.0 {
@@ -517,10 +517,12 @@ impl DrivingState {
         // number governs the curve at the end of this lane, and the lane is
         // where a truck at road speed sheds to it. It LEADS the line: a
         // driver doing their own braking has a few seconds of lane, and the
-        // number is what they brake on (review, 2026-09-24).
+        // number is what they brake on (review, 2026-09-24). Never a number
+        // the load aboard cannot take the ramp curve at (`spoken_exit_mph`).
         let exit_speed = format!(
             "Exit speed {}.",
-            ctx.settings.speed_value(self.armed_ramp_mph(Some(stop)))
+            ctx.settings
+                .speed_value(self.spoken_exit_mph(self.armed_ramp_mph(Some(stop))))
         );
         let message = if self.terse_speech(ctx) {
             let mut terminal = match self.ramp_control.as_str() {
@@ -550,6 +552,9 @@ impl DrivingState {
             }
             format!("{exit_speed} {take} {ramp} of ramp, {ending}.")
         };
+        // On the ramp from this line on: a mainline line it cuts is not
+        // handed back (see `speak_plain_route_event`).
+        self.refresh_live_facts();
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(message, opts);

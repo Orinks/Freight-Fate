@@ -42,6 +42,7 @@
 - **City streets to a facility have traffic lights and stop signs.** Lights along one street are timed so a truck at the speed limit meets mostly greens.
 
 - **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
+- **Taking a bend or ramp curve too fast can roll the truck over.** A full trailer or part-filled tank goes first, and the load is lost.
 
 ### Security
 
@@ -56,6 +57,15 @@
 - **The gate's 15 mph no longer applies on the public street.** The street keeps its limit up to the driveway, which is a turn like any other.
 
 - **The speed keeper holds a corner's speed when the next corner is close.** It no longer speeds up between them and brakes hard.
+- **The too-fast warning for a bend now comes before it costs you anything.** It names the speed your load can take the bend at.
+
+- **Curve and exit speed assistance slow below the sign when your load needs it.** A heavy load or part-filled tank takes some curves slower.
+
+- **A bend is never called faster than your load can take it.** Where the sign asks too much of a heavy load or part-filled tank, you hear a lower number.
+
+- **Partial lane keeping now steers the truck through bends.** Lane changes and speed stay yours; with lane keeping off, bends are still yours to steer.
+
+- **A rollover goes on your driving record as a crash.** It counts against your safety record and reputation like a serious violation.
 
 - **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
 
@@ -140,6 +150,36 @@
 
 ### Fixed
 
+- **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.
+
+- **The engine lean leads you through an exit ramp's curve with lane-departure warning off.**
+- **Adaptive cruise and the speed assists no longer drain the air tanks by pumping the brakes.** They hold the pedal steady while they slow you.
+
+- **Losing live weather is announced once.** You no longer hear that simulated weather is in use every minute while it stays that way.
+
+- **The stop bar countdown and stop bar tone stay quiet on a green light.**
+
+- **Exit announcements are no longer said twice or cut off.** The exit you take, the ramp's light and a hold at the sign are each heard once.
+
+- **A highway speed limit change is no longer spoken as you take an exit.**
+
+- **Stopping where the stop bar tone starts counts as stopping at the sign.** A stop farther back is said once, with the distance.
+
+- **Route-transition assistance says once that it is slowing for the light, sign or yield.**
+
+- **U names the destination exit, and gives the distance to the facility gate itself.**
+
+- **C's arrival estimate uses the road left to the gate once you are off the highway.**
+
+- **The facility gate warning stays quiet when an assist is already holding you to its speed.**
+
+- **The speed keeper says it is easing only when it is slowing the truck down.**
+
+- **Billboards wait until you are past the exit you are taking.**
+
+- **The downgrade warning no longer tells you to set the engine brake when it is already on.**
+
+- **The engine brake's growl no longer restarts over and over as the throttle comes and goes.**
 - **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
 
 - **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.

@@ -260,9 +260,9 @@ pub struct DrivingState {
     pub chains_fast_active: bool, // spoken chains-over-speed warning edge tracking
     pub chain_law_warned: HashSet<(i64, i64)>, // (area, level) spoken warnings
     pub chain_law_cited: HashSet<(i64, i64)>, // checkpoint rolls already taken
-    // Curve management: whether a hot-entry slip warning has been spoken
-    // for the current curve.
-    pub curve_slip_active: bool,
+    // Curve management: the curve the too-fast warning has been spoken for
+    // (its start milepost; the ramp curve has its own id), `driving_rollover`.
+    pub curve_warned_mi: Option<f64>,
 
     // ---- driving.py: enforcement counters and the live stop (driving_updates) ----------
     // Trooper pull-overs: a strike inside a patrol window may get you stopped
@@ -464,6 +464,8 @@ pub struct DrivingState {
     // built per ramp by _begin_ramp_terminal, None between ramps.
     pub cross_bubble: Option<CrossTraffic>,
     pub ramp_creep_prompt_said: bool,
+    // The gap to the bar the last "Stopped N short" line named.
+    pub ramp_creep_prompt_gap_mi: f64,
     pub ramp_gap_milestones_said: HashSet<i64>,
     pub ramp_bar_tick_timer: f64,
     pub bar_solid_on: bool, // the bar's continuous final-zone tone
@@ -862,6 +864,7 @@ pub struct DrivingState {
     pub reverse_cue_active: bool,
     pub air_cue_active: bool, // compressor fill loop below governor release
     pub jake_cue_key: Option<String>, // jake growl loop currently playing
+    pub jake_cue_idle_s: f64, // seconds that loop has been held silent
     pub curve_assist_jake: bool, // jake engaged BY the assist (not the player)
     pub auto_jake: bool,      // automatic-box retarder management (J on an AMT)
     pub auto_jake_enabled: bool, // Alt+J: whether J arms auto mode on an AMT

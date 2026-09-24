@@ -39,10 +39,10 @@ fn exit_rig(
 
 /// The settings a case can turn on beyond [`exit_rig`]'s.
 #[derive(Clone, Copy)]
-struct Rig {
-    exit_speed_assist: bool,
-    curve_speed_assist: bool,
-    time_scale: f64,
+pub(crate) struct Rig {
+    pub(crate) exit_speed_assist: bool,
+    pub(crate) curve_speed_assist: bool,
+    pub(crate) time_scale: f64,
 }
 
 impl Default for Rig {
@@ -55,7 +55,7 @@ impl Default for Rig {
     }
 }
 
-fn exit_rig_with(
+pub(crate) fn exit_rig_with(
     limit_mph: f64,
     grade_pct: f64,
     ahead_mi: f64,
@@ -107,14 +107,14 @@ fn exit_rig_with(
     (harness, stop)
 }
 
-fn frame(harness: &mut PlaytestHarness) {
+pub(crate) fn frame(harness: &mut PlaytestHarness) {
     harness.advance_clock(DT);
     harness.with_drive(|d, ctx| d.update_frame(ctx, DT));
 }
 
 /// Drive to the gore. Returns the slowest the truck went on the mainline
 /// and the speed it crossed the gore at.
-fn drive_to_the_gore(harness: &mut PlaytestHarness, stop: &RoadStop) -> (f64, f64) {
+pub(crate) fn drive_to_the_gore(harness: &mut PlaytestHarness, stop: &RoadStop) -> (f64, f64) {
     let mut slowest = f64::INFINITY;
     for _ in 0..(30 * 60 * 10) {
         let (speed, on_ramp, position) = harness.read_drive(|d| {
@@ -411,9 +411,10 @@ fn through_the_ramp_curve(speed_mph: f64) -> (f64, String) {
 fn test_a_ramp_curve_taken_hot_moves_the_load_and_says_so() {
     // The exit speed is the ramp curve's advisory, and the curve is a corner
     // to the freight like any mapped bend: taken at 50 against its 32 it
-    // pulls about 0.8 g, past what the securement holds. At the advisory it
-    // costs nothing. And the mapped bend's too-fast warning covers it.
-    let warning = "Ramp curve, too fast, drifting to the outside.";
+    // pulls about 0.8 g, far past what the truck stays upright at. At the
+    // advisory it costs nothing. And the mapped bend's too-fast warning
+    // covers it.
+    let warning = "Ramp curve, too fast. Slow to";
     let (at_advisory, calm) = through_the_ramp_curve(32.0);
     let (hot, text) = through_the_ramp_curve(50.0);
     assert_eq!(at_advisory, 0.0);

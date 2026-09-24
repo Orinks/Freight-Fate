@@ -568,10 +568,18 @@ impl DrivingState {
                     ctx.settings.speed_text(paired.limit_mph)
                 ));
             } else {
+                // The gate zone runs up to the gate, so its start is not where
+                // the gate is: "facility gate in 0.3 miles" here and "three
+                // quarters of a mile to the gate" from R (agent drive A,
+                // 2026-09-24). The gate's clause reads the gate.
+                let ahead = match self.gate_distance_mi(ctx) {
+                    Some(gate) if zone.reason == "facility gate" => gate,
+                    _ => zone.start_mi - pos,
+                };
                 parts.push(format!(
                     "{} in {}, speed limit {}",
                     zone.reason,
-                    ctx.settings.distance_text(zone.start_mi - pos, true),
+                    ctx.settings.distance_text(ahead, true),
                     ctx.settings.speed_text(zone.limit_mph)
                 ));
             }
@@ -591,21 +599,45 @@ impl DrivingState {
         // road for, and a ramp end that was a stop sign (agent drive, exit
         // 286A, 2026-09-23).
         let on_the_highway = self.ramp_mi.is_none() && !self.on_local_streets();
+        // The destination exit is the most notable thing on the road, and it
+        // is not one of the trip's stops: "Nothing notable in the next 15
+        // miles." 1.2 miles before it (agent drives A and B, 2026-09-24).
+        let destination = self
+            .destination_exit_stop(ctx)
+            .filter(|exit| on_the_highway && exit.at_mi - pos <= within_mi);
+        if let Some(exit) = destination.as_ref() {
+            let phrase = self.exit_phrase_of(ctx, exit);
+            let labeled = if phrase.is_empty() {
+                exit.exit_label.clone()
+            } else {
+                phrase
+            };
+            let named = if labeled.is_empty() {
+                format!("the destination exit for {}", exit.name)
+            } else {
+                format!("the destination exit, {labeled},")
+            };
+            parts.push(format!(
+                "{named} in {}{}",
+                ctx.settings.distance_text(exit.at_mi - pos, true),
+                Self::ramp_ending_clause(&self.ramp_control_for(ctx, exit, None))
+            ));
+        }
         if let Some(stop) = self
             .trip
             .upcoming_stop(within_mi)
             .cloned()
             .filter(|_| on_the_highway)
+            // Past the destination exit is road this truck is not driving.
+            .filter(|stop| {
+                destination
+                    .as_ref()
+                    .is_none_or(|exit| stop.at_mi < exit.at_mi)
+            })
         {
             // The ramp's ending is part of the plan: a stop sign first heard
             // mid-ramp is too late to brake for.
-            let ending = match self.ramp_control_for(ctx, &stop, None).as_str() {
-                "signal" => ", where the ramp ends at a traffic light",
-                "stop" => ", where the ramp ends at a stop sign",
-                "yield" => ", where the ramp ends at a yield",
-                "roundabout" => ", where the ramp ends at a roundabout",
-                _ => "",
-            };
+            let ending = Self::ramp_ending_clause(&self.ramp_control_for(ctx, &stop, None));
             parts.push(format!(
                 "{}{} in {}{ending}",
                 self.trip.planned_prefix(&stop),
@@ -653,6 +685,18 @@ impl DrivingState {
         // the readout back into a paragraph.
         parts.truncate(UPCOMING_MAX_CLAUSES);
         ctx.say(&format!("Coming up: {}.", parts.join(". ")));
+    }
+
+    /// ", where the ramp ends at a traffic light", or "" for a free-flowing
+    /// ramp.
+    fn ramp_ending_clause(control: &str) -> &'static str {
+        match control {
+            "signal" => ", where the ramp ends at a traffic light",
+            "stop" => ", where the ramp ends at a stop sign",
+            "yield" => ", where the ramp ends at a yield",
+            "roundabout" => ", where the ramp ends at a roundabout",
+            _ => "",
+        }
     }
 
     /// `_speak_fuel()`: F.

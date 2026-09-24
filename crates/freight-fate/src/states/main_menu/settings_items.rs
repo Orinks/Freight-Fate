@@ -680,8 +680,10 @@ impl SettingsCategoryState {
             "How much of the lane-holding work the truck does. Full \
              holds the lane, turns Left and Right into tap lane \
              changes, and takes your exits, including the destination \
-             exit, without a signal. Partial drifts gently with \
-             generous steering help. Off drifts like a real wheel, and \
+             exit, without a signal. Partial steers the truck through \
+             the road's bends and drifts gently, with generous steering \
+             help; lane changes and speed are yours. Off drifts like a \
+             real wheel, bends included, and \
              every exit needs its signal and its exit lane. On partial \
              or off the road sound leans toward where the wheel should \
              go, and the road edge answers: a stutter clipping the \

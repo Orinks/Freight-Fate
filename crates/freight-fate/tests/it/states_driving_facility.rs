@@ -402,6 +402,33 @@ fn test_pre_gate_warning_names_a_target_speed() {
     assert_eq!(app.event_lines().len(), 1); // said once, not every frame
 }
 
+/// Agent drive A (2026-09-24): "Facility gate in 0.2 miles. Slow to 15
+/// miles per hour." and the warning tone, while the keeper already held 15
+/// and facility stopping assistance was on. An assist doing the job is not
+/// told to do it.
+#[test]
+fn test_no_pre_gate_warning_when_an_assist_has_the_gate() {
+    for assist in [true, false] {
+        let mut app = TestApp::new();
+        let mut d = a_drive(&mut app);
+        app.ctx.settings.destination_approach_assist = assist;
+        if !assist {
+            // The keeper, already holding the gate's number.
+            d.keeper_mph = Some(25.0);
+            d.keeper_held_mph = Some(15.0);
+        }
+        app.clear_speech();
+        d.destination_exit_taken = true;
+        d.trip.position_mi = d.trip.total_miles() - 0.3;
+        d.trip.truck.engine_on = true;
+        d.trip.truck.velocity_mps = 16.0 / 2.23694;
+        d.check_gate_approach_warning(&mut app.ctx, 0.016);
+        assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
+        drop(d);
+        drop(app);
+    }
+}
+
 #[test]
 fn test_no_instant_miss_inside_the_reaction_window() {
     let mut app = TestApp::new();
@@ -1439,7 +1466,12 @@ fn test_the_lateral_hit_has_its_own_voice() {
     let mut truck = a_tank_truck(Some(LiquidLoad::new(0.5, false)), 20.0);
     truck.corner_advisory_mph = 25.0;
     let (mut d, log, clock) = a_tank_drive(&mut app, truck, false);
-    for _ in 0..500 {
+    // A reversal, not one steady bend: the pull builds in over a transition,
+    // so a single bend held hot sets the liquid against the wall without a
+    // slam (NTSB HAR-11/01 2.3.4 -- it is a quick succession of inputs that
+    // throws it). A bend and a straight, a second each.
+    for step in 0..500 {
+        d.trip.truck.corner_advisory_mph = if (step / 50) % 2 == 0 { 25.0 } else { 0.0 };
         clock.advance(0.02);
         d.trip.truck.update(0.02);
         d.update_liquid_cues(&mut app.ctx, 0.02);

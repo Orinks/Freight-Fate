@@ -456,9 +456,17 @@ impl DrivingState {
         match ahead.as_ref() {
             Some((ahead_mph, ahead_reason)) if *ahead_mph < target_mph => {
                 target_mph = KEEPER_MIN_MPH.max(*ahead_mph - KEEPER_EASE_UNDERSHOOT_MPH);
-                let fresh = self
-                    .keeper_ease_said
-                    .is_none_or(|said| *ahead_mph < said - 0.5);
+                // "Easing" is a line about slowing down. A truck already
+                // under the number, building speed from a stop, is not being
+                // eased: it heard "speed keeper easing to 15" while climbing
+                // from 9 (agent drive A, 2026-09-24). Nor is one inside the
+                // keeper's own ripple over it, which the snub threshold
+                // polices. Left unmarked, so the line still comes if the
+                // truck does get well above it.
+                let fresh = self.trip.truck.speed_mph() > *ahead_mph + KEEPER_SNUB_OVER_MPH
+                    && self
+                        .keeper_ease_said
+                        .is_none_or(|said| *ahead_mph < said - 0.5);
                 // A mapped bend is the curve call's to name, like a corner
                 // is the approach call's: the pacenote already carried the
                 // number and the assist clause.

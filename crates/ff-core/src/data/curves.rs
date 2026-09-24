@@ -398,6 +398,27 @@ pub fn min_radius_ft(design_speed_mph: f64) -> f64 {
 pub const ADVISORY_MAX_MPH: i64 = 80;
 
 pub const ADVISORY_LATERAL_G: f64 = 0.30;
+
+/// The most lateral acceleration any advisory is established at, in g. READ,
+/// FHWA-SA-11-22, "Procedures for Setting Advisory Speeds on Curves" (2011),
+/// 3.7, the accelerometer method: "A measurement of 0.26 g ... to 0.30 g ...
+/// is considered an acceptable range for establishing advisory speeds." Past
+/// this a bend is being taken faster than any posted advisory would ever have
+/// asked, which is where the roll model starts charging a full trailer
+/// (`sim::vehicle::ROLL_WARN_SHARE`).
+pub const ADVISORY_ACCEPTABLE_MAX_G: f64 = 0.30;
+
+/// The bank a mapped bend on a leg built for `design_mph` is credited with:
+/// [`superelevation_at`] on roads designed at [`BANKED_DESIGN_MIN_MPH`] and
+/// above, and none below it, where town streets are left unbanked -- the same
+/// rule the advisory is repriced and screened with.
+pub fn bend_bank(radius_ft: f64, design_mph: Option<f64>) -> f64 {
+    design_mph
+        .filter(|mph| *mph >= BANKED_DESIGN_MIN_MPH)
+        .map(|mph| superelevation_at(radius_ft, mph))
+        .unwrap_or(0.0)
+}
+
 /// The bank a road is actually BUILT with, which is not the same question as
 /// the bank a road is ALLOWED. `SUPERELEVATION_MAX` above is 8 percent because
 /// the screen asks "is this curve under every standard anywhere" and wants the
@@ -860,10 +881,7 @@ pub fn build_from_sources(
                 // Last, because it judges the number the other corrections
                 // produced: an advisory the truck cannot hold is a row that
                 // disagrees with itself, whatever priced it.
-                let bank = design_mph
-                    .filter(|mph| *mph >= BANKED_DESIGN_MIN_MPH)
-                    .map(|mph| superelevation_at(row.min_radius_ft as f64, mph))
-                    .unwrap_or(0.0);
+                let bank = bend_bank(row.min_radius_ft as f64, design_mph);
                 let advisory_mph = holdable_advisory(advisory_mph, row.min_radius_ft as f64, bank);
                 by_leg
                     .entry(row.leg.clone())

@@ -112,6 +112,15 @@ impl Preset {
         matches!(self, Preset::Cruise | Preset::Keeper | Preset::All)
     }
 
+    /// Whether an assist brakes the deceleration lane to the exit speed, so
+    /// the driver never hears the ramp curve called too fast.
+    fn owns_ramp_speed(self) -> bool {
+        matches!(
+            self,
+            Preset::ExitSpeed | Preset::Transition | Preset::Curve | Preset::Facility | Preset::All
+        )
+    }
+
     fn transition(self) -> bool {
         matches!(self, Preset::Transition | Preset::All)
     }
@@ -783,11 +792,19 @@ fn faults(preset: Preset, kind: Kind, run: &Run) -> Vec<String> {
         // Lane keeping, full or partial, holds the ramp curve.
         "Off the pavement",
         "Across the centerline",
-        "drifting to the outside",
+        // Nobody here takes the curve over what it costs this load.
+        "rolled over",
     ] {
         if heard.contains(bad) {
             faults.push(format!("heard \"{bad}\""));
         }
+    }
+    // The late-braking driver can be told the curve is coming up too fast:
+    // that is the warning doing its job, the reaction time a real driver
+    // needs ahead of the braking this one leaves to the last. An assist that
+    // owns the exit speed must never leave the truck needing it.
+    if preset.owns_ramp_speed() && heard.contains(", too fast. Slow to") {
+        faults.push("heard the curve called too fast with an assist on the pedals".to_string());
     }
     if !run.arrived {
         faults.push(format!("never arrived ({})", run.final_state));

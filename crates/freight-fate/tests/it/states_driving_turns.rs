@@ -2053,10 +2053,12 @@ fn drive_through_the_bend(
     }
 }
 
+/// Whether the bend's too-fast warning was spoken: the line that comes before
+/// the bend costs the load or the lane anything (`driving_rollover`).
 fn drifted(run: &BendRun) -> bool {
     run.lines
         .iter()
-        .any(|line| line.contains("drifting to the outside"))
+        .any(|line| line.contains(", too fast. Slow to"))
 }
 
 #[test]
@@ -2417,11 +2419,75 @@ fn test_the_last_few_miles_an_hour_are_shed_on_the_real_clock() {
     );
 }
 
+/// The worst the truck sat in its lane taking the 35 mph bend at 35 with
+/// curve assistance off and `lane_keeping`, nobody steering.
+fn worst_offset_at_the_advisory(lane_keeping: &str) -> (f64, Vec<String>) {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 35.0, 35, 307, 0.3);
+    app.ctx.settings.curve_speed_assist = false;
+    app.ctx.settings.lane_keeping = lane_keeping.to_string();
+    let mut worst: f64 = 0.0;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        d.trip.truck.velocity_mps = 35.0 * 0.44704;
+        if d.trip.position_mi >= bend.start_mi && d.trip.position_mi <= bend.end_mi {
+            worst = worst.max(d.lane.offset.abs());
+        }
+    });
+    (worst, run.lines)
+}
+
+#[test]
+fn test_the_cab_never_speaks_an_advisory_the_load_cannot_hold() {
+    // A 141 ft bend on a banked road, posted 30 because the bake rounded 27.6
+    // up: at 30 it asks a full trailer 0.37 g of its 0.35. The cab speaks the
+    // load's own number there, in the 5 mph steps a plaque comes in; an empty
+    // trailer is told the sign.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let bend = a_curve(d.trip.position_mi + 1.0, 'L', 30, 141, 60.0);
+    d.trip.truck.trailer_attached = true;
+    d.trip.truck.cargo_kg = ff_core::sim::vehicle::REFERENCE_CARGO_KG;
+    d.trip.truck.liquid = None;
+    assert_eq!(d.spoken_advisory_mph(&bend), 25);
+    d.trip.truck.cargo_kg = 0.0;
+    assert_eq!(d.spoken_advisory_mph(&bend), 30);
+    // A sign the load holds is spoken as it is.
+    let gentle = a_curve(d.trip.position_mi + 1.0, 'L', 45, 600, 40.0);
+    d.trip.truck.cargo_kg = ff_core::sim::vehicle::REFERENCE_CARGO_KG;
+    assert_eq!(d.spoken_advisory_mph(&gentle), 45);
+}
+
+#[test]
+fn test_partial_lane_keeping_holds_a_bend_at_its_advisory_without_curve_assistance() {
+    // Owner ruling, 2026-09-24: partial lane keeping steers through the
+    // road's curve the way curve assistance does; the driver keeps lane
+    // changes and speed. Its correction used to be capped with the driver's
+    // key at the steering limit, so this bend ran wide at its own advisory.
+    let (partial, lines) = worst_offset_at_the_advisory("partial");
+    assert!(
+        partial < 0.5,
+        "partial lane keeping left the truck {partial:.2} off centre at the advisory"
+    );
+    assert!(
+        !lines.iter().any(|l| l.contains(", too fast. Slow to")),
+        "{lines:#?}"
+    );
+    // Lane keeping off stays manual: nobody steering, the bend is not held.
+    let (off, _) = worst_offset_at_the_advisory("off");
+    assert!(
+        off > partial + 0.3,
+        "with lane keeping off the bend steered itself: {off:.2}"
+    );
+}
+
 #[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
-    // driver holding the throttle into the same bend gets the old drift
-    // line, and nothing brakes for them.
+    // driver holding the throttle into the same bend is warned while there
+    // is still road to slow in, nothing brakes for them, and at 60 into a
+    // 35 the truck goes over.
     let mut app = TestApp::new();
     let clock = app.fake_pacer_clock();
     let mut d = a_drive(&mut app);
@@ -2429,19 +2495,31 @@ fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     app.ctx.settings.curve_speed_assist = false;
     app.ctx.input.press(Key::Up, Mods::NONE);
 
-    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+    let mut warned_before_the_bend = false;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |app, d| {
         assert!(
             d.curve_servo.is_none(),
             "the servo armed with the assist off"
         );
+        if d.trip.position_mi < bend.start_mi
+            && app
+                .event_lines()
+                .iter()
+                .any(|l| l.contains(", too fast. Slow to"))
+        {
+            warned_before_the_bend = true;
+        }
     });
 
-    assert!(
-        run.speed_at_start_mph > 35.0 + 15.0,
-        "the throttle-held truck should still be hot: {:.1}",
-        run.speed_at_start_mph
-    );
+    assert!(warned_before_the_bend, "{:#?}", run.lines);
     assert!(drifted(&run), "{:#?}", run.lines);
+    assert!(
+        run.lines
+            .iter()
+            .any(|line| line.contains("rolled over in the bend")),
+        "{:#?}",
+        run.lines
+    );
     assert!(
         !run.lines
             .iter()

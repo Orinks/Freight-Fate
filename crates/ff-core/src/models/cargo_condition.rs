@@ -236,8 +236,7 @@ mod tests {
 
     use super::*;
     use crate::sim::vehicle::{
-        TruckState, CARGO_ADVISORY_LAT_G, CARGO_CORNER_LAT_G, CARGO_HARD_BRAKE_G,
-        EMERGENCY_BRAKE_MULT,
+        TruckState, CARGO_ADVISORY_LAT_G, CARGO_HARD_BRAKE_G, EMERGENCY_BRAKE_MULT, ROLL_WARN_SHARE,
     };
 
     struct FakeCargo {
@@ -447,7 +446,7 @@ mod tests {
     #[test]
     fn test_a_bend_taken_well_over_its_advisory_costs_the_freight() {
         let mut t = loaded(75.0);
-        t.corner_radius_ft = radius_for(30.0, CARGO_CORNER_LAT_G); // a 30 mph bend
+        t.corner_radius_ft = radius_for(30.0, CARGO_ADVISORY_LAT_G); // a 30 mph bend
         for _ in 0..120 {
             t.update_cargo(1.0 / 60.0, 0.0);
         }
@@ -492,7 +491,7 @@ mod tests {
         let mut t = loaded(60.0);
         t.corner_radius_ft = 0.0;
         t.corner_advisory_mph = 30.0;
-        assert!(t.corner_lateral_g() > CARGO_CORNER_LAT_G);
+        assert!(t.roll_share() > ROLL_WARN_SHARE);
         for _ in 0..120 {
             t.update_cargo(1.0 / 60.0, 0.0);
         }

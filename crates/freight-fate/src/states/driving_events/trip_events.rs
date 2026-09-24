@@ -1,6 +1,7 @@
 //! `_handle_trip_event` and everything that decides whether a trip event
 //! speaks at all, in what category, and at what priority.
 
+use ff_core::data::curves::RouteCurve;
 use ff_core::data::state_welcome::welcome_sign;
 use ff_core::data::world_parsing::crc32;
 use ff_core::models::trailer_yard::pickup_plan;
@@ -17,6 +18,7 @@ use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_turns::{is_judged_turn, TURN_COMMIT_TAIL_MI};
+use crate::states::driving_updates::curve_servo::CURVE_SERVO_HOLD_BAND_MPH;
 use crate::states::driving_updates::live;
 
 use super::ambient::Ambient;
@@ -51,6 +53,19 @@ impl DrivingState {
             return;
         }
         if self.corner_already_called(event) {
+            return;
+        }
+        if self.limit_change_of_road_left(ctx, event) {
+            return;
+        }
+        if matches!(
+            event.kind,
+            TripEventKind::Billboard | TripEventKind::Landmark
+        ) && self.in_exit_approach()
+        {
+            // Roadside colour waits out the last mile to an exit being taken:
+            // a billboard read 0.3 miles before the gore talked over the
+            // countdown and the take line (agent drive B, 2026-09-24).
             return;
         }
         let kind = event.kind;
@@ -467,8 +482,13 @@ impl DrivingState {
         // 31 percent across two bends before anyone knew (agent drive,
         // 2026-09-01, the owner's own settings).
         let announce = ctx.settings.curve_callouts;
-        let advisory = event.data.advisory_mph.unwrap_or(0.0);
         let curve = event.data.curve;
+        // The number spoken for this load, as the pacenote speaks it.
+        let advisory = curve
+            .as_ref()
+            .map_or(event.data.advisory_mph.unwrap_or(0.0), |c| {
+                self.spoken_advisory_mph(c) as f64
+            });
         let ahead = event.data.ahead_mi.unwrap_or(0.0);
         let speed = self.trip.truck.speed_mph();
         let message = match curve.as_ref() {
@@ -519,11 +539,21 @@ impl DrivingState {
         // 30 the whole time: the words were right and the assist was
         // not. The cruise pause below keys its resume to the same extent,
         // and the approach servo holds to it.
+        //
+        // And never faster than the bend lets THIS load through at no cost:
+        // an advisory is built for a full trailer at 0.30 g, so on a bend
+        // whose sign rounds up, or with a part-filled tank, the sign asks more
+        // than the load can give (`driving_rollover`). A servo band under it,
+        // so the hold's own band stays clear too.
+        let under_the_cost =
+            |bend: &RouteCurve| self.bend_safe_mph(ctx, bend) - CURVE_SERVO_HOLD_BAND_MPH;
         let chain = curve.as_ref().map(|curve| {
-            let mut hold_mph = advisory;
+            let mut hold_mph = advisory.min(under_the_cost(curve));
             let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
             if let Some(linked) = self.pacenote_linked(curve) {
-                hold_mph = hold_mph.min(linked.advisory_mph as f64);
+                hold_mph = hold_mph
+                    .min(linked.advisory_mph as f64)
+                    .min(under_the_cost(&linked));
                 hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
             }
             (hold_mph, hold_to_mi)
@@ -732,6 +762,13 @@ impl DrivingState {
         }
         let mut opts = SayEvent::queued().priority(priority);
         opts.category = category;
+        if event.data.limit_change.unwrap_or(false) {
+            // A mainline limit cut by the take line is about a road the truck
+            // has just left: "Speed limit raised to 75." came back after "You
+            // take exit 167" (agent drive, Edwards, 2026-09-24).
+            self.refresh_live_facts();
+            opts = opts.valid(|| !live::on_ramp());
+        }
         ctx.say_event_with(message, opts);
         // Any spoken route line pushes spaced ambient chatter back, so
         // an informational notice never lands on top of a navigation

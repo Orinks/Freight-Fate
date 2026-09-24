@@ -184,6 +184,14 @@ pub const JAKE_LOOP_RPMS: [i64; 6] = [1200, 1400, 1600, 1800, 2000, 2200];
 // recording of a real low stage -- do not dramatize what we cannot confirm.
 pub const JAKE_STAGE_GAIN: [f64; 3] = [0.25, 0.65, 1.0];
 pub const JAKE_MIN_RPM: f64 = 950.0;
+// How long the growl's loop is kept, silent, through a gap before it is
+// stopped. The gap is still heard (shift, clutch, a throttle blip), but the
+// return is the same loop coming back up rather than the loop restarted from
+// its top: a controller trading throttle and jake near a no-engine-brake zone
+// restarted it dozens of times in a row (agent drive, 2026-09-24). Assumed:
+// longer than a shift or a cruise throttle pulse, short enough that a jake
+// switched off is simply off.
+pub const JAKE_CUE_HOLD_S: f64 = 2.0;
 // Both jake voices are 1600 rpm cuts (the one real recording and the one
 // synth kept beside it), and one voice stands for every band, so the growl
 // used to sit on one note however the revs moved. It is re-pitched from
@@ -264,6 +272,30 @@ pub mod live {
         static HAZARD_ACTIVE: Cell<bool> = const { Cell::new(false) };
         static ARRIVAL_MENU_OPEN: Cell<bool> = const { Cell::new(false) };
         static GATE_STOP_PROMPTED: Cell<bool> = const { Cell::new(false) };
+        static ON_RAMP: Cell<bool> = const { Cell::new(false) };
+        static RAMP_HOLDING: Cell<bool> = const { Cell::new(false) };
+    }
+
+    /// Whether the truck has left the mainline for a ramp. A mainline line
+    /// ("Speed limit raised to 75") cut by the take line is about a road
+    /// the truck is no longer on, so it is not worth handing back.
+    pub fn set_on_ramp(value: bool) {
+        ON_RAMP.with(|cell| cell.set(value));
+    }
+
+    pub fn on_ramp() -> bool {
+        ON_RAMP.with(|cell| cell.get())
+    }
+
+    /// Whether the truck is still held at a ramp terminal's bar, waiting for
+    /// its gap or its green. "Assistance is holding for your gap" is true
+    /// only while this is; once the gap comes it is superseded.
+    pub fn set_ramp_holding(value: bool) {
+        RAMP_HOLDING.with(|cell| cell.set(value));
+    }
+
+    pub fn ramp_holding() -> bool {
+        RAMP_HOLDING.with(|cell| cell.get())
     }
 
     pub fn set_overspeed_active(value: bool) {
