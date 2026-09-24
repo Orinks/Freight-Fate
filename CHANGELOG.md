@@ -122,11 +122,10 @@
 
 ### Fixed
 
-<<<<<<< HEAD
 - **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
 
-- **Refusing a bad trailer at pickup no longer earns Somebody Else's Turn at delivery.** The trailer you dropped was the sound one.
-=======
+- **Refusing a bad trailer at pickup no longer earns Somebody Else's Turn at delivery.** You hauled the sound replacement, not the bad trailer.
+
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
@@ -136,7 +135,6 @@
 - **The steering lean on an exit ramp now leans only for its curve.** Running wide there no longer says you crossed into oncoming traffic.
 
 - **Exit speed assistance no longer takes over from cruise for a fraction of a mile per hour.**
->>>>>>> test/badge-moments
 
 - **Adaptive cruise no longer damages the freight when it brakes downhill for traffic, a ramp, or a lower limit.**
 
