@@ -305,11 +305,66 @@ fn turnpike_doubles_never_leave_the_frozen_network() {
             "seed {seed} offered LCV freight out of California"
         );
     }
-    // Salt Lake City sits in Utah, on the frozen network; an LCV lane is
-    // legal exactly when the destination's state is on it too.
+    // Western LCV states alone are no longer enough: the corridor must sit
+    // on a listed turnpike. Salt Lake to Denver is frozen-network states but
+    // not a classic turnpike. Cleveland to Toledo rides the Ohio Turnpike.
     let b = board(1);
-    assert!(b.lcv_lane("salt_lake_city_ut_us", "denver_co_us"));
+    assert!(!b.lcv_lane("salt_lake_city_ut_us", "denver_co_us"));
     assert!(!b.lcv_lane("salt_lake_city_ut_us", "los_angeles_ca_us"));
+    assert!(
+        b.lcv_lane("cleveland_oh_us", "toledo_oh_us")
+            || b.lcv_lane("buffalo_ny_us", "syracuse_ny_us")
+            || b.lcv_lane("gary_in_us", "south_bend_in_us"),
+        "expected a classic turnpike city pair to clear the LCV lane"
+    );
+}
+
+#[test]
+fn turnpike_doubles_board_skips_non_turnpike_corridors() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    // Columbus sits off the Ohio Turnpike; long doubles must not originate
+    // onto I-71-only lanes even with every credential held.
+    for seed in 0..6 {
+        let jobs = board(seed).offers(
+            "Columbus",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        for job in &jobs {
+            if job.cargo.key != "turnpike_doubles" {
+                continue;
+            }
+            let routes = world()
+                .supported_route_options(&job.origin, &job.destination, 3)
+                .expect("route options");
+            assert!(
+                routes
+                    .iter()
+                    .any(crate::data::lcv_turnpikes::route_allows_lcv_turnpike),
+                "seed {seed} offered turnpike_doubles {} -> {} off the turnpike",
+                job.origin,
+                job.destination
+            );
+        }
+    }
+}
+
+#[test]
+fn parcel_doubles_and_singles_ignore_the_turnpike_trailer_program() {
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("parcel_doubles"),
+        ["double_van"]
+    );
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("general"),
+        ["dry_van"]
+    );
+    assert!(!cargo_type("parcel_doubles").unwrap().lcv_lanes);
+    assert!(!cargo_type("general").unwrap().lcv_lanes);
 }
 
 #[test]

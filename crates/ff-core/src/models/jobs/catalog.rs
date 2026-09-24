@@ -308,10 +308,10 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
         )
         .min_level(18)
         .equipment("intermodal container chassis"),
-        // Turnpike doubles: two long trailers on the corridors whose networks
-        // were frozen into law in 1991. The game keeps the combination at
-        // legal GVW -- raising the weight ceiling on the frozen network is
-        // the oversize-permit economy's job, on the roadmap.
+        // Turnpike doubles: two 53-foot trailers on the classic LCV turnpike
+        // systems (see `data::lcv_turnpikes`). Distinct from STAA 28-foot
+        // pups. The game keeps the combination at legal GVW -- raising the
+        // weight ceiling / tare for LCVs is FIX 5 / the permit economy.
         CargoType::plain(
             "turnpike_doubles",
             "turnpike doubles freight",
