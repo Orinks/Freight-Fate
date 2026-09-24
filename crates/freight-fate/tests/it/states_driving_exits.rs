@@ -509,6 +509,13 @@ fn test_full_lane_keeping_says_it_is_taking_the_destination_exit() {
         "{:?}",
         spoken(&harness)
     );
+    // And it asks for no slowing on the mainline: the ramp is braked for
+    // past the gore (realistic exit review, 2026-09-24).
+    assert!(
+        !said_any(&harness, "Slow down for the ramp"),
+        "{:?}",
+        spoken(&harness)
+    );
 }
 
 #[test]

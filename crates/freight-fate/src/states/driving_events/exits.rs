@@ -169,7 +169,9 @@ impl DrivingState {
             _ => "",
         };
         let ahead_text = ctx.settings.distance_text(ahead, true);
-        let ramp_text = ctx.settings.speed_text(self.armed_ramp_mph(Some(&stop)));
+        // No ramp number here: it is braked for past the gore, where taking
+        // the exit names it as the exit speed. Said a mile out it asked the
+        // driver to shed on the mainline (realistic exit, 2026-09-24).
         let cap = self.cap_cruise_for_ramp(ctx, Some(&stop));
         let mut message = if ctx.settings.lane_is_automated() {
             self.exit_lane_alignment = EXIT_LANE_READY;
@@ -184,14 +186,10 @@ impl DrivingState {
                 self.lane_keeping_grant_said = true;
                 "Exit lane set for you by lane keeping."
             };
-            format!(
-                "{head} {ahead_text} ahead. {granted}{lane_hint} {ramp_text} or less for the \
-                 ramp.{ending}{cap}"
-            )
+            format!("{head} {ahead_text} ahead. {granted}{lane_hint}{ending}{cap}")
         } else {
             format!(
-                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then \
-                 {ramp_text} or less for the ramp.{ending}{cap}"
+                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane.{ending}{cap}"
             )
         };
         if self.is_selected_stop(Some(&stop)) {

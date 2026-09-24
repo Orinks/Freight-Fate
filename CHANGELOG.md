@@ -37,7 +37,7 @@
 
 ### Changed
 
-- **Taking an exit keeps road speed until the gore.** Braking for the ramp comes after it, and cruise eases 10 miles per hour at most.
+- **Taking an exit keeps road speed until the gore.** You brake for the ramp after it.
 
 - **The exit speed is now said as you enter the deceleration lane.** A ramp curve taken faster than that shifts the load.
 

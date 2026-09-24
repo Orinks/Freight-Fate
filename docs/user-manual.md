@@ -1216,7 +1216,7 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to slow down and set up for the ramp. With lane keeping on partial
+and tells you to set up for it. With lane keeping on partial
 or off, use X to signal and move right for the exit lane. On full, lane keeping
 takes the destination exit for you, and the first call of each approach says so. If automatic speed control is
 active, it holds road speed and eases at most 10 miles per hour below it just
@@ -1631,8 +1631,8 @@ Interactive is a descent-control level, not a preset.
 
 Exit speed assistance brakes in the deceleration lane of an already-selected
 exit, so the truck reaches the exit speed by the ramp curve. On the highway it
-only slows a truck the gore would refuse. Route-transition assistance does
-the same braking when exit speed assistance is off. Facility stopping
+only slows a truck the gore would refuse. Route-transition assistance or
+curve assistance does the same braking when exit speed assistance is off. Facility stopping
 assistance (the destination approach assistance row) slows and stops at the
 selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
 cleared stop or green light at the end of the destination ramp, it also pulls

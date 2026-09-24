@@ -78,21 +78,23 @@ impl DrivingState {
                 let _ = (tightness, load);
                 let direction = if bend.direction == 'L' { -1.0 } else { 1.0 };
                 curve = direction / (bend.min_radius_ft as f64).max(1.0);
-                // Spoken slip warning: entering a curve well above advisory
-                // pushes the truck toward the shoulder and the driver should
-                // know why.
                 if excess > 15.0 && !self.curve_slip_active {
-                    self.curve_slip_active = true;
                     let phrase = self.pacenote_phrase(bend);
-                    ctx.say_event_with(
-                        format!("{phrase}, too fast, drifting to the outside."),
-                        SayEvent::new().category(SpeechCategory::Safety),
-                    );
+                    self.announce_curve_slip(ctx, &phrase);
                 }
             }
             None => curve = 0.0,
         }
-        if let Some(ramp_radius) = self.ramp_curve_radius_ft() {
+        let ramp_curve = self.ramp_curve_radius_ft();
+        if let Some(ramp_radius) = ramp_curve {
+            // The same warning for the ramp's own curve, whose advisory is
+            // the exit speed: taken hot it runs wide and moves the load just
+            // as a mapped bend does (review of the realistic exit,
+            // 2026-09-24).
+            let exit_speed = self.armed_ramp_mph(None);
+            if self.trip.truck.speed_mph() - exit_speed > 15.0 && !self.curve_slip_active {
+                self.announce_curve_slip(ctx, "Ramp curve");
+            }
             // The ramp's controlling curve, past its deceleration lane. Its
             // radius is DERIVED from the speed it is posted at, through the
             // same AASHTO point-mass control the curve bake uses, rather than
@@ -107,7 +109,7 @@ impl DrivingState {
             // heading model).
             curve += 1.0 / ramp_radius;
         }
-        if active.is_none() && self.curve_slip_active {
+        if active.is_none() && ramp_curve.is_none() && self.curve_slip_active {
             self.curve_slip_active = false;
         }
         self.update_curve_run(ctx, active.as_ref());
@@ -464,6 +466,18 @@ impl DrivingState {
     }
 
     /// Advance an assist-off tap change: signal clicks, then the flip.
+    /// Spoken slip warning: entering a curve well above its advisory pushes
+    /// the truck toward the shoulder, and the driver should know why. Once
+    /// per curve, for a mapped bend (named by its pacenote) and for an exit
+    /// ramp's curve alike.
+    fn announce_curve_slip(&mut self, ctx: &mut GameContext, phrase: &str) {
+        self.curve_slip_active = true;
+        ctx.say_event_with(
+            format!("{phrase}, too fast, drifting to the outside."),
+            SayEvent::new().category(SpeechCategory::Safety),
+        );
+    }
+
     pub fn update_tap_lane_change(&mut self, ctx: &mut GameContext, dt: f64) {
         let Some(mut target) = self.lane_change_target else {
             if !self.steer_cue_active && !self.exit_blinker_on() {

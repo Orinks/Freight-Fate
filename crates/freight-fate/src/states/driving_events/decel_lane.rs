@@ -43,6 +43,17 @@ impl DrivingState {
         self.deceleration_lane_left_mi().is_some()
     }
 
+    /// Whether the truck is still on the lane or in the curve of the ramp it
+    /// took at the gore. The clock runs real over this stretch on every exit
+    /// (`update_exit_with_input`), because both are real lengths of road
+    /// braked over in real seconds.
+    pub fn short_of_ramp_curve_end(&self) -> bool {
+        match (self.ramp_layout, self.ramp_travelled_mi()) {
+            (Some(layout), Some(travelled)) => travelled < layout.decel_mi + layout.curve_mi,
+            _ => false,
+        }
+    }
+
     /// The radius of the ramp curve, in feet, while the truck is in it.
     ///
     /// DERIVED from the speed the ramp is built for through the same AASHTO
@@ -65,13 +76,15 @@ impl DrivingState {
     }
 
     /// Work the deceleration lane: publish the ramp's grade, and let the
-    /// exit assists brake to the exit speed by the curve.
+    /// assists brake to the exit speed by the curve.
     ///
-    /// Exit speed assistance and route-transition assistance both answer
-    /// here, as one servo: they are the two settings that promise help with
-    /// the exit's speed, and two servos on one lane would fight and speak
-    /// twice. Runs ahead of the physics step, and its press is a pedal
-    /// floor in the frame (`decel_lane_brake`), like the terminal's.
+    /// Exit speed assistance, route-transition assistance and curve
+    /// assistance all answer here, as one servo: the first two promise help
+    /// with the exit's speed, and the ramp curve is the bend ahead that curve
+    /// assistance brakes for on the approach, as it does a mapped bend. Three
+    /// servos on one lane would fight and speak three times. Runs ahead of
+    /// the physics step, and its press is a pedal floor in the frame
+    /// (`decel_lane_brake`), like the terminal's.
     pub fn update_deceleration_lane(&mut self, ctx: &mut GameContext) {
         // The lane runs beside the mainline and shares its grade; the ramp
         // proper has its own, ASSUMED level (see `ExitRampLayout::grade`).
@@ -79,7 +92,9 @@ impl DrivingState {
             (Some(_), Some(layout)) if !self.in_deceleration_lane() => Some(layout.grade),
             _ => None,
         };
-        let assisting = ctx.settings.exit_speed_assist || ctx.settings.route_transition_assist;
+        let assisting = ctx.settings.exit_speed_assist
+            || ctx.settings.route_transition_assist
+            || ctx.settings.curve_speed_assist;
         let Some(left_mi) = self.deceleration_lane_left_mi().filter(|_| assisting) else {
             self.decel_lane_brake = 0.0;
             return;
@@ -94,7 +109,12 @@ impl DrivingState {
         let target_mps = self.armed_ramp_mph(None) / MPH_PER_MPS;
         let v_mps = self.trip.truck.velocity_mps.max(0.0);
         let gap_m = 0.5f64.max(left_mi * METERS_PER_MILE);
-        let needed = (v_mps * v_mps - target_mps * target_mps).max(0.0) / (2.0 * gap_m);
+        // Priced in the seconds the truck slows in, as the curve servo's
+        // shed is: the road passes `scale` times faster than the brakes work.
+        // The lane runs on the real clock, so this is 1 there; it is here so
+        // the price stays true if that ever stops being so.
+        let scale = self.trip.effective_time_scale().max(1.0);
+        let needed = (v_mps * v_mps - target_mps * target_mps).max(0.0) * scale / (2.0 * gap_m);
         let idle = self.decel_lane_brake <= 0.0;
         if needed < RAMP_ASSIST_DECEL_RELEASE_MPS2
             || (idle && needed < RAMP_ASSIST_DECEL_START_MPS2)
@@ -113,8 +133,10 @@ impl DrivingState {
         // class as every other assist's slowing line.
         let who = if ctx.settings.exit_speed_assist {
             "Exit speed assistance"
-        } else {
+        } else if ctx.settings.route_transition_assist {
             "Route-transition assistance"
+        } else {
+            "Curve assistance"
         };
         ctx.say_event_with(
             format!("{who} slowing for the ramp."),

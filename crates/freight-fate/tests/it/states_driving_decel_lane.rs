@@ -30,17 +30,50 @@ fn exit_rig(
     cruise: bool,
     exit_speed_assist: bool,
 ) -> (PlaytestHarness, RoadStop) {
+    let rig = Rig {
+        exit_speed_assist,
+        ..Rig::default()
+    };
+    exit_rig_with(limit_mph, grade_pct, ahead_mi, speed_mph, cruise, rig)
+}
+
+/// The settings a case can turn on beyond [`exit_rig`]'s.
+#[derive(Clone, Copy)]
+struct Rig {
+    exit_speed_assist: bool,
+    curve_speed_assist: bool,
+    time_scale: f64,
+}
+
+impl Default for Rig {
+    fn default() -> Self {
+        Rig {
+            exit_speed_assist: false,
+            curve_speed_assist: false,
+            time_scale: 1.0,
+        }
+    }
+}
+
+fn exit_rig_with(
+    limit_mph: f64,
+    grade_pct: f64,
+    ahead_mi: f64,
+    speed_mph: f64,
+    cruise: bool,
+    rig: Rig,
+) -> (PlaytestHarness, RoadStop) {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Deceleration Lane"));
-    harness.app.ctx.settings.time_scale = 1.0;
+    harness.app.ctx.settings.time_scale = rig.time_scale;
     harness.app.ctx.settings.lane_keeping = "full".to_string();
     harness.app.ctx.settings.automatic_transmission = true;
-    harness.app.ctx.settings.exit_speed_assist = exit_speed_assist;
+    harness.app.ctx.settings.exit_speed_assist = rig.exit_speed_assist;
     harness.app.ctx.settings.route_transition_assist = false;
-    harness.app.ctx.settings.curve_speed_assist = false;
+    harness.app.ctx.settings.curve_speed_assist = rig.curve_speed_assist;
     harness.with_drive(move |d, _| {
         d.departure_checked = true;
-        bench_road(d, limit_mph, grade_pct, 1.0);
+        bench_road(d, limit_mph, grade_pct, rig.time_scale);
         d.truck_mut().set_air_ready(false);
     });
     harness.press_key(Key::E, None); // engine on
@@ -194,9 +227,20 @@ fn test_the_exit_speed_is_spoken_once_in_the_deceleration_lane_and_braked_for_th
             .count()
             .saturating_sub(harness.app.ctx.handed_back_count("Exit speed 49."))
     };
-    // Said as the truck enters the lane, on the driving channel.
+    // Said as the truck enters the lane, on the driving channel, and FIRST
+    // in the gore line: a driver braking for themselves has a few seconds of
+    // lane and brakes on that number.
     assert!(harness.read_drive(|d| d.in_deceleration_lane()));
     assert_eq!(said(&harness), 1, "{}", harness.transcript_text());
+    assert!(
+        harness
+            .app
+            .event_lines()
+            .iter()
+            .any(|line| line.starts_with("Exit speed 49. You take exit 42")),
+        "{}",
+        harness.transcript_text()
+    );
     assert!(
         !harness
             .app
@@ -227,10 +271,119 @@ fn test_the_exit_speed_is_spoken_once_in_the_deceleration_lane_and_braked_for_th
     );
 }
 
+/// Drive from the gore to the ramp curve. Returns the speed the truck
+/// entered the curve at.
+fn to_the_ramp_curve(harness: &mut PlaytestHarness) -> f64 {
+    for _ in 0..(30 * 60) {
+        frame(harness);
+        if harness.read_drive(|d| d.ramp_curve_radius_ft().is_some()) {
+            return harness.read_drive(|d| d.truck().speed_mph());
+        }
+    }
+    panic!(
+        "never reached the ramp curve\n{}",
+        harness.transcript_text()
+    );
+}
+
+#[test]
+fn test_a_free_flowing_ramp_runs_the_lane_and_curve_on_the_real_clock() {
+    // Review of the realistic exit: the lane is priced in real metres, and a
+    // ramp with no light or sign ran on the compressed clock. At five times
+    // the lane went by in about two real seconds and the truck met its
+    // curve far over the exit speed. Every exit is real time from the gore
+    // through the curve now.
+    let rig = Rig {
+        exit_speed_assist: true,
+        time_scale: 5.0,
+        ..Rig::default()
+    };
+    let (mut harness, stop) = exit_rig_with(70.0, 0.0, 1.0, 62.0, true, rig);
+    drive_to_the_gore(&mut harness, &stop);
+    // A free-flowing ramp: nothing at its end to hold the clock.
+    harness.with_drive(|d, _| {
+        d.ramp_control = "none".to_string();
+        d.ramp_terminal_done = true;
+        d.cross_bubble = None;
+    });
+    let mut entry = None;
+    for _ in 0..(30 * 60) {
+        frame(&mut harness);
+        let (short, scale, in_curve, speed) = harness.read_drive(|d| {
+            (
+                d.short_of_ramp_curve_end(),
+                d.trip.effective_time_scale(),
+                d.ramp_curve_radius_ft().is_some(),
+                d.truck().speed_mph(),
+            )
+        });
+        if short {
+            assert_eq!(scale, 1.0, "the lane or curve ran on a compressed clock");
+        }
+        if in_curve && entry.is_none() {
+            entry = Some(speed);
+        }
+        if !short {
+            break;
+        }
+    }
+    let entry = entry.expect("reached the ramp curve");
+    assert!(
+        entry <= 49.0 + 2.0,
+        "met the curve at {entry:.1} at five times"
+    );
+}
+
+#[test]
+fn test_nothing_on_the_approach_names_the_ramp_speed() {
+    // Review of the realistic exit: the signal-on line still said "then 49
+    // or less for the ramp" a mile out. The number is said past the gore.
+    let (mut harness, stop) = exit_rig(70.0, 0.0, 3.0, 70.0, true, true);
+    let armed = harness
+        .transcript()
+        .into_iter()
+        .find(|line| line.contains("Signal on for exit 42"))
+        .expect("the signal-on line");
+    assert!(!armed.contains("for the ramp"), "{armed}");
+    assert!(!armed.contains("49"), "{armed}");
+    harness.clear_speech();
+    drive_to_the_gore(&mut harness, &stop);
+    let approach: Vec<String> = harness
+        .transcript()
+        .into_iter()
+        .filter(|line| !line.contains("You take"))
+        .collect();
+    let approach = approach.join("\n");
+    assert!(!approach.contains("49"), "{approach}");
+    assert!(!approach.to_lowercase().contains("slow"), "{approach}");
+}
+
+#[test]
+fn test_curve_assistance_alone_brakes_before_the_ramp_curve() {
+    // Review of the realistic exit: with the ramp bending only inside its
+    // curve, curve assistance alone met it hot and braked mid-corner. It
+    // sees the ramp curve ahead from the lane, as it sees a mapped bend.
+    let rig = Rig {
+        curve_speed_assist: true,
+        ..Rig::default()
+    };
+    let (mut harness, stop) = exit_rig_with(70.0, 0.0, 1.0, 62.0, true, rig);
+    drive_to_the_gore(&mut harness, &stop);
+    let entry = to_the_ramp_curve(&mut harness);
+    assert!(entry <= 49.0 + 2.0, "met the curve at {entry:.1}");
+    assert!(
+        harness
+            .transcript_text()
+            .contains("Curve assistance slowing for the ramp."),
+        "{}",
+        harness.transcript_text()
+    );
+}
+
 /// Take the exit off a 45 mph road (a 32 mph ramp curve, 214 feet of
 /// radius) at `speed_mph` with every exit assist off, and roll it through
-/// the curve. Returns the load's damage after.
-fn through_the_ramp_curve(speed_mph: f64) -> f64 {
+/// the curve. Returns the load's damage after, and what was said.
+fn through_the_ramp_curve(speed_mph: f64) -> (f64, String) {
     let (mut harness, stop) = exit_rig(45.0, 0.0, 0.05, speed_mph, false, false);
     harness.with_drive(|d, _| assert!(d.truck().cargo_kg > 0.0, "the rig is loaded"));
     drive_to_the_gore(&mut harness, &stop);
@@ -248,17 +401,23 @@ fn through_the_ramp_curve(speed_mph: f64) -> f64 {
             break;
         }
     }
-    harness.read_drive(|d| d.truck().cargo_damage_pct)
+    (
+        harness.read_drive(|d| d.truck().cargo_damage_pct),
+        harness.transcript_text(),
+    )
 }
 
 #[test]
-fn test_a_ramp_curve_taken_hot_moves_the_load() {
+fn test_a_ramp_curve_taken_hot_moves_the_load_and_says_so() {
     // The exit speed is the ramp curve's advisory, and the curve is a corner
     // to the freight like any mapped bend: taken at 50 against its 32 it
     // pulls about 0.8 g, past what the securement holds. At the advisory it
-    // costs nothing.
-    let at_advisory = through_the_ramp_curve(32.0);
-    let hot = through_the_ramp_curve(50.0);
+    // costs nothing. And the mapped bend's too-fast warning covers it.
+    let warning = "Ramp curve, too fast, drifting to the outside.";
+    let (at_advisory, calm) = through_the_ramp_curve(32.0);
+    let (hot, text) = through_the_ramp_curve(50.0);
     assert_eq!(at_advisory, 0.0);
+    assert!(!calm.contains(warning), "{calm}");
     assert!(hot > 0.0, "a hot ramp curve cost the load nothing");
+    assert_eq!(text.matches(warning).count(), 1, "{text}");
 }

@@ -40,8 +40,15 @@ impl DrivingState {
         // were its own doing. Tapers came out at 14 to 28 miles an hour,
         // median 27 under the road, twenty-three of the twenty-five more than
         // 10 under. Nothing about the lane was wrong; the clock under it was.
+        //
+        // And the same law on the way OFF, on every exit whatever ends it:
+        // the deceleration lane and the ramp curve are real lengths of road
+        // too. On a free-flowing ramp at five times the clock the lane went
+        // by in about two real seconds and a truck met a 25 mph loop at 55
+        // (review of the realistic exit, 2026-09-24).
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
             || self.departure_merge_recovery
+            || self.short_of_ramp_curve_end()
             || (self.ramp_mi.is_some()
                 && (self
                     .ramp_stop
@@ -123,6 +130,21 @@ impl DrivingState {
             && !self.in_deceleration_lane()
         {
             self.announce_ramp_terminal(ctx);
+            // A countdown mark the truck is already inside when the callout
+            // lands is behind it: on a short or slow ramp the callout comes
+            // at 900 feet, and "1000 feet." there is a distance that is not
+            // true (review of the realistic exit, 2026-09-24).
+            let gap_mi = ramp_mi - RAMP_ACCESS_MI;
+            let unit_mi = if ctx.settings.imperial_units {
+                1.0 / 5280.0
+            } else {
+                1.0 / 1609.344
+            };
+            for mark in self.ramp_bar_milestones(ctx) {
+                if gap_mi < mark as f64 * unit_mi {
+                    self.ramp_gap_milestones_said.insert(mark);
+                }
+            }
         }
         self.update_ramp_terminal_assist_with_input(ctx, accelerating);
         if self.update_selected_stop_assist(ctx) {
@@ -424,6 +446,9 @@ impl DrivingState {
         self.decel_lane_brake = 0.0;
         self.decel_lane_assist_said = false;
         self.ramp_mi = Some(layout.length_mi() + RAMP_ACCESS_MI);
+        // Real time from this frame on, not from the next pass over the flag
+        // above: the lane is short enough that one compressed frame counts.
+        self.trip.controlled_ramp = true;
         self.ramp_stop = Some(stop.clone());
         self.ramp_end_said = false;
         self.ramp_arrival_grace_s = 0.0;
@@ -486,7 +511,9 @@ impl DrivingState {
         // The exit speed, once, where its sign stands: along the deceleration
         // lane the truck has just entered (MUTCD 11th ed. 2C.12, W13-2). The
         // number governs the curve at the end of this lane, and the lane is
-        // where a truck at road speed sheds to it.
+        // where a truck at road speed sheds to it. It LEADS the line: a
+        // driver doing their own braking has a few seconds of lane, and the
+        // number is what they brake on (review, 2026-09-24).
         let exit_speed = format!(
             "Exit speed {}.",
             ctx.settings.speed_value(self.armed_ramp_mph(Some(stop)))
@@ -500,7 +527,7 @@ impl DrivingState {
             if scale_ramp {
                 terminal = " The scale is at the end.";
             }
-            format!("{take} {exit_speed} {ramp} of ramp.{terminal}")
+            format!("{exit_speed} {take} {ramp} of ramp.{terminal}")
         } else {
             let mut ending = match self.ramp_control.as_str() {
                 "signal" => "traffic light at the end",
@@ -510,7 +537,7 @@ impl DrivingState {
             if scale_ramp {
                 ending = "the scale at the end, stop at the bar";
             }
-            format!("{take} {exit_speed} {ramp} of ramp, {ending}.")
+            format!("{exit_speed} {take} {ramp} of ramp, {ending}.")
         };
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
