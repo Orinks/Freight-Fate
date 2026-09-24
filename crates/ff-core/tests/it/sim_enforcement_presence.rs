@@ -648,13 +648,54 @@ fn test_the_safety_record_rides_on_the_profile_and_survives_a_save() {
     let previous = ff_core::settings::set_thread_data_dir(Some(tmp.path().to_path_buf()));
 
     let mut profile = Profile::named("Record");
-    profile.driving_record.citations = 3;
+    for _ in 0..3 {
+        profile
+            .driving_record
+            .record_citation_at(100.0, profile.game_hours);
+    }
     refresh_selection_score(&mut profile, 60.0);
     assert!(profile.selection_score > 40.0);
     let restored = Profile::from_dict(&profile.to_dict());
     assert_eq!(restored.selection_score, profile.selection_score);
 
     ff_core::settings::set_thread_data_dir(previous);
+}
+
+/// The scale reads a window, the way the real carrier score weighs the last
+/// 24 months: a citation, a serious violation, an out-of-service order and a
+/// fatigue event raise the score while they are recent and stop raising it
+/// once a game year has passed. The lifetime counts are untouched.
+#[test]
+fn test_an_aged_record_stops_raising_the_safety_record() {
+    use ff_core::models::profile::Profile;
+    use ff_core::models::safety_record::{
+        score_for_profile, SAFETY_RECORD_BASELINE, SAFETY_RECORD_WINDOW_DAYS,
+    };
+
+    let mut profile = Profile::named("Aged");
+    profile.career.reputation = 50.0; // neutral, so only the record moves it
+    let booked = profile.game_hours;
+    let record = &mut profile.driving_record;
+    record.record_citation_at(100.0, booked);
+    record.record_serious_violation(booked);
+    record.record_fatigue_event(booked);
+    record.out_of_service_times.push(booked);
+    profile.out_of_service_events = 1;
+
+    let fresh = score_for_profile(&profile, 0.0);
+    assert!(fresh > SAFETY_RECORD_BASELINE + 20.0, "{fresh}");
+
+    // One hour inside the window: still counted.
+    let window_h = SAFETY_RECORD_WINDOW_DAYS as f64 * 24.0;
+    profile.game_hours = booked + window_h - 1.0;
+    assert_eq!(score_for_profile(&profile, 0.0), fresh);
+
+    // One hour past it: the scale sees a clean record again.
+    profile.game_hours = booked + window_h + 1.0;
+    assert_eq!(score_for_profile(&profile, 0.0), SAFETY_RECORD_BASELINE);
+    assert_eq!(profile.driving_record.citations, 1);
+    assert_eq!(profile.driving_record.fatigue_events, 1);
+    assert_eq!(profile.out_of_service_events, 1);
 }
 
 // `test_the_marked_unit_pass_actually_plays` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.

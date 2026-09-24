@@ -221,7 +221,7 @@ fn tools_list() -> Value {
              credential keys bought outright, replacing what was held), hour (local \
              clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and \
              brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
-             out_of_service_events (counts on the record; with damage they set the \
+             out_of_service_events (counts on the record, dated now; with damage they set the \
              safety band that decides who is pulled into the inspection lane), \
              rested (true takes a full sleep), hos_driving_min, hos_duty_min and \
              hos_since_break_min (sandbox HOS counters in game minutes), clear_load (true drops a load in \

@@ -732,10 +732,18 @@ its status or release decision.
       charged but never booked on the licence file, and an out-of-service
       order only ever counted on the trip, never on the career field the
       scale screening scores. Both reach the record now.
-- [ ] The public safety record lists citations, serious violations, major
-      offenses, claims, terminations and repossessions; out-of-service
-      orders and fatigue events are scored but not shown, by the same rule
-      that keeps fatigue private. Decide whether orders belong on the page.
+- [x] Out-of-service orders go on the public safety record as a count
+      (owner ruling 2026-09-24: FMCSA publishes inspection out-of-service
+      results); fatigue events and the reason behind an order stay private.
+      The save already carries `out_of_service_events`, an allow-listed
+      profile field, so no invariants regen; the in-game driver profile
+      reads `outOfServiceOrders` when the site sends it.
+- [x] orinks.net side of the out-of-service count (orinks-net `fcdc9f3`,
+      live on staging and production 2026-09-24): the snapshot carries
+      `outOfServiceOrders` from the save's `out_of_service_events`, the
+      profile page lists "N out-of-service order(s)" after major offenses,
+      and the validator checks `out_of_service_times` and `fatigue_times`
+      against the career clock like `citation_times`.
 - [x] The driving record bites through the carrier and the insurer, and is
       spoken (owner ask, 2026-09-12). Endorsements stay untied to the record
       (hazmat is a TSA threat assessment, 49 CFR 1572, criminal and
@@ -789,10 +797,18 @@ its status or release decision.
       last row, confirmed) is how the game removes an ended career's save and its
       cloud backups. Real-life basis: 49 CFR 383.51 Table 1 lifetime
       disqualification, 49 CFR 384.225 55-year record retention.
-- [ ] Two record gaps from the same research: the scale-house safety
-      record scores lifetime counts where the real carrier score is a
-      time-weighted 24 months, and driving under an out-of-service order is
-      a disqualifying offense (383.51 Table 4) the game does not model.
+- [x] Two record gaps from the same research. The scale-house safety
+      record now counts citations, serious violations, out-of-service orders
+      and fatigue events inside the one-game-year window reputation and the
+      carrier review use (`SAFETY_RECORD_WINDOW_DAYS`), where the real
+      carrier score is time-weighted over 24 months; orders and fatigue
+      events carry career times from this build (older ones are never in
+      the window, like undated citations), and clean inspections stay a
+      lifetime credit. Driving under an out-of-service order (383.51 Table
+      4) is unreachable, not unmodelled: an order is written only once the
+      truck is stopped and is served in full before control returns, and
+      equipment orders are repaired on the spot. A test pins it, so the
+      offense gets modelled if a path ever opens.
 
 ### September 14 reputation reads the record
 

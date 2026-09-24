@@ -37,6 +37,10 @@
 
 ### Changed
 
+- **Open scales judge your safety record on the last game year only.** Old citations and out-of-service orders stop getting you pulled in.
+
+- **A driver's public profile counts their out-of-service orders.** The safety record row names how many, never why.
+
 - **Taking an exit keeps road speed until the gore.** You brake for the ramp after it.
 
 - **The exit speed is now said as you enter the deceleration lane.** A ramp curve taken faster than that shifts the load.

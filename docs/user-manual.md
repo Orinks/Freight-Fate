@@ -1080,8 +1080,9 @@ unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
 
 Inspections are real. A clean record is waved through an open scale nearly
-every time; a record carrying citations or out-of-service history is
-pulled into the lane, and the lane is a Level 1 inspection: driver,
+every time; a record carrying citations or out-of-service orders from the
+last game year is pulled into the lane, and older ones no longer count
+against you there. The lane is a Level 1 inspection: driver,
 paperwork, a walk-around and a look under the truck, about 45 minutes on
 duty. Worn tires, brakes near their limit, body damage and whatever the
 last driver left on a hooked trailer get written up, with a fine and a
