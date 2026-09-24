@@ -194,6 +194,8 @@ pub struct DrivingState {
     /// intentionally session-only; only a warning actually spoken is saved.
     pub hos_stop_check_key: Option<String>,
     pub hos_stop_warning_pending: Option<String>,
+    pub hos_plan_hint_check_key: Option<String>,
+    pub hos_plan_hint_pending: Option<String>,
     pub enforcement_events: HashSet<String>,
     pub out_of_service_count: i64,
     pub drowsy_said: bool,

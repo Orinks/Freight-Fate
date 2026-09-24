@@ -225,7 +225,10 @@ pub fn rest_shoulder(fatigue: f64) -> f64 {
 pub fn rest_sleeper_split(fatigue: f64, minutes: f64, completed: bool) -> f64 {
     let relief = if minutes <= 180.0 { 18.0 } else { 55.0 };
     let floor = if completed { 10.0 } else { 20.0 };
-    pyjson::py_max(floor, pyjson::py_max(0.0, fatigue - relief))
+    pyjson::py_min(
+        fatigue,
+        pyjson::py_max(floor, pyjson::py_max(0.0, fatigue - relief)),
+    )
 }
 
 // ---------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 
 ### Added
 
+- **HOS planning hints can suggest a break or sleep stop before your hours run low.** Turn them on under Difficulty and hours of service.
+
 - **Bananavision channels are on the dial.** Nine HTTPS Icecast mounts from bananavision.tv — Main, Bananalodeon 80s, Bananalodeon, Bananarang, Educational, Brain, Star Trek Vision, MST3K, and Over the Edge — and they come in anywhere you drive.
 
 - **The game lists every screen reader it finds on your computer.** Start it with `--list-speech-backends` and it names the one it would speak through.

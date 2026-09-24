@@ -32,8 +32,7 @@ use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 use crate::states::driving_rest_states::rest_preview::{sleep_preview, SleepChoice};
 
 const REST_STOP_INTRO_HELP: &str =
-    "Enter selects, Escape returns to the road. Breaks and sleep advance the clock and the \
-     deadline.";
+    "Enter selects, Escape returns to the road. Sleep choices first read a preview; press Enter again to sleep. Breaks and sleep advance the clock and the deadline.";
 
 /// Which wear meter a road shop is selling a job on.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -518,12 +517,22 @@ impl RestStopState {
             let engine_off = shut_down_engine(d, ctx);
             advance_rest_clock(d, ctx, minutes, None, "");
             let completed = hos_mut_of(ctx).sleeper_split_rest(minutes);
+            let full_reset = hos_of(ctx)
+                .history
+                .last()
+                .is_some_and(|event| event.source == "full_reset");
             {
                 let p = profile_mut_of(ctx);
-                p.fatigue = hos::rest_sleeper_split(p.fatigue, minutes, completed);
+                p.fatigue = if full_reset {
+                    hos::rest_sleep(p.fatigue)
+                } else {
+                    hos::rest_sleeper_split(p.fatigue, minutes, completed)
+                };
             }
             let mode = ctx.settings.hos_mode.clone();
-            let status = if completed {
+            let status = if full_reset {
+                "Hours of service reset. ".to_string()
+            } else if completed {
                 format!("Sleeper split credited. {} ", hos_of(ctx).summary(&mode))
             } else {
                 // A rest that did NOT reset the shift leads with that

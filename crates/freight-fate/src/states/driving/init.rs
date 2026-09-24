@@ -319,6 +319,8 @@ impl DrivingState {
             hos_fine_count: 0,
             hos_stop_check_key: None,
             hos_stop_warning_pending: None,
+            hos_plan_hint_check_key: None,
+            hos_plan_hint_pending: None,
             enforcement_events: HashSet::new(),
             out_of_service_count: 0,
             drowsy_said: false,

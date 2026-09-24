@@ -391,13 +391,25 @@ pub fn motel_rest_deadline_crunch() -> Outcome {
         }
         rig.app.ctx.push_state_with(state, false);
         rig.app.ctx.run_deferred();
-        rig.select_menu_containing("Motel room")
+        let selected = rig.select_menu_containing("Motel room");
+        if selected {
+            // The first press previews the cost and deadline; the second
+            // commits while the menu is still on the drive's state stack.
+            if rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money()) != 500.0
+                || !rig.transcript()[lines_before_sleep..]
+                    .iter()
+                    .any(|line| line.contains("Preview: sleep"))
+            {
+                findings.push("motel preview changed state or did not speak".to_string());
+            }
+            rig.key_screen(Key::Return);
+        }
+        selected
     });
     if !took_the_room {
         findings.push("no motel row on the rest-stop menu to take at all".to_string());
         return outcome("motel_rest_deadline_crunch", &rig, findings, "");
     }
-
     let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
     if money != 500.0 - MOTEL_COST {
         findings.push(format!(

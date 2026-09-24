@@ -345,6 +345,11 @@ impl SettingsCategoryState {
         self.announce(ctx);
     }
 
+    pub(super) fn toggle_hos_planning_hints(&mut self, ctx: &mut GameContext, _d: i64) {
+        ctx.settings.hos_planning_hints = !ctx.settings.hos_planning_hints;
+        self.announce(ctx);
+    }
+
     pub(super) fn toggle_steering_guide_inverted(&mut self, ctx: &mut GameContext, _d: i64) {
         ctx.settings.steering_guide_inverted = !ctx.settings.steering_guide_inverted;
         save_settings(&ctx.settings);

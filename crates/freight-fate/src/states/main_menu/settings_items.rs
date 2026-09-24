@@ -333,6 +333,7 @@ impl SettingsCategoryState {
             "difficulty" => vec![
                 adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
                 adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
             ],
             "world" => vec![
                 adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
@@ -415,6 +416,16 @@ impl SettingsCategoryState {
                      Relaxed: the same 11-hour drive, 14-hour window, and \
                      30-minute break, with lighter fines, fewer inspections, and \
                      rare road hazards.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "HOS planning hints: {}",
+                            if s.hos_planning_hints { "On" } else { "Off" }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
+                    "Optional early advice about a reachable break or sleep stop, or when none is reachable. Standard driving speech speaks one suggestion before the next hours warning. Quiet and Urgent only keep it silent. Your required hours warnings and readout keys still work when this is off.",
                 ),
                 // The overspeed warning no longer has a row. It armed at the
                 // same 5-over pace predictive cruise itself holds, so it

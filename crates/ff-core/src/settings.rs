@@ -257,7 +257,7 @@ pub fn driving_assist_preset(name: &str) -> Option<&'static [AssistValue; 9]> {
         .map(|(_, values)| values)
 }
 
-/// The 78 persisted fields, in the Python dataclass's declaration order
+/// The persisted fields, in the Python dataclass's declaration order
 /// (which is the order `save` writes them in). Each row is
 /// `name: type = default => coercion`, the coercion naming how a raw JSON
 /// value lands on the typed field (see `migrate::coerce`).
@@ -383,6 +383,9 @@ settings_fields! {
     /// hours of service: realistic/relaxed (debug_off is an internal dev
     /// bypass)
     hos_mode: String = "realistic" => str_checked,
+    /// Optional early advice from the legal-reach planner. The mandatory
+    /// hours warnings and requested readouts do not depend on this switch.
+    hos_planning_hints: bool = false => bool_strict,
     /// How much of the lane-holding work the truck does. "full" keeps the
     /// truck centred, takes your exits for you, and turns Left and Right
     /// into tap lane changes. "partial" drifts gently and gives you generous

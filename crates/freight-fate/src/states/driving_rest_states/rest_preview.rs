@@ -44,15 +44,23 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
         }
         SleepChoice::Sleeper(_) => after.sleeper_split_rest(minutes),
     };
+    let full_reset = after
+        .history
+        .last()
+        .is_some_and(|event| event.source == "full_reset");
     let fatigue_after = match choice {
-        SleepChoice::Sleeper(10) | SleepChoice::Motel => hos::rest_sleep(profile.fatigue),
+        SleepChoice::Sleeper(_) if full_reset => hos::rest_sleep(profile.fatigue),
+        SleepChoice::Motel => hos::rest_sleep(profile.fatigue),
         SleepChoice::Lot => hos::rest_shoulder(profile.fatigue),
         SleepChoice::Sleeper(_) => {
             hos::rest_sleeper_split(profile.fatigue, minutes, completed_split)
         }
     };
     let effect = match choice {
-        SleepChoice::Sleeper(10) | SleepChoice::Lot | SleepChoice::Motel => {
+        SleepChoice::Lot | SleepChoice::Motel => {
+            "A full 10-hour sleep resets your driving hours and legal driving window."
+        }
+        SleepChoice::Sleeper(_) if full_reset => {
             "A full 10-hour sleep resets your driving hours and legal driving window."
         }
         SleepChoice::Sleeper(_) if completed_split => {
@@ -100,7 +108,10 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
     } else {
         "The delivery deadline will have arrived.".to_string()
     };
-    let pending = after.split_pending_summary().unwrap_or("");
+    let pending = after
+        .split_pending_summary()
+        .map(|summary| format!(" {summary}"))
+        .unwrap_or_default();
     let cost = if choice == SleepChoice::Motel {
         format!(" The room costs {} dollars.", fmt_f(MOTEL_COST, 0))
     } else {
@@ -108,7 +119,7 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
     };
     format!(
         "Preview: sleep {hours} hours in {}. {effect} {legal} Fatigue goes from {} to {}. \
-         The game clock advances {hours} hours. {deadline} {pending}{cost} Press Enter again to sleep, or move to another choice.",
+         The game clock advances {hours} hours. {deadline}{pending}{cost} Press Enter again to sleep, or move to another choice.",
         choice.name(),
         fmt_f(profile.fatigue, 0),
         fmt_f(fatigue_after, 0)

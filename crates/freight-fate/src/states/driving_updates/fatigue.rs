@@ -50,6 +50,7 @@ impl DrivingState {
             && hos_of(ctx).in_violation(&mode);
         if moving && self.hazard_deadline.is_none() {
             self.warn_last_hos_stop(ctx);
+            self.maybe_hos_planning_hint(ctx);
         }
 
         let night = is_night(self.trip.local_hour());

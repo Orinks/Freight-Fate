@@ -80,18 +80,18 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_eighty_persisted_fields_in_python_order() {
+fn the_struct_carries_the_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12), the two shortcut tables (2026-09-14),
     // radio_shuffle_playlists and steering_guide_inverted (2026-09-18), and
     // synth_music and music_seed (2026-09-21) were added on the Rust side;
     // lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 82);
+    assert_eq!(Settings::FIELD_NAMES.len(), 83);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[78], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[79], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 82);
+    assert_eq!(pairs.len(), 83);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -113,7 +113,8 @@ fn the_defaults_match_the_python_dataclass() {
         "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
         "real_parking": false, "real_fuel_prices": true,
         "live_weather_controls_calendar": true,
-        "hos_mode": "realistic", "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
+        "hos_mode": "realistic", "hos_planning_hints": false,
+        "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
         "lane_cue_loudness": "standard", "lane_guide_tone": false,
         "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
         "lane_departure_warning": true, "stop_and_go_assist": true,
@@ -147,11 +148,22 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 82);
+    assert_eq!(expected.len(), 83);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
     assert!(!s.lane_keeping_unreadable);
+}
+
+#[test]
+fn hos_planning_hints_default_off_and_round_trip_as_a_boolean() {
+    assert!(!Settings::default().hos_planning_hints);
+    let mut enabled = Settings::default();
+    enabled.hos_planning_hints = true;
+    let stored: Value = serde_json::from_str(&enabled.to_file_text()).unwrap();
+    assert_eq!(stored["hos_planning_hints"], true);
+    assert!(from_json(stored).hos_planning_hints);
+    assert!(!from_json(json!({"hos_planning_hints": "true"})).hos_planning_hints);
 }
 
 #[test]

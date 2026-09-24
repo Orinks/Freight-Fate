@@ -1239,7 +1239,8 @@ fn rest_sleeper_split_floors_by_completion() {
     assert_eq!(rest_sleeper_split(50.0, 120.0, false), 32.0);
     assert_eq!(rest_sleeper_split(50.0, 480.0, false), 20.0);
     assert_eq!(rest_sleeper_split(50.0, 480.0, true), 10.0);
-    assert_eq!(rest_sleeper_split(5.0, 120.0, true), 10.0);
+    assert_eq!(rest_sleeper_split(5.0, 120.0, true), 5.0);
+    assert_eq!(rest_sleeper_split(0.0, 180.0, false), 0.0);
 }
 
 #[test]

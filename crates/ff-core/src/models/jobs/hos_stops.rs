@@ -36,6 +36,24 @@ pub struct HosStopAdvice {
 }
 
 impl HosStopAdvice {
+    /// Early optional road hint. The full estimate stays in requested readouts.
+    pub fn planning_hint(&self, distance: &str) -> Option<String> {
+        if self.destination_reachable {
+            return None;
+        }
+        Some(match &self.stop {
+            Some(stop) => format!(
+                "Plan your next {action} stop: {name}, {distance} ahead, is the last reachable one before your hours limit.",
+                action = self.action,
+                name = stop.spoken_name(),
+            ),
+            None => format!(
+                "No reachable {action} stop remains on this route before your hours limit. Find a safe place to stop and check your route and hours.",
+                action = self.action,
+            ),
+        })
+    }
+
     pub fn summary(&self, distance: &str) -> String {
         if self.destination_reachable {
             return format!(
