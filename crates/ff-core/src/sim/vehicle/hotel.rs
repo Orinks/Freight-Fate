@@ -193,7 +193,7 @@ impl TruckState {
     }
 }
 
-/// Spoken magnitude for a cargo temperature in the player's units.
+/// Spoken magnitude for a cargo temperature in the player's unit setting.
 ///
 /// Imperial: `"36 degrees"` (Fahrenheit, no unit word — same shape as weather).
 /// Metric: `"2 degrees Celsius"`.
