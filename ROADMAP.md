@@ -1269,6 +1269,13 @@ are intentionally not started here.
 - [ ] **FIX 4: Pup handling** (not started).
 - [ ] **FIX 5: Twin tare and GVW** (not started).
 
+### Travel-center bulk fuel (non-blocking)
+
+- [ ] **Restore `fuel_bulk` deliveries to `travel_center` as receive-only,**
+      gated behind the tanker and hazmat endorsements. Public travel centers
+      take bulk fuel drops but never originate freight. Non-blocking for the
+      carrier and home-terminal slices.
+
 ### Reefer, APU, and fuel-island hotel power (2.0 candidates)
 
 Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
