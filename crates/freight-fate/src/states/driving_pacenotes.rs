@@ -108,7 +108,12 @@ impl DrivingState {
         // The number this load can take the bend at, which is the sign's
         // except where the sign asks more than the load gives (`driving_rollover`).
         let advisory = self.spoken_advisory_mph(curve);
-        if speed_mph > advisory as f64 + PACENOTE_MARGIN_MPH {
+        // Named whenever the truck is over it by the margin, or over the
+        // speed the bend starts costing this load: a call made for the load
+        // has to carry the number that answers it.
+        if speed_mph > advisory as f64 + PACENOTE_MARGIN_MPH
+            || speed_mph > self.trip.bend_costs_above_mph(curve)
+        {
             call += &format!(" Advise {}.", s.speed_text(advisory as f64));
             terse += &format!(", {}", s.speed_text(advisory as f64));
         }
@@ -155,7 +160,8 @@ impl DrivingState {
         let curve = curve?;
         Some(CurveStillTrue {
             start_mi: curve.start_mi,
-            floor_mph: curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH,
+            floor_mph: (curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH)
+                .min(self.trip.bend_costs_above_mph(curve)),
         })
     }
 

@@ -614,11 +614,26 @@ impl DrivingState {
             self.cruise_curve_mph = None;
             self.cruise_curve_end_mi = None;
         }
-        let curve_capped = self
+        // And whatever curve assistance's servo is holding a bend at. The
+        // cap above comes only from a call that found cruise set well over
+        // the sign; a load whose own number sits under the sign, or a bend
+        // the servo armed without a call, left cruise throttling to its set
+        // speed against the servo's brake the whole way through the chain
+        // (bend sweep, Siskiyou, 2026-09-24: half the pedal against a fifth
+        // of the brake, for a mile).
+        let servo_mph = self
+            .curve_servo
+            .as_ref()
+            .filter(|servo| self.trip.position_mi <= servo.hold_to_mi)
+            .map(|servo| servo.target_mph);
+        let curve_mph = self
             .cruise_curve_mph
-            .is_some_and(|curve| curve < target_mph);
-        if curve_capped {
-            target_mph = self.cruise_curve_mph.expect("checked above");
+            .into_iter()
+            .chain(servo_mph)
+            .reduce(f64::min);
+        let curve_capped = curve_mph.is_some_and(|curve| curve < target_mph);
+        if let Some(curve) = curve_mph.filter(|_| curve_capped) {
+            target_mph = curve;
         }
         // Interactive descent control's safe ceiling, which lasts exactly as
         // long as the grade under the wheels.
@@ -860,6 +875,21 @@ impl DrivingState {
             ((ceiling_rpm - self.trip.truck.coupled_rpm(None)) / band).clamp(0.0, 1.0)
         };
         demand *= ceiling_factor;
+        // Curve assistance on the brake for a bend: cruise gives no more than
+        // what holds the grade, and lets go of any trim it wound up. Both hold
+        // the same number, the servo from above and cruise from below, and on
+        // a downgrade the servo holds the hill a band under it -- so the two
+        // met in the middle, half the throttle against a sixth of the brake
+        // for a mile down US-50's 4.7 percent with a half-full tank, the pedal
+        // flickering on every breath and the tanks at 48 psi by the bottom
+        // (bend sweep, 2026-09-24). Not a chop to nothing: on a climb that
+        // threw a half-full tank's liquid against the head every time the
+        // servo touched the pedal.
+        let servo_braking = self.curve_servo.as_ref().is_some_and(|s| s.brake > 0.0);
+        if servo_braking {
+            demand = demand.min(hold);
+            self.cruise_trim = self.cruise_trim.min(0.0);
+        }
         // Anti-windup: a grade the engine cannot pull, or a downgrade gravity
         // owns, pins the pedal at one end for as long as it lasts. Integrating
         // through that buries the trim at its limit, and the truck then sags or
@@ -867,7 +897,8 @@ impl DrivingState {
         // Only take the new trim when it can still move the pedal -- and the RPM
         // ceiling holding the pedal down counts as pinned just as much as the
         // floor or the roof does.
-        let saturated = (demand <= 0.0 && error < 0.0)
+        let saturated = servo_braking
+            || (demand <= 0.0 && error < 0.0)
             || (demand >= 1.0 && error > 0.0)
             || (ceiling_factor < 1.0 && error > 0.0);
         if !saturated {

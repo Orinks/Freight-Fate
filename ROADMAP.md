@@ -660,7 +660,8 @@ its status or release decision.
       the lateral wave running past its steady place takes back the stability
       its lower weight would have bought (derived, `vehicle/roll.rs`). The
       wave is fed each bend over a 2.0 s transition (Green Book Table 3-21,
-      read), so entering a 250 ft bend a half-full tank goes over at 34.6 mph
+      read), so entering a 250 ft bend a half-full tank goes over at 35.1 mph
+      (34.6 until the wave was judged against the bend's own pull, 2026-09-24)
       and a full one at 36.2; held long enough to settle, both at the same
       speed. Curve and exit speed assistance plan against the half-full
       figure.
@@ -1449,6 +1450,52 @@ mainline behaviour.
       partial lane keeping. Partial now supplies the road's wheel the way
       curve assistance does (`Settings::road_steers_the_bend`); lane changes
       and speed stay the driver's, and lane keeping off stays manual.
+- [x] **The assists hold every mapped bend without rolling the truck**
+      (test/rollover-assist-sweep, 2026-09-24; the owner's question). A
+      sweep (`states_driving_bend_rollover_sweep`) drives twelve bend-dense
+      three-mile stretches -- I-70 Floyd Hill and Glenwood Canyon, I-5
+      Siskiyou and Shasta Lake, I-40 Pigeon River, I-80 Donner, I-90
+      Lookout Pass, US-550 Red Mountain, US-62 Ozarks, US-60 Salt River
+      Canyon, CA-299, US-50 -- with bobtail, empty, half, full, and tanks at
+      50 and 95 percent, under curve assistance with the driver on the
+      throttle, the All preset with cruise, Balanced with cruise, and a
+      driver obeying only the number the cab speaks. None rolls and no bend
+      moves the load; the assists never hear "too fast", make at most one
+      full application per bend, and keep the air up; a driver 10 over every
+      sign rolls on seven of the twelve, warned first. It found five faults, all
+      fixed: the servo armed only off the spoken call, whose margin (3 mph,
+      8 on a gentle bend) sat past where a full trailer goes over, so the
+      Siskiyou's 6 percent rolled one at 60 with curve assistance on (it now
+      looks ahead on the load's own number); the call itself used that
+      margin, so a driver obeying every number spoken rolled on US-550 and
+      the Salt River Canyon (it now calls past where the bend costs this
+      load, or runs a manual lane wide); a half-full tank's wave was judged
+      against a pull still being built, or a gentle bend's tiny one, and
+      rolled at 50 and at 23 under its number (judged against the bend's own
+      pull, and the rollover pull where the bend asks less); adaptive cruise
+      held the throttle against the servo's brake -- half the pedal against
+      a sixth, the tanks at 48 psi down US-50 (it caps to the servo's number
+      and yields to its brake); and the too-fast warning looked only under
+      the truck, so the next of two bends was warned once the load was
+      already moving (it looks at both, and prices a downhill bend where the
+      truck will be after the reaction time).
+- [ ] **A half-full tank's swing from one bend into the next.** The
+      planning threshold prices a bend entered from rest, so in Lookout
+      Pass's pairs a half tank held under its number still moves its load
+      0.01 percent with the assists and 0.12 with a driver on the spoken
+      number (the sweep caps it at 0.2). Adding the present swing to the
+      plan was tried and dropped: the number moved with the wave, the servo
+      braked more, and on Donner a cruise-held half tank sloshed 2.5 percent
+      on a climb.
+- [ ] **Partial lane keeping in tight esses with an empty truck.** On
+      US-62's 20 to 30 mph bends the spoken-number driver still leaves the
+      pavement bobtail: warnings queue behind the calls in a dense run of
+      bends and arrive late. The sweep reports it without failing on it.
+- [ ] **Adaptive cruise and a half-full tank on a climb.** Cruise's
+      throttle swinging from nothing to full sloshes the liquid fore and
+      aft, and the load pays for it (2.5 percent on Donner's 3.8 percent in
+      one trial). Not a bend fault; seen only while the tank's plan was
+      being tried above.
 - [x] **A rollover goes on the driving record as a crash** (owner ruling,
       2026-09-24). 49 CFR 390.15's accident register lists every accident,
       and 390.5 counts a vehicle towed away; `DrivingRecord::crashes` and
