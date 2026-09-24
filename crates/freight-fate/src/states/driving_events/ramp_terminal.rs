@@ -15,6 +15,7 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
 use crate::states::driving_stops::{bar_solid_zone_mi, bar_tick_range_mi};
+use crate::states::driving_updates::live;
 
 /// What a terminal violation met: a vehicle in the conflict window, one
 /// arriving within a horn's length, or an empty crossroad.
@@ -158,6 +159,7 @@ impl DrivingState {
         self.ramp_terminal_done = self.ramp_control == "none";
         self.ramp_waiting_at_light = false;
         self.ramp_creep_prompt_said = false;
+        self.ramp_creep_prompt_gap_mi = 0.0;
         self.ramp_gap_milestones_said.clear();
         self.ramp_bar_tick_timer = 0.0;
         self.ramp_assist_said = false;
@@ -542,20 +544,24 @@ impl DrivingState {
         let Some(ramp_mi) = self.ramp_mi else {
             return;
         };
-        if ramp_mi <= RAMP_ACCESS_MI {
+        if ramp_mi <= RAMP_ACCESS_MI || self.stopped_at_the_bar() {
+            // At the bar, or stopped where the held tone said to be stopped:
+            // the terminal's own "Stopped at the sign" owns that stop.
             return;
         }
         if self.trip.truck.speed_mph() > RED_STOP_MPH {
-            self.ramp_creep_prompt_said = false;
             return;
         }
-        if self.ramp_creep_prompt_said {
-            return;
-        }
-        // Name the gap: "creep" for a real 600-foot gap takes minutes and
-        // reads as a light stuck in a loop. Far back is a drive, and the red
-        // phase is exactly the time to make it.
         let gap_mi = ramp_mi - RAMP_ACCESS_MI;
+        // Once per stop. A truck braking to a crawl bobs across the stopped
+        // line more than once, and each crossing re-armed this: "Stopped
+        // short of the stop sign." twice for one stop (agent drive B,
+        // 2026-09-24). A new stop has to be somewhere new.
+        if self.ramp_creep_prompt_said
+            && self.ramp_creep_prompt_gap_mi - gap_mi < RAMP_CREEP_REARM_MI
+        {
+            return;
+        }
         if ctx.settings.route_transition_assist && gap_mi <= RAMP_ASSIST_HOLD_MI {
             // Inside the hold window the assist owns the stop and says so
             // itself. This runs first in the frame, so it used to say
@@ -564,18 +570,18 @@ impl DrivingState {
             return;
         }
         self.ramp_creep_prompt_said = true;
+        self.ramp_creep_prompt_gap_mi = gap_mi;
+        // Always with the distance. Under two hundred feet it used to go
+        // unsaid, and the driver had to press S to learn "about 50 feet"
+        // (agent drive B, 2026-09-24).
+        let gap = self.short_distance_text(ctx, gap_mi);
         if matches!(self.ramp_control.as_str(), "stop" | "yield" | "roundabout") {
             let noun = match self.ramp_control.as_str() {
                 "stop" => "the stop sign",
                 "yield" => "the yield line",
                 _ => "the roundabout entry",
             };
-            let message = if gap_mi > RAMP_CREEP_MI {
-                let gap = self.short_distance_text(ctx, gap_mi);
-                format!("Stopped {gap} short of {noun}.")
-            } else {
-                format!("Stopped short of {noun}.")
-            };
+            let message = format!("Stopped {gap} short of {noun}.");
             // ROUTE, not the ambient default. This is an instruction about a
             // STANDING condition -- the truck is stopped short of the bar and
             // stays stopped until the driver acts -- so the staleness rule that
@@ -588,18 +594,10 @@ impl DrivingState {
             self.say_route_navigation(ctx, &message);
             return;
         }
-        let on_green = self.ramp_light_phase() == "green";
-        let message = if gap_mi > RAMP_CREEP_MI {
-            let gap = self.short_distance_text(ctx, gap_mi);
-            if on_green {
-                format!("Stopped {gap} short of the light. It is green.")
-            } else {
-                format!("Stopped {gap} short of the light.")
-            }
-        } else if on_green {
-            "Stopped short of the light. It is green.".to_string()
+        let message = if self.ramp_light_phase() == "green" {
+            format!("Stopped {gap} short of the light. It is green.")
         } else {
-            "Stopped short of the light.".to_string()
+            format!("Stopped {gap} short of the light.")
         };
         // ROUTE, not the ambient default. This is an instruction about a
         // STANDING condition -- the truck is stopped short of the bar and
@@ -611,6 +609,32 @@ impl DrivingState {
         // failure the comment below already records from 2026-07-19. ROUTE
         // waits its turn behind anything urgent, and is never dropped.
         self.say_route_navigation(ctx, &message);
+    }
+
+    /// Stopped where the bar's held tone told the driver to be stopped, at a
+    /// control that asks for a stop: that is a stop at the bar.
+    ///
+    /// The tone starts at the solid zone (about sixty feet out, the owner's
+    /// spec), and the terminal only counted a stop at zero feet. So a driver
+    /// who did exactly what the tone asked was told "Stopped short of the
+    /// stop sign." with the sign fifty feet away (agent drive B, 2026-09-24).
+    /// Route-transition assistance already holds anywhere inside sixty feet
+    /// (`RAMP_ASSIST_HOLD_MI`); this gives the driver's own stop the same
+    /// line.
+    pub(crate) fn stopped_at_the_bar(&self) -> bool {
+        let Some(ramp_mi) = self.ramp_mi else {
+            return false;
+        };
+        let must_stop = match self.ramp_control.as_str() {
+            "stop" | "yield" | "roundabout" => true,
+            "signal" => self.ramp_light_is_red(),
+            _ => false,
+        };
+        must_stop
+            && self.ramp_light_announced
+            && !self.ramp_terminal_done
+            && self.trip.truck.speed_mph() <= RED_STOP_MPH
+            && ramp_mi - RAMP_ACCESS_MI <= bar_solid_zone_mi(&self.trip.truck)
     }
 
     /// Count the stop bar down while the truck is rolling toward it.
@@ -698,6 +722,15 @@ impl DrivingState {
             return;
         }
         if self.trip.truck.speed_mph() <= RED_STOP_MPH {
+            self.set_bar_solid(ctx, false);
+            return;
+        }
+        if self.ramp_control == "signal" && self.ramp_light_phase() == "green" {
+            // A green is not a stop. The ticks and the held "you must be
+            // stopping" tone played all the way to the bar after "Light
+            // green.", so a driver without the assist was told by sound to
+            // stop on a green (agent drives A, D and E, 2026-09-24). They come
+            // back if the light turns while the truck is still short of it.
             self.set_bar_solid(ctx, false);
             return;
         }
@@ -894,7 +927,12 @@ impl DrivingState {
     }
 
     /// One ROUTE-priority navigation line, the shape this whole section uses.
+    ///
+    /// The live facts are stamped first: a release ("Gap in traffic",
+    /// "Light green") lands in the same frame the hold ends, and the pacer
+    /// asks the hold line whether it is still true while delivering it.
     pub(crate) fn say_route_navigation(&self, ctx: &mut GameContext, message: &str) {
+        self.refresh_live_facts();
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(message.to_string(), opts);
@@ -902,8 +940,28 @@ impl DrivingState {
 
     /// One ROUTE-priority confirmation line.
     pub(crate) fn say_route_confirmation(&self, ctx: &mut GameContext, message: &str) {
+        self.refresh_live_facts();
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Some(SpeechCategory::Confirmation);
+        ctx.say_event_with(message.to_string(), opts);
+    }
+
+    /// A line about the truck held at the bar ("holding for your gap",
+    /// "holding the brakes for green"). True only while the hold lasts: the
+    /// gap arriving a moment later used to replay it right before "Gap in
+    /// traffic. Clear; pull ahead" (agent drive, yield at exit 255,
+    /// 2026-09-24).
+    pub(crate) fn say_terminal_hold(
+        &self,
+        ctx: &mut GameContext,
+        message: &str,
+        category: SpeechCategory,
+    ) {
+        self.refresh_live_facts();
+        let opts = SayEvent::queued()
+            .priority(EventPriority::Route)
+            .category(category)
+            .valid(live::ramp_holding);
         ctx.say_event_with(message.to_string(), opts);
     }
 }

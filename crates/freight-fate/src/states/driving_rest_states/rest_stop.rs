@@ -31,6 +31,8 @@ use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 use crate::states::driving_rest_states::rest_preview::{sleep_preview, SleepChoice};
 
+mod cat_scale;
+
 const REST_STOP_INTRO_HELP: &str =
     "Select opens a choice; Back returns to the road. Sleep choices first read a preview; select the same choice again to sleep. Breaks and sleep advance the clock and the deadline.";
 
@@ -57,6 +59,8 @@ pub struct RestStopState {
     fueled_here: bool,
     inspection_complete: bool,
     pending_sleep: Option<SleepChoice>,
+    /// Game hour of this visit's full-price CAT Scale ticket (reweigh price).
+    full_weigh_h: Option<f64>,
 }
 
 impl RestStopState {
@@ -69,6 +73,7 @@ impl RestStopState {
             fueled_here: false,
             inspection_complete: false,
             pending_sleep: None,
+            full_weigh_h: None,
         }
     }
 
@@ -86,6 +91,7 @@ impl RestStopState {
             fueled_here: false,
             inspection_complete: false,
             pending_sleep: None,
+            full_weigh_h: None,
         }
     }
 
@@ -219,6 +225,9 @@ impl RestStopState {
                      Short on cash, it buys what you can afford. The engine must be off.",
                 ),
             );
+        }
+        if self.has_cat_scale() {
+            items.push(self.cat_scale_item(ctx, d));
         }
         if has("food") {
             items.push(

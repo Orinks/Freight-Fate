@@ -113,6 +113,11 @@ pub const DESTINATION_EXIT_RESPONSE_GRACE_S: f64 = EXIT_WARNING_REAL_S;
 // Spoken distance anchors for an armed exit; a signal-on announcement miles
 // out gets buried under canyon pacenotes without them.
 pub const EXIT_COUNTDOWN_MILESTONES_MI: [f64; 3] = [2.0, 1.0, 0.5];
+// Roadside chatter (billboards, landmarks) stays quiet inside this distance of
+// an exit being taken: the countdown's last two calls and the gore's take line
+// are the only things the driver needs to hear there. The countdown's own
+// one-mile mark, so it is not a new number.
+pub const EXIT_APPROACH_QUIET_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[1];
 // The pacenote cue tone leans hard toward the curve's side of the field.
 pub const PACENOTE_CUE_PAN: f64 = 0.85;
 pub const EXIT_COMMIT_WINDOW_MI: f64 = 0.4; // generous gore-window grace after the marker
@@ -137,10 +142,14 @@ pub const AEB_ESCALATE_CONFIRM_S: f64 = 0.5;
 // window at all. A dodgeable hazard adds LANE_TAP_CHANGE_S on top, because
 // "or change lanes" names a maneuver that takes that long to finish.
 pub const HAZARD_MIN_REACTION_S: f64 = 3.0;
-pub const RAMP_CREEP_MI: f64 = 0.04; // within ~200 ft of the bar, "creep"; farther is a drive
-                                     // Any faster and you blow past the exit. Defined in the portable layer,
-                                     // because the arrival speed zones are built from the same number: the
-                                     // destination approach must never cap below the speed the ramp needs.
+// How far a truck stopped short of the bar has to close before stopping again
+// earns another "Stopped N feet short" line. Assumed, not measured: about a
+// car length, so a crawl bobbing across the stopped line is one stop, and a
+// real hop toward the bar is a new one.
+pub const RAMP_CREEP_REARM_MI: f64 = 25.0 / 5280.0;
+// Any faster and you blow past the exit. Defined in the portable layer,
+// because the arrival speed zones are built from the same number: the
+// destination approach must never cap below the speed the ramp needs.
 pub const RAMP_MAX_MPH: f64 = TRIP_RAMP_MAX_MPH;
 // How far under a ramp's own design speed automatic control aims. Was the
 // gap between a flat 40 and a flat 45; now it is the gap itself, applied to
@@ -786,7 +795,9 @@ pub const POI_SERVICE_LABELS: [(&str, &str); 9] = [
     ("parking", "truck parking"),
     ("truck_parking", "truck parking"),
     ("restrooms", "restrooms"),
-    ("scale", "scale"),
+    // Only truck stops list it: the certified scale a driver pays to use,
+    // never the weigh station ("the scale" in short cues).
+    ("scale", "CAT Scale"),
     ("repair", "repair"),
     ("roadside_assistance", "roadside assistance"),
     ("towing", "towing"),

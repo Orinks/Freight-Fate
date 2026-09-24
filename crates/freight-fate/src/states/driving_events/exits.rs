@@ -2,7 +2,7 @@
 //! speed assist, and the destination exit's own scan and announcement.
 
 use ff_core::sim::trip_models::{
-    RoadStop, TrafficPressure, APPROACH_DECEL_MPS2, APPROACH_REACTION_S,
+    RoadStop, TrafficPressure, TripEvent, TripEventKind, APPROACH_DECEL_MPS2, APPROACH_REACTION_S,
 };
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
@@ -13,6 +13,46 @@ use crate::states::driving_core::*;
 use crate::states::driving_updates::live;
 
 impl DrivingState {
+    /// A posted-limit change on the mainline the truck is leaving: on the
+    /// ramp, or at the gore of an exit it is taking this frame.
+    ///
+    /// The limit line fires as the odometer crosses the change, which at an
+    /// exit can be the gore itself -- "Speed limit raised to 75." was spoken
+    /// on top of "Exit speed 52. You take exit 167" (agent drive, Edwards,
+    /// 2026-09-24). The ramp's own speed is the number that matters there.
+    pub(crate) fn limit_change_of_road_left(
+        &mut self,
+        ctx: &mut GameContext,
+        event: &TripEvent,
+    ) -> bool {
+        if event.kind != TripEventKind::GpsCue || !event.data.limit_change.unwrap_or(false) {
+            return false;
+        }
+        if self.ramp_mi.is_some() {
+            return true;
+        }
+        let Some(stop) = self.exit_stop.clone() else {
+            return false;
+        };
+        !self.exit_signal_canceled
+            && self.trip.position_mi >= stop.at_mi
+            && self.trip.position_mi <= stop.at_mi + EXIT_COMMIT_WINDOW_MI
+            && self.exit_intent_ready(ctx, &stop)
+            && self.exit_lane_ready()
+            && self.trip.truck.speed_mph() <= self.gore_acceptance_mph(Some(&stop))
+    }
+
+    /// The last mile to an exit the truck is set to take, or its ramp.
+    pub(crate) fn in_exit_approach(&self) -> bool {
+        if self.ramp_mi.is_some() {
+            return true;
+        }
+        self.exit_stop.as_ref().is_some_and(|stop| {
+            !self.exit_signal_canceled
+                && stop.at_mi - self.trip.position_mi <= EXIT_APPROACH_QUIET_MI
+        })
+    }
+
     /// `_take_exit()`: the take-exit control.
     pub fn take_exit(&mut self, ctx: &mut GameContext) {
         self.toggle_exit_signal(ctx);

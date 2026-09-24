@@ -464,6 +464,8 @@ pub struct DrivingState {
     // built per ramp by _begin_ramp_terminal, None between ramps.
     pub cross_bubble: Option<CrossTraffic>,
     pub ramp_creep_prompt_said: bool,
+    // The gap to the bar the last "Stopped N short" line named.
+    pub ramp_creep_prompt_gap_mi: f64,
     pub ramp_gap_milestones_said: HashSet<i64>,
     pub ramp_bar_tick_timer: f64,
     pub bar_solid_on: bool, // the bar's continuous final-zone tone
@@ -851,6 +853,7 @@ pub struct DrivingState {
     pub reverse_cue_active: bool,
     pub air_cue_active: bool, // compressor fill loop below governor release
     pub jake_cue_key: Option<String>, // jake growl loop currently playing
+    pub jake_cue_idle_s: f64, // seconds that loop has been held silent
     pub curve_assist_jake: bool, // jake engaged BY the assist (not the player)
     pub auto_jake: bool,      // automatic-box retarder management (J on an AMT)
     pub auto_jake_enabled: bool, // Alt+J: whether J arms auto mode on an AMT

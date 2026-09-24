@@ -748,6 +748,31 @@ impl EventSpeechPacer {
         Some((text, priority))
     }
 
+    /// Whether the only thing ahead of `text` in the voice is the protected
+    /// ROUTE or CRITICAL line, saying its words right now and still true (its
+    /// `valid`, when it has one), with nothing queued behind it.
+    ///
+    /// "Saying its words" is past the pre-utterance pause: a line cut inside
+    /// that pause has not been heard at all, so the flush below restarting it
+    /// ahead of the new line costs the player nothing -- that is the burst of
+    /// route lines landing in one frame, and its hand-back stays. A line past
+    /// it has been heard in part, and cutting it either replays it from the
+    /// top or drops its tail.
+    ///
+    /// A line superseded by what happened since -- "assistance is holding for
+    /// your gap" once the gap has come -- is not live, so the flush takes it
+    /// and it is never handed back.
+    fn only_a_live_line_ahead(&self, now: f64, text: &str) -> bool {
+        self.protected.as_ref().is_some_and(|held| {
+            let started_at = held.done_at - Self::duration_s(&held.text);
+            now - started_at >= Self::BASE_UTTERANCE_S
+                && now < held.done_at
+                && self.clear_at <= held.done_at
+                && held.text != text
+                && held.valid.as_ref().is_none_or(|valid| valid())
+        })
+    }
+
     /// An interrupting line purges the channel: the projection restarts.
     ///
     /// Returns the ROUTE or CRITICAL line the purge plausibly cut off
@@ -907,6 +932,18 @@ impl EventSpeechPacer {
         }
         let start = now.max(self.clear_at);
         let budget = Self::wait_budget_s(priority);
+        if start - now > budget && self.only_a_live_line_ahead(now, text) {
+            // Nothing stale is waiting: the wait is the rest of one ROUTE or
+            // CRITICAL line the player is hearing, still true. A flush here
+            // purged nothing but that line, and then either handed it back to
+            // be said again from the top ahead of this one ("Exit speed 49.
+            // You take exit 113" heard twice, agent drives 2026-09-24) or
+            // dropped its tail ("Light red." cutting the take line). Waiting
+            // it out is shorter than the replay, and it is heard once.
+            self.clear_at = start + Self::duration_s(text);
+            self.track(text, priority, None, valid);
+            return false;
+        }
         if start - now > budget {
             // A stale flush takes the backlog -- everything in it described
             // miles already driven -- but NOT a protected line that is still

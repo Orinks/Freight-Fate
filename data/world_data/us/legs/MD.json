@@ -1317,7 +1317,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -1330,7 +1330,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,
@@ -5932,7 +5933,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5945,7 +5946,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,
@@ -6012,7 +6014,7 @@
           "name": "Pilot Travel Center",
           "type": "travel_center",
           "at_mi": 76.2,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -6025,7 +6027,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.62906,
           "lon": -77.78268,
@@ -9732,7 +9735,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9745,7 +9748,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,
@@ -9755,7 +9759,7 @@
           "name": "TA Travel Center Baltimore South",
           "type": "travel_center",
           "at_mi": 13.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0151 at Baltimore South; town read from the mapped site's branch name; matched by coordinate, 0.07 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0151 at Baltimore South; town read from the mapped site's branch name; matched by coordinate, 0.07 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -9768,7 +9772,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.1646796,
           "lon": -76.7821706,
@@ -11302,7 +11307,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11315,7 +11320,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,
@@ -12785,7 +12791,7 @@
           "name": "Love's Travel Stop Pleasant Grove",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Love's store 537 at Pleasant Grove; town DERIVED, not read: the nearest mapped place, 1.8 mi away; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Love's store 537 at Pleasant Grove; town DERIVED, not read: the nearest mapped place, 1.8 mi away; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12798,7 +12804,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.6719,
           "lon": -78.71638,
@@ -12831,7 +12838,7 @@
           "name": "Pilot Travel Center Hagerstown",
           "type": "travel_center",
           "at_mi": 67.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -12844,7 +12851,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.62906,
           "lon": -77.78268,
@@ -14232,7 +14240,7 @@
           "name": "Love's Travel Stop Pleasant Grove",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Love's store 537 at Pleasant Grove; town DERIVED, not read: the nearest mapped place, 1.8 mi away; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the cumberland_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Love's store 537 at Pleasant Grove; town DERIVED, not read: the nearest mapped place, 1.8 mi away; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14245,7 +14253,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.6719,
           "lon": -78.71638,
@@ -16082,7 +16091,7 @@
           "name": "Pilot Travel Center Hagerstown",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16095,7 +16104,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.62906,
           "lon": -77.78268,
@@ -16146,7 +16156,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 74.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -16159,7 +16169,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,
@@ -17846,7 +17857,7 @@
           "name": "Pilot Travel Center Hagerstown",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): Pilot store at Hagerstown; town read from the mapped site's branch name; matched by coordinate, 0.05 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -17859,7 +17870,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.62906,
           "lon": -77.78268,
@@ -19684,7 +19696,7 @@
           "name": "TA Travel Center Baltimore",
           "type": "travel_center",
           "at_mi": 109.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the baltimore_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Maryland extract dated 2026-06-22, read 2026-09-17): TA store 0216 at Baltimore; town read from the mapped site's branch name; matched by coordinate, 0.00 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -19697,7 +19709,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 39.27868,
           "lon": -76.54885,

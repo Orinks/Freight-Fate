@@ -57,8 +57,10 @@ fn test_convenience_stations_typed_as_travel_centers_hide_behind_a_trailer() {
     }
     // The survey that motivated the screen (2026-09-12): a good hundred
     // convenience stations typed as travel centers or service plazas, none
-    // of them a truck-stop chain.
-    assert!(screened >= 100, "{screened} screened");
+    // of them a truck-stop chain. 90 on 2026-09-24: twenty records turned out
+    // to have a CAT Scale on their own lot (within 0.07 mi, OpenStreetMap),
+    // which is a truck stop's evidence, not a convenience store's.
+    assert!(screened >= 85, "{screened} screened");
     assert!(
         screened <= 400,
         "{screened} screened, more than the survey found"
