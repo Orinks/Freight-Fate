@@ -1318,6 +1318,18 @@ gate, turned up these on dev's own code.
       when the next turn is inside the keeper's own build-and-shed
       distance.
 
+### September 24 ramp length from the map
+
+- [x] Each exit carries its ramp length per direction, derived from
+      OpenStreetMap: measured along the ramp from the gore to where it meets
+      the surface road, or to the merge on a freeway-to-freeway ramp. The
+      deceleration lane before the gore is not included. It covers 16,882 of
+      18,165 exits (92.9%), with a median of 1,474 ft (5th percentile 735,
+      95th 3,456). 172 values under 300 ft and 47 over 1.5 miles were
+      dropped. `Trip::ramp_length_mi_at` reads it.
+- [ ] Use the length in the driving exit instead of the flat half-mile
+      ramp.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
