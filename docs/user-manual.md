@@ -651,6 +651,8 @@ wherever the pad has one.
 | Down arrow, tap then press and hold | Latch the brake so it stays applied hands-free. A click and a spoken confirmation mark the catch after about half a second of holding. Press Down arrow once to take it back; the accelerator releases it instantly. The throttle key never latches. Turn the gesture off under Settings, Driving assistance, Latching brake. |
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
+| Alt+R | Turn the trailer reefer unit on or off. Only cold freight uses it. |
+| Alt+U | Turn the APU on or off for low hotel power while parked. |
 | P | Release or set the parking brake. Set it above a crawl and the spring brakes slam on: a screech, a hard stop, and permanent flat spots ground into the tires, worse the faster you were going. It is not a brake pedal. |
 | K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. It pauses through the planned pickup and resumes once the loaded truck is rolling. Braking elsewhere also cancels it. Parked with the parking brake set, K latches a high idle instead. |
 | Shift+K | Resume automatic speed control at the last speed you had set, after braking cancelled it. |

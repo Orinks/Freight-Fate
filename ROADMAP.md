@@ -1242,13 +1242,22 @@ instead of a spawn point.
 Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
 and unnamed as blockers for the ALCAN corridor.
 
-- [ ] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
-      spoil model (not multi-temp zones).
-- [ ] **APU on/off** as low hotel burn versus idling the tractor.
-- [ ] **Fuel island: tractor-off required** while reefer TRU / APU may stay on.
+- [x] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
+      spoil model (not multi-temp zones). Alt+R. Burns from the tractor tank.
+- [x] **APU on/off** as low hotel burn versus idling the tractor. Alt+U.
+- [x] **Fuel island: tractor-off required** while reefer TRU / APU may stay on
+      ("Shut the engine off before you fuel.").
 - [ ] *(defer)* Multi-temp compartments, shore power, deep TRU fault trees,
       battery APU, scored idle noise, and HOS accounting driven from reefer
       duty — park until the coarse slice earns its keep.
+
+Honesty debts for this v1 slice (do not paper over):
+1. Cargo temperature is coarse (setpoint band + drift), not a thermal model.
+2. The TRU draws diesel from the tractor tank — a v1 simplification; many
+   real TRUs have their own tank.
+3. APU-at-pump is soft: reefer and APU are allowed while fueling, and no
+   separate rule model enforces or scores that choice beyond the tractor-off
+   fuel gate.
 
 ### Personal conveyance and duty-purpose correction
 
