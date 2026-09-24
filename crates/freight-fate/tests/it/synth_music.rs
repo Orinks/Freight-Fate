@@ -46,12 +46,79 @@ fn music_seed_row_rolls_a_new_seed_in_range() {
     move_to::<Cat>(&mut app, "Music seed");
     assert_eq!(current_label::<Cat>(&app), "Music seed: 48213");
     app.clear_speech();
-    key(&mut app, Key::Return);
+    key(&mut app, Key::Right);
     let transcript = app.speech().transcript();
     assert!(transcript.contains("New music seed, "), "{transcript}");
     let seed = app.ctx.settings.music_seed;
     assert!((10_000..=99_999).contains(&seed), "{seed}");
     assert_ne!(seed, 48213);
+}
+
+fn type_text(app: &mut TestApp, text: &str) {
+    for ch in text.chars() {
+        app.dispatch_to_state(&InputEvent::typed(ch));
+    }
+}
+
+#[test]
+fn a_typed_music_seed_saves_and_changes_the_menu_music() {
+    use freight_fate::states::text_entry::TextEntryState;
+    let mut app = TestApp::new();
+    app.ctx.settings.synth_music = true;
+    open_audio(&mut app);
+    move_to::<Cat>(&mut app, "Music seed");
+    app.clear_speech();
+    key(&mut app, Key::Return);
+    assert!(is::<TextEntryState>(&app));
+    let prompt = app.speech().transcript();
+    assert!(
+        prompt.contains("Music seed. Type, then press Enter."),
+        "{prompt}"
+    );
+
+    // Anything but a whole number is refused and the field stays open.
+    type_text(&mut app, "12a");
+    app.clear_speech();
+    key(&mut app, Key::Return);
+    assert!(is::<TextEntryState>(&app));
+    assert!(app.speech().transcript().contains("Type a whole number."));
+    assert_eq!(app.ctx.settings.music_seed, 48213);
+
+    key(&mut app, Key::Backspace);
+    type_text(&mut app, "34");
+    assert_eq!(
+        app.state()
+            .unwrap()
+            .borrow()
+            .as_any()
+            .downcast_ref::<TextEntryState>()
+            .unwrap()
+            .name(),
+        "1234"
+    );
+    app.clear_speech();
+    key(&mut app, Key::Return);
+    assert!(is::<Cat>(&app));
+    let back = app.speech().transcript();
+    assert!(back.contains("Music seed: 1234"), "{back}");
+    assert_eq!(app.ctx.settings.music_seed, 1234);
+    assert_eq!(ff_core::settings::Settings::load().music_seed, 1234);
+    let before = ff_core::music_synth::select_synth_menu_sequence(None, 48213);
+    let after = ff_core::music_synth::select_synth_menu_sequence(None, 1234);
+    assert!(after[1..].iter().all(|k| k.contains("_1234_")), "{after:?}");
+    assert!(after[1..].iter().all(|k| !before.contains(k)));
+}
+
+#[test]
+fn escape_leaves_the_music_seed_alone() {
+    let mut app = TestApp::new();
+    open_audio(&mut app);
+    move_to::<Cat>(&mut app, "Music seed");
+    key(&mut app, Key::Return);
+    type_text(&mut app, "777");
+    key(&mut app, Key::Escape);
+    assert!(is::<Cat>(&app));
+    assert_eq!(app.ctx.settings.music_seed, 48213);
 }
 
 #[test]

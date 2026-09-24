@@ -77,8 +77,12 @@ bookmarks usable.
       (a module that jumps back to its start ends after one pass, so the
       playlist moves on). The Tab radio screen says Freight Fate's own
       stations are off the dial in Synthesized mode.
-      - [ ] Typed-in music seeds.
-      - [ ] More synth voices per style.
+      - [x] Typed-in music seeds: Enter on Music seed opens the text field
+            and takes a whole number; Left and Right still roll one.
+      - [ ] More synth voices per style: built, awaiting the owner's
+            listening pass. A strummed guitar, drawbar organ, bell and reed,
+            two or three per style (the higher rungs get three); the reed
+            takes the B sections' tune. Tick once Josh has heard them.
 
 - [x] Career balance integrity: a `MoneyGuard` shadow (balance bits XORed
       with a per-instance key) resyncs on every legitimate earn, spend, or
@@ -481,14 +485,14 @@ its status or release decision.
       `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
       declared in the `tooling` group and locked, so a fresh checkout runs
       them with `uv run --group tooling ...`.
-- [x] `sound-test/` is ruff-clean (lint and format) and the pre-commit ruff
-      hooks no longer exclude it. CI's lint step still covers only `tests`
-      and `tools`.
-- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
-      test that failed on the word outside a CB clause in any player-facing
-      string; the Rust
-      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
-      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
+- [x] `sound-test/` is ruff-clean (lint and format); the pre-commit ruff
+      hooks no longer exclude it and CI's lint step covers it too.
+- [x] The "bear is CB voice only" source sweep is ported (2026-09-24).
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` reads every
+      string literal in both crates, multi-line and raw strings included, and
+      fails on "bear" or "bears" in any case outside a line that names the
+      CB; the song title "Black Bear Road" is the one exception. It lands
+      green: today's hits are all CB chatter.
 
 ### September 11 trucking corrections
 
@@ -537,6 +541,11 @@ its status or release decision.
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still
       dropped at the door.
+- [x] `weather_collector`'s copy names all nine skies the award needs
+      (2026-09-24). It listed eight and left out ice, which it now calls
+      freezing rain, the word the weather readout speaks. The award is
+      unchanged; the catalog digest and the invariants export moved with the
+      copy, and orinks.net carries the new export.
 - [x] Achievement triggers audited (2026-09-20). 181 badges: 177 wired, 3
       deliberately retired into "first_day" and tested as such, and 2 --
       `thrifty_run` and `coffee_regular` -- that had never been awardable in
@@ -554,10 +563,15 @@ its status or release decision.
       A test now asserts every catalog badge is either awarded in shipping
       code or named as retired, and that a retired one is never awarded
       again. It reads source, so it proves REACHABILITY, not correctness.
-- [ ] 130 of the 177 wired badges have no test naming them individually, so
-      nothing proves they fire at the right MOMENT rather than merely being
-      reachable. The trigger sites are concentrated (one arrival pass, one
-      rest-stop pass), so this is a readable job, not an endless one.
+- [x] Every wired badge has a moment test (2026-09-24). The 131 no test
+      named, plus 24 only named in a catalog check or as a truck key, each
+      take their real trigger step (a settled delivery, a trip event, a menu
+      row) and are checked absent on the step before or the near miss
+      (`crates/freight-fate/tests/it/badge_moments_*.rs`). Two fired at the
+      wrong moment and are fixed: "hooked_a_bad_one" was awarded at the hook,
+      announcing the defect before the walk-around its copy names, and
+      "dropped_the_bad_one" read the origin yard's trailer, so a driver who
+      refused it at pickup still earned it at the receiver.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.

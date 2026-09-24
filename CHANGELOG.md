@@ -23,6 +23,10 @@
 
 - **A music seed changes every synthesized piece.** Settings, Audio, Music seed rolls a new one and says it, so you can share one you like.
 
+- **You can type in a music seed.** Enter on Music seed opens a field for a seed someone shared; Left or Right rolls a new one.
+
+- **Synthesized music plays more instruments.** Each style adds some of a strummed guitar, an organ, a bell and a harmonica-like reed.
+
 - **The original 1.5 soundtrack is back in Synthesized mode.** Headlights West, Open Road and Night Haul return.
 
 - **Synthesized mode takes Freight Fate's own stations off the radio.** The dial keeps the synthesized Roadhouse, local and web stations, and your playlists.
@@ -131,6 +135,14 @@
 - **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.
 
 - **The engine lean leads you through an exit ramp's curve with lane-departure warning off.**
+
+- **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
+
+- **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.
+
+- **The You Get What You Get achievement waits for your walk-around to find the problem.** Hooking the trailer no longer gives the defect away.
+
+- **Refusing a bad trailer at pickup no longer earns Somebody Else's Turn at delivery.** You hauled the sound replacement, not the bad trailer.
 
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 

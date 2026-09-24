@@ -558,11 +558,11 @@ the CB, spoken by a driver on the radio. It is trade slang, and it is flavour.
 In a warning, a menu item, a status readout, or anything the game says in its
 own voice, the word is "trooper".
 
-The Python game enforced this with a sweep of every player-facing string
-that failed if the word appeared outside a CB clause. The Rust port has no
-equivalent yet (`test_bear_is_cb_voice_only_in_every_player_facing_string`
-in `crates/ff-core/tests/it/sim_enforcement_presence.rs` is an ignored
-placeholder), so for now it is a review rule. The check exists because slang leaks: the word is
+A sweep of every string literal in both crates' sources fails if the word
+appears outside a CB clause
+(`test_bear_is_cb_voice_only_in_every_player_facing_string` in
+`crates/ff-core/tests/it/sim_enforcement_vocabulary.rs`); the song title
+"Black Bear Road" is its one exception. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 

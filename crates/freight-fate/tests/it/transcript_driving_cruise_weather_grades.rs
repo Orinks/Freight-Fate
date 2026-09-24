@@ -320,6 +320,56 @@ fn test_predictive_cruise_cue_names_the_grade_it_is_building_for() {
     );
 }
 
+/// Whether the harness career holds the predictive-cruise badge.
+fn holds_predictive_crest(harness: &PlaytestHarness) -> bool {
+    harness
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .achievements
+        .iter()
+        .any(|id| id == "predictive_crest")
+}
+
+/// One frame of the preview naming its phase, then the badge tracker, in
+/// the order the drive frame runs them.
+fn preview_then_badges(harness: &mut PlaytestHarness) {
+    harness.with_drive(|d, ctx| {
+        let bias = d.predictive_cruise_bias(ctx, 62.0);
+        d.say_predictive_cruise(ctx, 0.0, bias);
+        d.track_driving_badges(ctx, 1.0 / 60.0);
+    });
+}
+
+#[test]
+fn test_the_predictive_crest_badge_lands_when_cruise_builds_for_a_real_climb() {
+    // A two percent pull is cued, but it would not have taken the speed off
+    // the truck, so building for it earns nothing.
+    let mut harness = cruising("Crest Shallow", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    hill_road(&mut harness, 0.5, 0.02, 1.0);
+    harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
+    harness.app.ctx.settings.predictive_cruise = true;
+    preview_then_badges(&mut harness);
+    assert_eq!(harness.read_drive(|d| d.pcc_phase.clone()), "building");
+    assert!(!holds_predictive_crest(&harness));
+    drop(harness);
+
+    // A five percent one does, on the frame the preview starts building.
+    let mut harness = cruising("Crest Steep", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    hill_road(&mut harness, 0.5, 0.05, 1.0);
+    harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
+    harness.with_drive(|d, ctx| d.track_driving_badges(ctx, 1.0 / 60.0));
+    assert!(
+        !holds_predictive_crest(&harness),
+        "before the preview built"
+    );
+    harness.app.ctx.settings.predictive_cruise = true;
+    preview_then_badges(&mut harness);
+    assert!(holds_predictive_crest(&harness));
+}
+
 #[test]
 fn test_predictive_cruise_finds_a_short_hill() {
     // A half-mile hill must not average away inside the preview.
