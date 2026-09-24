@@ -181,13 +181,37 @@ impl TruckState {
         if !self.cargo_needs_reefer {
             return String::new();
         }
-        if imperial {
-            let f = self.cargo_temp_c * 9.0 / 5.0 + 32.0;
-            format!("Cargo temperature {:.0} degrees Fahrenheit", f)
-        } else {
-            format!("Cargo temperature {:.0} degrees Celsius", self.cargo_temp_c)
-        }
+        format!(
+            "Cargo temperature {}",
+            spoken_cargo_temp_degrees(self.cargo_temp_c, imperial)
+        )
     }
+
+    /// Cold-pickup / departure line while the TRU is already running.
+    pub fn reefer_running_announcement(&self, imperial: bool) -> String {
+        reefer_running_announcement(self.cargo_temp_c, imperial)
+    }
+}
+
+/// Spoken magnitude for a cargo temperature in the player's units.
+///
+/// Imperial: `"36 degrees"` (Fahrenheit, no unit word — same shape as weather).
+/// Metric: `"2 degrees Celsius"`.
+pub fn spoken_cargo_temp_degrees(temp_c: f64, imperial: bool) -> String {
+    if imperial {
+        let f = (temp_c * 9.0 / 5.0 + 32.0).round();
+        format!("{f:.0} degrees")
+    } else {
+        format!("{:.0} degrees Celsius", temp_c.round())
+    }
+}
+
+/// `"Reefer running at 36 degrees."` / `"Reefer running at 2 degrees Celsius."`
+pub fn reefer_running_announcement(temp_c: f64, imperial: bool) -> String {
+    format!(
+        "Reefer running at {}.",
+        spoken_cargo_temp_degrees(temp_c, imperial)
+    )
 }
 
 /// Whether a cargo class needs the reefer TRU.
@@ -387,5 +411,59 @@ mod tests {
             t.cargo_temp_c
         );
         assert!(t.reefer_on, "TRU should auto-start on cold pickup");
+    }
+
+    #[test]
+    fn empty_tank_does_not_auto_start_reefer_on_fresh_load() {
+        let mut t = TruckState::new(TruckSpecs::default());
+        t.fuel_gal = 0.0;
+        t.ambient_temp_c = 30.0;
+        t.cargo_temp_c = 30.0;
+        t.cargo_kg = 10_000.0;
+        t.trailer_attached = true;
+        t.set_cargo_needs_reefer(true);
+        assert!(
+            (t.cargo_temp_c - REEFER_SETPOINT_C).abs() < 1e-9,
+            "temp still snaps to setpoint"
+        );
+        assert!(
+            !t.reefer_on,
+            "empty tank must not leave the TRU running after auto-start"
+        );
+    }
+
+    #[test]
+    fn reefer_running_announcement_respects_units() {
+        assert_eq!(
+            reefer_running_announcement(REEFER_SETPOINT_C, true),
+            "Reefer running at 36 degrees."
+        );
+        assert_eq!(
+            reefer_running_announcement(REEFER_SETPOINT_C, false),
+            "Reefer running at 2 degrees Celsius."
+        );
+        // Live cargo temp (slightly warm of setpoint) rounds in each unit.
+        assert_eq!(
+            reefer_running_announcement(3.0, true),
+            "Reefer running at 37 degrees."
+        );
+        assert_eq!(
+            reefer_running_announcement(3.0, false),
+            "Reefer running at 3 degrees Celsius."
+        );
+    }
+
+    #[test]
+    fn reefer_temp_status_text_respects_units() {
+        let mut t = truck();
+        t.cargo_temp_c = REEFER_SETPOINT_C;
+        assert_eq!(
+            t.reefer_temp_status_text(true),
+            "Cargo temperature 36 degrees"
+        );
+        assert_eq!(
+            t.reefer_temp_status_text(false),
+            "Cargo temperature 2 degrees Celsius"
+        );
     }
 }
