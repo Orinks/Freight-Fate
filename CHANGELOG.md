@@ -10,7 +10,7 @@
 
 ### Added
 
-- **Reefer and APU hotel power.** Turn the trailer reefer and the APU on or off; the reefer holds cold cargo near a coarse setpoint and both burn diesel from the tractor tank while the fuel island requires the tractor engine off.
+- **Reefer and APU hotel power.** Turn the trailer reefer and the APU on or off; a cold pickup starts the reefer at 2 degrees, cargo warms slowly when it is off, and the tractor must be shut down before fueling at a stop or the terminal garage.
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
