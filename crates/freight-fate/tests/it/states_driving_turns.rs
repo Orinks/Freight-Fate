@@ -8,7 +8,7 @@
 use std::sync::Arc;
 
 use ff_core::data::corners::corner_speed_mph;
-use ff_core::data::curves::{curve_severity, leg_curves, route_curves, RouteCurve};
+use ff_core::data::curves::{curve_severity, leg_curves, min_radius_ft, route_curves, RouteCurve};
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{CorridorDetail, Landmark, Leg, Route, RouteCheckpoint};
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
@@ -1121,10 +1121,14 @@ fn test_pacenote_stays_silent_when_already_slow() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     let pos = d.trip.position_mi;
+    // A radius a 55 sign is really built on: 307 ft asked 0.54 g at 50,
+    // past where any load goes over, and the call now prices the bend for
+    // the load (bend sweep, 2026-09-24).
+    let radius = min_radius_ft(55.0) as i64;
     let spoken = spoken_pacenotes(
         &mut app,
         &mut d,
-        vec![a_curve(pos + 0.3, 'L', 55, 307, 60.0)],
+        vec![a_curve(pos + 0.3, 'L', 55, radius, 60.0)],
         50.0,
     );
     assert!(
@@ -2337,8 +2341,12 @@ fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
     let mut d = a_drive(&mut app);
     for grade in [-0.02, -0.03, -0.04, -0.05, -0.061, -0.07, -0.08] {
         for target in [15.0, 25.0, 30.0, 40.0, 55.0] {
+            // 400 ft, or what a sign this fast is really built on: a 55 on
+            // 400 ft asks half a g, which curve assistance now slows for
+            // below the sign on its own (bend sweep, 2026-09-24).
+            let radius = min_radius_ft(target).max(400.0) as i64;
             for (over, push) in [(0.5, 0.0), (1.5, 0.0), (8.0, 0.0), (0.9, 0.04)] {
-                a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, 400, 0.5);
+                a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, radius, 0.5);
                 d.curve_servo = None;
                 let here = d.trip.position_mi;
                 d.arm_curve_servo(target, here - 0.1, here + 5.0, false);

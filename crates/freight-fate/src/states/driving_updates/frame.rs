@@ -41,7 +41,9 @@ impl DrivingState {
         self.critical_respeak_at = None;
         let ahead = curve.start_mi - self.trip.position_mi;
         let speed = self.trip.truck.speed_mph();
-        if ahead <= 0.0 || speed <= curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH {
+        let floor = (curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH)
+            .min(self.trip.bend_costs_above_mph(&curve));
+        if ahead <= 0.0 || speed <= floor {
             return;
         }
         // The pacenote speaks; the chime that preceded it does not (owner,
@@ -109,6 +111,8 @@ impl DrivingState {
         ctx.update_music_rotation(dt);
         self.refresh_live_facts();
         self.trace_engine_brake();
+        // The curve call prices a bend by who holds the lane in it.
+        self.trip.lane_steers = Self::lane_steers(ctx);
         // A fresh loaded run out of a chain-capable origin starts on the
         // facility's streets. Decided on the first tick, never on a resume:
         // from_snapshot marks the check done and re-enters a chain itself.

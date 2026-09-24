@@ -558,6 +558,7 @@ impl DrivingState {
             curve_assist_cue_s: 0.0,
             curve_assist_spoke: false,
             curve_servo: None,
+            curve_servo_declined_to_mi: None,
             transition_assist_active: false,
             keeper_mph: None,
             keeper_throttle: 0.0,

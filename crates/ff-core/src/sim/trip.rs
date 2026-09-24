@@ -326,6 +326,10 @@ pub struct Trip {
     pub grade_clock: f64,
     /// True while curve assistance is still taking speed off for a bend.
     pub curve_shed_active: bool,
+    /// How the lane work is shared, set by the game from the driver's lane
+    /// keeping (`TruckState::curve_safe_mph`): None with it automated. The
+    /// curve call prices a bend by it.
+    pub lane_steers: Option<bool>,
     /// Road left to an exit the driver has signalled for.
     pub exit_approach_mi: Option<f64>,
     pub exit_approach_release_s: f64,
@@ -492,6 +496,7 @@ impl Trip {
             turn_clock: 0.0,
             grade_clock: 0.0,
             curve_shed_active: false,
+            lane_steers: None,
             exit_approach_mi: None,
             exit_approach_release_s: 0.0,
             announced_chain_law: HashSet::new(),

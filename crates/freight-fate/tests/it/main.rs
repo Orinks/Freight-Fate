@@ -91,6 +91,7 @@ mod states_drivers_board;
 mod states_driving_air_brakes;
 mod states_driving_approach_sweep;
 mod states_driving_arrival_gate;
+mod states_driving_bend_rollover_sweep;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
 mod states_driving_cat_scale;

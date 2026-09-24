@@ -653,6 +653,9 @@ pub struct DrivingState {
     // and holds it through the bend (see driving_updates::curve_servo). The
     // fields above are the reactive half, inside the bend.
     pub curve_servo: Option<CurveServo>,
+    // Where the servo the driver's own brake cancelled would have let go:
+    // the bends up to here are theirs, so its lookahead leaves them alone.
+    pub curve_servo_declined_to_mi: Option<f64>,
     pub transition_assist_active: bool,
     pub keeper_mph: Option<f64>,
     pub keeper_throttle: f64,

@@ -28,8 +28,7 @@ use ff_core::data::curves::{
 };
 use ff_core::models::cargo_condition::{cargo_condition_text, CARGO_REJECT_PCT};
 use ff_core::models::enforcement::RECORD_CRASH;
-use ff_core::sim::lane::{MAX_CREDITED_BANK, MAX_ROAD_LATERAL_G, MAX_STEER_LATERAL_G};
-use ff_core::sim::vehicle::{BrakeApplication, G, MPS_TO_MPH, M_PER_FT, ROLL_WARN_SHARE};
+use ff_core::sim::vehicle::{BrakeApplication, G, MPS_TO_MPH, ROLL_WARN_SHARE};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -149,16 +148,17 @@ impl DrivingState {
         ))
     }
 
-    /// The fastest the truck takes a curve before it costs anything, in mph:
-    /// the roll model's safe speed for this load and, with the lane work the
-    /// driver's, the speed past which the lane model cannot hold the curve and
-    /// the truck runs wide.
-    ///
-    /// That second speed is the lane model's own ceiling, read rather than
-    /// restated: the tires' `MAX_ROAD_LATERAL_G` plus the credited bank when
-    /// curve assistance or partial lane keeping supplies the wheel the curve
-    /// wants, and the steering cap `MAX_STEER_LATERAL_G` when only the driver
-    /// steers; both scaled by grip (`LaneKeeping::update`).
+    /// How the lane work is shared, as `TruckState::curve_safe_mph` takes it:
+    /// None with it automated, else whether something supplies the wheel a
+    /// bend asks for.
+    pub fn lane_steers(ctx: &GameContext) -> Option<bool> {
+        ctx.settings
+            .lane_is_manual()
+            .then(|| ctx.settings.road_steers_the_bend())
+    }
+
+    /// The fastest the truck takes a curve before it costs anything, in mph
+    /// (`TruckState::curve_safe_mph`, with this driver's lane keeping).
     pub fn curve_safe_mph(
         &self,
         ctx: &GameContext,
@@ -166,21 +166,9 @@ impl DrivingState {
         roll_bank: f64,
         lane_bank: f64,
     ) -> f64 {
-        let truck = &self.trip.truck;
-        let roll = truck.roll_safe_mph(radius_ft, roll_bank);
-        if !ctx.settings.lane_is_manual() {
-            return roll;
-        }
-        let grip = truck.effective_grip().clamp(0.0, 1.0);
-        let road_g = MAX_ROAD_LATERAL_G + lane_bank.clamp(0.0, MAX_CREDITED_BANK);
-        let steer_g = if ctx.settings.road_steers_the_bend() {
-            road_g
-        } else {
-            MAX_STEER_LATERAL_G.min(road_g)
-        };
-        let hold_g = steer_g * grip;
-        let drift = (hold_g * G * radius_ft.max(0.0) * M_PER_FT).sqrt() * MPS_TO_MPH;
-        roll.min(drift)
+        self.trip
+            .truck
+            .curve_safe_mph(radius_ft, roll_bank, lane_bank, Self::lane_steers(ctx))
     }
 
     /// [`Self::curve_safe_mph`] for a mapped bend.
@@ -215,8 +203,13 @@ impl DrivingState {
         metres * self.trip.effective_time_scale().max(1.0) / METERS_PER_MILE
     }
 
-    /// The curve the warning is about: the one under the truck, else the next
-    /// inside the truck's own braking reach.
+    /// The curves the warning is about: the one under the truck, and the
+    /// next inside the truck's own braking reach.
+    ///
+    /// Both, not the first of them: in a run of bends the next one comes
+    /// into reach while the truck is still in the last, and looking only
+    /// under the truck left it unwarned until the truck was in it and the
+    /// load already moving (bend sweep, US-60 Salt River Canyon, 2026-09-24).
     ///
     /// On the approach, only a curve nothing else is already slowing for: a
     /// mapped bend once its call has gone out (the call names it first, and
@@ -224,74 +217,108 @@ impl DrivingState {
     /// has it; the ramp curve not while an assist is braking the lane down to
     /// the exit speed, unless the driver's foot is overriding it. Inside the
     /// curve, whatever is driving.
-    fn curve_in_play(&self, ctx: &GameContext) -> Option<CurveInPlay> {
+    fn curves_in_play(&self, ctx: &GameContext) -> Vec<CurveInPlay> {
         if self.ramp_mi.is_some() {
-            let (radius_ft, roll_bank) = self.ramp_curve_geometry()?;
+            let Some((radius_ft, roll_bank)) = self.ramp_curve_geometry() else {
+                return Vec::new();
+            };
             let ahead_mi = if self.ramp_curve_radius_ft().is_some() {
-                0.0
+                Some(0.0)
             } else {
                 let assisted = Self::ramp_speed_assisted(ctx) && !Self::driver_accelerating(ctx);
-                self.deceleration_lane_left_mi().filter(|_| !assisted)?
+                self.deceleration_lane_left_mi().filter(|_| !assisted)
             };
-            return Some(CurveInPlay {
-                id: RAMP_CURVE_ID,
-                ahead_mi,
-                radius_ft,
-                roll_bank,
-                lane_bank: 0.0,
-                phrase: "Ramp curve".to_string(),
-            });
+            return ahead_mi
+                .map(|ahead_mi| CurveInPlay {
+                    id: RAMP_CURVE_ID,
+                    ahead_mi,
+                    radius_ft,
+                    roll_bank,
+                    lane_bank: 0.0,
+                    phrase: "Ramp curve".to_string(),
+                })
+                .into_iter()
+                .collect();
         }
         let position = self.trip.position_mi;
-        let (ahead_mi, bend) = match self.trip.curve_at(position).filter(|c| !c.connector) {
-            Some(bend) => (0.0, bend),
-            None => {
-                // Look as far as the truck needs to shed to a crawl; anything
-                // further has time left to be warned about later.
-                if ctx.settings.curve_speed_assist {
-                    return None;
-                }
-                let reach = self.curve_warn_reach_mi(0.0);
-                let (ahead, bend) = self.trip.next_curve_within(reach)?;
-                if bend.connector || !self.trip.curve_called(&bend) {
-                    return None;
-                }
-                (ahead, bend)
-            }
+        let underfoot = self
+            .trip
+            .curve_at(position)
+            .filter(|c| !c.connector)
+            .map(|bend| (0.0, bend));
+        // Look as far as the truck needs to shed to a crawl; anything further
+        // has time left to be warned about later.
+        let ahead = if ctx.settings.curve_speed_assist {
+            None
+        } else {
+            self.trip
+                .next_curve_within(self.curve_warn_reach_mi(0.0))
+                .filter(|(_, bend)| !bend.connector && self.trip.curve_called(bend))
         };
-        Some(CurveInPlay {
-            id: bend.start_mi,
-            ahead_mi,
-            radius_ft: bend.min_radius_ft as f64,
-            roll_bank: self.bend_bank(&bend),
-            lane_bank: self.lane_bank(&bend),
-            phrase: self.pacenote_phrase(&bend),
-        })
+        underfoot
+            .into_iter()
+            .chain(ahead)
+            .map(|(ahead_mi, bend)| CurveInPlay {
+                id: bend.start_mi,
+                ahead_mi,
+                radius_ft: bend.min_radius_ft as f64,
+                roll_bank: self.bend_bank(&bend),
+                lane_bank: self.lane_bank(&bend),
+                phrase: self.pacenote_phrase(&bend),
+            })
+            .collect()
     }
 
     /// Say once per curve that it is being taken too fast for this load,
     /// while there is still road to fix it.
     pub fn update_curve_warning(&mut self, ctx: &mut GameContext) {
-        let Some(curve) = self.curve_in_play(ctx) else {
+        let curves = self.curves_in_play(ctx);
+        if curves.is_empty() {
             self.curve_warned_mi = None;
             return;
+        }
+        let speed = self.trip.truck.speed_mph();
+        // Inside a bend the truck is gaining speed in -- a downgrade under it
+        // -- the warning is priced at where it will be once the driver has
+        // reacted, or it comes the frame the load starts moving rather than
+        // before (bend sweep, 2026-09-24: CA-299's 6.6 percent into a 50
+        // bend). Not while curve assistance has the bend: it brakes before
+        // the truck gets there.
+        let gaining = if ctx.settings.curve_speed_assist {
+            0.0
+        } else {
+            self.trip.truck.net_accel_mph_per_s().max(0.0) * CURVE_WARN_REACTION_S
         };
-        if self.curve_warned_mi == Some(curve.id) {
+        for curve in curves {
+            // Once per curve, in road order: a bend at or behind the last one
+            // warned has had its word.
+            let had_its_word = self.curve_warned_mi.is_some_and(|warned| {
+                warned == curve.id
+                    || (curve.id != RAMP_CURVE_ID && warned != RAMP_CURVE_ID && curve.id < warned)
+            });
+            if had_its_word {
+                continue;
+            }
+            let safe = self.curve_safe_mph(ctx, curve.radius_ft, curve.roll_bank, curve.lane_bank);
+            let soon = if curve.ahead_mi > 0.0 {
+                speed
+            } else {
+                speed + gaining
+            };
+            if soon <= safe {
+                continue;
+            }
+            if curve.ahead_mi > 0.0 && curve.ahead_mi > self.curve_warn_reach_mi(safe) {
+                continue;
+            }
+            self.curve_warned_mi = Some(curve.id);
+            let slow_to = ctx.settings.speed_text(safe.floor().max(1.0));
+            ctx.say_event_with(
+                format!("{}, too fast. Slow to {slow_to}.", curve.phrase),
+                SayEvent::new().category(SpeechCategory::Safety),
+            );
             return;
         }
-        let safe = self.curve_safe_mph(ctx, curve.radius_ft, curve.roll_bank, curve.lane_bank);
-        if self.trip.truck.speed_mph() <= safe {
-            return;
-        }
-        if curve.ahead_mi > 0.0 && curve.ahead_mi > self.curve_warn_reach_mi(safe) {
-            return;
-        }
-        self.curve_warned_mi = Some(curve.id);
-        let slow_to = ctx.settings.speed_text(safe.floor().max(1.0));
-        ctx.say_event_with(
-            format!("{}, too fast. Slow to {slow_to}.", curve.phrase),
-            SayEvent::new().category(SpeechCategory::Safety),
-        );
     }
 
     /// Put the truck over if the bend is asking more than its threshold.
