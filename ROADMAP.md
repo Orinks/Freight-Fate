@@ -1261,7 +1261,9 @@ not started here.
 - [ ] **Honesty debt: reasonable-access distance.** Cap is the federal
       1.0 mi floor (23 CFR 658.19); access distance varies by state and
       those extensions are not modeled. Mid-route connectors never count
-      unless later flagged under the FHWA map work.
+      unless later flagged under the FHWA map work. Cue'd first/last legs
+      share that 1.0 mi cap; same-city facility approaches (`a == b` from
+      `Leg::local`) stay uncapped as the approach itself.
 - [ ] **Honesty debt: Twin parcel loads are not offered on ALCAN, Canada,
       or Alaska lanes until provincial and Alaska doubles rules are
       modeled.**
