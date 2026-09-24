@@ -427,6 +427,27 @@ fn test_curve_assist_jakes_a_bend_on_a_real_downgrade() {
 }
 
 #[test]
+fn test_curve_assist_does_not_pump_the_drums_at_ten_over() {
+    // With the retarder slowing the truck, the drums join the curve assist
+    // from ten over. Switched at ten, a truck riding that line had the pedal
+    // pressed and released on alternate frames, and every application costs
+    // air (the pedal-fanning class, 2026-09-24).
+    let mut harness = assist_rig("Ten Over", 45, -6.0);
+    assist_frame(&mut harness, 52.0); // raise the assist's jake
+    assert!(assist_jake(&harness));
+    let mut rises = 0.0;
+    let mut last_brake = 0.0;
+    for step in 0..60 {
+        let mph = if step % 2 == 0 { 54.9 } else { 55.1 };
+        same_bend_frame(&mut harness, mph);
+        let brake = service_brake(&harness);
+        rises += (brake - last_brake).max(0.0);
+        last_brake = brake;
+    }
+    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
+}
+
+#[test]
 fn test_curve_assist_holds_a_long_downgrade_on_the_jake_not_the_drums() {
     // The safety half of the same fix, in real physics. A threshold with no
     // downhill carve-out left the assist holding a six percent descent on the

@@ -391,6 +391,13 @@ impl Menu for DriverAppScreenState {
             return;
         };
         let refresh_failure_started = refresh_failed && !self.weather_refresh_failed;
+        // Same rule as the trip: a new cell loading while simulated weather
+        // is in use is not a status change.
+        let status = if status == "loading" && self.weather_status == Some("fallback") {
+            "fallback"
+        } else {
+            status
+        };
         if changed.is_none() && Some(status) == self.weather_status && !refresh_failure_started {
             self.weather_refresh_failed = refresh_failed;
             return;

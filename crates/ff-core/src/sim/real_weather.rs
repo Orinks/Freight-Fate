@@ -624,12 +624,13 @@ impl RealWeatherProvider {
     ///
     /// Lets callers tell a still-loading first fetch (hold steady, no warm-up
     /// flicker) apart from a genuine offline state (fall back to simulated
-    /// weather). False while a request is in flight or data is cached.
+    /// weather). False while data is cached or the first request is in
+    /// flight. A retry after a failure stays unavailable while it runs: the
+    /// player is still on simulated weather, and reading the retry as
+    /// "loading" flipped the source every minute, re-announcing the fallback
+    /// after each failed retry (agent drive, 2026-09-24).
     pub fn unavailable(&self, city: &str) -> bool {
         let inner = lock_unpoisoned(&self.ctx.inner);
-        if inner.inflight.contains(city) {
-            return false;
-        }
         if Self::entry_for(&inner, city).is_some_and(|entry| Self::usable(&self.ctx, entry)) {
             return false;
         }
