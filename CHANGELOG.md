@@ -42,6 +42,8 @@
 - **City streets to a facility have traffic lights and stop signs.** Lights along one street are timed so a truck at the speed limit meets mostly greens.
 
 - **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
+
+- **Many truck stops are now down the road from their exit.** You drive from the ramp to the lot, turn in at the driveway, and stop there.
 - **Taking a bend or ramp curve too fast can roll the truck over.** A full trailer or part-filled tank goes first, and the load is lost.
 
 ### Security

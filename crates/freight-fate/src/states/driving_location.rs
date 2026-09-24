@@ -94,6 +94,11 @@ impl DrivingState {
         // heard "on I-90 West, 3 miles remaining" with a frozen countdown
         // while rolling city streets toward the gate (playtest 2026-07-22).
         // Both approach shapes answer with the gate distance instead.
+        if let Some(stop) = self.stop_chain.clone() {
+            // The streets to a road stop's lot count down to the lot.
+            self.say_local_status(ctx, &stop.spoken_name(), None, None);
+            return;
+        }
         if self.surface_chain {
             let target = format!("the gate at {}", self.approach_facility_text(ctx));
             self.say_local_status(ctx, &target, None, None);
@@ -204,6 +209,7 @@ impl DrivingState {
     pub fn on_local_streets(&self) -> bool {
         self.surface_chain
             || self.departure_chain
+            || self.stop_chain.is_some()
             || self.destination_exit_taken
             || self.trip.is_facility_approach_route()
     }

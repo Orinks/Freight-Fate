@@ -260,7 +260,8 @@ impl DrivingState {
             || self.destination_exit_taken
             || self.surface_chain
             || self.trip.is_facility_approach_route();
-        if !approaching_gate || self.trip.finished {
+        // A road stop's streets end at its lot, not at a gate.
+        if !approaching_gate || self.trip.finished || self.stop_chain.is_some() {
             return None;
         }
         let remaining = self.trip.remaining_miles();

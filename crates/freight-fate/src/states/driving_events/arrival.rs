@@ -345,7 +345,11 @@ impl DrivingState {
     /// Mirrors the update loop's gate dispatch so the info keys agree with
     /// what the gate handlers are actually waiting for.
     pub fn arrival_gate_query_text(&self, ctx: &GameContext) -> Option<String> {
-        if !self.trip.finished || self.arrival_menu_open || self.departure_chain {
+        if !self.trip.finished
+            || self.arrival_menu_open
+            || self.departure_chain
+            || self.stop_chain.is_some()
+        {
             return None;
         }
         if self.phase == DRIVE_PHASE_PICKUP {

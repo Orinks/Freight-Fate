@@ -1,8 +1,10 @@
 //! The facility street chains: the surface chain that carries a delivery from
 //! the destination ramp to the gate, the departure chain that carries a loaded
-//! run out of the origin's gate, and the acceleration lane that ends it.
+//! run out of the origin's gate, and the acceleration lane that ends it; and
+//! a road stop's streets from its exit ramp to its lot.
 
 use ff_core::data::world_models::Route;
+use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::weather::WeatherSystem;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::units::spoken_feet_or_meters;
@@ -120,6 +122,55 @@ impl DrivingState {
             return false;
         };
         let local_state = self.city_state(ctx, &self.job.destination.clone());
+        let first_corner = self.enter_streets(ctx, &route, local_state, false);
+        self.surface_chain = true;
+        if announce {
+            let street = Self::start_street_text(&route);
+            ctx.audio.play_with("ui/notify", 0.7, 0.0);
+            let message = format!(
+                "Off the ramp and onto city streets. {street}.{first_corner} {} to the facility \
+                 gate.",
+                self.trip.distance_text(route.miles())
+            );
+            self.announce_streets(ctx, message, !first_corner.is_empty());
+        }
+        true
+    }
+
+    /// "Start on X", the street a chain begins on.
+    fn start_street_text(route: &Route) -> String {
+        let first = &route.legs[0];
+        if first.local_cue.is_empty() {
+            format!("Start on {}", first.highway)
+        } else {
+            first.local_cue.trim_end_matches('.').to_string()
+        }
+    }
+
+    /// The off-the-ramp line: the route channel, and the first corner's
+    /// reaction window when it carries one.
+    fn announce_streets(&mut self, ctx: &mut GameContext, message: String, with_corner: bool) {
+        if with_corner {
+            self.turn_grace_s = self.turn_grace_seconds(ctx, &message);
+        }
+        let mut opts = SayEvent::queued().priority(EventPriority::Route);
+        opts.category = Some(SpeechCategory::Navigation);
+        ctx.say_event_with(message, opts);
+        self.mark_start_cue_said();
+    }
+
+    /// Swap the highway trip at the end of a ramp for a street chain, park the
+    /// highway aside, and hand the streets to the speed keeper when the
+    /// terminal released the truck to facility stopping assistance. Returns
+    /// the first corner's call, " Then ...", when the chain starts inside its
+    /// window, for the caller's off-the-ramp line; empty otherwise.
+    fn enter_streets(
+        &mut self,
+        ctx: &mut GameContext,
+        route: &Route,
+        local_state: String,
+        road_stop: bool,
+    ) -> String {
         let options = TripOptions {
             time_scale: self.trip.time_scale,
             seed: Some(self.trip_seed ^ 0x5AFE),
@@ -130,6 +181,7 @@ impl DrivingState {
             bobtail: self.trip.bobtail,
             destination_label: self.trip.destination_label.clone(),
             local_state,
+            road_stop,
             ..Default::default()
         };
         let mut surface = Trip::new(
@@ -150,7 +202,6 @@ impl DrivingState {
         let weather = std::mem::replace(&mut old.weather, self.placeholder_weather());
         self.trip.weather = weather;
         self.highway_trip = Some(old);
-        self.surface_chain = true;
         // A latched destination arrival belongs to the trip it began on. The
         // ramp's arrival stopped the truck at the ramp's end; the street chain
         // is a fresh approach with its own point half a mile on, and carrying
@@ -180,17 +231,18 @@ impl DrivingState {
         // on the way out, rather than waiting a frame for the resume path.
         // The arrival assist takes the pedals back at the gate as it always
         // has. `approach_pull_ahead_available` refused the pull-ahead with the
-        // keeper off, so a chain reached this way always has it.
-        if self.approach_pull_ahead {
-            self.approach_pull_ahead = false;
-            if ctx.settings.speed_keeper {
-                let (limit, zone_reason) = self.trip.speed_limit_at(self.trip.position_mi);
-                if let Some(zone_reason) = zone_reason {
-                    if self.cruise_mph.is_some() {
-                        self.cancel_cruise(ctx, true);
-                    }
-                    self.engage_keeper(ctx, limit, &zone_reason, Some(limit), true);
+        // keeper off, so a chain reached this way always has it. An armed
+        // session takes the streets the same way, now rather than a frame
+        // later: a free-flowing ramp hands over at the ramp's own speed, and
+        // for that frame nothing held the truck to the street's number.
+        let pull_ahead = std::mem::take(&mut self.approach_pull_ahead);
+        if (pull_ahead || self.speed_control_armed) && ctx.settings.speed_keeper {
+            let (limit, zone_reason) = self.trip.speed_limit_at(self.trip.position_mi);
+            if let Some(zone_reason) = zone_reason {
+                if self.cruise_mph.is_some() {
+                    self.cancel_cruise(ctx, true);
                 }
+                self.engage_keeper(ctx, limit, &zone_reason, Some(limit), true);
             }
         }
         // The first corner, if the chain starts inside its own window: it is
@@ -217,28 +269,108 @@ impl DrivingState {
                 }
             }
         }
-        if announce {
-            let first = &route.legs[0];
-            let street = if first.local_cue.is_empty() {
-                format!("Start on {}", first.highway)
+        first_corner
+    }
+
+    /// The streets from the end of a road stop's exit ramp to its lot, for
+    /// this trip's direction, or None when the stop has none baked.
+    pub fn stop_chain_route(&self, stop: &RoadStop) -> Option<Route> {
+        if stop.stop_type == "delivery_destination" {
+            return None;
+        }
+        let highway = if self.stop_chain.is_some() {
+            self.highway_trip.as_ref()?
+        } else {
+            &self.trip
+        };
+        highway
+            .stop_approach_route(stop)
+            .filter(|route| !route.legs.is_empty())
+    }
+
+    /// Off a road stop's exit ramp onto the streets to its lot.
+    ///
+    /// The same swap as a facility's chain: the highway trip is parked with
+    /// its odometer at the exit, the streets carry their own limits, lights
+    /// and signs, and the driveway is a turn into the lot. At the lot the
+    /// highway comes back and the stop opens as it always has
+    /// (`finish_stop_chain`).
+    pub fn begin_stop_chain(&mut self, ctx: &mut GameContext, stop: &RoadStop) -> bool {
+        if self.surface_chain || self.stop_chain.is_some() || self.departure_chain {
+            return false;
+        }
+        let Some(route) = self.stop_chain_route(stop) else {
+            return false;
+        };
+        let city = route.cities.first().cloned().unwrap_or_default();
+        let local_state = self.city_state(ctx, &city);
+        let first_corner = self.enter_streets(ctx, &route, local_state, true);
+        self.stop_chain = Some(stop.clone());
+        self.stop_chain_end_said = false;
+        let street = Self::start_street_text(&route);
+        ctx.audio.play_with("ui/notify", 0.7, 0.0);
+        // In closing units: these streets are a few hundred feet to a mile,
+        // and whole miles said "0 miles" for the lot.
+        let message = format!(
+            "Off the ramp. {street}.{first_corner} {} to {}.",
+            self.closing_text(route.miles()),
+            stop.spoken_name()
+        );
+        self.announce_streets(ctx, message, !first_corner.is_empty());
+        true
+    }
+
+    /// At the end of a road stop's streets: stopped, the highway trip comes
+    /// back and the stop opens; still rolling, the lot says where it is once.
+    pub fn handle_stop_chain_end(&mut self, ctx: &mut GameContext) {
+        let Some(stop) = self.stop_chain.clone() else {
+            return;
+        };
+        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH {
+            self.finish_stop_chain(ctx);
+            self.open_poi_stop(ctx, &stop, true, None);
+            return;
+        }
+        if self.cruise_mph.is_some() || self.keeper_mph.is_some() {
+            // The lot is the stop: automatic speed control lets go here, as
+            // it did at the end of a stop's ramp, and stays off until the
+            // truck drives on (`resume_speed_control_if_ready`).
+            self.pause_speed_control(ctx, true);
+        }
+        if !self.stop_chain_end_said {
+            self.stop_chain_end_said = true;
+            let place = stop.spoken_name();
+            let message = if self.terse_speech(ctx) {
+                format!("At {place}. Stop now.")
             } else {
-                first.local_cue.trim_end_matches('.').to_string()
+                format!("At {place}. Come to a stop.")
             };
-            ctx.audio.play_with("ui/notify", 0.7, 0.0);
-            let message = format!(
-                "Off the ramp and onto city streets. {street}.{first_corner} {} to the facility \
-                 gate.",
-                self.trip.distance_text(route.miles())
-            );
-            if !first_corner.is_empty() {
-                self.turn_grace_s = self.turn_grace_seconds(ctx, &message);
-            }
-            let mut opts = SayEvent::queued().priority(EventPriority::Route);
+            let mut opts = SayEvent::new();
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(message, opts);
-            self.mark_start_cue_said();
         }
-        true
+    }
+
+    /// Back onto the highway trip from a road stop's streets, with the clock,
+    /// the toll ledger and the truck carried over: the stop and the ramp back
+    /// up are the highway's, as they always were.
+    pub fn finish_stop_chain(&mut self, _ctx: &mut GameContext) {
+        if self.stop_chain.take().is_none() {
+            return;
+        }
+        let Some(mut highway) = self.highway_trip.take() else {
+            return;
+        };
+        highway.game_minutes = self.trip.game_minutes;
+        highway.toll_charges = self.trip.toll_charges.clone();
+        highway.hos_violation = self.trip.hos_violation;
+        highway.truck = self.trip.truck.clone();
+        let mut streets = self.replace_trip(highway);
+        let weather = std::mem::replace(&mut streets.weather, self.placeholder_weather());
+        self.trip.weather = weather;
+        self.destination_arrival_active = false;
+        self.destination_assist_brake = 0.0;
+        self.reset_turn_state_for_trip();
     }
 
     /// The origin facility's street chain driven outbound, or None.

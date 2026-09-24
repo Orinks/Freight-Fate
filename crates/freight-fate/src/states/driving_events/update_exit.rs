@@ -85,7 +85,8 @@ impl DrivingState {
         // miles of Abilene streets took ten real minutes at 30 (owner,
         // 2026-09-23: "Are we moving? Real-time is so slow at this speed").
         // Its turns pace themselves (`pace_clock_for_turn`).
-        self.trip.dock_run_in = (self.surface_chain && self.at_the_gates_brake_point())
+        self.trip.dock_run_in = ((self.surface_chain || self.stop_chain.is_some())
+            && self.at_the_gates_brake_point())
             || (self.ramp_mi.is_some()
                 && self
                     .ramp_stop
@@ -108,6 +109,11 @@ impl DrivingState {
         self.trip.exit_approach_mi = ahead_to_exit.filter(|ahead| *ahead > 0.0);
         // A facility's own lights and signs, on its streets.
         self.update_street_controls(ctx, accelerating);
+        if self.stop_chain.is_some() {
+            // A selected stop's own assist brakes for its lot.
+            self.update_selected_stop_assist(ctx);
+            return;
+        }
         if self.ramp_mi.is_some() {
             self.update_active_ramp(ctx, moved_mi, dt, accelerating);
             return;
@@ -175,6 +181,17 @@ impl DrivingState {
             // the driver stopped dead in the road (owner playtest,
             // 2026-07-24). The scripted dock-menu arrival below still
             // rightly waits for a crawl.
+            self.ramp_mi = None;
+            self.ramp_stop = None;
+            self.ramp_control = String::new();
+            return;
+        }
+        if stop.stop_type != "delivery_destination"
+            && self.ramp_terminal_done
+            && self.begin_stop_chain(ctx, &stop)
+        {
+            // A road stop past its own streets: the ramp's end is where they
+            // begin, driven on at whatever the terminal let through.
             self.ramp_mi = None;
             self.ramp_stop = None;
             self.ramp_control = String::new();
@@ -550,7 +567,12 @@ impl DrivingState {
             if scale_ramp {
                 ending = "the scale at the end, stop at the bar";
             }
-            format!("{exit_speed} {take} {ramp} of ramp, {ending}.")
+            if ending == "stop at the end" && self.ramp_continues_to_destination_streets(ctx) {
+                // Streets follow this ramp: its end is not where to stop.
+                format!("{exit_speed} {take} {ramp} of ramp.")
+            } else {
+                format!("{exit_speed} {take} {ramp} of ramp, {ending}.")
+            }
         };
         // On the ramp from this line on: a mainline line it cuts is not
         // handed back (see `speak_plain_route_event`).
@@ -665,26 +687,38 @@ impl DrivingState {
     }
 
     /// Brake an explicitly selected optional stop at its entrance.
+    ///
+    /// Where the stop has its own streets past the ramp, its entrance is
+    /// their end, the lot, and the assist brakes for that instead.
     pub fn update_selected_stop_assist(&mut self, ctx: &mut GameContext) -> bool {
-        let Some(stop) = self.ramp_stop.clone() else {
+        let on_streets = self.stop_chain.is_some();
+        let Some(stop) = self.ramp_stop.clone().or_else(|| self.stop_chain.clone()) else {
             return false;
         };
         if !self.selected_stop_assist_armed
             || !self.is_selected_stop(Some(&stop))
             || !ctx.settings.selected_stop_assist
-            || !self.ramp_terminal_done
+            || (!on_streets && !self.ramp_terminal_done)
         {
             return false;
         }
-        if self.ramp_mi.is_some_and(|mi| mi <= -RAMP_OVERSHOOT_MI) {
+        if !on_streets
+            && (self.ramp_mi.is_some_and(|mi| mi <= -RAMP_OVERSHOOT_MI)
+                || self.stop_chain_route(&stop).is_some())
+        {
             return false;
         }
-        let gap_mi = 0.0f64.max(self.ramp_mi.unwrap_or(0.0));
+        let gap_mi = if on_streets {
+            self.trip.remaining_miles()
+        } else {
+            0.0f64.max(self.ramp_mi.unwrap_or(0.0))
+        };
         let speed = self.trip.truck.speed_mph();
         if speed <= DOCKING_MAX_MPH && gap_mi <= 0.08 {
             self.trip.truck.throttle = 0.0;
             self.trip.truck.brake = 1.0;
             self.trip.truck.set_parking_brake();
+            self.finish_stop_chain(ctx);
             self.ramp_mi = None;
             self.ramp_stop = None;
             self.ramp_control = String::new();

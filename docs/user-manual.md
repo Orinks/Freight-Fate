@@ -1222,6 +1222,16 @@ their own yard limits; 15 is the game's number for all of them. Where the map
 shows no driveway, the gate stands on the street itself, and the street keeps
 its limit right up to it.
 
+Truck stops, travel centers and fuel stations work the same way where the map
+shows the road from the exit to the lot. The ramp ends at the crossroad, not
+at the pumps: "Off the ramp. Start on" the road, then how far it is to the
+stop. The access road keeps its own limit, lights and signs,
+the driveway is a turn, and past it you are in the lot, "Into the lot. Lot
+limit 15". Stop in the lot and the stop's menu opens as it always has.
+Facility stopping assistance, or the stop assistance for a stop you picked,
+brings the truck to a stop in the lot. A stop the map shows no road for still
+has its entrance at the end of the ramp.
+
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
 up for it. As an announced exit approaches, use X to signal or cancel your intent,

@@ -295,7 +295,10 @@ from the words, and synonyms cost them a re-read.
 | A stop sign every approach to the intersection stops at: the truck's turn comes after its own stop, with no gap to wait for | all-way stop ("All-way stop ahead.") | four-way stop, 4-way, multiway stop | `street_control_kind == "all_way_stop"` |
 | Where a facility's streets leave the public road for its own service or private way (the manual's word; the drive names the turn onto it) | driveway | entrance, property line, gate (that is the check-in stop at the end of the yard) | `Driveway`, `Trip::driveway_mi`, `Leg::local_yard` |
 | The facility's own way past the driveway, up to the check-in stop at the gate | the yard ("Into the yard.") | lot, facility grounds, premises, private road | `YARD_ZONE`, `Trip::street_zones` |
-| The speed limit inside the yard: the operator's rule, not a law | yard limit ("Yard limit 15.") | gate speed, facility limit, lot limit | `YARD_LIMIT_MPH` |
+| The speed limit inside the yard: the operator's rule, not a law | yard limit ("Yard limit 15.") | gate speed, facility limit, lot limit (that is a road stop's) | `YARD_LIMIT_MPH` |
+| The public road from a road stop's exit ramp to its driveway | access road ("Entering access road zone.") | frontage road (unless the road is named one), service road (that is the driveway's), approach | `STOP_STREET_ZONE`, `begin_stop_chain` |
+| A truck stop's, travel center's or fuel station's own grounds past its driveway | the lot ("Into the lot.") | yard (that is a facility's), property, parking area | `LOT_ZONE`, `DrivingState::stop_chain` |
+| The speed limit inside a road stop's lot: the same rule as a yard | lot limit ("Lot limit 15.") | yard limit (a facility's), parking lot speed | `LOT_ZONE`, `YARD_LIMIT_MPH` |
 | The vehicles crossing in front of a stopped truck at a ramp terminal | cross traffic | crossing cars, the crossroad's traffic | `CrossTraffic`, `sim/cross_traffic.py` |
 | The opening in cross traffic a driver pulls out into | gap, always yours ("wait for your gap", "Gap in traffic") | window, opening, break | `CrossTraffic.clear_to_cross` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |

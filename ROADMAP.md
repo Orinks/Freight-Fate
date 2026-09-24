@@ -1626,7 +1626,16 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
 - [ ] **Street controls outbound.** A departure chain drops the READ
       controls, which face the inbound truck. Bake the controls facing the
       other way and play them on the way out.
-- [x] **ROAD_STOPS_PLACEHOLDER**
+- [x] **Road stops driven through their approach chain**
+      (`begin_stop_chain`, `finish_stop_chain`): at the ramp's end a stop
+      with `Trip::stop_approach_route` for this direction swaps to its
+      streets like a facility chain -- per-street limits ("access road"
+      zones), the same street controls, the driveway turn, the lot at the
+      yard's 15 (no chain posts a sourced lot limit) -- and at the lot the
+      highway trip comes back at the exit and the stop opens as before. A
+      save on those streets saves at the exit. Stops with no chain keep the
+      ramp-end entrance. The exit matrix's free-flow truck-stop cell drives
+      a frontage road and a lot.
 - [ ] **Gate and dock are one point (NOT built; owner has not decided).**
       A real arrival stops at the check-in, drives the yard at 5 to 15 and
       backs into a door. Recorded only; not to be built unasked.

@@ -153,6 +153,12 @@ impl Trip {
                 self.speed_value(zone.limit_mph)
             );
         }
+        if zone.reason == super::streets::LOT_ZONE {
+            return format!(
+                "Into the lot. Lot limit {}.",
+                self.speed_value(zone.limit_mph)
+            );
+        }
         if let Some(before) = self.street_zone_before(zone) {
             // A new street's limit, said the way the road signs it: the
             // number, and which way it went.
@@ -200,7 +206,10 @@ impl Trip {
             }
             // The yard begins at the driveway, which is a turn: its own call
             // names the corner and its speed, lower than the yard's.
-            if self.zones[i].reason == super::streets::YARD_ZONE {
+            if matches!(
+                self.zones[i].reason.as_str(),
+                super::streets::YARD_ZONE | super::streets::LOT_ZONE
+            ) {
                 continue;
             }
             // A street's change of limit is signed where it changes. Only a

@@ -14,10 +14,21 @@ pub const STREET_ZONE: &str = "facility access road";
 /// The zone reason for the facility's own way past the driveway.
 pub const YARD_ZONE: &str = "yard";
 
+/// The zone reason for a public road from an exit to a road stop.
+pub const STOP_STREET_ZONE: &str = "access road";
+/// The zone reason for a road stop's own lot past its driveway.
+pub const LOT_ZONE: &str = "lot";
+
 /// Whether a zone reason is the stretch the gate stands at the end of: the
-/// yard on a chain with a driveway, the old signed gate zone everywhere else.
+/// yard (a road stop's lot) on a chain with a driveway, the old signed gate
+/// zone everywhere else.
 pub fn is_gate_zone_reason(reason: &str) -> bool {
-    reason == "facility gate" || reason == YARD_ZONE
+    reason == "facility gate" || reason == YARD_ZONE || reason == LOT_ZONE
+}
+
+/// Whether a zone reason is a public street of a chain.
+pub fn is_street_zone_reason(reason: &str) -> bool {
+    reason == STREET_ZONE || reason == STOP_STREET_ZONE
 }
 
 impl Trip {
@@ -108,10 +119,17 @@ impl Trip {
             if end <= *start {
                 continue;
             }
-            let (reason, limit) = if leg.local_yard {
-                (YARD_ZONE, YARD_LIMIT_MPH)
+            // A road stop's lot takes the yard's rule: no public law reaches
+            // it either, and no chain posts a lot limit anyone has published.
+            let (street, yard) = if self.road_stop {
+                (STOP_STREET_ZONE, LOT_ZONE)
             } else {
-                (STREET_ZONE, leg.street_limit_mph().unwrap_or(fallback))
+                (STREET_ZONE, YARD_ZONE)
+            };
+            let (reason, limit) = if leg.local_yard {
+                (yard, YARD_LIMIT_MPH)
+            } else {
+                (street, leg.street_limit_mph().unwrap_or(fallback))
             };
             match zones.last_mut() {
                 Some(last)
@@ -131,12 +149,12 @@ impl Trip {
     /// the same chain, when `zone` is a change of limit along the streets
     /// rather than the start of them.
     pub fn street_zone_before(&self, zone: &Zone) -> Option<&Zone> {
-        if zone.reason != STREET_ZONE {
+        if !is_street_zone_reason(&zone.reason) {
             return None;
         }
         self.zones
             .iter()
-            .find(|z| z.reason == STREET_ZONE && (z.end_mi - zone.start_mi).abs() < 1e-6)
+            .find(|z| z.reason == zone.reason && (z.end_mi - zone.start_mi).abs() < 1e-6)
     }
 
     /// The stretch the gate stands at the end of, once posted: the yard, or

@@ -553,6 +553,7 @@ impl DrivingState {
         if self.selected_stop_key.is_some()
             && self.trip.planned_stop_key != self.selected_stop_key
             && self.ramp_stop.is_none()
+            && self.stop_chain.is_none()
         {
             // The trip model canceled a passed plan. Do not leave explicit
             // intent or its stopping assist armed for a later optional exit.
@@ -628,6 +629,9 @@ impl DrivingState {
             if self.departure_chain {
                 // End of the origin's streets: merge onto the highway trip.
                 self.finish_departure_chain(ctx);
+            } else if self.stop_chain.is_some() {
+                // At a road stop's lot, off its own streets.
+                self.handle_stop_chain_end(ctx);
             } else if self.phase == DRIVE_PHASE_PICKUP {
                 self.handle_pickup_gate(ctx);
             } else if self.ramp_mi.is_some() {

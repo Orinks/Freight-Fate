@@ -513,6 +513,10 @@ pub struct DrivingState {
     // arrival. The highway trip is kept for records; the active trip
     // becomes the surface route.
     pub surface_chain: bool,
+    // The road stop whose streets from its exit ramp to its lot are the trip
+    // right now (`begin_stop_chain`); the highway waits in `highway_trip`.
+    pub stop_chain: Option<RoadStop>,
+    pub stop_chain_end_said: bool,
     pub highway_trip: Option<Trip>,
     // Departure chain: the mirror. A loaded run out of a chain-capable
     // origin facility starts on its streets and merges onto the highway.

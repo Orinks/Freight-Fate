@@ -38,7 +38,9 @@ mod update;
 mod zones;
 
 pub use lookups::LaneRun;
-pub use streets::{is_gate_zone_reason, STREET_ZONE, YARD_ZONE};
+pub use streets::{
+    is_gate_zone_reason, is_street_zone_reason, LOT_ZONE, STOP_STREET_ZONE, STREET_ZONE, YARD_ZONE,
+};
 
 /// A stop is announced ("stop ahead") when it first comes within this many
 /// miles ahead; `restore` seeds this SAME window as already-announced so a
@@ -174,6 +176,8 @@ pub struct TripOptions {
     pub destination_approach_mi: Option<f64>,
     pub local_state: String,
     pub outbound: bool,
+    /// The streets from an exit to a road stop's lot, not to a facility.
+    pub road_stop: bool,
     /// The world the route names its cities in; the session world when None.
     pub world: Option<&'static World>,
 }
@@ -194,6 +198,7 @@ impl Default for TripOptions {
             destination_approach_mi: None,
             local_state: String::new(),
             outbound: false,
+            road_stop: false,
             world: None,
         }
     }
@@ -240,6 +245,9 @@ pub struct Trip {
     /// Which END of a facility street chain the gate is at: driven outbound
     /// it is the FIRST thing you pass.
     pub outbound: bool,
+    /// The streets from an exit to a road stop's lot: its zones speak of an
+    /// access road and a lot rather than a facility's road and yard.
+    pub road_stop: bool,
     pub position_mi: f64,
     pub game_minutes: f64,
     /// Diesel burned on this run, in gallons. Observed as a per-frame DROP in
@@ -438,6 +446,7 @@ impl Trip {
             destination_approach_mi: opts.destination_approach_mi,
             local_state: opts.local_state,
             outbound: opts.outbound,
+            road_stop: opts.road_stop,
             position_mi: 0.0,
             game_minutes: 0.0,
             fuel_used_gal: 0.0,

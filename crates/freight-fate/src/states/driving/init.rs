@@ -494,6 +494,8 @@ impl DrivingState {
             destination_exit_announced_key: String::new(),
             destination_exit_response_s: 0.0,
             surface_chain: false,
+            stop_chain: None,
+            stop_chain_end_said: false,
             highway_trip: None,
             departure_chain: false,
             departure_checked: false,
