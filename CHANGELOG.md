@@ -122,6 +122,8 @@
 
 ### Fixed
 
+- **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.
+
 - **A yield is judged where you cross the road.** A gap that holds while your whole rig gets across counts as clean.
 
 - **Route-transition assistance no longer stops short of a clear yield.** It rolls through at a walk and says when your gap comes.
