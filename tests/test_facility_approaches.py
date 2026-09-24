@@ -45,8 +45,9 @@ def test_facility_approach_data_covers_full_facility_set(world):
     assert coverage["endpoint_screen_refused"] == 344
     # Chains that still lead to a replaced endpoint because no public-road
     # path reaches the new one, not even over its own private road; kept until
-    # a chain replaces them, and labelled.
-    assert coverage["stale_chain_kept"] == 42
+    # a chain replaces them, and labelled. 2026-09-24's national re-route
+    # (street detail) found a path to Knoxville's new endpoint: 42 to 41.
+    assert coverage["stale_chain_kept"] == 41
     assert coverage["representative_fallback"] == 1397
     assert coverage["gate_yard_dock_hints"] == 0
 

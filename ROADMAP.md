@@ -1360,6 +1360,42 @@ mainline behaviour.
       can run the truck wide, but nothing models the rollover a loaded truck
       meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
 
+Streets from the ramp to the facility (owner order 2026-09-24). The data is
+baked (`tools/street_chain.py`, `facility_approaches.json` coverage
+`streets`); the driving side does not read any of it yet.
+
+- [x] **Ramp terminal per exit.** Each exit carries the OSM node its ramp
+      ends at, per direction (`Trip::ramp_terminal_node_at`): 19,882 of the
+      21,577 directional ramp lengths; a merge has none.
+- [x] **A chain from each ramp terminal.** For each leg into a city, the
+      labelled exit nearest the city end (the game's own destination-exit
+      rule) starts a chain at its terminal, kept whole
+      (`World::facility_exit_route`): 2,922 chains; 931 terminal-facility
+      pairs failed (404 disconnected, 248 terminal not on the street graph,
+      219 beyond the 18-mile limit, 51 over budget, 7 yard road too long,
+      2 no road at the endpoint). 1,343 of 2,049 routed facilities have one.
+- [x] **Posted limit per street, with its kind** (`Trip::street_limit_at`):
+      read from OSM on 48% of exit-chain miles, the state's statutory
+      district default on 41%, assumed on 11% (states with no district
+      default, and past the driveway).
+- [x] **Signals and stop signs along the chain**
+      (`Trip::street_controls_between`), read from OSM only: 24% of passed
+      intersections and 28% of turns have one on the exit chains; the rest
+      are unknown, not free. Signals dominate (32,967 against 1,422 stops,
+      816 all-way stops, 188 yields); 494 stops drawn on an intersection
+      node with no direction were left out as ambiguous.
+- [x] **Driveway** (`World::facility_driveway`): where the chain leaves the
+      public street for a service or private way, on 1,875 exit chains.
+- [ ] **Wire the street data into driving**: per-street zones, stops and
+      signals at corners, the yard limit from the driveway, and the arrival
+      picking its chain by `ramp_terminal_node_at`.
+- [ ] **Ramp terminals on service stubs.** The ramp walk stops at any
+      crossroad, so a service stub touching a ramp mid-link can stand in for
+      the real terminal (Baltimore node 9879536272); such chains fail as
+      disconnected. Stop the terminal walk at public roads only and re-bake.
+- [ ] **671 older chains carry no street detail**: kept from earlier bakes
+      because this re-route could not reproduce them. Re-route or retire.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily

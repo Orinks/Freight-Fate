@@ -73,6 +73,7 @@
     "exits": 18165,
     "exits_with_length": 16882,
     "coverage_ratio": 0.9294,
+    "directional_terminals": 19882,
     "directional_lengths": 21577,
     "percentiles_ft": {
       "p5": 735.1,
