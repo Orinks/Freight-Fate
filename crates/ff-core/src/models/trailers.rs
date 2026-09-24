@@ -121,21 +121,25 @@ pub const TRAILER_CATALOG: &[TrailerType] = &[
         combination_length_ft: 80.0,
         owned_per_mile_reserve: 0.10,
     },
-    // Two 53-foot vans and a converter dolly: turnpike / LCV doubles. Distinct
+    // Two 48-foot vans and a converter dolly: turnpike / LCV doubles. Distinct
     // from STAA 28-foot pups -- longer boxes, longer combination, and only
-    // legal on the permitted turnpike systems. Tare and GVW still use the
-    // shared trailer mass until FIX 5.
+    // legal on the permitted turnpike systems. Cargo-carrying length is about
+    // 102 ft (two 48-ft boxes plus converter); overall combination is 117 ft
+    // (day-cab tractor + boxes + dolly), inside the MA 120 ft unit cap and
+    // the frozen Appendix C cargo-length ceilings (NY 102 / MA 104 / OH 102 /
+    // IN 106 / KS 109; MA also caps trailers at 48 ft). Tare and GVW still
+    // use the shared trailer mass until FIX 5.
     TrailerType {
         key: "turnpike_double",
-        label: "Turnpike doubles",
-        equipment_text: "twin 53-foot turnpike trailers",
-        description: "LCV turnpike-doubles program: two long vans and a converter dolly,              staged on and off at turnpike exits.",
+        label: "48-foot turnpike doubles",
+        equipment_text: "48-foot turnpike doubles",
+        description: "LCV turnpike-doubles program: two 48-foot vans and a converter dolly, about 102 ft of cargo length and 117 ft overall, staged on and off at turnpike exits.",
         lease_deposit: 16_000.0,
         per_mile_reserve: 0.28,
         purchase_price: 110_000.0,
-        length_ft: 53.0,
+        length_ft: 48.0,
         unit_count: 2,
-        combination_length_ft: 130.0,
+        combination_length_ft: 117.0,
         owned_per_mile_reserve: 0.14,
     },
 ];
@@ -418,16 +422,17 @@ mod tests {
         );
         assert_eq!(
             equipment_text_for_cargo("turnpike_doubles"),
-            "twin 53-foot turnpike trailers"
+            "48-foot turnpike doubles"
         );
         let pups = trailer_type("double_van").expect("pups");
         let lcv = trailer_type("turnpike_double").expect("turnpike");
         assert_ne!(pups.key, lcv.key);
         assert_eq!(pups.length_ft, 28.0);
         assert_eq!(pups.unit_count, 2);
-        assert_eq!(lcv.length_ft, 53.0);
+        assert_eq!(lcv.label, "48-foot turnpike doubles");
+        assert_eq!(lcv.length_ft, 48.0);
         assert_eq!(lcv.unit_count, 2);
-        assert_eq!(lcv.combination_length_ft, 130.0);
+        assert_eq!(lcv.combination_length_ft, 117.0);
         assert!(lcv.combination_length_ft > pups.combination_length_ft);
     }
 }
