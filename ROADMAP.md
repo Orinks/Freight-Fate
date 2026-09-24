@@ -77,8 +77,12 @@ bookmarks usable.
       (a module that jumps back to its start ends after one pass, so the
       playlist moves on). The Tab radio screen says Freight Fate's own
       stations are off the dial in Synthesized mode.
-      - [ ] Typed-in music seeds.
-      - [ ] More synth voices per style.
+      - [x] Typed-in music seeds: Enter on Music seed opens the text field
+            and takes a whole number; Left and Right still roll one.
+      - [ ] More synth voices per style: built, awaiting the owner's
+            listening pass. A strummed guitar, drawbar organ, bell and reed,
+            two or three per style (the higher rungs get three); the reed
+            takes the B sections' tune. Tick once Josh has heard them.
 
 - [x] Career balance integrity: a `MoneyGuard` shadow (balance bits XORed
       with a per-instance key) resyncs on every legitimate earn, spend, or

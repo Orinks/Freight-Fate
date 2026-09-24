@@ -809,10 +809,16 @@ impl SettingsCategoryState {
                  Fate's other stations off the dial. Original plays the full \
                  soundtrack.",
             ),
-            row(
+            // Enter types a seed; Left and Right roll one (the adjust table).
+            MenuItem::new(
                 dyn_label(|s| format!("Music seed: {}", s.music_seed)),
-                adjust(|s, ctx, d| s.roll_music_seed(ctx, d)),
-                "Enter rolls a new seed. Every synthesized piece changes with it.",
+                |_s: &mut SettingsCategoryState, ctx| {
+                    ctx.push_state(SettingsCategoryState::music_seed_entry())
+                },
+            )
+            .help(
+                "Enter types a seed, a whole number. Left or Right rolls a new one. \
+                 Every synthesized piece changes with it.",
             ),
             row(
                 dyn_label(|s| format!("In-cab radio volume: {} percent", pct(s.radio_volume))),
