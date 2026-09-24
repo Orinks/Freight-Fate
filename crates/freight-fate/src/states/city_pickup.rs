@@ -4,6 +4,10 @@
 use serde_json::{json, Map, Value};
 use std::collections::HashSet;
 
+use ff_core::data::lcv_turnpikes::{
+    cargo_requires_lcv_turnpike, filter_lcv_turnpike_routes, LCV_TURNPIKE_REROUTE_NOTE,
+    LCV_TURNPIKE_ROUTE_REFUSAL,
+};
 use ff_core::data::national_network::{
     cargo_requires_national_network, city_key_outside_lower_48, city_outside_lower_48,
     filter_staa_doubles_routes, route_outside_lower_48, STAA_DOUBLES_CORRIDOR_REFUSAL,
@@ -764,6 +768,20 @@ impl PickupFacilityState {
             }
             let note = if filtered.len() < before {
                 Some(STAA_DOUBLES_REROUTE_NOTE)
+            } else {
+                None
+            };
+            (filtered, note)
+        } else if cargo_requires_lcv_turnpike(self.job.cargo.key) {
+            let before = routes.len();
+            let filtered = filter_lcv_turnpike_routes(&routes);
+            if filtered.is_empty() {
+                ctx.audio.play("ui/error");
+                ctx.say(LCV_TURNPIKE_ROUTE_REFUSAL);
+                return;
+            }
+            let note = if filtered.len() < before {
+                Some(LCV_TURNPIKE_REROUTE_NOTE)
             } else {
                 None
             };

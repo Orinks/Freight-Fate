@@ -1240,8 +1240,9 @@ instead of a spawn point.
 
 ### Twin parcel / STAA doubles (Track A)
 
-STAA twin 28-foot pups (`parcel_doubles`) on the National Network. FIX 2–5
-are intentionally not started here.
+STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
+LCV turnpike doubles on permitted toll roads. FIX 3–5 are intentionally
+not started here.
 
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
@@ -1260,14 +1261,57 @@ are intentionally not started here.
 - [ ] **Honesty debt: reasonable-access distance.** Cap is the federal
       1.0 mi floor (23 CFR 658.19); access distance varies by state and
       those extensions are not modeled. Mid-route connectors never count
-      unless later flagged under the FHWA map work.
+      unless later flagged under the FHWA map work. Cue'd first/last legs
+      share that 1.0 mi cap; same-city facility approaches (`a == b` from
+      `Leg::local`) stay uncapped as the approach itself.
 - [ ] **Honesty debt: Twin parcel loads are not offered on ALCAN, Canada,
       or Alaska lanes until provincial and Alaska doubles rules are
       modeled.**
-- [ ] **FIX 2: LCV turnpike trailer** (not started).
+- [x] **FIX 2: LCV turnpike trailer (landed).** `turnpike_doubles` uses its
+      own `turnpike_double` program: two **48-foot** vans (spoken
+      "48-foot turnpike doubles"), about **102 ft** cargo-carrying length
+      and **117 ft** overall, separate from STAA `double_van` pups.
+      Requires the doubles endorsement and the LCV certificate. Never
+      offered as hazmat. Offered and routed only on an explicit allowlist
+      of classic turnpike city-pair legs (NY Thruway I-90 Buffalo–Albany
+      and Berkshire/MA links, Mass Pike I-90, Ohio Turnpike west of the
+      Elyria split, Indiana Toll Road, Kansas Turnpike
+      Wichita–Emporia–Topeka) plus short staging stubs. Buffalo–Erie and
+      NYC endpoints are refused. Spoken refusal: "Dispatch only clears
+      long doubles on the turnpike."
+- [ ] **Honesty debt: Florida's Turnpike and Western LCV corridors.** FL
+      Turnpike is not Interstate-numbered in world data, so FL turnpike
+      doubles are not offered. Rocky Mountain / other Western LCV routes
+      outside the classic turnpike list are not modeled.
+- [ ] **Honesty debt: staging lots.** Break-bulk yards at turnpike exits
+      are approximated as same-city locals / end approaches / ≤ 1.0 mi
+      stubs, not curated LCV staging facilities.
+- [ ] **Honesty debt: no LCV driver certification or carrier permit gate
+      (49 CFR 380).** Holding the in-game LCV certificate opens the
+      freight; federal driver entry-level LCV training and carrier
+      permits are not modeled.
+- [ ] **Honesty debt: hazmat in doubles not modeled.** Placarded freight
+      never uses `turnpike_double`; twin hazmat rules are not simulated.
+- [ ] **Honesty debt / world-data gap: Ohio Turnpike east of Toledo to
+      the PA line.** No I-80 city-pair that avoids Cleveland, and no
+      Elyria node in world data. Pending map work; not faked.
+- [ ] **Honesty debt / world-data gap: Kansas Turnpike I-70 Topeka to
+      Kansas City.** No shipped leg (KC is in Missouri). Pending map
+      work; not faked.
+- [ ] **Honesty debt: NY I-87 Albany–Yonkers Thruway not modeled as a
+      city-pair.** Thruway tandems cannot leave onto public NY roads
+      (TAP-602); southern staging is Exit 6A Yonkers. `new_york_ny_us`
+      is refused as origin/destination, and the coarse world
+      `new_york`–`albany` I-87 leg is omitted rather than treated as a
+      legal turnpike-doubles lane. A Yonkers (or Exit 6A) node would be
+      needed before that corridor can be offered honestly.
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
-- [ ] **FIX 5: Twin tare and GVW** (not started).
+- [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
+      shares the stock trailer tare / legal-GVW clamp. Per-corridor LCV
+      GVW caps are recorded in `data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`
+      (OH/IN/MA 127,400 lb; NY 143,000 lb; KS 120,000 lb) but not enforced
+      yet.
 
 ### Travel-center bulk fuel (non-blocking)
 

@@ -423,11 +423,19 @@ impl<'w> JobBoard<'w> {
         weight.max(1e-12)
     }
 
-    /// Whether both ends of a lane sit in states on the frozen LCV network
-    /// (23 CFR 658 Appendix C). An endpoint check, deliberately: the route
-    /// between two LCV states can cross a non-LCV one, and modeling the
-    /// break-and-remake at the state line is the permit economy's job.
+    /// Whether turnpike doubles may run between these cities: both ends sit
+    /// in ISTEA-freeze LCV states, and at least one supported corridor option
+    /// stays on a listed LCV turnpike (plus staging stubs). See
+    /// `data::lcv_turnpikes`.
     pub(crate) fn lcv_lane(&self, origin: &str, destination: &str) -> bool {
+        use crate::data::lcv_turnpikes::{
+            city_allows_lcv_turnpike_endpoint, filter_lcv_turnpike_routes,
+        };
+        if !city_allows_lcv_turnpike_endpoint(origin)
+            || !city_allows_lcv_turnpike_endpoint(destination)
+        {
+            return false;
+        }
         let state_of = |key: &str| {
             self.world
                 .cities
@@ -435,8 +443,15 @@ impl<'w> JobBoard<'w> {
                 .map(|c| c.state_code.as_str())
                 .unwrap_or("")
         };
-        crate::models::credentials::lcv_state(state_of(origin))
-            && crate::models::credentials::lcv_state(state_of(destination))
+        if !(crate::models::credentials::lcv_state(state_of(origin))
+            && crate::models::credentials::lcv_state(state_of(destination)))
+        {
+            return false;
+        }
+        match self.world.supported_route_options(origin, destination, 3) {
+            Ok(routes) => !filter_lcv_turnpike_routes(&routes).is_empty(),
+            Err(_) => false,
+        }
     }
 
     /// Whether any supported corridor option from origin to destination stays

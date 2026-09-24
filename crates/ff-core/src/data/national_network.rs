@@ -12,9 +12,10 @@
 //!   [`crate::data::grades::road_class`]). Designated US and state primary
 //!   routes land later as explicit per-segment flags checked against the
 //!   FHWA National Network map, not by road class.
-//! * **Reasonable access** ≈ same-city local legs, plus first/last facility
-//!   approach (`local_cue`) or short terminal stubs capped at
-//!   [`REASONABLE_ACCESS_MAX_MI`]. Mid-route connectors never count.
+//! * **Reasonable access** ≈ same-city local legs (`a == b`, uncapped — the
+//!   facility-approach form), plus first/last end legs with `local_cue` or
+//!   plain stubs, both capped at [`REASONABLE_ACCESS_MAX_MI`]. Mid-route
+//!   connectors never count.
 //! * **Corridor policy:** twin loads are refused on ALCAN, Canada, and
 //!   Alaska lanes (any origin, destination, or leg outside the lower-48 US)
 //!   until provincial and Alaska doubles rules are modeled.
@@ -99,14 +100,15 @@ pub fn route_outside_lower_48(route: &Route) -> bool {
 }
 
 fn leg_is_end_access(leg: &Leg) -> bool {
+    // Same-city locals (facility approaches from `Leg::local`) are uncapped:
+    // they are the approach itself, not a highway stub.
     if leg_is_reasonable_access(leg) {
         return true;
     }
-    // Facility / surface approach at a terminal end only.
+    // First/last cue'd approach or plain stub: federal-floor mileage cap.
     if !leg.local_cue.is_empty() {
-        return true;
+        return leg.miles <= REASONABLE_ACCESS_MAX_MI;
     }
-    // Short corridor stub into or out of a yard (federal floor).
     leg.miles <= REASONABLE_ACCESS_MAX_MI
 }
 
@@ -261,6 +263,38 @@ mod tests {
             vec![stub, Leg::new("A", "B", 90.0, "I-5", "flat", Vec::new())],
         );
         assert!(!route_allows_staa_doubles(&route));
+    }
+
+    #[test]
+    fn cue_d_end_leg_over_one_mile_is_refused() {
+        // A first/last leg with a local_cue still has to fit the 1.0 mi access
+        // cap. Same-city facility approaches (a == b) stay uncapped.
+        let mut long_cue = Leg::new("yard", "A", 2.5, "Dock Spur", "flat", Vec::new());
+        long_cue.local_cue = "right onto Dock Spur".to_string();
+        let route = Route::from_legs(
+            vec!["yard".into(), "A".into(), "B".into()],
+            vec![
+                long_cue,
+                Leg::new("A", "B", 90.0, "I-5", "flat", Vec::new()),
+            ],
+        );
+        assert!(!route_allows_staa_doubles(&route));
+
+        let same_city = Leg::local(
+            "denver_co_us",
+            2.5,
+            "Dock Road",
+            "right onto Dock Road",
+            25.0,
+        );
+        let ok = Route::from_legs(
+            vec!["dock".into(), "A".into(), "B".into()],
+            vec![
+                same_city,
+                Leg::new("A", "B", 90.0, "I-5", "flat", Vec::new()),
+            ],
+        );
+        assert!(route_allows_staa_doubles(&ok));
     }
 
     #[test]

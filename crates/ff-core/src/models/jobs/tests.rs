@@ -305,11 +305,151 @@ fn turnpike_doubles_never_leave_the_frozen_network() {
             "seed {seed} offered LCV freight out of California"
         );
     }
-    // Salt Lake City sits in Utah, on the frozen network; an LCV lane is
-    // legal exactly when the destination's state is on it too.
+    // Western LCV states alone are no longer enough: the corridor must sit
+    // on an allowlisted turnpike leg. Salt Lake to Denver is frozen-network
+    // states but not a classic turnpike. Cleveland–Toledo on I-90 is east
+    // of the Elyria split and must not clear; Toledo–Elkhart and the NY /
+    // Indiana corridor pairs must.
     let b = board(1);
-    assert!(b.lcv_lane("salt_lake_city_ut_us", "denver_co_us"));
+    assert!(!b.lcv_lane("salt_lake_city_ut_us", "denver_co_us"));
     assert!(!b.lcv_lane("salt_lake_city_ut_us", "los_angeles_ca_us"));
+    assert!(
+        !b.lcv_lane("cleveland_oh_us", "toledo_oh_us"),
+        "OH I-90 into Cleveland is east of Elyria and must not clear"
+    );
+    assert!(
+        !b.lcv_lane("buffalo_ny_us", "erie_pa_us"),
+        "Buffalo–Erie leaves the Thruway into Pennsylvania"
+    );
+    assert!(
+        !b.lcv_lane("new_york_ny_us", "albany_ny_us")
+            && !b.lcv_lane("albany_ny_us", "new_york_ny_us"),
+        "NYC docks are not turnpike-doubles endpoints"
+    );
+    assert!(
+        b.lcv_lane("toledo_oh_us", "elkhart_in_us")
+            || b.lcv_lane("buffalo_ny_us", "syracuse_ny_us")
+            || b.lcv_lane("gary_in_us", "south_bend_in_us"),
+        "expected an allowlisted turnpike city pair to clear the LCV lane"
+    );
+}
+
+#[test]
+fn turnpike_doubles_never_start_or_end_in_nyc() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    let b = board(1);
+    assert!(!b.lcv_lane("new_york_ny_us", "albany_ny_us"));
+    assert!(!b.lcv_lane("albany_ny_us", "new_york_ny_us"));
+    assert!(!b.lcv_lane("new_york_ny_us", "buffalo_ny_us"));
+    for seed in 0..6 {
+        let jobs = board(seed).offers(
+            "New York",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        assert!(
+            jobs.iter().all(|j| j.cargo.key != "turnpike_doubles"),
+            "seed {seed} offered turnpike doubles out of NYC"
+        );
+    }
+}
+
+#[test]
+fn turnpike_doubles_require_doubles_endorsement_and_lcv() {
+    let cargo = cargo_type("turnpike_doubles").unwrap();
+    assert_eq!(cargo.credentials, ["doubles_triples", "lcv"]);
+    let job = Job::new(cargo, 20.0, "A", "Loc", "B", 300.0, 900.0, 24.0);
+    assert_eq!(
+        job.locked_reason(&["lcv"], 30, None, true),
+        "Requires the doubles endorsement."
+    );
+    assert_eq!(
+        job.locked_reason(&["doubles_triples"], 30, None, true),
+        "Requires the LCV certificate."
+    );
+    assert_eq!(
+        job.locked_reason(&["doubles_triples", "lcv"], 30, None, true),
+        ""
+    );
+}
+
+#[test]
+fn turnpike_double_never_offers_hazmat_cargo() {
+    // Placarded freight stays on dry van / tank programs. The turnpike
+    // doubles class is never a hazmat load, and hazmat classes never pull
+    // the turnpike_double trailer (hazmat in doubles is not modeled).
+    let turnpike = cargo_type("turnpike_doubles").unwrap();
+    assert!(!turnpike.credentials.contains(&"hazmat"));
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("turnpike_doubles"),
+        ["turnpike_double"]
+    );
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("hazardous"),
+        ["dry_van"]
+    );
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("fuel_bulk"),
+        ["tank"]
+    );
+    assert!(
+        !crate::models::trailers::trailer_keys_for_cargo("hazardous").contains(&"turnpike_double")
+    );
+    assert!(
+        !crate::models::trailers::trailer_keys_for_cargo("fuel_bulk").contains(&"turnpike_double")
+    );
+}
+
+#[test]
+fn turnpike_doubles_board_skips_non_turnpike_corridors() {
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    // Columbus sits off the Ohio Turnpike; long doubles must not originate
+    // onto I-71-only lanes even with every credential held.
+    for seed in 0..6 {
+        let jobs = board(seed).offers(
+            "Columbus",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        for job in &jobs {
+            if job.cargo.key != "turnpike_doubles" {
+                continue;
+            }
+            let routes = world()
+                .supported_route_options(&job.origin, &job.destination, 3)
+                .expect("route options");
+            assert!(
+                routes
+                    .iter()
+                    .any(crate::data::lcv_turnpikes::route_allows_lcv_turnpike),
+                "seed {seed} offered turnpike_doubles {} -> {} off the turnpike",
+                job.origin,
+                job.destination
+            );
+        }
+    }
+}
+
+#[test]
+fn parcel_doubles_and_singles_ignore_the_turnpike_trailer_program() {
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("parcel_doubles"),
+        ["double_van"]
+    );
+    assert_eq!(
+        crate::models::trailers::trailer_keys_for_cargo("general"),
+        ["dry_van"]
+    );
+    assert!(!cargo_type("parcel_doubles").unwrap().lcv_lanes);
+    assert!(!cargo_type("general").unwrap().lcv_lanes);
 }
 
 #[test]
