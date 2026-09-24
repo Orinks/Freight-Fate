@@ -1,9 +1,9 @@
 //! The achievement catalog: every badge and category. Originally generated
 //! from `src/freight_fate/achievements.py`; since the Python gameplay
-//! mirror retired (2026-08-29) this file is the source of truth, and new
-//! badges are added here AND to the Python module (whose id list still
-//! feeds the invariants export). The digest test pins the content against
-//! accidental edits -- update it deliberately with each catalog change.
+//! mirror retired (2026-08-29) this file is the source of truth, and the
+//! `ff-invariants` exporter reads it for the server's copy. The digest test
+//! pins the content against accidental edits -- update it deliberately with
+//! each catalog change, then regenerate the invariants export.
 //!
 //! Copy note (from the Python source): each badge has a specific
 //! inspiration, but player-facing text uses song-title-level allusions and
@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "8a0be9ee9387f8edd9c1f913584275ad7af8d33adab0c0f6c2df8d43b7136d44";
+pub const CATALOG_DIGEST: &str = "ef5b9f75da0d37c75db0a57c0f1dd7c06793d2924955e2f966d9163c920c3c45";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -922,7 +922,7 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
     Achievement {
         id: "weather_collector",
         name: "Every Sky in the Logbook",
-        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did.",
+        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, freezing rain, fog, and wind. None of it lasted; you did.",
         category: "weather_seasons",
         inspiration: "Waylon Jennings & Jessi Colter - Storms Never Last",
         hidden: false,
