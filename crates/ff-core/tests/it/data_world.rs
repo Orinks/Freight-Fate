@@ -274,14 +274,18 @@ fn test_each_metro_expands_to_representative_facilities() {
         if is_stand_in_market(&city.key) {
             let parking_only_curated = curated
                 && city.locations.iter().all(|loc| {
-                    loc.facility_type == "company_yard" || loc.facility_type == "terminal"
+                    matches!(
+                        loc.facility_type.as_str(),
+                        "company_yard" | "terminal" | "travel_center" | "truck_parking"
+                    )
                 })
                 && !city.locations.iter().any(|loc| loc.template);
             if parking_only_curated {
-                // ALCAN Phase A FIX 3: Surrey/Blaine truck lots stay yards.
+                // ALCAN: public truck lots / travel centers stay thin pins —
+                // no invented warehouse skyline on a stand-in market.
                 assert!(
                     city.locations.len() <= 2,
-                    "{}: parking-only stand-in should stay a yard, not {:?}",
+                    "{}: parking-only stand-in should stay thin, not {:?}",
                     city.name,
                     city.locations
                         .iter()
@@ -306,18 +310,22 @@ fn test_each_metro_expands_to_representative_facilities() {
         assert!(!city.market_tags.is_empty());
         let parking_only_curated = is_stand_in_market(&city.key)
             && curated
-            && city
-                .locations
-                .iter()
-                .all(|loc| loc.facility_type == "company_yard" || loc.facility_type == "terminal")
+            && city.locations.iter().all(|loc| {
+                matches!(
+                    loc.facility_type.as_str(),
+                    "company_yard" | "terminal" | "travel_center" | "truck_parking"
+                )
+            })
             && !city.locations.iter().any(|loc| loc.template);
         if !parking_only_curated {
             assert!(city.locations.iter().any(|loc| loc.template));
         }
-        assert!(city
-            .locations
-            .iter()
-            .any(|loc| loc.facility_type == "company_yard" || loc.facility_type == "terminal"));
+        assert!(city.locations.iter().any(|loc| {
+            matches!(
+                loc.facility_type.as_str(),
+                "company_yard" | "terminal" | "travel_center" | "truck_parking"
+            )
+        }));
     }
 }
 
