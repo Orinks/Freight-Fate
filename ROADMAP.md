@@ -1220,11 +1220,30 @@ against.
       September 12 sweep missed. Oklahoma answers (60 zones) but publishes its
       access token inside the URL, which is still a key; New Mexico still
       answers 503, a week on, so it is dead rather than briefly down.
-- [ ] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
-      each axle group weighs before a scale house tells them. 2,127 of them
-      are mapped and branded, and the truck already knows its mass and axle
-      load. Needs the owner's call on what a weigh costs and what the readout
-      says.
+- [x] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
+      each axle group weighs before a scale house tells them. The stop menu's
+      Weigh on the CAT Scale row costs CAT's published 15.25 dollars, 5.25 for
+      a reweigh at the same scale within 24 hours (read from catscale.com's
+      FAQ, 2026-09-24; company drivers bill the carrier), takes ten minutes on
+      duty (assumed), and reads the ticket: steer, drive and trailer axles and
+      gross in pounds, then legal or which groups are over the 34,000 lb
+      tandem and 80,000 lb gross limits. The split comes from a lever model
+      on the mass model's own parts (`sim/vehicle/axles.rs`), derived per
+      truck so a full legal load scales 12,000 / 34,000 / 34,000; the one
+      assumed number is a bare tractor's 55 percent on its steer axle. Which
+      stops have one is read: `tools/cat_scales.py` snapshots the 2,127
+      CAT-branded OpenStreetMap weighbridges and gives the `scale` service to
+      1,667 truck-stop records within 0.25 mi of one (calibrated: 844 of 1,102
+      travel centers within 0.1 mi, 868 within 0.25, 880 within 0.5), on top
+      of the 176 read from brand pages. Stop details now say "CAT Scale".
+- [ ] An axle cannot go over while the gross is legal: the game has no load
+      placement, fifth-wheel slide or tandem slide, so the axle model is fixed
+      per truck and a state scale still judges gross only. Real drivers weigh
+      mostly to catch a heavy drive tandem at a legal gross; that needs load
+      placement and an axle check at the scale house.
+- [ ] 234 travel-center records with a coordinate have no mapped CAT Scale
+      within 0.25 mi, and records with no coordinate are never matched. CAT
+      Scale's own locator is the check on both.
 - [ ] Where the state scale houses are is still unsolved. 78 of 1,283 legs
       carry one, every one of them found off an exit sign rather than looked
       for, and no keyless national source beats that -- OpenStreetMap's

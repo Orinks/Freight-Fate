@@ -10,7 +10,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 1.01,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -23,7 +23,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -33,7 +34,7 @@
           "name": "Love's Travel Stop Canaan",
           "type": "travel_center",
           "at_mi": 32.54,
-          "source": "Love's official store feed lists store 611 in Canaan, NY on I-90, exit B3; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 611 at Canaan; matched by position, the only Love's within 5 mi of mile 32.54 of this leg (0.4 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 611 in Canaan, NY on I-90, exit B3; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 611 at Canaan; matched by position, the only Love's within 5 mi of mile 32.54 of this leg (0.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -46,7 +47,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -3313,7 +3315,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -3326,7 +3328,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -8663,7 +8666,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8676,7 +8679,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -8756,7 +8760,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -8769,7 +8773,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -14158,7 +14163,7 @@
           "name": "Love's Travel Stop Binghamton",
           "type": "travel_center",
           "at_mi": 4.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 403 at Binghamton; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 403 at Binghamton; town read from the mapped site's branch name; matched by coordinate, 0.02 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14171,7 +14176,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.1015702,
           "lon": -75.8350387,
@@ -14223,7 +14229,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 137.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -14236,7 +14242,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -20702,7 +20709,7 @@
           "name": "Love's Travel Stop Ripley",
           "type": "travel_center",
           "at_mi": 68.7,
-          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 833 at Ripley; matched by name, the only Love's the map has at Ripley within 40 mi of mile 68.7 of this leg (6.6 mi); coordinates read from the mapped site. Mile marker moved from 63.4 to 68.7: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 63.4 is more than 5 mi from the store.",
+          "source": "Love's official store feed lists store 833 in Ripley, NY on I-90, exit 61 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 833 at Ripley; matched by name, the only Love's the map has at Ripley within 40 mi of mile 68.7 of this leg (6.6 mi); coordinates read from the mapped site. Mile marker moved from 63.4 to 68.7: DERIVED from the map import's record of this same store on this leg, which was placed from the store's coordinates; mile 63.4 is more than 5 mi from the store. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -20715,7 +20722,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -27471,7 +27479,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 117.3,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 117.3 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 117.3 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -27484,7 +27492,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -31811,7 +31820,7 @@
           "name": "TA Travel Center Erie",
           "type": "travel_center",
           "at_mi": 36.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): TA store 0215 at Erie; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Pennsylvania extract dated 2026-06-22, read 2026-09-17): TA store 0215 at Erie; town read from the mapped site's address; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -31824,7 +31833,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.14069,
           "lon": -79.926,
@@ -34595,7 +34605,7 @@
           "name": "Pilot Travel Center Mahwah",
           "type": "travel_center",
           "at_mi": 29.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Mahwah; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Pilot store at Mahwah; town read from the store page the mapped site links to; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34608,7 +34618,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.09208,
           "lon": -74.15557,
@@ -34685,7 +34696,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 144.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -34698,7 +34709,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -39264,7 +39276,7 @@
           "name": "Pilot Travel Center Sturbridge",
           "type": "travel_center",
           "at_mi": 165.9,
-          "source": "Pilot Flying J official Sturbridge, Massachusetts location page lists truck parking; at_mi estimated from the I-84/Massachusetts Turnpike approach west of Boston, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by name, the only Pilot the map has at Sturbridge within 40 mi of mile 165.9 of this leg (22.0 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official Sturbridge, Massachusetts location page lists truck parking; at_mi estimated from the I-84/Massachusetts Turnpike approach west of Boston, accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by name, the only Pilot the map has at Sturbridge within 40 mi of mile 165.9 of this leg (22.0 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -39276,7 +39288,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -41023,7 +41036,7 @@
           "name": "Petro Stopping Center Bordentown",
           "type": "travel_center",
           "at_mi": 80.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Petro store 0314 at Bordentown; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New Jersey extract dated 2026-06-22, read 2026-09-17): Petro store 0314 at Bordentown; town read from the mapped site's branch name; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -41036,7 +41049,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 40.12334,
           "lon": -74.7111,
@@ -49572,7 +49586,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 45.72,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 45.72 of this leg (0.3 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 45.72 of this leg (0.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -49585,7 +49599,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -49728,7 +49743,7 @@
           "name": "Pilot Travel Center Rotterdam",
           "type": "travel_center",
           "at_mi": 208.86,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Rotterdam; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Rotterdam; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49741,7 +49756,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.7815391,
           "lon": -74.029215,
@@ -49775,7 +49791,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 228.1,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49788,7 +49804,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -49896,7 +49913,7 @@
           "name": "Pilot Travel Center Fultonville",
           "type": "travel_center",
           "at_mi": 102.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Fultonville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Pilot store at Fultonville; town read from the store page the mapped site links to; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49909,7 +49926,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.9463726,
           "lon": -74.3563336,
@@ -49942,7 +49960,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 144.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -49955,7 +49973,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -52236,7 +52255,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 40.2,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.3 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.3 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -52249,7 +52268,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -54600,7 +54620,7 @@
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 40.2,
-          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 820 at Waterloo; matched by position, the only Love's within 5 mi of mile 40.2 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -54613,7 +54633,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -59119,7 +59140,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 93.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -59132,7 +59153,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -60567,7 +60589,7 @@
           "name": "Love's Travel Stop Watertown",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -60580,7 +60602,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 44.00177,
           "lon": -75.9229,
@@ -62115,7 +62138,7 @@
           "name": "Love's Travel Stop Watertown",
           "type": "travel_center",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the watertown_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik New York extract dated 2026-06-22, read 2026-09-17): Love's store 870 at Watertown; town DERIVED, not read: the nearest mapped place, 2.0 mi away; matched by coordinate, 0.03 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -62128,7 +62151,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 44.00177,
           "lon": -75.9229,

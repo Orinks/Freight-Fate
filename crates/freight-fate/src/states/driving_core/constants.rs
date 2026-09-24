@@ -780,7 +780,9 @@ pub const POI_SERVICE_LABELS: [(&str, &str); 9] = [
     ("parking", "truck parking"),
     ("truck_parking", "truck parking"),
     ("restrooms", "restrooms"),
-    ("scale", "scale"),
+    // Only truck stops list it: the certified scale a driver pays to use,
+    // never the weigh station ("the scale" in short cues).
+    ("scale", "CAT Scale"),
     ("repair", "repair"),
     ("roadside_assistance", "roadside assistance"),
     ("towing", "towing"),

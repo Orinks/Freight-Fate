@@ -5449,7 +5449,7 @@
           "name": "Pilot Travel Center Sturbridge",
           "type": "travel_center",
           "at_mi": 56.7,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 222 in Sturbridge, MA with 108 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by name, the only Pilot the map has at Sturbridge within 40 mi of mile 56.7 of this leg (5.4 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 222 in Sturbridge, MA with 108 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by name, the only Pilot the map has at Sturbridge within 40 mi of mile 56.7 of this leg (5.4 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -5462,7 +5462,8 @@
             "diesel",
             "food",
             "restrooms",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -5480,7 +5481,7 @@
           "name": "Love's Travel Stop Willington",
           "type": "travel_center",
           "at_mi": 75.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 75.8 of this leg (0.5 mi); coordinates read from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; town read from the mapped site's address; matched by position, the only Love's within 5 mi of mile 75.8 of this leg (0.5 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -5493,7 +5494,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "vehicle_access": "tractor_trailer",
           "lat": 41.926262,
@@ -11790,7 +11792,7 @@
           "name": "Plaza 23 Truck Stop",
           "type": "travel_center",
           "at_mi": 86.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -11803,7 +11805,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 42.63499,
           "lon": -73.75477,
@@ -17995,7 +17998,7 @@
           "name": "Love's Travel Stop Willington",
           "type": "travel_center",
           "at_mi": 38.2,
-          "source": "Love's official store feed lists store 646 in Willington, CT on I-84, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; matched by position, the only Love's within 5 mi of mile 38.2 of this leg (0.2 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 646 in Willington, CT on I-84, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; matched by position, the only Love's within 5 mi of mile 38.2 of this leg (0.2 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -18008,7 +18011,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -22137,7 +22141,7 @@
           "name": "Pilot Travel Center Sturbridge",
           "type": "travel_center",
           "at_mi": 23.1,
-          "source": "Pilot Flying J official locator lists Pilot Travel Center store 222 in Sturbridge, MA with 108 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by position, the only Pilot within 5 mi of mile 23.1 of this leg (1.7 mi); coordinates read from the mapped site.",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 222 in Sturbridge, MA with 108 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.3 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ma/sturbridge/400-haynes-st; Store coordinates read from OpenStreetMap (Geofabrik Massachusetts extract dated 2026-06-22, read 2026-09-17): Pilot store at Sturbridge; matched by position, the only Pilot within 5 mi of mile 23.1 of this leg (1.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -22150,7 +22154,8 @@
             "diesel",
             "food",
             "restrooms",
-            "parking"
+            "parking",
+            "scale"
           ],
           "directions": [
             "both"
@@ -22167,7 +22172,7 @@
           "name": "Love's Travel Stop Willington",
           "type": "travel_center",
           "at_mi": 35.9,
-          "source": "Love's official store feed lists store 646 in Willington, CT on I-84, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; matched by position, the only Love's within 5 mi of mile 35.9 of this leg (2.1 mi); coordinates read from the mapped site.",
+          "source": "Love's official store feed lists store 646 in Willington, CT on I-84, exit 71; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores; Store coordinates read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): Love's store 646 at Willington; matched by position, the only Love's within 5 mi of mile 35.9 of this leg (2.1 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "actions": [
             "park",
             "save",
@@ -22180,7 +22185,8 @@
             "diesel",
             "food",
             "parking",
-            "restrooms"
+            "restrooms",
+            "scale"
           ],
           "directions": [
             "both"
@@ -22198,7 +22204,7 @@
           "name": "TA Travel Center Southington",
           "type": "travel_center",
           "at_mi": 87.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): TA store 0154 at Southington; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Connecticut extract dated 2026-06-22, read 2026-09-17): TA store 0154 at Southington; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
           "parking": "likely",
           "actions": [
             "park",
@@ -22211,7 +22217,8 @@
           "services": [
             "diesel",
             "food",
-            "parking"
+            "parking",
+            "scale"
           ],
           "lat": 41.56517,
           "lon": -72.90972,
