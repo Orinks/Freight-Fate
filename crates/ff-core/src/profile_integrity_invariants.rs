@@ -999,10 +999,10 @@ mod tests {
     fn rendered_invariants_are_sorted_two_space_json() {
         let text = rendered_invariants(&world_data_root(), &inputs()).unwrap();
         assert!(text.starts_with(
-            "{\n  \"achievementCategories\": [\n {\n \"key\": \"road\",\n \"title\": \"Out on the Road\"\n }\n  ],\n  \"achievementDetails\": {\n \"first_delivery\": {\n \"category\": \"road\",\n"
+            "{\n  \"achievementCategories\": [\n    {\n      \"key\": \"road\",\n      \"title\": \"Out on the Road\"\n    }\n  ],\n  \"achievementDetails\": {\n    \"first_delivery\": {\n      \"category\": \"road\",\n"
         ));
-        assert!(text.contains("\n  \"achievementIds\": [\n \"antler_polisher\",\n"));
-        assert!(text.contains("\n  \"endorsements\": {\n \"hazmat\": {\n \"label\": \"hazmat\",\n \"tier\": \"endorsement\"\n },\n \"heavy_haul\": {\n \"label\": \"heavy-haul\",\n \"level\": 3,\n \"tier\": \"certificate\"\n },"));
+        assert!(text.contains("\n  \"achievementIds\": [\n    \"antler_polisher\",\n"));
+        assert!(text.contains("\n  \"endorsements\": {\n    \"hazmat\": {\n      \"label\": \"hazmat\",\n      \"tier\": \"endorsement\"\n    },\n    \"heavy_haul\": {\n      \"label\": \"heavy-haul\",\n      \"level\": 3,\n      \"tier\": \"certificate\"\n    },"));
         assert!(text.ends_with("}\n"));
     }
 }
