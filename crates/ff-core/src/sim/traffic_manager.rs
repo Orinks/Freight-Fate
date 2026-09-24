@@ -741,17 +741,21 @@ impl TrafficManager {
         count
     }
 
+    /// Index of the leg the given route mile falls in: the last leg whose
+    /// start is at or before the mile. `leg_starts` is the running sum of
+    /// leg miles, so it is sorted ascending and a binary search finds the
+    /// same leg the old front-to-back walk did.
+    fn leg_index_at(&self, mile: f64) -> Option<usize> {
+        let count = self.leg_starts.len().min(self.route.legs.len());
+        self.leg_starts[..count]
+            .partition_point(|start| mile + 1e-9 >= *start)
+            .checked_sub(1)
+    }
+
     /// The leg the given route mile falls in.
     pub fn leg_at(&self, mile: f64) -> Option<&Leg> {
-        let mut found: Option<&Leg> = None;
-        for (start, leg) in self.leg_starts.iter().zip(self.route.legs.iter()) {
-            if mile + 1e-9 >= *start {
-                found = Some(leg);
-            } else {
-                break;
-            }
-        }
-        found
+        self.leg_index_at(mile)
+            .map(|index| &*self.route.legs[index])
     }
 
     /// The leg a route mile falls in, how far into that leg it is
@@ -761,26 +765,16 @@ impl TrafficManager {
     /// The one walk the lane, limit and grade lookups all read, so they
     /// cannot come to different answers about which leg a mile is on.
     pub fn leg_offset_forward_at(&self, mile: f64) -> Option<(&Leg, f64, bool)> {
-        let mut found: Option<(&Leg, f64, bool)> = None;
-        for (index, (start, leg)) in self
-            .leg_starts
-            .iter()
-            .zip(self.route.legs.iter())
-            .enumerate()
-        {
-            if mile + 1e-9 >= *start {
-                let offset = (mile - start).clamp(0.0, leg.miles.max(0.0));
-                let forward = self.route.cities.get(index).is_some_and(|c| *c == leg.a);
-                found = Some((
-                    leg,
-                    if forward { offset } else { leg.miles - offset },
-                    forward,
-                ));
-            } else {
-                break;
-            }
-        }
-        found
+        let index = self.leg_index_at(mile)?;
+        let leg = &self.route.legs[index];
+        let start = self.leg_starts[index];
+        let offset = (mile - start).clamp(0.0, leg.miles.max(0.0));
+        let forward = self.route.cities.get(index).is_some_and(|c| *c == leg.a);
+        Some((
+            leg,
+            if forward { offset } else { leg.miles - offset },
+            forward,
+        ))
     }
 
     /// The leg a route mile falls in, and how far into that leg it is
@@ -800,9 +794,14 @@ impl TrafficManager {
     /// exist, where it could never be the lead the driver has to deal with
     /// and where its pass-by whoosh panned to a side of a road with no side.
     pub fn lane_count_at(&self, mile: f64) -> i64 {
-        let Some((leg, offset, forward)) = self.leg_offset_forward_at(mile) else {
-            return DEFAULT_LEG_LANES;
-        };
+        match self.leg_offset_forward_at(mile) {
+            Some((leg, offset, forward)) => Self::lane_count_on(leg, offset, forward),
+            None => DEFAULT_LEG_LANES,
+        }
+    }
+
+    /// [`TrafficManager::lane_count_at`] for an already resolved leg.
+    fn lane_count_on(leg: &Leg, offset: f64, forward: bool) -> i64 {
         for seg in leg.lane_segments() {
             if seg.start_mi <= offset && offset <= seg.end_mi {
                 return 1.max(MAX_DRIVABLE_LANES.min(seg.your_side(forward)));
@@ -834,9 +833,14 @@ impl TrafficManager {
     /// The posted limit for a car here -- the posted number rather than the
     /// truck cap, because the cars going by a rig held to 55 are doing 65.
     pub fn posted_limit_at(&self, mile: f64) -> f64 {
-        let Some((leg, offset)) = self.leg_and_offset_at(mile) else {
-            return DEFAULT_LIMIT_MPH;
-        };
+        match self.leg_and_offset_at(mile) {
+            Some((leg, offset)) => Self::posted_limit_on(leg, offset),
+            None => DEFAULT_LIMIT_MPH,
+        }
+    }
+
+    /// [`TrafficManager::posted_limit_at`] for an already resolved leg.
+    fn posted_limit_on(leg: &Leg, offset: f64) -> f64 {
         if let Some(baked) = leg_speed_limit_at(leg, offset) {
             return baked;
         }
@@ -849,9 +853,14 @@ impl TrafficManager {
     /// descends. Zero where the bake has nothing to say, so an unsurveyed
     /// stretch simply leaves the limiter in charge.
     pub fn grade_pct_at(&self, mile: f64) -> f64 {
-        let Some((leg, sample_offset, forward)) = self.leg_offset_forward_at(mile) else {
-            return 0.0;
-        };
+        match self.leg_offset_forward_at(mile) {
+            Some((leg, offset, forward)) => Self::grade_pct_on(leg, offset, forward),
+            None => 0.0,
+        }
+    }
+
+    /// [`TrafficManager::grade_pct_at`] for an already resolved leg.
+    fn grade_pct_on(leg: &Leg, sample_offset: f64, forward: bool) -> f64 {
         for segment in leg.grade_segments() {
             if segment.start_mi <= sample_offset && sample_offset <= segment.end_mi {
                 return if forward {
@@ -927,7 +936,21 @@ impl TrafficManager {
         governor_mph: Option<f64>,
         slowdown_mph: f64,
     ) -> f64 {
-        let posted = self.posted_limit_at(mile);
+        self.road_speed_from_posted(
+            self.posted_limit_at(mile),
+            limit_offset_mph,
+            governor_mph,
+            slowdown_mph,
+        )
+    }
+
+    fn road_speed_from_posted(
+        &self,
+        posted: f64,
+        limit_offset_mph: f64,
+        governor_mph: Option<f64>,
+        slowdown_mph: f64,
+    ) -> f64 {
         let mut speed = posted + limit_offset_mph;
         if let Some(governor) = governor_mph {
             speed = speed.min(governor);
@@ -1167,10 +1190,26 @@ impl TrafficManager {
             self.weekend = weekend;
         }
         let game_hours = dt * time_scale / 3600.0;
+        let truck_lanes = self.lane_count_at(position_mi);
         let mut kept = Vec::new();
         let vehicles = std::mem::take(&mut self.vehicles);
         for mut vehicle in vehicles {
             let gap = vehicle.position_mi - position_mi;
+            // Every road question below is asked of the road under the
+            // vehicle where this frame found it, so resolve that leg once.
+            let road = self.leg_offset_forward_at(vehicle.position_mi);
+            let lanes_here = match road {
+                Some((leg, offset, forward)) => Self::lane_count_on(leg, offset, forward),
+                None => DEFAULT_LEG_LANES,
+            };
+            let posted_here = match road {
+                Some((leg, offset, _)) => Self::posted_limit_on(leg, offset),
+                None => DEFAULT_LIMIT_MPH,
+            };
+            let grade_here = match road {
+                Some((leg, offset, forward)) => Self::grade_pct_on(leg, offset, forward),
+                None => 0.0,
+            };
             if vehicle.intent == "merging" && vehicle.lane < 0 {
                 let safe_gap_mi = vehicle.length_mi
                     + self.truck_speed_mph.abs().max(vehicle.speed_mph.abs())
@@ -1196,10 +1235,7 @@ impl TrafficManager {
             // lane to be in. Held to the lanes the road has under it, the
             // same clamp `LaneKeeping::set_lane_count` puts on the player.
             if vehicle.lane >= 0 {
-                vehicle.lane = vehicle
-                    .lane
-                    .min(self.lane_count_at(vehicle.position_mi) - 1)
-                    .max(0);
+                vehicle.lane = vehicle.lane.min(lanes_here - 1).max(0);
             }
             vehicle.relative_lane = self.player_lane - vehicle.lane;
             // What this driver would be doing on the road UNDER THEM, which
@@ -1214,7 +1250,14 @@ impl TrafficManager {
             // forced the truck to brake was carrying a number from a slower
             // piece of road, and one bubble vehicle in seventy was running
             // slower than any speed its own road could have drawn for it.
-            let road_mph = self.vehicle_road_speed_mph(&vehicle);
+            let road_mph = vehicle.limit_offset_mph.map(|offset| {
+                self.road_speed_from_posted(
+                    posted_here,
+                    offset,
+                    vehicle.governor_mph,
+                    vehicle.slowdown_mph,
+                )
+            });
             // Braking ends when the REASON does, and the reason is on the
             // ROAD -- so the question has to be asked BEFORE the near-gap jam
             // branch below, not only after it. That branch holds a braking
@@ -1238,7 +1281,7 @@ impl TrafficManager {
                     Some(pace) => vehicle.target_speed_mph = pace,
                     None => {
                         vehicle.target_speed_mph = self
-                            .floor_speed(self.posted_limit_at(vehicle.position_mi))
+                            .floor_speed(posted_here)
                             .max(vehicle.target_speed_mph - 8.0 * dt);
                     }
                 }
@@ -1252,7 +1295,7 @@ impl TrafficManager {
                 let cruise = match self.zone_pace_at(vehicle.position_mi) {
                     Some(pace) => pace,
                     None => {
-                        let mut open = self.posted_limit_at(vehicle.position_mi) + 1.0;
+                        let mut open = posted_here + 1.0;
                         if let Some(governor) = vehicle.governor_mph {
                             open = open.min(governor);
                         }
@@ -1302,10 +1345,7 @@ impl TrafficManager {
             // `From<NPCVehicle>` carrying the class `"vehicle"`, which is
             // just as unmodelled -- and an unknown class is not
             // climb-modelled, which is what a car is.
-            let climb = climb_speed_mph(
-                &vehicle.vehicle_class,
-                self.grade_pct_at(vehicle.position_mi),
-            );
+            let climb = climb_speed_mph(&vehicle.vehicle_class, grade_here);
             let target = vehicle.target_speed_mph.min(climb);
             let delta = target - vehicle.speed_mph;
             vehicle.speed_mph += (-6.0 * dt).max((4.0 * dt).min(delta));
@@ -1318,8 +1358,7 @@ impl TrafficManager {
             // a one-lane road). Held to a following gap at the truck's pace
             // instead, the way a queue forms behind a slow truck on a
             // two-lane highway.
-            if gap < 0.0 && vehicle.lane == self.player_lane && self.lane_count_at(position_mi) <= 1
-            {
+            if gap < 0.0 && vehicle.lane == self.player_lane && truck_lanes <= 1 {
                 let truck_mph = self.truck_speed_mph.abs();
                 let hold_at =
                     position_mi - vehicle.length_mi - truck_mph * HOLD_BEHIND_HEADWAY_S / 3600.0;
@@ -1488,6 +1527,73 @@ mod tests {
             "held {:.2} miles back",
             position_mi - unit.position_mi
         );
+    }
+
+    /// The binary search over `leg_starts` answers exactly what the old
+    /// front-to-back walk did: before the route, on a boundary (with the
+    /// same 1e-9 tolerance), inside a leg, across a zero-mile leg, past the
+    /// end, and with more starts than legs.
+    #[test]
+    fn leg_lookup_matches_the_linear_walk() {
+        let legs = vec![
+            Leg::new("A", "B", 10.0, "I-1", "flat", Vec::new()),
+            Leg::new("C", "B", 0.0, "I-2", "flat", Vec::new()),
+            Leg::new("C", "D", 5.0, "I-3", "flat", Vec::new()),
+            Leg::new("D", "E", 20.0, "I-4", "flat", Vec::new()),
+        ];
+        let cities = ["A", "B", "C", "D", "E"]
+            .iter()
+            .map(|c| c.to_string())
+            .collect();
+        let route = Route::from_legs(cities, legs);
+        let starts = [0.0, 10.0, 10.0, 15.0, 35.0];
+        let manager = TrafficManager::bare(&route, &starts);
+        let linear = |mile: f64| {
+            let mut found = None;
+            for (index, start) in starts.iter().zip(route.legs.iter()).enumerate() {
+                if mile + 1e-9 >= *start.0 {
+                    found = Some(index);
+                } else {
+                    break;
+                }
+            }
+            found
+        };
+        for mile in [
+            -1.0,
+            -1e-10,
+            0.0,
+            4.5,
+            10.0 - 2e-9,
+            10.0 - 1e-10,
+            10.0,
+            12.0,
+            15.0,
+            34.0,
+            35.0,
+            99.0,
+            f64::NAN,
+        ] {
+            let expected = linear(mile).map(|i| route.legs[i].highway.clone());
+            assert_eq!(
+                manager.leg_at(mile).map(|leg| leg.highway.clone()),
+                expected,
+                "mile {mile}"
+            );
+            let expected_offset = linear(mile).map(|i| {
+                let leg = &route.legs[i];
+                let offset = (mile - starts[i]).clamp(0.0, leg.miles.max(0.0));
+                let forward = route.cities[i] == leg.a;
+                (if forward { offset } else { leg.miles - offset }, forward)
+            });
+            assert_eq!(
+                manager
+                    .leg_offset_forward_at(mile)
+                    .map(|(_, offset, forward)| (offset, forward)),
+                expected_offset,
+                "mile {mile}"
+            );
+        }
     }
 
     #[test]
