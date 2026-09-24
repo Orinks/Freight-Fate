@@ -245,6 +245,50 @@ fn test_last_known_report_says_updating_only_during_true_inflight_refresh() {
 }
 
 #[test]
+fn test_retry_after_a_failure_stays_unavailable_while_it_runs() {
+    // Reading a retry as "loading" flipped the source back and forth every
+    // minute and re-announced simulated weather after each failed retry.
+    let monotonic = Arc::new(StdMutex::new(0.0));
+    let (started_tx, started_rx) = mpsc::channel::<()>();
+    let (release_tx, release_rx) = mpsc::channel::<()>();
+    let release_rx = StdMutex::new(release_rx);
+    let calls = Arc::new(StdMutex::new(0));
+    let counter = Arc::clone(&calls);
+    let provider = RealWeatherProvider::new(Arc::new(move |_, _| {
+        let n = {
+            let mut c = counter.lock().unwrap();
+            *c += 1;
+            *c
+        };
+        if n > 1 {
+            started_tx.send(()).unwrap();
+            release_rx
+                .lock()
+                .unwrap()
+                .recv_timeout(std::time::Duration::from_secs(5))
+                .expect("released");
+        }
+        Err("The server answered with error 404.".to_string())
+    }))
+    .with_clock(shared_clock(&monotonic));
+    provider.request("route-cell", 40.0, -80.0);
+    provider.join_background();
+    assert!(provider.unavailable("route-cell"));
+
+    *monotonic.lock().unwrap() = RETRY_AFTER_S + 1.0;
+    provider.request("route-cell", 40.0, -80.0);
+    started_rx
+        .recv_timeout(std::time::Duration::from_secs(5))
+        .expect("retry started");
+    assert!(provider.refreshing("route-cell"));
+    assert!(provider.unavailable("route-cell"));
+
+    release_tx.send(()).unwrap();
+    provider.join_background();
+    assert!(provider.unavailable("route-cell"));
+}
+
+#[test]
 fn test_failed_refresh_expires_last_known_observation_instead_of_loading_forever() {
     let monotonic = Arc::new(StdMutex::new(0.0));
     let wall = Arc::new(StdMutex::new(1_000_000.0));

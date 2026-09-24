@@ -1421,6 +1421,26 @@ mainline behaviour.
       during it is forced (`CrossTraffic::conflict_between`). The same timing
       decides when a yield or roundabout is clear to roll or to pull out
       from a stop. Stop signs still use the four-second look.
+- [x] **"Live weather unavailable. Simulated weather in use." repeats every
+      few minutes** (agent drive, 2026-09-24; fix/air-and-weather-repeat).
+      A retry after a failed fetch read as "loading" while it ran, so the
+      source flipped back to fallback after every failed retry and was
+      announced again once a minute. A retry now stays unavailable, and a new
+      route cell loading while simulated weather is in use is not a source
+      change (trip and weather tablet). Said once; "Live weather ready" once
+      on recovery.
+- [x] **Air ready went false at 62 mph on the mainline** (agent drive D,
+      2026-09-24; fix/air-and-weather-repeat). Pedal fanning again: cruise's
+      service trim for a lower target switched on at 2 mph over at a
+      fifteenth of the pedal, so an exit glide sliding down ahead of the
+      truck held it on that edge and the pedal rose about fifteen times a
+      second (8 full applications on the reproduced I-20 run, tanks to
+      100 psi; now under 1, 120 psi). It now fades in over the mile an hour
+      below the edge. Three siblings with the same switched edge, each
+      measured pumping on its own bench, fade in too: interactive descent
+      control's brake at 8 over its ceiling, exit speed assistance's 0.35 at
+      the gore's acceptance, and the curve assist's drums at 10 over with
+      the retarder on.
 
 ## 1.10 planned -- the working week and home
 

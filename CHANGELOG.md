@@ -126,6 +126,10 @@
 
 ### Fixed
 
+- **Adaptive cruise and the speed assists no longer drain the air tanks by pumping the brakes.** They hold the pedal steady while they slow you.
+
+- **Losing live weather is announced once.** You no longer hear that simulated weather is in use every minute while it stays that way.
+
 - **Live weather no longer drops to simulated weather when the nearest weather station is silent.** The next station over is used instead.
 
 - **The Every Sky in the Logbook achievement now names freezing rain.** Its description lists all nine kinds of weather it takes to earn.

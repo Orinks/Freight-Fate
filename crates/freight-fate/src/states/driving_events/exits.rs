@@ -768,7 +768,12 @@ impl DrivingState {
             let transit = stop.stop_type != "delivery_destination";
             self.pause_speed_control(ctx, transit);
         }
-        self.trip.truck.brake = self.trip.truck.brake.max(0.35);
+        // Faded in over the first mile an hour past the line. A full 0.35 the
+        // moment the truck crossed it pumped the pedal on a downgrade, where
+        // gravity put the truck straight back over after each application,
+        // and every application costs air.
+        let over = self.trip.truck.speed_mph() - self.gore_acceptance_mph(Some(stop)) - margin;
+        self.trip.truck.brake = self.trip.truck.brake.max(0.35 * over.min(1.0));
         if self.assist_exit_slowing_said {
             return;
         }
