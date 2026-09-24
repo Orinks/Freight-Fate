@@ -169,7 +169,9 @@ impl DrivingState {
             _ => "",
         };
         let ahead_text = ctx.settings.distance_text(ahead, true);
-        let ramp_text = ctx.settings.speed_text(self.armed_ramp_mph(Some(&stop)));
+        // No ramp number here: it is braked for past the gore, where taking
+        // the exit names it as the exit speed. Said a mile out it asked the
+        // driver to shed on the mainline (realistic exit, 2026-09-24).
         let cap = self.cap_cruise_for_ramp(ctx, Some(&stop));
         let mut message = if ctx.settings.lane_is_automated() {
             self.exit_lane_alignment = EXIT_LANE_READY;
@@ -184,14 +186,10 @@ impl DrivingState {
                 self.lane_keeping_grant_said = true;
                 "Exit lane set for you by lane keeping."
             };
-            format!(
-                "{head} {ahead_text} ahead. {granted}{lane_hint} {ramp_text} or less for the \
-                 ramp.{ending}{cap}"
-            )
+            format!("{head} {ahead_text} ahead. {granted}{lane_hint}{ending}{cap}")
         } else {
             format!(
-                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then \
-                 {ramp_text} or less for the ramp.{ending}{cap}"
+                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane.{ending}{cap}"
             )
         };
         if self.is_selected_stop(Some(&stop)) {
@@ -320,6 +318,30 @@ impl DrivingState {
         RAMP_MIN_DESIGN_MPH.max(self.armed_ramp_mph(stop) - RAMP_CRUISE_HEADROOM_MPH)
     }
 
+    /// The lowest automatic control goes on the MAINLINE for an armed exit.
+    ///
+    /// Road speed less `EXIT_MAINLINE_EASE_MPH`, and never under the ramp's
+    /// own cruise number. Real drivers do ease a little in the through lanes,
+    /// but they diverge fast -- 58 to 70 mph at 70 mph sites (NCHRP Research
+    /// Report 1081, 2024) -- and the ramp speed is reached in the
+    /// deceleration lane past the gore, which is what that lane is for. The
+    /// old floor was the ramp number itself, which put a truck at 44 mph in
+    /// a 70 lane for the last half mile (owner-approved redesign,
+    /// 2026-09-24). Road speed is read at the gore, so a work zone there
+    /// counts.
+    pub fn exit_approach_floor_mph(&mut self, stop: Option<&RoadStop>) -> f64 {
+        let ramp_cruise = self.armed_ramp_cruise_mph(stop);
+        let gore_mi = stop
+            .or(self.exit_stop.as_ref())
+            .or(self.ramp_stop.as_ref())
+            .map(|stop| stop.at_mi);
+        let Some(gore_mi) = gore_mi else {
+            return ramp_cruise;
+        };
+        let (road, _) = self.trip.speed_limit_at(gore_mi);
+        ramp_cruise.max(road - EXIT_MAINLINE_EASE_MPH)
+    }
+
     /// The speed route-transition assistance stays engaged down to, once it
     /// has engaged at the ramp cap.
     ///
@@ -337,30 +359,29 @@ impl DrivingState {
         cap_mph - RAMP_CRUISE_HEADROOM_MPH
     }
 
-    /// Bring automatic speed control down to ramp speed for an armed exit.
+    /// Ease automatic speed control for an armed exit.
     ///
-    /// Arming an exit commits the truck to leaving the highway, so the cruise
-    /// target has to come down with it. Otherwise automatic control holds
-    /// highway speed straight through the gore point and the driver loses the
-    /// exit without ever touching a control. Returns the spoken addition, or
-    /// an empty string when there is nothing to say.
+    /// Arming an exit commits the truck to leaving the highway, and the gore
+    /// only accepts road speed plus the posts' leeway, so the cruise target
+    /// comes down to [`Self::exit_approach_floor_mph`] -- at most ten under
+    /// road speed, never the ramp's number. The ramp's number is reached past
+    /// the gore, in the deceleration lane, where taking the ramp pauses speed
+    /// control. Returns the spoken addition, or an empty string when there is
+    /// nothing to say.
     pub fn cap_cruise_for_ramp(&mut self, ctx: &GameContext, stop: Option<&RoadStop>) -> String {
+        let floor = self.exit_approach_floor_mph(stop);
         let Some(cruise_mph) = self.cruise_mph else {
             // Paused mid-session -- a zone keeper, or a planned-stop pause.
-            // Remember the cap so cruise resumes at ramp speed, but say
-            // nothing: the keeper is already holding a low zone speed.
+            // Remember the cap so cruise resumes under it, but say nothing:
+            // the keeper is already holding a low zone speed.
             if self.speed_control_armed {
                 if let Some(target) = self.speed_control_target_mph {
-                    self.cruise_exit_mph = Some(target.min(self.armed_ramp_cruise_mph(stop)));
+                    self.cruise_exit_mph = Some(target.min(floor));
                 }
             }
             return String::new();
         };
-        // Cruise aims a little under the ramp's own number (the old 40 under
-        // a flat 45). Its normal two-mph brake deadband, downhill acceleration,
-        // and frame timing must not leave the truck hovering just above the
-        // ramp's speed as it comes off.
-        let capped = cruise_mph.min(self.armed_ramp_cruise_mph(stop));
+        let capped = cruise_mph.min(floor);
         if self
             .cruise_exit_mph
             .is_some_and(|existing| existing <= capped)
@@ -372,24 +393,22 @@ impl DrivingState {
         self.cruise_exit_mph = Some(capped);
         // The number is where the truck will BE at the gore, not where it goes
         // now: _ramp_approach_cap_mph holds road speed until the exit is close
-        // enough to shed for. Arming five miles out and dropping straight to
-        // ramp speed is the "keeper goes to 40 miles away from the exit"
-        // report (Shane, 2026-08-15).
+        // enough to ease for. Arming five miles out and dropping straight to
+        // the cap is the "keeper goes to 40 miles away from the exit" report
+        // (Shane, 2026-08-15).
         let target = ctx.settings.speed_text(capped);
         if self.trip.truck.speed_mph() > capped + 1.0 {
             // Say WHEN, not just what. "Adaptive cruise will ease to 40 for
             // the ramp", heard five miles out, reads as "I am going to 40 now"
-            // -- and the owner drove it and reported the truck slowing early
-            // when it had done nothing of the kind: _ramp_approach_cap_mph
-            // holds road speed until about half a mile out and only then
-            // sheds. The behaviour was right and the sentence was wrong, which
-            // is worse than the reverse, because nobody goes looking for a bug
-            // in a truck that is behaving (owner playtest, 2026-08-21).
+            // (owner playtest, 2026-08-21). And say where it lets go: past the
+            // gore the deceleration lane is the driver's, or the exit speed
+            // assist's, to brake in.
             return format!(
-                " Adaptive cruise holds road speed, then eases to {target} at the ramp."
+                " Adaptive cruise holds road speed, eases to {target} for the exit, and pauses \
+                 on the ramp."
             );
         }
-        format!(" Adaptive cruise holding {target} for the ramp.")
+        format!(" Adaptive cruise holding {target} to the exit, then pausing on the ramp.")
     }
 
     /// The armed exit's cap right now, measured off the road still left.
@@ -404,7 +423,8 @@ impl DrivingState {
     ///
     /// Instead the cap glides: corridor speed stands until the exit is inside
     /// the road this truck needs to shed for it, then comes down along the
-    /// deceleration itself, reaching the ramp number a little before the gore.
+    /// deceleration itself, reaching its floor -- at most ten under road
+    /// speed, see [`Self::exit_approach_floor_mph`] -- a little before the gore.
     /// The road is priced exactly as the keeper's ease prices it -- a reaction
     /// budget in real seconds at the speed the truck is doing, and a
     /// comfortable shed rate under that.
@@ -454,7 +474,6 @@ impl DrivingState {
         self.exit_lane_prompt_said = false;
         self.exit_lane_ready_said = false;
         self.exit_lane_lost_s = 0.0;
-        self.exit_commit_said = false;
         self.exit_cancel_armed = false;
         self.exit_right_hold_s = 0.0;
         self.exit_right_taps = 0;
@@ -546,6 +565,10 @@ impl DrivingState {
 
     /// `_update_exit_preparation(keys, dt)`.
     pub fn update_exit_preparation(&mut self, ctx: &mut GameContext, dt: f64) {
+        // Past the gore the exit's braking happens here, ahead of the physics
+        // step like every other assist's pedal; it stands itself down off
+        // the deceleration lane.
+        self.update_deceleration_lane(ctx);
         let Some(stop) = self.exit_stop.clone() else {
             self.reset_exit_lane_state();
             return;
@@ -629,15 +652,14 @@ impl DrivingState {
             } else {
                 ""
             };
-            let ramp = self.armed_ramp_mph(None);
+            // The lane, not a speed: the ramp's number is braked for past the
+            // gore, and asking for it two miles out is what had drivers
+            // crawling down the through lane (realistic exit, 2026-09-24).
             let distance = ctx.settings.distance_text(ahead, true);
             let mut opts = SayEvent::queued().priority(EventPriority::Route);
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
-                format!(
-                    "Exit lane in {distance}. Steer right for the exit lane and slow to \
-                     {ramp:.0}.{pressure_text}"
-                ),
+                format!("Exit lane in {distance}. Steer right for the exit lane.{pressure_text}"),
                 opts,
             );
         }
@@ -677,13 +699,11 @@ impl DrivingState {
         } else {
             self.exit_lane_lost_s = 0.0;
         }
-        if (0.0..=EXIT_COMMIT_WINDOW_MI).contains(&ahead) && !self.exit_commit_said {
-            self.exit_commit_said = true;
-            let ramp = self.armed_ramp_mph(None);
-            let mut opts = SayEvent::queued().priority(EventPriority::Route);
-            opts.category = Some(SpeechCategory::Navigation);
-            ctx.say_event_with(format!("At the exit gore. Stay under {ramp:.0}."), opts);
-        }
+        // No line at the gore. It used to say "Stay under" the ramp's number,
+        // which the gate itself never asked for (it accepts road speed), and
+        // the ramp's speed belongs past the gore anyway, where taking the
+        // ramp names it. Without the number all it restated was the half-mile
+        // anchor a tenth of a mile earlier (realistic exit, 2026-09-24).
     }
 
     /// Slow an armed exit toward ramp speed, in EVERY steering mode.
@@ -700,8 +720,20 @@ impl DrivingState {
         if !(ahead > 0.0 && ahead <= ff_core::sim::trip_models::EXIT_SPEED_ASSIST_START_MI) {
             return;
         }
-        if self.trip.truck.speed_mph() <= self.gore_acceptance_mph(Some(stop)) {
-            if self.cruise_mph.is_some() || self.keeper_mph.is_some() {
+        let controlled = self.cruise_mph.is_some() || self.keeper_mph.is_some();
+        // A controller already holding the road gets its brake deadband over
+        // the gate before the assist takes the pedals from it: cruise set at
+        // a 45 whose gore accepts 45 hovers a fraction over it, and the assist
+        // paused cruise a mile and a half out for 0.3 mph, then held the truck
+        // fifteen under the road for the rest of the approach (every-assist
+        // audit, 2026-09-24). Cruise's own exit glide brings it under.
+        let margin = if controlled {
+            EXIT_ASSIST_CONTROLLER_MARGIN_MPH
+        } else {
+            0.0
+        };
+        if self.trip.truck.speed_mph() <= self.gore_acceptance_mph(Some(stop)) + margin {
+            if controlled {
                 // Nothing to shed and a controller already holding the road:
                 // leave it. This used to pause speed control the moment the
                 // exit came inside its reach, whether or not it had anything
@@ -711,12 +743,13 @@ impl DrivingState {
                 // coasted; on a 3.7 percent downgrade the truck ran from 60 to
                 // 69 with "automatic speed control paused" the only thing the
                 // status said (owner, Spokane, twice, 2026-08-21/22). Cruise
-                // holds the grade and its own ramp glide eases to the ramp's
-                // number at the gore, which is what the callout promised.
+                // holds the grade and its own glide eases to its exit floor
+                // at the gore, which is what the callout promised.
                 return;
             }
-            // Down to ramp speed with nobody on the pedals. HOLD it to the
-            // gore rather than handing back an empty one: left alone the
+            // Under what the gore accepts with nobody on the pedals. HOLD
+            // the exit floor to the gore rather than handing back an empty
+            // one: left alone the
             // truck coasted the rest of the approach down to a dead stop in
             // the through lane, a quarter mile short of its own exit -- worst
             // at real-time pacing, where the coast has the most seconds to
@@ -754,16 +787,19 @@ impl DrivingState {
         ctx.say_event_with(format!("Exit speed assistance slowing. {lane_text}"), opts);
     }
 
-    /// Keep the truck at ramp speed on an approach the assist is running.
+    /// Keep the truck at its exit floor on an approach the assist is running.
     ///
     /// A light, bounded throttle and never a brake. It stands down the moment
     /// the driver is on a pedal of their own, because slowing further for
     /// their own gore is their call; the driver can always ask for more than
-    /// this, and the assist's own brake above ramp speed caps the other end.
+    /// this, and the assist's own brake above gore acceptance caps the other
+    /// end. The floor is [`Self::exit_approach_floor_mph`], at most ten under
+    /// road speed: holding the RAMP's number here is what left trucks
+    /// crawling down the through lane.
     /// Says nothing: the slowing line already named who has the pedal, and
     /// holding the speed it announced is the same assist finishing its job.
     pub fn hold_exit_approach_speed(&mut self) {
-        let target = self.armed_ramp_cruise_mph(None);
+        let target = self.exit_approach_floor_mph(None);
         let t = &mut self.trip.truck;
         if !t.engine_on || t.stalled || t.air_brakes_holding() {
             return;
@@ -773,9 +809,12 @@ impl DrivingState {
         }
         let short_by = target - t.speed_mph();
         if short_by <= 0.0 {
-            return; // coasting between the target and the ramp limit is fine
+            return; // coasting between the target and the gore's limit is fine
         }
-        t.throttle = t.throttle.max(EXIT_HOLD_MAX_THROTTLE.min(short_by / 10.0));
+        // A firmer gain than the old ramp-speed hold needed: at the exit
+        // floor a loaded truck wants most of this throttle just to stay
+        // rolling, and a tenth per mile per hour sagged it four under.
+        t.throttle = t.throttle.max(EXIT_HOLD_MAX_THROTTLE.min(short_by / 3.0));
     }
 
     /// `_active_exit_pressure(stop)`.

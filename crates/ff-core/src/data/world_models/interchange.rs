@@ -20,6 +20,13 @@ use regex::Regex;
 /// tells the runtime NOT to guess free flow off the exit's `via` signage,
 /// which points where the exit is signed toward, not at the road the ramp
 /// lands on.
+///
+/// `ramp_length_ft_forward/backward` is the exit ramp's length for travel
+/// along the leg A->B or B->A, derived from OSM geometry: summed along the
+/// link way(s) from the gore to the node where the ramp ends. It starts where
+/// the OSM ramp way leaves the motorway, at or near the gore, so a
+/// deceleration lane before the gore is NOT included. `None` when no
+/// gore matched in that direction or the bake's screen dropped the value.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Interchange {
     pub at_mi: f64,
@@ -34,6 +41,9 @@ pub struct Interchange {
     pub ramp_advisory_mph_forward: Option<f64>,
     pub ramp_advisory_mph_backward: Option<f64>,
     pub ramp_advisory_source: String,
+    pub ramp_length_ft_forward: Option<f64>,
+    pub ramp_length_ft_backward: Option<f64>,
+    pub ramp_length_source: String,
 }
 
 impl Interchange {

@@ -901,7 +901,7 @@ fn test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it() {
     // And the same ramp IS the arrival when nothing follows it: the
     // ramp-to-dock delivery the 2026-08-19 fix was made for still stops.
     d.destination_chain_ahead = Some(false);
-    d.ramp_mi = Some(RAMP_LENGTH_MI * 0.1);
+    d.ramp_mi = Some(0.05);
     d.update_destination_approach_assist(&mut app.ctx);
     assert!(d.destination_arrival_active);
     assert!(d.trip.truck.brake > 0.0);

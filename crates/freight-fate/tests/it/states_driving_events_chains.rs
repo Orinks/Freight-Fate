@@ -323,7 +323,10 @@ fn test_taking_the_exit_puts_the_truck_on_the_ramp() {
 
     d.update_frame(&mut app.ctx, 1.0 / 60.0);
 
-    assert_eq!(d.ramp_mi, Some(RAMP_LENGTH_MI));
+    // Gore to bar is this exit's own ramp, then the stretch to the driveway.
+    let expected = d.trip.ramp_length_mi(&stop) + RAMP_ACCESS_MI;
+    let ramp_mi = d.ramp_mi.expect("on the ramp");
+    assert!((ramp_mi - expected).abs() < 0.01, "{ramp_mi} vs {expected}");
     assert!(d.ramp_stop.is_some());
 }
 

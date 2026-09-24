@@ -1872,7 +1872,9 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1261.7,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 98.5,
@@ -1921,7 +1923,10 @@
             "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23",
             "ramp_advisory_forward": 15.0,
             "ramp_advisory_backward": 15.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2177.2,
+            "ramp_length_ft_forward": 1470.3,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 153.4,
@@ -1936,7 +1941,10 @@
             "highway": "I-87",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1420.1,
+            "ramp_length_ft_forward": 1685.1,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 156.2,
@@ -1954,7 +1962,9 @@
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 3699.3,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "speed_limits": [
@@ -4640,7 +4650,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 20.0,
             "ramp_advisory_backward": 20.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1289.5,
+            "ramp_length_ft_forward": 1250.8,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 8.1,
@@ -4653,7 +4666,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 312.7,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 23.1,
@@ -4667,7 +4682,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 484.5,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 55.5,
@@ -4738,7 +4755,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 620.0,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 87.9,
@@ -4769,7 +4788,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1671.9,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 93.0,
@@ -4786,7 +4807,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1425.2,
+            "ramp_length_ft_forward": 1328.4,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 95.0,
@@ -4806,7 +4830,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1277.1,
+            "ramp_length_ft_forward": 1275.9,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 97.3,
@@ -4822,7 +4849,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1460.0,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 100.9,
@@ -4835,7 +4864,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1349.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 103.1,
@@ -4848,7 +4879,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1265.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 113.3,
@@ -4882,7 +4915,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1524.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 118.9,
@@ -4916,7 +4951,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1528.7,
+            "ramp_length_ft_forward": 793.1,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 151.3,
@@ -4936,7 +4974,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 20.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1068.3,
+            "ramp_length_ft_forward": 1485.7,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 160.7,
@@ -6116,7 +6157,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 40.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2968.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 7.38,
@@ -6132,7 +6175,9 @@
             "ramp_control": "stop",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1296.6,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 12.51,
@@ -6151,7 +6196,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1018.8,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 15.9,
@@ -6165,7 +6212,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 484.5,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 27.49,
@@ -6185,7 +6234,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 35.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 953.8,
+            "ramp_length_ft_forward": 1911.8,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 33.23,
@@ -6201,7 +6253,9 @@
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1013.1,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 36.92,
@@ -6221,7 +6275,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 20.0,
             "ramp_advisory_backward": 20.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1472.9,
+            "ramp_length_ft_forward": 1415.8,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "speed_limits": [
@@ -8258,7 +8315,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 459.4,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 25.2,
@@ -8273,7 +8332,10 @@
             "ramp_control": "stop",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1625.5,
+            "ramp_length_ft_forward": 473.3,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 46.0,
@@ -8287,7 +8349,10 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 354.9,
+            "ramp_length_ft_forward": 620.0,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 52.3,
@@ -8320,7 +8385,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1671.9,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 57.4,
@@ -8337,7 +8404,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1425.2,
+            "ramp_length_ft_forward": 1328.4,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 59.4,
@@ -8357,7 +8427,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1277.1,
+            "ramp_length_ft_forward": 1275.9,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 61.7,
@@ -8373,7 +8446,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1460.0,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 65.2,
@@ -8386,7 +8461,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1349.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 67.4,
@@ -8399,7 +8476,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1265.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 72.7,
@@ -8418,7 +8497,9 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1101.5,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 77.6,
@@ -8452,7 +8533,9 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1524.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 83.2,
@@ -8485,7 +8568,9 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1642.4,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 95.3,
@@ -8503,7 +8588,10 @@
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1156.0,
+            "ramp_length_ft_forward": 1147.3,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 103.3,
@@ -8517,7 +8605,9 @@
             "highway": "I-89",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1774.2,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 115.4,
@@ -8537,7 +8627,10 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 20.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1068.3,
+            "ramp_length_ft_forward": 1485.7,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 124.9,
