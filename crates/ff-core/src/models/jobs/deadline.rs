@@ -148,16 +148,22 @@ fn plan_hos_for_drive_hours(
     let mut drive_this_shift = start_drive_h.max(0.0);
     let mut window_this_shift = start_window_h.max(0.0);
     while remaining > 1e-6 {
-        if since_break >= 8.0 {
-            breaks += 1;
-            since_break = 0.0;
-            window_this_shift += 0.5; // the 30-minute break burns window
-        }
-        if drive_this_shift >= 11.0 || window_this_shift >= 14.0 {
+        // A full sleep resets the break clock too. When both limits are due,
+        // planning a separate 30-minute break first invents legal time the
+        // driver does not have to spend.
+        if drive_this_shift >= 11.0
+            || window_this_shift >= 14.0
+            || (since_break >= 8.0 && window_this_shift + 0.5 >= 14.0)
+        {
             sleeps += 1;
             drive_this_shift = 0.0;
             window_this_shift = 0.0;
             since_break = 0.0;
+        }
+        if since_break >= 8.0 {
+            breaks += 1;
+            since_break = 0.0;
+            window_this_shift += 0.5; // the 30-minute break burns window
         }
         let step = remaining
             .min(8.0 - since_break)
@@ -209,6 +215,23 @@ pub fn route_required_hours(route: &Route, start_mi: f64, world: Option<&World>)
         0.0,
     )
     .total_h()
+}
+
+/// Legal plan for the route still ahead using the driver's current HOS clock.
+/// Used only for a one-time deadline repair of an older active delivery.
+pub fn remaining_route_hos_plan(
+    route: &Route,
+    start_mi: f64,
+    world: Option<&World>,
+    clock: &HosClock,
+) -> HosPlan {
+    plan_hos_for_drive_hours(
+        route_drive_hours(Some(route), start_mi, world),
+        Some(route),
+        clock.driving_min / 60.0,
+        clock.duty_min / 60.0,
+        clock.since_break_min / 60.0,
+    )
 }
 
 /// Deadline from the current route-aware timing model plus dispatch slack.

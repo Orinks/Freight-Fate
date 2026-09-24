@@ -37,16 +37,18 @@ use ff_core::models::career_training::{
 use ff_core::models::enforcement;
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
-    board_offer_count, job_from_payload, job_payload, normalize_job_cities, Job, JobBoard,
-    OfferOptions,
+    board_offer_count, dispatch_deadline_hours, job_from_payload, job_payload,
+    normalize_job_cities, plan_hos, Job, JobBoard, OfferOptions, ACTIVE_TRIP_FAIRNESS_SLACK,
 };
 use ff_core::models::profile::Profile;
 use ff_core::models::start_options::option_for_profile;
 use ff_core::music::crc32;
 use ff_core::playtest_levers::{forced_dispatch_destination, resolve_city_forgiving};
-use ff_core::pyfmt::{fmt_grouped, py_int};
+use ff_core::pyfmt::{fmt_f, fmt_grouped, py_int, round_py_n};
+use ff_core::sim::hos::limits;
 
 use crate::app::{GameContext, Say};
+use crate::bindings::Action;
 use crate::states::base::{InputEvent, Key, Menu, MenuItem, SimpleMenuState};
 use crate::states::driving::DrivingState;
 
@@ -714,7 +716,7 @@ pub fn loaded_departure_line(
 /// Python did.
 pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
     let DrivingLaunch {
-        job,
+        mut job,
         route,
         trip_seed,
         phase,
@@ -722,6 +724,48 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
         resume,
         announcement,
     } = launch;
+    // The board may have been cached before this shift's hours were spent,
+    // and the pickup or deadhead can consume a duty window after acceptance.
+    // Reconcile the deadline once, at the loaded departure, against the route
+    // and legal hours the driver actually has. Resuming a snapshot does not
+    // pass through this function, so a save cannot grant a fresh deadline.
+    let deadline_note = if phase == DRIVE_PHASE_DELIVERY {
+        let clock = limits(&ctx.settings.hos_mode)
+            .is_some()
+            .then(|| &profile(ctx).hos);
+        let fair = dispatch_deadline_hours(
+            route.miles(),
+            ACTIVE_TRIP_FAIRNESS_SLACK,
+            Some(&route),
+            Some(ctx.world),
+            clock,
+        );
+        let fair = round_py_n(fair, 1);
+        if fair > job.deadline_game_h {
+            let extra_rest = clock.is_some_and(|clock| {
+                plan_hos(route.miles(), Some(&route), Some(ctx.world), Some(clock)).sleeps
+                    > plan_hos(route.miles(), Some(&route), Some(ctx.world), None).sleeps
+            });
+            job.deadline_game_h = fair;
+            job.deadline_covers_rest |= extra_rest;
+            if extra_rest {
+                format!(
+                    " Dispatch adjusted the delivery deadline to {} hours. Your current hours require a 10-hour sleep en route. {} selects a rest stop.",
+                    fmt_f(job.deadline_game_h, 1),
+                    ctx.control_name(Action::HosDrive)
+                )
+            } else {
+                format!(
+                    " Dispatch adjusted the delivery deadline to {} hours for this route and your current legal hours.",
+                    fmt_f(job.deadline_game_h, 1)
+                )
+            }
+        } else {
+            String::new()
+        }
+    } else {
+        String::new()
+    };
     // The line needs the route, and the drive takes it by value, so build
     // what the summary reads before handing the route over.
     let route_for_line = route.clone();
@@ -757,7 +801,7 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context)
         }
     };
-    ctx.say(&line);
+    ctx.say(&format!("{line}{deadline_note}"));
     ctx.push_state(driving);
 }
 

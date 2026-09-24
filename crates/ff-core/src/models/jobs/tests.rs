@@ -420,6 +420,22 @@ fn test_burned_duty_window_forces_the_sleep_even_with_drive_hours_left() {
 }
 
 #[test]
+fn mandatory_sleep_also_satisfies_a_due_break() {
+    for duty_h in [13.75, 14.0] {
+        let clock = HosClock {
+            driving_min: 8.0 * 60.0,
+            duty_min: duty_h * 60.0,
+            since_break_min: 8.0 * 60.0,
+            ..HosClock::new()
+        };
+        let plan = plan_hos(55.0, None, None, Some(&clock));
+        assert_eq!(plan.sleeps, 1);
+        assert_eq!(plan.breaks, 0);
+        assert_eq!(plan.total_h(), 11.0);
+    }
+}
+
+#[test]
 fn test_board_speaks_the_rest_the_deadline_covers() {
     let mut job = Job::new(general(), 15.0, "A", "Loc", "B", 300.0, 700.0, 24.0);
     job.deadline_covers_rest = true;

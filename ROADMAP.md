@@ -519,6 +519,11 @@ its status or release decision.
       a second press commits the rest. Arrival at a planned sleep stop focuses
       the full reset. A 30-minute break, either 7/3 split order, and full
       10-hour reset have menu-level scenario coverage.
+- [x] At loaded departure, reconcile the delivery deadline once against the
+      chosen route and live HOS clock. A cached short offer cannot penalize a
+      mandatory 10-hour sleep; the adjusted time is spoken and saved. Existing
+      still-on-time active deliveries get a one-time repair on resume. A full
+      sleep also satisfies a due break in the deadline estimate.
 - [x] Optional HOS planning hints, off by default, use the legal-reach planner
       as the next limit reaches three game-hours. An earlier compatible stop is
       suggested when its estimated arrival leaves a useful 30-to-90-minute
