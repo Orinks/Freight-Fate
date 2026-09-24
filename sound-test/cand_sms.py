@@ -31,7 +31,7 @@ RNG = np.random.default_rng(7)
 IDLE_RPM = 647.0
 REV_TOP_RPM = 1800.0
 CRUISE_RPM = 1500.0
-F_MAX = 9000.0          # highest partial we care about
+F_MAX = 9000.0  # highest partial we care about
 XFADE_S = 0.12
 
 
@@ -70,7 +70,7 @@ def analyse_idle():
             continue
         j = lo + int(np.argmax(mag[lo:hi]))
         # amplitude from a coherent-gain-corrected line: sum of the local lobe
-        amp = mag[max(0, j - 1):j + 2].sum() / (w.sum() / 2.0)
+        amp = mag[max(0, j - 1) : j + 2].sum() / (w.sum() / 2.0)
         part_f.append(f[j])
         part_a.append(amp)
         part_ph.append(float(np.angle(X[j])))
@@ -99,8 +99,7 @@ def build_env(part_f, part_a):
 
     def E(freqs):
         freqs = np.asarray(freqs, dtype=float)
-        out = np.interp(np.log(np.maximum(freqs, 1.0)), lf, la,
-                        left=la[0], right=la[-1])
+        out = np.interp(np.log(np.maximum(freqs, 1.0)), lf, la, left=la[0], right=la[-1])
         return np.exp(out)
 
     return E
@@ -142,7 +141,7 @@ def noise_block(nsamp, noise_f, noise_m, rpm_of_n):
     filt = np.fft.irfft(np.fft.rfft(white) * shape, nsamp)
     # gentle rise with rpm: idle=1.0, ~1.6x by 1800 rpm
     gain = (rpm_of_n / IDLE_RPM) ** 0.55
-    filt = filt / (np.sqrt(np.mean(filt ** 2)) or 1.0)
+    filt = filt / (np.sqrt(np.mean(filt**2)) or 1.0)
     return filt * gain
 
 
@@ -156,8 +155,7 @@ def integer_period(rpm):
     return P, C.SR / P
 
 
-def steady_loop(rpm, n_periods, E, part_ph, noise_f, noise_m, coherence,
-                noise_gain):
+def steady_loop(rpm, n_periods, E, part_ph, noise_f, noise_m, coherence, noise_gain):
     P, f0 = integer_period(rpm)
     nsamp = P * n_periods
     f0_of_n = np.full(nsamp, f0)
@@ -168,7 +166,7 @@ def steady_loop(rpm, n_periods, E, part_ph, noise_f, noise_m, coherence,
     nz_long = noise_block(nsamp + xf, noise_f, noise_m, rpm_of_n)
     nz = C.make_seamless_loop(nz_long, xfade_s=XFADE_S)
     nz = nz[:nsamp] if len(nz) >= nsamp else np.pad(nz, (0, nsamp - len(nz)))
-    harm = harm / (np.sqrt(np.mean(harm ** 2)) or 1.0)
+    harm = harm / (np.sqrt(np.mean(harm**2)) or 1.0)
     loop = harm + noise_gain * nz
     # The firing pulse lands on n=0 (all harmonics coherent there), so the loop
     # boundary sits on the steepest part of the waveform. The loop is already
@@ -189,13 +187,11 @@ def main():
     NOISE_GAIN = 1.10
 
     # IDLE loop: 32 firing periods (~1 s), seamless, then tile to 6 s.
-    idle_loop = steady_loop(IDLE_RPM, 32, E, part_ph, noise_f, noise_m,
-                            COHERENCE, NOISE_GAIN)
+    idle_loop = steady_loop(IDLE_RPM, 32, E, part_ph, noise_f, noise_m, COHERENCE, NOISE_GAIN)
     idle_out = C.tile(idle_loop, 6.0)
 
     # CRUISE 1500 loop: 75 periods (~1 s), tile to 4 s.
-    cruise_loop = steady_loop(CRUISE_RPM, 75, E, part_ph, noise_f, noise_m,
-                              COHERENCE, NOISE_GAIN)
+    cruise_loop = steady_loop(CRUISE_RPM, 75, E, part_ph, noise_f, noise_m, COHERENCE, NOISE_GAIN)
     cruise_out = C.tile(cruise_loop, 4.0)
 
     # REV: continuous 7 s pull from idle -> 1800 rpm.
@@ -207,7 +203,7 @@ def main():
     rpm_of_n = IDLE_RPM + (REV_TOP_RPM - IDLE_RPM) * ramp
     f0_of_n = rpm_of_n / 20.0
     harm, _ = harmonic_block(nsamp, f0_of_n, E, part_ph, COHERENCE)
-    harm = harm / (np.sqrt(np.mean(harm ** 2)) or 1.0)
+    harm = harm / (np.sqrt(np.mean(harm**2)) or 1.0)
     nz = noise_block(nsamp, noise_f, noise_m, rpm_of_n)
     rev_out = harm + NOISE_GAIN * nz
 
@@ -221,9 +217,8 @@ def main():
     print(" ", p_rev)
     print(" ", p_cruise)
     print("score:", metrics)
-    for name, arr in (("idle", idle_out), ("rev", rev_out),
-                      ("cruise", cruise_out)):
-        print(f"  {name} rms={np.sqrt(np.mean(arr**2)):.3f} len={len(arr)/C.SR:.2f}s")
+    for name, arr in (("idle", idle_out), ("rev", rev_out), ("cruise", cruise_out)):
+        print(f"  {name} rms={np.sqrt(np.mean(arr**2)):.3f} len={len(arr) / C.SR:.2f}s")
 
 
 if __name__ == "__main__":

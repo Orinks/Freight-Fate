@@ -720,8 +720,20 @@ impl DrivingState {
         if !(ahead > 0.0 && ahead <= ff_core::sim::trip_models::EXIT_SPEED_ASSIST_START_MI) {
             return;
         }
-        if self.trip.truck.speed_mph() <= self.gore_acceptance_mph(Some(stop)) {
-            if self.cruise_mph.is_some() || self.keeper_mph.is_some() {
+        let controlled = self.cruise_mph.is_some() || self.keeper_mph.is_some();
+        // A controller already holding the road gets its brake deadband over
+        // the gate before the assist takes the pedals from it: cruise set at
+        // a 45 whose gore accepts 45 hovers a fraction over it, and the assist
+        // paused cruise a mile and a half out for 0.3 mph, then held the truck
+        // fifteen under the road for the rest of the approach (every-assist
+        // audit, 2026-09-24). Cruise's own exit glide brings it under.
+        let margin = if controlled {
+            EXIT_ASSIST_CONTROLLER_MARGIN_MPH
+        } else {
+            0.0
+        };
+        if self.trip.truck.speed_mph() <= self.gore_acceptance_mph(Some(stop)) + margin {
+            if controlled {
                 // Nothing to shed and a controller already holding the road:
                 // leave it. This used to pause speed control the moment the
                 // exit came inside its reach, whether or not it had anything

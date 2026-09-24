@@ -46,8 +46,10 @@ def main() -> None:
     freqs = np.fft.rfftfreq(len(z), 1 / sr)
     band = (freqs > 20) & (freqs < 115)
     f0 = freqs[band][np.argmax(spec[band])]
-    print(f"wrote {DST.name}: {len(y) / sr:.1f}s, low peak {f0:.1f} Hz "
-          f"(target 2x harmonic {2 * TARGET / 20:.1f} Hz)")
+    print(
+        f"wrote {DST.name}: {len(y) / sr:.1f}s, low peak {f0:.1f} Hz "
+        f"(target 2x harmonic {2 * TARGET / 20:.1f} Hz)"
+    )
 
 
 def _run_with_deep_stack() -> None:

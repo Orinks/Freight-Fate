@@ -38,6 +38,7 @@ mod sim_billboard_placement;
 mod sim_chain_law;
 mod sim_congestion;
 mod sim_enforcement_presence;
+mod sim_enforcement_vocabulary;
 mod sim_facility_approaches;
 mod sim_grade_clock;
 mod sim_interchanges;

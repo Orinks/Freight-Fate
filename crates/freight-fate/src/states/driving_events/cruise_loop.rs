@@ -7,6 +7,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_stops::assist_full_decel_mps2;
 
 impl DrivingState {
     /// Seconds of room adaptive cruise leaves to the vehicle ahead.
@@ -979,7 +980,22 @@ impl DrivingState {
                 } else {
                     0.65
                 };
-                self.trip.truck.brake = self.trip.truck.brake.max(weather_brake.min(over / 30.0));
+                // Net of whatever the retarder is already doing. On a downgrade
+                // the stage below is kept up on purpose -- dropping it would
+                // hand the whole grade to the drums -- but it is already buying
+                // real deceleration, and this snub was sized as though it were
+                // the only thing slowing the truck. Stacked on a retarder doing
+                // real work, the two together cleared the freight's hard-brake
+                // line on an ordinary ramp or following-distance close: the
+                // same insult to the load as an emergency stop, for ACC just
+                // catching up to a lead.
+                let jake_decel_mps2 =
+                    self.trip.truck.jake_brake_force() / self.trip.truck.gross_mass_kg().max(1.0);
+                let jake_fraction = jake_decel_mps2 / assist_full_decel_mps2(&self.trip.truck);
+                let wanted = weather_brake.min(over / 30.0) - jake_fraction;
+                if wanted > 0.0 {
+                    self.trip.truck.brake = self.trip.truck.brake.max(wanted);
+                }
             }
             // Hand the speed over cleanly: give back a retarder cruise itself
             // raised on the grade that has just run out, rather than letting

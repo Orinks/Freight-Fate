@@ -77,8 +77,12 @@ bookmarks usable.
       (a module that jumps back to its start ends after one pass, so the
       playlist moves on). The Tab radio screen says Freight Fate's own
       stations are off the dial in Synthesized mode.
-      - [ ] Typed-in music seeds.
-      - [ ] More synth voices per style.
+      - [x] Typed-in music seeds: Enter on Music seed opens the text field
+            and takes a whole number; Left and Right still roll one.
+      - [ ] More synth voices per style: built, awaiting the owner's
+            listening pass. A strummed guitar, drawbar organ, bell and reed,
+            two or three per style (the higher rungs get three); the reed
+            takes the B sections' tune. Tick once Josh has heard them.
 
 - [x] Career balance integrity: a `MoneyGuard` shadow (balance bits XORed
       with a per-instance key) resyncs on every legitimate earn, spend, or
@@ -141,9 +145,16 @@ These steps remain open even where a related implementation bullet is checked:
       rework left the Vercel build deploying a backend only on `dev`,
       so `main` would have shipped the new site against production's old
       Convex functions. Fixed in orinks-net `9925714` first.
-- [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
-      the place-callouts ladder rides the release merge to dev.
-- [ ] **The 1.9 stable-release path.** OWNER RULING 2026-09-20: 1.8 gets
+- [x] The place-callouts ladder is on dev (`e340995e`): `place_callouts`
+      is off, sparse or all, sparse by default, and split from the
+      sitting-budget chatter.
+- [ ] The radio stream sweep (`--recheck-dead`) runs before the release.
+- [x] **The 1.9 stable-release path is written; pushing a `v*.*.*` tag
+      cuts the release** (`9bbe8f12`). The tag push drops `--prerelease`,
+      takes the version and tag from the tag, and writes the notes with
+      `tools/release_notes.py stable`; CI never creates, moves or deletes a
+      stable tag. `main`'s copy of `build-career-1.9.yml` matches `dev`'s.
+      OWNER RULING 2026-09-20: 1.8 gets
       no further releases of any kind, and the next stable is 1.9. So
       `build.yml` was deleted rather than retired in stages -- it built
       the Python game (no `rustup` step, no `fetch_bass.py`, and
@@ -152,19 +163,13 @@ These steps remain open even where a related implementation bullet is checked:
       nightly could not succeed against a Rust `dev`, and its tag trigger
       would have handed a `v1.9.0` to Nuitka. `build-career-1.9.yml` is
       the only workflow that builds the game now.
-      * What is left to build: that workflow only cuts PRERELEASES today
-        (`--prerelease`, `1.9-tester-*` tags, version from the date). A
-        stable release needs the version and tag to come from a `v*.*.*`
-        push, the prerelease flag dropped, and stable release notes.
-      * Deliberately not written yet. Nothing can exercise it short of
-        tagging a real release, and 1.9 is not close to stable. Write it
-        when it is, against a workflow that has been running nightly by
-        then rather than against guesses now.
       * [x] Also freed by the ruling, and DONE in the Python sunset
         (2026-09-21): `tools/build_release.py`'s Python/Nuitka mode,
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
+- [ ] The owner pushes the `v1.9.0` tag on the commit to ship, last, after
+      every other gate here is closed.
 - [x] The owner voice pass over seven achievement titles (2026-09-22).
       The category-description cut landed and the owner accepted all
       seven titles as-is. The physical-Mac VoiceOver listening pass was
@@ -427,12 +432,6 @@ endpoints behind miles of private road.
       sweeping junction is now genuinely faster than a square one and a
       switchback slower. The local-geometry layer still reports 0 read; it
       serves the retired city-service rows and nothing the game drives.
-- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
-      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
-      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
-      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
-      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
-      in: 29 states carry live construction now, 15 of them new that day.
 
 #### Owner decisions
 
@@ -482,18 +481,18 @@ its status or release decision.
       `freightfate --playtest-road --find <feature>` and
       `freightfate --playtest-sandbox --launch`; `tools/playtest_watch.py`
       still follows their logs.
-- [ ] `av` and `scipy` are imported by `tools/encode_music_opus.py`,
-      `tools/patch_loop_transients.py` and the `sound-test/` scripts but
-      declared nowhere in `pyproject.toml`. Add them to a group (`tooling`
-      fits) so a fresh checkout can run those tools.
-- [ ] `sound-test/` carries old ruff lint and format debt, so the
-      pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
-      Clean it up and drop the exclude.
-- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
-      test that failed on the word outside a CB clause in any player-facing
-      string; the Rust
-      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
-      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
+- [x] `av` and `scipy`, imported by `tools/encode_music_opus.py`,
+      `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
+      declared in the `tooling` group and locked, so a fresh checkout runs
+      them with `uv run --group tooling ...`.
+- [x] `sound-test/` is ruff-clean (lint and format); the pre-commit ruff
+      hooks no longer exclude it and CI's lint step covers it too.
+- [x] The "bear is CB voice only" source sweep is ported (2026-09-24).
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` reads every
+      string literal in both crates, multi-line and raw strings included, and
+      fails on "bear" or "bears" in any case outside a line that names the
+      CB; the song title "Black Bear Road" is the one exception. It lands
+      green: today's hits are all CB chatter.
 
 ### September 11 trucking corrections
 
@@ -559,10 +558,19 @@ its status or release decision.
       A test now asserts every catalog badge is either awarded in shipping
       code or named as retired, and that a retired one is never awarded
       again. It reads source, so it proves REACHABILITY, not correctness.
-- [ ] 130 of the 177 wired badges have no test naming them individually, so
-      nothing proves they fire at the right MOMENT rather than merely being
-      reachable. The trigger sites are concentrated (one arrival pass, one
-      rest-stop pass), so this is a readable job, not an endless one.
+- [x] Every wired badge has a moment test (2026-09-24). The 131 no test
+      named, plus 24 only named in a catalog check or as a truck key, each
+      take their real trigger step (a settled delivery, a trip event, a menu
+      row) and are checked absent on the step before or the near miss
+      (`crates/freight-fate/tests/it/badge_moments_*.rs`). Two fired at the
+      wrong moment and are fixed: "hooked_a_bad_one" was awarded at the hook,
+      announcing the defect before the walk-around its copy names, and
+      "dropped_the_bad_one" read the origin yard's trailer, so a driver who
+      refused it at pickup still earned it at the receiver.
+- [ ] `weather_collector`'s copy names eight skies (sun, cloud, rain,
+      downpour, thunder, snow, fog, wind) but the award needs all nine
+      weather kinds, ice included. Either the copy or the count is wrong;
+      changing the copy moves the catalog digest and the invariants export.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
@@ -632,6 +640,15 @@ its status or release decision.
       `ZETA_LATERAL` equals the smooth-bore value whatever the baffles,
       matching FMCSA's Cargo Tank Incidents Study -- "in all cases, tank
       structure does not control side-to-side sloshing".
+- [x] Adaptive cruise's own closing snub -- following a lead, easing to a
+      lower posted limit, or shedding for a ramp -- stacked on top of
+      whatever engine-brake stage a downgrade had already raised (2026-09-24).
+      The snub was sized as though it were the only thing slowing the truck;
+      on a steep, loaded descent with the retarder doing real work, the two
+      together crossed the freight's hard-brake line the same way an
+      emergency stop does, for an ordinary approach. The snub now nets out
+      the retarder's own deceleration first, so the two share one planned
+      stop instead of compounding.
 - [ ] A part-filled tank is priced as a FULL one by the roll models, not as
       worse than one. `roll_load_fraction` stops a half-empty tank reading as
       a light load, which was the bug; the truth is that the half-empty tank
@@ -728,10 +745,18 @@ its status or release decision.
       charged but never booked on the licence file, and an out-of-service
       order only ever counted on the trip, never on the career field the
       scale screening scores. Both reach the record now.
-- [ ] The public safety record lists citations, serious violations, major
-      offenses, claims, terminations and repossessions; out-of-service
-      orders and fatigue events are scored but not shown, by the same rule
-      that keeps fatigue private. Decide whether orders belong on the page.
+- [x] Out-of-service orders go on the public safety record as a count
+      (owner ruling 2026-09-24: FMCSA publishes inspection out-of-service
+      results); fatigue events and the reason behind an order stay private.
+      The save already carries `out_of_service_events`, an allow-listed
+      profile field, so no invariants regen; the in-game driver profile
+      reads `outOfServiceOrders` when the site sends it.
+- [x] orinks.net side of the out-of-service count (orinks-net `fcdc9f3`,
+      live on staging and production 2026-09-24): the snapshot carries
+      `outOfServiceOrders` from the save's `out_of_service_events`, the
+      profile page lists "N out-of-service order(s)" after major offenses,
+      and the validator checks `out_of_service_times` and `fatigue_times`
+      against the career clock like `citation_times`.
 - [x] The driving record bites through the carrier and the insurer, and is
       spoken (owner ask, 2026-09-12). Endorsements stay untied to the record
       (hazmat is a TSA threat assessment, 49 CFR 1572, criminal and
@@ -785,10 +810,18 @@ its status or release decision.
       last row, confirmed) is how the game removes an ended career's save and its
       cloud backups. Real-life basis: 49 CFR 383.51 Table 1 lifetime
       disqualification, 49 CFR 384.225 55-year record retention.
-- [ ] Two record gaps from the same research: the scale-house safety
-      record scores lifetime counts where the real carrier score is a
-      time-weighted 24 months, and driving under an out-of-service order is
-      a disqualifying offense (383.51 Table 4) the game does not model.
+- [x] Two record gaps from the same research. The scale-house safety
+      record now counts citations, serious violations, out-of-service orders
+      and fatigue events inside the one-game-year window reputation and the
+      carrier review use (`SAFETY_RECORD_WINDOW_DAYS`), where the real
+      carrier score is time-weighted over 24 months; orders and fatigue
+      events carry career times from this build (older ones are never in
+      the window, like undated citations), and clean inspections stay a
+      lifetime credit. Driving under an out-of-service order (383.51 Table
+      4) is unreachable, not unmodelled: an order is written only once the
+      truck is stopped and is served in full before control returns, and
+      equipment orders are repaired on the spot. A test pins it, so the
+      offense gets modelled if a path ever opens.
 
 ### September 14 reputation reads the record
 
@@ -1227,17 +1260,25 @@ against.
       cannot hold it were deliberately NOT written. They stay as the profile
       left them for the load screen to clamp, because baking a bridge deck in
       as a grade would put it beyond the one rule that catches it.
-- [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
-      out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
-      reader that trusts the status stores that string as an elevation.
-- [ ] California stays dark until a route-to-district lookup exists. Caltrans
-      publishes lane closures per district with no key, but district 7 alone
-      is 17.6 MB against an 8-second feed budget.
-- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
-      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
-      feed, and EIA fuel prices. Not in the registry at all: Alabama,
-      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
-      Tennessee, West Virginia, Wyoming, DC.
+- [x] USGS answers an out-of-coverage point with HTTP 200 and the text
+      `Call failed.`, so a reader that trusts the status stores that string
+      as an elevation. `tools/screen_grades_3dep.py` refuses any non-JSON
+      body (pinned by `tests/test_screen_grades_3dep.py`), and the gotcha is
+      written up in `docs/data-sources.md` for the next USGS reader.
+- [x] California reads Caltrans's Lane Closure System, fetching only the
+      districts a leg crosses. Counties come from the Census 1:20M outlines,
+      widened by their measured 3.24 mi error against the 1:500k file, and
+      map to districts through Caltrans's own county layer (Kern also gets
+      District 9, which files eastern Kern's closures). The CSV feed is the
+      size fix: District 7 is 2.2 MB and arrived in 4.5 to 5.0 seconds on
+      2026-09-24, where its 13.6 MB JSON took 11 to 16. Only mainline closures
+      in effect now are kept, and an incident closure open over a week is
+      dropped as stale: that day's feeds held a full closure of I-5 through
+      Los Angeles "under investigation" since June. No state's feed is
+      fetched twice at once any more.
+- The keyed feeds (Colorado and the other states that want a registered
+  key, and EIA fuel prices) moved to the 1.10 section, under "Deferred from
+  1.9: live feeds that need a key".
 - [x] The National Highway System and FHWA toll facility datasets were
       checked and left: the route graph already carries truck-restricted
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
@@ -1359,6 +1400,26 @@ mainline behaviour.
 - [ ] **Truck rollover on ramp curves.** A hot ramp curve costs the load and
       can run the truck wide, but nothing models the rollover a loaded truck
       meets first on a ramp (0.34 to 0.40 g, TRB CTBSSP Synthesis 3).
+- [x] **Every assist follows the exit rules.** One matrix
+      (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
+      by seven ramp kinds, from two miles out to the stop or the gate) found
+      and fixed: facility stopping assistance ignoring the ramp curve; the
+      run to the entrance on the compressed clock; a clear yield leaving the
+      terminal servo's last press held (stopped 270 ft short) and a gap at a
+      held yield never released; exit speed assistance pausing cruise for
+      0.3 mph over; the street pull-ahead aiming at the mainline's limit; the
+      steering lean bending the whole ramp; "oncoming lane" on a one-way
+      ramp; the yield unnamed in the take line.
+- [x] **A yield's gap is judged at the crossroad** (fix/yield-at-the-line,
+      2026-09-24). It was judged about 100 ft past the line, so a gap clear
+      at the line could read as "forced". The crossroad now starts 17 ft past
+      the yield line (the middle of MUTCD 11th ed. 3B.19's 4 to 30 ft,
+      assumed), is two 12 ft lanes (assumed), and a WB-67 (73.5 ft, Green
+      Book Table 2-1a, read) must get across it on Long's truck acceleration;
+      a gap that holds for that whole crossing is clean, one that closes
+      during it is forced (`CrossTraffic::conflict_between`). The same timing
+      decides when a yield or roundabout is clear to roll or to pull out
+      from a stop. Stop signs still use the four-second look.
 
 Streets from the ramp to the facility (owner order 2026-09-24). The data is
 baked (`tools/street_chain.py`, `facility_approaches.json` coverage
@@ -1509,6 +1570,23 @@ onto exit signalling.
 ### World and narration
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#world-and-narration).
+
+### Deferred from 1.9: live feeds that need a key
+
+Moved here 2026-09-24. Both need a registered API key, and a key shipped in
+a public build leaks.
+
+- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
+      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
+      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
+      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
+      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
+      in: 29 states carry live construction now, 15 of them new that day.
+- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
+      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
+      feed, and EIA fuel prices. Not in the registry at all: Alabama,
+      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
+      Tennessee, West Virginia, Wyoming, DC.
 
 ## Shipped in 1.6.0
 

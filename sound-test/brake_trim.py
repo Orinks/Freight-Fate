@@ -34,13 +34,15 @@ INTENSITIES = [("feather", 0.14), ("light", 0.26), ("firm", 0.45)]
 
 def write(name: str, x: np.ndarray, target_rms: float = 0.10) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -60,7 +62,7 @@ def main() -> None:
         a = onset(x)
         for tag, dur in INTENSITIES:
             n = int(dur * SR)
-            clip = x[a:a + n].copy()
+            clip = x[a : a + n].copy()
             # 8 ms attack so it starts clean; the last 40% eased out so the long
             # "sssh" tail is gone and it reads as a short chuff.
             atk = int(0.008 * SR)
@@ -70,7 +72,7 @@ def main() -> None:
             # firmer press = a touch more level; feather sits back
             gain = {"feather": 0.6, "light": 0.8, "firm": 1.0}[tag]
             write(f"brake_{key}_{tag}.wav", clip * gain)
-            print(f"  brake_{key}_{tag}.wav  {dur*1000:3.0f}ms")
+            print(f"  brake_{key}_{tag}.wav  {dur * 1000:3.0f}ms")
     print(f"\nwrote short brake hisses to {OUT}")
 
 

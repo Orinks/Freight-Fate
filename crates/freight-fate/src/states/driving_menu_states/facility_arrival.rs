@@ -7,7 +7,7 @@
 //! shared with the pickup side.
 
 use ff_core::models::business::{build_business_settlement, SettlementTerms};
-use ff_core::models::trailer_yard::{delivery_plan, pickup_plan, DeliveryPlan};
+use ff_core::models::trailer_yard::{delivery_plan, DeliveryPlan};
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
 use ff_core::sim::vehicle::TruckState;
@@ -237,14 +237,17 @@ impl FacilityArrivalState {
         );
     }
 
-    /// Whether the empty hooked here carries a write-up.
+    /// Whether the loaded trailer dropped here still carries its write-up.
+    ///
+    /// Asks the drive, which knows a box refused at the shipper or repaired
+    /// on the road is no longer the bad one. Reading the origin yard's plan
+    /// directly handed the badge for leaving a bad trailer behind to a driver
+    /// who had refused it at pickup and hauled a sound one.
     fn hooked_defect(&self, ctx: &mut GameContext) -> bool {
         self.driving
             .with(ctx, |d, ctx| {
-                let plan = pickup_plan(&d.job, profile_of(ctx));
-                plan.trailer
-                    .as_ref()
-                    .is_some_and(|trailer| trailer.defect().is_some_and(|d| !d.is_empty()))
+                d.hooked_trailer_defect(ctx)
+                    .is_some_and(|defect| !defect.is_empty())
             })
             .unwrap_or(false)
     }

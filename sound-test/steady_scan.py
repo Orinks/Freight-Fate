@@ -84,9 +84,7 @@ def analyze(x: np.ndarray, sr: int):
         env = float(np.sqrt(np.mean(raw * raw)))
         wide = np.abs(np.fft.rfft(raw * np.hanning(frame)))
         freqs = np.fft.rfftfreq(frame, 1 / sr)
-        hiss = float(
-            np.sum(wide[(freqs > 3000) & (freqs < 8000)] ** 2) / (np.sum(wide**2) + 1e-12)
-        )
+        hiss = float(np.sum(wide[(freqs > 3000) & (freqs < 8000)] ** 2) / (np.sum(wide**2) + 1e-12))
         rows.append((i / sr, rpm, env, hiss))
     return rows
 

@@ -1346,6 +1346,66 @@ fn test_drive_limit_inspection_still_orders_ten_hours() {
     ));
 }
 
+/// Driving under an out-of-service order is a disqualifying offense (49 CFR
+/// 383.51 Table 4) the game has no path to: the order is written only once
+/// the truck is stopped on the shoulder, and served in full in the same call,
+/// so the truck is legal again before it can roll. Equipment orders are fixed
+/// on the spot (`test_bald_tires_in_the_lane_are_out_of_service_until_replaced`).
+/// If this ever fails, the offense needs modelling, not this test.
+#[test]
+fn test_the_truck_never_rolls_under_an_out_of_service_order() {
+    let mut harness = a_drive("Order Served");
+    harness.app.ctx.settings.hos_mode = "realistic".to_string();
+    harness
+        .app
+        .ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .hos
+        .drive(11.0 * 60.0 + 1.0);
+    let minutes = harness.read_drive(|d| d.trip.game_minutes);
+    let career_h = harness
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .game_hours;
+    let event = TripEvent {
+        kind: TripEventKind::Inspection,
+        message: "Inspection station open.".into(),
+        data: TripEventData {
+            key: Some("scale:served".to_string()),
+            evidence: Some(vec!["HOS/ELD violation".to_string()]),
+            ..Default::default()
+        },
+    };
+    harness.with_drive(move |d, ctx| d.handle_inspection(ctx, &event));
+    // Lights on and still rolling: no order has been written yet.
+    harness.with_drive(|d, ctx| {
+        assert_eq!(d.pull_over.as_deref(), Some("lights"));
+        assert_eq!(d.out_of_service_count, 0);
+        let record = &ctx.profile.as_ref().expect("a career").driving_record;
+        assert!(record.out_of_service_times.is_empty());
+        d.pull_over_signaled = true;
+        d.truck_mut().velocity_mps = 0.0;
+        d.open_traffic_stop(ctx);
+    });
+    // Stopped: the order is written and already served when control returns.
+    let p = harness.app.ctx.profile.as_ref().expect("a career");
+    assert!(!p.hos.in_violation("realistic"));
+    assert_eq!(
+        p.driving_record.out_of_service_times,
+        vec![career_h + minutes / 60.0]
+    );
+    harness.with_drive(|d, _| {
+        assert_eq!(d.out_of_service_count, 1);
+        assert_eq!(d.trip.truck.velocity_mps, 0.0);
+        assert!(approx(d.trip.game_minutes, minutes + hos::SLEEP_MIN));
+    });
+}
+
 // -- the clock the shift runs on --------------------------------------------------------
 
 #[test]

@@ -1080,8 +1080,9 @@ unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
 
 Inspections are real. A clean record is waved through an open scale nearly
-every time; a record carrying citations or out-of-service history is
-pulled into the lane, and the lane is a Level 1 inspection: driver,
+every time; a record carrying citations or out-of-service orders from the
+last game year is pulled into the lane, and older ones no longer count
+against you there. The lane is a Level 1 inspection: driver,
 paperwork, a walk-around and a look under the truck, about 45 minutes on
 duty. Worn tires, brakes near their limit, body damage and whatever the
 last driver left on a hooked trailer get written up, with a fine and a
@@ -1631,8 +1632,9 @@ Interactive is a descent-control level, not a preset.
 
 Exit speed assistance brakes in the deceleration lane of an already-selected
 exit, so the truck reaches the exit speed by the ramp curve. On the highway it
-only slows a truck the gore would refuse. Route-transition assistance or
-curve assistance does the same braking when exit speed assistance is off. Facility stopping
+only slows a truck the gore would refuse. Route-transition, curve, or
+facility stopping assistance does the same braking when exit speed assistance
+is off. Facility stopping
 assistance (the destination approach assistance row) slows and stops at the
 selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
 cleared stop or green light at the end of the destination ramp, it also pulls
@@ -1753,7 +1755,7 @@ quiets it, and settling back under the limit disarms it.
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
 | Music volume | Menu and facility background music volume. |
 | Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |
-| Music seed | Only shown with Music source set to Synthesized. Rolls a new seed and reads it aloud, so you can share a favorite with someone else. Every synthesized piece changes, and the current music restarts at once. |
+| Music seed | Picks every synthesized piece. Enter opens a field where you type a whole number, such as a seed someone shared with you; Escape leaves the seed as it was. Left or Right rolls a new seed and reads it aloud, so you can share a favorite. Every synthesized piece changes, and the current music restarts at once. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. With Music source set to Synthesized, this locks the radio to the synthesized Roadhouse alone; every other station control does nothing, though the radio key, volume, and now playing still work. |
 | Shuffle personal playlists | Off by default: each of your playlists plays top to bottom and resumes where it left off. On plays it in a random order, every track once before any repeats, with a new order each time through. |

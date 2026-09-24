@@ -1221,6 +1221,10 @@ impl DrivingState {
     /// Park for `minutes`. A full 10-hour order resets the clock and fatigue;
     /// a 30-minute break order only takes the missed break.
     pub fn place_out_of_service_minutes(&mut self, ctx: &mut GameContext, minutes: f64) {
+        // Written now, served in full below before this returns: the truck is
+        // never under an order it could drive on, so driving under one (49 CFR
+        // 383.51 Table 4) has no path in the game.
+        let written_h = crate::states::driving_rest_states::record_hours(ctx, self);
         advance_rest_clock(self, ctx, minutes, None, "");
         if minutes >= hos::SLEEP_MIN {
             hos_mut_of(ctx).sleep();
@@ -1236,7 +1240,9 @@ impl DrivingState {
         // OUT_OF_SERVICE_WEIGHT). The trip tally above was the only one ever
         // kept, in Python and in the port, so no order ever reached the
         // record and the scale kept waving the driver through.
-        profile_mut_of(ctx).out_of_service_events += 1;
+        let profile = profile_mut_of(ctx);
+        profile.out_of_service_events += 1;
+        profile.driving_record.out_of_service_times.push(written_h);
         let snapshot = self.snapshot(ctx);
         profile_mut_of(ctx).active_trip = Some(snapshot);
         ctx.save_profile();

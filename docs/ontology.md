@@ -308,6 +308,7 @@ from the words, and synonyms cost them a re-read.
 | An officer going over the truck, the driver's papers, or both, at a scale or on the shoulder | roadside inspection; "Level 1 full inspection", "Level 2 walk-around inspection", "Level 3 driver inspection" for the kind | DOT inspection, safety check, CVSA inspection, audit | `sim/roadside_inspection::InspectionLevel`, `DrivingState::settle_inspection` |
 | The item an inspector writes up | written up for ...; the finding itself is the noun ("brakes out of adjustment") | violation, defect code, OOS item | `roadside_inspection::Finding` |
 | A critical item that parks the truck until it is fixed | out of service until repaired | OOS, red-tagged, grounded | `Finding::out_of_service`, `Repair` |
+| An officer's order parking the driver, served in full on the spot and counted on the safety record (public as a count, never its reason) | out-of-service order | OOS, OOS order, put out of service | `Profile::out_of_service_events`, `DrivingRecord::out_of_service_times`, `outOfServiceOrders` on the public profile |
 | The sticker a clean Level 1 earns, good for three months of being waved past open scales | inspection decal; "the decal on the windshield" | CVSA sticker, decal, bypass sticker | `DrivingRecord::decal_until_h`, `DECAL_VALID_HOURS` |
 | The driver's own pre-trip check of the same items | walk-around; "Walk around the truck" is the row | pre-trip, DVIR, pre-trip inspection, vehicle check | `roadside_inspection::walk_around`, `WALK_AROUND_MIN` |
 | The three days in May when every inspector is on the road | Roadcheck week | blitz, inspection blitz, Roadcheck event | `roadside_inspection::roadcheck_blitz`, `Trip::roadcheck_blitz` |
@@ -555,11 +556,11 @@ the CB, spoken by a driver on the radio. It is trade slang, and it is flavour.
 In a warning, a menu item, a status readout, or anything the game says in its
 own voice, the word is "trooper".
 
-The Python game enforced this with a sweep of every player-facing string
-that failed if the word appeared outside a CB clause. The Rust port has no
-equivalent yet (`test_bear_is_cb_voice_only_in_every_player_facing_string`
-in `crates/ff-core/tests/it/sim_enforcement_presence.rs` is an ignored
-placeholder), so for now it is a review rule. The check exists because slang leaks: the word is
+A sweep of every string literal in both crates' sources fails if the word
+appears outside a CB clause
+(`test_bear_is_cb_voice_only_in_every_player_facing_string` in
+`crates/ff-core/tests/it/sim_enforcement_vocabulary.rs`); the song title
+"Black Bear Road" is its one exception. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 

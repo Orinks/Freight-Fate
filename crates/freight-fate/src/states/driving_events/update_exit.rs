@@ -42,13 +42,14 @@ impl DrivingState {
         // 10 under. Nothing about the lane was wrong; the clock under it was.
         //
         // And the same law on the way OFF, on every exit whatever ends it:
-        // the deceleration lane and the ramp curve are real lengths of road
-        // too. On a free-flowing ramp at five times the clock the lane went
-        // by in about two real seconds and a truck met a 25 mph loop at 55
-        // (review of the realistic exit, 2026-09-24).
+        // the deceleration lane, the ramp curve and the run to the entrance
+        // are real lengths of road too. On a free-flowing ramp at five times
+        // the clock the lane went by in about two real seconds and a truck
+        // met a 25 mph loop at 55 (review of the realistic exit, 2026-09-24);
+        // see `on_laid_out_ramp` for the entrance.
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
             || self.departure_merge_recovery
-            || self.short_of_ramp_curve_end()
+            || self.on_laid_out_ramp()
             || (self.ramp_mi.is_some()
                 && (self
                     .ramp_stop
@@ -522,6 +523,8 @@ impl DrivingState {
             let mut terminal = match self.ramp_control.as_str() {
                 "signal" => " Traffic light at the end.",
                 "stop" => " Stop sign at the end.",
+                "yield" => " Yield at the end.",
+                "roundabout" => " Roundabout at the end.",
                 _ => "",
             };
             if scale_ramp {
@@ -532,6 +535,11 @@ impl DrivingState {
             let mut ending = match self.ramp_control.as_str() {
                 "signal" => "traffic light at the end",
                 "stop" => "stop sign at the end",
+                // A yield named as "stop at the end" was an instruction the
+                // rule at the line does not give (every-assist audit,
+                // 2026-09-24).
+                "yield" => "yield at the end",
+                "roundabout" => "roundabout at the end",
                 _ => "stop at the end",
             };
             if scale_ramp {

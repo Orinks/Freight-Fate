@@ -207,6 +207,43 @@ fn test_cruise_leaves_the_drivers_own_jake_alone() {
     assert_eq!(harness.read_drive(|d| d.cruise_jake_stage), 0);
 }
 
+#[test]
+fn test_cruise_closing_on_a_downgrade_does_not_stack_past_the_cargo_line() {
+    // Closing on a ramp, a lower limit, or a lead vehicle keeps whatever
+    // retarder stage the descent already raised -- rightly, since dropping it
+    // would hand the whole grade to the drums -- but the snub that does the
+    // closing was sized blind to that retarder: a flat fraction of the
+    // overspeed, with no idea the jake was already holding the hill. On a
+    // steep loaded descent with the retarder up, the two stack, and the
+    // combined deceleration reaches the freight the same way an emergency
+    // stop does.
+    let (mut harness, _speeds, stages) =
+        grade_hold("Closing Downgrade", -0.06, GradeHold::default());
+    assert!(
+        stages.iter().any(|s| *s > 0),
+        "the descent never raised the retarder: {stages:?}"
+    );
+    harness.with_drive(|d, _| d.truck_mut().cargo_damage_pct = 0.0);
+
+    // A ramp cap well under the truck's speed, arriving mid-descent -- the
+    // shape a lower posted limit or a slower lead makes too.
+    let speed = harness.read_drive(|d| d.truck().speed_mph());
+    harness.with_drive(move |d, _| d.cruise_exit_mph = Some(speed - 25.0));
+    for _ in 0..(5 * 60) {
+        harness.advance_clock(DT);
+        harness.with_drive(|d, ctx| {
+            d.truck_mut().grade = -0.06;
+            d.update_cruise(ctx, DT, false, false, false);
+            d.truck_mut().update(DT);
+        });
+    }
+    assert_eq!(
+        harness.read_drive(|d| d.truck().cargo_damage_pct),
+        0.0,
+        "closing on a downgrade stacked the snub on the retarder and damaged the freight"
+    );
+}
+
 // -- predictive cruise ------------------------------------------------------------
 
 /// `_hill_road(driving, flat_mi=, grade=, climb_mi=)`: flat, then a sustained
@@ -281,6 +318,56 @@ fn test_predictive_cruise_cue_names_the_grade_it_is_building_for() {
         "{:#?}",
         spoken(&harness)
     );
+}
+
+/// Whether the harness career holds the predictive-cruise badge.
+fn holds_predictive_crest(harness: &PlaytestHarness) -> bool {
+    harness
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .achievements
+        .iter()
+        .any(|id| id == "predictive_crest")
+}
+
+/// One frame of the preview naming its phase, then the badge tracker, in
+/// the order the drive frame runs them.
+fn preview_then_badges(harness: &mut PlaytestHarness) {
+    harness.with_drive(|d, ctx| {
+        let bias = d.predictive_cruise_bias(ctx, 62.0);
+        d.say_predictive_cruise(ctx, 0.0, bias);
+        d.track_driving_badges(ctx, 1.0 / 60.0);
+    });
+}
+
+#[test]
+fn test_the_predictive_crest_badge_lands_when_cruise_builds_for_a_real_climb() {
+    // A two percent pull is cued, but it would not have taken the speed off
+    // the truck, so building for it earns nothing.
+    let mut harness = cruising("Crest Shallow", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    hill_road(&mut harness, 0.5, 0.02, 1.0);
+    harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
+    harness.app.ctx.settings.predictive_cruise = true;
+    preview_then_badges(&mut harness);
+    assert_eq!(harness.read_drive(|d| d.pcc_phase.clone()), "building");
+    assert!(!holds_predictive_crest(&harness));
+    drop(harness);
+
+    // A five percent one does, on the frame the preview starts building.
+    let mut harness = cruising("Crest Steep", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    hill_road(&mut harness, 0.5, 0.05, 1.0);
+    harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
+    harness.with_drive(|d, ctx| d.track_driving_badges(ctx, 1.0 / 60.0));
+    assert!(
+        !holds_predictive_crest(&harness),
+        "before the preview built"
+    );
+    harness.app.ctx.settings.predictive_cruise = true;
+    preview_then_badges(&mut harness);
+    assert!(holds_predictive_crest(&harness));
 }
 
 #[test]

@@ -126,7 +126,15 @@ impl DrivingState {
             // fought, and a foot on the brake wins outright.
             self.destination_arrival_active = false;
             if let Some(ramp_mi) = self.ramp_mi.filter(|mi| *mi > 0.0) {
-                let (limit_mph, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                // The street's limit past the bar, never the mainline's: the
+                // milepost holds at the gore while the truck is on the ramp,
+                // so the limit "here" was the interstate's, and the assist
+                // wound a truck leaving a stop bar toward 70 on the way into
+                // town (every-assist audit, 2026-09-24). With no street zone
+                // to read, the facility access limit stands in.
+                let limit_mph = self
+                    .street_limit_past_bar_mph()
+                    .unwrap_or(ff_core::sim::trip_models::FACILITY_ACCESS_LIMIT_MPH);
                 let target_mph = limit_mph.max(FACILITY_LANE_ROLL_MPH);
                 self.hold_approach_speed_with(
                     ramp_mi * 1609.344,

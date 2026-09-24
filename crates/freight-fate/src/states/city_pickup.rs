@@ -491,6 +491,9 @@ impl PickupFacilityState {
             fmt_f(TRAILER_SWAP_MIN, 0),
             self.tank_walk_around_clause()
         ));
+        // The badge is for finding it: awarded at the hook, it announced the
+        // write-up before the driver had looked, and to drivers who never did.
+        ctx.award_achievement("hooked_a_bad_one");
         self.offer_refusal = true;
         self.refresh(ctx, false);
     }
@@ -716,9 +719,6 @@ impl PickupFacilityState {
         ctx.award_achievement("first_day");
         if plan.is_drop_hook() {
             ctx.award_achievement("first_drop_hook");
-            if plan.trailer.as_ref().is_some_and(|t| t.defect().is_some()) {
-                ctx.award_achievement("hooked_a_bad_one");
-            }
         } else if plan.detention_minutes > 0.0 && is_owner_operator(&profile(ctx).business_status) {
             ctx.award_achievement("detention_paid");
         }

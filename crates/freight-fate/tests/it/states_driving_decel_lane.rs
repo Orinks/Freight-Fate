@@ -421,3 +421,38 @@ fn test_a_ramp_curve_taken_hot_moves_the_load_and_says_so() {
     assert!(hot > 0.0, "a hot ramp curve cost the load nothing");
     assert_eq!(text.matches(warning).count(), 1, "{text}");
 }
+
+#[test]
+fn test_the_steering_lean_asks_for_the_wheel_only_for_the_ramp_curve() {
+    // Every-assist audit, 2026-09-24: the engine leaned for the whole ramp,
+    // gore to driveway, so a driver steering for themselves was asked to
+    // turn down a straight deceleration lane and a straight run to the bar.
+    // It leans for the curve now, leading into it like a street turn.
+    use freight_fate::states::driving_turns::{RAMP_GUIDE_DEMAND, TURN_GUIDE_LEAD_MI};
+    let (mut harness, stop) = exit_rig(70.0, 0.0, 1.0, 62.0, true, true);
+    drive_to_the_gore(&mut harness, &stop);
+    let mut seen = (false, false, false); // lane far, curve, past the curve
+    for _ in 0..(30 * 120) {
+        frame(&mut harness);
+        let (lane_left, in_curve, past, lean) = harness.read_drive(|d| {
+            (
+                d.deceleration_lane_left_mi(),
+                d.ramp_curve_radius_ft().is_some(),
+                d.ramp_mi.is_some() && !d.short_of_ramp_curve_end(),
+                d.maneuver_steer_demand(None),
+            )
+        });
+        if lane_left.is_some_and(|left| left > TURN_GUIDE_LEAD_MI) {
+            assert_eq!(lean, 0.0, "leaned {lean} down the deceleration lane");
+            seen.0 = true;
+        } else if in_curve {
+            assert_eq!(lean, RAMP_GUIDE_DEMAND);
+            seen.1 = true;
+        } else if past {
+            assert_eq!(lean, 0.0, "leaned {lean} on the run to the bar");
+            seen.2 = true;
+            break;
+        }
+    }
+    assert!(seen.1 && seen.2, "{seen:?}");
+}
