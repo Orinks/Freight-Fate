@@ -541,6 +541,11 @@ its status or release decision.
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still
       dropped at the door.
+- [x] `weather_collector`'s copy names all nine skies the award needs
+      (2026-09-24). It listed eight and left out ice, which it now calls
+      freezing rain, the word the weather readout speaks. The award is
+      unchanged; the catalog digest and the invariants export moved with the
+      copy, and orinks.net carries the new export.
 - [x] Achievement triggers audited (2026-09-20). 181 badges: 177 wired, 3
       deliberately retired into "first_day" and tested as such, and 2 --
       `thrifty_run` and `coffee_regular` -- that had never been awardable in
@@ -567,10 +572,6 @@ its status or release decision.
       announcing the defect before the walk-around its copy names, and
       "dropped_the_bad_one" read the origin yard's trailer, so a driver who
       refused it at pickup still earned it at the receiver.
-- [ ] `weather_collector`'s copy names eight skies (sun, cloud, rain,
-      downpour, thunder, snow, fog, wind) but the award needs all nine
-      weather kinds, ice included. Either the copy or the count is wrong;
-      changing the copy moves the catalog digest and the invariants export.
 - [ ] Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
