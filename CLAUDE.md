@@ -111,6 +111,13 @@ code, in the same change:
 - Discovering follow-up work worth doing (deferred wiring, a needed data
   re-sweep, a known gap): record it as an unchecked bullet rather than
   leaving it only in commit messages or session memory.
+- The release line's open work lives in two lists (owner rule 2026-09-24).
+  "Release gate" is fixed: a new finding goes there only if it costs the
+  drive (tier 1 under "Working with the owner" below). Everything else goes
+  to "Found along the way" by default. The owner can promote any item. Keep
+  the detail in the dated section, marked "(Release gate)" or "(Found along
+  the way)", with a one-line checkbox in the list; landing a gate item ticks
+  it in the gate.
 
 ## Commands
 
