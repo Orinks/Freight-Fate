@@ -14,7 +14,7 @@ use crate::states::driving_core::*;
 use crate::states::driving_updates::{
     shift_recovery_curve, AIR_FILL_REARM_PSI, AIR_FILL_VOLUME, AUTO_JAKE_OVER_MPH,
     AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S,
-    JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX, JAKE_RATE_MIN, JAKE_STAGE_GAIN,
+    JAKE_CUE_HOLD_S, JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX, JAKE_RATE_MIN, JAKE_STAGE_GAIN,
     JAKE_VOICE_NATIVE_RPM, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
     SHIFT_LOAD_RECOVERY_S,
 };
@@ -359,6 +359,7 @@ impl DrivingState {
             // the band key restarted that same file over itself every time
             // rpm crossed a boundary -- which on a grade is constantly.
             let sounding = ctx.audio.voice_key(&key);
+            self.jake_cue_idle_s = 0.0;
             if Some(sounding.as_str()) != self.jake_cue_key.as_deref() {
                 ctx.audio.start_loop_with(CH_JAKE, &key, volume, 120);
                 self.jake_cue_key = Some(sounding);
@@ -373,8 +374,15 @@ impl DrivingState {
             let rate = (rpm / JAKE_VOICE_NATIVE_RPM).clamp(JAKE_RATE_MIN, JAKE_RATE_MAX);
             ctx.audio.set_loop_rate(CH_JAKE, rate);
         } else if self.jake_cue_key.is_some() {
-            ctx.audio.stop_loop_with(CH_JAKE, 150);
-            self.jake_cue_key = None;
+            // The gap is silence, but the loop is held through it (see
+            // JAKE_CUE_HOLD_S). A zero-length sync is not a gap: it stops.
+            self.jake_cue_idle_s += dt;
+            if dt <= 0.0 || self.jake_cue_idle_s >= JAKE_CUE_HOLD_S {
+                ctx.audio.stop_loop_with(CH_JAKE, 150);
+                self.jake_cue_key = None;
+            } else {
+                ctx.audio.set_loop_volume(CH_JAKE, 0.0);
+            }
         }
         // The cold-start low-air buzzer waits out the ignition crank so the
         // start itself stays audible; if the compressor has already built past

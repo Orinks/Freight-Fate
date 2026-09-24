@@ -149,11 +149,12 @@ impl DrivingState {
                     if !self.ramp_waiting_at_sign {
                         self.ramp_waiting_at_sign = true;
                         let what = self.crossing_description();
-                        self.say_route_navigation(
+                        self.say_terminal_hold(
                             ctx,
                             &format!(
                                 "Stopped at the {noun}. {what}; assistance is holding for your gap."
                             ),
+                            SpeechCategory::Navigation,
                         );
                     }
                     return;
@@ -173,9 +174,10 @@ impl DrivingState {
                 // assist) that just took the brakes, same as the stop-sign
                 // sibling above (automation-handoff sweep, 2026-08-20, the
                 // deferred 2026-08-15 audit).
-                self.say_route_confirmation(
+                self.say_terminal_hold(
                     ctx,
                     "Stopped at the red light. Assistance is holding the brakes for green.",
+                    SpeechCategory::Confirmation,
                 );
             }
             return;
@@ -218,13 +220,7 @@ impl DrivingState {
             // the session comes back on its own past it rather than waiting
             // for a departure that never happens on a ramp.
             self.pause_speed_control(ctx, true);
-            let what = match self.ramp_control.as_str() {
-                "signal" => "light",
-                "stop" => "stop sign",
-                "yield" => "yield",
-                "roundabout" => "roundabout",
-                _ => "stop sign",
-            };
+            let what = self.terminal_noun();
             // A yield whose gap closed on the roll is the same approach the
             // roll line already named: "slowing for the yield" then "braking
             // for the yield" back to back said one thing twice. A light is
@@ -238,6 +234,60 @@ impl DrivingState {
                 );
             }
         }
+    }
+
+    /// What the assist's lines call the control at the end of this ramp.
+    fn terminal_noun(&self) -> &'static str {
+        match self.ramp_control.as_str() {
+            "signal" => "light",
+            "yield" => "yield",
+            "roundabout" => "roundabout",
+            _ => "stop sign",
+        }
+    }
+
+    /// The ramp cap's lift taking the pedals, said once.
+    ///
+    /// On a ramp that ends at a light or a sign the lift and the terminal's
+    /// braking are one act by one assist -- slowing for what is at the end --
+    /// and each used to announce itself: "Route-transition assistance
+    /// slowing." then "Route-transition assistance braking for the yield." a
+    /// second later (agent drive, yield at exit 255, 2026-09-24). So the lift
+    /// names the terminal, and the terminal's own line for this approach is
+    /// spent.
+    pub(crate) fn say_ramp_lift(&mut self, ctx: &mut GameContext) {
+        let controlled = self.ramp_mi.is_some()
+            && !self.ramp_terminal_done
+            && matches!(
+                self.ramp_control.as_str(),
+                "signal" | "stop" | "yield" | "roundabout"
+            );
+        if !controlled {
+            self.say_route_confirmation(ctx, "Route-transition assistance slowing.");
+            return;
+        }
+        // Spend the line the terminal would have said for this same act: the
+        // roll's on a green, the stop's on a red or a sign, either at a yield
+        // (whose roll and stop are one approach).
+        let what = match self.ramp_control.as_str() {
+            "signal" if self.ramp_light_phase() == "green" => {
+                self.ramp_green_roll_said = true;
+                "green light"
+            }
+            "yield" | "roundabout" => {
+                self.ramp_green_roll_said = true;
+                self.ramp_assist_said = true;
+                self.terminal_noun()
+            }
+            _ => {
+                self.ramp_assist_said = true;
+                self.terminal_noun()
+            }
+        };
+        self.say_route_confirmation(
+            ctx,
+            &format!("Route-transition assistance slowing for the {what}."),
+        );
     }
 
     /// Take the truck through a terminal it may roll -- a green, or a yield
@@ -389,7 +439,11 @@ impl DrivingState {
             if speed <= RED_STOP_MPH {
                 if !self.ramp_waiting_at_light {
                     self.ramp_waiting_at_light = true;
-                    self.say_route_navigation(ctx, "Stopped at the red light.");
+                    self.say_terminal_hold(
+                        ctx,
+                        "Stopped at the red light.",
+                        SpeechCategory::Navigation,
+                    );
                 }
                 return;
             }
@@ -496,9 +550,10 @@ impl DrivingState {
                 if !self.ramp_waiting_at_sign {
                     self.ramp_waiting_at_sign = true;
                     let what = self.crossing_description();
-                    self.say_route_navigation(
+                    self.say_terminal_hold(
                         ctx,
                         &format!("Stopped at the sign. {what}; wait for your gap."),
+                        SpeechCategory::Navigation,
                     );
                 }
                 return;
@@ -654,9 +709,10 @@ impl DrivingState {
                 if !self.ramp_waiting_at_sign {
                     self.ramp_waiting_at_sign = true;
                     let what = self.crossing_description();
-                    self.say_route_navigation(
+                    self.say_terminal_hold(
                         ctx,
                         &format!("Stopped at the {noun}. {what}; wait for your gap."),
+                        SpeechCategory::Navigation,
                     );
                 }
                 return;

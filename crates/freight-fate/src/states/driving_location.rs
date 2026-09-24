@@ -101,23 +101,17 @@ impl DrivingState {
         }
         if self.destination_exit_taken {
             let mut target = self.approach_facility_text(ctx);
-            // The ramp's own countdown, never the frozen mainline remainder.
-            let mut ramp_left = self.ramp_mi;
-            // Unless streets follow the ramp: then the gate is those streets
-            // further on, and "50 feet to the Abilene metro freight market"
-            // at a stop sign five miles short of it was the ramp's end
-            // mistaken for the destination (agent drive, 2026-09-23).
-            if self.ramp_continues_to_destination_streets(ctx) {
-                if let Some(streets) = self.surface_chain_route(ctx) {
-                    target = format!("the gate at {target}");
-                    ramp_left = Some(ramp_left.unwrap_or(0.0) + streets.miles());
-                }
+            if self.ramp_continues_to_destination_streets(ctx)
+                && self.surface_chain_route(ctx).is_some()
+            {
+                target = format!("the gate at {target}");
             }
+            let left = self.gate_distance_mi(ctx);
             self.say_local_status(
                 ctx,
                 &target,
                 Some("off the highway, on the facility approach"),
-                ramp_left,
+                left,
             );
             return;
         }
@@ -522,6 +516,40 @@ impl DrivingState {
             .collect::<Vec<_>>()
             .join(" ");
         ctx.say(&line);
+    }
+
+    /// Road left to the destination's gate once the truck is on its way in,
+    /// or None while the highway is still ahead.
+    ///
+    /// One answer for every readout that names the gate. The upcoming
+    /// readout read the gate ZONE's start as "facility gate in 0.3 miles"
+    /// while route status said "three quarters of a mile to the gate", and
+    /// the arrival estimate divided the frozen highway remainder by a crawl:
+    /// "arrival in 8.6 hours" two miles from the gate (agent drives A and B,
+    /// 2026-09-24).
+    ///
+    /// On the destination ramp the mainline odometer holds, so the ramp's
+    /// own countdown is the distance -- plus the facility's streets when
+    /// they follow the ramp, or "50 feet to the freight market" at a stop
+    /// sign five miles short of it named the ramp's end as the destination
+    /// (agent drive, 2026-09-23).
+    pub fn gate_distance_mi(&mut self, ctx: &GameContext) -> Option<f64> {
+        if self.surface_chain {
+            return Some(self.trip.remaining_miles());
+        }
+        if self.destination_exit_taken {
+            let mut left = self.ramp_mi.map(|mi| mi.max(0.0));
+            if self.ramp_continues_to_destination_streets(ctx) {
+                if let Some(streets) = self.surface_chain_route(ctx) {
+                    left = Some(left.unwrap_or(0.0) + streets.miles());
+                }
+            }
+            return Some(left.unwrap_or_else(|| self.trip.remaining_miles()));
+        }
+        if !self.departure_chain && self.trip.is_facility_approach_route() {
+            return Some(self.trip.remaining_miles());
+        }
+        None
     }
 
     /// `_closing_text(miles)`: a distance to something the truck has not
