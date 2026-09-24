@@ -1483,7 +1483,9 @@ mainline behaviour.
       planning threshold prices a bend entered from rest, so in Lookout
       Pass's pairs a half tank held under its number still moves its load
       0.01 percent with the assists and 0.12 with a driver on the spoken
-      number (the sweep caps it at 0.2). Adding the present swing to the
+      number (the sweep caps it at 0.2), and that driver reaches 0.98 of
+      the rollover threshold with no warning heard -- the closest call in
+      the sweep, and the one to fix first. Adding the present swing to the
       plan was tried and dropped: the number moved with the wave, the servo
       braked more, and on Donner a cruise-held half tank sloshed 2.5 percent
       on a climb.
