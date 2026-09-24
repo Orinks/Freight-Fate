@@ -754,7 +754,12 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             let next_context = driving
                 .trip
                 .next_navigation_context(ctx.settings.imperial_units);
-            loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context)
+            let mut line =
+                loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context);
+            if driving.trip.truck.reefer_on && driving.trip.truck.cargo_needs_reefer() {
+                line.push_str(" Reefer running at 2 degrees.");
+            }
+            line
         }
     };
     ctx.say(&line);
