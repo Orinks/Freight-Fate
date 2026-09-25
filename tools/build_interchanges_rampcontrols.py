@@ -23,6 +23,8 @@ starts and what the screen drops).
 
 from __future__ import annotations
 
+import bisect
+
 from build_interchanges_base import *
 from exit_position_screen import leg_position_drift_mi
 from build_interchanges_maxspeed import (
@@ -313,11 +315,18 @@ def load_or_build_ramp_control_index(
 def _exit_location(
     geom: list[tuple[float, float, float]], at_mi: float, leg_miles: float
 ) -> tuple[float, float]:
-    """Geometry vertex at an interchange's leg-frame milepost."""
+    """The point on the polyline at an interchange's leg-frame milepost,
+    interpolated between vertices: the archive thins straights to a vertex
+    every few miles, so the nearest vertex could be miles from the exit."""
     total = geom[-1][2] or leg_miles
     target = at_mi / leg_miles * total if leg_miles else 0.0
-    best = min(geom, key=lambda p: abs(p[2] - target))
-    return best[0], best[1]
+    i = bisect.bisect_left([p[2] for p in geom], target)
+    if i <= 0 or i >= len(geom):
+        end = geom[0] if i <= 0 else geom[-1]
+        return end[0], end[1]
+    (a_lat, a_lon, a_mi), (b_lat, b_lon, b_mi) = geom[i - 1], geom[i]
+    t = (target - a_mi) / (b_mi - a_mi) if b_mi > a_mi else 0.0
+    return a_lat + (b_lat - a_lat) * t, a_lon + (b_lon - a_lon) * t
 
 
 def load_junction_ref_map(path: Path) -> dict[str, list[tuple[float, float]]]:
@@ -694,6 +703,8 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
                 f"({100.0 * stats.get('via_disagrees', 0) / judged:.1f}%)."
             )
     meta = ramp_length_meta(data["legs"], stats)
+    # The screen counts are this run's alone; an --only run judges few legs.
+    meta["screen"]["legs_this_run"] = processed
     meta["position_screen"] = {
         "rule": (
             "derived: per leg, the median gap between each labelled exit's at_mi and "

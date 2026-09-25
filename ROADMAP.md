@@ -160,15 +160,23 @@ Costs the drive (found 2026-09-24):
       truck and load, the retarder no longer hunts, and the G key gives a
       pitch one length (PR #243;
       [September 24](#september-24-descent-control-into-denver)).
-- [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
-      their exits were found (Charlotte to Knoxville by a median 8 miles),
-      so those exits keep old ramp data and get no ramp terminal. Re-derive
-      their interchanges (PR #232).
+- [x] 81 legs' exits sat at the wrong mile: the legs were rerouted after
+      their exits were found (Charlotte to Knoxville by a median 8 miles).
+      Their interchanges are re-derived on the polyline each leg drives,
+      from the June OSM extracts every other layer was read from, and the
+      layers under them rebuilt. The position screen flagged all 81 and
+      withheld 1,113 exits; it now flags none and withholds none. Exits
+      more than 0.75 mi from their own junction, or with none on the road:
+      2,016 of 2,776 labelled exits before, 19 of 3,073 after; at the leg
+      ends, where the game hands over to the destination exit, 85 of 162
+      before and 2 after
+      ([September 24](#september-24-realistic-interstate-exit)).
 
 World data (the rest of the 1.9 world-data list moved to
 [2.0](#world-data-deferred-from-19) on 2026-09-25):
 
-- [ ] The Flying J listed at exit 286A belongs on an I-20 Abilene leg
+- [x] The Flying J listed at exit 286A is off the Abilene to Wichita Falls
+      leg and on Lubbock to Abilene, which passes it on I-20 at exit 277
       ([September 23](#september-23-agent-drive-into-abilene)).
 
 Driving and platform:
@@ -1484,10 +1492,16 @@ gate, turned up these on dev's own code.
 - [x] **Ramp readouts.** The route readout on a destination ramp adds the
       street chain to the gate; U drops highway stops off the highway; the
       unrecorded ramp control is seeded by the exit, not by each stop.
-- (Release gate) **Data: the Flying J listed at exit 286A** on the Wichita Falls to
+- [x] **Data: the Flying J listed at exit 286A** on the Wichita Falls to
       Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
-      miles off this road by its own source note. Move it to an I-20
-      Abilene leg and re-bake.
+      miles off this road by its own source note. Two legs pass the store:
+      Big Spring to Abilene (I-20) already lists it, as "Flying J Travel
+      Center Tye" at exit 277, so the record moved to Lubbock to Abilene
+      (US-84, on I-20 for its last miles), which listed nothing there. It
+      carries the store's coordinates read from OpenStreetMap, sits at mile
+      155.7 by projecting them onto that leg (derived), and the stop snap
+      reads exit 277 from its own source. That leg has no interchange
+      records, so the ramp control stays seeded.
 - (Release gate) **The speed keeper between close street turns.** It built back to
       the zone limit between turns a quarter mile apart (9 to 21 mph), then
       eased in the last 0.07 mile at about 0.3 g. It now holds the next
@@ -1850,10 +1864,35 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
 - (Found along the way) **Gate and dock are one point (NOT built; owner has not decided).**
       A real arrival stops at the check-in, drives the yard at 5 to 15 and
       backs into a door. Recorded only; not to be built unasked.
-- (Release gate) **81 legs' exit mileage disagrees with their polyline** (rerouted
-      after their exits were discovered; Charlotte to Knoxville by a median
-      8 miles). Unpinned exits there keep old ramp data and get no terminal
-      (`ramp_length_bake.position_screen`). Re-derive their interchanges.
+- [x] **81 legs' exit mileage re-derived on their polyline** (they were
+      rerouted after their exits were discovered; Charlotte to Knoxville by
+      a median 8 miles). `build_interchanges.py --force --only` on the 81,
+      read from the June 2026 Geofabrik extracts (the rollback copy, swapped
+      in for the bake and back out), then ramp controls, the stop snap, stop
+      approaches (`--only`) and the facility chains of the 72 cities whose
+      destination exit changed. Four builder faults were fixed first: the
+      PBF prefilter boxed route_points (on 7 legs part of the polyline lay
+      outside them, 77 percent of Dallas to St Louis), junctions snapped to
+      the nearest vertex of an archive that keeps one every few miles on a
+      straight (at 200 m that found 5,545 of the 13,841 junctions on these
+      polylines), one exit number seen in two states was averaged into a
+      mile between them, and a leg
+      relabelled for its new road (Denver to Albuquerque, I-25 to US-285)
+      was skipped and kept the old road's exits. Re-derived at_mi is
+      labelled derived. Results on the 81: 3,082 exits to 3,379; labelled
+      exits with no junction of their number on the road, 455 to 0; exits
+      given a ramp length 1,940 to 3,313 and a surface terminal 1,826 to
+      3,113 (all exits: length 16,253 of 18,165 to 17,626 of 18,462); the
+      exit link changed on 154 road stops, and 69 to 114 have a street chain;
+      facility exit chains 3,054 to 3,135, turn-level facilities unchanged
+      at 2,456. The 19 exits still over 0.75 mi from a junction are split
+      interchanges whose two directions sit 1.5 to 1.9 mi apart, averaged
+      into one record like every other exit on the map.
+- (Found along the way) **Lane segments on the 81 legs were not re-baked.** The lane
+      bake reads live Overpass, not the June extract this bake used. Its
+      only tie to exits is keeping a lane-count stretch under 0.3 mi within
+      0.4 mi of an exit: 50 such stretches there now sit at no exit. Re-bake
+      them with the next lane sweep.
 - (Release gate) **In-town and rural statutory limits kept apart.** An untagged street
       takes the in-town district default only inside the boundary its
       state's code keys on (Census 2020 Urban Areas for a density district,

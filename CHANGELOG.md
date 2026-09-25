@@ -155,6 +155,7 @@
 
 ### Fixed
 
+- **Exits on several routes are announced at the right mile.** Charlotte to Knoxville and Dallas to St. Louis no longer name another highway's exits.
 - **Descent control holds a steep downgrade at a safe speed for your load.** It slows before the steep part, holds the gear, and names the speed once.
 
 - **The engine brake no longer steps up and down every few seconds on a long descent.**

@@ -358,6 +358,16 @@ def test_an_unpinned_exit_on_a_drifted_leg_gets_no_new_verdict(monkeypatch):
     assert ix["ramp_control"] == "stop" and stats["withheld"] == 1
 
 
+def test_an_exit_mid_tangent_is_looked_up_where_it_is():
+    """The archive keeps two vertices for a ten-mile straight; the exit at
+    mile 5 is halfway between them, not at either end."""
+    m = _topo_tools()
+    geom = [(40.0, -80.0, 0.0), (40.2, -80.0, 10.0)]
+    lat, lon = m._exit_location(geom, 5.0, 10.0)
+    assert abs(lat - 40.1) < 1e-9 and lon == -80.0
+    assert m._exit_location(geom, 12.0, 10.0) == (40.2, -80.0)
+
+
 def test_exit_mileage_is_measured_against_its_own_junctions():
     import exit_position_screen as screen
 

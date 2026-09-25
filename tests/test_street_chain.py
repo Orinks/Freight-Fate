@@ -458,6 +458,36 @@ def test_a_stop_off_an_exit_gets_the_streets_from_its_ramp(tmp_path, monkeypatch
     assert found["approach_chains_failed"][0]["route_failure"] == stops.ON_MAINLINE
 
 
+def test_a_stop_whose_exit_is_gone_loses_its_old_chain(monkeypatch):
+    """A rebake of some legs judges every stop on them afresh. A stop whose
+    exit moved or lost its terminal used to keep the chain from a ramp that
+    is not there; stops on legs outside the rebake keep theirs."""
+    from types import SimpleNamespace
+
+    import build_stop_approaches as stops
+
+    def leg(start):
+        stop = {"name": "Truck Stop", "type": "travel_center", "at_mi": 5.0, "lat": 41.0}
+        stop |= {"lon": -87.0, "approach_chains": [{"terminal_node": 1}]}
+        state_miles = [{"state": "Illinois", "miles": 10.0}]
+        return {
+            "from": start,
+            "to": "b_il_us",
+            "corridor": {"state_miles": state_miles},
+            "stops": [stop],
+        }
+
+    rebaked, other = leg("a_il_us"), leg("c_il_us")
+    monkeypatch.setattr(stops, "load_world", lambda: {"legs": [rebaked, other]})
+    monkeypatch.setattr(stops, "save_world", lambda _data: None)
+    monkeypatch.setattr(stops, "route_stops", lambda *_args: {})
+    extract = SimpleNamespace(state_extract_path=lambda _cache, _state: Path(__file__))
+    monkeypatch.setattr(stops, "_local_geometry", lambda: extract)
+    assert stops.main(["--only", "a_il_us->b_il_us", "--write"]) == 0
+    assert "approach_chains" not in rebaked["stops"][0]
+    assert other["stops"][0]["approach_chains"] == [{"terminal_node": 1}]
+
+
 def _one_street(state, town, major=frozenset()):
     segments = [
         {

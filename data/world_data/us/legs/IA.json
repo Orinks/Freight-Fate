@@ -11823,13 +11823,13 @@
           "lon": -89.47534,
           "vehicle_access": "tractor_trailer",
           "exit_ref": "54",
-          "interchange_mi": 70.7,
+          "interchange_mi": 72.7,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I88, 0.29 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {
               "terminal_node": 3537258110,
               "exit": {
-                "direction": "forward"
+                "direction": "backward"
               },
               "total_miles": 0.32,
               "segments": [
@@ -11924,7 +11924,7 @@
           "lat": 41.898182,
           "lon": -89.066681,
           "exit_ref": "76",
-          "interchange_mi": 91.3,
+          "interchange_mi": 95.0,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I88, 0.54 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {
@@ -12596,72 +12596,32 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "interchanges": [
           {
-            "at_mi": 4.7,
-            "exit_ref": "123A",
-            "name": "",
-            "destinations": [],
-            "via": "",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 7.0,
-            "exit_ref": "298",
+            "at_mi": 4.9,
+            "exit_ref": "1A",
             "name": "",
             "destinations": [
-              "Bettendorf",
-              "Davenport",
-              "Des Moines"
+              "River Drive",
+              "3rd Avenue"
             ],
-            "via": "I 74 East",
+            "via": "IL 92 West",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 9.7,
-            "exit_ref": "",
-            "name": "",
-            "destinations": [
-              "Rest Area"
-            ],
-            "via": "",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 15.0,
-            "exit_ref": "306",
-            "name": "",
-            "destinations": [
-              "LeClaire",
-              "Bettendorf"
-            ],
-            "via": "US 67",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 30.0,
-            "ramp_advisory_backward": 30.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 2009.0,
-            "ramp_terminal_backward": {
-              "node": 711300542,
-              "lat": 41.5847904,
-              "lon": -90.3656802
+            "ramp_length_ft_forward": 1386.0,
+            "ramp_terminal_forward": {
+              "node": 8066020721,
+              "lat": 41.5110121,
+              "lon": -90.5098951
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 18.7,
-            "exit_ref": "4A",
+            "at_mi": 15.9,
+            "exit_ref": "1A",
             "name": "",
             "destinations": [
               "East Moline",
@@ -12670,27 +12630,32 @@
             ],
             "via": "IL 5 West;IL 92 West",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "motorway",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_control": "none",
             "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23",
-            "ramp_length_ft_backward": 1923.3,
-            "ramp_length_ft_forward": 1871.5,
+            "ramp_advisory_forward": 30.0,
+            "ramp_advisory_backward": 30.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1793.7,
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 24.7,
+            "at_mi": 22.1,
             "exit_ref": "6",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "stop",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 45.0,
+            "ramp_advisory_backward": 45.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 2325.0,
             "ramp_terminal_backward": {
               "node": 2880048477,
@@ -12701,7 +12666,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 29.1,
+            "at_mi": 26.9,
             "exit_ref": "10",
             "name": "",
             "destinations": [
@@ -12710,7 +12675,7 @@
             ],
             "via": "",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 2162.4,
@@ -12723,7 +12688,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 36.8,
+            "at_mi": 35.4,
             "exit_ref": "18",
             "name": "",
             "destinations": [
@@ -12732,20 +12697,20 @@
             ],
             "via": "",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1997.1,
-            "ramp_terminal_backward": {
-              "node": 237364491,
-              "lat": 41.6904852,
-              "lon": -90.098546
+            "ramp_length_ft_forward": 1943.2,
+            "ramp_terminal_forward": {
+              "node": 237364515,
+              "lat": 41.687448,
+              "lon": -90.0959584
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 43.7,
+            "at_mi": 43.0,
             "exit_ref": "26",
             "name": "",
             "destinations": [
@@ -12754,7 +12719,7 @@
             ],
             "via": "IL 78",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1637.7,
@@ -12767,7 +12732,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 53.7,
+            "at_mi": 54.1,
             "exit_ref": "36",
             "name": "",
             "destinations": [
@@ -12777,12 +12742,12 @@
             ],
             "via": "I 88 West",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 30.0,
             "ramp_advisory_backward": 35.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1833.5,
             "ramp_terminal_backward": {
               "node": 237365648,
@@ -12799,7 +12764,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 58.3,
+            "at_mi": 59.1,
             "exit_ref": "41",
             "name": "",
             "destinations": [
@@ -12809,20 +12774,23 @@
             ],
             "via": "IL 40",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 2124.0,
-            "ramp_terminal_forward": {
-              "node": 237359530,
-              "lat": 41.7495206,
-              "lon": -89.6896139
+            "ramp_advisory_forward": 40.0,
+            "ramp_advisory_backward": 40.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1648.0,
+            "ramp_terminal_backward": {
+              "node": 12244662551,
+              "lat": 41.7532571,
+              "lon": -89.6891149
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 61.1,
+            "at_mi": 62.1,
             "exit_ref": "44",
             "name": "",
             "destinations": [
@@ -12831,7 +12799,7 @@
             ],
             "via": "US 30",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_forward": 2223.7,
@@ -12844,17 +12812,17 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 70.7,
+            "at_mi": 72.7,
             "exit_ref": "54",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 5202.2,
-            "ramp_terminal_forward": {
+            "ramp_length_ft_backward": 3721.4,
+            "ramp_terminal_backward": {
               "node": 3537258110,
               "lat": 41.8206064,
               "lon": -89.47364
@@ -12863,13 +12831,13 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 91.3,
+            "at_mi": 95.0,
             "exit_ref": "76",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_forward": 2566.5,
@@ -12882,137 +12850,33 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 93.5,
-            "exit_ref": "78A",
-            "name": "",
-            "destinations": [
-              "Moline",
-              "Rock Island",
-              "Bloomington"
-            ],
-            "via": "I 88 West Toll",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "motorway",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_control": "none",
-            "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23",
-            "ramp_length_ft_forward": 3672.8,
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 96.2,
-            "exit_ref": "99",
-            "name": "",
-            "destinations": [],
-            "via": "",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 2183.4,
-            "ramp_terminal_forward": {
-              "node": 3175843471,
-              "lat": 41.9345253,
-              "lon": -89.021626
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 101.0,
-            "exit_ref": "104",
-            "name": "",
-            "destinations": [],
-            "via": "",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 2011.5,
-            "ramp_terminal_forward": {
-              "node": 1872087020,
-              "lat": 42.0072062,
-              "lon": -89.0179096
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 107.4,
-            "exit_ref": "111",
-            "name": "",
-            "destinations": [
-              "Genoa",
-              "Byron"
-            ],
-            "via": "IL 72",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 2121.3,
-            "ramp_terminal_forward": {
-              "node": 1707549331,
-              "lat": 42.100704,
-              "lon": -89.0203986
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 111.4,
-            "exit_ref": "115",
-            "name": "",
-            "destinations": [],
-            "via": "",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 1835.2,
-            "ramp_terminal_forward": {
-              "node": 237528867,
-              "lat": 42.1659115,
-              "lon": -89.0212952
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 114.7,
-            "exit_ref": "119",
-            "name": "",
-            "destinations": [
-              "Freeport",
-              "Rockford"
-            ],
-            "via": "US 20 West",
-            "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "motorway",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_control": "none",
-            "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23",
-            "ramp_length_ft_forward": 5723.6,
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 118.6,
+            "at_mi": 118.7,
             "exit_ref": "",
             "name": "",
             "destinations": [
-              "Freeport",
               "Belvidere",
-              "Rochelle"
+              "Rochelle",
+              "11th Street"
             ],
-            "via": "US 20 West",
+            "via": "US 20 East",
             "highway": "I-88",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1434.7,
+            "ramp_terminal_backward": {
+              "node": 602412547,
+              "lat": 42.2192736,
+              "lon": -89.0720847
+            },
+            "ramp_length_ft_forward": 1486.4,
+            "ramp_terminal_forward": {
+              "node": 602412483,
+              "lat": 42.2197984,
+              "lon": -89.0723261
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "speed_limits": [
@@ -20759,108 +20623,52 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "interchanges": [
           {
-            "at_mi": 1.4,
-            "exit_ref": "7B",
+            "at_mi": 8.7,
+            "exit_ref": "101",
+            "name": "",
+            "destinations": [
+              "Veterans Parkway"
+            ],
+            "via": "",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2536.3,
+            "ramp_terminal_backward": {
+              "node": 160742579,
+              "lat": 41.5191461,
+              "lon": -93.7229737
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 11.3,
+            "exit_ref": "68",
             "name": "",
             "destinations": [
               "Des Moines International Airport",
-              "Keo Way",
-              "Pappajohn Sculpture Park"
+              "Kansas City"
             ],
-            "via": "",
+            "via": "IA 5",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "motorway",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 2340.0,
-            "ramp_terminal_backward": {
-              "node": 588086981,
-              "lat": 41.5954246,
-              "lon": -93.635593
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_control": "none",
+            "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23",
+            "ramp_length_ft_backward": 2171.6,
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 5.3,
-            "exit_ref": "3",
-            "name": "",
-            "destinations": [
-              "Windsor Heights",
-              "West Des Moines",
-              "73rd Street"
-            ],
-            "via": "",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1678.8,
-            "ramp_terminal_backward": {
-              "node": 1250708899,
-              "lat": 41.5926093,
-              "lon": -93.7036352
-            },
-            "ramp_length_ft_forward": 1298.9,
-            "ramp_terminal_forward": {
-              "node": 160786984,
-              "lat": 41.5947756,
-              "lon": -93.7170826
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 8.3,
-            "exit_ref": "123A",
-            "name": "",
-            "destinations": [
-              "Council Bluffs",
-              "West Des Moines",
-              "Des Moines"
-            ],
-            "via": "I 80 west",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 12.2,
-            "exit_ref": "69",
-            "name": "",
-            "destinations": [
-              "Grand Avenue",
-              "DMACC West Campus"
-            ],
-            "via": "",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1966.2,
-            "ramp_terminal_backward": {
-              "node": 3111010422,
-              "lat": 41.541056,
-              "lon": -93.7733056
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 16.3,
+            "at_mi": 13.9,
             "exit_ref": "65",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 2487.2,
@@ -20873,51 +20681,52 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 24.4,
+            "at_mi": 22.1,
             "exit_ref": "56",
             "name": "",
             "destinations": [
-              "Kansas City",
-              "Des Moines"
+              "Des Moines",
+              "Kansas City"
             ],
-            "via": "I-35 south",
+            "via": "I-35 north",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 2099.5,
-            "ramp_terminal_backward": {
-              "node": 161197574,
-              "lat": 41.363515,
-              "lon": -93.7781571
+            "ramp_length_ft_forward": 2149.6,
+            "ramp_terminal_forward": {
+              "node": 161194519,
+              "lat": 41.3626926,
+              "lon": -93.7821004
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 28.0,
-            "exit_ref": "",
+            "at_mi": 26.9,
+            "exit_ref": "52",
             "name": "",
             "destinations": [
-              "Rest Area"
+              "St Charles",
+              "St Marys",
+              "Des Moines"
             ],
-            "via": "",
+            "via": "CR G50",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1591.0,
+            "ramp_terminal_forward": {
+              "node": 161193813,
+              "lat": 41.2934699,
+              "lon": -93.7811027
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 30.1,
-            "exit_ref": "",
-            "name": "Parking Area",
-            "destinations": [],
-            "via": "",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "stop",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 33.7,
+            "at_mi": 31.5,
             "exit_ref": "47",
             "name": "",
             "destinations": [
@@ -20927,22 +20736,22 @@
             ],
             "via": "CR G64",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "stop",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1439.5,
-            "ramp_terminal_backward": {
-              "node": 161197517,
-              "lat": 41.22785,
-              "lon": -93.780073
+            "ramp_length_ft_forward": 991.8,
+            "ramp_terminal_forward": {
+              "node": 161195996,
+              "lat": 41.227824,
+              "lon": -93.782488
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 37.1,
+            "at_mi": 35.1,
             "exit_ref": "43",
             "name": "",
             "destinations": [
@@ -20951,7 +20760,7 @@
             ],
             "via": "CR G76",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1777.9,
@@ -20964,18 +20773,16 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 44.5,
+            "at_mi": 42.6,
             "exit_ref": "36",
             "name": "",
             "destinations": [
-              "Kansas City",
-              "Des Moines"
+              "Des Moines",
+              "Kansas City"
             ],
-            "via": "I-35 south",
+            "via": "I-35 north",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1118.1,
@@ -20988,86 +20795,125 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 48.3,
+            "at_mi": 45.9,
+            "exit_ref": "33",
+            "name": "",
+            "destinations": [
+              "Osceola",
+              "Creston",
+              "Kansas City"
+            ],
+            "via": "US 34",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 25.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1654.3,
+            "ramp_terminal_backward": {
+              "node": 159379377,
+              "lat": 41.0271516,
+              "lon": -93.7921567
+            },
+            "ramp_length_ft_forward": 958.3,
+            "ramp_terminal_forward": {
+              "node": 1687438729,
+              "lat": 41.026281,
+              "lon": -93.7961642
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 47.9,
             "exit_ref": "",
-            "name": "Rest Area",
+            "name": "Parking Area",
             "destinations": [
               "Rest Area"
             ],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1287.3,
+            "ramp_terminal_backward": {
+              "node": 159373181,
+              "lat": 40.988815,
+              "lon": -93.797109
+            },
+            "ramp_length_ft_forward": 1212.4,
+            "ramp_terminal_forward": {
+              "node": 159389109,
+              "lat": 40.992498,
+              "lon": -93.799416
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 50.5,
-            "exit_ref": "",
-            "name": "Weigh Station",
-            "destinations": [
-              "Weigh Station"
-            ],
-            "via": "",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 58.4,
+            "at_mi": 56.6,
             "exit_ref": "22",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1562.6,
-            "ramp_terminal_backward": {
-              "node": 391256314,
-              "lat": 40.870083,
-              "lon": -93.800662
-            },
-            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 64.4,
-            "exit_ref": "5B",
-            "name": "",
-            "destinations": [
-              "42nd Street",
-              "Art Center",
-              "Kansas City"
-            ],
-            "via": "I 29 South;I 35 South;US 71 South",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 70.0,
-            "exit_ref": "4",
-            "name": "",
-            "destinations": [
-              "63rd Street",
-              "Windsor Heights",
-              "Berkley Parkway"
-            ],
-            "via": "IA 28",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 2209.0,
+            "ramp_length_ft_forward": 1652.2,
             "ramp_terminal_forward": {
-              "node": 159510571,
-              "lat": 40.6236257,
-              "lon": -93.8928741
+              "node": 159507960,
+              "lat": 40.869919,
+              "lon": -93.804409
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 73.5,
+            "at_mi": 60.9,
+            "exit_ref": "18",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1890.3,
+            "ramp_terminal_forward": {
+              "node": 159513972,
+              "lat": 40.811702,
+              "lon": -93.8292086
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 66.1,
+            "exit_ref": "12",
+            "name": "",
+            "destinations": [
+              "Leon",
+              "Mount Ayr"
+            ],
+            "via": "IA 2",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2097.1,
+            "ramp_terminal_backward": {
+              "node": 159559953,
+              "lat": 40.739196,
+              "lon": -93.840435
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 71.9,
             "exit_ref": "",
             "name": "",
             "destinations": [
@@ -21075,23 +20921,56 @@
             ],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2579.9,
+            "ramp_terminal_backward": {
+              "node": 159522219,
+              "lat": 40.654086,
+              "lon": -93.854229
+            },
+            "ramp_length_ft_forward": 3027.4,
+            "ramp_terminal_forward": {
+              "node": 159522249,
+              "lat": 40.6563958,
+              "lon": -93.8554445
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 80.5,
+            "at_mi": 74.7,
+            "exit_ref": "4",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 2179.7,
+            "ramp_terminal_backward": {
+              "node": 159571098,
+              "lat": 40.623654,
+              "lon": -93.887859
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 79.0,
             "exit_ref": "114",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 50.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1419.5,
             "ramp_terminal_backward": {
               "node": 159583998,
@@ -21108,56 +20987,60 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 85.0,
-            "exit_ref": "52",
-            "name": "",
-            "destinations": [
-              "St Charles",
-              "St Marys",
-              "Des Moines"
-            ],
-            "via": "CR G50",
-            "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
-          },
-          {
-            "at_mi": 88.1,
+            "at_mi": 86.7,
             "exit_ref": "106",
             "name": "",
             "destinations": [
               "Eagleville",
               "Blythedale",
-              "Kansas City"
+              "Des Moines"
             ],
             "via": "MO N",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "stop",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 40.0,
+            "ramp_advisory_backward": 40.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1232.3,
+            "ramp_terminal_forward": {
+              "node": 190655050,
+              "lat": 40.4665989,
+              "lon": -93.9778405
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 94.3,
-            "exit_ref": "6",
+            "at_mi": 93.2,
+            "exit_ref": "99",
             "name": "",
-            "destinations": [
-              "Terrace Hill Historic Site",
-              "31st Street",
-              "Armour Road"
-            ],
-            "via": "31st Street",
+            "destinations": [],
+            "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1032.5,
+            "ramp_terminal_forward": {
+              "node": 190669617,
+              "lat": 40.3743305,
+              "lon": -94.0039297
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 101.0,
+            "at_mi": 99.8,
             "exit_ref": "93",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1199.0,
@@ -21170,28 +21053,36 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 104.0,
-            "exit_ref": "33",
+            "at_mi": 104.6,
+            "exit_ref": "88",
             "name": "",
             "destinations": [
-              "Osceola",
-              "Creston",
-              "Kansas City"
+              "Bethany",
+              "Gallatin",
+              "Des Moines"
             ],
-            "via": "US 34",
+            "via": "MO 13",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1204.6,
+            "ramp_terminal_backward": {
+              "node": 190665420,
+              "lat": 40.209656,
+              "lon": -94.01244
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 109.8,
+            "at_mi": 108.7,
             "exit_ref": "84",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1603.9,
@@ -21204,51 +21095,51 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 113.7,
+            "at_mi": 112.6,
             "exit_ref": "80",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1133.7,
-            "ramp_terminal_backward": {
-              "node": 190101533,
-              "lat": 40.105113,
-              "lon": -94.070032
+            "ramp_length_ft_forward": 1027.0,
+            "ramp_terminal_forward": {
+              "node": 190101442,
+              "lat": 40.10516,
+              "lon": -94.072073
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 116.0,
+            "at_mi": 115.0,
             "exit_ref": "78",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 998.1,
-            "ramp_terminal_forward": {
-              "node": 190096271,
-              "lat": 40.076496,
-              "lon": -94.09445
+            "ramp_length_ft_backward": 1049.7,
+            "ramp_terminal_backward": {
+              "node": 190093466,
+              "lat": 40.07646,
+              "lon": -94.092403
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 121.4,
+            "at_mi": 120.5,
             "exit_ref": "72",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1155.6,
@@ -21261,70 +21152,89 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 128.9,
+            "at_mi": 124.4,
+            "exit_ref": "68",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1006.7,
+            "ramp_terminal_forward": {
+              "node": 190095536,
+              "lat": 39.945757,
+              "lon": -94.117346
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 128.0,
             "exit_ref": "64",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 1050.0,
-            "ramp_terminal_backward": {
-              "node": 190137385,
-              "lat": 39.899582,
-              "lon": -94.15047
+            "ramp_length_ft_forward": 1074.2,
+            "ramp_terminal_forward": {
+              "node": 190110476,
+              "lat": 39.89965,
+              "lon": -94.152459
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 132.3,
+            "at_mi": 131.5,
             "exit_ref": "61",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 1320.5,
-            "ramp_terminal_forward": {
-              "node": 190119042,
-              "lat": 39.853515,
-              "lon": -94.177816
+            "ramp_length_ft_backward": 1053.4,
+            "ramp_terminal_backward": {
+              "node": 190117617,
+              "lat": 39.853396,
+              "lon": -94.175847
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 139.5,
+            "at_mi": 138.8,
             "exit_ref": "54",
             "name": "",
             "destinations": [
               "Cameron",
               "Hamilton",
-              "Kansas City"
+              "Bethany"
             ],
-            "via": "US 36;MO 110 East;I 35 Business",
+            "via": "US 36;I 35 Business",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 1135.5,
-            "ramp_terminal_forward": {
-              "node": 190193999,
-              "lat": 39.7539278,
-              "lon": -94.2213717
+            "ramp_length_ft_backward": 1214.6,
+            "ramp_terminal_backward": {
+              "node": 190191072,
+              "lat": 39.7535709,
+              "lon": -94.2184065
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 145.3,
+            "at_mi": 144.7,
             "exit_ref": "48",
             "name": "",
             "destinations": [
@@ -21333,33 +21243,55 @@
             ],
             "via": "US 69",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 153.4,
+            "at_mi": 152.9,
             "exit_ref": "40",
             "name": "",
             "destinations": [
-              "Kansas City",
-              "Polo",
-              "Lathrop"
+              "Cameron",
+              "Des Moines",
+              "Polo"
             ],
-            "via": "I 35 South;MO 110 West",
+            "via": "I 35 North;MO 110 East",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 782.2,
-            "ramp_terminal_backward": {
-              "node": 5131904731,
-              "lat": 39.5516734,
-              "lon": -94.2690468
+            "ramp_length_ft_forward": 1131.2,
+            "ramp_terminal_forward": {
+              "node": 5131904728,
+              "lat": 39.552389,
+              "lon": -94.2704549
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 167.1,
+            "at_mi": 159.9,
+            "exit_ref": "33",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-35",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 40.0,
+            "ramp_advisory_backward": 45.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1158.4,
+            "ramp_terminal_backward": {
+              "node": 189857944,
+              "lat": 39.459848,
+              "lon": -94.3199236
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 166.8,
             "exit_ref": "26",
             "name": "",
             "destinations": [
@@ -21369,35 +21301,46 @@
             ],
             "via": "MO 92 East",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_forward": 982.9,
-            "ramp_terminal_forward": {
-              "node": 189864156,
-              "lat": 39.3679439,
-              "lon": -94.3730713
+            "ramp_advisory_forward": 45.0,
+            "ramp_advisory_backward": 45.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 819.7,
+            "ramp_terminal_backward": {
+              "node": 4893057573,
+              "lat": 39.3678235,
+              "lon": -94.3715802
             },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 173.3,
+            "at_mi": 173.0,
             "exit_ref": "20",
             "name": "",
             "destinations": [],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
-            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_length_ft_forward": 1240.3,
+            "ramp_terminal_forward": {
+              "node": 189860512,
+              "lat": 39.288285,
+              "lon": -94.416672
+            },
+            "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 175.3,
+            "at_mi": 175.1,
             "exit_ref": "17",
             "name": "",
             "destinations": [
@@ -21407,13 +21350,13 @@
             ],
             "via": "I 35 North;US 69 North;MO 110 East",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 45.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 45.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 781.7,
             "ramp_terminal_backward": {
               "node": 189860479,
@@ -21424,7 +21367,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 179.3,
+            "at_mi": 179.2,
             "exit_ref": "13",
             "name": "",
             "destinations": [
@@ -21434,14 +21377,14 @@
             ],
             "via": "I 35 South",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 40.0,
-            "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 40.0,
+            "ramp_advisory_backward": 25.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 991.1,
             "ramp_terminal_backward": {
               "node": 5003313116,
@@ -21452,7 +21395,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 182.1,
+            "at_mi": 182.0,
             "exit_ref": "11",
             "name": "",
             "destinations": [
@@ -21462,13 +21405,13 @@
             ],
             "via": "US 69 North",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 15.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 15.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 1865.1,
             "ramp_terminal_backward": {
               "node": 189854101,
@@ -21485,7 +21428,7 @@
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 184.1,
+            "at_mi": 184.0,
             "exit_ref": "8C",
             "name": "",
             "destinations": [
@@ -21495,21 +21438,26 @@
             ],
             "via": "MO 1",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 20.0,
-            "ramp_advisory_backward": 40.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
-            "ramp_length_ft_backward": 755.4,
+            "ramp_advisory_forward": 20.0,
+            "ramp_advisory_backward": 40.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_length_ft_backward": 1060.6,
             "ramp_terminal_backward": {
-              "node": 189856339,
-              "lat": 39.1725618,
-              "lon": -94.5490234
+              "node": 189856367,
+              "lat": 39.173915,
+              "lon": -94.536484
             },
-            "ramp_length_ft_forward": 1632.0,
+            "ramp_length_ft_forward": 921.9,
+            "ramp_terminal_forward": {
+              "node": 5088557077,
+              "lat": 39.1732804,
+              "lon": -94.5488893
+            },
             "ramp_length_source": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_terminal_source": "read from OpenStreetMap topology: the node where the same walk that measures ramp_length ends (the public crossroad or dead end the motorway_link way reaches), per direction of travel. Only baked beside a length that passed its screen, and never for a ramp that ends in a merge. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/"
           },
@@ -21524,14 +21472,14 @@
             ],
             "via": "",
             "highway": "I-35",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_advisory_forward": 15.0,
-            "ramp_advisory_backward": 25.0,
-            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "Exit ref, name and destination signs read from OpenStreetMap highway=motorway_junction nodes and motorway_link destination tags, accessed 2026-06-23. at_mi derived: the mean of the exit's junction nodes projected onto the leg's route polyline (its archived geometry; OSRM only where none is archived), rescaled to the leg's miles: https://www.openstreetmap.org/",
             "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/",
+            "ramp_advisory_forward": 15.0,
+            "ramp_advisory_backward": 25.0,
+            "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_length_ft_backward": 873.1,
             "ramp_terminal_backward": {
               "node": 5262508318,
@@ -22139,8 +22087,56 @@
           "lat": 40.46587,
           "lon": -93.979341,
           "exit_ref": "106",
-          "interchange_mi": 88.1,
-          "exit_source": "exit_ref read: the stop's own source names exit 106; interchange_mi derived: this leg's interchange record with that exit number."
+          "interchange_mi": 86.7,
+          "exit_source": "exit_ref read: the stop's own source names exit 106; interchange_mi derived: this leg's interchange record with that exit number.",
+          "approach_chains": [
+            {
+              "terminal_node": 190655050,
+              "exit": {
+                "direction": "forward"
+              },
+              "total_miles": 0.24,
+              "segments": [
+                {
+                  "road": "Locust Street (MO N)",
+                  "miles": 0.05,
+                  "cue": "Start on Locust Street (MO N).",
+                  "speed_mph": 35.0,
+                  "turn_deg": 0.0,
+                  "limit_mph": 35.0,
+                  "limit_source": "read",
+                  "controls": []
+                },
+                {
+                  "road": "a service road",
+                  "miles": 0.19,
+                  "cue": "Turn left onto a service road.",
+                  "speed_mph": 15.0,
+                  "turn_deg": 50.1,
+                  "limit_mph": 15.0,
+                  "limit_source": "assumed",
+                  "controls": []
+                }
+              ],
+              "street_counts": {
+                "intersections": 1,
+                "controlled": 0,
+                "ambiguous": 0,
+                "conflicts": 0,
+                "street_edges": 1,
+                "crosses_town_line": 0
+              },
+              "driveway": {
+                "at_mi": 0.05,
+                "node": 11112509185,
+                "lat": 40.4667342,
+                "lon": -93.9786571,
+                "kind": "service_road",
+                "source": "derived from OpenStreetMap road class: the first node of the chain's final run of highway=service or access=private ways; no property line is mapped"
+              }
+            }
+          ],
+          "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
         },
         {
           "name": "Love's Travel Stop Cameron",
@@ -22210,32 +22206,37 @@
           "lon": -94.37323,
           "vehicle_access": "tractor_trailer",
           "exit_ref": "26",
-          "interchange_mi": 167.1,
+          "interchange_mi": 166.8,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I35, 0.12 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {
-              "terminal_node": 189864156,
+              "terminal_node": 4893057573,
               "exit": {
-                "direction": "forward"
+                "direction": "backward"
               },
-              "total_miles": 0.33,
+              "total_miles": 0.44,
               "segments": [
                 {
                   "road": "MO 92",
-                  "miles": 0.07,
+                  "miles": 0.18,
                   "cue": "Start on MO 92.",
                   "speed_mph": 35.0,
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "read",
-                  "controls": []
+                  "controls": [
+                    {
+                      "at_mi": 0.17,
+                      "kind": "signal"
+                    }
+                  ]
                 },
                 {
                   "road": "Shanks Avenue",
                   "miles": 0.16,
                   "cue": "Turn right onto Shanks Avenue.",
                   "speed_mph": 25.0,
-                  "turn_deg": 66.3,
+                  "turn_deg": 93.9,
                   "limit_mph": 25.0,
                   "limit_source": "read",
                   "controls": []
@@ -22252,15 +22253,15 @@
                 }
               ],
               "street_counts": {
-                "intersections": 3,
-                "controlled": 0,
+                "intersections": 4,
+                "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22,
+                "street_edges": 28,
                 "crosses_town_line": 0
               },
               "driveway": {
-                "at_mi": 0.23,
+                "at_mi": 0.34,
                 "node": 5905716603,
                 "lat": 39.3701515,
                 "lon": -94.3745156,

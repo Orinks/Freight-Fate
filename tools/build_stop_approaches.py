@@ -22,7 +22,12 @@ failure ``on_mainline``.
 
     uv run --group tooling python tools/build_stop_approaches.py --states Iowa
     uv run --group tooling python tools/build_stop_approaches.py --write
+    uv run --group tooling python tools/build_stop_approaches.py --only "a->b;c->d" --write
     uv run python tools/index_world.py
+
+``--only`` rebakes the stops on some legs (after their exits were
+re-derived); every stop on them is judged afresh, so one whose exit moved or
+lost its ramp terminal loses the chain it had.
 """
 
 from __future__ import annotations
@@ -37,6 +42,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import street_chain  # noqa: E402
+from build_interchanges_base import select_only  # noqa: E402
 from snap_stops_to_interchanges import fabricated_coordinates  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
@@ -242,13 +248,32 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     parser.add_argument("--states", nargs="*", default=None)
+    parser.add_argument(
+        "--only", default="", help="legs to rebake, 'from_slug->to_slug;...' (default all)"
+    )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args(argv)
     data = load_world()
     legs = data["legs"]
+    in_scope = {id(leg) for leg in (select_only(legs, args.only) if args.only else legs)}
+    states = set(args.states) if args.states else None
     work, counts = stop_targets(legs)
+    work = [item for item in work if id(legs[item["leg"]]) in in_scope]
     print(f"{len(work)} stops routable; {counts}", flush=True)
-    found = route_stops(args.cache_dir, work, set(args.states) if args.states else None)
+    found = route_stops(args.cache_dir, work, states)
+    # Every stop in scope is judged afresh: one whose exit moved, or lost its
+    # ramp terminal, must not keep a chain from a ramp that is not there.
+    extract_exists = _local_geometry().state_extract_path
+    for leg in legs:
+        if id(leg) not in in_scope:
+            continue
+        for stop in leg.get("stops") or []:
+            state = state_at(leg, float(stop["at_mi"]))
+            if states is not None and state not in states:
+                continue
+            if extract_exists(args.cache_dir, state).exists():
+                for key in ("approach_chains", "approach_chains_failed", "approach_source"):
+                    stop.pop(key, None)
     for (leg_i, stop_i), fields in found.items():
         stop = legs[leg_i]["stops"][stop_i]
         for key in ("approach_chains", "approach_chains_failed", "approach_source"):
