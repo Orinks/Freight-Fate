@@ -607,7 +607,7 @@ pub struct TruckState {
     pub high_idle_rpm: Option<f64>,
     pub last_service_air_application: f64,
     /// Descent control is holding a downgrade: the automatic keeps its gear
-    /// off the throttle the way it does for the engine brake, rather than
+    /// off the throttle the way it does under a brake application, rather than
     /// taking an economy upshift over the crest that the retarder then has
     /// to take straight back. Not persisted -- the driving layer sets it
     /// every frame cruise runs.

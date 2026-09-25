@@ -7,6 +7,7 @@
 //! Severity Rating System's rule run on the truck's own brake heat model
 //! (see `ff_core::sim::vehicle::descent` for the method and its sources).
 
+use ff_core::sim::transmission::JAKE_MAX_RPM;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -37,6 +38,26 @@ impl DrivingState {
             target = target.min(cap);
         }
         target
+    }
+
+    /// How far the truck is over the top speed of the gear descent control
+    /// holds it in, or None when no gear is held. That top is the revs a
+    /// guard band under the retarder's ceiling: past it the truck is over the
+    /// only number the held gear can keep, whatever the target says, and the
+    /// retarder answers it before the box's protective upshift or cruise's
+    /// revs guard has to. Measured against the target alone, a light load
+    /// under 55 on Siskiyou's 6.3 percent had its retarder stepped down to
+    /// nothing and rode eighth's ceiling at 50 on a snub every two seconds,
+    /// and the J key's manager let a loaded truck on I-70's 4.9 percent spin
+    /// into that upshift at 71 while it waited for 70 plus a mile an hour
+    /// (bend sweep and descent bench, 2026-09-25).
+    pub fn held_gear_overspeed_mph(&self) -> Option<f64> {
+        let truck = &self.trip.truck;
+        let rpm = truck.coupled_rpm(None);
+        (truck.descent_gear_hold && truck.transmission.automatic && rpm > 0.0).then(|| {
+            let top_rpm = JAKE_MAX_RPM - 2.0 * DESCENT_RPM_GUARD;
+            truck.speed_mph() * (1.0 - top_rpm / rpm)
+        })
     }
 
     /// The safe descent speed for the hill under and just ahead of the

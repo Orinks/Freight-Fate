@@ -971,6 +971,12 @@ impl DrivingState {
             self.cruise_snubbing = false;
             return;
         }
+        // A gear held for a descent has a top speed of its own; past it the
+        // retarder answers before the revs guard below needs the drums.
+        let over = self
+            .held_gear_overspeed_mph()
+            .map_or(over, |past_top| over.max(past_top));
+        let rpm_now = self.trip.truck.coupled_rpm(None);
         // Cruise reaches for the retarder only where a real one would: the
         // engine-brake stalk has to permit it. Descent control set to off is
         // the driver saying they manage grades themselves, and a real truck's
@@ -1106,7 +1112,10 @@ impl DrivingState {
         // the jake and is the start of a runaway: the agent's drive down the
         // seven percent went from 45 to 55 that way (2026-09-24). So a snub
         // also starts when the revs close on that ceiling, whatever the
-        // overspeed says.
+        // overspeed says -- while the retarder is ON. With no stage up there
+        // is no retarder gear to keep, and guarding one anyway put a bobtail
+        // on a snub every two seconds down Red Mountain's 8.4 percent (bend
+        // sweep, 2026-09-25); the box's own protective upshift is the answer.
         // And a hill's safe descent speed is a ceiling, not a preference: past
         // it by the snub band the drums come out whatever the retarder is
         // doing, the way the CDL manual's snub braking reads -- at the safe
@@ -1114,18 +1123,17 @@ impl DrivingState {
         let past_safe_descent = self
             .descent_safe_mph
             .is_some_and(|safe| speed_now > safe + CRUISE_BRAKE_OVER_MPH);
-        let automatic = self.trip.truck.transmission.automatic;
-        let revs_at_ceiling = automatic
+        let guarding_gear = self.trip.truck.transmission.automatic
             && self.on_downgrade()
+            && self.trip.truck.engine_brake_stage > 0;
+        let revs_at_ceiling = guarding_gear
             && self.trip.truck.throttle <= 0.05
-            && self.trip.truck.coupled_rpm(None) >= JAKE_MAX_RPM - DESCENT_RPM_GUARD;
+            && rpm_now >= JAKE_MAX_RPM - DESCENT_RPM_GUARD;
         if self.cruise_snubbing {
             // A revs snub runs until they are a guard band clear of the
             // ceiling again, so it is one application rather than a flutter.
             let revs_still_high = revs_at_ceiling
-                || (automatic
-                    && self.on_downgrade()
-                    && self.trip.truck.coupled_rpm(None) >= JAKE_MAX_RPM - 2.0 * DESCENT_RPM_GUARD);
+                || (guarding_gear && rpm_now >= JAKE_MAX_RPM - 2.0 * DESCENT_RPM_GUARD);
             self.cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH || revs_still_high;
         } else if (jake_maxed && over > CRUISE_BRAKE_OVER_MPH)
             || revs_at_ceiling

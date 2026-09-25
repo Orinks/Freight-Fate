@@ -126,7 +126,12 @@ impl DrivingState {
         // reason: holding retard the truck no longer needs is what drags it
         // under the speed the controller is supposed to be keeping.
         let mut at_once = false;
+        // Over the top of a gear descent control holds counts as over the
+        // number, as it does for adaptive cruise's own staging.
         let err = self.trip.truck.speed_mph() - target;
+        let err = self
+            .held_gear_overspeed_mph()
+            .map_or(err, |past_top| err.max(past_top));
         if self.on_climb() || (!self.on_downgrade() && err <= AUTO_JAKE_RELEASE_MPH) {
             // Two cases, one answer: the road is CLIMBING, where a hill
             // takes the speed off by itself and overspeed is the hill's to

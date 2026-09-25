@@ -1899,11 +1899,18 @@ rev ceiling.
       76,000 lb 65 at 5.8 and 6, 45 at 7, 30 at 8, 20 at 10;
       80,000 lb 65 at 6, 30 at 7 and 8. Descent control at every level but
       Off caps cruise there, raises full engine brake at once on such a
-      hill, snubs past the number, snubs to hold the gear short of the
-      protective upshift, keeps the snub through a shift, and never fuels
-      against the retarder. The box holds its gear while descent control
-      holds a grade, and a retarder pre-select lands 100 rpm (assumed) under
-      its ceiling. Over the number on the downgrade above a steep pitch, the
+      hill, snubs past the number, snubs to keep the retarder's gear short
+      of the protective upshift while a stage is on, keeps the snub through
+      a shift, and never fuels against the retarder. The box holds its gear
+      while descent control holds a grade, the way it does under a brake
+      application (no pre-select without a stage on), and a retarder
+      pre-select lands 100 rpm (assumed) under its ceiling. Past the held
+      gear's top, the revs 100 rpm under that ceiling, the retarder answers
+      as it would past the number. The bend sweep caught the first version
+      pumping: it pre-selected a bobtail down into sixth with no stage on,
+      and guarded a gear with no retarder in it on a snub every two seconds
+      (Siskiyou, Red Mountain, Salt River; up to 1.1 applications a bend,
+      now under 0.7). Over the number on the downgrade above a steep pitch, the
       retarder goes to full before the drums join in; the bench had the
       drums alone take the truck from 63 to 45 on the 2.4 percent above the
       7.0. The same run now holds 60 to 65 down the 5.8 and 43 to 46 down
