@@ -881,8 +881,9 @@ the speed your truck can hold the hill at with its current load, and D
 says "for the grade". Descent speed control, in the driving assistance
 settings, drives a descent the same way for you with adaptive cruise on:
 it slows to that speed before the steep part, sets the engine brake,
-holds the gear, and snubs the service brakes. It says the speed it is
-holding once, and again only when the hill changes it.
+holds the gear, and snubs the service brakes. When the hill needs a
+slower speed than cruise is already holding, descent control says that
+speed once, and again only when the hill changes it.
 
 ## Taking curves
 

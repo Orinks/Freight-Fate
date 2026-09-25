@@ -149,9 +149,20 @@ impl DrivingState {
     /// mountain, and a rolling road enters and leaves the control on every
     /// dip. A number already said is not news; a new one is, whenever it
     /// comes, which is why this has no cooldown of its own.
+    ///
+    /// And only descent control's OWN number: the hill's safe descent speed,
+    /// interactive's ceiling, or a brake's capture. Where none of them binds,
+    /// cruise is holding its own target down the grade, and "holding 70" on
+    /// a 65 road named the limit plus five -- a number cruise already had
+    /// and the hill never asked for (descent bench, 2026-09-24).
     fn say_descent_hold(&mut self, ctx: &mut GameContext) {
-        let held = self.descent_hold_mph().round();
-        if self.descent_said_mph == Some(held) || self.terse_speech(ctx) {
+        let hold = self.descent_hold_mph();
+        let own_number = [self.cruise_descent_mph, self.descent_safe_mph]
+            .into_iter()
+            .flatten()
+            .any(|cap| (cap - hold).abs() < 0.01);
+        let held = hold.round();
+        if !own_number || self.descent_said_mph == Some(held) || self.terse_speech(ctx) {
             return;
         }
         self.descent_said_mph = Some(held);
@@ -297,9 +308,10 @@ impl DrivingState {
             self.descent_limit_state = String::new();
             self.descent_beaten_s = 0.0;
             self.descent_capture_active = false;
-            self.cruise_descent_mph = None; // the grade is behind us; so is its cap
-                                            // Release only the retarder cruise itself raised: the driver's own
-                                            // jake switch survives the road levelling out.
+            // The grade is behind us; so is its cap.
+            self.cruise_descent_mph = None;
+            // Release only the retarder cruise itself raised: the driver's own
+            // jake switch survives the road levelling out.
             if self.cruise_jake_stage > 0 {
                 self.cruise_jake_stage = 0;
                 self.trip.truck.engine_brake_stage = 0;

@@ -24,7 +24,7 @@
 //! (`TruckState::safe_descent_mph`), full engine brake set at the top, the
 //! gear held, the drums in snubs -- and each number said once.
 
-use ff_core::sim::vehicle::GSRS_BRAKE_LIMIT_C;
+use ff_core::sim::vehicle::{GSRS_BRAKE_LIMIT_C, JAKE_STAGES};
 use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
@@ -93,6 +93,7 @@ struct Frame {
     drum_c: f64,
     downgrade: bool,
     jake_sounding: bool,
+    brake: f64,
 }
 
 fn read(d: &DrivingState, t: f64) -> Frame {
@@ -109,13 +110,24 @@ fn read(d: &DrivingState, t: f64) -> Frame {
         drum_c: truck.brake_temp_c,
         downgrade: d.on_downgrade(),
         jake_sounding: d.jake_cue_key.is_some(),
+        brake: truck.brake,
     }
 }
 
 fn line(f: &Frame) -> String {
     format!(
-        "t {:.0}s mile {:.2} grade {:+.1}% {:.1} mph (safe {:?}) jake {} gear {} air {:.0} drums {:.0}",
-        f.t, f.mile, f.grade_pct, f.speed_mph, f.safe_mph, f.stage, f.gear, f.air_psi, f.drum_c
+        "t {:.0}s mile {:.2} grade {:+.1}% {:.1} mph (safe {:?}) jake {} gear {} brake {:.2} \
+         air {:.0} drums {:.0}",
+        f.t,
+        f.mile,
+        f.grade_pct,
+        f.speed_mph,
+        f.safe_mph,
+        f.stage,
+        f.gear,
+        f.brake,
+        f.air_psi,
+        f.drum_c
     )
 }
 
@@ -157,10 +169,12 @@ fn check_run(auto_jake: bool) {
     );
 
     // The number: a hill's number, never the set speed or limit plus five.
+    // Every number said is one the safe-descent rule gave for this run.
     let held = held_numbers(&lines);
+    let hill_numbers: Vec<f64> = frames.iter().filter_map(|f| f.safe_mph).collect();
     assert!(
-        held.iter().all(|mph| *mph <= 70.0),
-        "{who}: descent control named a speed nothing on the road allows: {held:?}"
+        held.iter().all(|mph| hill_numbers.contains(mph)),
+        "{who}: descent control named a number that is not the hill's: {held:?}"
     );
     assert!(
         held.iter().any(|mph| *mph <= 50.0),
@@ -199,6 +213,25 @@ fn check_run(auto_jake: bool) {
             "{who}: the drums went past the grade-severity limit: {}",
             line(f)
         );
+    }
+
+    // Engine brake first: wherever the drums are on to bring the truck down
+    // to a hill's number on a downgrade, the retarder is already at full.
+    // Between the 5.8 and the 7.0 the drums used to take it from 63 to 45
+    // with the retarder down on a 2.4 percent stretch above the pitch. (On
+    // level road, slowing to a number is the drums' job by design.)
+    // (A frame onto the grade is the controller's first look at it.)
+    for pair in frames.windows(2) {
+        let f = &pair[1];
+        let over_the_hill = f.safe_mph.is_some_and(|safe| f.speed_mph > safe + 1.0);
+        if f.brake > 0.01 && over_the_hill && pair[0].downgrade && f.downgrade {
+            assert_eq!(
+                f.stage,
+                JAKE_STAGES,
+                "{who}: the drums braked for the hill before the engine brake: {}",
+                line(f)
+            );
+        }
     }
 
     // The gear is held on the steep pitches: no automatic upshift.

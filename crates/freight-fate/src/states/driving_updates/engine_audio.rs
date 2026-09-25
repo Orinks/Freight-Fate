@@ -147,12 +147,16 @@ impl DrivingState {
             // whole hill onto the drums.
             desired = 0;
             at_once = true;
-        } else if self.descent_safe_mph.is_some() && self.retarder_warranted() {
+        } else if self.descent_safe_mph.is_some()
+            && (self.retarder_warranted() || (err > AUTO_JAKE_OVER_MPH && self.on_downgrade()))
+        {
             // A hill steep enough to have a safe descent speed: full retard,
             // set once at the top the way a driver sets it, and the drums
             // snub the rest. Walking it up a stage at a time let a loaded
             // truck run from 44 to 62 onto a seven percent pitch (bench of
-            // the owner's run into Denver, 2026-09-24).
+            // the owner's run into Denver, 2026-09-24). Over that number on
+            // the easier downgrade above the pitch, too: the speed comes off
+            // on the engine brake, not the drums, as adaptive cruise takes it.
             desired = JAKE_STAGES;
             at_once = true;
         } else if err > AUTO_JAKE_OVER_MPH {

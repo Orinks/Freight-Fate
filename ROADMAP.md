@@ -1889,9 +1889,12 @@ rev ceiling.
       protective upshift, keeps the snub through a shift, and never fuels
       against the retarder. The box holds its gear while descent control
       holds a grade, and a retarder pre-select lands 100 rpm (assumed) under
-      its ceiling. The same run now holds 63 to 65 down the 5.8 and 43 to 46
-      down the 7.0, drums under 180 C, air over 100 psi, no upshift. D names
-      the number "for the grade".
+      its ceiling. Over the number on the downgrade above a steep pitch, the
+      retarder goes to full before the drums join in; the bench had the
+      drums alone take the truck from 63 to 45 on the 2.4 percent above the
+      7.0. The same run now holds 60 to 65 down the 5.8 and 43 to 46 down
+      the 7.0, drums under 220 C, air at 100 psi or more, no upshift. D
+      names the number "for the grade".
 - [x] (Release gate) **The retarder no longer hunts.** Cruise steps a stage at a
       time, drops one only when well under its number and never with a
       steep pitch in sight, and waits 12 s (assumed) before stepping back
@@ -1899,9 +1902,18 @@ rev ceiling.
       works to what descent control holds, not the set speed.
 - [x] (Release gate) **One length per grade.** The G key's "for another" reads the
       same run as the grade look-ahead's "running".
-- [x] (Release gate) **"Descent control holding N" once per number,** with no clock.
+- [x] (Release gate) **"Descent control holding N" once per number,** with no
+      clock, and only for a number of descent control's own: the hill's,
+      Interactive's 55, or a brake's capture. A grade that needs none is held
+      at cruise's speed without a line; the same run said "holding 70" on a
+      65 road, the limit plus five.
 - [x] **Colorado's dead traffic feed is no longer fetched** (benched until
       the 2.0 keyed-feeds item).
+- [ ] (2.0) **Two brake-heat lines.** The retarder comes up where the drums
+      alone would settle past fade (400 C), while the safe descent speed
+      works to GSRS's 260 C. On the 4.5 percent below the 7.0 the drums
+      alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
+      line, or show why two are right.
 
 ## 2.0 planned -- the working week and home
 

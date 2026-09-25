@@ -974,7 +974,18 @@ impl DrivingState {
         // * and it comes off entirely only when the grade itself is over.
         let current = self.cruise_jake_stage;
         let slowing = self.trip.truck.net_accel_mph_per_s() < -GRADE_HOLDING_MPH_PER_S;
-        let steep_hill = may_retard && self.descent_safe_mph.is_some();
+        let speed_now = self.trip.truck.speed_mph();
+        // Over the number of a steep pitch in sight, on a downgrade, the speed
+        // comes off on the engine brake whatever this easier stretch would
+        // warrant on its own. Between the 5.8 and the 7.0 on I-70 the
+        // retarder stayed down on a 2.4 percent stretch and the drums alone
+        // took the truck from 63 to the 45 the pitch ahead needed (descent
+        // bench, 2026-09-24). Level road is still the drums' (see above).
+        let over_hill_number = still_a_grade
+            && self
+                .descent_safe_mph
+                .is_some_and(|safe| speed_now > safe + CRUISE_JAKE_OVER_MPH);
+        let steep_hill = (may_retard && self.descent_safe_mph.is_some()) || over_hill_number;
         let mut wanted = current;
         if !still_a_grade {
             wanted = 0;
@@ -1028,7 +1039,11 @@ impl DrivingState {
         // than the old code did, which waited for the retarder to max out
         // first. A stage already up under the hysteresis above satisfies
         // `jake_maxed` on its own, so the drums stay available there too.
-        let jake_ceiling = if may_retard { ceiling } else { 0 };
+        let jake_ceiling = if may_retard || over_hill_number {
+            ceiling
+        } else {
+            0
+        };
         let stage_now = if self.auto_jake {
             self.trip.truck.engine_brake_stage
         } else {
@@ -1045,7 +1060,6 @@ impl DrivingState {
         // it by the snub band the drums come out whatever the retarder is
         // doing, the way the CDL manual's snub braking reads -- at the safe
         // speed, brake down below it, release.
-        let speed_now = self.trip.truck.speed_mph();
         let past_safe_descent = self
             .descent_safe_mph
             .is_some_and(|safe| speed_now > safe + CRUISE_BRAKE_OVER_MPH);
