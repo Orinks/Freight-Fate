@@ -509,8 +509,8 @@ def cargo_exe_name(platform_name: str = sys.platform) -> str:
 
 
 def cargo_build_command(target_dir: Path | None = None) -> list[str]:
-    # No default features: the agent server (``--agent-server``, with an
-    # ``--online`` mode that backs up as the real driver) is dev tooling.
+    # No default features: the agent server (``--agent-server``) is dev
+    # tooling, and a player has no use for an agent at the wheel.
     cmd = ["cargo", "build", "--release", "-p", RUST_PACKAGE, "--no-default-features"]
     if target_dir is not None:
         cmd.extend(["--target-dir", str(target_dir)])

@@ -107,9 +107,13 @@ pub const PAUSED_ACTIVITY: &str = "Paused";
 
 const WORKER_TICK_S: f64 = HEARTBEAT_INTERVAL_S;
 
+/// Overrides the Orinks site root, for development, tests and the staging
+/// agent session.
+pub const ONLINE_URL_ENV: &str = "FREIGHT_FATE_ONLINE_URL";
+
 /// The Orinks site root, overridable for development and tests.
 pub fn base_url() -> String {
-    std::env::var("FREIGHT_FATE_ONLINE_URL")
+    std::env::var(ONLINE_URL_ENV)
         .unwrap_or_else(|_| DEFAULT_BASE_URL.to_string())
         .trim_end_matches('/')
         .to_string()
