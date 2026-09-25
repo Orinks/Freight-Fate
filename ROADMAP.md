@@ -172,6 +172,13 @@ Costs the drive (found 2026-09-24):
       before and 2 after
       ([September 24](#september-24-realistic-interstate-exit)).
 
+Costs the drive (found 2026-09-25, gate drive on I-70):
+
+- [x] J refused the engine brake whenever cruise was pulling, with
+      "Release the accelerator" though no pedal was down, right after the
+      downgrade call asked for J. Only the driver's own accelerator refuses
+      it now.
+
 World data (the rest of the 1.9 world-data list moved to
 [2.0](#world-data-deferred-from-19) on 2026-09-25):
 
@@ -1435,7 +1442,7 @@ against.
 ### September 23 flight's driving notes
 
 flight drove with every assist off and sent four notes. All four have
-shipped; the second shipped the second way, below.
+shipped; the second shipped the third way, below.
 
 - [x] **The drift lean reads the heading, not only the position.** Both
       drift producers (the engine lean and the opt-in tone) lean on
@@ -1448,17 +1455,21 @@ shipped; the second shipped the second way, below.
       lean went quiet as soon as the settled point was centred, with heading
       still on, and the truck carried on across. `drift_speaks` now keeps
       it awake until the truck is also pointing down the road.
-- [x] **A hill pays the same at every pace.** Integrating motion on the
-      game clock (merged to `dev` 2026-09-23, reverted 2026-09-24) made the
-      truck pull away at the pace's multiple in real time and rattled the
-      gearbox through its gears, so motion stays on the real clock. The
-      downhill-energy exploit is closed from the clock's side instead: a
-      grade of `GRADE_CLOCK_MIN` (3%) or steeper, either way, eases the
-      clock to real time over `GRADE_CLOCK_EASE_S`, read far enough ahead
-      that it is real by the crest, and lets go below 2.5%. A loaded coast
-      down a 6% grade now reaches the same speed at 1x, 4x and 20x (it
-      reached 72 mph at 4x against 111 at real time before). Gentler
-      grades and flat coasting still run on the paced clock.
+- [x] **A hill's speed is spent on the clock that gave it.** Integrating
+      motion on the game clock (merged to `dev` 2026-09-23, reverted
+      2026-09-24) made the truck pull away at the pace's multiple in real
+      time and rattled the gearbox through its gears, so motion stays on
+      the real clock. A grade clock followed (2026-09-24: 3% or steeper ran
+      in real time) and came out on 2026-09-25 at the owner's call: it
+      dragged every mountain pass into real minutes and made flight's
+      switch for the driver, real time down the grade and paced on the
+      flat after it. Fuel is billed at the pace, so at one pace a climb, a
+      coast and a pulse-and-glide each cost what they should per mile; the
+      free energy was only speed gained on one clock and spent on another.
+      A Driving mode change made mid-drive now waits until the truck is
+      stopped (`PACE_CHANGE_MAX_MPH`). At a faster pace a hill passes in
+      fewer real seconds and moves the speed less, the trade a compressed
+      map makes.
 - [x] **Real time from the brake point, not from the corner call.** The
       call stays time-based; `controlled_turn` now goes on at
       `turn_brake_point_mi` (eight real seconds of reaction and settle plus

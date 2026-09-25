@@ -131,9 +131,12 @@ fn tools_list() -> Value {
             "Let the game run until something arrives: a spoken line or sound whose \
              text contains `text` (case-insensitive), or a menu on screen when `menu` \
              is true, or `seconds` of real time (max 300), whichever comes first. \
-             Anything heard since the last listen counts, so a line already spoken \
-             answers at once. Replies with everything heard, and says if the clock \
-             ran out. Use it to drive to the next event instead of waiting blind.",
+             It also stops early whenever the cab cuts in on the driving channel \
+             (an interrupting instruction or warning), so it can be answered: act \
+             on it, then wait again. Anything heard since the last listen counts, \
+             so a line already spoken answers at once. Replies with everything \
+             heard, and says if the cab or the clock ended it first. Use it to \
+             drive to the next event instead of waiting blind.",
             json!({
                 "text": {"type": "string", "description": "text to listen for"},
                 "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},

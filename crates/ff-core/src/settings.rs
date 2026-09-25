@@ -40,7 +40,8 @@ pub use paths::{
 // Real time (1x) joined the row on 2026-08-22: the driving clock runs at the
 // speed of the wall clock, which with live weather is as true to life as the
 // game gets. It is last in the cycle so the two compressed pacings keep their
-// places, and like the others it can be changed mid-drive from the pause menu.
+// places, and like the others it can be changed mid-drive from the pause menu,
+// taking effect when the truck next stops (PACE_CHANGE_MAX_MPH).
 pub const TIME_SCALES: [f64; 3] = [10.0, 20.0, 1.0];
 pub const RETIRED_TIME_SCALE: f64 = 40.0;
 pub const TIME_SCALE_FALLBACK: f64 = 20.0;

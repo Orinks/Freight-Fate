@@ -407,7 +407,8 @@ impl SettingsCategoryState {
                      pressure and runs the driving clock at the speed of a real \
                      clock, lined up with your computer's date and time; delivery \
                      time remaining and hours of service do not move. Changeable \
-                     mid-drive from the pause menu.",
+                     mid-drive from the pause menu; the new pacing starts when \
+                     the truck next stops.",
                 ),
                 row(
                     dyn_label(|s| format!("Hours of service: {}", hos_label(s))),

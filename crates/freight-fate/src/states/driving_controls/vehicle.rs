@@ -4,6 +4,7 @@
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, Say};
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -17,8 +18,14 @@ impl DrivingState {
     /// arms AUTO mode, the controller picks and steps the stage to hold the
     /// engagement speed (owner design, 2026-07-22), and 1/2/3 take manual
     /// control back.
+    ///
+    /// Only the driver's own foot refuses it. Cruise's throttle is not a
+    /// pedal the driver can release, and the downgrade call asks for J with
+    /// cruise still pulling up to the crest (agent drive, I-70, 2026-09-25).
     pub fn toggle_engine_brake(&mut self, ctx: &mut GameContext) {
-        if self.trip.truck.throttle > 0.05 && !self.trip.truck.engine_brake() {
+        let foot_on_it = ctx.bindings.pressed(&ctx.input, Action::Accelerate)
+            || (ctx.controller.active() && ctx.controller.throttle_target() > 0.05);
+        if foot_on_it && !self.trip.truck.engine_brake() {
             ctx.say("Release the accelerator before turning the jake on.");
             return;
         }

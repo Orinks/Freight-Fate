@@ -72,6 +72,10 @@ fn pan_step_text(step: i32) -> String {
 
 // -- the speech tee -------------------------------------------------------------------
 
+/// How an interrupting driving-channel line starts in the ears: the cab
+/// cutting in with something to answer now (`wait_for` stops on it).
+pub(super) const CAB_CUT_IN: &str = "[spoken:event] (interrupting) ";
+
 /// Passes every call to the real sink (the words still reach the screen
 /// reader) while recording what was said.
 struct TeeSpeech {
@@ -717,6 +721,21 @@ mod tests {
             3,
             "{heard}"
         );
+    }
+
+    #[test]
+    fn only_an_interrupting_cab_line_reads_as_cutting_in() {
+        let ears = Ears::shared();
+        let mut tee = TeeSpeech {
+            inner: Box::new(crate::speech::capture::NullSpeech),
+            ears: Rc::clone(&ears),
+        };
+        tee.say_event("Exit lane opening. Steer right into it.", true);
+        tee.say_event("Billboard: truck parking.", false);
+        tee.say("Speed limit 60 miles per hour.", true);
+        let lines = ears.borrow().lines.clone();
+        let cut: Vec<bool> = lines.iter().map(|l| l.starts_with(CAB_CUT_IN)).collect();
+        assert_eq!(cut, vec![true, false, false], "{lines:#?}");
     }
 
     #[test]
