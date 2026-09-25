@@ -149,7 +149,7 @@ Costs the drive (found 2026-09-24):
       drives no longer speak bend calls or award Bumper-to-Bumper Blues on
       frame one; the crest hold is silent and the descent line names its
       grade; "At the yield" while creeping; capitalised progress line;
-      weather period.
+      weather period (PR #242).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
