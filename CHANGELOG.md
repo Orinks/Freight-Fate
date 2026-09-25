@@ -164,11 +164,9 @@
 
 - **A ramp-end yield names the car the crossing sounds are for.** The words and the panned traffic come from the same vehicle.
 
-- **Staged drives no longer hear bend warnings or win Bumper-to-Bumper Blues before you have the wheel.**
-
 - **Cruise says what grade it is easing for, and stays quiet over a crest.**
 
-- **The street progress line starts with a capital, and the weather Conditions line ends with a period.**
+- **Route status on city streets starts with a capital, and the live weather Conditions line ends with a period.**
 
 - **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
 
