@@ -649,7 +649,10 @@ its status or release decision.
 - [x] `--agent-server --operator-keys` keeps the window up and lets the
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still
-      dropped at the door.
+      dropped at the door. Since 2026-09-24 the window also comes up when
+      the desktop app launches the server hidden (STARTUPINFO `SW_HIDE`
+      turned SDL's first show into a hide); the startup log records
+      whether a show had to be forced.
 - [x] `weather_collector`'s copy names all nine skies the award needs
       (2026-09-24). It listed eight and left out ice, which it now calls
       freezing rain, the word the weather readout speaks. The award is
