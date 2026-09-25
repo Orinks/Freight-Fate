@@ -130,6 +130,12 @@ Costs the drive (found 2026-09-24):
 - [x] Rural roads no longer take the in-town statutory limit: outside the
       boundary a state's code keys on, an untagged road gets its rural
       default (IA 175 by the Love's is 55) (PR #232).
+- [x] The exit lane is the deceleration lane: the approach asks for the
+      right lane only when the truck is out of it, and the cab calls the
+      exit lane once where it opens at the taper. The miles-long offset hold
+      that walked the owner onto the shoulder, across into the left lane and
+      back into a semi is gone
+      ([September 24](#september-24-realistic-interstate-exit)).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -1501,6 +1507,38 @@ mainline behaviour.
       300 ft and 47 over 1.5 miles were dropped. The OSM length starts at
       the gore, so `Trip::ramp_length_mi` adds the deceleration lane in
       front of it; exits without a length keep the derived default.
+- [x] (Release gate) **The exit lane is the deceleration lane** (owner's
+      drive, I-70 East to exit 263, partial lane keeping). The old "exit
+      lane" was an offset held inside the right lane for miles: already in
+      the right lane he was told to steer right, pushed at the shoulder,
+      went "set" and "lost", overcorrected across into the left lane and
+      steered back onto the right-lane semi his adaptive cruise had been
+      following. Now the arming line, the destination callout, the 2 / 1 /
+      1/2 mi anchors and the exit speed assistance line ask for the right
+      lane only while the truck is out of it. The exit lane opens
+      `EXIT_TAPER_MI` (300 ft, derived: Green Book 2018 10.9.6.6.2 parallel
+      taper 25:1 on 12 ft) before the gore; the cab says "Exit lane opening.
+      Steer right into it." once, the lane model treats the right side of
+      lane 0 as a lane line (no rumble), and crossing it takes the ramp at
+      once. It stays open, on the real clock, until the gore window closes;
+      no steer by then is "You were not in the exit lane." Full lane keeping
+      takes it at the gore as before. The exit lane is not a traffic lane:
+      entering it runs no mirror check. The lane-open readout flip in the
+      same log was the message history being replayed plus a real 3-to-2
+      lane drop, each change said once; now pinned stable where the count is.
+- [x] **The exit blinker runs from half a mile out** (owner ruling,
+      2026-09-24: a driver flicks it on a quarter to half a mile out, never
+      miles of blinker; agent drives blinked 7.3 and 5.8 miles to the gore).
+      X still commits the truck wherever it is pressed and stays the gate;
+      the clicks, for X and for lane keeping on full taking the exit, start
+      at `EXIT_BLINKER_MI` (0.5 mi, the last advance guide sign). Armed
+      farther out the line says "Signal set for ...", "Signal on for ..."
+      once it clicks; a new ontology row names the pair.
+- (Found along the way) **Sideswipe window.** `finish_lane_change` calls any
+      vehicle in the new lane from 0.15 mi behind to 0.35 mi ahead a
+      sideswipe, the same clearance the lane-open cue uses. A truck landing
+      a few hundred feet behind a car hears it hit. Owner's call whether
+      contact should need overlap.
 - (Found along the way) **Per-exit ramp grade.** The ramp past the deceleration lane is
       assumed level because nothing records its climb or drop. Needs an
       elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
@@ -1965,6 +2003,10 @@ here 2026-09-25. Details stay in the linked dated sections.
 
 - [ ] Per-exit ramp grade: past the deceleration lane a ramp is assumed
       level ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] A lane change is called a sideswipe when a vehicle in the new lane is
+      anywhere within a third of a mile ahead, not only alongside; owner's
+      call whether contact should need overlap
+      ([September 24](#september-24-realistic-interstate-exit)).
 - [ ] Price curve signs by the MUTCD's ball-bank criteria, once the bake's
       minimum radii are re-measured
       ([September 24](#september-24-realistic-interstate-exit)).

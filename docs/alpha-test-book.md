@@ -184,8 +184,8 @@ nothing. Chapter 3.
 **The lane is a place.** Discrete lanes with real traffic in them:
 dodgeable hazards, sideswipe risk, construction lane closures, keep-right
 nags, and exits that gate on being in the right lane. Highway exits take
-a real setup — signal with X, get to the exit lane, make ramp speed at
-the gore. Signalized ramp terminals run a stable green/yellow/red cycle with
+a real setup — signal with X, get to the right lane, steer into the exit
+lane where it opens just before the gore, and slow down in it. Signalized ramp terminals run a stable green/yellow/red cycle with
 dedicated earcons and a cross-traffic clearance before green. Chapter 4.
 
 **Traffic has a clock.** Congestion is grounded in real federal traffic
@@ -533,10 +533,11 @@ Setup: any leg with announced exits; know your destination exit (R for
 progress, Shift+R for what the next exit offers).
 
 Do: when your exit is announced, press X to commit to it. Follow the
-GPS: right-side exit lane, then ramp speed by the gore. Once, miss the
+GPS: the right lane, then the exit lane where it opens. Once, miss the
 exit on purpose.
 
-Listen for: the GPS asking for the exit lane, checking your speed at the
+Listen for: the GPS asking for the right lane only while you are out of
+it, and for the exit lane once, where it opens; checking your speed at the
 gore point, and explaining plainly what happens now that you missed —
 and merge/exit traffic pressuring the maneuver while you do it.
 
