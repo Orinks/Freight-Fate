@@ -492,13 +492,45 @@ impl Trip {
         }
     }
 
+    /// Whether the truck is still going round a street corner it has reached:
+    /// the front is past the corner by less than the truck's own length.
+    ///
+    /// The turn chime sounds as the truck reaches the corner, and the next
+    /// corner's call used to go out on the same tick, so "Turn right onto
+    /// North Freeway Road" landed on the left-turn chime of the corner being
+    /// taken, four turns out of four (agent drive, Tucson, 2026-09-24). The
+    /// next call waits until the rear is round.
+    pub fn turning_through_corner(&self) -> bool {
+        use crate::sim::cross_traffic::{COMBINATION_LENGTH_FT, TRACTOR_LENGTH_FT};
+        let length_ft = if self.truck.trailer_attached {
+            COMBINATION_LENGTH_FT
+        } else {
+            TRACTOR_LENGTH_FT
+        };
+        let clear_mi = length_ft / 5280.0;
+        self.navigation_cues.iter().any(|cue| {
+            let past = self.position_mi - cue.at_mi;
+            cue.kind == "local_turn"
+                && matches!(
+                    cue.direction.trim().to_ascii_lowercase().as_str(),
+                    "left" | "right"
+                )
+                && (0.0..clear_mi).contains(&past)
+        })
+    }
+
     pub fn check_navigation_cues(&mut self) {
         // One maneuver at a time on street chains: only the nearest
-        // not-yet-passed local turn may speak each tick.
+        // not-yet-passed local turn may speak each tick, and none ahead while
+        // the truck is still round the last one.
+        let turning = self.turning_through_corner();
         let mut next_turn_key: Option<String> = None;
         let mut next_turn_ahead: Option<f64> = None;
         for cue in &self.navigation_cues {
             if cue.kind != "local_turn" {
+                continue;
+            }
+            if turning && cue.at_mi > self.position_mi {
                 continue;
             }
             // A turn already called and already taken is done speaking. Left
