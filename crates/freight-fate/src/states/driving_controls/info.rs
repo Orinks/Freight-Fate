@@ -198,9 +198,12 @@ impl DrivingState {
         }
         let position = self.trip.position_mi;
         let (limit, reason) = self.trip.speed_limit_at(position);
+        // A street is not a zone: its limit is its own (`spoken_zone`).
         let zone = match reason {
-            Some(reason) => format!(", in a {reason} zone"),
-            None => String::new(),
+            Some(reason) if !ff_core::sim::trip::is_street_zone_reason(&reason) => {
+                format!(", in a {reason} zone")
+            }
+            _ => String::new(),
         };
         let over = self.trip.truck.speed_mph() - limit;
         let comparison = if over >= 1.0 {
@@ -286,6 +289,15 @@ impl DrivingState {
         let (limit, _) = self.trip.speed_limit_at(position);
         let mut safe = limit.min(self.trip.weather.effects().safe_speed_mph);
         let mut context = "";
+        // A steep downgrade has a safe speed of its own for this truck at this
+        // weight -- the one descent control holds. Without it D answered the
+        // posted 65 on a seven percent grade while descent control held 45.
+        if let Some(descent) = self.safe_descent_here_mph() {
+            if descent < safe {
+                safe = descent;
+                context = " for the grade";
+            }
+        }
         // The bend under the wheels, or the next one close ahead: whichever
         // binds, its advisory is the number that keeps the truck on the road.
         // Connector arcs count when the truck is inside one.
@@ -406,26 +418,19 @@ impl DrivingState {
         } else {
             let direction = if grade > 0.0 { "uphill" } else { "downhill" };
             let mut lead = format!("Grade {:.1} percent {direction}", grade.abs() * 100.0);
-            // How far the slope keeps its character, sampled the way the
-            // chain-law scan does; flat or reversed counts as the end.
-            let sign = if grade > 0.0 { 1.0 } else { -1.0 };
-            let mut run_mi: Option<f64> = None;
-            let mut probe = 0.25;
-            while probe <= 15.0 {
-                let at = self.trip.position_mi + probe;
-                if at >= self.trip.total_miles() {
-                    break;
-                }
-                if self.trip.grade_at(at) * sign <= 0.002 {
-                    run_mi = Some(probe);
-                    break;
-                }
-                probe += 0.25;
-            }
-            if let Some(run_mi) = run_mi {
-                if run_mi >= 1.0 {
-                    lead.push_str(&format!(" for another {}", self.trip.distance_text(run_mi)));
-                }
+            // How far the slope keeps its character: the same run the grade
+            // ahead is measured by ("running 2 miles"), so one pitch has one
+            // length whichever sentence names it. A grade gentler than the
+            // steep line runs until the road stops going its way at all.
+            let sign = if grade > 0.0 { 1 } else { -1 };
+            let floor_pct = if grade.abs() * 100.0 >= GRADE_WARN_CLEAR_PCT {
+                GRADE_WARN_CLEAR_PCT
+            } else {
+                GRADE_READOUT_LEVEL_PCT
+            };
+            let run_mi = self.grade_run_over_mi(self.trip.position_mi, sign, floor_pct);
+            if (1.0..GRADE_WARN_SCAN_MI).contains(&run_mi) {
+                lead.push_str(&format!(" for another {}", self.trip.distance_text(run_mi)));
             }
             parts.push(format!("{lead}."));
         }
@@ -539,6 +544,12 @@ impl DrivingState {
         if !upcoming.is_empty() {
             return upcoming;
         }
+        // Under a mile of road left to scan -- the streets to a gate -- whole
+        // miles said "Nothing steep in the next 0 miles" (live drive into
+        // Abilene, 2026-09-24): the rest of the route is all there is.
+        if scanned < 1.0 {
+            return format!("{nothing} ahead.");
+        }
         format!(
             "{nothing} in the next {}.",
             self.trip.distance_text(scanned)
@@ -644,12 +655,21 @@ impl DrivingState {
                     Some(gate) if zone.reason == "facility gate" => gate,
                     _ => zone.start_mi - pos,
                 };
-                parts.push(format!(
-                    "{} in {}, speed limit {}",
-                    zone.reason,
-                    ctx.settings.distance_text(ahead, true),
-                    ctx.settings.speed_text(zone.limit_mph)
-                ));
+                // The next street's number, not a zone by name.
+                if ff_core::sim::trip::is_street_zone_reason(&zone.reason) {
+                    parts.push(format!(
+                        "speed limit {} in {}",
+                        ctx.settings.speed_text(zone.limit_mph),
+                        ctx.settings.distance_text(ahead, true)
+                    ));
+                } else {
+                    parts.push(format!(
+                        "{} in {}, speed limit {}",
+                        zone.reason,
+                        ctx.settings.distance_text(ahead, true),
+                        ctx.settings.speed_text(zone.limit_mph)
+                    ));
+                }
             }
         }
         // Every distance here is PRECISE. Whole miles bottom out at "0

@@ -502,14 +502,26 @@ pub const CRUISE_GRADE_BEATEN_S: f64 = 3.0;
 // answers first because its heat goes out the exhaust; the drums only join in
 // when the jake cannot hold, so a long grade does not fade them away.
 pub const CRUISE_JAKE_OVER_MPH: f64 = 0.75; // over the target by this much and the jake steps in
-pub const CRUISE_JAKE_STEP_MPH: f64 = 1.0; // further overspeed per additional jake stage
-pub const CRUISE_JAKE_RELEASE_MPH: f64 = 0.25; // back inside this and the retarder hands off
 pub const CRUISE_JAKE_STEP_S: f64 = 4.0; // quiet time between stage changes; the jake is loud
-                                         // Descent control announcing itself is a per-grade event, not a per-dip one:
-                                         // rolling country crosses the 2.5 percent trigger every dip, and at 1.5
-                                         // seconds of retarder spacing the bench heard a stage change every ten
-                                         // seconds and the holding cue four times in six minutes (2026-07-25).
-pub const DESCENT_CUE_COOLDOWN_S: f64 = 120.0;
+                                         // Under the target by this much and the retarder steps DOWN a stage -- and
+                                         // inside it cruise does not fuel against a retarder holding a grade, since
+                                         // any throttle cuts the jake. Assumed: wider than the snub's own band (it
+                                         // ends half a mile an hour under), so the snub finishing never reads as
+                                         // over-retarding, and inside the droop band that calls a climb beaten.
+pub const CRUISE_JAKE_UNDER_MPH: f64 = 2.0;
+// A step in the opposite direction to the last waits this long. Assumed:
+// three of the steps above, so a stage just raised has a hill's worth of
+// road to prove itself before it can come back off -- the owner heard
+// 3, 0, 2, 1, 2, 1 in thirty seconds down a 5.8 percent grade (2026-09-24).
+pub const CRUISE_JAKE_REVERSE_S: f64 = 12.0;
+// Descent control engages at this grade (a fraction, downhill) and lets go
+// where the road stops being a grade at all (`on_downgrade`).
+pub const DESCENT_CONTROL_GRADE: f64 = 0.025;
+// How close to the automatic's retarder ceiling (`JAKE_MAX_RPM`) the revs
+// may come on a downgrade before cruise snubs to hold the gear. Assumed: a
+// fraction of the ratio step between gears, so the snub lands well before
+// the box's protective upshift and releases a guard band lower.
+pub const DESCENT_RPM_GUARD: f64 = 50.0;
 // The drums are the last resort, and they only come out in snubs: apply,
 // recover the target, release. Dragging a light application down a long grade
 // is how a real truck fades its brakes and empties its air tanks -- and the
@@ -578,6 +590,10 @@ pub const GRADE_WARN_STEEPEN_PCT: f64 = 1.0;
 pub const GRADE_WARN_LOOKAHEAD_MI: f64 = 0.75; // how far ahead the advisory reaches
 pub const GRADE_WARN_SCAN_MI: f64 = 15.0; // how far a grade's run is measured before giving up
 pub const GRADE_WARN_STEP_MI: f64 = 0.25; // sampling stride; matches the baked segment length
+                                          // A grade gentler than the steep line's release runs, for the G key's "for
+                                          // another", until the road stops going its way at all -- this close to
+                                          // level. The number the readout has always used (0.002 as a fraction).
+pub const GRADE_READOUT_LEVEL_PCT: f64 = 0.2;
 pub const GRADE_WARN_MIN_MPH: f64 = 25.0; // no advisories while crawling; nothing to plan for
                                           // A grade has to last to be worth planning for. The baked segments are around
                                           // half a mile each and the mountain corridors are full of short punchy dips: a

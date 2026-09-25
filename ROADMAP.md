@@ -136,6 +136,11 @@ Costs the drive (found 2026-09-24):
       that walked the owner onto the shoulder, across into the left lane and
       back into a semi is gone
       ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Street lights and signs, and road stops' streets, are off for 1.9 and
+      the streets drive as before 2026-09-24. A street is never called a
+      zone, G never says "the next 0 miles", lines raised in one moment are
+      said once in order, and a corner taken under its speed sounds at the
+      corner ([September 24](#september-24-realistic-interstate-exit)).
 - [x] Exit labels named the driver's own Interstate: the interchange bake
       merged a mainline entrance ramp's signage into the exit's record, so
       southbound at Ardmore exit 31B was "for I-35 North toward Oklahoma
@@ -150,6 +155,11 @@ Costs the drive (found 2026-09-24):
       frame one; the crest hold is silent and the descent line names its
       grade; "At the yield" while creeping; capitalised progress line;
       weather period (PR #242).
+- [x] Descent control held 77 and 85 on a 7 percent grade and let a
+      loaded truck run: it now holds a safe descent speed derived for the
+      truck and load, the retarder no longer hunts, and the G key gives a
+      pitch one length (PR #243;
+      [September 24](#september-24-descent-control-into-denver)).
 - [x] 81 legs' exits sat at the wrong mile: the legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles).
       Their interchanges are re-derived on the polyline each leg drives,
@@ -1908,6 +1918,86 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       from the exit I am." With the signal on for the destination exit or a
       stop's exit, Space ends with that exit and its distance and U leads with
       it; neither is spoken unasked, and both drop it on the ramp.
+- [x] (Release gate) **Street lights off for 1.9, and the live drive's
+      street faults** (owner decision after the live drives into Abilene and
+      Ardmore, `fix/street-lights-live`). Street lights and signs sit behind
+      `STREET_CONTROLS_IN_PLAY`, road stops' streets behind
+      `STOP_STREETS_IN_PLAY`, both false; no code or data is removed, and the
+      street-control and truck-stop-street tests switch them on as the 2.0
+      suite. Road stops' streets are off because most exits have a ramp end
+      baked one way only (3,456 of 18,165 have both), so the Love's at Baird,
+      I-20 exit 307, had streets eastbound and none westbound; the builder
+      fix is on `feat/street-lights-2-0` and needs a re-bake
+      ([2.0](#street-traffic-controls)). Also: a street zone is never spoken
+      as a zone (`spoken_zone`); G says "Nothing steep ahead" with under a
+      mile to scan; route lines raised in the same instant queue whole
+      instead of each purging the one before and handing it back to be said
+      again; and a corner taken under its speed settles at once. Its grace
+      only defers a miss now: the Ardmore yard's off-the-ramp line held its
+      first corner for 71 s (its words at the slowest modelled voice) while
+      the truck drove the next two, 0.05 mile apart, and all three tones
+      sounded together 0.2 mile on.
+
+### September 24 descent control into Denver
+
+Two live drives of I-70 east from the Eisenhower tunnel, a 76,000 lb truck on
+Balanced. Descent control said it was holding 85 (the set speed) and then 77
+on the 7 percent; the agent's run held 45 by its own words and ran to 55, the
+automatic upshifting on the downgrade; the retarder walked 3, 0, 2, 1, 2, 1
+inside half a minute; the G key called the 7 percent pitch "running 2 miles"
+and then "for another 10 miles". A bench of the owner's run reproduced it: 68
+to 72 mph down the 5.8 and the 7.0 on a tenth of the drums, the retarder never
+raised, drums past 300 C, the box cycling ninth and tenth at the retarder's
+rev ceiling.
+
+- [x] (Release gate) **A safe descent speed, derived.** `TruckState::safe_descent_mph`
+      runs the Grade Severity Rating System's rule (FHWA-RD-79-116, read) on
+      the truck's own heat model: the highest multiple of 5 mph (MUTCD
+      2B.13, read) at which the drums, holding what gravity leaves after
+      drag, rolling and full engine brake in the gear an automatic holds,
+      settle under GSRS's 500 F limit (read) or the shoes' own fade line.
+      Derived numbers for the default truck, set at the top of the steepest
+      grade inside the advisory's look-ahead:
+      40,000 lb none up to 10 percent; 60,000 lb 45 at 8, 30 at 10;
+      76,000 lb 65 at 5.8 and 6, 45 at 7, 30 at 8, 20 at 10;
+      80,000 lb 65 at 6, 30 at 7 and 8. Descent control at every level but
+      Off caps cruise there, raises full engine brake at once on such a
+      hill, snubs past the number, snubs to keep the retarder's gear short
+      of the protective upshift while a stage is on, keeps the snub through
+      a shift, and never fuels against the retarder. The box holds its gear
+      while descent control holds a grade, the way it does under a brake
+      application (no pre-select without a stage on), and a retarder
+      pre-select lands 100 rpm (assumed) under its ceiling. Past the held
+      gear's top, the revs 100 rpm under that ceiling, the retarder answers
+      as it would past the number. The bend sweep caught the first version
+      pumping: it pre-selected a bobtail down into sixth with no stage on,
+      and guarded a gear with no retarder in it on a snub every two seconds
+      (Siskiyou, Red Mountain, Salt River; up to 1.1 applications a bend,
+      now under 0.7). Over the number on the downgrade above a steep pitch, the
+      retarder goes to full before the drums join in; the bench had the
+      drums alone take the truck from 63 to 45 on the 2.4 percent above the
+      7.0. The same run now holds 60 to 65 down the 5.8 and 43 to 46 down
+      the 7.0, drums under 220 C, air at 100 psi or more, no upshift. D
+      names the number "for the grade".
+- [x] (Release gate) **The retarder no longer hunts.** Cruise steps a stage at a
+      time, drops one only when well under its number and never with a
+      steep pitch in sight, and waits 12 s (assumed) before stepping back
+      the other way; the J key's manager gets the same reversal time and
+      works to what descent control holds, not the set speed.
+- [x] (Release gate) **One length per grade.** The G key's "for another" reads the
+      same run as the grade look-ahead's "running".
+- [x] (Release gate) **"Descent control holding N" once per number,** with no
+      clock, and only for a number of descent control's own: the hill's,
+      Interactive's 55, or a brake's capture. A grade that needs none is held
+      at cruise's speed without a line; the same run said "holding 70" on a
+      65 road, the limit plus five.
+- [x] **Colorado's dead traffic feed is no longer fetched** (benched until
+      the 2.0 keyed-feeds item).
+- [ ] (2.0) **Two brake-heat lines.** The retarder comes up where the drums
+      alone would settle past fade (400 C), while the safe descent speed
+      works to GSRS's 260 C. On the 4.5 percent below the 7.0 the drums
+      alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
+      line, or show why two are right.
 
 ## 2.0 planned -- the working week and home
 
@@ -2005,13 +2095,22 @@ onto exit signalling.
 
 ### Street traffic controls
 
-The street signals and signs baked for 1.9 are switched off for the 1.9
-release (`fix/street-lights-live`); the timing work is parked on
-`feat/street-lights-2-0`. Detail in
+The street signals and signs baked for 1.9, and road stops' streets, are
+switched off for the 1.9 release (`fix/street-lights-live`,
+`STREET_CONTROLS_IN_PLAY` and `STOP_STREETS_IN_PLAY`); the timing work is
+parked on `feat/street-lights-2-0`. Detail in
 [September 24](#september-24-realistic-interstate-exit).
 
 - [ ] **Turn street traffic controls back on.** Lights and signs on the
       approach chains play again once the items below hold up on a drive.
+- [ ] **Turn road stops' streets back on.** Most exits have a ramp end
+      baked for one direction only (3,456 of 18,165 have both), because the
+      other direction's ramp leaves at its own junction node. The search
+      around same-numbered junctions (`RAMP_SIBLING_JUNCTION_M`, with its
+      pytest, on `feat/street-lights-2-0`) adds 34 of 47 on the Abilene to
+      Fort Worth leg. Re-bake the ramp terminals, then the stop approaches
+      and facility exit chains, from one OSM set; I-20 exit 307 westbound
+      (the Love's at Baird) is the check.
 - [ ] **Arterial progression.** Signals along one street share a cycle
       and are offset for its posted limit, so a truck at the limit meets
       greens.
@@ -2085,6 +2184,20 @@ here 2026-09-25. Details stay in the linked dated sections.
 - [ ] 995 streets with an OSM speed tag on under half their miles take the
       statutory fill for the whole street; splitting them needs a
       per-stretch limit (PR #232).
+- [ ] Owner call: a rural statutory limit inside city limits. North Arnold
+      Boulevard (FM 3438), the last 0.27 mile before the Abilene Company
+      Yard's street, reads 70 (Tex. Transp. Code 545.352(b)(2), rural
+      basis): it is inside Abilene's corporate limits but outside the Census
+      2020 urban area that stands in for Texas's urban district, and OSM
+      tags no limit. Counting corporate limits as town would undo the IA 175
+      ruling (PR #232); the official source is TxDOT's posted speed zones.
+- [ ] Owner call: one limit for an older chain. The 394 chains with no
+      street detail post one limit for the whole chain: the state's in-town
+      figure, else the highest street's. Oklahoma sets no in-town figure, so
+      the Ardmore Company Yard's 3.06 miles post 55 from the ramp, service
+      road included; OSM reads 35, then 40, 45 and 55 along West Broadway
+      Street west of M Street. Options: each street's own number, or match
+      the chain to the map.
 
 ### Lanes and maneuvering
 

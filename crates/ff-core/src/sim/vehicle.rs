@@ -18,6 +18,7 @@ use crate::sim::transmission::Transmission;
 mod air;
 mod axles;
 mod condition;
+mod descent;
 mod forces;
 mod mass;
 mod roll;
@@ -25,6 +26,7 @@ mod shifting;
 mod updates;
 
 pub use axles::{AxleLoads, TANDEM_LIMIT_LB};
+pub use descent::{DESCENT_SPEED_STEP_MPH, GSRS_BRAKE_LIMIT_C};
 pub use mass::DIESEL_KG_PER_GAL;
 pub use roll::ROLL_WARN_SHARE;
 
@@ -604,6 +606,12 @@ pub struct TruckState {
     /// a real ECM drops fast idle at the key cycle.
     pub high_idle_rpm: Option<f64>,
     pub last_service_air_application: f64,
+    /// Descent control is holding a downgrade: the automatic keeps its gear
+    /// off the throttle the way it does under a brake application, rather than
+    /// taking an economy upshift over the crest that the retarder then has
+    /// to take straight back. Not persisted -- the driving layer sets it
+    /// every frame cruise runs.
+    pub descent_gear_hold: bool,
 }
 
 impl Default for TruckState {
@@ -668,6 +676,7 @@ impl TruckState {
             stalled: false,
             high_idle_rpm: None,
             last_service_air_application: 0.0,
+            descent_gear_hold: false,
         }
     }
 

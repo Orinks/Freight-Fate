@@ -89,6 +89,12 @@ impl DrivingState {
         self.cruise_curve_mph = None;
         self.cruise_curve_end_mi = None;
         self.cruise_descent_mph = None;
+        self.descent_said_mph = None;
+        self.descent_safe_mph = None;
+        self.descent_safe_key = None;
+        self.descent_posted_cap_mph = None;
+        self.trip.truck.descent_gear_hold = false;
+        self.cruise_jake_last_step = 0;
         self.cruise_snubbing = false;
         self.pcc_phase = String::new();
         self.climb_cue_said = false;
@@ -392,8 +398,8 @@ impl DrivingState {
                 )
             } else {
                 format!(
-                    "Automatic speed control resuming. Speed keeper holding {held} through the \
-                     {zone_reason} zone."
+                    "Automatic speed control resuming. {}",
+                    crate::states::driving_events::cruise::keeper_holding_line(&held, &zone_reason)
                 )
             };
             ctx.say_event_with(
