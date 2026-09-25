@@ -225,7 +225,7 @@ fn test_x_signals_for_upcoming_route_exit_without_taking_it() {
         assert_eq!(armed.stop_type, "delivery_destination");
         assert!(d.exit_signal_on);
     });
-    assert!(said_any(&harness, "Signal on"), "{:?}", spoken(&harness));
+    assert!(said_any(&harness, "Signal set"), "{:?}", spoken(&harness));
 
     press_x(&mut harness);
 

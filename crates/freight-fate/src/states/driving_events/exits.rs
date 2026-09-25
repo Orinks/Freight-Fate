@@ -118,10 +118,11 @@ impl DrivingState {
             // and says so; only a deliberate second press cancels.
             if ahead <= EXIT_CANCEL_GUARD_MI && !self.exit_cancel_armed {
                 self.exit_cancel_armed = true;
+                let stays = if self.exit_blinker_on() { "on" } else { "set" };
                 self.say_plain(
                     ctx,
                     format!(
-                        "Signal stays on. Press {} again to cancel the exit.",
+                        "Signal stays {stays}. Press {} again to cancel the exit.",
                         ctx.control_hint("take_exit")
                     ),
                 );
@@ -165,8 +166,16 @@ impl DrivingState {
         self.exit_countdown_said.clear();
         self.steer_cue_timer = 0.0;
         self.update_steering_lane_cue(ctx, 0.0);
+        // X commits the truck to the exit wherever it is pressed, but the
+        // blinker itself runs only from half a mile out (owner ruling,
+        // 2026-09-24): "set" until then, "on" once it clicks.
+        let signal = if self.exit_blinker_on() {
+            "Signal on"
+        } else {
+            "Signal set"
+        };
         let head = if scale_claimed.is_some() {
-            format!("Signal on for the scale exit: {},", stop.name)
+            format!("{signal} for the scale exit: {},", stop.name)
         } else if stop.stop_type == "delivery_destination" {
             let labeled = self.exit_phrase_of(ctx, &stop);
             let labeled = if labeled.is_empty() {
@@ -177,10 +186,10 @@ impl DrivingState {
             // A labeled exit already names itself; don't repeat the
             // facility that the fallback phrase would have baked in.
             if labeled.is_empty() {
-                format!("Signal on for the destination exit for {},", stop.name)
+                format!("{signal} for the destination exit for {},", stop.name)
             } else {
                 format!(
-                    "Signal on for {labeled}, destination exit for {},",
+                    "{signal} for {labeled}, destination exit for {},",
                     stop.name
                 )
             }
@@ -190,9 +199,9 @@ impl DrivingState {
             // R6).
             let facility = self.trip.name_facility(&stop.name, &stop.spoken_name());
             if stop.exit_label.is_empty() {
-                format!("Signal on for the {facility} exit,")
+                format!("{signal} for the {facility} exit,")
             } else {
-                format!("Signal on for {}, {facility},", stop.exit_label)
+                format!("{signal} for {}, {facility},", stop.exit_label)
             }
         };
         let in_right_lane = self.in_right_lane_for_exit();

@@ -56,6 +56,8 @@
 
 - **The exit lane opens just before the gore, and you steer into it there.** Already in the right lane, you hear no lane instructions before that.
 
+- **The exit blinker starts clicking half a mile out.** X still sets the signal from miles away, and the game says "Signal set" until then.
+
 - **Each city street keeps its own speed limit.** The cab says the new number when the street changes, and delivery times are planned on them.
 
 - **City streets start on the road your exit ramp meets.** The streets named and the miles to the gate are the ones from that exit.

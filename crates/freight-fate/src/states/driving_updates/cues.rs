@@ -370,8 +370,21 @@ impl DrivingState {
         ctx.audio.play_if_idle("vehicle/turn_signal", volume, pan);
     }
 
+    /// Whether the turn signal is clicking for an exit.
+    ///
+    /// Signalled with X, or taken by lane keeping on full, and only from
+    /// `EXIT_BLINKER_MI` out. X commits the truck wherever it is pressed, but
+    /// a real driver flicks the signal on a quarter to half a mile out; eight
+    /// miles of blinker is what gets a trucker flashed (owner ruling,
+    /// 2026-09-24, after agent drives that blinked 7.3 miles to the gore).
     pub fn exit_blinker_on(&self) -> bool {
-        self.exit_signal_on && self.exit_stop.is_some() && self.ramp_mi.is_none()
+        let Some(stop) = self.exit_stop.as_ref() else {
+            return false;
+        };
+        self.ramp_mi.is_none()
+            && !self.exit_signal_canceled
+            && (self.exit_signal_on || self.exit_lane_entered)
+            && stop.at_mi - self.trip.position_mi <= EXIT_BLINKER_MI
     }
 
     /// Run the edge-boundary ladder: structural loops, not louder beeps.

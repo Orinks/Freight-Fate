@@ -725,10 +725,11 @@ fn test_taking_the_announced_exit_does_not_repeat_the_ramp_cap() {
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.take_exit(ctx));
 
-    // The exit key is a turn signal now: "Signal on for ..." replaced the
-    // older "Signaling for ..." callout when the cancel/confirm model landed.
+    // The exit key is a turn signal now: "Signal set for ..." (the blinker
+    // itself waits for half a mile) replaced the older "Signaling for ..."
+    // callout when the cancel/confirm model landed.
     let confirmation = last_said(&harness);
-    assert!(confirmation.contains("Signal on for"), "{confirmation}");
+    assert!(confirmation.contains("Signal set for"), "{confirmation}");
     // Already said, and already capped.
     assert!(!confirmation.contains("Adaptive cruise"), "{confirmation}");
     assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(ramp_mph));

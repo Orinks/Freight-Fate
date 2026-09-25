@@ -1526,6 +1526,14 @@ mainline behaviour.
       entering it runs no mirror check. The lane-open readout flip in the
       same log was the message history being replayed plus a real 3-to-2
       lane drop, each change said once; now pinned stable where the count is.
+- [x] **The exit blinker runs from half a mile out** (owner ruling,
+      2026-09-24: a driver flicks it on a quarter to half a mile out, never
+      miles of blinker; agent drives blinked 7.3 and 5.8 miles to the gore).
+      X still commits the truck wherever it is pressed and stays the gate;
+      the clicks, for X and for lane keeping on full taking the exit, start
+      at `EXIT_BLINKER_MI` (0.5 mi, the last advance guide sign). Armed
+      farther out the line says "Signal set for ...", "Signal on for ..."
+      once it clicks; a new ontology row names the pair.
 - (Found along the way) **Sideswipe window.** `finish_lane_change` calls any
       vehicle in the new lane from 0.15 mi behind to 0.35 mi ahead a
       sideswipe, the same clearance the lane-open cue uses. A truck landing

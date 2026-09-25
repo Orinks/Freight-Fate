@@ -24,13 +24,25 @@ const STOP_MI: f64 = 40.0;
 /// A truck at 60 on cruise in lane `lane`, `ahead_mi` short of a truck stop
 /// on a bench road posted 65, with lane keeping `mode`. Not yet signalled.
 fn rig(mode: &str, lane: i64, ahead_mi: f64) -> (PlaytestHarness, RoadStop) {
+    rig_scaled(mode, lane, ahead_mi, 1.0)
+}
+
+/// [`rig`] on a compressed clock, which is what widens the window X can arm
+/// an exit in to eight miles and more.
+fn rig_scaled(
+    mode: &str,
+    lane: i64,
+    ahead_mi: f64,
+    time_scale: f64,
+) -> (PlaytestHarness, RoadStop) {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Exit Lane"));
     harness.app.ctx.settings.lane_keeping = mode.to_string();
     harness.app.ctx.settings.automatic_transmission = true;
-    harness.with_drive(|d, _| {
+    harness.app.ctx.settings.time_scale = time_scale;
+    harness.with_drive(move |d, _| {
         d.departure_checked = true;
-        bench_road(d, 65.0, 0.0, 1.0);
+        bench_road(d, 65.0, 0.0, time_scale);
         d.truck_mut().set_air_ready(false);
     });
     harness.press_key(Key::E, None); // engine on
@@ -115,7 +127,7 @@ fn neighbour_readout(harness: &mut PlaytestHarness) -> String {
 fn already_in_the_right_lane_hears_one_steer_at_the_taper_and_takes_the_exit() {
     let (mut harness, stop) = rig("partial", 0, 2.3);
     harness.press_key(Key::X, None);
-    assert!(heard(&harness).iter().any(|l| l.contains("Signal on")));
+    assert!(heard(&harness).iter().any(|l| l.contains("Signal set")));
 
     // The whole approach, the two-mile, one-mile and half-mile anchors
     // included: no lane instruction, because the truck is where it belongs.
@@ -164,7 +176,7 @@ fn out_of_the_right_lane_is_asked_to_move_right_until_it_is_there() {
     harness.press_key(Key::X, None);
     let arming = heard(&harness)
         .into_iter()
-        .find(|l| l.contains("Signal on"))
+        .find(|l| l.contains("Signal set"))
         .expect("the signal line");
     assert!(arming.contains("Move to the right lane."), "{arming}");
 
@@ -284,4 +296,85 @@ fn the_lane_readout_holds_steady_where_the_lane_count_does() {
         frame(&mut harness);
     }
     assert!(exit_lane_seen);
+}
+
+// -- the blinker (owner ruling, 2026-09-24) ---------------------------------------------
+
+fn blinker_clicks(log: &freight_fate::app::testing::AudioLog) -> usize {
+    log.borrow()
+        .played
+        .iter()
+        .filter(|(key, ..)| key == "vehicle/turn_signal")
+        .count()
+}
+
+/// Armed eight and a half miles out, the blinker stays quiet until half a
+/// mile, clicks from there, and the exit is still taken: X is the commitment,
+/// the blinker only its sound. Agent drives blinked 7.3 miles to the gore.
+fn armed_far_out_blinks_from_half_a_mile(mode: &str) {
+    let (mut harness, stop) = rig_scaled(mode, 0, 8.5, 24.0);
+    assert!(harness.read_drive(|d| d.exit_window_mi()) > 8.5);
+    let log = harness.app.record_audio();
+    harness.press_key(Key::X, None);
+    let arming = heard(&harness)
+        .into_iter()
+        .find(|l| l.contains("Signal"))
+        .expect("the signal line");
+    assert!(arming.starts_with("Signal set for exit 42"), "{arming}");
+    assert!(harness.read_drive(|d| d.exit_signal_on));
+
+    for _ in 0..(30 * 5) {
+        frame(&mut harness);
+    }
+    assert_eq!(blinker_clicks(&log), 0, "{mode}: a blinker miles out");
+
+    // The miles between, then the last of them driven.
+    let at = stop.at_mi;
+    harness.with_drive(move |d, _| d.trip.position_mi = at - 0.6);
+    // Every click lands at half a mile or nearer (one frame of road slack).
+    for _ in 0..(30 * 60) {
+        let before = blinker_clicks(&log);
+        frame(&mut harness);
+        let ahead = at - harness.read_drive(|d| d.trip.position_mi);
+        if blinker_clicks(&log) > before {
+            assert!(ahead <= 0.501, "{mode}: clicked {ahead:.3} mi out");
+        }
+        if ahead <= 0.45 {
+            break;
+        }
+    }
+    for _ in 0..(30 * 3) {
+        frame(&mut harness);
+    }
+    assert!(
+        blinker_clicks(&log) > 0,
+        "{mode}: no blinker at half a mile"
+    );
+
+    // Right into the exit lane where it opens (lane keeping on full takes
+    // it itself), and the exit is taken.
+    for _ in 0..(30 * 60) {
+        if harness.read_drive(|d| d.ramp_mi.is_some()) {
+            break;
+        }
+        let open = harness.read_drive(|d| d.lane.exit_lane_open);
+        steer(&mut harness, open.then_some(Key::Right));
+        frame(&mut harness);
+    }
+    steer(&mut harness, None);
+    assert!(
+        harness.read_drive(|d| d.ramp_mi.is_some()),
+        "{mode}: never took the exit\n{}",
+        harness.transcript_text()
+    );
+}
+
+#[test]
+fn the_blinker_starts_at_half_a_mile_on_partial_lane_keeping() {
+    armed_far_out_blinks_from_half_a_mile("partial");
+}
+
+#[test]
+fn the_blinker_starts_at_half_a_mile_on_full_lane_keeping() {
+    armed_far_out_blinks_from_half_a_mile("full");
 }

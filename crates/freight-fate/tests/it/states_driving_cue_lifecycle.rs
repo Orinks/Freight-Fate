@@ -39,9 +39,10 @@ fn arm(d: &mut DrivingState, app: &mut TestApp, direction: f64) {
 }
 
 /// `_signal_for_the_exit(driving)`: an armed route exit, without needing a
-/// real stop on this leg.
+/// real stop on this leg. Inside the half mile where the blinker runs.
 fn signal_for_the_exit(d: &mut DrivingState) {
-    d.exit_stop = Some(RoadStop::new("Test Exit", 30.0, "travel_center"));
+    let at = d.trip.position_mi + 0.4;
+    d.exit_stop = Some(RoadStop::new("Test Exit", at, "travel_center"));
     d.exit_signal_on = true;
     d.lane.lane = 0; // ramps peel off the right lane
 }

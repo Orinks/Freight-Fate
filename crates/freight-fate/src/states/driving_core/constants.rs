@@ -126,6 +126,12 @@ pub const EXIT_COMMIT_WINDOW_MI: f64 = 0.4; // generous gore-window grace after 
 /// lane; the long end, 300 feet. MUTCD 11th ed. 2E.25 stands the exit direction
 /// sign at the start of this taper, which is where the cab calls the lane.
 pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
+/// How far out the exit's turn signal starts clicking, in miles. Owner ruling
+/// (2026-09-24): a driver flicks it on a quarter to half a mile out, never
+/// miles of blinker; the long end, which is also the last advance guide sign
+/// (MUTCD 11th ed. 2E.23, 1/2 mi). X commits to the exit wherever it is
+/// pressed; this is only when the blinker runs.
+pub const EXIT_BLINKER_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[2];
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor

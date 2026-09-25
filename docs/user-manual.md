@@ -1235,6 +1235,9 @@ has its entrance at the end of the ramp.
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
 up for it. As an announced exit approaches, use X to signal or cancel your intent.
+X commits you to the exit wherever you press it, and the game says "Signal
+set"; the blinker itself starts clicking half a mile out, the way a driver
+flicks it on near the exit.
 Unless lane keeping is on full, move to the right lane and stay centered there;
 the game asks for that move only while you are out of the right lane. Just
 before the gore the exit lane opens beside the right lane, and the game says
