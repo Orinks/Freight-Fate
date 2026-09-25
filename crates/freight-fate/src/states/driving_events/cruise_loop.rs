@@ -417,11 +417,17 @@ impl DrivingState {
                 // throttle (automation-handoff sweep, 2026-08-20, the deferred
                 // 2026-08-15 audit).
                 let held = ctx.settings.speed_text(self.keeper_mph.unwrap_or(0.0));
-                let title = title_case(&zone_reason);
-                self.say_route_confirmation(
-                    ctx,
-                    &format!("{title} zone. Speed keeper holding {held}."),
-                );
+                // A street is not a zone and the yard is the yard
+                // (`spoken_zone`): "Facility Access Road zone" named a city
+                // street (live drive into Abilene, 2026-09-24).
+                let message = match ff_core::sim::trip::spoken_zone(&zone_reason) {
+                    Some(zone) if zone.ends_with(" zone") => format!(
+                        "{} zone. Speed keeper holding {held}.",
+                        title_case(&zone_reason)
+                    ),
+                    _ => super::cruise::keeper_holding_line(&held, &zone_reason),
+                };
+                self.say_route_confirmation(ctx, &message);
                 return;
             }
         }

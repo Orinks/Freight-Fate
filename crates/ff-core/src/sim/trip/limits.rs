@@ -82,6 +82,13 @@ impl Trip {
                 self.ahead_text(ahead)
             );
         }
+        if super::streets::is_street_zone_reason(&zone.reason) {
+            return format!(
+                "In {}, speed limit {}.",
+                self.ahead_text(ahead),
+                self.speed_value(zone.limit_mph)
+            );
+        }
         if zone.reason == "heavy traffic" && zone.aadt.is_some() {
             return format!(
                 "In {}, {} ahead. Traffic slowing to {}.",
@@ -168,6 +175,11 @@ impl Trip {
                 "raised to"
             };
             return format!("Speed limit {verb} {}.", self.speed_value(zone.limit_mph));
+        }
+        if super::streets::is_street_zone_reason(&zone.reason) {
+            // The first street: just its limit. The line onto the streets
+            // has already named it, and a street is not a zone.
+            return format!("Speed limit {}.", self.speed_value(zone.limit_mph));
         }
         // Say you are *in* it, not that it is ahead; pairs with the "End of
         // ... zone" exit.
@@ -333,11 +345,15 @@ impl Trip {
                     .remove(&zone_key(&previous));
                 let resumed = self.corridor_limit_at(pos);
                 self.announced_speed_limit = Some(resumed);
-                let message = format!(
-                    "End of {} zone. Speed limit {}.",
-                    previous.reason,
-                    self.speed_value(resumed)
-                );
+                let message = if super::streets::is_street_zone_reason(&previous.reason) {
+                    format!("Speed limit {}.", self.speed_value(resumed))
+                } else {
+                    format!(
+                        "End of {} zone. Speed limit {}.",
+                        previous.reason,
+                        self.speed_value(resumed)
+                    )
+                };
                 self.emit(
                     TripEventKind::ZoneExit,
                     SpokenMessage::new(message),

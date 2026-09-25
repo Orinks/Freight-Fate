@@ -163,3 +163,34 @@ fn test_a_truck_stops_streets_give_the_highway_back_at_the_lot() {
         harness.transcript_text()
     );
 }
+
+#[test]
+fn test_a_truck_stops_streets_are_off_in_1_9() {
+    // Owner decision, 2026-09-24: a stop's streets are off for 1.9, because
+    // most exits have a ramp end baked one way only (the Love's at Baird had
+    // streets eastbound and none westbound). The bench stop has streets; a
+    // drive with the gate as shipped keeps its entrance at the ramp's end.
+    use freight_fate::states::driving_events::chains::STOP_STREETS_IN_PLAY;
+    let mut harness = start(Preset::None, Kind::FreeFlow5x);
+    assert!(harness.read_drive(|d| d.stop_chain_route(&d.trip.stops[0]).is_some()));
+    harness.with_drive(|d, _| d.stop_streets_on = STOP_STREETS_IN_PLAY);
+    assert!(harness.read_drive(|d| d.stop_chain_route(&d.trip.stops[0]).is_none()));
+    let mut at_the_end = false;
+    for _ in 0..(30 * 60 * 6) {
+        frame_plain(&mut harness);
+        if harness.read_drive(|d| d.stop_chain.is_some()) {
+            break;
+        }
+        if harness.read_drive(|d| d.ramp_mi.is_some() && d.ramp_terminal_done) {
+            at_the_end = true;
+            break;
+        }
+    }
+    for _ in 0..30 {
+        frame_plain(&mut harness);
+    }
+    let heard = harness.transcript_text();
+    assert!(at_the_end, "{heard}");
+    assert!(harness.read_drive(|d| d.stop_chain.is_none()), "{heard}");
+    assert!(!heard.contains("Off the ramp"), "{heard}");
+}

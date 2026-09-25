@@ -491,6 +491,9 @@ pub struct DrivingState {
     // The live street signal's (red, green) seconds; None at a ramp end,
     // which keeps its own timing profile. It cycles on the trip's clock.
     pub street_light_split: Option<(f64, f64)>,
+    // Whether the streets play their lights and signs at all
+    // (`street_controls::STREET_CONTROLS_IN_PLAY`, off for 1.9).
+    pub street_controls_on: bool,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,
@@ -515,6 +518,9 @@ pub struct DrivingState {
     // right now (`begin_stop_chain`); the highway waits in `highway_trip`.
     pub stop_chain: Option<RoadStop>,
     pub stop_chain_end_said: bool,
+    // Whether a road stop's streets are driven at all
+    // (`chains::STOP_STREETS_IN_PLAY`, off for 1.9).
+    pub stop_streets_on: bool,
     pub highway_trip: Option<Trip>,
     // Departure chain: the mirror. A loaded run out of a chain-capable
     // origin facility starts on its streets and merges onto the highway.
