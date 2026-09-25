@@ -7,7 +7,7 @@
 > with curve nav), (4) the engine-ring spectra rebuild, and (5) the
 > NPR translator radio batch. Nothing else: every other unchecked
 > FEATURE bullet below targets the `feat/career-2.0` line, except the
-> explicitly scoped 1.10 work below (2.0 worktree
+> explicitly scoped 2.0 work below (2.0 worktree
 > `.claude/worktrees/career-2.0`, created 2026-08-18; the `C:/dev/ff-2.0`
 > path this note used to name never existed). The driving school stays
 > gated off 1.9 (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be
@@ -17,7 +17,7 @@
 > On September 11, the owner approved five corrections to existing 1.9 systems:
 > commercial bobtail duty, braking estimates, component service limits, fuel
 > weight, and reachable HOS rest stops. The weekly HOS cycle and full personal
-> conveyance controls remain in the 1.10 plan.
+> conveyance controls remain in the 2.0 plan.
 
 > Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
@@ -34,7 +34,7 @@ what stands between here and 1.9.0, and
 [Found along the way](#found-along-the-way-not-blocking-190), open work
 that does not block it. The [release gate record](#release-gate-record)
 keeps the cutover checklist, the closed blockers and the owner decisions.
-The [1.10 plan](#110-planned----the-working-week-and-home) follows it.
+The [2.0 plan](#20-planned----the-working-week-and-home) follows it.
 The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
 bookmarks usable.
@@ -135,24 +135,9 @@ Costs the drive (found 2026-09-24):
       so those exits keep old ramp data and get no ramp terminal. Re-derive
       their interchanges (PR #232).
 
-World data:
+World data (the rest of the 1.9 world-data list moved to
+[2.0](#world-data-deferred-from-19) on 2026-09-25):
 
-- [ ] 995 sourced facility endpoints are not freight sites; the owner
-      decides on unnamed warehouses ([record](#release-gate-record)).
-- [ ] Two facility endpoints reached only over miles of private road want
-      an endpoint fix ([record](#release-gate-record)).
-- [ ] Wholesale and trade sites are refused as retail
-      ([September 11](#september-11-trucking-corrections)).
-- [ ] 196 legs have no sleep stop a loaded truck can use
-      ([September 18](#september-18-a-nights-parking-on-every-road)).
-- [ ] Rest areas are stored for both directions, so a pair is announced
-      twice within a mile ([September 18](#september-18-a-nights-parking-on-every-road)).
-- [ ] Chain truck stops' mile markers are loose
-      ([September 17](#september-17-truck-stops-listed-twice)).
-- [ ] Truck stops whose ramp control is still seeded
-      ([September 17](#september-17-truck-stops-listed-twice)).
-- [ ] Where the state scale houses are
-      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
 - [ ] The Flying J listed at exit 286A belongs on an I-20 Abilene leg
       ([September 23](#september-23-agent-drive-into-abilene)).
 
@@ -188,29 +173,9 @@ drive. New findings land here by default; the owner can promote any of them
 into the release gate. Details stay in the linked dated sections, marked
 "(Found along the way)".
 
-- [ ] Per-exit ramp grade: past the deceleration lane a ramp is assumed
-      level ([September 24](#september-24-realistic-interstate-exit)).
-- [ ] Price curve signs by the MUTCD's ball-bank criteria, once the bake's
-      minimum radii are re-measured
-      ([September 24](#september-24-realistic-interstate-exit)).
-- [ ] Catch an axle over while the gross is legal: needs load placement and
-      an axle check at the scale house
-      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
-- [ ] 234 travel centers have no mapped CAT Scale within 0.25 mi; check
-      them against CAT's locator
-      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
-- [ ] Check the street signal numbers against the Signal Timing Manual 2nd
-      ed. (NCHRP 812), whose text could not be fetched (PR #232).
-- [ ] Street controls on the way out: a departure chain drops the signals
-      and signs, which face the inbound truck (PR #232).
-- [ ] Gate and dock are one point, where a real arrival checks in, drives
-      the yard and backs into a door. The owner has not decided; not to be
-      built unasked (PR #232).
-- [ ] 3,630 road stops have no decided exit, so no street chain (PR #232).
-- [ ] 394 older facility chains still carry no street detail (PR #232).
-- [ ] 995 streets with an OSM speed tag on under half their miles take the
-      statutory fill for the whole street; splitting them needs a
-      per-stretch limit (PR #232).
+Everything found before 2026-09-25 moved to
+[2.0](#found-along-the-way-in-19-moved-to-20) that day; the list is empty
+until the next finding.
 
 ### Release gate record
 
@@ -849,7 +814,7 @@ its status or release decision.
       board here is thin (few loads, poor pay, or half the freight of a market
       in range), deadhead paid and timed as part of the assignment, driven as
       one pickup drive that resumes from a save. The one-in-nine empty
-      reposition is gone. Home-time relays wait for the 1.10 home terminal.
+      reposition is gone. Home-time relays wait for the 2.0 home terminal.
 - [x] The agent server's `scenario` tool stages the sandbox career in any
       situation; the sandbox turns every live feed on. Driven live: Tonopah,
       relayed Las Vegas load assigned and accepted.
@@ -1417,7 +1382,7 @@ against.
       Los Angeles "under investigation" since June. No state's feed is
       fetched twice at once any more.
 - The keyed feeds (Colorado and the other states that want a registered
-  key, and EIA fuel prices) moved to the 1.10 section, under "Deferred from
+  key, and EIA fuel prices) moved to the 2.0 section, under "Deferred from
   1.9: live feeds that need a key".
 - [x] The National Highway System and FHWA toll facility datasets were
       checked and left: the route graph already carries truck-restricted
@@ -1853,7 +1818,7 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       stop's exit, Space ends with that exit and its distance and U leads with
       it; neither is spoken unasked, and both drop it on the ramp.
 
-## 1.10 planned -- the working week and home
+## 2.0 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
 countdown into the system that shapes a driver's week, and the home
@@ -1862,7 +1827,7 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [ ] **70-hour/8-day cycle with the 34-hour restart.** A rolling on-duty
       ledger on `HosClock`, spoken through the existing ELD status line;
       restarts at the home terminal are free and full, road restarts cost
-      motel money and comfort. The 1.10 centerpiece.
+      motel money and comfort. The 2.0 centerpiece.
 - [ ] **Home terminal persisted and consequential.** `home_terminal_city`
       on the profile (old saves default to the current city with a
       one-time spoken note), ELD readouts in home-terminal time,
@@ -1946,6 +1911,79 @@ onto exit signalling.
       different reason -- the edge ladder took its job -- so it is a
       deletion, not a wiring job.
 
+
+### Street traffic controls
+
+The street signals and signs baked for 1.9 are switched off for the 1.9
+release (`fix/street-lights-live`); the timing work is parked on
+`feat/street-lights-2-0`. Detail in
+[September 24](#september-24-realistic-interstate-exit).
+
+- [ ] **Turn street traffic controls back on.** Lights and signs on the
+      approach chains play again once the items below hold up on a drive.
+- [ ] **Arterial progression.** Signals along one street share a cycle
+      and are offset for its posted limit, so a truck at the limit meets
+      greens.
+- [ ] **Coast to green.** The speed keeper eases off ahead of a red that
+      turns green before the bar, instead of stopping and starting.
+- [ ] **Pedestrian signals.** Walk phases at the mapped crossings, with
+      the extra clearance they add to the cycle.
+- [ ] **The light speech.** Approach, change and bar lines on the event
+      channel: brief, no line that repeats what the driver knows.
+- [ ] **Check the timing against the Signal Timing Manual 2nd ed. (NCHRP
+      812).** Its text could not be fetched; the cycle, splits and band
+      come from FHWA-HOP-08-024 and TTI 0-6402-P1 (PR #232).
+
+### World data deferred from 1.9
+
+Moved out of the 1.9 release gate on 2026-09-25: none of these makes the
+truck do the wrong thing on a drive.
+
+- [ ] **995 sourced facility endpoints are unnamed.** Plan: take OSM
+      buildings over 500 m2 and name them from Overture Places keyed by
+      GERS id ([record](#release-gate-record)).
+- [ ] **196 legs have no sleep stop a loaded truck can use**
+      ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] **Where the state scale houses are**
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] **Chain truck stops' mile markers are loose**
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] **Truck stops whose ramp control is still seeded**
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] **Rest areas are stored for both directions**, so a pair is
+      announced twice within a mile
+      ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] **Wholesale and trade sites are refused as retail**
+      ([September 11](#september-11-trucking-corrections)).
+- [ ] **Two facility endpoints reached only over miles of private road**
+      want an endpoint fix ([record](#release-gate-record)).
+
+### Found along the way in 1.9, moved to 2.0
+
+Open work found during the 1.9 gate that does not cost the drive, moved
+here 2026-09-25. Details stay in the linked dated sections.
+
+- [ ] Per-exit ramp grade: past the deceleration lane a ramp is assumed
+      level ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Price curve signs by the MUTCD's ball-bank criteria, once the bake's
+      minimum radii are re-measured
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Catch an axle over while the gross is legal: needs load placement and
+      an axle check at the scale house
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] 234 travel centers have no mapped CAT Scale within 0.25 mi; check
+      them against CAT's locator
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] Street controls on the way out: a departure chain drops the signals
+      and signs, which face the inbound truck (PR #232).
+- [ ] Gate and dock are one point, where a real arrival checks in, drives
+      the yard and backs into a door. The owner has not decided; not to be
+      built unasked (PR #232).
+- [ ] 3,630 road stops have no decided exit, so no street chain (PR #232).
+- [ ] 394 older facility chains still carry no street detail (PR #232).
+- [ ] 995 streets with an OSM speed tag on under half their miles take the
+      statutory fill for the whole street; splitting them needs a
+      per-stretch limit (PR #232).
 
 ### Lanes and maneuvering
 

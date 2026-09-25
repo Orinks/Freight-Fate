@@ -2592,7 +2592,7 @@ repository root; Markdown links are relative to this document.
       measurably sparser than a busy freeway at the hour it is quieter. The
       ORDER is real; the absolute COUNT still is not, because the bubble
       caps at `MAX_BUBBLE_VEHICLES` (~5/mile) while a median road at peak
-      wants thirteen in your direction. Lifting that cap is 1.10 work with a
+      wants thirteen in your direction. Lifting that cap is 2.0 work with a
       performance question attached.
 
 - [ ] **Congestion queue re-pacing when the clock moves the zone.** The
