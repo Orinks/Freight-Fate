@@ -17,6 +17,8 @@
 
 - **Country, classic rock, blues, and Night Line stations play new songs.**
 
+- **The radio has additional songs, station IDs and ads.**
+
 - **Two new achievements, both hidden.** One is earned at the wheel and one only on a particular day of the year.
 
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.

@@ -80,7 +80,7 @@ ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # environment at deploy time, so setting it takes a redeploy to have any
 # effect. The sha256 below is what actually gates the download either way.
 DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
-DEFAULT_MUSIC_SHA256 = "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
+DEFAULT_MUSIC_SHA256 = "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:

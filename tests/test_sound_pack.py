@@ -158,6 +158,8 @@ def test_committed_pack_has_freight_fate_header():
 def test_committed_music_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
+    # Repacked 2026-09-25: eight jazz songs, ten station IDs and three
+    # carrier hiring ads, preserving all 405 prior entries.
     # Repacked 2026-09-19: 25 selected songs, preserving all 380 prior entries.
     # Repacked 2026-09-13 for two owner-supplied instrumentals, D-Major
     # Medley (a menu bed) and From Bossa to Blues (a day drive bed):
@@ -174,10 +176,10 @@ def test_committed_music_pack_has_freight_fate_header():
     # Split out of sounds.pak on 2026-08-14 alongside the radio
     # station-identity batch: 356 entries, the music/ subtree plus the new
     # station jingles and songs.
-    assert len(pack_bytes) == 367_493_532
+    assert len(pack_bytes) == 392_392_427
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
+        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
     )
 
 
