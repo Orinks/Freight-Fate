@@ -153,6 +153,16 @@ impl DrivingState {
                 } else {
                     !self.yield_gap_clear()
                 };
+                // "Stopped" is the sign's word: at the sign the hold is the
+                // stop. A yield is held from the moment the truck is under
+                // the stop speed, still creeping, and "Stopped at the yield"
+                // was heard at 4 miles per hour (agent drive, exit 255,
+                // 2026-09-24). "At the yield" is true at any creep.
+                let at = if self.ramp_control == "stop" {
+                    "Stopped at"
+                } else {
+                    "At"
+                };
                 if blocked {
                     if !self.ramp_waiting_at_sign {
                         self.ramp_waiting_at_sign = true;
@@ -160,7 +170,7 @@ impl DrivingState {
                         self.say_terminal_hold(
                             ctx,
                             &format!(
-                                "Stopped at the {noun}. {what}; assistance is holding for your gap."
+                                "{at} the {noun}. {what}; assistance is holding for your gap."
                             ),
                             SpeechCategory::Navigation,
                         );
@@ -171,7 +181,7 @@ impl DrivingState {
                 let lead = if self.ramp_waiting_at_sign {
                     "Gap in traffic.".to_string()
                 } else {
-                    format!("Stopped at the {noun}.")
+                    format!("{at} the {noun}.")
                 };
                 self.ramp_waiting_at_sign = false;
                 let message = self.terminal_release_text(ctx, &lead, true);
@@ -361,12 +371,25 @@ impl DrivingState {
     /// which a car clears and a loaded tractor-semitrailer pulling away from
     /// the line does not: it needs about ten.
     pub fn yield_gap_clear(&self) -> bool {
-        let Some(bubble) = self.cross_bubble.as_ref() else {
-            return true;
-        };
+        self.yield_blocker().is_none()
+    }
+
+    /// The vehicle that closes a yield's gap for this truck, if any.
+    fn yield_blocker(&self) -> Option<&CrossVehicle> {
+        let bubble = self.cross_bubble.as_ref()?;
         let roll_mph = self.trip.truck.speed_mph().min(YIELD_ROLL_MPH - 3.0);
         let (enter, exit) = self.yield_crossing_s(roll_mph);
-        bubble.conflict_between(enter, exit).is_none()
+        bubble.conflict_between(enter, exit)
+    }
+
+    /// The vehicle a stop at this terminal is waiting on: the one that shut
+    /// the gap the release is waiting for, by the same test.
+    fn terminal_blocker(&self) -> Option<&CrossVehicle> {
+        if self.ramp_control == "stop" {
+            self.cross_bubble.as_ref()?.blocker()
+        } else {
+            self.yield_blocker()
+        }
     }
 
     /// What a truck rolling a yield meets as its front reaches the crossroad:
@@ -402,12 +425,14 @@ impl DrivingState {
     }
 
     /// "A semi crossing from the left", or "Cross traffic" with nothing near.
+    ///
+    /// Names the vehicle the wait is FOR. It used to name whichever vehicle
+    /// was next to reach the crossing inside eight seconds, which skips one
+    /// already in the crossroad: "A car crossing from the left" was said while
+    /// the car and pickup actually holding the truck crossed in the right ear
+    /// (agent drive, yield at exit 255, 2026-09-24).
     fn crossing_description(&self) -> String {
-        match self
-            .cross_bubble
-            .as_ref()
-            .and_then(|bubble| bubble.approaching(8.0))
-        {
+        match self.terminal_blocker() {
             Some(nearest) => format!(
                 "A {} crossing from the {}",
                 nearest.vehicle_class, nearest.from_side
@@ -725,7 +750,7 @@ impl DrivingState {
                     let what = self.crossing_description();
                     self.say_terminal_hold(
                         ctx,
-                        &format!("Stopped at the {noun}. {what}; wait for your gap."),
+                        &format!("At the {noun}. {what}; wait for your gap."),
                         SpeechCategory::Navigation,
                     );
                 }

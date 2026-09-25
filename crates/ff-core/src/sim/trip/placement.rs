@@ -155,6 +155,12 @@ impl Trip {
     pub fn build_navigation_cues(&self) -> Vec<NavigationCue> {
         let mut cues: Vec<NavigationCue> = Vec::new();
         let facility_route = self.is_facility_approach_route();
+        let mainline_cities: Vec<String> = self
+            .route
+            .cities
+            .iter()
+            .map(|c| self.world.spoken_city(c, Some(false)))
+            .collect();
         for (i, (start, leg)) in self
             .leg_starts
             .iter()
@@ -325,13 +331,23 @@ impl Trip {
                 ));
             }
             for ix in leg.interchanges() {
+                // Destinations the leg's other exits sign too are the
+                // mainline's own promise, not this exit's: on I-35 south the
+                // merge put "Dallas" on exit 31B while three other exits
+                // signed it for the road the driver is already on.
+                let siblings: Vec<String> = leg
+                    .interchanges()
+                    .iter()
+                    .filter(|other| other.at_mi != ix.at_mi)
+                    .flat_map(|other| other.destinations.iter().cloned())
+                    .collect();
                 let offset = stop_offset_for_direction(ix.at_mi, leg.miles, forward);
                 cues.push(NavigationCue::new(
                     &format!("interchange:{i}:{}:{}", py_str_float(ix.at_mi), ix.exit_ref),
                     "interchange",
                     start + offset,
-                    &ix.spoken_phrase(),
-                    &ix.near_phrase(),
+                    &ix.spoken_phrase_on(&leg.highway, &mainline_cities, &siblings),
+                    &ix.near_phrase_on(&leg.highway, &mainline_cities, &siblings),
                 ));
             }
             for stop in &leg.stops {

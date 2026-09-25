@@ -9,6 +9,18 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_stops::assist_full_decel_mps2;
 
+/// Which case of the grade preview produced the bias, so the cue can say
+/// what the road is doing rather than one vague "the road ahead" line.
+/// `EasingForDescent` carries the coming downgrade as a positive grade
+/// fraction (0.05 is five percent).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PccReason {
+    None,
+    Building,
+    EasingForDescent(f64),
+    HoldingOverCrest,
+}
+
 impl DrivingState {
     /// Seconds of room adaptive cruise leaves to the vehicle ahead.
     ///
@@ -242,14 +254,19 @@ impl DrivingState {
     /// added just before a downgrade comes straight back out through the
     /// retarder and the drums, which in this truck means real heat and real
     /// air -- so the preview shaves instead of adding.
-    pub fn predictive_cruise_bias(&self, ctx: &GameContext, target_mph: f64) -> f64 {
+    /// The bias and which preview case produced it: `Building` banks
+    /// momentum for a climb, `EasingForDescent` shaves before a downgrade
+    /// cruise would otherwise brake away, `HoldingOverCrest` stops reaching
+    /// for speed the summit hands back. `None` means flat reading or a
+    /// nearer owner of the speed.
+    pub fn predictive_cruise_bias(&self, ctx: &GameContext, target_mph: f64) -> (f64, PccReason) {
         if !ctx.settings.predictive_cruise {
-            return 0.0;
+            return (0.0, PccReason::None);
         }
         // Following a lead, capped for a ramp or a bend, or already fighting a
         // lower posted limit: something closer than the horizon owns the speed.
         if self.acc_following || self.cruise_exit_mph.is_some() {
-            return 0.0;
+            return (0.0, PccReason::None);
         }
         let (climb_ahead, descent_ahead) = self.grade_extremes_ahead();
         let here = self.trip.truck.grade;
@@ -259,7 +276,10 @@ impl DrivingState {
             // Shave in proportion to how steep, so the truck rolls onto the
             // grade at or under the set speed instead of arriving over it and
             // spending the retarder to get back down.
-            return -PCC_DESCENT_SHAVE_MPH.min(PCC_DESCENT_SHAVE_MPH * (-descent_ahead / 0.05));
+            return (
+                -PCC_DESCENT_SHAVE_MPH.min(PCC_DESCENT_SHAVE_MPH * (-descent_ahead / 0.05)),
+                PccReason::EasingForDescent(-descent_ahead),
+            );
         }
         if here >= PCC_GRADE_MIN && self.grade_preview(PCC_CREST_WINDOW_MI) < PCC_GRADE_MIN {
             // On a pull whose top is inside the crest window. Stop reaching for
@@ -274,17 +294,23 @@ impl DrivingState {
             // 2026-07-25) -- the allowance is a ceiling on the giveaway, not
             // the giveaway itself.
             if speed < target_mph - 0.5 {
-                return (-PCC_CREST_SAG_MPH).max(speed - target_mph);
+                return (
+                    (-PCC_CREST_SAG_MPH).max(speed - target_mph),
+                    PccReason::HoldingOverCrest,
+                );
             }
-            return 0.0;
+            return (0.0, PccReason::HoldingOverCrest);
         }
         if here < PCC_GRADE_MIN && climb_ahead >= PCC_GRADE_MIN {
             // Level ground now, a pull inside the preview: bank what the grade
             // is about to take. Scaled by the climb, capped so cruise never
             // reads as running away with the truck.
-            return PCC_PREBUILD_MPH.min(PCC_PREBUILD_MPH * (climb_ahead / 0.04));
+            return (
+                PCC_PREBUILD_MPH.min(PCC_PREBUILD_MPH * (climb_ahead / 0.04)),
+                PccReason::Building,
+            );
         }
-        0.0
+        (0.0, PccReason::None)
     }
 
     /// Name what the preview is doing, once per hill and never terse.
@@ -293,35 +319,55 @@ impl DrivingState {
     /// broken to a driver who cannot see the road ahead. Naming it once turns
     /// the same behavior into the system working. It is information, not
     /// safety, so terse speech keeps it.
-    pub fn say_predictive_cruise(&mut self, ctx: &mut GameContext, dt: f64, bias: f64) {
+    /// `delta` is the change the target actually took after the caps
+    /// clamped it: a shave that the posted cap neutralised is not "easing"
+    /// and says nothing. `reason` names which preview case produced it.
+    pub fn say_predictive_cruise(
+        &mut self,
+        ctx: &mut GameContext,
+        dt: f64,
+        delta: f64,
+        reason: PccReason,
+    ) {
         self.pcc_cue_s = 0.0f64.max(self.pcc_cue_s - dt);
-        let phase = if bias > 0.5 {
-            "building"
-        } else if bias < -0.5 {
-            "easing"
-        } else {
-            ""
+        // Silent phases still track, so the next audible change speaks; a
+        // bias the caps neutralised is its own phase so the cue fires once
+        // the cap lifts. The crest hold eases nothing -- it just stops
+        // chasing -- so it stays silent (silence over redundant speech).
+        let (phase, speaks) = match reason {
+            PccReason::Building if delta > 0.5 => ("building", true),
+            PccReason::EasingForDescent(_) if delta <= -0.5 => ("easing", true),
+            PccReason::HoldingOverCrest => ("holding", false),
+            PccReason::EasingForDescent(_) => ("easing-capped", false),
+            PccReason::Building => ("building-capped", false),
+            PccReason::None => ("", false),
         };
         if phase == self.pcc_phase {
             return;
         }
         self.pcc_phase = phase.to_string();
-        if phase.is_empty() || self.terse_speech(ctx) || self.pcc_cue_s > 0.0 {
+        if !speaks || self.terse_speech(ctx) || self.pcc_cue_s > 0.0 {
             return;
         }
         self.pcc_cue_s = PCC_CUE_COOLDOWN_S;
-        let message = if phase == "building" {
-            // Name the number. "The grade ahead" reads as a steep one, and the
-            // G key -- which only calls a grade steep at three percent -- then
-            // answered that nothing steep was coming for fifteen miles, which
-            // is how a two percent pull looked like a bug (tester, 2026-08-15).
-            let (climb_ahead, _) = self.grade_extremes_ahead();
-            format!(
-                "Building speed for a {:.1} percent upgrade ahead.",
-                climb_ahead * 100.0
-            )
-        } else {
-            "Easing off for the road ahead.".to_string()
+        let message = match reason {
+            PccReason::Building => {
+                // Name the number. "The grade ahead" reads as a steep one, and
+                // the G key -- which only calls a grade steep at three percent
+                // -- then answered that nothing steep was coming for fifteen
+                // miles, which is how a two percent pull looked like a bug
+                // (tester, 2026-08-15).
+                let (climb_ahead, _) = self.grade_extremes_ahead();
+                format!(
+                    "Building speed for a {:.1} percent upgrade ahead.",
+                    climb_ahead * 100.0
+                )
+            }
+            PccReason::EasingForDescent(descent_pct) => format!(
+                "Easing off for a {:.1} percent downgrade ahead.",
+                descent_pct * 100.0
+            ),
+            _ => return,
         };
         let mut opts = SayEvent::queued();
         opts.category = Some(SpeechCategory::Confirmation);
@@ -752,11 +798,16 @@ impl DrivingState {
         // The preview goes on last so it can only ever move the number the
         // caps already agreed on, and it is clamped against the posted cap:
         // banking momentum for a hill must never bank it past the limit.
-        let bias = self.predictive_cruise_bias(ctx, target_mph);
-        self.say_predictive_cruise(ctx, dt, bias);
+        let (bias, reason) = self.predictive_cruise_bias(ctx, target_mph);
+        // The cue hears the clamped delta, not the raw bias: a shave the cap
+        // cancelled is not easing and stays silent.
+        let mut delta = 0.0;
         if bias != 0.0 {
-            target_mph = CRUISE_MIN_MPH.max((target_mph + bias).min(cap_mph));
+            let applied = CRUISE_MIN_MPH.max((target_mph + bias).min(cap_mph));
+            delta = applied - target_mph;
+            target_mph = applied;
         }
+        self.say_predictive_cruise(ctx, dt, delta, reason);
         let context = self.trip.traffic_context();
         let mut following = false;
         if let Some(context) = context.as_ref() {

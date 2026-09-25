@@ -184,7 +184,10 @@ impl DriverAppScreenState {
                         "Observation age: {}.",
                         d.trip.weather.observation_age_value()
                     ),
-                    format!("Conditions: {}", d.trip.weather.source_conditions(imperial)),
+                    format!(
+                        "Conditions: {}.",
+                        d.trip.weather.source_conditions(imperial)
+                    ),
                     format!(
                         "Safe speed guidance: about {}.",
                         ctx.settings
