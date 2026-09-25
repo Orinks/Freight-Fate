@@ -171,7 +171,9 @@ The owner's:
       ([above](#19-in-flight-featcareer-19)).
 - [ ] Listening pass and a longer drive over wear thresholds and
       interrupted warnings ([September 11](#september-11-trucking-corrections)).
-- [ ] Verify the OneCore leak with Prism's author
+- [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
+      workaround (enumerate voices only on a voice change) is the fix; any
+      upstream report stays the owner's call
       ([September 12](#september-12-long-sessions-and-speech)).
 - [ ] Download the eight remaining jazz songs and 19 station jingles from
       Suno, then integrate them ([September 13](#september-13-driver-directory)).
@@ -1306,8 +1308,9 @@ its status or release decision.
       a session with no screen reader running, where OneCore is the automatic
       main voice and the probe re-acquired it on every pass. 1.8 never
       enumerated outside the settings menu.
-- (Release gate) Owner verifies the OneCore leak with Prism's author before anything
-      goes upstream; no issue or PR from this side (owner rule 2026-09-12).
+- [x] Closed for 1.9.0 by owner ruling 2026-09-24: the game-side workaround
+      is the fix. Before anything goes upstream the owner verifies the
+      OneCore leak with Prism's author; no issue or PR from this side (owner rule 2026-09-12).
       Hand-off is the probe, which left the tree with the in-tree Prism
       crates on 2026-09-21: `git show f9c06a7f:crates/prism/examples/handle_leak_probe.rs`.
       Pinned 2026-09-12: the leak is in FREEING an
