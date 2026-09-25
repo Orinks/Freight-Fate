@@ -177,22 +177,6 @@ impl Trip {
         } else {
             self.exit_approach_release_s = (self.exit_approach_release_s - dt).max(0.0);
         }
-        // Read far enough up the road that the clock is real by the crest.
-        let ease_ahead_mi =
-            self.truck.speed_mph().abs() * self.time_scale.max(1.0) * GRADE_CLOCK_EASE_S / 3600.0;
-        let grade = self
-            .grade_at(self.position_mi)
-            .abs()
-            .max(self.grade_at(self.position_mi + ease_ahead_mi).abs());
-        let on_grade =
-            grade >= GRADE_CLOCK_MIN || (self.grade_clock > 0.0 && grade >= GRADE_CLOCK_RELEASE);
-        let ease = dt.max(0.0) / GRADE_CLOCK_EASE_S;
-        self.grade_clock = if on_grade {
-            (self.grade_clock + ease).min(1.0)
-        } else {
-            (self.grade_clock - ease).max(0.0)
-        };
-
         // Night, fuel, ELD/HOS stay on drive time (game_min). Weather color
         // and the sitting budget chatter reads tick on real dt instead, so
         // 20x does not spawn 20x pokes.

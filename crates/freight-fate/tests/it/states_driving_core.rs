@@ -250,6 +250,30 @@ fn sixty_frames_of_the_drive_run_without_panicking() {
     assert!(!drive.parked_entry_status().is_empty());
 }
 
+/// flight, 2026-09-22: descend in Real time to gain speed, switch back to
+/// Standard, and coast for miles on no engine. The pause menu's pacing
+/// change now waits until the truck is stopped, so a hill's speed is spent
+/// on the clock that gave it.
+#[test]
+fn a_pacing_change_while_rolling_waits_for_the_truck_to_stop() {
+    let mut app = TestApp::new();
+    app.ctx.settings.time_scale = 1.0;
+    let mut drive = a_real_drive(&mut app);
+    drive.enter(&mut app.ctx);
+    drive.trip.truck.velocity_mps = 25.0;
+
+    app.ctx.settings.time_scale = 20.0;
+    for _ in 0..30 {
+        drive.update(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(drive.trip.truck.speed_mph() > 1.0);
+    assert_eq!(drive.trip.time_scale, 1.0, "rolling keeps the old pacing");
+
+    drive.trip.truck.velocity_mps = 0.0;
+    drive.update(&mut app.ctx, 1.0 / 60.0);
+    assert_eq!(drive.trip.time_scale, 20.0, "stopped takes the new pacing");
+}
+
 #[test]
 fn a_snapshot_round_trips_the_drive() {
     let mut app = TestApp::new();

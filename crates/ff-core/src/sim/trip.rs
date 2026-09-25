@@ -322,9 +322,6 @@ pub struct Trip {
     /// to a corner's brake point. Set every frame by the driving state; 0
     /// means the trip's own pacing.
     pub turn_clock: f64,
-    /// 0 to 1: how far the clock has eased toward real time for a steep
-    /// grade ([`GRADE_CLOCK_MIN`]). Advanced by [`Trip::update`].
-    pub grade_clock: f64,
     /// True while curve assistance is still taking speed off for a bend.
     pub curve_shed_active: bool,
     /// How the lane work is shared, set by the game from the driver's lane
@@ -495,7 +492,6 @@ impl Trip {
             pull_over_active: false,
             controlled_turn: false,
             turn_clock: 0.0,
-            grade_clock: 0.0,
             curve_shed_active: false,
             lane_steers: None,
             exit_approach_mi: None,
@@ -640,10 +636,9 @@ impl Trip {
         let ramp = (self.truck.speed_mph() / FULL_COMPRESSION_MPH).min(1.0);
         let paced = floor + (full - floor) * ramp;
         // Easing into a corner's brake point, the mirror of the exit release
-        // above, or onto a steep grade: the clock slides down to real time
-        // rather than dropping to it.
+        // above: the clock slides down to real time rather than dropping to it.
         let real = full.min(1.0);
-        let toward_real = self.turn_clock.max(self.grade_clock).clamp(0.0, 1.0);
+        let toward_real = self.turn_clock.clamp(0.0, 1.0);
         paced + (real - paced) * toward_real
     }
 

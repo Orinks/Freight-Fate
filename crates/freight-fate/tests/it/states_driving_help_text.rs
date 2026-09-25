@@ -176,6 +176,7 @@ fn test_how_to_play_documents_new_gameplay_systems() {
         "standard keeps balanced timing and consequences",
         "real time keeps standard's pressure and runs the driving clock",
         "changed mid-drive from the pause menu",
+        "the new pacing starts when the truck next stops",
         "real violations keep their normal consequences",
         "adaptive cruise",
         "three second clear-weather gap",

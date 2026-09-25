@@ -59,7 +59,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Relaxed gives more time to respond, wider hazard windows, gentler damage and fatigue, and calmer speech.",
             "Standard keeps balanced timing and consequences and moves the clock twice as fast.",
             "Real time keeps Standard's pressure and runs the driving clock at the speed of a real clock, lined up with your computer's date and time. Delivery time remaining and hours of service do not move.",
-            "Any of the three can be changed mid-drive from the pause menu.",
+            "Any of the three can be changed mid-drive from the pause menu; the new pacing starts when the truck next stops.",
             "Hours of service: Realistic uses the full driving, duty, break, and rest rules. Relaxed gives longer limits and rarer road hazards. Real violations keep their normal consequences in either mode.",
             "Lane keeping sets how much of the lane-holding work the truck does.",
             "Full keeps the truck centered and takes your exits, including the destination exit, with no signal and no exit lane.",
