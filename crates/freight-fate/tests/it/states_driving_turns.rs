@@ -462,6 +462,76 @@ fn test_a_turn_inside_the_last_ones_tail_is_called_before_it() {
     );
 }
 
+/// Run the route's own street calls for this spot and hand them to the drive.
+fn route_calls(d: &mut DrivingState, app: &mut TestApp) {
+    d.trip.check_navigation_cues();
+    for event in std::mem::take(&mut d.trip.events) {
+        d.handle_trip_event(&mut app.ctx, &event);
+    }
+}
+
+#[test]
+fn test_the_next_turn_waits_until_the_truck_is_round_the_last() {
+    // The chime for the corner being taken and the call for the next corner
+    // went out on the same tick, so "Turn right onto North Freeway Road" was
+    // heard over the left-turn chime, four turns out of four (agent drive,
+    // Tucson streets, 2026-09-24).
+    let mut app = TestApp::new();
+    let audio = app.record_audio();
+    let mut d = a_drive(&mut app);
+    street_chain(&mut d, 1.0, 0.06);
+    assert!(d.trip.truck.trailer_attached);
+    let corners: Vec<_> = d
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| is_judged_turn(cue))
+        .cloned()
+        .collect();
+    let (first, second) = (corners[0].clone(), corners[1].clone());
+    // The first corner, called by the route and approached at a crawl.
+    mph(&mut d, 8.0);
+    d.trip.position_mi = first.at_mi - 0.05;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    app.clear_speech();
+
+    // At the corner: its own chime, and not a word about the next one, from
+    // the route or from the corner's approach call.
+    d.trip.position_mi = first.at_mi + 0.001;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    let chimes = |audio: &freight_fate::app::testing::AudioLog| {
+        audio
+            .borrow()
+            .played
+            .iter()
+            .filter(|(key, _, _)| key.starts_with("events/turn_"))
+            .map(|(key, _, _)| key.clone())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(chimes(&audio), vec!["events/turn_left".to_string()]);
+    mph(&mut d, 20.0); // over the next corner's speed, so it has a call owed
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        lines_with(&app, "West Sample Street").is_empty(),
+        "the next turn was called over this one's chime: {:?}",
+        app.event_lines()
+    );
+
+    // With the trailer round (a WB-67 is 73.5 feet), the next turn is called.
+    d.trip.position_mi = first.at_mi + 0.015;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        !lines_with(&app, "West Sample Street").is_empty(),
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(second.at_mi > d.trip.position_mi);
+}
+
 #[test]
 fn test_a_cold_arrival_at_the_turn_still_gets_its_window() {
     // A resumed save can reach the turn without ever hearing the approach.
@@ -1942,7 +2012,7 @@ fn test_route_status_on_a_street_chain_answers_with_the_gate() {
     app.clear_speech();
     d.speak_route_status(&mut app.ctx);
     let said = app.main_lines().last().expect("a route status").clone();
-    assert!(said.starts_with("on city streets, "));
+    assert!(said.starts_with("On city streets, "));
     assert!(said.contains(" to the gate at "));
 }
 

@@ -790,6 +790,34 @@ impl Trip {
             self.announced_navigation.insert(format!("{key}:advance"));
             self.announced_navigation.insert(format!("{key}:near"));
         }
+        // The restore path's latch: passed curves count as called, posts
+        // inside their watch were heard, pressures behind are old news, and
+        // the zone under the truck is entered -- without it the first frame
+        // spoke a fresh "traffic is backing up" ZoneEnter for the zone the
+        // truck was dropped into and awarded the jam achievement.
+        self.latch_passed_roadside();
+    }
+
+    /// After a staged drive sets the truck's speed, count as already called
+    /// any bend whose call window the truck was dropped inside of -- the
+    /// pacenote was "heard before the handoff". A bend the speed still
+    /// outruns keeps its call.
+    pub fn settle_calls_in_hand(&mut self) {
+        let speed = self.truck.speed_mph();
+        for cr in &self.curves {
+            let ahead = cr.start_mi - self.position_mi;
+            if ahead <= 0.0 {
+                continue;
+            }
+            let (call_above, target) = self.curve_call_mph(cr);
+            if speed > call_above && ahead <= Self::curve_pacenote_lead_mi(speed, target) {
+                self.announced_curves.insert(format!(
+                    "curve:{}:{}",
+                    crate::pyfmt::fmt_f(cr.start_mi, 3),
+                    cr.direction
+                ));
+            }
+        }
     }
 
     pub fn emit(
