@@ -557,13 +557,20 @@ pub struct DrivingState {
     pub cruise_trim: f64,       // integral trim on top of the grade feed-forward
     pub cruise_jake_stage: i32, // retarder stages cruise itself commanded
     pub cruise_jake_cooldown_s: f64, // quiet time between those stage steps
+    pub cruise_jake_reverse_s: f64, // ...and the longer one before a step back
+    pub cruise_jake_last_step: i32, // +1 raised, -1 lowered, 0 released
     pub cruise_snubbing: bool,  // a service-brake snub is in progress
     pub pcc_phase: String,      // what the grade preview is doing, for the cue
     pub pcc_cue_s: f64,         // quiet time between preview cues
     pub climb_cue_said: bool,   // cruise has already owned up to this pull
     pub climb_cue_s: f64,       // quiet time between hand-back cues
     pub climb_beaten_s: f64,    // how long the grade has genuinely been winning
-    pub descent_cue_s: f64,     // quiet time between descent-control cues
+    pub descent_said_mph: Option<f64>, // the descent-control number last spoken
+    // The safe descent speed of the hill under and just ahead of the truck
+    // (`refresh_descent_safe`), and the grade it was worked out for.
+    pub descent_safe_mph: Option<f64>,
+    pub descent_safe_key: Option<i64>,
+    pub descent_posted_cap_mph: Option<f64>, // the posted cap cruise keeps here
     // A trailer refused at the shipper: the yard swapped it, so the box
     // under the truck is sound and no scale house should say otherwise.
     pub trailer_refused: bool,
@@ -882,6 +889,8 @@ pub struct DrivingState {
     pub resume_target_mph: Option<f64>, // Shift+K brings this speed back
     pub auto_jake_hold_mph: Option<f64>, // speed auto mode holds
     pub auto_jake_cooldown_s: f64, // rate limit between stage steps
+    pub auto_jake_reverse_s: f64, // ...and the longer one before a step back
+    pub auto_jake_last_step: i32, // +1 raised, -1 lowered, 0 released
     pub shift_recover_t: f64, // 0->1 recovery progress after an automatic shift ends
     pub shift_hold_rpm: Option<f64>, // engine voice held here through a shift
     pub manual_engage_clunk_pending: bool, // a manual shift's second clunk, owed at engagement

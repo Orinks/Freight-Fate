@@ -155,6 +155,11 @@ Costs the drive (found 2026-09-24):
       frame one; the crest hold is silent and the descent line names its
       grade; "At the yield" while creeping; capitalised progress line;
       weather period (PR #242).
+- [x] Descent control held 77 and 85 on a 7 percent grade and let a
+      loaded truck run: it now holds a safe descent speed derived for the
+      truck and load, the retarder no longer hunts, and the G key gives a
+      pitch one length (PR #243;
+      [September 24](#september-24-descent-control-into-denver)).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -1893,6 +1898,67 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       first corner for 71 s (its words at the slowest modelled voice) while
       the truck drove the next two, 0.05 mile apart, and all three tones
       sounded together 0.2 mile on.
+
+### September 24 descent control into Denver
+
+Two live drives of I-70 east from the Eisenhower tunnel, a 76,000 lb truck on
+Balanced. Descent control said it was holding 85 (the set speed) and then 77
+on the 7 percent; the agent's run held 45 by its own words and ran to 55, the
+automatic upshifting on the downgrade; the retarder walked 3, 0, 2, 1, 2, 1
+inside half a minute; the G key called the 7 percent pitch "running 2 miles"
+and then "for another 10 miles". A bench of the owner's run reproduced it: 68
+to 72 mph down the 5.8 and the 7.0 on a tenth of the drums, the retarder never
+raised, drums past 300 C, the box cycling ninth and tenth at the retarder's
+rev ceiling.
+
+- [x] (Release gate) **A safe descent speed, derived.** `TruckState::safe_descent_mph`
+      runs the Grade Severity Rating System's rule (FHWA-RD-79-116, read) on
+      the truck's own heat model: the highest multiple of 5 mph (MUTCD
+      2B.13, read) at which the drums, holding what gravity leaves after
+      drag, rolling and full engine brake in the gear an automatic holds,
+      settle under GSRS's 500 F limit (read) or the shoes' own fade line.
+      Derived numbers for the default truck, set at the top of the steepest
+      grade inside the advisory's look-ahead:
+      40,000 lb none up to 10 percent; 60,000 lb 45 at 8, 30 at 10;
+      76,000 lb 65 at 5.8 and 6, 45 at 7, 30 at 8, 20 at 10;
+      80,000 lb 65 at 6, 30 at 7 and 8. Descent control at every level but
+      Off caps cruise there, raises full engine brake at once on such a
+      hill, snubs past the number, snubs to keep the retarder's gear short
+      of the protective upshift while a stage is on, keeps the snub through
+      a shift, and never fuels against the retarder. The box holds its gear
+      while descent control holds a grade, the way it does under a brake
+      application (no pre-select without a stage on), and a retarder
+      pre-select lands 100 rpm (assumed) under its ceiling. Past the held
+      gear's top, the revs 100 rpm under that ceiling, the retarder answers
+      as it would past the number. The bend sweep caught the first version
+      pumping: it pre-selected a bobtail down into sixth with no stage on,
+      and guarded a gear with no retarder in it on a snub every two seconds
+      (Siskiyou, Red Mountain, Salt River; up to 1.1 applications a bend,
+      now under 0.7). Over the number on the downgrade above a steep pitch, the
+      retarder goes to full before the drums join in; the bench had the
+      drums alone take the truck from 63 to 45 on the 2.4 percent above the
+      7.0. The same run now holds 60 to 65 down the 5.8 and 43 to 46 down
+      the 7.0, drums under 220 C, air at 100 psi or more, no upshift. D
+      names the number "for the grade".
+- [x] (Release gate) **The retarder no longer hunts.** Cruise steps a stage at a
+      time, drops one only when well under its number and never with a
+      steep pitch in sight, and waits 12 s (assumed) before stepping back
+      the other way; the J key's manager gets the same reversal time and
+      works to what descent control holds, not the set speed.
+- [x] (Release gate) **One length per grade.** The G key's "for another" reads the
+      same run as the grade look-ahead's "running".
+- [x] (Release gate) **"Descent control holding N" once per number,** with no
+      clock, and only for a number of descent control's own: the hill's,
+      Interactive's 55, or a brake's capture. A grade that needs none is held
+      at cruise's speed without a line; the same run said "holding 70" on a
+      65 road, the limit plus five.
+- [x] **Colorado's dead traffic feed is no longer fetched** (benched until
+      the 2.0 keyed-feeds item).
+- [ ] (2.0) **Two brake-heat lines.** The retarder comes up where the drums
+      alone would settle past fade (400 C), while the safe descent speed
+      works to GSRS's 260 C. On the 4.5 percent below the 7.0 the drums
+      alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
+      line, or show why two are right.
 
 ## 2.0 planned -- the working week and home
 

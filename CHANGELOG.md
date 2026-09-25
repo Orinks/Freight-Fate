@@ -155,6 +155,13 @@
 
 ### Fixed
 
+- **Descent control holds a steep downgrade at a safe speed for your load.** It slows before the steep part, holds the gear, and names the speed once.
+
+- **The engine brake no longer steps up and down every few seconds on a long descent.**
+
+- **The G key gives a steep grade one length.** On a two-mile pitch it no longer says ten miles once you are on it.
+
+- **D names a steep downgrade's safe speed for your truck and load.** You hear "for the grade" after the number.
 - **City streets are no longer called a facility access road zone.** A street keeps its own name, and the speed keeper just says its number.
 
 - **G no longer says "the next 0 miles" on the last streets to a gate.** It says nothing steep is ahead.

@@ -272,6 +272,7 @@ from the words, and synonyms cost them a re-read.
 | When the load is due | deadline | due time, drop time (the appointment is the named hour) | `Job.deadline_game_h` |
 | The retarder | engine brake; "jake" in short control feedback ("Jake on, stage two") | retarder | `TruckState.engine_brake_stage` |
 | A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
+| The speed this truck, at its weight, can hold a steep downgrade at without overheating its brakes ("Descent control holding 45 miles per hour." / D: "Safe speed 45 miles per hour for the grade.") | the number descent control holds; "safe speed ... for the grade" on D | weight-specific speed, grade speed, runaway speed, descent speed | `TruckState::safe_descent_mph`, `DrivingState::descent_safe_mph` |
 | A posted height restriction on the corridor | low bridge | low clearance, height limit, clearance restriction | `RouteRestriction.kind_label` |
 | A posted weight restriction on the corridor | weight limit | max weight, tonnage limit, weight restriction | `RouteRestriction.kind_label` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |

@@ -307,7 +307,23 @@ impl DrivingState {
     ///
     /// Sampled at the stride the baked grade segments use, so the answer is
     /// the run the road data actually has rather than an interpolation of it.
+    ///
+    /// The ONE length a steep grade has. The advisory, the G key's "running
+    /// 2 miles" for the grade ahead and its "for another" for the grade
+    /// underneath all read it here. The G key used to measure until the
+    /// road stopped going downhill at all, so one seven percent pitch was
+    /// "running 2 miles" from the top and "for another 10 miles" a minute
+    /// later, on it (agent drive into Denver, 2026-09-24): the gentle grade
+    /// below it was being counted as the seven percent.
     pub fn grade_run_mi(&self, start_mi: f64, sign: i32) -> f64 {
+        self.grade_run_over_mi(start_mi, sign, GRADE_WARN_CLEAR_PCT)
+    }
+
+    /// [`Self::grade_run_mi`] with the floor named: the run lasts while the
+    /// grade holds at least `floor_pct` in the direction of `sign`. Only a
+    /// grade already gentler than the steep line's release is measured on a
+    /// lower floor, and it has no steep run to disagree with.
+    pub fn grade_run_over_mi(&self, start_mi: f64, sign: i32, floor_pct: f64) -> f64 {
         let mut run = 0.0;
         let mut probe = start_mi;
         while run < GRADE_WARN_SCAN_MI {
@@ -315,7 +331,7 @@ impl DrivingState {
             if probe >= self.trip.total_miles() {
                 break;
             }
-            if self.trip.grade_at(probe) * sign as f64 * 100.0 < GRADE_WARN_CLEAR_PCT {
+            if self.trip.grade_at(probe) * sign as f64 * 100.0 < floor_pct {
                 break;
             }
             run += GRADE_WARN_STEP_MI;

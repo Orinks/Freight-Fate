@@ -26,6 +26,13 @@ impl TruckState {
         // blip to keep the target speed must not release the hold and grab a
         // taller gear that guts the retarder mid-descent.
         jaking = jaking || (self.engine_brake() && self.engine_on && self.grade < -0.01);
+        // Descent control holding the grade holds the gear the way a brake
+        // application does: a downgrade is no place for an economy upshift.
+        // Not as the retarder does, though: with no stage on, its pre-select
+        // walked a bobtail down from eighth to sixth on Red Mountain's 8.4
+        // percent, into a gear the truck then rode at the rev ceiling (bend
+        // sweep, 2026-09-25). The engine still upshifts past the ceiling.
+        let descent_hold = self.descent_gear_hold && self.engine_on && self.throttle <= 0.05;
         let bobtail = !self.trailer_attached;
         let load_fraction = self.load_fraction();
         let base_interval = if bobtail { 1.1 } else { 1.25 };
@@ -174,7 +181,7 @@ impl TruckState {
             rpm: rpm_est,
             throttle: self.throttle,
             moving: self.velocity_mps > 0.5,
-            braking,
+            braking: braking || descent_hold,
             can_upshift,
             minimum_shift_interval_s,
             upshift_rpm,
