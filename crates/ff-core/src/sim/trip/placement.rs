@@ -698,7 +698,15 @@ impl Trip {
         ((advisory + margin).min(costs), advisory.min(costs))
     }
 
-    /// The next curve ahead that deserves a spoken approach warning.
+    /// The next curve ahead that deserves a spoken approach warning and has
+    /// not had it.
+    ///
+    /// Not had it: a bend already called (or riding the last call's "then"
+    /// tail) used to be returned here too, and `check_curves` stopped at it,
+    /// so in a dense run every bend behind it waited until the truck was past
+    /// it. On US-62's esses a 25 mph bend was never called at all: the
+    /// called bends ahead of it masked it until the truck was in it (bend
+    /// sweep, 2026-09-24).
     pub fn next_curve_approach(&self) -> Option<RouteCurve> {
         let speed = self.truck.speed_mph();
         for cr in &self.curves {
@@ -709,7 +717,7 @@ impl Trip {
             if ahead > PACENOTE_MAX_LEAD_MI {
                 break;
             }
-            if cr.connector {
+            if cr.connector || self.curve_called(cr) {
                 continue;
             }
             let (call_above, target) = self.curve_call_mph(cr);
@@ -799,9 +807,6 @@ impl Trip {
         };
         let ahead = cr.start_mi - self.position_mi;
         let key = format!("curve:{}:{}", fmt_f(cr.start_mi, 3), cr.direction);
-        if self.announced_curves.contains(&key) {
-            return;
-        }
         self.announced_curves.insert(key);
         // The immediate follower rides this call's "then ..." tail.
         let linked = self.curves.iter().find(|c| {

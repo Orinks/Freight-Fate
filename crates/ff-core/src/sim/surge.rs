@@ -253,10 +253,19 @@ impl SloshAxis {
         }
         if head_on {
             // The slug ran out of tank: it stops against the steel and spends
-            // its momentum on the truck over the contact window.
+            // its momentum on the truck over the contact window. It stops --
+            // liquid piles against a head, it does not bounce off it, and the
+            // spring runs it back from there. It used to rebound at nearly its
+            // full speed AND hand that speed to the truck, momentum made twice
+            // over; the truck's lurch then threw the slug back harder still, so
+            // every strike fed the next. Once a half-full tank's wave reached
+            // the heads it ran itself up to 18 m/s end to end, shoving the
+            // truck back and forth near half a g several times a second and
+            // costing the load with no pedal moving (bend sweep, 2026-09-24:
+            // 2.5 percent under adaptive cruise up Donner's 3.8 percent).
             self.impact_v = incoming_v;
             self.impact_left_s = HEAD_IMPACT_S;
-            self.v = -self.v * (1.0 - self.zeta);
+            self.v = 0.0;
         }
         self.struck = true;
         self.strike_strength = (incoming_v.abs() / self.peak_v().max(1e-6)).min(1.0);
@@ -457,6 +466,33 @@ impl LiquidLoad {
             return 0.0;
         }
         (half.sin() / half).abs().min(1.0)
+    }
+
+    /// The overshoot to plan the next bend against: what a bend entered from
+    /// rest leaves ([`Self::entry_overshoot`]), plus the swing the liquid is
+    /// still carrying from the last one, on the scale
+    /// [`Self::lateral_overshoot`] uses where a bend asks less than the
+    /// rollover pull.
+    ///
+    /// The swing is the free wave's amplitude about where the pull driving it
+    /// now would hold it, `sqrt(dx^2 + (v/w)^2)`: its energy, not where it
+    /// happens to be this frame, so the price does not breathe with the wave
+    /// the way the position does. It is what the next bend can find
+    /// running outward at its entry whatever the phase; the wave is nearly
+    /// undamped (`ZETA_LATERAL`), so in a run of bends it survives from one
+    /// to the next. Priced from rest, a half-full tank held under its number
+    /// on I-90's Lookout Pass came within 0.98 of rolling with no warning
+    /// (bend sweep, 2026-09-24).
+    pub fn planning_overshoot(&self) -> f64 {
+        let axis = &self.lateral;
+        if axis.omega <= 0.0 {
+            return 0.0;
+        }
+        let w2 = axis.omega * axis.omega;
+        let dx = axis.x + self.lateral_drive_mps2 / w2;
+        let swing = (dx * dx + (axis.v / axis.omega).powi(2)).sqrt();
+        let reference = ROLLOVER_SURGE_PULL_G * G / w2;
+        (self.entry_overshoot() + swing / reference).min(1.0)
     }
 
     /// What the liquid is doing to the truck right now, newtons.

@@ -881,6 +881,14 @@ impl EventSpeechPacer {
         self.now() < self.clear_at
     }
 
+    /// Whether a CRITICAL line is still being spoken, by the same projection.
+    pub fn speaking_critical(&mut self) -> bool {
+        let now = self.now();
+        self.protected
+            .as_ref()
+            .is_some_and(|held| held.priority == EventPriority::Critical && now < held.done_at)
+    }
+
     /// Whether this queued line would start past its priority's budget.
     ///
     /// A pure reading -- the projection is not touched, nothing is tracked.

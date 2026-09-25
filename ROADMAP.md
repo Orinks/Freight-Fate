@@ -116,15 +116,17 @@ stay in the dated sections linked from each line, marked "(Release gate)".
 
 Costs the drive (found 2026-09-24):
 
-- [ ] A half-full tank's swing from one bend into the next: in Lookout
-      Pass's pairs a driver on the spoken number reaches 0.98 of the
-      rollover threshold with no warning heard
+- [x] A half-full tank's swing from one bend into the next: the plan now
+      counts the swing the liquid carries; Lookout Pass's closest call went
+      from 0.98 unwarned to 0.74 with two warnings
       ([September 24](#september-24-realistic-interstate-exit)).
-- [ ] An empty truck under partial lane keeping leaves the pavement in
-      US-62's tight esses; the warnings arrive late
+- [x] An empty truck under partial lane keeping left the pavement in US-62's
+      tight esses: calls no longer hide the bends behind them or cut a
+      warning, and stale warnings are dropped
       ([September 24](#september-24-realistic-interstate-exit)).
-- [ ] Adaptive cruise sloshes a half-full tank on a climb, 2.5 percent
-      damage on Donner ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Adaptive cruise sloshed a half-full tank on a climb: the slug now stops
+      against the tank head instead of rebounding
+      ([September 24](#september-24-realistic-interstate-exit)).
 - [ ] Rural roads take the in-town statutory limit: an untagged state route
       outside town gets the district default (IA 175 at 20 near a Love's).
       Needs an urban-area test before the fill (PR #232).
@@ -1581,25 +1583,47 @@ mainline behaviour.
       the truck, so the next of two bends was warned once the load was
       already moving (it looks at both, and prices a downhill bend where the
       truck will be after the reaction time).
-- (Release gate) **A half-full tank's swing from one bend into the next.** The
-      planning threshold prices a bend entered from rest, so in Lookout
-      Pass's pairs a half tank held under its number still moves its load
-      0.01 percent with the assists and 0.12 with a driver on the spoken
-      number (the sweep caps it at 0.2), and that driver reaches 0.98 of
-      the rollover threshold with no warning heard -- the closest call in
-      the sweep, and the one to fix first. Adding the present swing to the
-      plan was tried and dropped: the number moved with the wave, the servo
-      braked more, and on Donner a cruise-held half tank sloshed 2.5 percent
-      on a climb.
-- (Release gate) **Partial lane keeping in tight esses with an empty truck.** On
-      US-62's 20 to 30 mph bends the spoken-number driver still leaves the
-      pavement bobtail: warnings queue behind the calls in a dense run of
-      bends and arrive late. The sweep reports it without failing on it.
-- (Release gate) **Adaptive cruise and a half-full tank on a climb.** Cruise's
-      throttle swinging from nothing to full sloshes the liquid fore and
-      aft, and the load pays for it (2.5 percent on Donner's 3.8 percent in
-      one trial). Not a bend fault; seen only while the tank's plan was
-      being tried above.
+- [x] **A half-full tank's swing from one bend into the next**
+      (fix/roll-near-misses, 2026-09-24). The plan now counts the swing
+      the liquid still carries (`LiquidLoad::planning_overshoot`): its
+      energy about where the present pull holds it, as a share of the
+      steady shift at the rollover pull, on top of what a bend entered from
+      rest leaves. Energy, not position, so the number eases as the wave
+      settles instead of rising and falling with it; the position was what
+      made the first try brake more. On Lookout Pass the spoken-number
+      driver's closest call went from 0.98 of the rollover threshold,
+      unwarned, to 0.74 with two warnings, and no bend in the sweep moves a
+      load. The sweep now caps every setup but the daring one at 0.90 and
+      fails any bend past the warning share (0.857) with no "too fast" in
+      the ten seconds before; the highest is 0.85. Curve assistance's surge
+      allowance on the approach went on whole the moment the shed passed
+      the road's own drag, which chattered the pedal every other frame for
+      fifteen seconds approaching a Shasta bend; it fades in with the
+      braking now.
+- [x] **Partial lane keeping in tight esses with an empty truck**
+      (fix/roll-near-misses, 2026-09-24). Three faults behind US-62's late
+      warnings: a bend already called stopped the call search, so the
+      bends behind it in a run went uncalled until the truck was in them; a
+      warning cut off by the next bend's came back after it, naming a bend
+      already behind with a higher number, which is the one the driver
+      heard last; and a curve call cut off any warning still being spoken,
+      which then came back behind it. Calls skip bends already called, a
+      warning is handed back only while its bend is ahead or underfoot and
+      the truck still over the number, and a call waits behind a warning or
+      another call instead of cutting it. The sweep fails any setup but the
+      daring one that leaves the pavement; "too fast" warnings to the
+      spoken-number driver across the sweep fell from 302 to 231.
+- [x] **Adaptive cruise and a half-full tank on a climb**
+      (fix/roll-near-misses, 2026-09-24). The surge model, not cruise: a
+      slug that reached a tank head rebounded at nearly the speed it
+      arrived with and also handed that momentum to the truck, whose lurch
+      threw it back harder. Once a wave reached the heads it ran itself up
+      to 18 m/s end to end and cost the load with no pedal moving; cruise's
+      throttle was only the first kick. The slug now stops against the head
+      and the spring runs it back, as liquid piling against a head does.
+      Pinned in `vehicle::tests` (the old rebound runs a kicked slug to
+      29.7 m/s in a minute); the sweep's Donner cruise run keeps the load
+      whole.
 - [x] **A rollover goes on the driving record as a crash** (owner ruling,
       2026-09-24). 49 CFR 390.15's accident register lists every accident,
       and 390.5 counts a vehicle towed away; `DrivingRecord::crashes` and

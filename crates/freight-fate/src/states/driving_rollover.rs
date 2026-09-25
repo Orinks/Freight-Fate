@@ -35,6 +35,7 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_rest_states::record_hours;
+use crate::states::driving_updates::live;
 
 /// Seconds between a warning and the brakes going on. READ: the brake
 /// reaction time the Green Book's stopping sight distance is built on (AASHTO
@@ -60,6 +61,8 @@ struct CurveInPlay {
     /// The bank the lane model credits.
     lane_bank: f64,
     phrase: String,
+    /// Where it ends, miles; None for the ramp curve, which lasts the ramp.
+    end_mi: Option<f64>,
 }
 
 impl DrivingState {
@@ -236,6 +239,7 @@ impl DrivingState {
                     roll_bank,
                     lane_bank: 0.0,
                     phrase: "Ramp curve".to_string(),
+                    end_mi: None,
                 })
                 .into_iter()
                 .collect();
@@ -265,6 +269,7 @@ impl DrivingState {
                 roll_bank: self.bend_bank(&bend),
                 lane_bank: self.lane_bank(&bend),
                 phrase: self.pacenote_phrase(&bend),
+                end_mi: Some(bend.start_mi.max(bend.end_mi)),
             })
             .collect()
     }
@@ -312,10 +317,27 @@ impl DrivingState {
                 continue;
             }
             self.curve_warned_mi = Some(curve.id);
-            let slow_to = ctx.settings.speed_text(safe.floor().max(1.0));
+            let slow_to = safe.floor().max(1.0);
+            // True while the truck is still in or short of the bend and still
+            // over the number. Cut by the next bend's warning in a run of
+            // esses, it used to come back after it: "Sharp right, too fast.
+            // Slow to 27" and then "Sharp left, too fast. Slow to 31" for a
+            // bend already behind, so the last number heard was the wrong
+            // one (bend sweep, US-62, 2026-09-24).
+            let end_mi = curve.end_mi;
+            let still_true = move || {
+                live::speed_mph() > slow_to
+                    && end_mi.map_or_else(live::on_ramp, |end| live::position_mi() <= end)
+            };
             ctx.say_event_with(
-                format!("{}, too fast. Slow to {slow_to}.", curve.phrase),
-                SayEvent::new().category(SpeechCategory::Safety),
+                format!(
+                    "{}, too fast. Slow to {}.",
+                    curve.phrase,
+                    ctx.settings.speed_text(slow_to)
+                ),
+                SayEvent::new()
+                    .category(SpeechCategory::Safety)
+                    .valid(still_true),
             );
             return;
         }
