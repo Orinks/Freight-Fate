@@ -279,6 +279,11 @@ pub fn scan_destination_exit(
             Some(false),
         )
         .to_lowercase();
+    let mainline_cities: Vec<String> = route
+        .cities
+        .iter()
+        .map(|c| world.spoken_city(c, Some(false)))
+        .collect();
     let scan_floor = trip.total_miles() - DESTINATION_EXIT_SCAN_WINDOW_MI;
     // (legs from the end, distance from the leg's destination end, whether
     // the sign does NOT name the destination, route mile, label, phrase)
@@ -314,13 +319,19 @@ pub fn scan_destination_exit(
                 .destinations
                 .iter()
                 .any(|part| part.to_lowercase().contains(&destination));
+            let siblings: Vec<String> = leg
+                .interchanges()
+                .iter()
+                .filter(|other| other.at_mi != ix.at_mi)
+                .flat_map(|other| other.destinations.iter().cloned())
+                .collect();
             candidates.push((
                 route.legs.len() - 1 - i,
                 dist_from_destination,
                 !matches_destination,
                 route_mile,
                 exit_label,
-                ix.spoken_phrase(),
+                ix.spoken_phrase_on(&leg.highway, &mainline_cities, &siblings),
             ));
         }
     }
