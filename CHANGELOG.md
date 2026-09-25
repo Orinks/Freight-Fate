@@ -162,6 +162,7 @@
 - **Lines the cab says in the same moment are each said once, in order.** The first is no longer cut off and started again by the next.
 
 - **Each street turn's sound plays as you make that turn.** Turns close together off the ramp no longer save their sounds and play them all at once.
+
 - **Exit announcements no longer name your own Interstate as the exit.** Southbound at Ardmore, exit 31B is toward Waurika, not I-35 North.
 
 - **On facility streets the next turn is called after you are round the last.** The turn chime and the words agree again.
