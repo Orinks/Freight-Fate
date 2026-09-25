@@ -97,10 +97,11 @@ impl TruckState {
     }
 
     /// The threshold a bend should be planned against, in g: the static one,
-    /// less what the wave keeps after a bend entered along its transition. The
+    /// less what the wave keeps after a bend entered along its transition and
+    /// what it still carries from the last one (`planning_overshoot`). The
     /// assists and the warning price a bend ahead with this.
     pub fn planning_roll_threshold_g(&self) -> f64 {
-        let overshoot = self.liquid.as_ref().map_or(0.0, |l| l.entry_overshoot());
+        let overshoot = self.liquid.as_ref().map_or(0.0, |l| l.planning_overshoot());
         self.roll_threshold_g() - self.tank_roll_penalty_g() * overshoot
     }
 
@@ -166,7 +167,7 @@ impl TruckState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sim::surge::LiquidLoad;
+    use crate::sim::surge::{LiquidLoad, SPIRAL_TRANSITION_S};
     use crate::sim::vehicle::REFERENCE_CARGO_KG;
 
     const MPS_PER_MPH: f64 = 1.0 / MPS_TO_MPH;
@@ -274,6 +275,40 @@ mod tests {
             "gentle bend after a tight one priced at {live:.3} g, floor {:.3}",
             floor(&t)
         );
+    }
+
+    #[test]
+    fn a_swing_carried_out_of_a_bend_lowers_the_next_plan_without_breathing() {
+        // Bend sweep, 2026-09-24: priced from rest, a half-full tank held
+        // under its number on Lookout Pass came within 0.98 of rolling with
+        // the swing of the bend before, and nothing was said. The plan counts
+        // the swing -- but by its energy, so it eases as the wave settles and
+        // never rises and falls with it, which is what made the assists pump
+        // the brake when the swing's position was tried instead.
+        let mut t = tanker(0.5);
+        let from_rest = t.planning_roll_threshold_g();
+        hold_bend(&mut t, 50.0, 50.0, 10.0);
+        // Out of the bend: the pull let go over its transition, then a
+        // straight.
+        hold_bend(&mut t, 50.0, 0.0, SPIRAL_TRANSITION_S);
+        let mut plan = t.planning_roll_threshold_g();
+        assert!(
+            plan < from_rest - 0.01,
+            "out of the bend plans at {plan:.4} g, from rest {from_rest:.4}"
+        );
+        // Two wave periods of straight: the plan only eases back up, to
+        // within the integrator's own wobble (a thousandth of a g; the swing
+        // it carries costs ten times that).
+        for _ in 0..200 {
+            hold_bend(&mut t, 50.0, 0.0, 0.02);
+            let next = t.planning_roll_threshold_g();
+            assert!(
+                next >= plan - 1e-3,
+                "the plan fell from {plan:.4} to {next:.4}"
+            );
+            plan = next;
+        }
+        assert!(plan <= from_rest + 1e-12);
     }
 
     /// The slowest speed at which a bend of `radius_ft` puts a tank filled to

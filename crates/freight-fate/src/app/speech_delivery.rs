@@ -895,6 +895,11 @@ impl GameContext {
         self.event_pacer.busy()
     }
 
+    /// Whether the event voice is mid-way through a warning to act on now.
+    pub fn event_voice_critical(&mut self) -> bool {
+        self.event_pacer.speaking_critical()
+    }
+
     pub fn event_delivery_status(
         &mut self,
         key: &str,

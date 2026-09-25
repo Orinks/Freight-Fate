@@ -1594,6 +1594,33 @@ fn test_coasting_into_a_bar_without_braking_is_still_the_drivers_fault() {
     assert!(!truck.pushed_through_by_surge());
 }
 
+#[test]
+fn test_a_slug_that_reaches_the_head_stops_there_and_does_not_feed_itself() {
+    // Bend sweep, 2026-09-24: the slug rebounded off a head at nearly the
+    // speed it arrived with AND handed that speed to the truck, whose lurch
+    // threw it back harder. Kicked once, a half-full smooth bore ran itself up
+    // to 18 m/s end to end and cost the load with no pedal touched.
+    // At the game's own frame, the slug kicked hard enough to reach a head:
+    // what a throttle swinging from nothing to full, or a stab of the brake,
+    // leaves in the tank.
+    const DT: f64 = 1.0 / 30.0;
+    let mut truck = tank_truck(Some(LiquidLoad::new(0.5, false)), 20.0);
+    let axis = &mut truck.liquid.as_mut().unwrap().longitudinal;
+    let peak = axis.peak_v();
+    axis.v = 1.5 * peak;
+    let mut fastest = 0.0f64;
+    for _ in 0..1800 {
+        // A minute of coasting.
+        truck.update(DT);
+        fastest = fastest.max(truck.liquid.as_ref().unwrap().longitudinal.v.abs());
+    }
+    assert!(
+        fastest <= 1.5 * peak + 1e-9,
+        "the slug ran at {fastest:.1} m/s, a full swing is {peak:.1}"
+    );
+    assert_eq!(truck.cargo_damage_pct, 0.0);
+}
+
 // `test_liquid_freight_is_hard_to_ruin_because_liquid_does_not_break` and
 // `test_a_tank_load_is_described_in_words_that_fit_a_tank` are the
 // cargo-condition half of `tests/test_tanker_surge.py`; they live with the

@@ -148,6 +148,12 @@
 
 - **A half-full tank no longer rolls over entering a bend right after another.**
 
+- **Surge left over from one bend now lowers the number spoken for the next.** A half-full tank no longer nears a rollover unwarned.
+
+- **Surge in a tank trailer settles instead of building on its own.** Adaptive cruise on a climb no longer damages a half-full load.
+
+- **Every bend in a tight run is called before you reach it.** Warnings no longer wait behind calls or repeat for bends behind you.
+
 - **The too-fast warning covers the next bend while you are still in one.** Downhill, it comes before the load moves.
 
 - **Leaving the pavement damages the truck with lane-departure warning off.** The setting only silences the warning.

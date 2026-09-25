@@ -261,10 +261,15 @@ impl DrivingState {
         // a twentieth of the pedal on a climb that was taking the speed off by
         // itself, which with adaptive cruise yielding to the brake chopped
         // the throttle and sloshed a half-full tank's load up Donner (bend
-        // sweep, 2026-09-24).
+        // sweep, 2026-09-24). And faded in with the braking, never switched
+        // on at its edge: added whole the moment the shed passed the road,
+        // it was a fifth of the pedal on a hair of shed, which took the
+        // speed off, which took the shed back under the road -- on, off,
+        // every other frame for fifteen seconds of a half-full tank's
+        // approach on the Shasta (bend sweep, 2026-09-24).
         let surge = self.trip.truck.surge_decel_penalty_mps2();
         let demand = match shed {
-            Some(shed) if approach && shed > road => Some(shed - road + surge),
+            Some(shed) if approach && shed > road => Some(shed - road + surge.min(shed - road)),
             Some(shed) => Some(shed - road),
             None if road < 0.0 && v > target - band => {
                 Some(-road * ((v - (target - band)) / band).min(1.0))

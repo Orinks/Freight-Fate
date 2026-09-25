@@ -515,11 +515,20 @@ impl DrivingState {
         // saying anything, and the driver still has the whole bend to steer.
         // The engine's lean carries that continuously now, so the chime was
         // noise stacked in front of the guide rather than help.
-        let say_curve = |ctx: &mut GameContext, text: SpokenMessage, interrupt: bool| {
+        //
+        // A call cuts chatter, never a warning or another call still being
+        // spoken: it falls in behind them. Cutting, a run of esses played
+        // backwards -- the next bend's call over this one's, this one handed
+        // back after it -- and a too-fast warning cut by a call came back
+        // after the call, late (bend sweep, US-62, 2026-09-24).
+        let say_curve = |ctx: &mut GameContext, text: SpokenMessage| {
             if !announce {
                 return;
             }
-            let mut opts = SayEvent::new().interrupt(interrupt);
+            let interrupt = !ctx.event_voice_critical();
+            let mut opts = SayEvent::new()
+                .interrupt(interrupt)
+                .priority(EventPriority::Critical);
             opts.category = category;
             if let Some(valid) = curve_valid {
                 opts = opts.valid(move || valid.holds());
@@ -596,7 +605,7 @@ impl DrivingState {
                 // the number cruise is easing to, and the deceleration
                 // itself is audible (R4's curve-composite row).
                 let text = cruise_curve_easing(&message, &ctx.settings.speed_text(advisory));
-                say_curve(ctx, text, true);
+                say_curve(ctx, text);
             } else {
                 // Under cruise's floor (or with the assist off): the bend is
                 // the driver's, but the SESSION is not over. This used to
@@ -623,14 +632,14 @@ impl DrivingState {
                 } else {
                     cruise_curve_paused(&message)
                 };
-                say_curve(ctx, text, true);
+                say_curve(ctx, text);
             }
         } else {
-            // Interrupt, always: a pacenote queued behind landmark chatter
+            // Interrupting chatter: a pacenote queued behind landmark chatter
             // arrived with the bend three seconds away instead of a
             // quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
             // were honest when emitted and stale when finally spoken).
-            // Ambient lines can wait; the road cannot.
+            // Ambient lines can wait; the road cannot (`say_curve`).
             //
             // Manual pedals or the speed keeper: the pacenote carries the
             // assist clause in the same breath, never as a second line.
@@ -639,7 +648,7 @@ impl DrivingState {
             } else {
                 message
             };
-            say_curve(ctx, text, true);
+            say_curve(ctx, text);
         }
         // Open the re-arm window: if Ctrl silences this call before it
         // finishes, it gets one refreshed re-speak (owner worry,
