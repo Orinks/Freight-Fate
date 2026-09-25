@@ -154,6 +154,18 @@
 
 ### Fixed
 
+- **Exit announcements no longer name your own Interstate as the exit.** Southbound at Ardmore, exit 31B is toward Waurika, not I-35 North.
+
+- **On facility streets the next turn is called after you are round the last.** The turn chime and the words agree again.
+
+- **A ramp-end yield names the car the crossing sounds are for.** The words and the panned traffic come from the same vehicle.
+
+- **Staged drives no longer hear bend warnings or win Bumper-to-Bumper Blues before you have the wheel.**
+
+- **Cruise says what grade it is easing for, and stays quiet over a crest.**
+
+- **The street progress line starts with a capital, and the weather Conditions line ends with a period.**
+
 - **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
 
 - **The cab calls a bend whenever it would move your load.** You hear the number to slow to before the freight shifts, not after.

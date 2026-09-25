@@ -130,6 +130,20 @@ Costs the drive (found 2026-09-24):
 - [x] Rural roads no longer take the in-town statutory limit: outside the
       boundary a state's code keys on, an untagged road gets its rural
       default (IA 175 by the Love's is 55) (PR #232).
+- [x] Exit labels named the driver's own Interstate: the interchange bake
+      merged a mainline entrance ramp's signage into the exit's record, so
+      southbound at Ardmore exit 31B was "for I-35 North toward Oklahoma
+      City". At run time a via on the leg's own route with a cardinal is
+      dropped with the mainline's destinations (route cities, and cities the
+      leg's other exits also sign); 3,151 of 18,165 interchange records
+      (17 percent) carried one, an opposite-direction label for one of the
+      two travel directions. Also: facility-street turn calls wait until the
+      truck is round the last corner so tone and words agree; a ramp-end
+      yield names the same car the crossing sounds are panned for; staged
+      drives no longer speak bend calls or award Bumper-to-Bumper Blues on
+      frame one; the crest hold is silent and the descent line names its
+      grade; "At the yield" while creeping; capitalised progress line;
+      weather period (PR turn-tones-yield-pan-exit-labels).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -1939,6 +1953,12 @@ release (`fix/street-lights-live`); the timing work is parked on
 Moved out of the 1.9 release gate on 2026-09-25: none of these makes the
 truck do the wrong thing on a drive.
 
+- [ ] **The interchange bake is direction-blind.** `tools/build_interchanges.py`
+      merges every ramp near a junction into one record, so an exit's real
+      via (US-70 West at Ardmore 31B) is lost when a mainline entrance
+      ramp's via is taken first. Re-derive per carriageway, keeping only
+      exit ramps leaving in the direction of travel; the run-time filter
+      landed for 1.9 can then go.
 - [ ] **995 sourced facility endpoints are unnamed.** Plan: take OSM
       buildings over 500 m2 and name them from Overture Places keyed by
       GERS id ([record](#release-gate-record)).

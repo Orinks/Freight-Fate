@@ -330,22 +330,23 @@ impl DrivingState {
         reason: PccReason,
     ) {
         self.pcc_cue_s = 0.0f64.max(self.pcc_cue_s - dt);
-        let (phase, message) = match reason {
-            PccReason::Building if delta > 0.5 => ("building", None),
-            PccReason::EasingForDescent(_) if delta <= -0.5 => ("easing", None),
-            // The crest hold eases nothing -- it just stops chasing -- so it
-            // stays silent (silence over redundant speech) while still
-            // tracking the phase so the next real change speaks.
-            PccReason::HoldingOverCrest => ("holding", None),
-            PccReason::EasingForDescent(_) => ("easing", Some(())),
-            PccReason::Building => ("building", Some(())),
-            PccReason::None => ("", Some(())),
+        // Silent phases still track, so the next audible change speaks; a
+        // bias the caps neutralised is its own phase so the cue fires once
+        // the cap lifts. The crest hold eases nothing -- it just stops
+        // chasing -- so it stays silent (silence over redundant speech).
+        let (phase, speaks) = match reason {
+            PccReason::Building if delta > 0.5 => ("building", true),
+            PccReason::EasingForDescent(_) if delta <= -0.5 => ("easing", true),
+            PccReason::HoldingOverCrest => ("holding", false),
+            PccReason::EasingForDescent(_) => ("easing-capped", false),
+            PccReason::Building => ("building-capped", false),
+            PccReason::None => ("", false),
         };
         if phase == self.pcc_phase {
             return;
         }
         self.pcc_phase = phase.to_string();
-        if phase.is_empty() || message.is_some() || self.terse_speech(ctx) || self.pcc_cue_s > 0.0 {
+        if !speaks || self.terse_speech(ctx) || self.pcc_cue_s > 0.0 {
             return;
         }
         self.pcc_cue_s = PCC_CUE_COOLDOWN_S;
