@@ -73,7 +73,7 @@ mod protocol;
 pub use ears::{install_ears, Ears, SharedEars};
 pub use protocol::{build_command, serve_lines};
 
-use ears::drain_ears;
+use ears::{drain_ears, CAB_CUT_IN};
 use protocol::{discover, serve};
 // -- commands between the MCP thread and the game loop --------------------------------
 
@@ -202,10 +202,12 @@ enum Until {
 struct Waiting {
     remaining: f64,
     until: Until,
-    /// Where in the ears the scan for `Heard` resumes.
+    /// Where in the ears the scan resumes.
     scanned: usize,
-    /// False for a plain `wait`; true for the tools whose reply should say
-    /// when the clock, not the thing waited for, ended the wait.
+    /// True for `wait_for`: it also stops when the cab cuts in, and says
+    /// when the clock, not the thing waited for, ended the wait. A blind
+    /// wait_for drove past "Exit lane opening. Steer right into it." and
+    /// missed the exit (agent drive, Dallas, 2026-09-25).
     reports_timeout: bool,
     reply: Reply,
 }
@@ -465,26 +467,36 @@ impl AgentPolicy {
         if let Some(mut waiting) = self.waiting.take() {
             waiting.remaining -= dt;
             let out_of_time = waiting.remaining <= 0.0;
-            let released = match &waiting.until {
-                Until::Elapsed => out_of_time,
-                Until::Heard(needle) => {
-                    let ears = self.ears.borrow();
-                    let from = waiting.scanned.min(ears.lines.len());
-                    let heard = ears.lines[from..]
+            let (heard, cut_in) = {
+                let ears = self.ears.borrow();
+                let fresh = &ears.lines[waiting.scanned.min(ears.lines.len())..];
+                let heard = match &waiting.until {
+                    Until::Heard(needle) => fresh
                         .iter()
-                        .any(|line| line.to_lowercase().contains(needle.as_str()));
-                    waiting.scanned = ears.lines.len();
-                    heard || out_of_time
-                }
-                Until::Menu => input.menu_rows().is_some() || out_of_time,
+                        .any(|line| line.to_lowercase().contains(needle.as_str())),
+                    _ => false,
+                };
+                let cut_in =
+                    waiting.reports_timeout && fresh.iter().any(|l| l.starts_with(CAB_CUT_IN));
+                waiting.scanned = ears.lines.len();
+                (heard, cut_in)
             };
-            if !released {
+            let arrived = match &waiting.until {
+                Until::Elapsed => false,
+                Until::Heard(_) => heard,
+                Until::Menu => input.menu_rows().is_some(),
+            };
+            if !(arrived || cut_in || out_of_time) {
                 self.waiting = Some(waiting);
                 return true;
             }
             let mut text = drain_ears(&self.ears);
-            if out_of_time && waiting.reports_timeout && !matches!(waiting.until, Until::Elapsed) {
-                text.push_str("\n(the clock ran out before that arrived)");
+            if !arrived && waiting.reports_timeout && !matches!(waiting.until, Until::Elapsed) {
+                text.push_str(if cut_in {
+                    "\n(the cab cut in before that arrived)"
+                } else {
+                    "\n(the clock ran out before that arrived)"
+                });
             }
             let _ = waiting.reply.send(Ok(text));
         }
