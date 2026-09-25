@@ -4,6 +4,7 @@
 
 use ff_core::data::curves::RouteCurve;
 use ff_core::sim::trip::Trip;
+use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::{GameContext, Say};
 use crate::states::driving::DrivingState;
@@ -120,7 +121,58 @@ impl DrivingState {
         let speed = ctx.settings.speed_text(self.trip.truck.speed_mph());
         let rpm = self.trip.truck.rpm;
         let air = self.air_status_text(false);
-        ctx.say(&format!("{speed}, {gear}, {rpm:.0} RPM{cruise}, {air}."));
+        // With the signal on, how far to the exit is the number the driver is
+        // waiting on, and until now only the countdown anchors said it (owner,
+        // driving, 2026-09-24: "I should be able to see how far away from the
+        // exit I am"). Asked for, never volunteered.
+        let armed = match self.armed_exit() {
+            Some(stop) => format!(
+                " Signal on for {}, {}.",
+                self.armed_exit_name(ctx, &stop),
+                ctx.settings
+                    .distance_text(stop.at_mi - self.trip.position_mi, true)
+            ),
+            None => String::new(),
+        };
+        ctx.say(&format!(
+            "{speed}, {gear}, {rpm:.0} RPM{cruise}, {air}.{armed}"
+        ));
+    }
+
+    /// The exit the signal is on for, while the truck is still short of its
+    /// gore. `None` once on the ramp, where the ramp readouts take over.
+    fn armed_exit(&self) -> Option<RoadStop> {
+        if !self.exit_signal_on || self.exit_signal_canceled || self.ramp_mi.is_some() {
+            return None;
+        }
+        self.exit_stop
+            .clone()
+            .filter(|stop| stop.at_mi > self.trip.position_mi)
+    }
+
+    /// The armed exit as Space and U name it, in the signal-on line's shapes:
+    /// "exit 263, Main Street" for the destination, "exit 42, Flying J" or
+    /// "the Flying J exit" for a stop. The signal-on line already gave the
+    /// stop's full name, so the plain one is enough here.
+    fn armed_exit_name(&mut self, ctx: &mut GameContext, stop: &RoadStop) -> String {
+        if stop.stop_type != "delivery_destination" {
+            return if stop.exit_label.is_empty() {
+                format!("the {} exit", stop.name)
+            } else {
+                format!("{}, {}", stop.exit_label, stop.name)
+            };
+        }
+        let phrase = self.exit_phrase_of(ctx, stop);
+        let labeled = if phrase.is_empty() {
+            stop.exit_label.clone()
+        } else {
+            phrase
+        };
+        if labeled.is_empty() {
+            format!("the destination exit for {}", stop.name)
+        } else {
+            labeled
+        }
     }
 
     /// `_speak_speed_limit()`: S -- the posted limit here, the zone if any,
@@ -539,6 +591,22 @@ impl DrivingState {
         if let Some(light) = self.ramp_light_query_text(ctx) {
             parts.push(light.trim_end_matches('.').to_lowercase());
         }
+        // The exit the signal is on for leads: it is the one thing on this
+        // road the driver has already committed to (owner, 2026-09-24).
+        let armed = self.armed_exit();
+        if let Some(stop) = armed.as_ref() {
+            let name = self.armed_exit_name(ctx, stop);
+            parts.push(format!(
+                "signal on for {name}, in {}{}",
+                ctx.settings.distance_text(stop.at_mi - pos, true),
+                Self::ramp_ending_clause(&self.ramp_control_for(ctx, stop, None))
+            ));
+        }
+        let is_armed = |at_mi: f64| {
+            armed
+                .as_ref()
+                .is_some_and(|a| (a.at_mi - at_mi).abs() < 0.001)
+        };
         if let Some(zone) = self.trip.next_zone_within(within_mi) {
             let paired = if zone.reason == "construction merge" {
                 self.trip
@@ -605,7 +673,7 @@ impl DrivingState {
         let destination = self
             .destination_exit_stop(ctx)
             .filter(|exit| on_the_highway && exit.at_mi - pos <= within_mi);
-        if let Some(exit) = destination.as_ref() {
+        if let Some(exit) = destination.as_ref().filter(|exit| !is_armed(exit.at_mi)) {
             let phrase = self.exit_phrase_of(ctx, exit);
             let labeled = if phrase.is_empty() {
                 exit.exit_label.clone()
@@ -627,7 +695,7 @@ impl DrivingState {
             .trip
             .upcoming_stop(within_mi)
             .cloned()
-            .filter(|_| on_the_highway)
+            .filter(|stop| on_the_highway && !is_armed(stop.at_mi))
             // Past the destination exit is road this truck is not driving.
             .filter(|stop| {
                 destination

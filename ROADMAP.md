@@ -1847,6 +1847,11 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
 - (Found along the way) **3,630 road stops have no decided exit**, among them every travel
       center the stop snap could not link; they get no street chain.
 - (Found along the way) **394 older chains still carry no street detail** (above).
+- [x] **How far to the signalled exit, on demand.** Owner, driving: "When
+      the signal is on for the exit, I should be able to see how far away
+      from the exit I am." With the signal on for the destination exit or a
+      stop's exit, Space ends with that exit and its distance and U leads with
+      it; neither is spoken unasked, and both drop it on the ramp.
 
 ## 1.10 planned -- the working week and home
 

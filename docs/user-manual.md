@@ -665,7 +665,7 @@ wherever the pad has one.
 | Alt+T | Switch between automatic and manual transmission on the road. This changes your whole control scheme, so it is worth knowing you pressed it. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
-| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. With the turn signal on for an exit, it ends with that exit and how far away it is. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding, pulling, or losing it -- including whether the engine brake has the descent or is about to lose it. G also names the next grade ahead worth planning for, how far off and how long it runs -- including one that steepens without flattening out first, and the gentler pull automatic speed control is building speed for when nothing steep is coming. |
@@ -687,7 +687,7 @@ wherever the pad has one.
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
-| U | Report the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
+| U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
@@ -1548,7 +1548,7 @@ Use these keys when you need status without leaving the road:
 
 | Key | Information |
 | --- | --- |
-| Space | Speed, gear, RPM, air pressure, and brake state. |
+| Space | Speed, gear, RPM, air pressure, and brake state, and with the signal on, how far to the exit. |
 | F | Fuel level and estimated range. |
 | C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
 | Alt+A | Time at the wheel so far this shift, and time on duty. |

@@ -104,7 +104,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Driving information keys",
         &[
-            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
+            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state, then, with the signal on, how far to the exit.",
             "{{speed_limit}} speaks the posted speed limit here, the zone if any, and how far over you are.",
             "{{safe_speed}} speaks one safe-speed number for right now, with weather grip and an armed exit ramp already in it.",
             "{{grade}} speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
@@ -132,7 +132,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "{{last_announcement}} repeats the last driving announcement.",
             "{{cb}} repeats the last CB chatter on its own, with the distance as it is now, and says so once you have passed what the CB called.",
             "Comma repeats what was just said and keeps stepping back; Period moves forward again. Control with Comma or Period jumps to the oldest or newest message, the bracket keys switch between all messages, general messages, and driving events, and Control C copies the one you are on.",
-            "{{upcoming}} speaks the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that demands slowing.",
+            "{{upcoming}} speaks the road ahead that no other key answers: the exit your signal is on for, the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that demands slowing.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",
             "The keys named here are yours: every driving key and pad button can be moved under Settings, Gameplay, Controls, then Keyboard shortcuts or Controller buttons, and this page follows the move. With a controller in use it names the button where there is one.",
