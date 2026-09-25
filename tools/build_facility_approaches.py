@@ -823,7 +823,9 @@ def clean_segment(segment: dict[str, Any]) -> dict[str, Any]:
     # The street detail `street_chain.annotate` measured, where it did: the
     # posted limit with its kind, and the READ controls along the street.
     street = {
-        key: segment[key] for key in ("limit_mph", "limit_source", "controls") if key in segment
+        key: segment[key]
+        for key in ("limit_mph", "limit_source", "limit_basis", "controls")
+        if key in segment
     }
     return {
         **street,

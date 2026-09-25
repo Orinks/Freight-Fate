@@ -189,14 +189,15 @@ def adopt(
                 for c in new.get("controls") or []
                 if c["at_mi"] >= start and (last or c["at_mi"] < start + miles)
             ]
-            out.append(
-                {
-                    **old,
-                    "limit_mph": new["limit_mph"],
-                    "limit_source": new["limit_source"],
-                    "controls": controls,
-                }
-            )
+            row = {
+                **old,
+                "limit_mph": new["limit_mph"],
+                "limit_source": new["limit_source"],
+                "controls": controls,
+            }
+            if new.get("limit_basis"):
+                row["limit_basis"] = new["limit_basis"]
+            out.append(row)
             start += miles
     return out
 
@@ -249,7 +250,11 @@ def apply_match(old: dict[str, Any], match: dict[str, Any]) -> dict[str, Any]:
     """A kept chain with its matched street detail (the chain itself is
     unchanged), or labelled with why none could be matched."""
     bare = [
-        {k: v for k, v in seg.items() if k not in ("limit_mph", "limit_source", "controls")}
+        {
+            k: v
+            for k, v in seg.items()
+            if k not in ("limit_mph", "limit_source", "limit_basis", "controls")
+        }
         for seg in old["segments"]
     ]
     out = {k: v for k, v in old.items() if k not in MATCH_KEYS}

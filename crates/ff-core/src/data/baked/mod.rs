@@ -107,7 +107,9 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 ///
 /// 6: a road stop carries the street chains from its exit's ramp terminals
 /// (`approach_chains`).
-pub const FORMAT_VERSION: u32 = 6;
+///
+/// 7: a street limit carries the statute it follows (`basis`: town or rural).
+pub const FORMAT_VERSION: u32 = 7;
 
 const HEADER_LEN: usize = 32;
 

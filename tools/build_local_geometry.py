@@ -26,7 +26,7 @@ from ffworld.world import get_world
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import chain_match  # noqa: E402
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
-from street_chain import annotate, control_of  # noqa: E402
+from street_chain import MAJOR_HIGHWAYS, annotate, control_of  # noqa: E402
 from yard_roads import (  # noqa: E402
     bans_trucks,
     is_blocking_barrier,
@@ -257,6 +257,9 @@ class RouteGraph:
     service: set[tuple[int, int]] = field(default_factory=set)
     street_deg: dict[int, int] = field(default_factory=lambda: defaultdict(int))
     controls: dict[int, tuple[str, str]] = field(default_factory=dict)
+    # Edges on trunk/primary/secondary ways (both directions): the stand-in
+    # for a numbered highway where a rural statute sets its own default.
+    major: set[tuple[int, int]] = field(default_factory=set)
 
     def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
         self.edges[a].append((b, miles, road, mph))
@@ -531,6 +534,7 @@ def route_state_targets(
             continue
         no_truck = yard_roads and bool(road) and bans_trucks(tags)
         service = tags.get("highway") == "service"
+        major = tags.get("highway") in MAJOR_HIGHWAYS
         coords = way_coords(way)
         if len(coords) < 2:
             continue
@@ -558,6 +562,8 @@ def route_state_targets(
                             graph.no_truck.update({(prev[0], ref), (ref, prev[0])})
                         if street_detail:
                             graph.forward.add((prev[0], ref))
+                            if major:
+                                graph.major.update({(prev[0], ref), (ref, prev[0])})
                             if service:
                                 graph.service.update({(prev[0], ref), (ref, prev[0])})
                             else:
@@ -812,6 +818,7 @@ def _finish(
             graph.controls,
             graph.street_deg,
             target.state,
+            graph.major,
         )
     return GeometryPath(total, tuple(segments), yard_miles, driveway, counts)
 
