@@ -865,7 +865,8 @@ fn test_the_exit_calls_name_the_road_that_is_really_left() {
     let calls: Vec<Regex> = [
         format!(r"at exit \S+ in {DIST}"),
         format!(r"In {DIST}, [^.]*exit"),
-        format!(r"[Ee]xit lane in {DIST}"),
+        // The countdown anchors: "Exit for truck stop: ... in 2 miles."
+        format!(r"[Ee]xit for [^.]* in {DIST}"),
     ]
     .iter()
     .map(|p| Regex::new(p).expect("a valid call pattern"))

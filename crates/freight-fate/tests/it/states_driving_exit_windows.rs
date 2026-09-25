@@ -483,8 +483,9 @@ fn test_exit_announcements_speak_each_name_once() {
     assert!(close.contains("a quarter mile"), "{close}");
 
     harness.with_drive(move |drive, _| {
-        drive.trip.position_mi = stop.at_mi;
-        drive.truck_mut().velocity_mps = 29.0; // too fast: blow past it
+        // Past the end of the gore window, never having taken the exit lane.
+        drive.trip.position_mi = stop.at_mi + 0.5;
+        drive.truck_mut().velocity_mps = 29.0;
     });
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.update_exit(ctx, 0.0, DT));

@@ -1294,7 +1294,7 @@ fn test_a_signaled_speed_valid_open_scale_enters_its_ramp() {
     drive.trip.truck.velocity_mps = mph_to_mps(33.0);
     drive.exit_stop = Some(scale.clone());
     drive.exit_signal_on = true;
-    drive.exit_lane_alignment = EXIT_LANE_READY;
+    drive.exit_lane_entered = true;
 
     drive.update_exit(&mut app.ctx, 0.02, 0.1);
 

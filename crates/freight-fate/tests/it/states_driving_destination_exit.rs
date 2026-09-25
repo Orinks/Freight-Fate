@@ -132,12 +132,13 @@ fn test_armed_exit_counts_down() {
 
     walk_the_countdown(&mut harness, at_mi, &[2.5, 1.9, 1.9, 0.9, 0.4, 0.3]);
 
-    // Each anchor speaks once, in order. A driver doing their own lane work
-    // already gets the two-mile exit-lane prep prompt, so the countdown starts
-    // at one mile for them.
+    // Each anchor speaks once, in order, in every lane-keeping mode: the
+    // separate two-mile "exit lane" prompt is gone, since the exit lane is
+    // asked for where it opens.
     assert_eq!(
         countdown_calls(&harness),
         vec![
+            "Destination exit in 2 miles".to_string(),
             "Destination exit in 1 mile".to_string(),
             "Destination exit in half a mile".to_string(),
         ]
@@ -467,6 +468,9 @@ fn test_destination_exit_announcement_names_lane_move_when_drift_is_on() {
             .destination_exit_stop(ctx)
             .expect("a delivery run has a destination exit");
         drive.trip.position_mi = destination.at_mi - 4.0;
+        // Out of the right lane: the move is owed.
+        drive.lane.lane_count = 2;
+        drive.lane.lane = 1;
     });
     harness.clear_speech();
 
@@ -474,7 +478,7 @@ fn test_destination_exit_announcement_names_lane_move_when_drift_is_on() {
 
     let said = last_event(&harness);
     assert!(
-        said.to_lowercase().contains("move right for the exit lane"),
+        said.to_lowercase().contains("move to the right lane"),
         "{said}"
     );
     // The lane move is the second half of the instruction; the signal is the
@@ -641,10 +645,9 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     assert!(message.contains("exit "), "{message}");
     assert!(message.contains("toward"), "{message}");
     assert!(message.contains("destination exit"), "{message}");
-    assert!(
-        message.contains("Move right for the exit lane"),
-        "{message}"
-    );
+    // Already in the right lane: no lane instruction at all, the exit lane
+    // is called where it opens (owner's drive into Denver West, 2026-09-24).
+    assert!(!message.contains("lane"), "{message}");
     // And the gate the lane work is in aid of. Doing everything this line
     // asks except the signal is still a miss, so the line has to ask for it
     // (agent drive into Payson, 2026-09-19).
@@ -1084,7 +1087,7 @@ fn take_destination_exit(harness: &mut PlaytestHarness) {
             .destination_exit_stop(ctx)
             .expect("a delivery run has a destination exit");
         drive.exit_stop = Some(destination.clone());
-        drive.exit_lane_alignment = 1.0;
+        drive.exit_lane_entered = true;
         drive.trip.position_mi = destination.at_mi;
         drive.truck_mut().velocity_mps = 0.0;
         drive.update_exit(ctx, 0.0, DT);

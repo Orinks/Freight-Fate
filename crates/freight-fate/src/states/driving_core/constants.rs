@@ -106,9 +106,8 @@ pub const STOP_PULL_IN_WAIT_S: f64 = 1.0;
 pub const EXIT_WINDOW_MI: f64 = 5.0; // how far out X can arm the upcoming exit, at minimum
 pub const EXIT_WARNING_REAL_S: f64 = 25.0; // target real seconds from callout to the ramp
 pub const EXIT_WINDOW_MAX_MI: f64 = 20.0;
-pub const EXIT_LANE_PREP_MI: f64 = 2.0; // where GPS starts asking for the exit lane
-                                        // Keep the exact announced destination exit available for the same real-time
-                                        // budget even if coasting or automatic braking shrinks the dynamic window.
+// Keep the exact announced destination exit available for the same real-time
+// budget even if coasting or automatic braking shrinks the dynamic window.
 pub const DESTINATION_EXIT_RESPONSE_GRACE_S: f64 = EXIT_WARNING_REAL_S;
 // Spoken distance anchors for an armed exit; a signal-on announcement miles
 // out gets buried under canyon pacenotes without them.
@@ -121,11 +120,14 @@ pub const EXIT_APPROACH_QUIET_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[1];
 // The pacenote cue tone leans hard toward the curve's side of the field.
 pub const PACENOTE_CUE_PAN: f64 = 0.85;
 pub const EXIT_COMMIT_WINDOW_MI: f64 = 0.4; // generous gore-window grace after the marker
-pub const EXIT_LANE_READY: f64 = 0.85; // accumulated right-lane commitment
-pub const EXIT_LANE_OFFSET_READY: f64 = 0.45; // right-side lane position also counts
+/// Where the exit lane opens: the length of its taper ahead of the gore, in
+/// miles. DERIVED: a parallel deceleration lane's taper runs 15:1 to 25:1
+/// (AASHTO Green Book 2018, 10.9.6.6.2), so 180 to 300 feet to reach a 12-foot
+/// lane; the long end, 300 feet. MUTCD 11th ed. 2E.25 stands the exit direction
+/// sign at the start of this taper, which is where the cab calls the lane.
+pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
-pub const EXIT_LANE_LOST_S: f64 = 1.0; // held out of the exit lane this long before it is called lost
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
 pub const AEB_LEAD_S: f64 = 0.5; // plus this flat lead, covering brake heat added during the stop
                                  // The assist brakes on the SERVICE brakes, and the escalation to the emergency

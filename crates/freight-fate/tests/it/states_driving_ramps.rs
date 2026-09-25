@@ -1070,7 +1070,7 @@ fn test_the_mainline_limit_stays_off_the_take_line() {
     bake_ramp_control(&mut d, stop.at_mi, "signal");
     d.exit_stop = Some(stop.clone());
     d.exit_signal_on = true;
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.lane.lane = 0;
     d.trip.position_mi = stop.at_mi;
     d.handle_trip_event(&mut app.ctx, &a_limit_change(raised));
@@ -1581,7 +1581,7 @@ fn take_the_exit(
     d.exit_stop = Some(stop.clone());
     d.exit_signal_on = true;
     d.exit_signal_canceled = false;
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.lane.lane = 0;
     d.trip.position_mi = stop.at_mi;
     d.update_exit(&mut app.ctx, 0.0, 0.0);
@@ -2358,7 +2358,7 @@ fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp()
         d.truck_mut().velocity_mps = 60.0 * MPS_PER_MPH;
         d.engage_cruise(ctx, 65.0, false);
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
     });
     let mut forced = false;

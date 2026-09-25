@@ -570,7 +570,7 @@ pub fn arrive_corners(destination: &Destination, bench: Bench) -> (Vec<Corner>, 
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;

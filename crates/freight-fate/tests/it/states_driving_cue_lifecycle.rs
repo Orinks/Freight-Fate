@@ -13,7 +13,7 @@ fn steering_blinker_releases_when_wheel_centers_but_exit_blinker_persists() {
         arm(&mut d, &mut app, 1.0);
         assert!(app.ctx.audio.cue_held("vehicle/turn_signal"));
         if exit_ready {
-            d.exit_lane_alignment = EXIT_LANE_READY;
+            d.exit_lane_entered = true;
         } else {
             d.lane.steering = 0.0;
         }
@@ -200,9 +200,9 @@ fn exit_blinker_keeps_ticking_after_alignment_and_wheel_release() {
     signal_for_the_exit(&mut d);
     d.update_steering_lane_cue(&mut app.ctx, 0.0);
     assert_eq!(tape.last(), ("vehicle/turn_signal".to_string(), 0.5, 0.6));
-    for alignment in [0.4, EXIT_LANE_READY, 0.0] {
+    for entered in [false, true, false] {
         tape.clear();
-        d.exit_lane_alignment = alignment;
+        d.exit_lane_entered = entered;
         d.lane.offset = -0.5;
         d.lane.steering = 0.0;
         d.update_steering_lane_cue(&mut app.ctx, STEER_CUE_TOCK_S);
@@ -309,11 +309,11 @@ fn test_the_whole_manoeuvre_adds_no_speech() {
     let mut d = a_steering_drive(&mut app);
     let _tape = CueAudio::install(&mut app);
     signal_for_the_exit(&mut d);
-    d.exit_lane_alignment = 0.3;
+    d.lane.exit_lane_open = true;
     app.clear_speech();
     for _ in 0..240 {
         d.lane.steering = 1.0;
-        d.exit_lane_alignment = 1.0f64.min(d.exit_lane_alignment + 1.0 / 60.0);
+        d.lane.offset = 1.0f64.min(d.lane.offset + 1.0 / 60.0);
         d.update_steering_lane_cue(&mut app.ctx, 1.0 / 60.0);
     }
     d.lane.steering = 0.0;

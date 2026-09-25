@@ -195,11 +195,7 @@ impl DrivingState {
                 format!("Signal on for {}, {facility},", stop.exit_label)
             }
         };
-        let lane_hint = if self.lane.lane == 0 {
-            ""
-        } else {
-            " Right lane."
-        };
+        let in_right_lane = self.in_right_lane_for_exit();
         // Name the ramp's ending now, while there is still a mile of
         // mainline to plan the braking on: a stop sign heard only on the
         // ramp cost real playtesters real cross-traffic damage.
@@ -214,36 +210,39 @@ impl DrivingState {
         // driver to shed on the mainline (realistic exit, 2026-09-24).
         let cap = self.cap_cruise_for_ramp(ctx, Some(&stop));
         let mut message = if ctx.settings.lane_is_automated() {
-            self.exit_lane_alignment = EXIT_LANE_READY;
-            self.exit_lane_ready_said = true;
+            self.exit_lane_entered = true;
             ctx.audio.play_with("ui/notify", 0.6, 0.0);
+            let lane_hint = if in_right_lane { "" } else { " Right lane." };
             // The first granted lane of the run says who granted it. A driver
             // who never asked for this needs one chance to notice the truck
             // is doing it, and where to change that.
+            // It takes the exit lane where it opens, at the gore.
             let granted = if self.lane_keeping_grant_said {
-                "Exit lane set."
+                "Lane keeping takes the exit lane."
             } else {
                 self.lane_keeping_grant_said = true;
-                "Exit lane set for you by lane keeping."
+                "Lane keeping takes the exit lane for you."
             };
             format!("{head} {ahead_text} ahead. {granted}{lane_hint}{ending}{cap}")
         } else {
-            format!(
-                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane.{ending}{cap}"
-            )
+            // The right lane now; the exit lane itself where it opens, which
+            // the cab calls at the taper. Nothing at all when the truck is
+            // already where it needs to be (owner's drive, I-70 into Denver
+            // West, 2026-09-24: "I'm already in the right lane").
+            let lane_hint = if in_right_lane {
+                ""
+            } else {
+                " Move to the right lane."
+            };
+            format!("{head} {ahead_text} ahead.{lane_hint}{ending}{cap}")
         };
         if self.is_selected_stop(Some(&stop)) {
             self.selected_stop_assist_armed = ctx.settings.destination_approach_assist;
             if self.selected_stop_assist_armed {
-                let lane_action = if ctx.settings.lane_is_manual() {
-                    "Set the exit lane. "
-                } else {
-                    ""
-                };
-                message.push_str(&format!(
-                    " Facility stopping assistance armed. {lane_action}It stops at the entrance \
-                     once the ramp control is clear."
-                ));
+                message.push_str(
+                    " Facility stopping assistance armed. It stops at the entrance once the \
+                     ramp control is clear.",
+                );
             } else {
                 message.push_str(" Stop at the entrance.");
             }
@@ -510,10 +509,9 @@ impl DrivingState {
 
     /// `_reset_exit_lane_state()`.
     pub fn reset_exit_lane_state(&mut self) {
-        self.exit_lane_alignment = 0.0;
-        self.exit_lane_prompt_said = false;
-        self.exit_lane_ready_said = false;
-        self.exit_lane_lost_s = 0.0;
+        self.exit_lane_entered = false;
+        self.exit_taper_said = false;
+        self.lane.exit_lane_open = false;
         self.exit_cancel_armed = false;
         self.exit_right_hold_s = 0.0;
         self.exit_right_taps = 0;
@@ -521,15 +519,36 @@ impl DrivingState {
         self.exit_countdown_said.clear();
     }
 
-    /// `_exit_lane_ready()`.
+    /// In the rightmost travel lane, or changing into it: the only lane the
+    /// exit lane opens beside.
+    pub fn in_right_lane_for_exit(&self) -> bool {
+        self.lane.lane == 0 || self.lane_change_target == Some(0)
+    }
+
+    /// Whether the truck is in the exit lane.
+    ///
+    /// The exit lane is the deceleration lane: an auxiliary lane with no
+    /// through traffic that opens beside the right lane at its taper, just
+    /// ahead of the gore. A driver moves to the rightmost travel lane on the
+    /// approach, stays centred there, and moves into the exit lane only where
+    /// it opens (MUTCD 11th ed. 2E.23 and 2E.25). This used to be a lateral
+    /// offset inside the right lane that had to be held for miles, which had
+    /// the driver pushing at the shoulder the whole approach and drifting in
+    /// and out of "set" -- and the overcorrection off that edge carried a
+    /// truck across into the left lane and back onto the right lane's traffic
+    /// (owner's drive, I-70 East into Denver West, 2026-09-24).
     pub fn exit_lane_ready(&self) -> bool {
-        // Ramps peel off the right lane: no amount of in-lane alignment
-        // helps from the left lane, and a change in progress toward the
-        // right still counts as making the gore.
-        if self.lane.lane != 0 && self.lane_change_target != Some(0) {
-            return false;
-        }
-        self.exit_lane_alignment >= EXIT_LANE_READY || self.lane.offset >= EXIT_LANE_OFFSET_READY
+        self.in_right_lane_for_exit() && self.exit_lane_entered
+    }
+
+    /// Whether an exit lane is due beside this truck: an exit it is set to
+    /// take, lane work that is the driver's, and the truck in the right lane
+    /// without having taken the lane yet.
+    pub fn exit_lane_due(&self, ctx: &GameContext, stop: &RoadStop) -> bool {
+        ctx.settings.lane_is_manual()
+            && self.exit_intent_ready(ctx, stop)
+            && self.in_right_lane_for_exit()
+            && !self.exit_lane_entered
     }
 
     /// Distance reminders for an armed exit, every steering mode.
@@ -549,14 +568,7 @@ impl DrivingState {
         if ahead <= 0.0 {
             return;
         }
-        let milestones: &[f64] = if ctx.settings.lane_is_manual() {
-            // Players doing their own lane work get the two-mile exit-lane prep
-            // prompt; the countdown adds only the closer anchors.
-            &EXIT_COUNTDOWN_MILESTONES_MI[1..]
-        } else {
-            &EXIT_COUNTDOWN_MILESTONES_MI
-        };
-        let crossed: Vec<f64> = milestones
+        let crossed: Vec<f64> = EXIT_COUNTDOWN_MILESTONES_MI
             .iter()
             .copied()
             .filter(|m| ahead <= *m && !self.exit_countdown_said.contains(m))
@@ -590,12 +602,20 @@ impl DrivingState {
             owed.push(' ');
             owed.push_str(&self.exit_signal_instruction());
         }
-        if !self.exit_lane_ready() {
+        // The right lane, and only while the truck is not in it. The exit lane
+        // itself is asked for where it opens, at the taper.
+        if !self.in_right_lane_for_exit() {
             owed.push_str(if ctx.settings.lane_is_automated() {
                 " Tap Right to the right lane."
             } else {
-                " Steer right for the exit lane."
+                " Move to the right lane."
             });
+            if self
+                .active_exit_pressure(stop)
+                .is_some_and(|p| p.intensity >= 0.35)
+            {
+                owed.push_str(" Traffic is tight.");
+            }
         }
         ctx.audio.play_with("ui/notify", 0.6, 0.0);
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
@@ -609,10 +629,20 @@ impl DrivingState {
         // step like every other assist's pedal; it stands itself down off
         // the deceleration lane.
         self.update_deceleration_lane(ctx);
+        // The lane pass ran first this frame: a steer across the line the
+        // exit lane opened is the truck in it. The lane is reopened below only
+        // while it still stands.
+        let steered_in = std::mem::take(&mut self.lane.entered_exit_lane);
+        self.lane.exit_lane_open = false;
         let Some(stop) = self.exit_stop.clone() else {
             self.reset_exit_lane_state();
             return;
         };
+        if steered_in && self.ramp_mi.is_none() {
+            self.exit_lane_entered = true;
+            let volume = 1.0f64.min(0.7 * self.cue_loudness(ctx));
+            ctx.audio.play_with("vehicle/lane_line_cross", volume, 0.6);
+        }
         if self.ramp_mi.is_some() {
             self.reset_exit_lane_state();
             return;
@@ -642,12 +672,29 @@ impl DrivingState {
             return;
         }
 
+        // The exit lane opens at its taper, just ahead of the gore, and stays
+        // open through the gore window. The cab calls it once, where the exit
+        // direction sign stands; before that there is nothing to steer into,
+        // and a truck already in the right lane is told nothing at all.
+        let due = self.exit_lane_due(ctx, &stop) && ahead <= EXIT_TAPER_MI;
+        if due && !self.exit_taper_said {
+            self.exit_taper_said = true;
+            ctx.audio.play_with("ui/notify", 0.6, 0.0);
+            // Never handed back once the truck is in the lane (the take line
+            // cuts it) or past the end of the gore window.
+            let window_end = stop.at_mi + EXIT_COMMIT_WINDOW_MI;
+            let mut opts =
+                SayEvent::new().valid(move || !live::on_ramp() && live::position_mi() < window_end);
+            opts.category = Some(SpeechCategory::Navigation);
+            ctx.say_event_with("Exit lane opening. Steer right into it.", opts);
+        }
+        self.lane.exit_lane_open = due && self.exit_taper_said;
+
         let right = ctx.bindings.pressed(&ctx.input, Action::SteerRight);
-        let left = ctx.bindings.pressed(&ctx.input, Action::SteerLeft);
         // A quick tap is how full-lane-keeping players change lanes; when the
-        // lane work is yours it only nudges the wheel and the exit lane never
-        // builds. Two taps on one approach earn the how-to, once, so the
-        // silence never reads as broken keys.
+        // lane work is yours it only nudges the wheel and never reaches the
+        // exit lane. Two taps at an open exit lane earn the how-to, once, so
+        // the silence never reads as broken keys.
         if right {
             self.exit_right_hold_s += dt;
         } else {
@@ -656,90 +703,15 @@ impl DrivingState {
             }
             self.exit_right_hold_s = 0.0;
         }
-        if self.exit_right_taps >= 2
-            && self.exit_lane_alignment < EXIT_LANE_READY
-            && !self.exit_tap_hint_said
-        {
+        if self.exit_right_taps >= 2 && self.lane.exit_lane_open && !self.exit_tap_hint_said {
             self.exit_tap_hint_said = true;
             self.say_plain(
                 ctx,
                 "Taps only nudge the wheel. Hold Right to steer into the exit lane.",
             );
         }
-        if right {
-            self.exit_lane_alignment += dt / 1.2;
-        } else if left {
-            self.exit_lane_alignment -= dt / 0.8;
-        } else if self.exit_lane_ready_said
-            && self.exit_lane_alignment >= EXIT_LANE_READY
-            && self.lane.offset >= -0.25
-        {
-            self.exit_lane_alignment = self.exit_lane_alignment.max(EXIT_LANE_READY);
-        } else if self.lane.offset >= EXIT_LANE_OFFSET_READY {
-            self.exit_lane_alignment += dt / 2.0;
-        } else if self.lane.offset < -0.25 {
-            self.exit_lane_alignment -= dt / 0.8;
-        } else {
-            self.exit_lane_alignment -= dt / 4.0;
-        }
-        self.exit_lane_alignment = self.exit_lane_alignment.clamp(0.0, 1.0);
-
-        if ahead > 0.0 && ahead <= EXIT_LANE_PREP_MI && !self.exit_lane_prompt_said {
-            self.exit_lane_prompt_said = true;
-            let pressure = self.active_exit_pressure(&stop);
-            let pressure_text = if pressure.is_some_and(|p| p.intensity >= 0.35) {
-                " Traffic is tight."
-            } else {
-                ""
-            };
-            // The lane, not a speed: the ramp's number is braked for past the
-            // gore, and asking for it two miles out is what had drivers
-            // crawling down the through lane (realistic exit, 2026-09-24).
-            let distance = ctx.settings.distance_text(ahead, true);
-            let mut opts = SayEvent::queued().priority(EventPriority::Route);
-            opts.category = Some(SpeechCategory::Navigation);
-            ctx.say_event_with(
-                format!("Exit lane in {distance}. Steer right for the exit lane.{pressure_text}"),
-                opts,
-            );
-        }
-        if ahead > 0.0
-            && ahead <= EXIT_LANE_PREP_MI
-            && self.exit_lane_ready()
-            && !self.exit_lane_ready_said
-        {
-            self.exit_lane_ready_said = true;
-            ctx.audio.play_with("ui/notify", 0.6, 0.0);
-            self.say_plain(ctx, "Exit lane set.");
-        } else if ahead > 0.0 && self.exit_lane_ready_said && !self.exit_lane_ready() {
-            // "Exit lane set." is a promise, and it was being broken in
-            // silence: wander left out of the lane it was said about and the
-            // alignment decays, or cross into the left lane and it is gone
-            // outright, with nothing said either way until "You missed the
-            // exit. You were not in the exit lane." at the gore (agent drive
-            // into Payson, 2026-09-19 -- the second miss of the same exit).
-            //
-            // A standing condition that ends says so, the way going off the
-            // pavement and coming back does. Clearing the latch also lets the
-            // lane be re-earned and "Exit lane set." mean something again.
-            //
-            // Debounced, because the readiness it answers to is a hair-trigger:
-            // the hold that pins the alignment releases at a quarter of a lane
-            // left of centre, and one frame of decay past it reads as lost. A
-            // truck wandering across that line on partial lane keeping would
-            // otherwise announce the lane lost and set several times in a
-            // straight mile.
-            self.exit_lane_lost_s += dt;
-            if self.exit_lane_lost_s >= EXIT_LANE_LOST_S {
-                self.exit_lane_ready_said = false;
-                self.exit_lane_lost_s = 0.0;
-                ctx.audio.play("ui/warning");
-                self.say_plain(ctx, "Exit lane lost. Steer right again.");
-            }
-        } else {
-            self.exit_lane_lost_s = 0.0;
-        }
-        // No line at the gore. It used to say "Stay under" the ramp's number,
+        // No "Exit lane set" or "lost": crossing into the lane is the truck
+        // taking the exit, and "You take" says so. No line at the gore. It used to say "Stay under" the ramp's number,
         // which the gate itself never asked for (it accepts road speed), and
         // the ramp's speed belongs past the gore anyway, where taking the
         // ramp names it. Without the number all it restated was the half-mile
@@ -820,16 +792,19 @@ impl DrivingState {
         self.assist_exit_slowing_said = true;
         // Never name a key this driver's settings do not give them: with lane
         // drift off a tap changes lanes, and holding Right does nothing.
-        let lane_text = if ctx.settings.lane_is_automated() {
-            "Tap Right to the right lane."
+        // And only a lane the truck is not already in.
+        let lane_text = if self.in_right_lane_for_exit() {
+            ""
+        } else if ctx.settings.lane_is_automated() {
+            " Tap Right to the right lane."
         } else {
-            "Hold Right for the exit lane."
+            " Move to the right lane."
         };
         // Never "confirm": there is no confirm action, and an X pressed to
         // obey it cancels the signal instead.
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Some(SpeechCategory::Confirmation);
-        ctx.say_event_with(format!("Exit speed assistance slowing. {lane_text}"), opts);
+        ctx.say_event_with(format!("Exit speed assistance slowing.{lane_text}"), opts);
     }
 
     /// Keep the truck at its exit floor on an approach the assist is running.
