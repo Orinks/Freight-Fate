@@ -165,6 +165,15 @@
 - **The G key gives a steep grade one length.** On a two-mile pitch it no longer says ten miles once you are on it.
 
 - **D names a steep downgrade's safe speed for your truck and load.** You hear "for the grade" after the number.
+- **Exit announcements no longer name your own Interstate as the exit.** Southbound at Ardmore, exit 31B is toward Waurika, not I-35 North.
+
+- **On facility streets the next turn is called after you are round the last.** The turn chime and the words agree again.
+
+- **A ramp-end yield names the car the crossing sounds are for.** The words and the panned traffic come from the same vehicle.
+
+- **Cruise says what grade it is easing for, and stays quiet over a crest.**
+
+- **Route status on city streets starts with a capital, and the live weather Conditions line ends with a period.**
 
 - **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
 

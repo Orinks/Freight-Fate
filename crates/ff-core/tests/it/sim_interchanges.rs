@@ -724,3 +724,29 @@ fn test_metric_zone_warning_uses_metric_speed_limit() {
         "{blob}"
     );
 }
+
+#[test]
+fn test_mainline_via_does_not_pollute_the_exit_label() {
+    // tools/build_interchanges.py merges every ramp near an interchange node,
+    // so this exit's record carried the I-35 North entrance ramp's signage.
+    // The cue must not send the driver "for I-35 North" toward their own road.
+    let w = world();
+    let route = route_from_cities(w, &["Oklahoma City", "Ardmore"]);
+    assert!(
+        route
+            .legs
+            .iter()
+            .any(|leg| { leg.interchanges().iter().any(|ix| ix.exit_ref == "31B") }),
+        "exit 31B missing from the Oklahoma City -> Ardmore route"
+    );
+    let trip = make_trip(w, "Oklahoma City", "Ardmore", 2);
+    let cue = trip
+        .navigation_cues
+        .iter()
+        .find(|c| c.kind == "interchange" && c.text.contains("exit 31B"))
+        .expect("an interchange cue for exit 31B");
+    assert!(cue.text.contains("toward Waurika"), "{}", cue.text);
+    assert!(!cue.text.contains("I-35 North"), "{}", cue.text);
+    assert!(!cue.text.contains("Oklahoma City"), "{}", cue.text);
+    assert!(!cue.near_text.contains("I-35 North"), "{}", cue.near_text);
+}

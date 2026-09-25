@@ -471,7 +471,14 @@ impl CrossTraffic {
     /// The gap-acceptance answer: nothing in the window, nothing about
     /// to arrive in it.
     pub fn clear_to_cross(&self) -> bool {
-        !self.occupied() && self.approaching(4.0).is_none()
+        self.blocker().is_none()
+    }
+
+    /// The vehicle that makes `clear_to_cross` false: the one in the window,
+    /// else the one about to arrive. The wait names this one, so the words
+    /// and the crossing sound are about the same car.
+    pub fn blocker(&self) -> Option<&CrossVehicle> {
+        self.occupant().or_else(|| self.approaching(4.0))
     }
 
     /// The first vehicle that will be in the conflict window at any moment

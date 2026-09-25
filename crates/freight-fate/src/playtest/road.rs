@@ -1420,6 +1420,10 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         driving.truck_mut().transmission.gear = gears;
         driving.truck_mut().grade = grade;
     }
+    // A bend whose call window the drop landed inside was heard before the
+    // handoff; a departure start at 0 mph calls nothing, so this is a no-op
+    // there but keeps the two paths identical.
+    driving.trip.settle_calls_in_hand();
     if !departure && opts.cruise > 0.0 {
         // Engage the way K does, so the session is armed exactly as a
         // player's would be rather than a hand-set field the rest of the

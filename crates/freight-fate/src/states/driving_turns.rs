@@ -403,6 +403,13 @@ impl DrivingState {
             if ahead > self.turn_window_mi() {
                 return;
             }
+            if ahead > 0.0 && self.trip.turning_through_corner() {
+                // Still round the last corner, whose chime has just sounded:
+                // this call waits for the rear to clear it, or the words name
+                // one side over the other side's chime.
+                self.pace_clock_for_turn(&cue, ahead);
+                return;
+            }
             // Either the window opened, or a resumed save arrived at the
             // corner cold. Both start the clock with the corner's own advice;
             // neither may latch a miss on first contact.

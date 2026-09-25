@@ -1161,6 +1161,39 @@ fn test_the_hold_line_is_not_replayed_once_the_gap_comes() {
     );
 }
 
+/// Agent drive, yield at exit 255 (2026-09-24): "Stopped at the yield. A car
+/// crossing from the left" was said at 4 miles per hour while the car and
+/// pickup holding the truck crossed in the right ear. The wait names the
+/// vehicle it is waiting on, and a yield is not called a stop.
+#[test]
+fn test_the_yield_wait_names_the_car_it_is_waiting_on() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = true;
+    on_ramp(&mut d, "yield", false, 0.0);
+    let mut bubble = a_car_in_the_crossroad();
+    let in_the_crossroad = &mut bubble.vehicles[0];
+    in_the_crossroad.from_side = "right";
+    in_the_crossroad.position_mi = 5.0 / 5280.0; // past the centre, still in it
+    in_the_crossroad.speed_mph = 4.0; // creeping through: there when the truck would be
+    in_the_crossroad.sound_started = true; // already heard, in the right ear
+    let mut coming = in_the_crossroad.clone();
+    coming.from_side = "left";
+    coming.position_mi = -0.03; // about three and a half seconds out
+    coming.speed_mph = 30.0;
+    coming.sound_started = false;
+    bubble.vehicles.push(coming);
+    d.cross_bubble = Some(bubble);
+    app.clear_speech();
+    d.update_ramp_terminal_assist(&mut app.ctx);
+    let lines = spoken(&app);
+    assert!(
+        lines.iter().any(|line| line
+            == "At the yield. A car crossing from the right; assistance is holding for your gap."),
+        "{lines:?}"
+    );
+}
+
 /// Same drive: "Route-transition assistance slowing." then "Route-transition
 /// assistance braking for the yield." a second later -- one assist, one act,
 /// two lines. The lift names the yield and the terminal's braking is silent.

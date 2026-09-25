@@ -46,31 +46,7 @@ impl Trip {
                 }
             }
         }
-        // Only curves already passed are certainly history.
-        for cr in &self.curves {
-            if cr.start_mi <= self.position_mi {
-                self.announced_curves.insert(format!(
-                    "curve:{}:{}",
-                    fmt_f(cr.start_mi, 3),
-                    cr.direction
-                ));
-            }
-        }
-        let pos = self.position_mi;
-        for post in self.posts.iter_mut() {
-            // A post whose watch the truck has already entered was heard
-            // before the save; one still ahead must get its cue again.
-            if post.watch_start_mi() <= pos {
-                post.announced = true;
-                self.heads_up_seen.insert(post.id());
-            }
-        }
-        for pressure in &self.traffic_pressures {
-            if pressure.start_mi <= self.position_mi {
-                self.announced_traffic_pressures
-                    .insert(traffic_pressure_key(pressure));
-            }
-        }
+        self.latch_passed_roadside();
         for (i, (start, leg)) in self
             .leg_starts
             .iter()
@@ -101,6 +77,41 @@ impl Trip {
         for (i, start) in self.leg_starts.iter().enumerate() {
             if i != 0 && self.position_mi >= *start {
                 self.announced_cities.insert(i);
+            }
+        }
+    }
+
+    /// Latch the per-mile markers the restore path and the staged-drive
+    /// settle path both owe the road already under the truck: passed curves
+    /// count as called, posts inside their watch were heard, traffic
+    /// pressures behind are old news, and the zone/timezone under the truck
+    /// is "entered" so the first frame does not announce it as new.
+    pub(crate) fn latch_passed_roadside(&mut self) {
+        // Only curves already passed are certainly history.
+        for cr in &self.curves {
+            if cr.start_mi <= self.position_mi {
+                self.announced_curves.insert(format!(
+                    "curve:{}:{}",
+                    fmt_f(cr.start_mi, 3),
+                    cr.direction
+                ));
+            }
+        }
+        let pos = self.position_mi;
+        for post in self.posts.iter_mut() {
+            // A post whose watch the truck is inside was heard before the
+            // handoff; one still ahead must get its cue, and one wholly
+            // behind has nothing left to watch -- `announced` stays "this
+            // post made a noise", it must not say a finished post spoke.
+            if post.watch_start_mi() <= pos && pos <= post.at_mi + post.reach_mi {
+                post.announced = true;
+                self.heads_up_seen.insert(post.id());
+            }
+        }
+        for pressure in &self.traffic_pressures {
+            if pressure.start_mi <= self.position_mi {
+                self.announced_traffic_pressures
+                    .insert(traffic_pressure_key(pressure));
             }
         }
         self.entered_zone = self.active_zone_at(pos);
@@ -492,13 +503,45 @@ impl Trip {
         }
     }
 
+    /// Whether the truck is still going round a street corner it has reached:
+    /// the front is past the corner by less than the truck's own length.
+    ///
+    /// The turn chime sounds as the truck reaches the corner, and the next
+    /// corner's call used to go out on the same tick, so "Turn right onto
+    /// North Freeway Road" landed on the left-turn chime of the corner being
+    /// taken, four turns out of four (agent drive, Tucson, 2026-09-24). The
+    /// next call waits until the rear is round.
+    pub fn turning_through_corner(&self) -> bool {
+        use crate::sim::cross_traffic::{COMBINATION_LENGTH_FT, TRACTOR_LENGTH_FT};
+        let length_ft = if self.truck.trailer_attached {
+            COMBINATION_LENGTH_FT
+        } else {
+            TRACTOR_LENGTH_FT
+        };
+        let clear_mi = length_ft / 5280.0;
+        self.navigation_cues.iter().any(|cue| {
+            let past = self.position_mi - cue.at_mi;
+            cue.kind == "local_turn"
+                && matches!(
+                    cue.direction.trim().to_ascii_lowercase().as_str(),
+                    "left" | "right"
+                )
+                && (0.0..clear_mi).contains(&past)
+        })
+    }
+
     pub fn check_navigation_cues(&mut self) {
         // One maneuver at a time on street chains: only the nearest
-        // not-yet-passed local turn may speak each tick.
+        // not-yet-passed local turn may speak each tick, and none ahead while
+        // the truck is still round the last one.
+        let turning = self.turning_through_corner();
         let mut next_turn_key: Option<String> = None;
         let mut next_turn_ahead: Option<f64> = None;
         for cue in &self.navigation_cues {
             if cue.kind != "local_turn" {
+                continue;
+            }
+            if turning && cue.at_mi > self.position_mi {
                 continue;
             }
             // A turn already called and already taken is done speaking. Left
