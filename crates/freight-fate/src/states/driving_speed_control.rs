@@ -54,6 +54,13 @@ pub const KEEPER_SETTLE_REAL_S: f64 = ff_core::sim::trip_models::APPROACH_SETTLE
 // costs a stretch at the lower number, arriving late costs the corner, the
 // loop-back, and the session with it.
 pub const KEEPER_EASE_DECEL_MPS2: f64 = APPROACH_DECEL_MPS2;
+// How fast the keeper builds speed on a street, for the build-and-shed test
+// between close corners (`keeper_build_and_shed_mi`). Measured on the bench,
+// not assumed (`test_the_keepers_build_rate_is_the_one_its_planner_assumes`):
+// 10 to 28 mph on the flat at 0.94 m/s2 empty and 0.49 with 18 t aboard.
+// Planned under the loaded figure, for the reason the ease plans at 0.4: a
+// build priced too fast is a corner the truck reaches over its number.
+pub const KEEPER_BUILD_MPS2: f64 = 0.4;
 // A ceiling, so a long access road is never crawled from one end.
 pub const KEEPER_EASE_MAX_MI: f64 = 0.75;
 // Scan step for the posted-limit look ahead. A city block is shorter than the
@@ -315,6 +322,12 @@ impl DrivingState {
             // which is exactly where the entrance still is. This, not the
             // pause above, is what keeps a transit pause from re-engaging on
             // the creep to the bar.
+            return;
+        }
+        if self.street_bar_mi.is_some() && self.ramp_terminal_owns_the_stop() {
+            // A light or sign on the streets the assist is stopping for or
+            // holding at: the same guard as the ramp above, for the length of
+            // that stop. Its release hands the streets back.
             return;
         }
         if self.destination_arrival_active {
@@ -591,7 +604,13 @@ impl DrivingState {
     /// The physical half of `keeper_ease_mi`: the road the keeper's shed
     /// down to `target_mph`, and its settling tail, cover at `scale`.
     pub fn keeper_shed_mi(&self, target_mph: f64, scale: f64) -> f64 {
-        let speed = self.trip.truck.speed_mph().max(1.0);
+        self.keeper_shed_from_mi(self.trip.truck.speed_mph(), target_mph, scale)
+    }
+
+    /// `keeper_shed_mi` from `from_mph` rather than the speed the truck is
+    /// doing now.
+    pub fn keeper_shed_from_mi(&self, from_mph: f64, target_mph: f64, scale: f64) -> f64 {
+        let speed = from_mph.max(1.0);
         let target = 1.0f64.max(target_mph.min(speed));
         // Net of the surge, for the reason the facility arrival is: a tank
         // the liquid can move in gives some of the rate back at the worst
@@ -603,6 +622,21 @@ impl DrivingState {
         // down at the new number, because that is where the truck spends it.
         let shed_mi = shed_s * (speed + target) / 2.0 * scale / 3600.0;
         shed_mi + KEEPER_SETTLE_REAL_S * target * scale / 3600.0
+    }
+
+    /// The road the keeper needs to build from the truck's speed up to the
+    /// street's `limit_mph` and shed back down to a corner's `advise_mph`.
+    /// Zero when there is nothing to build: at the limit, the ordinary ease
+    /// window is the whole answer.
+    pub fn keeper_build_and_shed_mi(&self, limit_mph: f64, advise_mph: f64, scale: f64) -> f64 {
+        let speed = self.trip.truck.speed_mph();
+        if limit_mph <= advise_mph || speed >= limit_mph - KEEPER_SNUB_UNDER_MPH {
+            return 0.0;
+        }
+        let from = speed / MPH_PER_MPS;
+        let to = limit_mph / MPH_PER_MPS;
+        let build_mi = (to * to - from * from) / (2.0 * KEEPER_BUILD_MPS2) / METERS_PER_MILE;
+        build_mi * scale + self.keeper_shed_from_mi(limit_mph, advise_mph, scale)
     }
 
     /// `_keeper_turn_ease_scale()`: the clock the keeper will actually ease a
@@ -646,13 +680,20 @@ impl DrivingState {
             _ => None,
         };
         let turn_scale = self.keeper_turn_ease_scale();
+        let (limit, under_reason) = self.trip.speed_limit_at(position);
         for cue in self.turn_cues_in_play() {
             let ahead = cue.at_mi - position;
             if ahead <= 0.0 {
                 continue;
             }
             let advise = self.turn_speed_mph(&cue);
-            if ahead > self.keeper_ease_mi(advise, turn_scale) {
+            // A corner too close to build back up to the street's number and
+            // shed it again is held at its own number from here: building to
+            // the limit between two corners a quarter mile apart and braking
+            // for the second at about 0.3 g in the last 0.07 mile is the
+            // see-saw the September 23 drive into Abilene measured.
+            let no_room = ahead <= self.keeper_build_and_shed_mi(limit, advise, turn_scale);
+            if ahead > self.keeper_ease_mi(advise, turn_scale) && !no_room {
                 continue;
             }
             // Every corner whose window is open, not just the nearest, and the
@@ -693,7 +734,6 @@ impl DrivingState {
                 }
             }
         }
-        let (limit, under_reason) = self.trip.speed_limit_at(position);
         // A merge taper exists for one thing: shedding to the work zone's
         // number by the barrels. Taking the taper over from cruise at its
         // start and then holding the taper's number until the ease window

@@ -39,6 +39,11 @@
 
 - **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
 
+- **City streets to a facility have traffic lights and stop signs.** Lights along one street are timed so a truck at the speed limit meets mostly greens.
+
+- **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
+
+- **Many truck stops are now down the road from their exit.** You drive from the ramp to the lot, turn in at the driveway, and stop there.
 - **Taking a bend or ramp curve too fast can roll the truck over.** A full trailer or part-filled tank goes first, and the load is lost.
 
 ### Security
@@ -47,6 +52,13 @@
 
 ### Changed
 
+- **Each city street keeps its own speed limit.** The cab says the new number when the street changes, and delivery times are planned on them.
+
+- **City streets start on the road your exit ramp meets.** The streets named and the miles to the gate are the ones from that exit.
+
+- **The gate's 15 mph no longer applies on the public street.** The street keeps its limit up to the driveway, which is a turn like any other.
+
+- **The speed keeper holds a corner's speed when the next corner is close.** It no longer speeds up between them and brakes hard.
 - **The too-fast warning for a bend now comes before it costs you anything.** It names the speed your load can take the bend at.
 
 - **Curve and exit speed assistance slow below the sign when your load needs it.** A heavy load or part-filled tank takes some curves slower.

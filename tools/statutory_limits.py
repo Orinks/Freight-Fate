@@ -1592,8 +1592,26 @@ def _validate(rows: dict[str, dict]) -> list[str]:
     return problems
 
 
+def _with_rural(rows: dict[str, dict]) -> dict[str, dict]:
+    """Each row with its outside-town half (``statutory_rural.py``) under
+    ``rural`` and the boundary its in-town default keys on as ``town_basis``."""
+    from statutory_rural import RURAL_LIMITS
+
+    out = {}
+    for state, row in rows.items():
+        rural = dict(RURAL_LIMITS[state])
+        rural["url"] = rural["url"] or row.get("url", "")
+        out[state] = {**row, "town_basis": rural.pop("town_basis"), "rural": rural}
+    return out
+
+
 def main() -> int:
+    from statutory_rural import RURAL_LIMITS
+    from statutory_rural import validate as validate_rural
+
     problems = _validate(STATUTORY_LIMITS)
+    problems += [f"{s}: no rural row" for s in STATUTORY_LIMITS if s not in RURAL_LIMITS]
+    problems += validate_rural(RURAL_LIMITS)
     if problems:
         print("REFUSING TO WRITE -- the table does not hold:")
         for problem in problems:
@@ -1610,8 +1628,10 @@ def main() -> int:
             # see at a glance how much of this layer is law and how much the
             # game will quietly fall back on.
             "unverified": total - verified,
+            "rural_verified": sum(1 for row in RURAL_LIMITS.values() if row["verified"]),
+            "rural_source": "state vehicle codes; see tools/statutory_rural.py",
         },
-        "limits": STATUTORY_LIMITS,
+        "limits": _with_rural(STATUTORY_LIMITS),
     }
     OUT_PATH.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {OUT_PATH} -- {total} states, {verified} verified, {total - verified} not")

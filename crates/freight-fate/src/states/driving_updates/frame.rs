@@ -291,7 +291,7 @@ impl DrivingState {
         // 15 mph and had to slam the rest (agent drive into Abilene,
         // 2026-09-23). Only while it still has a terminal to stop at: a press
         // left over once the ramp is behind the truck held it on its brakes.
-        let ramp_terminal_brake = if self.ramp_mi.is_some() && !self.ramp_terminal_done {
+        let ramp_terminal_brake = if self.terminal_live() && !self.ramp_terminal_done {
             self.ramp_assist_brake
         } else {
             0.0
@@ -557,6 +557,7 @@ impl DrivingState {
         if self.selected_stop_key.is_some()
             && self.trip.planned_stop_key != self.selected_stop_key
             && self.ramp_stop.is_none()
+            && self.stop_chain.is_none()
         {
             // The trip model canceled a passed plan. Do not leave explicit
             // intent or its stopping assist armed for a later optional exit.
@@ -632,6 +633,9 @@ impl DrivingState {
             if self.departure_chain {
                 // End of the origin's streets: merge onto the highway trip.
                 self.finish_departure_chain(ctx);
+            } else if self.stop_chain.is_some() {
+                // At a road stop's lot, off its own streets.
+                self.handle_stop_chain_end(ctx);
             } else if self.phase == DRIVE_PHASE_PICKUP {
                 self.handle_pickup_gate(ctx);
             } else if self.ramp_mi.is_some() {

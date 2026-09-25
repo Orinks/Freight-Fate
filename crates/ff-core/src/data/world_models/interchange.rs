@@ -27,6 +27,12 @@ use regex::Regex;
 /// the OSM ramp way leaves the motorway, at or near the gore, so a
 /// deceleration lane before the gore is NOT included. `None` when no
 /// gore matched in that direction or the bake's screen dropped the value.
+///
+/// `ramp_terminal_node_forward/backward` is the OSM node id where that same
+/// walk ends on a surface road (read from link topology), per direction: the
+/// crossroad the ramp hands the truck to, and the key of the facility street
+/// chain that starts there (`World::facility_exit_route`). `None` for a ramp
+/// ending in a merge, or where no length survived the screen.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Interchange {
     pub at_mi: f64,
@@ -44,6 +50,9 @@ pub struct Interchange {
     pub ramp_length_ft_forward: Option<f64>,
     pub ramp_length_ft_backward: Option<f64>,
     pub ramp_length_source: String,
+    pub ramp_terminal_node_forward: Option<i64>,
+    pub ramp_terminal_node_backward: Option<i64>,
+    pub ramp_terminal_source: String,
 }
 
 impl Interchange {

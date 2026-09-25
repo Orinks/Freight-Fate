@@ -127,9 +127,9 @@ Costs the drive (found 2026-09-24):
 - [x] Adaptive cruise sloshed a half-full tank on a climb: the slug now stops
       against the tank head instead of rebounding
       ([September 24](#september-24-realistic-interstate-exit)).
-- [ ] Rural roads take the in-town statutory limit: an untagged state route
-      outside town gets the district default (IA 175 at 20 near a Love's).
-      Needs an urban-area test before the fill (PR #232).
+- [x] Rural roads no longer take the in-town statutory limit: outside the
+      boundary a state's code keys on, an untagged road gets its rural
+      default (IA 175 by the Love's is 55) (PR #232).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -158,9 +158,9 @@ World data:
 
 Driving and platform:
 
-- [ ] The speed keeper builds back to the zone limit between close street
-      turns ([September 23](#september-23-agent-drive-into-abilene); fixed
-      in PR #232).
+- [x] The speed keeper holds the next turn's speed when it is too close to
+      build back up and brake again
+      ([September 23](#september-23-agent-drive-into-abilene); PR #232).
 - [ ] Drop the whole-archive Prism link once a `prismer` release vendors
       ethindp/prism#135
       ([September 21](#september-21-prism-from-the-prismer-crate)).
@@ -206,6 +206,9 @@ into the release gate. Details stay in the linked dated sections, marked
       built unasked (PR #232).
 - [ ] 3,630 road stops have no decided exit, so no street chain (PR #232).
 - [ ] 394 older facility chains still carry no street detail (PR #232).
+- [ ] 995 streets with an OSM speed tag on under half their miles take the
+      statutory fill for the whole street; splitting them needs a
+      per-stretch limit (PR #232).
 
 ### Release gate record
 
@@ -1484,11 +1487,13 @@ gate, turned up these on dev's own code.
       Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
       miles off this road by its own source note. Move it to an I-20
       Abilene leg and re-bake.
-- (Release gate) **The speed keeper between close street turns.** It builds back to
+- (Release gate) **The speed keeper between close street turns.** It built back to
       the zone limit between turns a quarter mile apart (9 to 21 mph), then
-      eases in the last 0.07 mile at about 0.3 g. Hold the lower number
-      when the next turn is inside the keeper's own build-and-shed
-      distance.
+      eased in the last 0.07 mile at about 0.3 g. It now holds the next
+      turn's advise speed when that turn is inside its own build-and-shed
+      distance (`keeper_build_and_shed_mi`; build rate 0.4 m/s2, under the
+      0.49 measured with 18 t aboard and 0.94 empty). Pinned: peak between
+      the corners at or under the second's number, under 0.2 g into it.
 
 ### September 24 realistic interstate exit
 
@@ -1708,6 +1713,134 @@ mainline behaviour.
       cruise holding five over a lowered limit is the documented design
       (`ACC_LIMIT_OFFSET_MPH`, and the driving help: "never holds more than
       five over the posted limit"), left as is.
+
+Streets from the ramp to the facility (owner order 2026-09-24). The data is
+baked (`tools/street_chain.py`, `facility_approaches.json` coverage
+`streets`), and the drive reads all of it (below).
+
+- [x] **Ramp terminal per exit.** Each exit carries the OSM node its ramp
+      ends at, per direction (`Trip::ramp_terminal_node_at`): 18,764 of the
+      20,531 directional ramp lengths; a merge has none.
+- [x] **Ramp walks end at public roads.** A service stub or driveway
+      touching a ramp mid-link no longer stands in for its crossroad
+      (Baltimore node 9879536272). Of the chains that failed on it, 65 of 404
+      "disconnected" and 74 of 248 "terminal not on the street graph"
+      recovered; 313 of the 340 still disconnected are facilities no route
+      reaches today at all.
+- [x] **One ramp rule with and without --force.** Every exit a run reaches
+      is judged from the evidence alone; the bake is a fixed point.
+- [x] **A chain from each ramp terminal.** For each leg into a city, the
+      labelled exit nearest the city end (the game's own destination-exit
+      rule) starts a chain at its terminal, kept whole
+      (`World::facility_exit_route`): 3,054 chains, 1,386 of 2,049 routed
+      facilities have one; 746 terminal-facility pairs failed (340
+      disconnected, 215 beyond the 18-mile limit, 127 terminal not on the
+      street graph -- a terminal across a state line from the facility's
+      extract, or on a motorroad -- 54 over budget, 8 yard road too long, 2
+      no road at the endpoint).
+- [x] **Posted limit per street, with its kind** (`Trip::street_limit_at`):
+      read from OSM on 49% of exit-chain miles, the state's statutory
+      district default on 40%, assumed on 11% (states with no district
+      default, and past the driveway).
+- [x] **Signals and stop signs along the chain**
+      (`Trip::street_controls_between`), read from OSM only: 25% of passed
+      intersections and 29% of turns have one on the exit chains; the rest
+      are unknown, not free. Signals dominate (35,335 against 1,473 stops,
+      880 all-way stops, 203 yields); 531 stops drawn on an intersection
+      node with no direction were left out as ambiguous.
+- [x] **Driveway** (`World::facility_driveway`): where the chain leaves the
+      public street for a service or private way, on 1,968 exit chains.
+- [x] **Older city-centre chains matched to the map.** 277 of the 671 chains
+      no re-route reproduces got their street detail by reading their own
+      streets back off OSM (`tools/chain_match.py`); 270 name a street the
+      graph no longer offers, 83 match the names but not the miles, 41 lead
+      to a replaced endpoint.
+- [x] **Road stops off an exit** (`Trip::stop_approach_route`): 1,005
+      chains from the serving exit's ramp terminal to 888 stops' lots (756
+      travel centers, 111 fuel stations, 17 service plazas, 4 truck stops),
+      893 with a driveway. Rest areas and weigh stations get none: no exit
+      is linked to them; 7 routes that never touch a public street are
+      recorded on_mainline.
+- [x] **Per-street limits in driving** (`Trip::street_zones`): one zone
+      per street at its baked limit, joined where neighbours agree; the
+      keeper, enforcement, corner advise speeds and the assists read the same
+      number. A change is said as "Speed limit raised to 40"; only a drop of
+      10 or more is warned, at the highway pacenote's lead. Chains with no
+      street detail keep the old single zone and gate zone.
+- [x] **The arrival picks its chain by the exit taken**
+      (`DrivingState::destination_terminal_node`): the exit chain from that
+      ramp terminal when one is baked, the city-centre chain otherwise.
+- [x] **The yard from the driveway** (`Leg::local_yard`, `YARD_LIMIT_MPH`
+      15, industry practice, assumed for any one yard): no 15 on a public
+      street; the driveway is a judged turn at corner speed; the gate
+      warning waits for the yard, and a gate standing on the street is
+      warned at the braking distance or six seconds, whichever is longer.
+- [x] **Street lights and signs** (`driving_events/street_controls.rs`):
+      each READ signal, stop, all-way stop and yield plays through the ramp
+      terminal's own state (`terminal_gap_mi`): light cycle, cross traffic,
+      bar countdown, route-transition assistance, and the keeper pulling
+      ahead when facility stopping assistance is on. A green is driven at
+      street speed and not spoken past; an all-way stop has no crossroad
+      traffic; the ramp terminal's own node is not played twice. Deadlines
+      and pickup ETAs plan each street at its limit (`route_planning_limit`).
+      The exit matrix gained a street chain with a red light and a stop sign.
+- [x] **Street signal timing and progression** (`street_light_plan`): a
+      90 s cycle (read range 60-150, assumed), 53 s through green (derived:
+      the coordinated phase takes what the side street leaves), 25 s side
+      street green (read range 20-40, assumed) where the chain turns at the
+      light. Signals along one street share the cycle and are offset for its
+      posted limit with a 21 s band (derived from the TTI handbook's worked
+      two-way example, 0.23 of the cycle); the light runs on the trip clock.
+      Mapped nodes within 0.03 mile are one intersection. Synthetic 10-signal
+      arterial, 5 seeds: 0-2 reds at the limit (mean 0.8), 3-5 at half of it
+      (mean 4.2). Real Dallas to Abilene Company Yard streets (exit 292B, 14
+      mapped signals), every assist on, 20 seeds: 2.55 red stops before, 2.20
+      after; most of what is left is the first light of each street and the
+      side-street turn. Sourced from FHWA-HOP-08-024 and TTI 0-6402-P1.
+- (Found along the way) **Check the street signal numbers against the Signal Timing Manual
+      2nd ed. (NCHRP 812).** Its text could not be fetched (the PDF is past
+      the fetch limit, the NAP reader serves page images); the cycle, splits
+      and band come from the two documents it builds on.
+- (Found along the way) **Street controls outbound.** A departure chain drops the READ
+      controls, which face the inbound truck. Bake the controls facing the
+      other way and play them on the way out.
+- [x] **Road stops driven through their approach chain**
+      (`begin_stop_chain`, `finish_stop_chain`): at the ramp's end a stop
+      with `Trip::stop_approach_route` for this direction swaps to its
+      streets like a facility chain -- per-street limits ("access road"
+      zones), the same street controls, the driveway turn, the lot at the
+      yard's 15 (no chain posts a sourced lot limit) -- and at the lot the
+      highway trip comes back at the exit and the stop opens as before. A
+      save on those streets saves at the exit. Stops with no chain keep the
+      ramp-end entrance. The exit matrix's free-flow truck-stop cell drives
+      a frontage road and a lot.
+- (Found along the way) **Gate and dock are one point (NOT built; owner has not decided).**
+      A real arrival stops at the check-in, drives the yard at 5 to 15 and
+      backs into a door. Recorded only; not to be built unasked.
+- (Release gate) **81 legs' exit mileage disagrees with their polyline** (rerouted
+      after their exits were discovered; Charlotte to Knoxville by a median
+      8 miles). Unpinned exits there keep old ramp data and get no terminal
+      (`ramp_length_bake.position_screen`). Re-derive their interchanges.
+- (Release gate) **In-town and rural statutory limits kept apart.** An untagged street
+      takes the in-town district default only inside the boundary its
+      state's code keys on (Census 2020 Urban Areas for a density district,
+      incorporated places for corporate limits); outside it, the state's
+      rural default for a numbered highway or a local road
+      (`tools/statutory_rural.py`, 49 cited rows; the median 55 where a code
+      sets none, labelled assumed). Each fill records its `limit_basis`. IA
+      175 by the Love's off I-35 is now 55, not 20. 2,115 street segments
+      (1,185 mi) changed.
+- (Found along the way) **Minority speed tags on a street.** 995 filled streets (1,286 mi)
+      carry an OSM maxspeed on some of their own ways but under half their
+      miles, so the fill wins for the whole street. Splitting a street into
+      read and filled stretches needs a per-stretch limit in the record.
+      (The Wichita Falls "Waurika Freeway" 30 is not this: the chain drives
+      the untagged frontage road; the 55 and 70 tags belong to the TX 79
+      main lanes, which share the name. 24 filled streets share a name only
+      with a freeway.)
+- (Found along the way) **3,630 road stops have no decided exit**, among them every travel
+      center the stop snap could not link; they get no street chain.
+- (Found along the way) **394 older chains still carry no street detail** (above).
 
 ## 1.10 planned -- the working week and home
 

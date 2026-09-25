@@ -442,11 +442,17 @@ impl DrivingState {
 
     /// Whether this delivery's ramp hands off to a street chain rather than
     /// ending at the gate (see `destination_street_chain_ahead`).
+    ///
+    /// A road stop with its own streets from the exit to its lot continues
+    /// the same way (`begin_stop_chain`).
     pub(crate) fn ramp_continues_to_destination_streets(&mut self, ctx: &GameContext) -> bool {
-        self.ramp_stop
-            .as_ref()
-            .is_some_and(|stop| stop.stop_type == "delivery_destination")
-            && self.destination_street_chain_ahead(ctx)
+        match self.ramp_stop.clone() {
+            Some(stop) if stop.stop_type == "delivery_destination" => {
+                self.destination_street_chain_ahead(ctx)
+            }
+            Some(stop) => self.stop_chain_route(&stop).is_some(),
+            None => false,
+        }
     }
 
     /// Whether facility stopping assistance can take the truck on from the
@@ -458,6 +464,13 @@ impl DrivingState {
     /// release stays the driver's. A driver who braked the pull-ahead off has
     /// said no for this ramp.
     pub(crate) fn approach_pull_ahead_available(&mut self, ctx: &GameContext) -> bool {
+        if self.on_street_control() {
+            // A light or sign on the streets: the speed keeper is what drives
+            // on from it, so the same promise needs the keeper.
+            return ctx.settings.destination_approach_assist
+                && ctx.settings.speed_keeper
+                && !self.approach_pull_ahead_canceled;
+        }
         if !ctx.settings.destination_approach_assist
             || self.ramp_stop.is_none()
             || self.approach_pull_ahead_canceled

@@ -29,8 +29,10 @@
 //!
 //! Submodules: `driving/init.rs` (`new`), `driving/snapshot.rs` (save and
 //! resume), `driving/lifecycle.rs` (enter/exit and the facade's own
-//! helpers).
+//! helpers), `driving/facade.rs` (the trip accessors, the trip swap and the
+//! `State` impl).
 
+mod facade;
 mod init;
 mod lifecycle;
 mod snapshot;
@@ -50,12 +52,7 @@ use ff_core::sim::pedal_latch::PedalLatch;
 use ff_core::sim::trip::Trip;
 use ff_core::sim::trip_models::{ExitRampLayout, RoadStop};
 use ff_core::sim::turn_guide::TurnGuide;
-use ff_core::sim::vehicle::TruckState;
-use ff_core::sim::weather::WeatherSystem;
 
-use crate::app::GameContext;
-use crate::discord_presence::PresenceState;
-use crate::states::base::{InputEvent, State};
 use crate::states::driving_core::{
     CbChatterRecall, CurveRun, Instructor, PendingAmbient, PendingSound, RigBuffs, SirenLoop,
 };
@@ -482,6 +479,17 @@ pub struct DrivingState {
     // cancel holds for the rest of this ramp.
     pub approach_pull_ahead: bool,
     pub approach_pull_ahead_canceled: bool,
+    // A street control on a facility chain, played through the ramp
+    // terminal's own state above (`driving_events/street_controls.rs`): the
+    // route mile of its stop bar while it is live, its baked kind, and the
+    // bars this trip has already played, by trip generation.
+    pub street_bar_mi: Option<f64>,
+    pub street_control_kind: String,
+    pub street_controls_played: HashSet<i64>,
+    pub street_controls_trip: u64,
+    // The live street signal's (red, green) seconds; None at a ramp end,
+    // which keeps its own timing profile. It cycles on the trip's clock.
+    pub street_light_split: Option<(f64, f64)>,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,
@@ -502,6 +510,10 @@ pub struct DrivingState {
     // arrival. The highway trip is kept for records; the active trip
     // becomes the surface route.
     pub surface_chain: bool,
+    // The road stop whose streets from its exit ramp to its lot are the trip
+    // right now (`begin_stop_chain`); the highway waits in `highway_trip`.
+    pub stop_chain: Option<RoadStop>,
+    pub stop_chain_end_said: bool,
     pub highway_trip: Option<Trip>,
     // Departure chain: the mirror. A loaded run out of a chain-capable
     // origin facility starts on its streets and merges onto the highway.
@@ -898,128 +910,9 @@ pub struct DrivingState {
     pub entered_once: bool,
 }
 
-impl DrivingState {
-    /// `self.truck`: the truck rides on the trip.
-    #[inline]
-    pub fn truck(&self) -> &TruckState {
-        &self.trip.truck
-    }
-
-    #[inline]
-    pub fn truck_mut(&mut self) -> &mut TruckState {
-        &mut self.trip.truck
-    }
-
-    /// `self.weather`: the weather system rides on the trip.
-    #[inline]
-    pub fn weather(&self) -> &WeatherSystem {
-        &self.trip.weather
-    }
-
-    #[inline]
-    pub fn weather_mut(&mut self) -> &mut WeatherSystem {
-        &mut self.trip.weather
-    }
-
-    /// Replace the active trip (surface or departure chain) and bump the
-    /// generation the turn latches compare against (`id(self.trip)`).
-    pub fn replace_trip(&mut self, trip: Trip) -> Trip {
-        self.trip_generation += 1;
-        // The keeper's "keep aiming at the corner already being slowed for"
-        // memory is a milepost on the OLD trip. Carried across the swap it
-        // held the street chain's last corner -- 20 mph, to a mile the new
-        // road reaches much later -- through the whole acceleration lane, so
-        // the truck merged at 19 into 40 mph traffic (Brandon, Waco onto
-        // TX-31, 2026-09-01: "speed keeper didn't build up to traffic
-        // speed"). The corner latches reset on the same generation bump.
-        self.keeper_ease_target = None;
-        // The curve servo is the same kind of memory and needs the same
-        // treatment: its start and hold mileposts belong to the road just
-        // swapped out. A servo armed for a bend near a destination exit is
-        // never past its hold point on a short street chain, so it stayed
-        // armed for the whole approach -- braking the surface streets down to
-        // a highway bend's advisory, and, since it now pins the clock and
-        // holds a downgrade, doing both of those on a road it never saw
-        // (review finding, 2026-09-19).
-        self.curve_servo = None;
-        self.trip.curve_shed_active = false;
-        std::mem::replace(&mut self.trip, trip)
-    }
-}
-
-// -- the State facade ---------------------------------------------------------------------
+// The accessors onto the trip, the trip swap and the `State` facade live in
+// `driving/facade.rs`.
 //
-// Forwards to the mixin modules' methods:
-//   driving_controls.rs : handle_key_event, handle_controller_event,
-//                         handle_controller_disconnect
-//   driving_updates.rs  : update_frame, tick_drive_music, apply_radio_settings_to_drive
-//   driving_events.rs   : visible_lines, presence_state, online_presence_state
-
-impl State for DrivingState {
-    // At the wheel, main-channel lines (achievements, assist notices, info
-    // replies) queue instead of cutting whatever is mid-air -- the event
-    // channel's discipline, extended to the other voice (research doc, R2).
-    fn paces_main_speech(&self) -> bool {
-        true
-    }
-
-    fn enter(&mut self, ctx: &mut GameContext) {
-        self.enter_drive(ctx);
-    }
-
-    fn exit(&mut self, ctx: &mut GameContext) {
-        self.exit_drive(ctx);
-    }
-
-    fn handle_event(&mut self, ctx: &mut GameContext, event: &InputEvent) {
-        self.handle_key_event(ctx, event);
-    }
-
-    fn handle_controller(&mut self, ctx: &mut GameContext, event: &InputEvent) {
-        self.handle_controller_event(ctx, event);
-    }
-
-    fn on_controller_disconnect(&mut self, ctx: &mut GameContext) {
-        self.handle_controller_disconnect(ctx);
-    }
-
-    fn update(&mut self, ctx: &mut GameContext, dt: f64) {
-        self.update_frame(ctx, dt);
-    }
-
-    fn lines(&self, ctx: &GameContext) -> Vec<String> {
-        self.visible_lines(ctx)
-    }
-
-    fn presence(&self, ctx: &GameContext) -> Option<PresenceState> {
-        self.presence_state(ctx)
-    }
-
-    fn online_presence(&self, ctx: &GameContext) -> Option<PresenceState> {
-        self.online_presence_state(ctx)
-    }
-
-    fn ticks_covered_music(&self) -> bool {
-        true
-    }
-
-    fn tick_covered_music(&mut self, ctx: &mut GameContext, dt: f64) {
-        self.tick_drive_music(ctx, dt);
-    }
-
-    fn applies_radio_settings(&self) -> bool {
-        true
-    }
-
-    fn apply_radio_settings_now(&mut self, ctx: &mut GameContext) {
-        self.apply_radio_settings_to_drive(ctx);
-    }
-
-    fn radio(&self) -> Option<&RadioState> {
-        Some(&self.radio)
-    }
-}
-
 // The TEMPORARY stub module that stood here while the mixins landed is gone:
 // every block in it has been deleted by the module that took it over, this
 // task's (`driving_updates.rs`) last of all.

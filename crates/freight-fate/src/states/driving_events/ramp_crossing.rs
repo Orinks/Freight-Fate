@@ -46,7 +46,7 @@ impl DrivingState {
         // behind when the terminal ended -- crossed, run, or the ramp left --
         // held the truck on its brakes for good (merge bench, 2026-09-23).
         let owns_terminal = ctx.settings.route_transition_assist
-            && self.ramp_mi.is_some()
+            && self.terminal_live()
             && !self.ramp_terminal_done
             && matches!(
                 self.ramp_control.as_str(),
@@ -57,7 +57,7 @@ impl DrivingState {
             self.ramp_assist_brake = 0.0;
             return;
         }
-        let Some(ramp_mi) = self.ramp_mi else {
+        let Some(gap_mi) = self.terminal_gap_mi() else {
             return;
         };
         if accelerating {
@@ -72,11 +72,19 @@ impl DrivingState {
             self.trip.truck.brake = 1.0;
             return;
         }
-        let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         let speed = self.trip.truck.speed_mph();
         if self.ramp_control == "signal" {
             let phase = self.ramp_light_phase();
             let must_stop = phase == "red" || (phase == "yellow" && gap_mi > 0.0);
+            if !must_stop && self.on_street_control() {
+                // A green on the streets is driven at the street's own
+                // speed: the ramp's roll target is for the turn a ramp
+                // terminal always is, and a corner here has its own call and
+                // its own speed.
+                self.ramp_assist_said = false;
+                self.ramp_assist_brake = 0.0;
+                return;
+            }
             if !must_stop {
                 // The green stands the servo down, and the NEXT red is a new
                 // take: it has to announce itself again. Left latched, a
@@ -336,9 +344,7 @@ impl DrivingState {
     /// When this truck enters the crossroad past a yield line and when its
     /// rear clears it, in seconds from now, were it doing `speed_mph` here.
     fn yield_crossing_s(&self, speed_mph: f64) -> (f64, f64) {
-        let to_line_ft = self
-            .ramp_mi
-            .map_or(0.0, |ramp_mi| (ramp_mi - RAMP_ACCESS_MI) * 5280.0);
+        let to_line_ft = self.terminal_gap_mi().map_or(0.0, |gap_mi| gap_mi * 5280.0);
         let length_ft = if self.trip.truck.trailer_attached {
             COMBINATION_LENGTH_FT
         } else {
@@ -387,7 +393,7 @@ impl DrivingState {
     }
 
     pub(crate) fn ramp_terminal_owns_the_stop(&self) -> bool {
-        self.ramp_mi.is_some()
+        self.terminal_live()
             && !self.ramp_terminal_done
             && self.ramp_light_announced
             && (self.ramp_assist_brake > 0.0
@@ -417,8 +423,8 @@ impl DrivingState {
     pub fn update_ramp_terminal(&mut self, ctx: &mut GameContext) {
         let speed = self.trip.truck.speed_mph();
         let past_bar = self
-            .ramp_mi
-            .is_some_and(|ramp_mi| ramp_mi <= RAMP_ACCESS_MI - RAMP_TERMINAL_GRACE_MI);
+            .terminal_gap_mi()
+            .is_some_and(|gap_mi| gap_mi <= -RAMP_TERMINAL_GRACE_MI);
         if self.ramp_control == "signal" {
             self.cross_traffic_light(ctx, speed, past_bar);
             return;
@@ -466,6 +472,7 @@ impl DrivingState {
                 0.4
             };
             let cue = Self::cross_vehicle_sound(vehicle.as_ref());
+            let place = self.terminal_where();
             if speed > STOP_ROLL_CLIP_MPH {
                 match met {
                     CrossMeeting::Hit => {
@@ -483,7 +490,7 @@ impl DrivingState {
                         self.say_safety_interrupt(
                             ctx,
                             &format!(
-                                "You ran the red light at the ramp end and {hit}! Total damage \
+                                "You ran the red light{place} and {hit}! Total damage \
                                  {damage:.0} percent."
                             ),
                         );
@@ -492,14 +499,16 @@ impl DrivingState {
                         ctx.audio.play_with(&cue, 1.0, pan);
                         self.say_confirmation_interrupt(
                             ctx,
-                            "You ran the red light at the ramp end. Cross traffic brakes hard and \
-                             leans on the horn.",
+                            &format!(
+                                "You ran the red light{place}. Cross traffic brakes hard and \
+                                 leans on the horn."
+                            ),
                         );
                     }
                     CrossMeeting::Empty => {
                         self.say_confirmation_interrupt(
                             ctx,
-                            "You ran the red light at the ramp end. Nothing was crossing.",
+                            &format!("You ran the red light{place}. Nothing was crossing."),
                         );
                     }
                 }
@@ -520,6 +529,11 @@ impl DrivingState {
         }
         self.ramp_terminal_done = true;
         self.ramp_waiting_at_light = false;
+        if self.on_street_control() {
+            // Through a street's green at the street's own speed: the light
+            // was named on the approach, and nothing about it is news.
+            return;
+        }
         ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
         let on_yellow = self.ramp_light_phase() == "yellow";
         let message = if speed > GREEN_ROLL_MPH {
@@ -584,6 +598,7 @@ impl DrivingState {
             -0.4
         };
         let cue = Self::cross_vehicle_sound(vehicle.as_ref());
+        let place = self.terminal_where();
         if speed > STOP_ROLL_CLIP_MPH {
             match met {
                 CrossMeeting::Hit => {
@@ -598,7 +613,7 @@ impl DrivingState {
                     self.say_safety_interrupt(
                         ctx,
                         &format!(
-                            "You blew the stop sign at the ramp end and {hit}! Total damage \
+                            "You blew the stop sign{place} and {hit}! Total damage \
                              {damage:.0} percent."
                         ),
                     );
@@ -607,27 +622,29 @@ impl DrivingState {
                     ctx.audio.play_with(&cue, 1.0, pan);
                     self.say_confirmation_interrupt(
                         ctx,
-                        "You blew the stop sign at the ramp end. Cross traffic brakes hard and \
-                         leans on the horn.",
+                        &format!(
+                            "You blew the stop sign{place}. Cross traffic brakes hard and leans \
+                             on the horn."
+                        ),
                     );
                 }
                 CrossMeeting::Empty => {
                     self.say_confirmation_interrupt(
                         ctx,
-                        "You blew the stop sign at the ramp end. The crossroad was empty.",
+                        &format!("You blew the stop sign{place}. The crossroad was empty."),
                     );
                 }
             }
         } else if met == CrossMeeting::Empty {
             self.say_confirmation_interrupt(
                 ctx,
-                "You rolled the stop sign at the ramp end. Nothing was crossing this time.",
+                &format!("You rolled the stop sign{place}. Nothing was crossing this time."),
             );
         } else {
             ctx.audio.play_with(&cue, 1.0, pan);
             self.say_confirmation_interrupt(
                 ctx,
-                "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
+                &format!("You rolled the stop sign{place}. Cross traffic leans on the horn."),
             );
         }
         self.cite_signal_run(ctx, "the stop sign", STOP_SIGN_FINE);
@@ -648,10 +665,7 @@ impl DrivingState {
         if ctx.profile.is_none() || self.enforcement_bypassed(ctx) {
             return;
         }
-        let at_mi = self
-            .ramp_stop
-            .as_ref()
-            .map_or(self.trip.position_mi, |stop| stop.at_mi);
+        let at_mi = self.terminal_seed_mi();
         let mut rng = PyRandom::new_from_str(&format!("{}:signal-run:{at_mi:.1}", self.trip_seed));
         if rng.random() >= SIGNAL_RUN_CATCH_CHANCE {
             return;
@@ -730,8 +744,8 @@ impl DrivingState {
         // arrived after the truck had gone (fix/yield-at-the-line,
         // 2026-09-24).
         let at_the_crossroad = self
-            .ramp_mi
-            .is_some_and(|ramp_mi| ramp_mi <= RAMP_ACCESS_MI - YIELD_LINE_TO_CROSSROAD_FT / 5280.0);
+            .terminal_gap_mi()
+            .is_some_and(|gap_mi| gap_mi <= -YIELD_LINE_TO_CROSSROAD_FT / 5280.0);
         if !at_the_crossroad {
             return; // still rolling down to the crossroad; the gap decides there
         }
@@ -775,10 +789,12 @@ impl DrivingState {
                 ),
             );
         } else if speed > YIELD_ROLL_MPH {
-            self.say_route_confirmation(
-                ctx,
-                &format!("Through the {noun}, far too fast. Stop at the entrance."),
-            );
+            let tail = if self.on_street_control() {
+                ""
+            } else {
+                " Stop at the entrance."
+            };
+            self.say_route_confirmation(ctx, &format!("Through the {noun}, far too fast.{tail}"));
         } else {
             let message =
                 self.terminal_release_text(ctx, &format!("Through the {noun} in a gap."), false);
@@ -804,6 +820,9 @@ impl DrivingState {
         lead: &str,
         clear: bool,
     ) -> String {
+        if self.on_street_control() {
+            return self.street_release_text(ctx, lead, clear);
+        }
         // A facility with a street chain is miles past this terminal: "the
         // entrance" there was followed by "5 miles to the facility gate"
         // (agent drive into Abilene, 2026-09-22).

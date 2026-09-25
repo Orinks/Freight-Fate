@@ -829,6 +829,22 @@ pub fn parse_interchange(
             "{from_city} to {to_city} {label} has a ramp length without a source"
         )));
     }
+    let ramp_terminal_node = |key: &str| {
+        raw.get(key)
+            .and_then(|terminal| terminal.get("node"))
+            .and_then(Value::as_i64)
+            .filter(|node| *node > 0)
+    };
+    let ramp_terminal_node_forward = ramp_terminal_node("ramp_terminal_forward");
+    let ramp_terminal_node_backward = ramp_terminal_node("ramp_terminal_backward");
+    let ramp_terminal_source = get_str(raw, "ramp_terminal_source");
+    if (ramp_terminal_node_forward.is_some() || ramp_terminal_node_backward.is_some())
+        && ramp_terminal_source.is_empty()
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} {label} has a ramp terminal without a source"
+        )));
+    }
     Ok(Interchange {
         at_mi,
         exit_ref,
@@ -845,6 +861,9 @@ pub fn parse_interchange(
         ramp_length_ft_forward,
         ramp_length_ft_backward,
         ramp_length_source,
+        ramp_terminal_node_forward,
+        ramp_terminal_node_backward,
+        ramp_terminal_source,
     })
 }
 

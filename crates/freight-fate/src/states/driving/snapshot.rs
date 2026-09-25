@@ -195,7 +195,13 @@ impl DrivingState {
         out.insert("trailer_repaired".to_string(), json!(self.trailer_repaired));
         out.insert("trip_seed".to_string(), json!(self.trip_seed));
         out.insert("start_hour".to_string(), json!(self.trip.start_hour));
-        out.insert("position_mi".to_string(), json!(self.trip.position_mi));
+        // On a road stop's streets the saved place is the highway's, at the
+        // stop's exit, where a ramp in progress is saved too.
+        let position_mi = match (&self.stop_chain, &self.highway_trip) {
+            (Some(_), Some(highway)) => highway.position_mi,
+            _ => self.trip.position_mi,
+        };
+        out.insert("position_mi".to_string(), json!(position_mi));
         out.insert("game_minutes".to_string(), json!(self.trip.game_minutes));
         out.insert("toll_charges".to_string(), json!(tolls));
         out.insert("start_damage".to_string(), json!(self.start_damage));

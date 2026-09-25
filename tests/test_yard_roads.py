@@ -15,6 +15,12 @@ TOOL_PATH = Path(__file__).resolve().parents[1] / "tools" / "build_facility_appr
 YARD = "a service road"
 
 
+def in_town(_kind: str, _lat: float, _lon: float) -> bool:
+    """The fixture town judge: every fixture street is in town. The real
+    bake judges by the Census boundaries, a local download CI does not have."""
+    return True
+
+
 def _load_tool():
     spec = importlib.util.spec_from_file_location("build_facility_approaches", TOOL_PATH)
     assert spec and spec.loader
@@ -69,7 +75,11 @@ def _route(tmp_path, monkeypatch, nodes, ways, *, end: int, whole: bool = False)
     monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
     monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
     payload = tool.build_facility_approaches(
-        tmp_path, states=("Illinois",), endpoint_screen=False, accessed="2026-09-17"
+        tmp_path,
+        states=("Illinois",),
+        endpoint_screen=False,
+        accessed="2026-09-17",
+        town_judge=in_town,
     )
     return payload if whole else payload["approaches"]["fixture:warehouse"]
 

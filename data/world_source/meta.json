@@ -67,27 +67,403 @@
   },
   "ramp_length_bake": {
     "kind": "derived",
-    "measure": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a surface road or dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
+    "measure": "derived from OpenStreetMap geometry: summed node-to-node distance along this exit's motorway_link way(s), from the gore node where the ramp leaves the motorway to the nearest node where it ends (a public road -- trunk to residential, not a service or private way -- or a dead end, else a motorway merge). Starts at the OSM diverge, at or near the gore, so any deceleration lane before it is not included; direction from the ramp's first edge against the leg. Screened: under 300 ft or over 1.5 mi dropped, not clamped. Local Geofabrik extract accessed 2026-06-23: https://www.openstreetmap.org/",
     "starts_at": "the OSM node where the motorway_link way leaves the motorway way: at or near the gore (painted-gore start to physical nose, by mapper). The deceleration lane or taper lies before it and is not included.",
     "ends_at": "the nearest surface-road node or dead end along the link ways, else the merge onto another motorway",
     "exits": 18165,
-    "exits_with_length": 16882,
-    "coverage_ratio": 0.9294,
-    "directional_lengths": 21577,
+    "exits_with_length": 16253,
+    "coverage_ratio": 0.8947,
+    "directional_terminals": 18764,
+    "directional_lengths": 20531,
     "percentiles_ft": {
-      "p5": 735.1,
-      "p25": 1144.2,
-      "p50": 1473.8,
-      "p75": 1897.6,
-      "p95": 3456.3
+      "p5": 764.0,
+      "p25": 1160.7,
+      "p50": 1489.8,
+      "p75": 1918.6,
+      "p95": 3704.0
     },
     "screen": {
       "min_ft": 300.0,
       "max_ft": 7920.0,
-      "gores_measured": 21796,
-      "dropped_too_short": 172,
-      "dropped_too_long": 47,
+      "gores_measured": 20712,
+      "dropped_too_short": 128,
+      "dropped_too_long": 53,
       "no_terminal_reached": 0
+    },
+    "position_screen": {
+      "rule": "derived: per leg, the median gap between each labelled exit's at_mi and the nearest same-ref OSM junction node on the leg's own polyline. Wider than the 1200 m far-end search radius, an exit not pinned to its own junction is not judged: it keeps its saved control and far end and gets no length or terminal. The fix is re-deriving the leg's interchange mileage, not this bake.",
+      "legs_this_run": [
+        {
+          "leg": "dallas_tx_us->st_louis_mo_us",
+          "median_gap_mi": 184.15
+        },
+        {
+          "leg": "rochester_ny_us->new_york_ny_us",
+          "median_gap_mi": 71.07
+        },
+        {
+          "leg": "burlington_vt_us->manchester_nh_us",
+          "median_gap_mi": 31.77
+        },
+        {
+          "leg": "buffalo_ny_us->new_york_ny_us",
+          "median_gap_mi": 24.32
+        },
+        {
+          "leg": "washington_dc_us->philadelphia_pa_us",
+          "median_gap_mi": 13.48
+        },
+        {
+          "leg": "hartford_ct_us->new_york_ny_us",
+          "median_gap_mi": 10.85
+        },
+        {
+          "leg": "montpelier_vt_us->manchester_nh_us",
+          "median_gap_mi": 9.23
+        },
+        {
+          "leg": "portsmouth_nh_us->manchester_nh_us",
+          "median_gap_mi": 8.79
+        },
+        {
+          "leg": "charlotte_nc_us->knoxville_tn_us",
+          "median_gap_mi": 8.75
+        },
+        {
+          "leg": "worcester_ma_us->new_york_ny_us",
+          "median_gap_mi": 7.82
+        },
+        {
+          "leg": "nashville_tn_us->atlanta_ga_us",
+          "median_gap_mi": 6.92
+        },
+        {
+          "leg": "champaign_il_us->indianapolis_in_us",
+          "median_gap_mi": 3.99
+        },
+        {
+          "leg": "providence_ri_us->new_york_ny_us",
+          "median_gap_mi": 3.74
+        },
+        {
+          "leg": "valencia_ca_us->victorville_ca_us",
+          "median_gap_mi": 3.49
+        },
+        {
+          "leg": "portland_or_us->seattle_wa_us",
+          "median_gap_mi": 3.48
+        },
+        {
+          "leg": "philadelphia_pa_us->baltimore_md_us",
+          "median_gap_mi": 3.28
+        },
+        {
+          "leg": "milwaukee_wi_us->fond_du_lac_wi_us",
+          "median_gap_mi": 2.95
+        },
+        {
+          "leg": "wausau_wi_us->madison_wi_us",
+          "median_gap_mi": 2.93
+        },
+        {
+          "leg": "tallahassee_fl_us->jacksonville_fl_us",
+          "median_gap_mi": 2.82
+        },
+        {
+          "leg": "allentown_pa_us->bridgeport_ct_us",
+          "median_gap_mi": 2.79
+        },
+        {
+          "leg": "wilmington_de_us->baltimore_md_us",
+          "median_gap_mi": 2.58
+        },
+        {
+          "leg": "green_bay_wi_us->grand_rapids_mi_us",
+          "median_gap_mi": 2.51
+        },
+        {
+          "leg": "atlanta_ga_us->birmingham_al_us",
+          "median_gap_mi": 2.42
+        },
+        {
+          "leg": "atlanta_ga_us->dallas_tx_us",
+          "median_gap_mi": 2.26
+        },
+        {
+          "leg": "chicago_il_us->indianapolis_in_us",
+          "median_gap_mi": 2.26
+        },
+        {
+          "leg": "idaho_falls_id_us->twin_falls_id_us",
+          "median_gap_mi": 2.06
+        },
+        {
+          "leg": "denver_co_us->albuquerque_nm_us",
+          "median_gap_mi": 2.05
+        },
+        {
+          "leg": "new_haven_ct_us->new_york_ny_us",
+          "median_gap_mi": 2.03
+        },
+        {
+          "leg": "fayetteville_nc_us->rocky_mount_nc_us",
+          "median_gap_mi": 1.96
+        },
+        {
+          "leg": "norfolk_va_us->raleigh_nc_us",
+          "median_gap_mi": 1.92
+        },
+        {
+          "leg": "indianapolis_in_us->fort_wayne_in_us",
+          "median_gap_mi": 1.91
+        },
+        {
+          "leg": "green_bay_wi_us->madison_wi_us",
+          "median_gap_mi": 1.89
+        },
+        {
+          "leg": "baltimore_md_us->richmond_va_us",
+          "median_gap_mi": 1.86
+        },
+        {
+          "leg": "richmond_in_us->dayton_oh_us",
+          "median_gap_mi": 1.85
+        },
+        {
+          "leg": "cincinnati_oh_us->indianapolis_in_us",
+          "median_gap_mi": 1.83
+        },
+        {
+          "leg": "north_port_fl_us->fort_myers_fl_us",
+          "median_gap_mi": 1.71
+        },
+        {
+          "leg": "des_moines_ia_us->kansas_city_mo_us",
+          "median_gap_mi": 1.71
+        },
+        {
+          "leg": "conway_ar_us->russellville_ar_us",
+          "median_gap_mi": 1.62
+        },
+        {
+          "leg": "davenport_ia_us->rockford_il_us",
+          "median_gap_mi": 1.6
+        },
+        {
+          "leg": "memphis_tn_us->nashville_tn_us",
+          "median_gap_mi": 1.58
+        },
+        {
+          "leg": "newport_ri_us->new_haven_ct_us",
+          "median_gap_mi": 1.53
+        },
+        {
+          "leg": "parkersburg_wv_us->charleston_wv_us",
+          "median_gap_mi": 1.53
+        },
+        {
+          "leg": "allentown_pa_us->baltimore_md_us",
+          "median_gap_mi": 1.52
+        },
+        {
+          "leg": "clarksville_tn_us->huntsville_al_us",
+          "median_gap_mi": 1.49
+        },
+        {
+          "leg": "milwaukee_wi_us->chicago_il_us",
+          "median_gap_mi": 1.41
+        },
+        {
+          "leg": "las_cruces_nm_us->midland_tx_us",
+          "median_gap_mi": 1.4
+        },
+        {
+          "leg": "los_angeles_ca_us->san_diego_ca_us",
+          "median_gap_mi": 1.39
+        },
+        {
+          "leg": "temple_tx_us->waco_tx_us",
+          "median_gap_mi": 1.39
+        },
+        {
+          "leg": "rock_springs_wy_us->salt_lake_city_ut_us",
+          "median_gap_mi": 1.39
+        },
+        {
+          "leg": "washington_dc_us->richmond_va_us",
+          "median_gap_mi": 1.38
+        },
+        {
+          "leg": "newark_nj_us->new_york_ny_us",
+          "median_gap_mi": 1.29
+        },
+        {
+          "leg": "st_louis_mo_us->nashville_tn_us",
+          "median_gap_mi": 1.28
+        },
+        {
+          "leg": "sacramento_ca_us->reno_nv_us",
+          "median_gap_mi": 1.26
+        },
+        {
+          "leg": "wichita_ks_us->kansas_city_mo_us",
+          "median_gap_mi": 1.26
+        },
+        {
+          "leg": "portland_me_us->manchester_nh_us",
+          "median_gap_mi": 1.23
+        },
+        {
+          "leg": "charlotte_nc_us->atlanta_ga_us",
+          "median_gap_mi": 1.22
+        },
+        {
+          "leg": "morgantown_wv_us->cumberland_md_us",
+          "median_gap_mi": 1.22
+        },
+        {
+          "leg": "detroit_mi_us->chicago_il_us",
+          "median_gap_mi": 1.21
+        },
+        {
+          "leg": "corpus_christi_tx_us->mcallen_tx_us",
+          "median_gap_mi": 1.19
+        },
+        {
+          "leg": "athens_ga_us->chattanooga_tn_us",
+          "median_gap_mi": 1.17
+        },
+        {
+          "leg": "atlantic_city_nj_us->philadelphia_pa_us",
+          "median_gap_mi": 1.15
+        },
+        {
+          "leg": "indianapolis_in_us->anderson_in_us",
+          "median_gap_mi": 1.14
+        },
+        {
+          "leg": "ruston_la_us->monroe_la_us",
+          "median_gap_mi": 1.14
+        },
+        {
+          "leg": "dallas_tx_us->albuquerque_nm_us",
+          "median_gap_mi": 1.13
+        },
+        {
+          "leg": "cape_coral_fl_us->tampa_fl_us",
+          "median_gap_mi": 1.06
+        },
+        {
+          "leg": "harrisburg_pa_us->philadelphia_pa_us",
+          "median_gap_mi": 1.05
+        },
+        {
+          "leg": "portland_or_us->salt_lake_city_ut_us",
+          "median_gap_mi": 1.03
+        },
+        {
+          "leg": "longview_wa_us->portland_or_us",
+          "median_gap_mi": 1.03
+        },
+        {
+          "leg": "little_rock_ar_us->oklahoma_city_ok_us",
+          "median_gap_mi": 0.99
+        },
+        {
+          "leg": "santa_ana_ca_us->valencia_ca_us",
+          "median_gap_mi": 0.92
+        },
+        {
+          "leg": "rocky_mount_nc_us->petersburg_va_us",
+          "median_gap_mi": 0.92
+        },
+        {
+          "leg": "hammond_la_us->new_orleans_la_us",
+          "median_gap_mi": 0.88
+        },
+        {
+          "leg": "kansas_city_mo_us->denver_co_us",
+          "median_gap_mi": 0.88
+        },
+        {
+          "leg": "buffalo_ny_us->cleveland_oh_us",
+          "median_gap_mi": 0.88
+        },
+        {
+          "leg": "las_vegas_nv_us->los_angeles_ca_us",
+          "median_gap_mi": 0.85
+        },
+        {
+          "leg": "tampa_fl_us->miami_fl_us",
+          "median_gap_mi": 0.84
+        },
+        {
+          "leg": "san_jose_ca_us->sacramento_ca_us",
+          "median_gap_mi": 0.83
+        },
+        {
+          "leg": "riverside_ca_us->valencia_ca_us",
+          "median_gap_mi": 0.82
+        },
+        {
+          "leg": "pocatello_id_us->twin_falls_id_us",
+          "median_gap_mi": 0.79
+        },
+        {
+          "leg": "fort_smith_ar_us->little_rock_ar_us",
+          "median_gap_mi": 0.77
+        },
+        {
+          "leg": "sheboygan_wi_us->green_bay_wi_us",
+          "median_gap_mi": 0.76
+        }
+      ],
+      "exits_withheld": 1113
+    }
+  },
+  "stop_approach_bake": {
+    "kind": "derived",
+    "source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources",
+    "stops": {
+      "stops": 4591,
+      "no_serving_exit": 3630,
+      "exit_has_no_terminal": 17,
+      "no_read_coordinates": 20
+    },
+    "chains": 1005,
+    "chains_with_driveway": 893,
+    "terminals_failed": {
+      "disconnected": 30,
+      "no_start_road": 5,
+      "on_mainline": 7,
+      "terminal_off_graph": 10
+    },
+    "by_type": {
+      "fuel_station": {
+        "stops": 1126,
+        "with_chain": 111
+      },
+      "public_rest_area": {
+        "stops": 682
+      },
+      "service_plaza": {
+        "stops": 228,
+        "with_chain": 17
+      },
+      "travel_center": {
+        "stops": 2400,
+        "with_chain": 756
+      },
+      "truck_parking": {
+        "stops": 22
+      },
+      "truck_stop": {
+        "stops": 46,
+        "with_chain": 4
+      },
+      "weigh_station": {
+        "stops": 87
+      }
     }
   }
 }

@@ -9,6 +9,8 @@
 //! 2. At or under the exit speed where the ramp curve begins.
 //! 3. A clean terminal: nothing run, nothing crossed "far too fast".
 //! 4. An arrival: no missed exit, no strand, no crawl far from the stop.
+//!    On the streets, the light and the stop sign are stops too: nothing
+//!    run there either, and the assists drive on from them.
 //! 5. No line naming an assist that is off, or a key this lane keeping
 //!    does not give the driver.
 //!
@@ -28,7 +30,8 @@
 
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{
-    CorridorDetail, GradeSegment, Interchange, Leg, Route, SpeedLimitSample,
+    CorridorDetail, Driveway, ExitChain, GradeSegment, Interchange, Leg, LocalGeometrySegment,
+    Route, SpeedLimitSample, Stop, StreetControl, StreetLimit,
 };
 use ff_core::settings::Settings;
 use ff_core::sim::trip::{Trip, TripOptions};
@@ -47,15 +50,16 @@ use freight_fate::states::driving_rest_states::RestStopState;
 use crate::states_driving_approach_sweep::{destinations, driver_target_mph};
 use crate::transcript_cruise_support::{quiet, MPS_PER_MPH};
 
-const DT: f64 = 1.0 / 30.0;
+pub(crate) const DT: f64 = 1.0 / 30.0;
 const MPH_PER_MPS: f64 = 2.23694;
-const STOP_MI: f64 = 40.0;
+pub(crate) const STOP_MI: f64 = 40.0;
+const STOP_TERMINAL_NODE: i64 = 4242;
 const ROAD_MPH: f64 = 70.0;
 /// The driver brakes only past this: a firm, late stop.
 const DRIVER_LATE_MPS2: f64 = 2.0;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Preset {
+pub(crate) enum Preset {
     None,
     Cruise,
     ExitSpeed,
@@ -80,7 +84,7 @@ const PRESETS: [Preset; 9] = [
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Kind {
+pub(crate) enum Kind {
     SignalRed,
     SignalGreen,
     StopSign,
@@ -88,9 +92,13 @@ enum Kind {
     FreeFlow5x,
     ShortMeasured,
     DestinationChain,
+    /// The destination's streets with a traffic light (red until the truck
+    /// is stopped at it) and a stop sign on them, played through the ramp
+    /// terminal's own rules.
+    StreetChain,
 }
 
-const KINDS: [Kind; 7] = [
+const KINDS: [Kind; 8] = [
     Kind::SignalRed,
     Kind::SignalGreen,
     Kind::StopSign,
@@ -98,6 +106,7 @@ const KINDS: [Kind; 7] = [
     Kind::FreeFlow5x,
     Kind::ShortMeasured,
     Kind::DestinationChain,
+    Kind::StreetChain,
 ];
 
 impl Preset {
@@ -151,8 +160,12 @@ impl Kind {
             Kind::SignalRed | Kind::SignalGreen => "signal",
             Kind::StopSign | Kind::ShortMeasured => "stop",
             Kind::Yield => "yield",
-            Kind::FreeFlow5x | Kind::DestinationChain => "none",
+            Kind::FreeFlow5x | Kind::DestinationChain | Kind::StreetChain => "none",
         }
+    }
+
+    fn chain(self) -> bool {
+        matches!(self, Kind::DestinationChain | Kind::StreetChain)
     }
 
     fn time_scale(self) -> f64 {
@@ -182,8 +195,64 @@ fn bench(d: &mut DrivingState, kind: Kind) {
         // The shortest the bake reports in earnest: the run to the bar is
         // then only the Green Book stopping distance.
         ramp_length_ft_forward: (kind == Kind::ShortMeasured).then_some(300.0),
+        // The free-flow exit ends on a crossroad the stop's own streets
+        // leave from.
+        ramp_terminal_node_forward: (kind == Kind::FreeFlow5x).then_some(STOP_TERMINAL_NODE),
+        ramp_terminal_source: if kind == Kind::FreeFlow5x {
+            "test bench".to_string()
+        } else {
+            String::new()
+        },
         ..Default::default()
     };
+    // Its truck stop lies down that crossroad: a 45 mph frontage road, then a
+    // right onto the service road into the lot.
+    let mut stop_record = Stop {
+        name: "Prairie Travel Center".to_string(),
+        at_mi: STOP_MI,
+        exit_ref: "42".to_string(),
+        interchange_mi: Some(STOP_MI),
+        ..Default::default()
+    };
+    if kind == Kind::FreeFlow5x {
+        stop_record.approach_chains = vec![ExitChain {
+            terminal_node: STOP_TERMINAL_NODE,
+            total_miles: 0.5,
+            segments: vec![
+                LocalGeometrySegment {
+                    road: "Prairie Frontage Road".to_string(),
+                    miles: 0.4,
+                    cue: "Start on Prairie Frontage Road.".to_string(),
+                    speed_mph: 45.0,
+                    limit: Some(StreetLimit {
+                        mph: 45.0,
+                        source: "read".to_string(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                LocalGeometrySegment {
+                    road: "a service road".to_string(),
+                    miles: 0.1,
+                    cue: "Turn right onto a service road.".to_string(),
+                    speed_mph: 15.0,
+                    turn_deg: 90.0,
+                    limit: Some(StreetLimit {
+                        mph: 15.0,
+                        source: "assumed".to_string(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+            ],
+            driveway: Some(Driveway {
+                at_mi: 0.4,
+                kind: "service_road".to_string(),
+                source: "test bench".to_string(),
+                ..Default::default()
+            }),
+        }];
+    }
     let detail = CorridorDetail {
         speed_limits: vec![SpeedLimitSample {
             at_mi: 0.0,
@@ -195,7 +264,7 @@ fn bench(d: &mut DrivingState, kind: Kind) {
         interchanges: vec![interchange],
         ..Default::default()
     };
-    let leg = Leg::new(&city, &city, miles, "I 90", "flat", Vec::new()).with_detail(detail);
+    let leg = Leg::new(&city, &city, miles, "I 90", "flat", vec![stop_record]).with_detail(detail);
     let route = Route::from_legs(vec![city.clone(), city], vec![leg]);
     let truck = d.trip.truck.clone();
     let mut weather = WeatherSystem::new("heartland", Some(3), None, None, true);
@@ -231,9 +300,9 @@ fn bench(d: &mut DrivingState, kind: Kind) {
     d.trip.position_mi = STOP_MI - 2.0;
 }
 
-fn start(preset: Preset, kind: Kind) -> PlaytestHarness {
+pub(crate) fn start(preset: Preset, kind: Kind) -> PlaytestHarness {
     let mut harness = PlaytestHarness::new();
-    if kind == Kind::DestinationChain {
+    if kind.chain() {
         let world = get_world();
         let (chain, _) = destinations(world, 1);
         let destination = chain.first().expect("a chain facility").clone();
@@ -299,6 +368,9 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
     let assist_braking = d.truck().brake > 0.01;
     let Some(ramp_mi) = d.ramp_mi else {
         if d.surface_chain || d.trip.is_facility_approach_route() {
+            if let Some(keys) = street_bar_keys(d, preset, braking) {
+                return keys;
+            }
             // The streets: the posted number, the corner's advise speed, and
             // a stop at the gate, braked for late.
             if d.destination_arrival_active || d.keeper_mph.is_some() || d.cruise_mph.is_some() {
@@ -373,7 +445,12 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
             creep = true;
         }
     } else {
-        let continues = kind == Kind::DestinationChain;
+        // The ramp's end hands off to streets for a chain facility and for a
+        // road stop with its own streets to its lot.
+        let continues = kind.chain()
+            || d.ramp_stop
+                .clone()
+                .is_some_and(|stop| d.stop_chain_route(&stop).is_some());
         if continues {
             // The ramp's end hands off to the streets: no stop there.
             cruise_to = 20.0;
@@ -402,6 +479,82 @@ fn driver_keys(d: &mut DrivingState, preset: Preset, kind: Kind, braking: bool) 
         && speed < cruise_to - 3.0
         && (d.ramp_terminal_done || bar_mi > 0.03);
     (brake, go)
+}
+
+/// The driver at a light or sign on the streets, or None when there is none
+/// to stop for: a green is driven like the street. With route-transition
+/// assistance on the assist makes the stop and the driver stays off the
+/// pedals unless it is late; on their own they brake late for the bar, wait
+/// out a red or a gap, and pull away.
+fn street_bar_keys(d: &mut DrivingState, preset: Preset, braking: bool) -> Option<(bool, bool)> {
+    if d.street_bar_mi.is_none() || d.ramp_terminal_done || !d.ramp_light_announced {
+        return None;
+    }
+    let gap = d.terminal_gap_mi()?;
+    let speed = d.truck().speed_mph();
+    let assist_braking = d.truck().brake > 0.01;
+    let control = d.ramp_control.clone();
+    let phase = d.ramp_light_phase();
+    let clear = if control == "yield" {
+        d.yield_gap_clear()
+    } else {
+        d.cross_bubble
+            .as_ref()
+            .is_none_or(|bubble| bubble.clear_to_cross())
+    };
+    if control == "signal" && phase == "green" {
+        return None;
+    }
+    let demand = needed(speed, 0.0, gap.max(0.0));
+    if speed <= RED_STOP_MPH && gap < 0.03 {
+        let waiting = match control.as_str() {
+            "signal" => true,
+            "yield" => !clear,
+            _ => d.ramp_waiting_at_sign && !clear,
+        };
+        if waiting || (preset.transition() && d.ramp_assist_said) {
+            return Some((!assist_braking && !preset.transition(), false));
+        }
+        return Some((
+            false,
+            speed < 2.0 && !assist_braking && !d.approach_pull_ahead,
+        ));
+    }
+    let brake = demand > DRIVER_LATE_MPS2 || (braking && demand > 0.5);
+    // Up to the bar on a gentle stop profile, and off the throttle once an
+    // assist has said it is braking for it.
+    let terminal_owned = d.ramp_assist_said && speed > RED_STOP_MPH;
+    let gentle = (2.0 * 0.8 * gap.max(0.0) * 1609.344).sqrt() * MPH_PER_MPS;
+    let go = !brake
+        && !assist_braking
+        && !terminal_owned
+        && gap > 0.03
+        && speed < gentle.min(driver_target_mph(d)) - 3.0;
+    Some((brake, go))
+}
+
+/// Put a traffic light and a stop sign on the destination's streets, in
+/// place of whatever the map has there, so every run meets the same two.
+fn lay_street_controls(d: &mut DrivingState) {
+    let streets: Vec<usize> = (1..d.trip.route.legs.len())
+        .filter(|i| !d.trip.route.legs[*i].local_yard)
+        .collect();
+    for leg in d.trip.route.legs.iter_mut() {
+        std::sync::Arc::make_mut(leg).local_controls.clear();
+    }
+    let (light, sign) = match streets.as_slice() {
+        [] => return,
+        [only] => ((*only, 0.0), (*only, d.trip.route.legs[*only].miles / 2.0)),
+        [first, second, ..] => ((*first, 0.0), (*second, 0.0)),
+    };
+    for ((leg, at_mi), kind) in [(light, "signal"), (sign, "stop")] {
+        std::sync::Arc::make_mut(&mut d.trip.route.legs[leg])
+            .local_controls
+            .push(StreetControl {
+                at_mi,
+                kind: kind.to_string(),
+            });
+    }
 }
 
 fn hold(harness: &mut PlaytestHarness, brake: bool, go: bool) {
@@ -436,7 +589,8 @@ fn drive(preset: Preset, kind: Kind) -> Run {
     let mut braking = false;
     let mut on_ramp_seen = false;
     let mut stopped_s = 0.0;
-    let budget = if kind == Kind::DestinationChain {
+    let mut laid = false;
+    let budget = if kind.chain() {
         30 * 60 * 25
     } else {
         30 * 60 * 8
@@ -475,6 +629,23 @@ fn drive(preset: Preset, kind: Kind) -> Run {
             harness.with_drive(|d, _| {
                 if !d.ramp_terminal_done {
                     d.ramp_light_offset_s = d.ramp_light_red_s() + 1.0;
+                    d.ramp_light_timer = 0.0;
+                }
+            });
+        }
+        if kind == Kind::StreetChain {
+            if !laid && harness.read_drive(|d| d.surface_chain) {
+                laid = true;
+                harness.with_drive(|d, _| lay_street_controls(d));
+            }
+            harness.with_drive(|d, _| {
+                // The street light: red until the truck is stopped at it.
+                if d.street_bar_mi.is_some()
+                    && d.ramp_control == "signal"
+                    && !d.ramp_waiting_at_light
+                    && !d.ramp_terminal_done
+                {
+                    d.ramp_light_offset_s = 0.0;
                     d.ramp_light_timer = 0.0;
                 }
             });
@@ -574,6 +745,10 @@ fn drive(preset: Preset, kind: Kind) -> Run {
                 let stop_left = match d.ramp_mi {
                     Some(mi) if !d.ramp_terminal_done => mi - RAMP_ACCESS_MI,
                     Some(mi) => mi,
+                    // A light or sign on the streets is a stop too.
+                    None if d.street_bar_mi.is_some() && !d.ramp_terminal_done => {
+                        d.terminal_gap_mi().unwrap_or(0.0)
+                    }
                     None => d.trip.remaining_miles(),
                 };
                 (
@@ -746,7 +921,21 @@ fn faults(preset: Preset, kind: Kind, run: &Run) -> Vec<String> {
             run.driver_brake_frames, run.first_driver_brake
         ));
     }
-    let _ = kind;
+    if kind == Kind::FreeFlow5x {
+        // The truck stop's own streets: off the ramp, down the frontage road,
+        // the driveway turn, and the lot.
+        for step in [
+            "Off the ramp. Start on Prairie Frontage Road",
+            "Into the lot. Lot limit 15.",
+        ] {
+            if !heard.contains(step) {
+                faults.push(format!("never heard \"{step}\""));
+            }
+        }
+    } else if !kind.chain() && heard.contains("Off the ramp") {
+        // A stop with no streets baked keeps its entrance at the ramp's end.
+        faults.push("left the ramp for streets the stop does not have".to_string());
+    }
     faults
 }
 
@@ -782,117 +971,4 @@ fn test_every_assist_follows_the_exit_rules_on_every_kind_of_exit() {
         KINDS.len() * PRESETS.len(),
         failures.join("\n\n")
     );
-}
-
-// -- a yield, judged where the truck meets the crossroad ------------------------------
-
-/// Drive the yield bench to its ramp, then put the truck's front at the
-/// crossroad -- the yield line plus the MUTCD 3B.19 distance to the near edge
-/// -- rolling at 12 mph, with one car on an otherwise empty crossroad whose
-/// front reaches the conflict window `car_after_clear_s` seconds after the
-/// truck's rear will have cleared it (negative: before). Returns what was said
-/// once the crossing was judged.
-fn roll_the_yield_with_a_car(car_after_clear_s: f64) -> String {
-    use ff_core::sim::cross_traffic::{
-        yield_crossing_times_s, CrossTraffic, CrossVehicle, COMBINATION_LENGTH_FT,
-        CONFLICT_WINDOW_FT, YIELD_LINE_TO_CROSSROAD_FT,
-    };
-    let mut harness = start(Preset::None, Kind::Yield);
-    for _ in 0..(30 * 60 * 3) {
-        if harness.read_drive(|d| d.ramp_mi.is_some()) {
-            break;
-        }
-        frame_plain(&mut harness);
-    }
-    let past_line_ft = YIELD_LINE_TO_CROSSROAD_FT + 0.5;
-    let (_, clear_s) = yield_crossing_times_s(12.0, -past_line_ft, COMBINATION_LENGTH_FT);
-    let car_mph = 45.0;
-    let car_fps = car_mph * 5280.0 / 3600.0;
-    let front_ft = CONFLICT_WINDOW_FT + (clear_s + car_after_clear_s) * car_fps;
-    harness.clear_speech();
-    harness.with_drive(move |d, ctx| {
-        assert!(
-            d.truck().trailer_attached,
-            "the combination length is the one timed"
-        );
-        d.ramp_control = "yield".to_string();
-        d.ramp_terminal_done = false;
-        d.ramp_light_announced = true;
-        let mut bubble = CrossTraffic::new(1, "yield", false);
-        bubble.vehicles = vec![CrossVehicle {
-            position_mi: -(front_ft + 15.0) / 5280.0,
-            speed_mph: car_mph,
-            target_mph: car_mph,
-            vehicle_class: "car",
-            length_mi: 15.0 / 5280.0,
-            from_side: "left",
-            crossed: false,
-            committed: false,
-            sound_started: false,
-        }];
-        d.cross_bubble = Some(bubble);
-        d.ramp_mi = Some(RAMP_ACCESS_MI - past_line_ft / 5280.0);
-        d.truck_mut().velocity_mps = 12.0 * MPS_PER_MPH;
-        d.update_ramp_terminal(ctx);
-        assert!(
-            d.ramp_terminal_done,
-            "the crossing is judged at the crossroad"
-        );
-    });
-    harness.transcript_text()
-}
-
-fn frame_plain(harness: &mut PlaytestHarness) {
-    harness.advance_clock(DT);
-    harness.with_drive(|d, ctx| d.update_frame(ctx, DT));
-}
-
-#[test]
-fn test_a_gap_clear_at_the_line_and_through_the_crossing_is_clean() {
-    // The reported case: the car arrives a second after the truck is across.
-    // Judged a hundred feet past the line it read as forced; judged at the
-    // crossroad over the truck's own crossing it is a clean gap.
-    let heard = roll_the_yield_with_a_car(1.0);
-    assert!(heard.contains("Through the yield in a gap"), "{heard}");
-    assert!(!heard.contains("forced the gap"), "{heard}");
-}
-
-#[test]
-fn test_a_gap_that_closes_during_the_crossing_is_forced() {
-    let heard = roll_the_yield_with_a_car(-1.5);
-    assert!(heard.contains("You forced the gap at the yield"), "{heard}");
-}
-
-#[test]
-fn test_the_assists_still_roll_a_clear_yield() {
-    // Route-transition assistance, alone and with facility stopping
-    // assistance, rolls an empty crossroad's yield rather than stopping at it.
-    for preset in [Preset::Transition, Preset::All] {
-        let mut harness = start(preset, Kind::Yield);
-        let mut done = false;
-        for _ in 0..(30 * 60 * 6) {
-            // Nothing on the crossroad, for the whole run.
-            harness.with_drive(|d, _| {
-                if let Some(bubble) = d.cross_bubble.as_mut() {
-                    bubble.vehicles.clear();
-                }
-            });
-            frame_plain(&mut harness);
-            if harness.read_drive(|d| d.ramp_mi.is_some() && d.ramp_terminal_done) {
-                done = true;
-                break;
-            }
-        }
-        let heard = harness.transcript_text();
-        assert!(done, "{preset:?}: never crossed\n{heard}");
-        assert!(
-            heard.contains("Through the yield in a gap"),
-            "{preset:?}\n{heard}"
-        );
-        assert!(
-            !heard.contains("Stopped at the yield"),
-            "{preset:?}\n{heard}"
-        );
-        assert!(!heard.contains("far too fast"), "{preset:?}\n{heard}");
-    }
 }

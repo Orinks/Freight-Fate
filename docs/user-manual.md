@@ -1192,6 +1192,46 @@ bar, the same rule as every other assist. If the speed keeper is off, a
 facility with city streets keeps the manual release, because nothing could
 drive the streets for you.
 
+City streets start where your ramp ends: the first street named off the ramp
+is the one the ramp meets. Each street keeps its own speed limit, taken from
+the map where the map has one and from the state's default for city streets
+where it does not. When the street changes, the cab says the new number, "Speed
+limit raised to 40". A drop of 10 or more is called ahead of the sign. The
+traffic lights and stop signs the map shows along the way play by the same
+rules as a ramp end. The cab names each one ahead ("Traffic light ahead.
+Light red", "Stop sign ahead" or "All-way stop ahead"), and the stop bar tick
+and cross traffic work as they do there. Route-transition assistance stops for a red or a sign and holds
+the stop. With Facility stopping assistance and the speed keeper on, the
+keeper drives on from it: "Stopped at the sign. Clear. Speed keeper pulling
+ahead." A green light is driven at the street's own speed, and nothing is said
+as you cross it. An intersection the map shows no light or sign for has none.
+
+The lights along one street are timed together the way a city times an
+arterial: hold the street's speed limit and the next light is usually green
+when you reach it. The first light you meet on a street is wherever its cycle
+happens to be, and a truck well under or over the limit, or pulling away from
+a stop, drifts out of step and meets more reds. Lights on different streets
+are not timed together. Where your route turns at a light, you are the side
+street there, and its green is shorter: about 25 seconds in a 90-second
+cycle, against about 53 for the street you are driving along.
+
+The facility's driveway is a turn like any other, called with its advise
+speed. Past it you are in the yard, "Into the yard. Yard limit 15", and the
+gate where you stop to check in is at the end of the yard. Facilities post
+their own yard limits; 15 is the game's number for all of them. Where the map
+shows no driveway, the gate stands on the street itself, and the street keeps
+its limit right up to it.
+
+Truck stops, travel centers and fuel stations work the same way where the map
+shows the road from the exit to the lot. The ramp ends at the crossroad, not
+at the pumps: "Off the ramp. Start on" the road, then how far it is to the
+stop. The access road keeps its own limit, lights and signs,
+the driveway is a turn, and past it you are in the lot, "Into the lot. Lot
+limit 15". Stop in the lot and the stop's menu opens as it always has.
+Facility stopping assistance, or the stop assistance for a stop you picked,
+brings the truck to a stop in the lot. A stop the map shows no road for still
+has its entrance at the end of the ramp.
+
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
 up for it. As an announced exit approaches, use X to signal or cancel your intent,
@@ -1582,7 +1622,9 @@ AppImage does not move those saves.
 At the destination, slow down for the facility gate, stop, and choose **Dock
 and deliver**. On highway deliveries, take the announced destination exit
 first; in cities with street data, the arrival flows off the ramp onto the
-destination's real local streets with spoken turn-by-turn cues, and loaded
+destination's real local streets with spoken turn-by-turn cues, their own
+speed limits, traffic lights and stop signs, and the yard behind the
+facility's driveway (see the ramp section above), and loaded
 departures drive the streets back out to the on-ramp the same way. You can
 also review paperwork before settling.
 
@@ -1687,7 +1729,7 @@ Lane keeping is a preset field: Realistic sets it to off, Balanced to partial, a
 
 #### Speed keeper
 
-Speed keeper sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone.
+Speed keeper sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone. When the next corner is too close to build back up to the street's number and brake again in time, the keeper holds the corner's own speed until it.
 
 On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. The same handoff covers an open road where a hazard or a stop has left you below 20 miles per hour with the session still armed: the speed keeper builds speed behind whatever slowed you, and adaptive cruise takes over at 20. With the speed keeper off, the cab says once that automatic speed control resumes at 20, and the pedals are yours until then.
 
