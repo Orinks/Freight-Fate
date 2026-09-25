@@ -157,15 +157,23 @@ pub static STATE_APIS: &[(&str, StateApi)] = &[
             "Minnesota 511MN",
         ),
     ),
+    // Colorado is benched: COtrip retired its CARS GraphQL (every fetch came
+    // back "invalid JSON", logged on every refresh of the owner's I-70 drive,
+    // 2026-09-24), and its WZDx feed wants a registered key. Waiting on
+    // ROADMAP.md, 1.10, "Deferred from 1.9: live feeds that need a key"; the
+    // old query stays listed for when a key story exists.
     (
         "colorado",
-        cars(
-            "https://www.cotrip.org",
-            "roadReports",
-            "roadWork",
-            "36.9,-109.1,41.1,-102.0",
-            "Colorado COtrip",
-        ),
+        StateApi {
+            parser: "no_api",
+            ..cars(
+                "https://www.cotrip.org",
+                "roadReports",
+                "roadWork",
+                "36.9,-109.1,41.1,-102.0",
+                "Colorado COtrip",
+            )
+        },
     ),
     // ── WZDx standard (GeoJSON FeatureCollection) ────────────────────────
     // The old per-site /api/events endpoints are gone everywhere, but these

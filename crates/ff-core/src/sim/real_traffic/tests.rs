@@ -553,7 +553,7 @@ fn test_cars_states_have_bounds_and_layer_slugs() {
         .collect();
     let mut sorted = cars_keys.clone();
     sorted.sort();
-    assert_eq!(sorted, vec!["colorado", "indiana", "minnesota"]);
+    assert_eq!(sorted, vec!["indiana", "minnesota"]);
     for key in cars_keys {
         let config = state_api(key).unwrap();
         let bounds: Vec<f64> = config
@@ -634,6 +634,17 @@ fn test_wzdx_states_in_state_apis() {
         assert_eq!(config.events_endpoint, Some("/api/wzdx"), "{key}");
         assert_eq!(config.construction_endpoint, Some("/api/wzdx"), "{key}");
     }
+}
+
+/// COtrip's CARS GraphQL is retired and its WZDx feed wants a key: every
+/// refresh of the owner's I-70 drive logged "Failed to fetch traffic data for
+/// colorado: invalid JSON" (2026-09-24). Benched, it is never asked.
+#[test]
+fn test_colorado_is_benched_and_never_fetched() {
+    let config = state_api("colorado").unwrap();
+    assert_eq!(config.parser, "no_api");
+    assert!(!fetches(config, "colorado", false));
+    assert!(!fetches(config, "colorado", true));
 }
 
 #[test]

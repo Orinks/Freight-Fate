@@ -102,6 +102,7 @@ mod states_driving_damage;
 mod states_driving_decel_lane;
 mod states_driving_departure_merge;
 mod states_driving_departure_sweep;
+mod states_driving_descent_live;
 mod states_driving_descent_truth;
 mod states_driving_destination_exit;
 mod states_driving_direction;

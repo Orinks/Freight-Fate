@@ -739,34 +739,62 @@ fn test_interactive_descent_brake_does_not_pump_on_its_edge() {
     // retarder manager in charge (no cruise snub), a grade the jake cannot
     // hold parked the truck on that edge and the pedal pumped: every new
     // application costs air (the pedal-fanning class, 2026-09-24).
+    //
+    // Since 2026-09-24 cruise also snubs under the retarder manager (it used
+    // to leave the drums alone, and a loaded truck ran from 45 to 55 down a
+    // seven percent grade), so the brake now comes in real applications: a
+    // snub, a release, another snub. What must never happen is the flutter
+    // -- an application that lets go a frame or two after it started.
     let mut harness = cruising("Descent Edge", 62.0, 200.0, &[(0.0, BENCH_MILES, -8.0)]);
     harness.app.ctx.settings.descent_speed_control = "interactive".to_string();
     harness.with_drive(|d, _| d.auto_jake = true);
-    let mut rises = 0.0;
-    let mut last_brake = 0.0;
     let mut top = 0.0f64;
+    let mut hold = f64::INFINITY;
+    let mut applying = false;
+    let mut on_frames = 0usize;
+    let mut shortest = usize::MAX;
+    let mut lowest_air = f64::INFINITY;
     for _ in 0..(60 * 90) {
         harness.advance_clock(DT);
-        let (brake, speed) = harness.with_drive(|d, ctx| {
+        let (brake, speed, held, air) = harness.with_drive(|d, ctx| {
             d.truck_mut().grade = -0.08;
-            let ramp = DT * 2.2;
-            let brake = d.truck().brake;
-            d.truck_mut().brake = 0.0f64.max(brake - ramp * 3.0);
+            d.truck_mut().brake = 0.0; // the pedal is the controller's alone
             d.update_cruise(ctx, DT, false, false, false);
             d.update_auto_jake(ctx, DT);
             d.truck_mut().auto_shift();
             d.truck_mut().update(DT);
-            (d.truck().brake, d.truck().speed_mph())
+            (
+                d.truck().brake,
+                d.truck().speed_mph(),
+                d.descent_hold_mph(),
+                d.truck().air_pressure_psi(),
+            )
         });
-        rises += (brake - last_brake).max(0.0);
-        last_brake = brake;
+        let on = brake > 0.01;
+        if on {
+            on_frames += 1;
+        } else if applying {
+            shortest = shortest.min(on_frames);
+            on_frames = 0;
+        }
+        applying = on;
         top = top.max(speed);
+        hold = hold.min(held);
+        lowest_air = lowest_air.min(air);
     }
     assert!(
-        top > DESCENT_SAFE_MAX_MPH + 7.0,
-        "the grade never beat the retarder ({top:.1} mph), so the edge was never reached"
+        top > hold + 7.0,
+        "the grade never beat the retarder ({top:.1} mph against {hold:.1}), so the edge was \
+         never reached"
     );
-    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
+    assert!(
+        shortest >= (0.25 / DT) as usize,
+        "an application let go after {shortest} frames: the pedal pumped"
+    );
+    assert!(
+        lowest_air >= 90.0,
+        "the air ran down to {lowest_air:.0} psi"
+    );
 }
 
 #[test]

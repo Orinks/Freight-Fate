@@ -13,10 +13,10 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::{
     shift_recovery_curve, AIR_FILL_REARM_PSI, AIR_FILL_VOLUME, AUTO_JAKE_OVER_MPH,
-    AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S,
-    JAKE_CUE_HOLD_S, JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX, JAKE_RATE_MIN, JAKE_STAGE_GAIN,
-    JAKE_VOICE_NATIVE_RPM, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
-    SHIFT_LOAD_RECOVERY_S,
+    AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_REVERSE_S, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH,
+    ENGINE_LOAD_SMOOTH_S, JAKE_CUE_HOLD_S, JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX,
+    JAKE_RATE_MIN, JAKE_STAGE_GAIN, JAKE_VOICE_NATIVE_RPM, SHIFT_DISENGAGE_DUCK,
+    SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP, SHIFT_LOAD_RECOVERY_S,
 };
 
 impl DrivingState {
@@ -102,12 +102,21 @@ impl DrivingState {
         // to snub. Descent control's ceiling reaches auto mode through this
         // same line, which is what the old `descent_control_active` branch
         // said in the one case it covered.
+        //
+        // Descent control's number, though, is not a target to arrive at: it
+        // IS the grade, held. With cruise set at 85 above a 7 percent grade
+        // the manager worked to the 85 and never raised a stage while cruise
+        // held the truck at 68 on the drums alone (bench of the owner's run
+        // into Denver, 2026-09-24). So it works to what descent control
+        // holds -- the set speed under the posted cap and the hill's safe
+        // descent speed -- which is the set speed itself on open road.
         if let Some(keeper) = self.keeper_mph {
             target = keeper;
-        } else if let Some(cruise) = self.cruise_mph {
-            target = cruise;
+        } else if self.cruise_mph.is_some() {
+            target = self.descent_hold_mph();
         }
         self.auto_jake_cooldown_s = (self.auto_jake_cooldown_s - dt).max(0.0);
+        self.auto_jake_reverse_s = (self.auto_jake_reverse_s - dt).max(0.0);
         let max_stage = self.auto_jake_max_stage();
         let stage = self.trip.truck.engine_brake_stage;
         let mut desired = stage;
@@ -138,16 +147,36 @@ impl DrivingState {
             // whole hill onto the drums.
             desired = 0;
             at_once = true;
+        } else if self.descent_safe_mph.is_some() && self.retarder_warranted() {
+            // A hill steep enough to have a safe descent speed: full retard,
+            // set once at the top the way a driver sets it, and the drums
+            // snub the rest. Walking it up a stage at a time let a loaded
+            // truck run from 44 to 62 onto a seven percent pitch (bench of
+            // the owner's run into Denver, 2026-09-24).
+            desired = JAKE_STAGES;
+            at_once = true;
         } else if err > AUTO_JAKE_OVER_MPH {
             desired = stage + 1;
-        } else if err < -AUTO_JAKE_UNDER_MPH {
+        } else if err < -AUTO_JAKE_UNDER_MPH && self.descent_safe_mph.is_none() {
+            // Held through the easier stretch between two steep pitches,
+            // for the same reason adaptive cruise holds it there.
             desired = stage - 1;
         }
         let ceiling = if max_stage >= 1 { max_stage } else { 1 };
         desired = desired.min(ceiling).clamp(0, JAKE_STAGES);
-        if desired != stage && (at_once || self.auto_jake_cooldown_s <= 0.0) {
+        // A step back the other way waits out the longer reversal time, so
+        // the manager cannot hunt between two stages: the agent's drive down
+        // a 2.4 percent grade heard 1, 2, 3, 2, 1, 2, 3 inside half a minute
+        // (2026-09-24), and the growl changing is all a driver hears of it.
+        let step = (desired - stage).signum();
+        let reversing =
+            step != 0 && self.auto_jake_last_step != 0 && step != self.auto_jake_last_step;
+        let held_for_reversal = reversing && !at_once && self.auto_jake_reverse_s > 0.0;
+        if desired != stage && !held_for_reversal && (at_once || self.auto_jake_cooldown_s <= 0.0) {
             self.trip.truck.engine_brake_stage = desired;
             self.auto_jake_cooldown_s = AUTO_JAKE_STEP_S;
+            self.auto_jake_reverse_s = AUTO_JAKE_REVERSE_S;
+            self.auto_jake_last_step = if at_once { 0 } else { step };
         } else if stage > max_stage && max_stage >= 1 && self.auto_jake_cooldown_s <= 0.0 {
             // Traction shrank under the current stage (ice arrived): step
             // down immediately rather than grinding the drives loose.

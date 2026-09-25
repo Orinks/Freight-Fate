@@ -130,6 +130,11 @@ Costs the drive (found 2026-09-24):
 - [x] Rural roads no longer take the in-town statutory limit: outside the
       boundary a state's code keys on, an untagged road gets its rural
       default (IA 175 by the Love's is 55) (PR #232).
+- [x] Descent control held 77 and 85 on a 7 percent grade and let a
+      loaded truck run: it now holds a safe descent speed derived for the
+      truck and load, the retarder no longer hunts, and the G key gives a
+      pitch one length
+      ([September 24](#september-24-descent-control-into-denver)).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -1844,6 +1849,48 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
 - (Found along the way) **3,630 road stops have no decided exit**, among them every travel
       center the stop snap could not link; they get no street chain.
 - (Found along the way) **394 older chains still carry no street detail** (above).
+
+### September 24 descent control into Denver
+
+Two live drives of I-70 east from the Eisenhower tunnel, a 76,000 lb truck on
+Balanced. Descent control said it was holding 85 (the set speed) and then 77
+on the 7 percent; the agent's run held 45 by its own words and ran to 55, the
+automatic upshifting on the downgrade; the retarder walked 3, 0, 2, 1, 2, 1
+inside half a minute; the G key called the 7 percent pitch "running 2 miles"
+and then "for another 10 miles". A bench of the owner's run reproduced it: 68
+to 72 mph down the 5.8 and the 7.0 on a tenth of the drums, the retarder never
+raised, drums past 300 C, the box cycling ninth and tenth at the retarder's
+rev ceiling.
+
+- [x] (Release gate) **A safe descent speed, derived.** `TruckState::safe_descent_mph`
+      runs the Grade Severity Rating System's rule (FHWA-RD-79-116, read) on
+      the truck's own heat model: the highest multiple of 5 mph (MUTCD
+      2B.13, read) at which the drums, holding what gravity leaves after
+      drag, rolling and full engine brake in the gear an automatic holds,
+      settle under GSRS's 500 F limit (read) or the shoes' own fade line.
+      Derived numbers for the default truck, set at the top of the steepest
+      grade inside the advisory's look-ahead:
+      40,000 lb none up to 10 percent; 60,000 lb 45 at 8, 30 at 10;
+      76,000 lb 65 at 5.8 and 6, 45 at 7, 30 at 8, 20 at 10;
+      80,000 lb 65 at 6, 30 at 7 and 8. Descent control at every level but
+      Off caps cruise there, raises full engine brake at once on such a
+      hill, snubs past the number, snubs to hold the gear short of the
+      protective upshift, keeps the snub through a shift, and never fuels
+      against the retarder. The box holds its gear while descent control
+      holds a grade, and a retarder pre-select lands 100 rpm (assumed) under
+      its ceiling. The same run now holds 63 to 65 down the 5.8 and 43 to 46
+      down the 7.0, drums under 180 C, air over 100 psi, no upshift. D names
+      the number "for the grade".
+- [x] (Release gate) **The retarder no longer hunts.** Cruise steps a stage at a
+      time, drops one only when well under its number and never with a
+      steep pitch in sight, and waits 12 s (assumed) before stepping back
+      the other way; the J key's manager gets the same reversal time and
+      works to what descent control holds, not the set speed.
+- [x] (Release gate) **One length per grade.** The G key's "for another" reads the
+      same run as the grade look-ahead's "running".
+- [x] (Release gate) **"Descent control holding N" once per number,** with no clock.
+- [x] **Colorado's dead traffic feed is no longer fetched** (benched until
+      the 1.10 keyed-feeds item).
 
 ## 1.10 planned -- the working week and home
 

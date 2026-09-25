@@ -78,7 +78,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "descent_speed_control",
         "Descent speed control",
-        "Engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also picks safe targets and intervenes harder.",
+        "With adaptive cruise on, holds a steep downgrade at the speed your truck can take it at with its load, on the engine brake and short brake applications. Balanced and Interactive capture a lower target when you brake. Interactive also caps every descent at 55 miles per hour and intervenes harder.",
     ),
     (
         "exit_speed_assist",

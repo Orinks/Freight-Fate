@@ -1,6 +1,7 @@
 //! The adaptive-cruise loop itself: the gap, the posted-limit lookahead, the
 //! grade preview, and holding the target from above.
 
+use ff_core::sim::transmission::JAKE_MAX_RPM;
 use ff_core::sim::trip::LIMIT_WARNING_MAX_LEAD_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
@@ -328,16 +329,6 @@ impl DrivingState {
         ctx.say_event_with(message, opts);
     }
 
-    /// The speed descent control is actually working to: set speed under the
-    /// interactive level's safe ceiling.
-    pub fn descent_hold_mph(&self) -> f64 {
-        let mut target = self.cruise_mph.unwrap_or(CRUISE_MIN_MPH);
-        if let Some(descent) = self.cruise_descent_mph {
-            target = target.min(descent);
-        }
-        target
-    }
-
     /// Hold speed when clear, and follow slower modeled traffic when present.
     pub fn update_cruise(
         &mut self,
@@ -354,7 +345,6 @@ impl DrivingState {
         // truck simply never reaches its number. Name it, once per engagement.
         self.announce_limp_cruise_cap(ctx);
         self.acc_follow_cue_s = 0.0f64.max(self.acc_follow_cue_s - dt);
-        self.descent_cue_s = 0.0f64.max(self.descent_cue_s - dt);
         if self.update_descent_control(ctx, dt, braking) {
             return;
         }
@@ -399,181 +389,22 @@ impl DrivingState {
             // clutch engages again.
             self.trip.truck.throttle = 0.0;
             self.cruise_applied = 0.0;
+            // A snub under way stays on through the shift. Let off for the
+            // second the box takes to find a gear, a truck on a steep grade
+            // gained two or three miles an hour a shift and landed the lower
+            // gear past its governor (bench, twelve percent, 2026-09-24).
+            if self.cruise_snubbing {
+                let weather_brake: f64 = if self.trip.weather.effects().grip < 0.7 {
+                    0.45
+                } else {
+                    0.65
+                };
+                let snub = weather_brake.min(CRUISE_SNUB_BRAKE);
+                self.trip.truck.brake = self.trip.truck.brake.max(snub);
+            }
             return;
         }
         self.run_cruise_loop(ctx, dt);
-    }
-
-    /// Has the hill actually beaten descent control, or is it holding it?
-    ///
-    /// "Descent control cannot hold this grade. Apply service brakes." is the
-    /// loudest thing the assist says, and it used to be a single frame's
-    /// arithmetic: speed over the ceiling by ten. On the interactive level
-    /// that ceiling is [`DESCENT_SAFE_MAX_MPH`], imposed the moment a
-    /// downgrade starts, so on a 75 mph road with cruise set at 80 the sum was
-    /// already true on the first frame of every dip -- before the control had
-    /// done anything, and while it was about to do it. The owner heard it
-    /// three times in a minute on I-70 west of Vail (2026-08-24) and the G key
-    /// answered "Level road" in between: the dips are a quarter of a mile, and
-    /// the truck was braking hard through every one of them.
-    ///
-    /// So being over the number is only the first of three, and the other two
-    /// are the ones that make the sentence true:
-    ///
-    /// * still genuinely over what the control is working to, by
-    ///   [`DESCENT_BEATEN_MPH`];
-    /// * still GAINING speed with everything applied -- the same net-force
-    ///   verdict the spoken G readout gives the driver
-    ///   ([`TruckState::net_accel_mph_per_s`] against
-    ///   [`GRADE_HOLDING_MPH_PER_S`]), so the warning and the readout can
-    ///   never contradict each other about one moment of road;
-    /// * and holding that for [`DESCENT_BEATEN_S`], because one frame is a
-    ///   grade boundary, not a runaway.
-    ///
-    /// The mirror of `say_cruise_out_of_truck` on the climb side, which was
-    /// given these same three guards in 2026-07 for the same reason.
-    fn descent_is_beaten(&mut self, dt: f64) -> bool {
-        let over = self.trip.truck.speed_mph() - self.descent_hold_mph();
-        let gaining = self.trip.truck.net_accel_mph_per_s() > GRADE_HOLDING_MPH_PER_S;
-        if over <= DESCENT_BEATEN_MPH || !gaining {
-            self.descent_beaten_s = 0.0;
-            return false;
-        }
-        self.descent_beaten_s += dt;
-        self.descent_beaten_s >= DESCENT_BEATEN_S
-    }
-
-    /// The descent-control half of `_update_cruise`; true when it returns.
-    fn update_descent_control(&mut self, ctx: &mut GameContext, dt: f64, braking: bool) -> bool {
-        let descent_level = ctx.settings.descent_speed_control.clone();
-        let descending = self.trip.truck.grade <= -0.025 && descent_level != "off";
-        if descending && self.cruise_mph.is_some() {
-            if braking && matches!(descent_level.as_str(), "balanced" | "interactive") {
-                self.descent_control_active = true;
-                let new_target = CRUISE_MIN_MPH.max(self.trip.truck.speed_mph());
-                let previous = self.cruise_descent_mph;
-                let should_announce = !self.descent_capture_active
-                    || previous.is_none_or(|previous| (new_target - previous).abs() >= 2.0);
-                self.descent_capture_active = true;
-                // A CAP FOR THIS GRADE, never a rewrite of the driver's set
-                // speed -- the same correction the interactive branch below
-                // already carries, which this one was missed out of. Assigning
-                // into cruise_mph made every brake on a downgrade permanent
-                // and cumulative: 65 becomes 55 on one hill, 49 on the next,
-                // and cruise never climbs back on the flat because 49 IS the
-                // set speed now. Brandon drove a whole run pinned at "forty
-                // nine mph or lower and losing speed" (2026-08-23).
-                //
-                // Taking the lower of any cap already standing keeps a
-                // deliberate brake from being undone by the automatic cap a
-                // frame later; the whole thing is released together when the
-                // grade ends.
-                self.cruise_descent_mph = Some(match previous {
-                    Some(previous) => previous.min(new_target),
-                    None => new_target,
-                });
-                // The working setpoint still follows the truck down now, so
-                // cruise does not fight the brake the driver is holding.
-                self.cruise_working_mph = Some(new_target);
-                if should_announce {
-                    let held = ctx
-                        .settings
-                        .speed_text(self.cruise_descent_mph.expect("set above"));
-                    let mut opts = SayEvent::queued();
-                    opts.category = Some(SpeechCategory::Confirmation);
-                    ctx.say_event_with(
-                        format!("Descent control holding {held} for this grade."),
-                        opts,
-                    );
-                }
-                return true;
-            }
-            self.descent_capture_active = false;
-            if !self.descent_control_active {
-                self.descent_control_active = true;
-                // Rolling country crosses the descent trigger on every dip, so
-                // the announcement needs a clock of its own or it becomes the
-                // loudest thing on the road: four times in six minutes of
-                // rollers on the bench (2026-07-25). The control still engages
-                // every time; only saying so waits.
-                if self.descent_cue_s <= 0.0 && !self.terse_speech(ctx) {
-                    self.descent_cue_s = DESCENT_CUE_COOLDOWN_S;
-                    // ROUTE, not the ambient default: names an automation that
-                    // just took the brakes for a grade (automation-handoff
-                    // sweep, 2026-08-20, the deferred 2026-08-15 audit).
-                    let held = ctx.settings.speed_text(self.descent_hold_mph());
-                    self.say_route_confirmation(ctx, &format!("Descent control holding {held}."));
-                }
-            }
-            let mut limit_state = String::new();
-            let mut limit_message = String::new();
-            if !self.trip.truck.transmission.automatic && self.trip.truck.rpm < 1100.0 {
-                limit_state = "gear".to_string();
-                limit_message = "Descent control needs a lower gear.".to_string();
-                self.descent_beaten_s = 0.0; // a different limit; not this count
-            } else if self.trip.truck.grip < 0.55 {
-                limit_state = "traction".to_string();
-                limit_message = "Low traction limits descent control.".to_string();
-                self.descent_beaten_s = 0.0;
-            } else {
-                // The retarder is staged against the overspeed further down,
-                // not pinned open here. Selecting all three stages the moment
-                // the grade passed 2.5 percent over-retarded every descent
-                // gentler than the one that balances full jake: a 4 percent
-                // grade settled seven mph under the set speed and stayed
-                // there, with cruise at full throttle fighting its own
-                // engine brake (bench trace, 2026-07-25: 62 set, 54.9 held).
-                if descent_level == "interactive" {
-                    // A cap that lives as long as the grade does, not a rewrite
-                    // of the driver's set speed. It used to assign straight into
-                    // _cruise_mph, so one 3 percent dip on a 65 road knocked
-                    // cruise down to 55 permanently -- on the flat, uphill, the
-                    // rest of the run (bench trace, 2026-07-25: 62 set, 55 held
-                    // ever after). The driver's number now survives the hill.
-                    // Never above a cap the driver's own brake already set on
-                    // this grade: capture is an instruction, not a suggestion.
-                    self.cruise_descent_mph = Some(
-                        DESCENT_SAFE_MAX_MPH
-                            .min(self.cruise_descent_mph.unwrap_or(DESCENT_SAFE_MAX_MPH)),
-                    );
-                    let safe_target = self.cruise_mph.unwrap_or(0.0).min(DESCENT_SAFE_MAX_MPH);
-                    let speed = self.trip.truck.speed_mph();
-                    if speed > safe_target + 7.0 {
-                        // Faded in across the mile an hour under the old
-                        // +8 edge, which switched straight to a third of
-                        // the pedal and pumped it on a grade the retarder
-                        // could not hold: air is charged per application.
-                        let feather = (speed - safe_target - 7.0).min(1.0);
-                        let brake = feather * 0.7f64.min((speed - safe_target) / 25.0);
-                        self.trip.truck.brake = self.trip.truck.brake.max(brake);
-                    }
-                }
-                if self.descent_is_beaten(dt) {
-                    limit_state = "grade".to_string();
-                    limit_message =
-                        "Descent control cannot hold this grade. Apply service brakes.".to_string();
-                }
-            }
-            if limit_state != self.descent_limit_state {
-                self.descent_limit_state = limit_state;
-                if !limit_message.is_empty() {
-                    self.say_safety_interrupt(ctx, &limit_message);
-                }
-            }
-        } else if self.descent_control_active {
-            self.descent_control_active = false;
-            self.descent_limit_state = String::new();
-            self.descent_beaten_s = 0.0;
-            self.descent_capture_active = false;
-            self.cruise_descent_mph = None; // the grade is behind us; so is its cap
-                                            // Release only the retarder cruise itself raised: the driver's own
-                                            // jake switch survives the road levelling out.
-            if self.cruise_jake_stage > 0 {
-                self.cruise_jake_stage = 0;
-                self.trip.truck.engine_brake_stage = 0;
-            }
-        }
-        false
     }
 
     /// The speed loop proper: caps, the lead, the pedal.
@@ -635,12 +466,14 @@ impl DrivingState {
         if let Some(curve) = curve_mph.filter(|_| curve_capped) {
             target_mph = curve;
         }
-        // Interactive descent control's safe ceiling, which lasts exactly as
-        // long as the grade under the wheels.
-        if let Some(descent) = self.cruise_descent_mph {
-            if descent < target_mph {
-                target_mph = descent;
-            }
+        // Descent control's ceilings, which last exactly as long as the grade:
+        // a brake's capture, interactive mode's own, and the safe descent
+        // speed of the hill under and just ahead of the truck.
+        for descent in [self.cruise_descent_mph, self.descent_safe_mph]
+            .into_iter()
+            .flatten()
+        {
+            target_mph = target_mph.min(descent);
         }
         // Predictive ACC: never carry the driver past the posted limit. With real
         // OSM limits baked per leg, a held set speed would otherwise sail through
@@ -829,9 +662,10 @@ impl DrivingState {
             "for the bend".to_string()
         } else if limit_capped {
             "for the lower limit".to_string()
-        } else if self
-            .cruise_descent_mph
-            .is_some_and(|descent| (descent - target_mph).abs() < 0.01)
+        } else if [self.cruise_descent_mph, self.descent_safe_mph]
+            .into_iter()
+            .flatten()
+            .any(|descent| (descent - target_mph).abs() < 0.01)
         {
             "for the grade".to_string()
         } else {
@@ -890,6 +724,31 @@ impl DrivingState {
             demand = demand.min(hold);
             self.cruise_trim = self.cruise_trim.min(0.0);
         }
+        // No fuel against a retarder that is holding a downgrade. Any
+        // throttle cuts the jake, so cruise trimming up to its number a mile
+        // an hour under it switched the engine brake off and on every few
+        // seconds -- the growl dropping out and coming back, which is what
+        // the owner heard looping. Under the number by more than the
+        // retarder's own release band, the stage steps down first (see
+        // `hold_cruise_from_above`); only a truck with no stage left is fed.
+        //
+        // Nor above a steep hill's safe descent speed: a truck a mile an hour
+        // under it on seven percent is about to be over it on gravity alone,
+        // and the fuel only bought an upshift out of the retarder's gear.
+        //
+        // Nor anywhere descent control holds a grade that pulls the truck
+        // along by itself: gravity is already bringing it up to its number,
+        // and fuel there bought an upshift over the crest that the retarder
+        // took straight back a few seconds later (bench, 2026-09-24).
+        let gravity_pulls = self.descent_control_active && self.trip.truck.resistance_force() < 0.0;
+        let retarding_grade = gravity_pulls
+            || ((self.trip.truck.engine_brake_stage > 0 || self.descent_safe_mph.is_some())
+                && self.on_downgrade()
+                && error < CRUISE_JAKE_UNDER_MPH);
+        if retarding_grade {
+            demand = 0.0;
+            self.cruise_trim = self.cruise_trim.min(0.0);
+        }
         // Anti-windup: a grade the engine cannot pull, or a downgrade gravity
         // owns, pins the pedal at one end for as long as it lasts. Integrating
         // through that buries the trim at its limit, and the truck then sags or
@@ -898,6 +757,7 @@ impl DrivingState {
         // ceiling holding the pedal down counts as pinned just as much as the
         // floor or the roof does.
         let saturated = servo_braking
+            || retarding_grade
             || (demand <= 0.0 && error < 0.0)
             || (demand >= 1.0 && error > 0.0)
             || (ceiling_factor < 1.0 && error > 0.0);
@@ -929,8 +789,14 @@ impl DrivingState {
         // -- so a bend on a downgrade still retards, because that is the
         // grade's doing and not the corner's. See _on_downgrade for the rule
         // and _update_lane for the same rule in the curve assist.
+        //
+        // A lower posted limit on a downgrade is the grade's too. Held as a
+        // target to arrive at, the cap for "limit plus five" put a tenth of
+        // the drums on a 76,000 lb truck for three miles of 4.9 and 5.8
+        // percent with the retarder never raised, and the shoes climbed past
+        // 300 C (the owner's run into Denver on the bench, 2026-09-24).
         let closing =
-            following || limit_capped || exit_capped || (curve_capped && !self.on_downgrade());
+            following || exit_capped || ((limit_capped || curve_capped) && !self.on_downgrade());
         self.hold_cruise_from_above(ctx, dt, error, closing);
     }
 
@@ -1054,11 +920,6 @@ impl DrivingState {
             self.cruise_snubbing = false;
             return;
         }
-        if self.auto_jake {
-            // The driver put the AMT retarder manager in charge with J; it
-            // already holds the descent target. Two owners would fight.
-            return;
-        }
         // Cruise reaches for the retarder only where a real one would: the
         // engine-brake stalk has to permit it. Descent control set to off is
         // the driver saying they manage grades themselves, and a real truck's
@@ -1096,29 +957,62 @@ impl DrivingState {
             ctx.settings.descent_speed_control != "off" && self.assist_jake_allowed(ctx);
         let still_a_grade = stalk_open && self.on_downgrade();
         let may_retard = still_a_grade && self.retarder_warranted();
-        let mut wanted = 0;
-        if may_retard && over > CRUISE_JAKE_OVER_MPH && self.trip.truck.throttle <= 0.05 {
-            let steps = ((over - CRUISE_JAKE_OVER_MPH) / CRUISE_JAKE_STEP_MPH) as i32;
-            wanted = JAKE_STAGES.min(1 + steps);
-        } else if still_a_grade && over > CRUISE_JAKE_RELEASE_MPH {
-            wanted = self.cruise_jake_stage; // inside the deadband, hold
+        let ceiling = JAKE_STAGES.min(0.max(self.auto_jake_max_stage()));
+        // The stage is STEPPED, not read off the overspeed. It used to be one
+        // stage per mile an hour over, so a truck wobbling a mile an hour
+        // either side of its number walked the retarder 3, 0, 2, 1, 2, 1
+        // inside half a minute down a 5.8 percent grade (owner's playtest,
+        // I-70 into Denver, 2026-09-24) -- and every change is heard. Now:
+        //
+        // * a hill steep enough to have a safe descent speed gets the full
+        //   retarder at once, the way a driver sets it at the top, and the
+        //   drums snub the rest;
+        // * otherwise a stage goes up while the truck is over its number and
+        //   not already slowing, and down only once it is well under;
+        // * a step the other way waits out `CRUISE_JAKE_REVERSE_S`, so the
+        //   retarder cannot hunt between two stages;
+        // * and it comes off entirely only when the grade itself is over.
+        let current = self.cruise_jake_stage;
+        let slowing = self.trip.truck.net_accel_mph_per_s() < -GRADE_HOLDING_MPH_PER_S;
+        let steep_hill = may_retard && self.descent_safe_mph.is_some();
+        let mut wanted = current;
+        if !still_a_grade {
+            wanted = 0;
+        } else if steep_hill {
+            wanted = ceiling;
+        } else if may_retard && over > CRUISE_JAKE_OVER_MPH && !slowing {
+            wanted = current + 1;
+        } else if over < -CRUISE_JAKE_UNDER_MPH && self.descent_safe_mph.is_none() {
+            // Not with a steep pitch in sight: the easier quarter mile
+            // between two of them is not the bottom of the hill, and a
+            // retarder let down there only comes straight back up.
+            wanted = current - 1;
         }
-        wanted = wanted.min(0.max(self.auto_jake_max_stage()));
+        wanted = wanted.clamp(0, ceiling);
         // Never reach for a retarder the driver's own jake switch is holding,
-        // and never release one either -- only what cruise raised itself.
-        let driver_owns_jake =
-            self.cruise_jake_stage == 0 && self.trip.truck.engine_brake_stage > 0;
-        if wanted != self.cruise_jake_stage && !driver_owns_jake {
-            // Stage changes wait out a cooldown so a rolling grade does not
-            // make the retarder chatter -- it is a loud device. Coming off it
-            // because the truck has fallen under the target goes through at
-            // once: holding retard the truck no longer needs is what drags it
-            // below the speed cruise is supposed to be keeping.
-            let releasing_under_target = wanted == 0 && over < -CRUISE_JAKE_RELEASE_MPH;
-            if releasing_under_target || self.cruise_jake_cooldown_s <= 0.0 {
+        // and never release one either -- only what cruise raised itself. The
+        // J key's retarder manager is the driver's too: it holds its own
+        // stage, and cruise only snubs below.
+        let driver_owns_jake = self.auto_jake
+            || (self.cruise_jake_stage == 0 && self.trip.truck.engine_brake_stage > 0);
+        self.cruise_jake_reverse_s = 0.0f64.max(self.cruise_jake_reverse_s - dt);
+        if wanted != current && !driver_owns_jake {
+            let step = (wanted - current).signum();
+            let reversing = step != self.cruise_jake_last_step && self.cruise_jake_last_step != 0;
+            let released = wanted == 0 && !still_a_grade;
+            // Setting full retard at the top of a steep hill is one decision,
+            // not a step, and it cannot wait: a stage let down on the easier
+            // stretch above a seven percent pitch held the truck at nothing
+            // while it ran from 44 to 62 (bench, 2026-09-24).
+            let set_for_hill = steep_hill && wanted == ceiling;
+            let settled = self.cruise_jake_cooldown_s <= 0.0
+                && (!reversing || self.cruise_jake_reverse_s <= 0.0);
+            if released || set_for_hill || settled {
                 self.cruise_jake_stage = wanted;
                 self.trip.truck.engine_brake_stage = wanted;
                 self.cruise_jake_cooldown_s = CRUISE_JAKE_STEP_S;
+                self.cruise_jake_reverse_s = CRUISE_JAKE_REVERSE_S;
+                self.cruise_jake_last_step = if released { 0 } else { step };
             }
         }
         // Holding a grade. The drums only come out once the retarder is doing
@@ -1134,15 +1028,44 @@ impl DrivingState {
         // than the old code did, which waited for the retarder to max out
         // first. A stage already up under the hysteresis above satisfies
         // `jake_maxed` on its own, so the drums stay available there too.
-        let jake_ceiling = if may_retard {
-            JAKE_STAGES.min(self.auto_jake_max_stage())
+        let jake_ceiling = if may_retard { ceiling } else { 0 };
+        let stage_now = if self.auto_jake {
+            self.trip.truck.engine_brake_stage
         } else {
-            0
+            self.cruise_jake_stage
         };
-        let jake_maxed = self.cruise_jake_stage >= 1.max(jake_ceiling) || jake_ceiling <= 0;
+        let jake_maxed = stage_now >= 1.max(jake_ceiling) || jake_ceiling <= 0;
+        // The gear is held with the brakes, not given up. An automatic spun
+        // past its retarder ceiling upshifts to save the engine, which halves
+        // the jake and is the start of a runaway: the agent's drive down the
+        // seven percent went from 45 to 55 that way (2026-09-24). So a snub
+        // also starts when the revs close on that ceiling, whatever the
+        // overspeed says.
+        // And a hill's safe descent speed is a ceiling, not a preference: past
+        // it by the snub band the drums come out whatever the retarder is
+        // doing, the way the CDL manual's snub braking reads -- at the safe
+        // speed, brake down below it, release.
+        let speed_now = self.trip.truck.speed_mph();
+        let past_safe_descent = self
+            .descent_safe_mph
+            .is_some_and(|safe| speed_now > safe + CRUISE_BRAKE_OVER_MPH);
+        let automatic = self.trip.truck.transmission.automatic;
+        let revs_at_ceiling = automatic
+            && self.on_downgrade()
+            && self.trip.truck.throttle <= 0.05
+            && self.trip.truck.coupled_rpm(None) >= JAKE_MAX_RPM - DESCENT_RPM_GUARD;
         if self.cruise_snubbing {
-            self.cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH;
-        } else if jake_maxed && over > CRUISE_BRAKE_OVER_MPH {
+            // A revs snub runs until they are a guard band clear of the
+            // ceiling again, so it is one application rather than a flutter.
+            let revs_still_high = revs_at_ceiling
+                || (automatic
+                    && self.on_downgrade()
+                    && self.trip.truck.coupled_rpm(None) >= JAKE_MAX_RPM - 2.0 * DESCENT_RPM_GUARD);
+            self.cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH || revs_still_high;
+        } else if (jake_maxed && over > CRUISE_BRAKE_OVER_MPH)
+            || revs_at_ceiling
+            || past_safe_descent
+        {
             self.cruise_snubbing = true;
         }
         if self.cruise_snubbing {

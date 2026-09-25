@@ -876,9 +876,13 @@ needs one.
 
 If you cook the brakes anyway, you will hear it: hot brakes squeal, and
 a spoken warning names the trend. Press D for the one safe-speed number
-that already accounts for the conditions. Descent speed control, in the
-driving assistance settings, can manage engine braking for you at the
-level you choose.
+that already accounts for the conditions; on a steep downgrade that is
+the speed your truck can hold the hill at with its current load, and D
+says "for the grade". Descent speed control, in the driving assistance
+settings, drives a descent the same way for you with adaptive cruise on:
+it slows to that speed before the steep part, sets the engine brake,
+holds the gear, and snubs the service brakes. It says the speed it is
+holding once, and again only when the hill changes it.
 
 ## Taking curves
 
@@ -1668,7 +1672,7 @@ quarters always reaching you. See When You Owe Money.
 
 ### Driving assistance and speed keeper
 
-Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
 #### Individual assists
 
@@ -1678,7 +1682,9 @@ approach assistance, Planned rest-stop stopping assistance, Curve speed
 assistance, and Route-transition assistance.
 
 Descent speed control has four levels: Off, Realistic, Balanced, and Interactive.
-Interactive is a descent-control level, not a preset.
+Interactive is a descent-control level, not a preset. At every level but Off,
+adaptive cruise holds a steep downgrade at the speed your truck can take it at
+with its load, never faster than your set speed or the posted limit allows.
 
 #### Exit and stopping assistance
 

@@ -54,6 +54,12 @@ pub fn shift_time_for(gear: i32) -> f64 {
 // that would spin the engine past the ceiling.
 pub const JAKE_PRESELECT_RPM: f64 = 1700.0;
 pub const JAKE_MAX_RPM: f64 = 2150.0;
+/// A pre-select has to land this far under the ceiling, not on it. Landing at
+/// 2149 on a twelve percent grade, the box upshifted straight back out of the
+/// gear it had just found -- six, five, six, over and over, a second apart
+/// (descent bench, 2026-09-24). Assumed: a few percent of the ceiling, room
+/// for the speed a held truck still gains through the one-second downshift.
+pub const JAKE_PRESELECT_LANDING_MARGIN_RPM: f64 = 100.0;
 pub const PROGRESSIVE_UPSHIFT_RPM: [f64; 10] = [
     1450.0, 1550.0, 1650.0, 1700.0, 1750.0, 1800.0, 1800.0, 1800.0, 1800.0, 1850.0,
 ];
@@ -310,7 +316,7 @@ impl Transmission {
             // Real retarder management is traction-linked for the same reason.
             let lower = GEAR_RATIOS[(self.gear - 2) as usize];
             let current = GEAR_RATIOS[(self.gear - 1) as usize];
-            if rpm * lower / current <= JAKE_MAX_RPM {
+            if rpm * lower / current <= JAKE_MAX_RPM - JAKE_PRESELECT_LANDING_MARGIN_RPM {
                 self.gear -= 1;
                 // Downshifts stay deliberate at the full interruption: the
                 // quick low-box time is a POWER-shift feel. On a jake
