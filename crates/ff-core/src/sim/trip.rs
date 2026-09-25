@@ -40,7 +40,8 @@ mod zones;
 
 pub use lookups::LaneRun;
 pub use streets::{
-    is_gate_zone_reason, is_street_zone_reason, LOT_ZONE, STOP_STREET_ZONE, STREET_ZONE, YARD_ZONE,
+    is_gate_zone_reason, is_street_zone_reason, spoken_zone, LOT_ZONE, STOP_STREET_ZONE,
+    STREET_ZONE, YARD_ZONE,
 };
 
 /// A stop is announced ("stop ahead") when it first comes within this many
@@ -635,15 +636,22 @@ impl Trip {
             let eased = 1.0 - self.exit_approach_release_s / EXIT_APPROACH_RELEASE_S;
             return real + (full - real) * eased;
         }
-        let floor = LOW_SPEED_TIME_SCALE.min(full);
-        let ramp = (self.truck.speed_mph() / FULL_COMPRESSION_MPH).min(1.0);
-        let paced = floor + (full - floor) * ramp;
+        let paced = self.cruise_time_scale(self.truck.speed_mph());
         // Easing into a corner's brake point, the mirror of the exit release
         // above, or onto a steep grade: the clock slides down to real time
         // rather than dropping to it.
         let real = full.min(1.0);
         let toward_real = self.turn_clock.max(self.grade_clock).clamp(0.0, 1.0);
         paced + (real - paced) * toward_real
+    }
+
+    /// The compression a truck holding `mph` on open road gets: the low-speed
+    /// floor ramping to the full pacing at `FULL_COMPRESSION_MPH`.
+    pub fn cruise_time_scale(&self, mph: f64) -> f64 {
+        let full = self.time_scale;
+        let floor = LOW_SPEED_TIME_SCALE.min(full);
+        let ramp = (mph / FULL_COMPRESSION_MPH).min(1.0);
+        floor + (full - floor) * ramp
     }
 
     pub fn imperial(&self) -> bool {

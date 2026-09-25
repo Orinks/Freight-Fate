@@ -75,7 +75,13 @@ impl DrivingState {
         let speed = self.trip.truck.speed_mph();
         if self.ramp_control == "signal" {
             let phase = self.ramp_light_phase();
-            let must_stop = phase == "red" || (phase == "yellow" && gap_mi > 0.0);
+            // A street's light is judged at the truck's arrival, the way a
+            // driver reads one a block ahead (`street_light_owes_stop`).
+            let must_stop = if self.on_street_control() {
+                self.street_light_owes_stop()
+            } else {
+                phase == "red" || (phase == "yellow" && gap_mi > 0.0)
+            };
             if !must_stop && self.on_street_control() {
                 // A green on the streets is driven at the street's own
                 // speed: the ramp's roll target is for the turn a ramp

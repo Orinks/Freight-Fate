@@ -146,9 +146,12 @@ impl DrivingState {
         }
         let position = self.trip.position_mi;
         let (limit, reason) = self.trip.speed_limit_at(position);
+        // A street is not a zone: its limit is its own (`spoken_zone`).
         let zone = match reason {
-            Some(reason) => format!(", in a {reason} zone"),
-            None => String::new(),
+            Some(reason) if !ff_core::sim::trip::is_street_zone_reason(&reason) => {
+                format!(", in a {reason} zone")
+            }
+            _ => String::new(),
         };
         let over = self.trip.truck.speed_mph() - limit;
         let comparison = if over >= 1.0 {
@@ -487,6 +490,12 @@ impl DrivingState {
         if !upcoming.is_empty() {
             return upcoming;
         }
+        // Under a mile of road left to scan -- the streets to a gate -- whole
+        // miles said "Nothing steep in the next 0 miles" (live drive into
+        // Abilene, 2026-09-24): the rest of the route is all there is.
+        if scanned < 1.0 {
+            return format!("{nothing} ahead.");
+        }
         format!(
             "{nothing} in the next {}.",
             self.trip.distance_text(scanned)
@@ -576,12 +585,21 @@ impl DrivingState {
                     Some(gate) if zone.reason == "facility gate" => gate,
                     _ => zone.start_mi - pos,
                 };
-                parts.push(format!(
-                    "{} in {}, speed limit {}",
-                    zone.reason,
-                    ctx.settings.distance_text(ahead, true),
-                    ctx.settings.speed_text(zone.limit_mph)
-                ));
+                // The next street's number, not a zone by name.
+                if ff_core::sim::trip::is_street_zone_reason(&zone.reason) {
+                    parts.push(format!(
+                        "speed limit {} in {}",
+                        ctx.settings.speed_text(zone.limit_mph),
+                        ctx.settings.distance_text(ahead, true)
+                    ));
+                } else {
+                    parts.push(format!(
+                        "{} in {}, speed limit {}",
+                        zone.reason,
+                        ctx.settings.distance_text(ahead, true),
+                        ctx.settings.speed_text(zone.limit_mph)
+                    ));
+                }
             }
         }
         // Every distance here is PRECISE. Whole miles bottom out at "0

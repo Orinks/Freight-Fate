@@ -71,6 +71,11 @@ pub const STREET_MAJOR_GREEN_S: f64 =
 /// each way in a 60 s cycle once both directions are served, 0.23 of the
 /// cycle, applied to this cycle.
 pub const STREET_BAND_S: f64 = STREET_CYCLE_S * 14.0 / 60.0;
+/// How long a light must already have been green when the truck reaches it
+/// to owe no stop. ASSUMED: about the 1.5 to 2 s a driver takes to perceive
+/// and react, the reaction time AASHTO's stopping sight distance allows 2.5 s
+/// for; the pace the truck is projected at can still change under it.
+pub const STREET_GREEN_MARGIN_S: f64 = 2.0;
 
 /// A street signal's timing: its red and green, and where in its cycle it
 /// stands on the trip's clock when it is armed.
@@ -134,13 +139,69 @@ impl DrivingState {
             return true;
         }
         match self.ramp_control.as_str() {
-            "signal" => {
-                let phase = self.ramp_light_phase();
-                phase == "red"
-                    || (phase == "yellow" && self.terminal_gap_mi().is_some_and(|gap| gap > 0.0))
-            }
+            "signal" => self.street_light_owes_stop(),
             "yield" => !self.yield_gap_clear(),
             _ => true,
+        }
+    }
+
+    /// Whether the bar's spoken countdown is owed: a stop is, and a street's
+    /// light has been named. "1000 feet." before "Traffic light ahead" counted
+    /// down to a light nobody had mentioned.
+    pub fn bar_words_owed(&self) -> bool {
+        let unnamed_light =
+            self.on_street_control() && self.ramp_control == "signal" && !self.street_light_named;
+        self.bar_cues_owed() && !unnamed_light
+    }
+
+    /// Real seconds until the truck reaches the street's bar at its present
+    /// speed, on the clock it runs at when nothing is owed; None for a truck
+    /// stopped or crawling, whose arrival its speed says nothing about.
+    fn street_bar_eta_s(&self) -> Option<f64> {
+        let gap = self.terminal_gap_mi()?;
+        let speed = self.trip.truck.speed_mph();
+        (speed > RED_STOP_MPH)
+            .then(|| gap.max(0.0) * 3600.0 / (speed * self.trip.cruise_time_scale(speed)))
+    }
+
+    /// The live light's phase `ahead_s` real seconds from now.
+    fn ramp_light_phase_in(&self, ahead_s: f64) -> &'static str {
+        let into = (self.ramp_light_offset_s + self.ramp_light_timer + ahead_s)
+            .rem_euclid(self.ramp_light_cycle_s());
+        let red_s = self.ramp_light_red_s();
+        if into < red_s {
+            "red"
+        } else if into < red_s + self.ramp_light_green_s() {
+            "green"
+        } else {
+            "yellow"
+        }
+    }
+
+    /// Whether a street's light owes the truck a stop: red or yellow when
+    /// the truck gets to it, or green by less than `STREET_GREEN_MARGIN_S`.
+    ///
+    /// Judged at the arrival, not at the call, the way a driver reads a light
+    /// a block ahead. Judged now, a red about to turn was a stop owed: it was
+    /// named, the clock went real for it, and the truck crawled a quarter
+    /// mile to a light that had been green for twenty seconds when it got
+    /// there, out of step with every light after it (the Abilene streets,
+    /// 2026-09-24). Stopped or crawling, the light is what it is now.
+    pub fn street_light_owes_stop(&self) -> bool {
+        if self.ramp_waiting_at_light {
+            return true;
+        }
+        let gap = self.terminal_gap_mi().unwrap_or(0.0);
+        let now = self.ramp_light_phase();
+        if gap <= 0.0 {
+            return now == "red";
+        }
+        match self.street_bar_eta_s() {
+            Some(eta) => {
+                self.ramp_light_phase_in(eta) != "green"
+                    || self.ramp_light_phase_in((eta - STREET_GREEN_MARGIN_S).max(0.0)) != "green"
+            }
+            None => now != "green",
         }
     }
 
@@ -204,6 +265,17 @@ impl DrivingState {
         };
         if !self.ramp_light_announced && gap_mi <= self.street_control_call_mi() {
             self.announce_street_control(ctx);
+        } else if self.ramp_light_announced
+            && !self.street_light_named
+            && !self.ramp_terminal_done
+            && self.street_control_kind == "signal"
+            && gap_mi > 0.0
+            && self.ramp_light_phase() != "green"
+            && self.street_light_owes_stop()
+        {
+            // A light passed over at the call owes a stop after all: the
+            // truck slowed, or the light is changing. Named now, once.
+            self.name_street_light(ctx);
         }
         self.update_ramp_terminal_assist_with_input(ctx, accelerating);
         if !self.ramp_terminal_done && gap_mi <= 0.0 {
@@ -278,7 +350,7 @@ impl DrivingState {
     }
 
     /// The timing of a street signal at route mile `node_mi`, and where in
-    /// its cycle it stands on the trip's clock now.
+    /// its cycle it stands now, on the real clock the light runs on.
     ///
     /// The truck turning at this node is the minor movement there, and gets
     /// the side street's split with its own offset. Anywhere else along a
@@ -288,6 +360,14 @@ impl DrivingState {
     /// seeded slide within its green that leaves the band `STREET_BAND_S`
     /// wide. A truck held well under or over the limit, or starting from a
     /// stop, drifts out of it. Streets are not coordinated with each other.
+    ///
+    /// The travel time is the real seconds a truck at the limit takes under
+    /// the game's compression (`Trip::cruise_time_scale`). Planned on the
+    /// compressed clock instead, the offsets held only for a truck that never
+    /// changed speed: the truck slows and pulls away in real seconds, so a
+    /// corner or a stop cost it eight times its length against the plan, and
+    /// the live drive into Abilene met a red at most of its lights
+    /// (2026-09-24).
     fn street_light_plan(&self, node_mi: f64, span: &[f64]) -> StreetLightPlan {
         let (leg_i, leg_start) = self.trip.leg_at_mile(node_mi);
         let leg = &self.trip.route.legs[leg_i];
@@ -299,7 +379,8 @@ impl DrivingState {
         });
         let key = street_control_key(node_mi);
         let mut own = PyRandom::new_from_i64((self.trip_seed << 16) ^ key ^ 0x0FF5E7);
-        let now_s = self.trip.game_minutes * 60.0;
+        // Real seconds on this trip, the clock every light of the chain shares.
+        let now_s = self.trip.sitting_s;
         let cycle = STREET_CYCLE_S;
         if turning {
             let red_s = cycle - STREET_MINOR_GREEN_S - RAMP_LIGHT_YELLOW_S;
@@ -319,8 +400,10 @@ impl DrivingState {
             .street_limit_mph()
             .unwrap_or(leg.local_speed_mph)
             .max(5.0);
-        let travel_s = (node_mi - leg_start) * 3600.0 / limit_mph;
-        let slide_s = own.random() * (green_s - STREET_BAND_S);
+        let along = node_mi - leg_start;
+        let pace_mph = limit_mph * self.trip.cruise_time_scale(limit_mph);
+        let travel_s = along * 3600.0 / pace_mph;
+        let slide_s = self.street_light_slide_s(leg, leg_start, along, pace_mph, green_s);
         let green_starts_at = anchor_s + travel_s - slide_s;
         // The cycle begins with red: green opens `red_s` in.
         StreetLightPlan {
@@ -330,35 +413,91 @@ impl DrivingState {
         }
     }
 
+    /// How far into its green a street's light at `along` miles meets a truck
+    /// at the limit on the street's plan: the band's leading edge.
+    ///
+    /// The leading edge of a progression band is the platoon a light releases
+    /// at the start of its green, and it reaches the next light at or after
+    /// the start of that one's (the Handbook's time-space diagrams, Figures
+    /// 3-3 to 3-5). So the slide only grows down the street: each light adds
+    /// a seeded share of what serving the other direction can cost at that
+    /// link -- twice the travel time from the light behind, the gap between
+    /// the two directions' ideal offsets (DERIVED from the same diagram) --
+    /// until the band is `STREET_BAND_S` wide. A random slide per light
+    /// sent the truck released by one light's green to the next one before
+    /// its green, at every other light of the Abilene streets (2026-09-24).
+    fn street_light_slide_s(
+        &self,
+        leg: &ff_core::data::world_models::Leg,
+        leg_start: f64,
+        along: f64,
+        pace_mph: f64,
+        green_s: f64,
+    ) -> f64 {
+        let mut signals: Vec<f64> = leg
+            .local_controls
+            .iter()
+            .filter(|c| c.kind == "signal" && c.at_mi <= along + 1e-9)
+            .map(|c| c.at_mi)
+            .collect();
+        signals.sort_by(f64::total_cmp);
+        let cap = green_s - STREET_BAND_S;
+        let mut slide = 0.0f64;
+        let mut behind: Option<f64> = None;
+        for at in signals {
+            // One intersection's second node is that intersection.
+            if behind.is_some_and(|b| at - b < STREET_INTERSECTION_SPAN_MI) {
+                continue;
+            }
+            if let Some(b) = behind {
+                let link_s = (at - b) * 3600.0 / pace_mph;
+                let key = street_control_key(leg_start + at);
+                let mut rng = PyRandom::new_from_i64((self.trip_seed << 16) ^ key ^ 0x0FF5E7);
+                slide = (slide + rng.random() * 2.0 * link_s).min(cap);
+            }
+            behind = Some(at);
+        }
+        slide
+    }
+
     /// The call for a street control, on the route channel like the ramp's.
+    ///
+    /// A light the truck will go through on green is not named: the green
+    /// light cue marks it, and a red about to turn says nothing until it
+    /// has (silence over redundant speech; "Traffic light ahead. Light
+    /// green." at every light of the Abilene streets, 2026-09-24). A light is
+    /// named when it owes a stop, here or when it changes to one.
     fn announce_street_control(&mut self, ctx: &mut GameContext) {
         self.ramp_light_announced = true;
+        self.street_light_named = false;
         let message = match self.street_control_kind.as_str() {
             "signal" => {
                 let phase = self.ramp_light_phase();
                 self.ramp_light_last_phase = phase.to_string();
-                ctx.audio.play_with(
-                    if phase == "red" {
-                        "events/ramp_light_red"
-                    } else {
-                        "events/ramp_light_green"
-                    },
-                    0.8,
-                    0.0,
-                );
-                format!("Traffic light ahead. Light {phase}.")
+                // A green that will have changed by the time the truck gets
+                // there is named when it changes: its yellow is the news.
+                let named = phase != "green" && self.street_light_owes_stop();
+                if named || phase == "green" {
+                    ctx.audio.play_with(street_light_cue(phase), 0.8, 0.0);
+                }
+                self.street_light_named = named;
+                named.then(|| format!("Traffic light ahead. Light {phase}."))
             }
             kind => {
                 ctx.audio.play_with("ui/notify", 0.7, 0.0);
-                match kind {
-                    "all_way_stop" => "All-way stop ahead.",
-                    "give_way" => "Yield sign ahead.",
-                    _ => "Stop sign ahead.",
-                }
-                .to_string()
+                Some(
+                    match kind {
+                        "all_way_stop" => "All-way stop ahead.",
+                        "give_way" => "Yield sign ahead.",
+                        _ => "Stop sign ahead.",
+                    }
+                    .to_string(),
+                )
             }
         };
-        self.say_route_navigation(ctx, &message);
+        if let Some(message) = message {
+            self.say_route_navigation(ctx, &message);
+        }
         // A countdown mark already behind the truck when the call lands is
         // not a distance that is true (the ramp's rule).
         if let Some(gap_mi) = self.terminal_gap_mi() {
@@ -372,6 +511,35 @@ impl DrivingState {
                     self.ramp_gap_milestones_said.insert(mark);
                 }
             }
+        }
+    }
+
+    /// Name the live light in the phase it is in: the first words about it.
+    fn name_street_light(&mut self, ctx: &mut GameContext) {
+        let phase = self.ramp_light_phase();
+        self.street_light_named = true;
+        ctx.audio.play_with(street_light_cue(phase), 0.8, 0.0);
+        self.say_route_navigation(ctx, &format!("Traffic light ahead. Light {phase}."));
+    }
+
+    /// A street light changed phase with the truck short of it. A named
+    /// light says its change while it owes a stop, and its green; one never
+    /// named is named once it owes a stop (`update_street_controls`), and a
+    /// green it turns to is the cue alone.
+    pub(crate) fn street_light_changed(&mut self, ctx: &mut GameContext, phase: &'static str) {
+        if self.terminal_gap_mi().is_none_or(|gap| gap <= 0.0) {
+            return;
+        }
+        if phase == "green" {
+            ctx.audio.play_with(street_light_cue(phase), 0.7, 0.0);
+            if self.street_light_named {
+                self.say_route_navigation(ctx, "Light green.");
+            }
+            return;
+        }
+        if self.street_light_named && self.street_light_owes_stop() {
+            ctx.audio.play_with(street_light_cue(phase), 0.7, 0.0);
+            self.say_route_navigation(ctx, &format!("Light {phase}."));
         }
     }
 
@@ -434,6 +602,16 @@ impl DrivingState {
         self.ramp_assist_brake = 0.0;
         self.cross_bubble = None;
         self.set_bar_solid(ctx, false);
+    }
+}
+
+/// The cue for a light's phase: the green and red light cues, and the
+/// notify tone a yellow has always had.
+fn street_light_cue(phase: &str) -> &'static str {
+    match phase {
+        "green" => "events/ramp_light_green",
+        "yellow" => "ui/notify",
+        _ => "events/ramp_light_red",
     }
 }
 

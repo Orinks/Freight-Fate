@@ -211,6 +211,20 @@ into the release gate. Details stay in the linked dated sections, marked
 - [ ] 995 streets with an OSM speed tag on under half their miles take the
       statutory fill for the whole street; splitting them needs a
       per-stretch limit (PR #232).
+- [ ] Re-bake ramp terminals and street chains with the sibling-junction
+      search (`RAMP_SIBLING_JUNCTION_M`, builder fixed 2026-09-24): only
+      3,456 of 18,165 exits have a terminal each way, because the other
+      direction's ramp leaves at its own junction node. On the Abilene to
+      Fort Worth leg it adds 34 of 47; I-20 exit 307 westbound (the Love's at
+      Baird) then gets its streets. The OSM refresh re-bake must run it, then
+      un-ignore `test_the_bairds_streets_are_driven_westbound_when_signalled_with_x`.
+- [ ] Rural statutory fill inside city limits: North Arnold Boulevard (FM
+      3438) by the Abilene yard reads 70 (Tex. Transp. Code 545.352(b)(2),
+      rural basis) because it lies inside Abilene's corporate limits but
+      outside the Census 2020 urban area; OSM tags no limit there. Counting
+      corporate limits as town would undo the Iowa Love's ruling (PR #232),
+      so the fix is a real source: TxDOT's posted speed zones for state
+      routes. Owner call.
 
 ### Release gate record
 
@@ -1800,6 +1814,25 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       mapped signals), every assist on, 20 seeds: 2.55 red stops before, 2.20
       after; most of what is left is the first light of each street and the
       side-street turn. Sourced from FHWA-HOP-08-024 and TTI 0-6402-P1.
+- [x] **Street lights at the game's own pace** (live drive into Abilene,
+      2026-09-24: about seven reds in ten miles, every light spoken). The
+      measurement above ran at time scale 1; the game runs at 10, where a
+      light on the trip clock cycled in about eleven real seconds and every
+      slowdown, which the truck makes on the real clock, cost it eight times
+      its length against the plan. Now the light runs in real seconds, the
+      offsets are the real seconds a truck at the limit takes under
+      compression (`Trip::cruise_time_scale`), a light owes a stop by the
+      phase it will show when the truck arrives (`street_light_owes_stop`,
+      2 s assumed margin), and each light's slide into its green only grows
+      down the street, bounded by twice its link time
+      (`street_light_slide_s`), so the platoon a green releases reaches the
+      next light on green. Real 292B streets, every assist on, time scale 10,
+      20 seeds (`states_driving_street_signals_real.rs`): lights owing a stop
+      8.35 of 12 before, 2.90 after; stops 3.60 before, 0.90 after. A light
+      the truck goes through on green is its cue alone; one is named when it
+      owes a stop, and a green about to change is named at its yellow. A
+      street is never a zone in speech (`spoken_zone`), and route lines landing
+      in one instant queue instead of purging and restarting each other.
 - (Found along the way) **Check the street signal numbers against the Signal Timing Manual
       2nd ed. (NCHRP 812).** Its text could not be fetched (the PDF is past
       the fetch limit, the NAP reader serves page images); the cycle, splits

@@ -152,6 +152,16 @@
 
 ### Fixed
 
+- **City traffic lights no longer change every few seconds.** A truck at the speed limit meets far fewer reds in a row.
+
+- **A traffic light you will go through on green is not announced.** You hear its green light sound; a light is named when you have to stop for it.
+
+- **Lines the cab says in the same moment are each said once, in order.** The first no longer gets cut and started again by the next.
+
+- **City streets are no longer called a facility access road zone.** The street keeps its own name, and the speed keeper just says its number.
+
+- **The grade key no longer says "the next 0 miles" on the last streets to a gate.**
+
 - **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
 
 - **The cab calls a bend whenever it would move your load.** You hear the number to slow to before the freight shifts, not after.

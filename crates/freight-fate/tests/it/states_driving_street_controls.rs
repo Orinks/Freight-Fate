@@ -206,14 +206,8 @@ fn test_a_new_street_says_its_limit_and_the_yard_says_the_yard_limit() {
     assert!(heard.contains("Speed limit raised to 40."), "{heard}");
     assert!(heard.contains("Into the yard. Yard limit 15."), "{heard}");
     assert!(!heard.contains("facility gate zone"), "{heard}");
-    // The street change is said as a change, not as a zone entered again.
-    assert_eq!(
-        heard.matches("Entering facility access road zone").count(),
-        heard
-            .matches("Entering facility access road zone. Speed limit 30.")
-            .count(),
-        "{heard}"
-    );
+    // The street change is said as a change, and a street is never a zone.
+    assert!(!heard.contains("access road"), "{heard}");
 }
 
 /// A careful driver on their own: holds the street's number, takes each
@@ -342,12 +336,14 @@ fn test_a_green_street_light_is_driven_at_the_streets_own_speed() {
         }
     }
     let heard = harness.transcript_text();
-    assert!(heard.contains("Traffic light ahead."), "{heard}");
     assert!(
         slowest > 25.0,
         "slowed to {slowest:.1} for a green\n{heard}"
     );
+    // A green the truck goes through owes nothing: its cue, and no words.
     for bad in [
+        "Traffic light ahead.",
+        "Light green.",
         "Route-transition assistance slowing",
         "Green light. Through",
         "far too fast",

@@ -316,14 +316,11 @@ impl DrivingState {
         // and out into the menus (Shane, 2026-08-03).
         self.update_ramp_bar_ticks(ctx, dt);
         if self.terminal_live() && !self.ramp_terminal_done && self.ramp_control == "signal" {
-            // A street signal runs on the trip's own clock, the one its
-            // coordination is planned on (`street_controls.rs`); a ramp end
-            // on real seconds, the way it always has.
-            self.ramp_light_timer += if self.on_street_control() {
-                dt * self.trip.effective_time_scale()
-            } else {
-                dt
-            };
+            // Real seconds, a street's light as much as a ramp's: the truck
+            // slows, stops and pulls away on the real clock, so a light on
+            // the compressed one cycled in eleven seconds and every slowdown
+            // cost eight times its length (`street_controls.rs`).
+            self.ramp_light_timer += dt;
         }
         self.update_cross_bubble(ctx, dt);
         if !self.terminal_live() || self.ramp_terminal_done {
@@ -359,6 +356,9 @@ impl DrivingState {
             ctx.audio.play_with("events/ramp_light_green", 0.8, 0.0);
             self.say_route_navigation(ctx, "Light green.");
             return;
+        }
+        if self.on_street_control() {
+            return self.street_light_changed(ctx, phase);
         }
         // Keep every phase change on the route channel so the driver hears
         // it promptly, with only the color in the cycling announcement.
@@ -679,7 +679,7 @@ impl DrivingState {
     /// 2026-07-19). Rolling milestone calls give the bar a position the same
     /// way the exit countdown gives the exit one.
     pub fn update_ramp_gap_countdown(&mut self, ctx: &mut GameContext) {
-        if !self.ramp_light_announced || self.ramp_waiting_at_light || !self.bar_cues_owed() {
+        if !self.ramp_light_announced || self.ramp_waiting_at_light || !self.bar_words_owed() {
             return;
         }
         let Some(gap_mi) = self.terminal_gap_mi() else {

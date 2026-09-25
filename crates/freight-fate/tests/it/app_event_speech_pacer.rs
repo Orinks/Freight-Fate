@@ -46,59 +46,62 @@ fn logged(app: &TestApp) -> Vec<String> {
         .collect()
 }
 
+const APPROACH: [&str; 4] = [
+    "Slow down for the dock, twenty five miles per hour through the yard.",
+    "Passing the fuel island, dock doors ahead on the left.",
+    "At the dock. Line up square and ease it back.",
+    "Delivering. The forklift crew is unloading the trailer.",
+];
+
 #[test]
-fn test_say_event_flushes_a_stale_route_backlog_end_to_end() {
-    // ctx.say_event: a burst of queued ROUTE events turns into an
-    // interrupting (channel-purging) delivery once the backlog goes stale --
-    // the drive is never dropped, staleness only changes its delivery.
+fn test_say_event_queues_a_burst_of_route_lines_whole_end_to_end() {
+    // Four ROUTE lines in one frame are one moment of road: all of it is
+    // current and none of it heard yet. Each used to flush the one before
+    // it inside its pre-utterance pause and hand it straight back, so the
+    // voice was sent 0, 0, 1, 1, 2, 2, 3 and every playtest log read as
+    // each line said twice ("1000 feet.", "Light yellow.", the take line;
+    // live drive into Abilene, 2026-09-24). Now they queue, once each, in
+    // order, and nothing is handed back.
     let mut app = sapi_app();
-    let approach = [
-        "Slow down for the dock, twenty five miles per hour through the yard.",
-        "Passing the fuel island, dock doors ahead on the left.",
-        "At the dock. Line up square and ease it back.",
-        "Delivering. The forklift crew is unloading the trailer.",
-    ];
-    for line in approach {
+    for line in APPROACH {
         app.ctx
             .say_event_with(line, SayEvent::queued().priority(EventPriority::Route));
     }
+    assert_eq!(
+        app.event_calls(),
+        APPROACH
+            .iter()
+            .map(|line| (line.to_string(), false))
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(app.ctx.handed_back_count(""), 0);
+    app.shutdown();
+}
+
+#[test]
+fn test_say_event_flushes_a_stale_route_backlog_end_to_end() {
+    // A backlog the voice has been working through is another matter: once
+    // a ROUTE line would start stale behind it, the channel is purged and
+    // the line speaks now -- staleness changes delivery, never drops the
+    // newest information.
+    let mut app = sapi_app();
+    let clock = app.fake_pacer_clock();
+    for line in &APPROACH[..3] {
+        app.ctx
+            .say_event_with(*line, SayEvent::queued().priority(EventPriority::Route));
+    }
+    clock.advance(1.0);
+    app.ctx.say_event_with(
+        APPROACH[3],
+        SayEvent::queued().priority(EventPriority::Route),
+    );
     let calls = app.event_calls();
-    assert!(calls.iter().take(1).all(|(_, interrupt)| !interrupt));
+    assert!(calls.iter().take(3).all(|(_, interrupt)| !interrupt));
     assert!(
-        calls.iter().any(|(_, interrupt)| *interrupt),
+        calls[3..].iter().any(|(_, interrupt)| *interrupt),
         "a stale backlog was performed in full -- the pacer never flushed"
     );
-    // Every line still reached the voice in order; for ROUTE, staleness
-    // changes delivery, never drops the newest information.
-    //
-    // And a flush that lands inside a line's pre-utterance pause hands that
-    // line back, so the whole burst is still heard rather than only its
-    // last member: submitting all four in one frame used to leave the player
-    // with the fourth alone at the voice, three yard instructions destroyed
-    // before the voice said a word of them.
-    //
-    // The hand-back is spoken FIRST, interrupting, and the line that flushed
-    // queues behind it. Requeued behind that line instead, it played the
-    // burst backwards -- 0, 1, 0, 2, 3, 2 -- and the older line landed last
-    // (agent drive, 2026-09-23). Each flush here restarts the line it cut,
-    // not a word of which was out yet, so the voice hears 0, 1, 2, 3.
-    assert_eq!(
-        calls,
-        vec![
-            (approach[0].to_string(), false),
-            (approach[0].to_string(), true), // handed back, 0 ms in: restarts
-            (approach[1].to_string(), false),
-            (approach[1].to_string(), true), // and again for each flush
-            (approach[2].to_string(), false),
-            (approach[2].to_string(), true),
-            (approach[3].to_string(), false),
-        ]
-    );
-    let texts: Vec<&str> = calls.iter().map(|(t, _)| t.as_str()).collect();
-    // Nothing was lost: every line of the approach reached the voice.
-    for line in approach {
-        assert!(texts.contains(&line), "{line} never reached the voice");
-    }
+    assert_eq!(calls.last(), Some(&(APPROACH[3].to_string(), false)));
     app.shutdown();
 }
 
