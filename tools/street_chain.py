@@ -31,6 +31,7 @@ from __future__ import annotations
 import json
 import math
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -182,10 +183,10 @@ def _street_setting(
     major_edges: Any,
     path_nodes: list[int],
     limits: dict[str, Any],
+    in_town: TownJudge,
 ) -> tuple[float, float, float]:
     """(miles in town, miles outside, miles on a numbered highway) over a
     street's edges, each judged at its midpoint."""
-    in_town = TOWN_TEST or _census_in_town
     kind = town_basis(state, limits)
     town = rural = major = 0.0
     for e in edges:
@@ -200,12 +201,17 @@ def _street_setting(
     return town, rural, major
 
 
-# Tests replace the town test with a function of (kind, lat, lon); the bake
-# always uses the Census boundaries and refuses to run without them.
-TOWN_TEST: Any = None
+# Is a point in town? ``(kind, lat, lon) -> bool``, ``kind`` being the
+# boundary the state's code keys on (``town_basis``). Every street-detail
+# bake is handed one: the real bake builds it from the Census files
+# (``census_town_judge``); tests hand in a fixture judge.
+TownJudge = Callable[[str, float, float], bool]
 
 
-def _census_in_town(kind: str, lat: float, lon: float) -> bool:
+def census_town_judge() -> TownJudge:
+    """The real bake's judge, from the Census boundaries. Refuses loudly
+    without them: a street limit cannot be judged in town or out, and a bake
+    that guessed would ship statutory numbers under the wrong statute."""
     import census_boundaries
 
     if not census_boundaries.available():
@@ -214,7 +220,7 @@ def _census_in_town(kind: str, lat: float, lon: float) -> bool:
             "two files and where they go. A street limit cannot be judged in town or "
             "out without them."
         )
-    return census_boundaries.in_town(kind, lat, lon)
+    return census_boundaries.in_town
 
 
 _LIMITS_CACHE: dict[str, Any] | None = None
@@ -238,6 +244,8 @@ def annotate(
     street_deg: dict[int, int],
     state: str,
     major_edges: set[tuple[int, int]] | frozenset[tuple[int, int]] = frozenset(),
+    *,
+    town_judge: TownJudge,
 ) -> tuple[dict[str, Any] | None, dict[str, int]]:
     """Fill ``limit_mph``/``limit_source``/``controls`` on each segment, in
     place, and return ``(driveway, counts)``.
@@ -314,7 +322,14 @@ def annotate(
             seg["limit_mph"], seg["limit_source"] = seg["speed_mph"], LIMIT_ASSUMED
         else:
             town, rural, major = _street_setting(
-                state, coords, edge_miles, range(first, end), major_edges, path_nodes, limits
+                state,
+                coords,
+                edge_miles,
+                range(first, end),
+                major_edges,
+                path_nodes,
+                limits,
+                town_judge,
             )
             counts["crosses_town_line"] += 1 if town and rural else 0
             if town >= rural:

@@ -8,6 +8,12 @@ import pytest
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "source_ref")
 
 
+def in_town(_kind: str, _lat: float, _lon: float) -> bool:
+    """The fixture town judge: every fixture street is in town. The real
+    bake judges by the Census boundaries, a local download CI does not have."""
+    return True
+
+
 def _load_tool():
     pytest.importorskip("osmium")
     path = Path(__file__).resolve().parents[1] / "tools" / "build_facility_approaches.py"
@@ -173,6 +179,7 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
         tmp_path,
         states=("Illinois",),
         max_route_mi=2.0,
+        town_judge=in_town,
     )
     record = payload["approaches"]["fixture:warehouse"]
 
@@ -254,6 +261,7 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
         tmp_path,
         states=("Illinois",),
         max_route_mi=2.0,
+        town_judge=in_town,
     )
     record = payload["approaches"]["fixture:cross_dock"]
 
@@ -379,7 +387,9 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
     monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
     monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
 
-    screened = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    screened = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )
     record = screened["approaches"]["fixture:cross_dock"]
     assert not record["turn_level"]
     assert record["fallback_reason"].startswith(tool.SCREEN_REFUSAL_PREFIX)
@@ -388,7 +398,7 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
 
     # The screen is a switch, not an edit: off, the same endpoint routes.
     unscreened = tool.build_facility_approaches(
-        tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False
+        tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False, town_judge=in_town
     )
     assert unscreened["approaches"]["fixture:cross_dock"]["turn_level"]
 
@@ -398,12 +408,14 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
         '<tag k="power" v="substation" />', '<tag k="building" v="warehouse" />'
     )
     osm_path.write_text(warehouse, encoding="utf-8")
-    assert tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)[
-        "approaches"
-    ]["fixture:cross_dock"]["turn_level"]
+    assert tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )["approaches"]["fixture:cross_dock"]["turn_level"]
     across = "The sourced endpoint lies across the national border from its city."
     monkeypatch.setattr(tool, "endpoint_row_refusals", lambda: {"fixture:cross_dock": across})
-    labelled = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    labelled = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )
     record = labelled["approaches"]["fixture:cross_dock"]
     assert not record["turn_level"]
     assert across in record["fallback_reason"]

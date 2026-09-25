@@ -16,11 +16,14 @@ if str(TOOLS) not in sys.path:
 import street_chain  # noqa: E402
 
 
-@pytest.fixture(autouse=True)
-def _in_town(monkeypatch):
-    """The fixtures stand in town unless a test says otherwise; the real
-    Census boundaries are a local download the suite does not need."""
-    monkeypatch.setattr(street_chain, "TOWN_TEST", lambda kind, lat, lon: True)
+def in_town(_kind: str, _lat: float, _lon: float) -> bool:
+    """The fixture town judge: every fixture street is in town. The real
+    bake judges by the Census boundaries, a local download CI does not have."""
+    return True
+
+
+def out_of_town(_kind: str, _lat: float, _lon: float) -> bool:
+    return False
 
 
 FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
@@ -118,7 +121,9 @@ def baked(tmp_path, monkeypatch):
     local_geometry = tool._load_local_geometry_tool()
     monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
     monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
-    payload = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    payload = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )
     return payload, payload["approaches"]["fixture:warehouse"]
 
 
@@ -207,6 +212,7 @@ def test_a_stop_facing_the_other_way_binds_nothing_but_a_signal_binds_its_juncti
             {2: control},
             {1: 3, 3: 3},
             "Nowhere",
+            town_judge=in_town,
         )
         return segments[0]["controls"]
 
@@ -301,6 +307,7 @@ def test_a_kept_chain_gets_its_detail_by_matching_its_own_streets(baked, tmp_pat
         street_detail=True,
         match_chains={"fixture:warehouse": recorded},
         matched=matched,
+        town_judge=in_town,
     )
     found = matched["fixture:warehouse"]
     assert [seg["limit_source"] for seg in found.segments] == ["statutory", "assumed"]
@@ -319,6 +326,7 @@ def test_a_kept_chain_gets_its_detail_by_matching_its_own_streets(baked, tmp_pat
         street_detail=True,
         match_chains={"fixture:warehouse": renamed},
         matched=matched,
+        town_judge=in_town,
     )
     assert matched["fixture:warehouse"] == chain_match.MATCH_NO_PATH
 
@@ -434,7 +442,7 @@ def test_a_stop_off_an_exit_gets_the_streets_from_its_ramp(tmp_path, monkeypatch
     legs = [_stop_leg(100, 41.0, -87.01)]
     work, counts = stops.stop_targets(legs)
     assert counts["no_serving_exit"] == 1 and len(work) == 1
-    found = stops.route_stops(tmp_path, work, None)[(0, 0)]
+    found = stops.route_stops(tmp_path, work, None, in_town)[(0, 0)]
     [chain] = found["approach_chains"]
     assert [seg["road"] for seg in chain["segments"]] == [
         "Exit Road",
@@ -445,7 +453,7 @@ def test_a_stop_off_an_exit_gets_the_streets_from_its_ramp(tmp_path, monkeypatch
     # A ramp that leads straight into the lot is on the mainline: no chain.
     legs = [_stop_leg(4, 41.0080, -87.0000)]
     work, _counts = stops.stop_targets(legs)
-    found = stops.route_stops(tmp_path, work, None)[(0, 0)]
+    found = stops.route_stops(tmp_path, work, None, in_town)[(0, 0)]
     assert found["approach_chains"] == []
     assert found["approach_chains_failed"][0]["route_failure"] == stops.ON_MAINLINE
 
@@ -462,7 +470,6 @@ def _one_street(state, town, major=frozenset()):
             "_read_miles": 0.0,
         }
     ]
-    street_chain.TOWN_TEST = lambda kind, lat, lon: town
     street_chain.annotate(
         segments,
         [0, 1, 2],
@@ -474,6 +481,7 @@ def _one_street(state, town, major=frozenset()):
         {},
         state,
         major,
+        town_judge=in_town if town else out_of_town,
     )
     return segments[0]
 
@@ -526,3 +534,25 @@ def test_every_state_has_a_cited_rural_row_and_the_table_is_current():
     assert set(statutory_rural.RURAL_LIMITS) == set(statutory_limits.STATUTORY_LIMITS)
     shipped = json.loads(statutory_limits.OUT_PATH.read_text(encoding="utf-8"))["limits"]
     assert shipped == statutory_limits._with_rural(statutory_limits.STATUTORY_LIMITS)
+
+
+def test_the_real_bake_refuses_to_run_without_the_census_boundaries(tmp_path, monkeypatch):
+    """A street limit cannot be judged in town or out without the boundaries,
+    and a bake that guessed would ship statutory numbers under the wrong
+    statute -- so the real entry points stop, loudly, before routing."""
+    import census_boundaries
+
+    monkeypatch.setattr(census_boundaries, "URBAN_AREAS", tmp_path / "missing" / "uac20")
+    monkeypatch.setattr(census_boundaries, "PLACES", tmp_path / "missing" / "place")
+    tool = _load_tool()
+    monkeypatch.setattr(tool, "collect_targets", lambda: pytest.fail("routed anyway"))
+    with pytest.raises(SystemExit, match="Census boundaries are missing"):
+        tool.build_facility_approaches(tmp_path, states=("Illinois",))
+    import build_stop_approaches as stops
+
+    with pytest.raises(SystemExit, match="Census boundaries are missing"):
+        stops.route_stops(tmp_path, [], None)
+    # A library caller that asks for street detail must name its judge.
+    lg = tool._load_local_geometry_tool()
+    with pytest.raises(ValueError, match="town judge"):
+        lg.route_state_targets(tmp_path / "none.osm", [], street_detail=True)

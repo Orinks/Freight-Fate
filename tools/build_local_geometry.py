@@ -260,6 +260,8 @@ class RouteGraph:
     # Edges on trunk/primary/secondary ways (both directions): the stand-in
     # for a numbered highway where a rural statute sets its own default.
     major: set[tuple[int, int]] = field(default_factory=set)
+    # In town or out (``street_chain.TownJudge``), for the limit fill.
+    town_judge: Any = None
 
     def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
         self.edges[a].append((b, miles, road, mph))
@@ -469,6 +471,7 @@ def route_state_targets(
     exit_routes: dict[tuple[str, int], GeometryPath | str] | None = None,
     match_chains: dict[str, list[dict[str, Any]]] | None = None,
     matched: dict[str, GeometryPath | str] | None = None,
+    town_judge: Any = None,
 ) -> dict[str, GeometryPath]:
     """Route every target over its own clipped graph.
 
@@ -487,7 +490,12 @@ def route_state_targets(
     ``MAX_SPOKEN_SEGMENTS``), into ``exit_routes[(target_id, node)]``: the
     path, or its failure code. ``match_chains`` maps a target to the
     segments of a chain baked before the street detail; its path is read
-    back off the same graph (``chain_match.py``) into ``matched``."""
+    back off the same graph (``chain_match.py``) into ``matched``.
+
+    ``town_judge`` says whether a point is in town (``street_chain``'s
+    ``TownJudge``); street detail cannot be baked without one."""
+    if street_detail and town_judge is None:
+        raise ValueError("street detail needs a town judge (street_chain.census_town_judge)")
     barriers: set[int] = set()
     controls: dict[int, tuple[str, str]] = {}
     graphs = {
@@ -496,6 +504,7 @@ def route_state_targets(
             truck_legal=truck_legal,
             street_detail=street_detail,
             controls=controls,
+            town_judge=town_judge,
         )
         for target in targets
     }
@@ -819,6 +828,7 @@ def _finish(
             graph.street_deg,
             target.state,
             graph.major,
+            town_judge=graph.town_judge,
         )
     return GeometryPath(total, tuple(segments), yard_miles, driveway, counts)
 

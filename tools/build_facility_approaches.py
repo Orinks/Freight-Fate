@@ -188,11 +188,17 @@ def build_facility_approaches(
     endpoint_screen: bool = True,
     truck_legal: bool = True,
     only_ids: set[str] | None = None,
+    town_judge: street_chain.TownJudge | None = None,
 ) -> dict[str, Any]:
     """Route the batch and return the payload to write.
 
     ``only_ids`` narrows the batch to those facilities; with a merge every
     other row keeps its record.
+
+    ``town_judge`` says whether a street is in town, for its limit fill.
+    None is the real bake: the judge is built from the Census boundaries,
+    and the run is refused without them (``street_chain.census_town_judge``).
+    Tests hand in a fixture judge.
 
     With ``endpoint_screen`` (the default) a target is only routed when its
     endpoint's own OSM object reads as a freight site; see
@@ -204,6 +210,7 @@ def build_facility_approaches(
     :func:`merge_existing` for the rules. Without it the payload is a whole
     rebuild in which every facility outside the batch is a fallback record.
     """
+    town_judge = town_judge or street_chain.census_town_judge()
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
     terminals = city_exit_terminals()
@@ -300,6 +307,7 @@ def build_facility_approaches(
                     if target.target_id in legacy
                 },
                 matched=matched,
+                town_judge=town_judge,
             )
             routed.update({k: v for k, v in fresh.items() if k in routed_ids})
             failures.update({k: v for k, v in batch_failures.items() if k in routed_ids})

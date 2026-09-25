@@ -116,9 +116,16 @@ def stop_targets(legs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict
 
 
 def route_stops(
-    cache_dir: Path, work: list[dict[str, Any]], states: set[str] | None
+    cache_dir: Path,
+    work: list[dict[str, Any]],
+    states: set[str] | None,
+    town_judge: street_chain.TownJudge | None = None,
 ) -> dict[tuple[int, int], dict[str, Any]]:
-    """(leg, stop) -> ``approach_chains``/``approach_chains_failed`` fields."""
+    """(leg, stop) -> ``approach_chains``/``approach_chains_failed`` fields.
+
+    ``town_judge`` None is the real bake: built from the Census boundaries,
+    and refused without them (``street_chain.census_town_judge``)."""
+    town_judge = town_judge or street_chain.census_town_judge()
     lg = _local_geometry()
     by_state: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in work:
@@ -165,6 +172,7 @@ def route_stops(
             street_detail=True,
             exit_starts=starts,
             exit_routes=exit_routes,
+            town_judge=town_judge,
         )
         for item in items:
             target_id = f"{item['leg']}:{item['stop']}"
