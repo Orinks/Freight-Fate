@@ -69,6 +69,7 @@ mod online_profile_switch;
 mod playtest_harness;
 mod playtest_road_departure;
 mod playtest_road_destination;
+mod playtest_road_settle;
 mod playtest_sandbox;
 mod playtest_scenario;
 mod playtest_state_lines;

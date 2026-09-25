@@ -46,31 +46,7 @@ impl Trip {
                 }
             }
         }
-        // Only curves already passed are certainly history.
-        for cr in &self.curves {
-            if cr.start_mi <= self.position_mi {
-                self.announced_curves.insert(format!(
-                    "curve:{}:{}",
-                    fmt_f(cr.start_mi, 3),
-                    cr.direction
-                ));
-            }
-        }
-        let pos = self.position_mi;
-        for post in self.posts.iter_mut() {
-            // A post whose watch the truck has already entered was heard
-            // before the save; one still ahead must get its cue again.
-            if post.watch_start_mi() <= pos {
-                post.announced = true;
-                self.heads_up_seen.insert(post.id());
-            }
-        }
-        for pressure in &self.traffic_pressures {
-            if pressure.start_mi <= self.position_mi {
-                self.announced_traffic_pressures
-                    .insert(traffic_pressure_key(pressure));
-            }
-        }
+        self.latch_passed_roadside();
         for (i, (start, leg)) in self
             .leg_starts
             .iter()
@@ -101,6 +77,41 @@ impl Trip {
         for (i, start) in self.leg_starts.iter().enumerate() {
             if i != 0 && self.position_mi >= *start {
                 self.announced_cities.insert(i);
+            }
+        }
+    }
+
+    /// Latch the per-mile markers the restore path and the staged-drive
+    /// settle path both owe the road already under the truck: passed curves
+    /// count as called, posts inside their watch were heard, traffic
+    /// pressures behind are old news, and the zone/timezone under the truck
+    /// is "entered" so the first frame does not announce it as new.
+    pub(crate) fn latch_passed_roadside(&mut self) {
+        // Only curves already passed are certainly history.
+        for cr in &self.curves {
+            if cr.start_mi <= self.position_mi {
+                self.announced_curves.insert(format!(
+                    "curve:{}:{}",
+                    fmt_f(cr.start_mi, 3),
+                    cr.direction
+                ));
+            }
+        }
+        let pos = self.position_mi;
+        for post in self.posts.iter_mut() {
+            // A post whose watch the truck is inside was heard before the
+            // handoff; one still ahead must get its cue, and one wholly
+            // behind has nothing left to watch -- `announced` stays "this
+            // post made a noise", it must not say a finished post spoke.
+            if post.watch_start_mi() <= pos && pos <= post.at_mi + post.reach_mi {
+                post.announced = true;
+                self.heads_up_seen.insert(post.id());
+            }
+        }
+        for pressure in &self.traffic_pressures {
+            if pressure.start_mi <= self.position_mi {
+                self.announced_traffic_pressures
+                    .insert(traffic_pressure_key(pressure));
             }
         }
         self.entered_zone = self.active_zone_at(pos);
