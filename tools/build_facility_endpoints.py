@@ -65,6 +65,7 @@ import osmium
 from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import osm_extract  # noqa: E402
 from facility_endpoint_match import RoleMatch, match_roles  # noqa: E402
 from facility_endpoint_screen import screen_endpoint  # noqa: E402
 
@@ -72,7 +73,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS_DIR = ROOT / "tools"
 FACILITY_ENDPOINTS_PATH = ROOT / "data" / "facility_endpoints.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-ACCESSED_DATE = "2026-06-27"
+ACCESSED_DATE = osm_extract.OSM_EXTRACT_ACCESSED
 EARTH_RADIUS_MI = 3958.7613
 DEFAULT_RADIUS_MI = 6.4
 
@@ -247,6 +248,7 @@ def build_facility_endpoints(
 def generated_block(radius_mi: float) -> dict[str, Any]:
     return {
         "accessed": ACCESSED_DATE,
+        "osm_extract": osm_extract.meta(),
         "family": "OpenStreetMap local Geofabrik extracts plus checked-in world facilities",
         "radius_mi": radius_mi,
         "source_policy": "Build-time only; runtime reads this compact checked-in file.",
@@ -748,6 +750,7 @@ def resweep(
         "matcher": "facility_endpoint_match.match_roles gated by facility_endpoint_screen",
         "last_batch": {"states": batch, **dict(summary)},
     }
+    generated["osm_extract"] = osm_extract.meta()
     payload = {
         "version": existing.get("version", 1),
         "generated": generated,
@@ -911,9 +914,10 @@ def main() -> int:
         ),
     )
     parser.add_argument("--existing", type=Path, default=FACILITY_ENDPOINTS_PATH)
-    parser.add_argument("--accessed", default=time.strftime("%Y-%m-%d"))
+    parser.add_argument("--accessed", default=ACCESSED_DATE)
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
+    osm_extract.check_extracts(args.cache_dir)
 
     existing = None
     if args.merge_existing and args.existing.exists():

@@ -120,7 +120,8 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import leg_geometry as lg  # noqa: E402
-from build_interchanges_base import LOCAL_CORRIDOR_M  # noqa: E402
+import osm_extract  # noqa: E402
+from build_interchanges_base import ACCESSED_DATE, LOCAL_CORRIDOR_M  # noqa: E402
 from build_interchanges_maxspeed import (  # noqa: E402
     OSM_REGION_CACHE_DIR,
     _leg_states,
@@ -129,7 +130,6 @@ from build_interchanges_maxspeed import (  # noqa: E402
 from reverse_pair_stops import TWIN_STOP_MILES, _same_chain_store  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
-ACCESSED_DATE = "2026-09-17"
 SNAP_CUT_MI = 0.6
 RECORD_MATCH_MAX_MI = 5.0
 NAMED_EXIT_MAX_MI = 5.3
@@ -736,8 +736,10 @@ def main(argv: list[str] | None = None) -> int:
         help="list every stop that names an exit it is not at",
     )
     args = parser.parse_args(argv)
+    osm_extract.check_extracts(args.osm_region_dir)
 
     data = load_world()
+    data["osm_extract"] = osm_extract.meta()
     legs = data["legs"]
     states = set().union(*(_leg_states(data, leg) for leg in legs))
     pbf_paths = _pbf_for_states(states, args.osm_region_dir)

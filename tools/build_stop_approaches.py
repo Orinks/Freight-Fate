@@ -36,6 +36,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import osm_extract  # noqa: E402
 import street_chain  # noqa: E402
 from snap_stops_to_interchanges import fabricated_coordinates  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
@@ -47,7 +48,8 @@ DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 MAX_ROUTE_MI = 18.0
 ON_MAINLINE = "on_mainline"
 APPROACH_SOURCE = (
-    "derived: routed over the local OpenStreetMap extract from this exit's ramp "
+    "derived: routed over the local OpenStreetMap extract (Geofabrik, OpenStreetMap "
+    f"as of {osm_extract.OSM_EXTRACT_DATE}) from this exit's ramp "
     "terminal node (read) to the stop's read coordinates; per-street limit, "
     "controls and driveway as in facility_approaches.json generated.street_sources"
 )
@@ -230,6 +232,7 @@ def meta(legs: list[dict[str, Any]], counts: dict[str, int]) -> dict[str, Any]:
     return {
         "kind": "derived",
         "source": APPROACH_SOURCE,
+        "osm_extract": osm_extract.meta(),
         "stops": counts,
         "chains": chains,
         "chains_with_driveway": with_driveway,
@@ -244,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--states", nargs="*", default=None)
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args(argv)
+    osm_extract.check_extracts(args.cache_dir)
     data = load_world()
     legs = data["legs"]
     work, counts = stop_targets(legs)

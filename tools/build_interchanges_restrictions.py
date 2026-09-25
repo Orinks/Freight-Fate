@@ -487,6 +487,8 @@ def run_restrictions(data: dict[str, Any], args: argparse.Namespace) -> int:
             f"Auto-selected {len(pbf_paths)} per-state extract(s) for {len(states)} state(s).",
             flush=True,
         )
+        osm_extract.check_extracts(args.osm_region_dir)
+        data["osm_extract"] = osm_extract.meta()
     missing = [p for p in pbf_paths if not p.exists()]
     if missing:
         raise SystemExit("OSM PBF not found: " + ", ".join(str(p) for p in missing))

@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import osm_extract
 import osmium
 from ffworld.world import get_world
 
@@ -30,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 EARTH_RADIUS_MI = 3958.7613
-ACCESSED_DATE = "2026-06-27"
+ACCESSED_DATE = osm_extract.OSM_EXTRACT_ACCESSED
 SERVICE_ORDER = ("freight_market", "garage", "truck_dealer")
 DEFAULT_RADIUS_MI = 28.0
 # A city service is an errand, not a haul. A sourced POI whose estimated road
@@ -160,6 +161,7 @@ def build_all_supported(
         "generated": {
             "accessed": ACCESSED_DATE,
             "family": "OpenStreetMap local Geofabrik extracts",
+            "osm_extract": osm_extract.meta(),
             "radius_mi": radius_mi,
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
         },
@@ -648,6 +650,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.all_supported:
+        osm_extract.check_extracts(args.cache_dir)
         payload = build_all_supported(args.cache_dir, radius_mi=args.radius_mi)
         print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
         if args.write:

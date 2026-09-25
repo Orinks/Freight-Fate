@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import osm_extract
 from world_source import WORLD_SOURCE_PATH, save_world  # re-exported to the sweep modules
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +24,10 @@ OVERPASS_MIRRORS = (
 )
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freight-Fate)"
-ACCESSED_DATE = "2026-06-23"
+# Every "accessed" in the extract-read source strings names the snapshot too.
+ACCESSED_DATE = (
+    f"{osm_extract.OSM_EXTRACT_ACCESSED} (OpenStreetMap as of {osm_extract.OSM_EXTRACT_DATE})"
+)
 EARTH_RADIUS_MI = 3958.7613
 
 SAMPLE_SPACING_MI = 10.0  # how often to drop an Overpass probe along the leg

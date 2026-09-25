@@ -39,7 +39,6 @@ import importlib.util
 import json
 import math
 import sys
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -48,6 +47,7 @@ from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import chain_match  # noqa: E402
+import osm_extract  # noqa: E402
 import street_chain  # noqa: E402
 from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa: E402
 
@@ -57,7 +57,7 @@ FACILITY_ENDPOINTS_PATH = ROOT / "data" / "facility_endpoints.json"
 LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
 FACILITY_APPROACHES_PATH = ROOT / "data" / "facility_approaches.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-ACCESSED_DATE = "2026-06-27"
+ACCESSED_DATE = osm_extract.OSM_EXTRACT_ACCESSED
 DEFAULT_STATES = ("Illinois", "Indiana", "Ohio")
 MAX_ROUTE_MI = 18.0
 EARTH_RADIUS_MI = 3958.7613
@@ -348,6 +348,7 @@ def build_facility_approaches(
         "version": 1,
         "generated": {
             "accessed": accessed,
+            "osm_extract": osm_extract.meta(),
             "family": "OpenStreetMap local Geofabrik extracts plus checked-in facility endpoints",
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
             "states": list(states),
@@ -472,6 +473,7 @@ def merge_existing(
         "gate_policy",
         "street_sources",
         "max_route_mi",
+        "osm_extract",
     ):
         if key in fresh["generated"]:
             generated[key] = fresh["generated"][key]
@@ -934,8 +936,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--accessed",
-        default=time.strftime("%Y-%m-%d"),
-        help="Date stamped on this batch (default: today)",
+        default=ACCESSED_DATE,
+        help="Date stamped on this batch (default: the day the extracts were fetched)",
     )
     parser.add_argument(
         "--endpoint-screen",
@@ -970,6 +972,7 @@ def main() -> int:
     )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
+    osm_extract.check_extracts(args.cache_dir)
 
     existing = None
     if args.merge_existing and args.existing.exists():

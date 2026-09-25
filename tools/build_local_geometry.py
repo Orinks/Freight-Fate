@@ -25,6 +25,7 @@ from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import chain_match  # noqa: E402
+import osm_extract  # noqa: E402
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
 from street_chain import MAJOR_HIGHWAYS, annotate, control_of  # noqa: E402
 from yard_roads import (  # noqa: E402
@@ -39,7 +40,7 @@ CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
 LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
 LOCAL_GEOMETRY_PATH = ROOT / "data" / "local_geometry.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-ACCESSED_DATE = "2026-06-27"
+ACCESSED_DATE = osm_extract.OSM_EXTRACT_ACCESSED
 EARTH_RADIUS_MI = 3958.7613
 MAX_CITY_SERVICE_ROUTE_MI = 18.0
 # Build-time fallback approach distance by service role, for services this
@@ -320,6 +321,7 @@ def build_local_geometry(cache_dir: Path, only_states: set[str] | None = None) -
         "version": 1,
         "generated": {
             "accessed": ACCESSED_DATE,
+            "osm_extract": osm_extract.meta(),
             "family": "OpenStreetMap local Geofabrik extracts plus checked-in local approach data",
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
             "city_service_route_limit_mi": MAX_CITY_SERVICE_ROUTE_MI,
@@ -1484,6 +1486,7 @@ def main() -> int:
     args = parser.parse_args()
 
     only_states = set(args.state) if args.state else None
+    osm_extract.check_extracts(args.cache_dir)
     payload = build_local_geometry(args.cache_dir, only_states=only_states)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     coverage = payload["coverage"]

@@ -320,18 +320,35 @@ def _exit_location(
     return best[0], best[1]
 
 
-def load_junction_ref_map(path: Path) -> dict[str, list[tuple[float, float]]]:
+def load_junction_ref_map(
+    path: Path, pbf_paths: list[Path] | None = None
+) -> dict[str, list[tuple[float, float]]]:
     """Exit-ref -> junction node locations from a saved interchange index.
 
     The interchange crawl already banked every motorway_junction node with its
     exit ref and precise location; reusing it pins each baked exit to its real
     OSM node instead of a geometry estimate. Read leniently: any index built
-    over these routes works, staleness only costs a few unmatched refs."""
+    over these routes works, staleness only costs a few unmatched refs. But an
+    index built from other extracts than the ones being baked pins exits to an
+    older map, so that is refused: rebuild it with ``build_interchanges.py
+    --pbf <every extract> --local-index-cache <path> --rebuild-local-index``."""
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         print(f"    junction index unreadable ({exc}); using geometry estimates", flush=True)
         return {}
+    if pbf_paths is not None:
+        built_from = {Path(p["path"]).name: p for p in payload.get("pbfs", ())}
+        stale = [
+            p.name
+            for p in pbf_paths
+            if p.name in built_from and built_from[p.name] != _pbf_set_metadata([p])[0]
+        ]
+        if stale:
+            raise SystemExit(
+                f"junction index {path} was built from other copies of {len(stale)} "
+                f"extract(s) ({', '.join(stale[:3])}...); rebuild it first"
+            )
     by_ref: dict[str, list[tuple[float, float]]] = {}
     for raw in payload.get("junctions", ()):
         ref = re.sub(r"\s+", "", str(raw.get("tags", {}).get("ref", "")).strip())
@@ -555,6 +572,8 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
             f"Auto-selected {len(pbf_paths)} per-state extract(s) for {len(states)} state(s).",
             flush=True,
         )
+        osm_extract.check_extracts(args.osm_region_dir)
+        data["osm_extract"] = osm_extract.meta()
     missing = [p for p in pbf_paths if not p.exists()]
     if missing:
         raise SystemExit("OSM PBF not found: " + ", ".join(str(p) for p in missing))
@@ -583,7 +602,7 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
     )
     junction_refs: dict[str, list[tuple[float, float]]] = {}
     if JUNCTION_INDEX_DEFAULT.exists():
-        junction_refs = load_junction_ref_map(JUNCTION_INDEX_DEFAULT)
+        junction_refs = load_junction_ref_map(JUNCTION_INDEX_DEFAULT, pbf_paths)
 
     stats: dict[str, int] = {}
     drifted: list[dict[str, Any]] = []

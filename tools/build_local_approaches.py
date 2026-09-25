@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import osm_extract
 import osmium
 from ffworld.world import get_world
 
@@ -25,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "data" / "city_services.json"
 LOCAL_APPROACHES_PATH = ROOT / "data" / "local_approaches.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-ACCESSED_DATE = "2026-06-27"
+ACCESSED_DATE = osm_extract.OSM_EXTRACT_ACCESSED
 EARTH_RADIUS_MI = 3958.7613
 GRID_DEGREES = 0.08
 SEARCH_RADIUS_MI = 1.25
@@ -141,6 +142,7 @@ def build_local_approaches(cache_dir: Path) -> dict[str, Any]:
         "version": 1,
         "generated": {
             "accessed": ACCESSED_DATE,
+            "osm_extract": osm_extract.meta(),
             "family": "OpenStreetMap local Geofabrik extracts plus checked-in world data",
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
             "search_radius_mi": SEARCH_RADIUS_MI,
@@ -527,6 +529,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=LOCAL_APPROACHES_PATH)
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
+    osm_extract.check_extracts(args.cache_dir)
 
     payload = build_local_approaches(args.cache_dir)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))

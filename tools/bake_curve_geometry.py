@@ -142,10 +142,11 @@ def bake_speed_limits(
     cum_m: list[float],
     mile_scale: float,
     ways: list[dict],
+    source: str = MAXSPEED_SOURCE,
 ) -> list[dict[str, Any]]:
     """Coverage-aware step function: numeric postings + null coverage gaps.
 
-    Numeric rows carry MAXSPEED_SOURCE for the world-source schema; ``mph: null``
+    Numeric rows carry ``source`` for the world-source schema; ``mph: null``
     rows mark a >SPEED_GAP_MI OSM hole (mid-leg and trailing, rider 3) and are
     stripped before the profile is written into the world source."""
     lats = [c[1] for c in coords]
@@ -200,7 +201,7 @@ def bake_speed_limits(
         hole_start_mi = None
         if samples and samples[-1]["mph"] == int(mph) and samples[-1]["hgv"] == is_hgv:
             continue
-        row = {"at_mi": at_mi, "mph": int(mph), "hgv": is_hgv, "source": MAXSPEED_SOURCE}
+        row = {"at_mi": at_mi, "mph": int(mph), "hgv": is_hgv, "source": source}
         if samples and samples[-1]["at_mi"] == at_mi:
             samples[-1] = row
             continue
@@ -396,6 +397,40 @@ def route_from_router(leg: dict, cities: dict) -> dict[str, Any]:
     return {"coordinates": shape, "elevations_ft": elevations}
 
 
+def world_speed_profile(leg: dict, miles: float, speed_full: list[dict]) -> list[dict]:
+    """The world-source profile: the full coverage-aware step function, gap markers
+    included (the schema accepts mph null since the NY-12 Norwich smear -- a
+    village 30 held for nine untagged miles). Then the anchor linter's OWN
+    repair runs so fresh data is clean by construction -- it drops interstate
+    sub-45 end anchors and fast-corridor surface mile-0/end city-street anchors
+    exactly as the post-bake linter would, guaranteeing it then reports ZERO
+    (repair is idempotent and keeps gap markers)."""
+    world_profile = [
+        {
+            "at_mi": s["at_mi"],
+            "mph": s["mph"],
+            "source": s.get("source", ""),
+            "hgv": s.get("hgv", False),
+        }
+        if s["mph"] is not None
+        else {"at_mi": s["at_mi"], "mph": None}
+        for s in speed_full
+    ]
+    tmp = {
+        "legs": [
+            {
+                "from": leg["from"],
+                "to": leg["to"],
+                "highway": leg.get("highway", ""),
+                "miles": miles,
+                "corridor": {"speed_limits": world_profile},
+            }
+        ]
+    }
+    _repair_profiles(tmp)
+    return tmp["legs"][0].get("corridor", {}).get("speed_limits", [])
+
+
 def process_leg(
     leg: dict,
     cities: dict,
@@ -442,37 +477,7 @@ def process_leg(
         gameplay_curves.append(row)
 
     rt = scs.roundtrip_check(geom, curv_dec["curves"])
-    # world-source profile: the full coverage-aware step function, gap markers
-    # included (the schema accepts mph null since the NY-12 Norwich smear --
-    # a village 30 held for nine untagged miles). Then run the anchor
-    # linter's OWN repair so fresh data is clean by construction -- it drops
-    # interstate sub-45 end anchors and fast-corridor surface mile-0/end
-    # city-street anchors exactly as the post-bake linter would, guaranteeing
-    # it then reports ZERO (repair is idempotent and keeps gap markers).
-    world_profile = [
-        {
-            "at_mi": s["at_mi"],
-            "mph": s["mph"],
-            "source": s.get("source", ""),
-            "hgv": s.get("hgv", False),
-        }
-        if s["mph"] is not None
-        else {"at_mi": s["at_mi"], "mph": None}
-        for s in speed_full
-    ]
-    _tmp = {
-        "legs": [
-            {
-                "from": frm,
-                "to": to,
-                "highway": highway,
-                "miles": leg_miles or round(raw_mi, 2),
-                "corridor": {"speed_limits": world_profile},
-            }
-        ]
-    }
-    _repair_profiles(_tmp)
-    world_profile = _tmp["legs"][0].get("corridor", {}).get("speed_limits", [])
+    world_profile = world_speed_profile(leg, leg_miles or round(raw_mi, 2), speed_full)
     return {
         "leg_id": f"{frm}:{to}",
         "state": str(cities[frm]["state"]).lower(),
