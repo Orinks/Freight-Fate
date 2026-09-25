@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Space and U say how far away your signalled exit is.** Space ends with it, and U names it first.
+
 - **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
 
 - **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.

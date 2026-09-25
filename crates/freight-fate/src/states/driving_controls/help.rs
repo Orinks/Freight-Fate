@@ -148,7 +148,8 @@ impl DrivingState {
         ));
         text.push_str(&objective_help);
         text.push_str(&format!(
-            "{} speed, active speed-control mode, and target. ",
+            "{} speed, active speed-control mode, and target, and with the signal on, \
+             how far to the exit. ",
             n(Action::Speed)
         ));
         text.push_str(&format!(
@@ -219,7 +220,8 @@ impl DrivingState {
         );
         text.push_str("Control C copies the message you are on. ");
         text.push_str(&format!(
-            "{} reads the road ahead that no other key answers: the ramp ",
+            "{} reads the road ahead that no other key answers: the exit your \
+             signal is on for, the ramp ",
             n(Action::Upcoming)
         ));
         text.push_str("control coming up, the next imposed limit, the next stop, and ");
