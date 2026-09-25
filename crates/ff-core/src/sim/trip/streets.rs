@@ -31,6 +31,22 @@ pub fn is_street_zone_reason(reason: &str) -> bool {
     reason == STREET_ZONE || reason == STOP_STREET_ZONE
 }
 
+/// What a spoken line calls the stretch a zone reason stands for: nothing
+/// for a public street of a chain, which is just a street with its own
+/// limit (the turn-by-turn says its name), "the yard" or "the lot", and
+/// "the (reason) zone" for everything else. "Speed keeper holding 55 miles
+/// per hour through the facility access road zone" named ten miles of city
+/// streets as one zone (live drive into Abilene, 2026-09-24).
+pub fn spoken_zone(reason: &str) -> Option<String> {
+    if is_street_zone_reason(reason) {
+        None
+    } else if reason == YARD_ZONE || reason == LOT_ZONE {
+        Some(format!("the {reason}"))
+    } else {
+        Some(format!("the {reason} zone"))
+    }
+}
+
 impl Trip {
     /// The streets from the ramp terminal of the exit serving a road stop,
     /// for this trip's direction of travel, to the stop's driveway; None for

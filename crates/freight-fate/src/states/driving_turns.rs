@@ -491,6 +491,20 @@ impl DrivingState {
             self.pace_clock_for_turn(&cue, ahead);
             return;
         }
+        let too_fast =
+            self.trip.truck.speed_mph() > self.turn_speed_mph(&cue) + TURN_SPEED_MARGIN_MPH;
+        if !too_fast {
+            // Taken under its speed: settled here, its tone now. The grace
+            // below only keeps a corner from being FAILED while its own cue
+            // is still speaking. It used to hold a corner taken cleanly too,
+            // for as long as the off-the-ramp line took at the slowest
+            // modelled voice -- 71 seconds for the Ardmore yard's -- while
+            // the truck drove through the next two corners, whose calls came
+            // late and whose tones all sounded together at the end of it
+            // (live drive into Ardmore, 2026-09-24).
+            self.resolve_turn(ctx, &cue);
+            return;
+        }
         if self.turn_grace_s > 0.0 {
             return; // the corner's own cue is still speaking
         }
@@ -498,11 +512,7 @@ impl DrivingState {
             self.resolve_turn(ctx, &cue);
             return;
         }
-        if self.trip.truck.speed_mph() > self.turn_speed_mph(&cue) + TURN_SPEED_MARGIN_MPH {
-            self.handle_missed_turn(ctx, &cue);
-        } else {
-            self.resolve_turn(ctx, &cue);
-        }
+        self.handle_missed_turn(ctx, &cue);
     }
 
     /// `_resolve_turn(cue)`: this corner is settled; the clock goes back to

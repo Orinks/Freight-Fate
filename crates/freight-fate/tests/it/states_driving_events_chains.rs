@@ -155,6 +155,89 @@ fn test_chain_swaps_to_streets_and_keeps_the_clock() {
 }
 
 #[test]
+fn test_each_first_corner_sounds_where_it_is_made() {
+    // Live drive into Ardmore, 2026-09-24: the yard's streets open with three
+    // corners 0.05 mile apart -- left onto West Broadway Street, right onto M
+    // Street Southwest, left back onto West Broadway Street. The first is
+    // called in the off-the-ramp line, and that line's grace (its words at
+    // the slowest modelled voice, 71 seconds) held the corner in play long
+    // after the truck had made it: the other two calls came late, and all
+    // three turn tones sounded together 0.2 mile on.
+    use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
+    use freight_fate::states::driving_turns::is_judged_turn;
+    let dt = 1.0 / 30.0;
+    let mut harness = PlaytestHarness::new();
+    {
+        let settings = &mut harness.app.ctx.settings;
+        settings.apply_driving_assistance_preset("all");
+        settings.speed_keeper = true;
+        settings.automatic_transmission = true;
+    }
+    harness.start_route(
+        "oklahoma_city_ok_us",
+        "ardmore_ok_us",
+        RouteSetup::seeded(4242)
+            .named("Ardmore Corners")
+            .destination_location("Ardmore Company Yard"),
+    );
+    let log = harness.app.record_audio();
+    let corners = harness.with_drive(|d, ctx| {
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+        d.departure_checked = true;
+        d.truck_mut().start_engine();
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 4;
+        d.truck_mut().velocity_mps = 15.0 / 2.23694;
+        d.destination_exit_taken = true;
+        d.speed_control_armed = true;
+        assert!(d.begin_surface_chain(ctx, true));
+        d.trip
+            .navigation_cues
+            .iter()
+            .filter(|cue| is_judged_turn(cue))
+            .take(3)
+            .map(|cue| (cue.at_mi, cue.direction.clone()))
+            .collect::<Vec<_>>()
+    });
+    let sides: Vec<&str> = corners.iter().map(|(_, side)| side.as_str()).collect();
+    assert_eq!(sides, ["left", "right", "left"], "{corners:?}");
+    assert!(corners[2].0 - corners[0].0 < 0.15, "{corners:?}");
+    let mut tones = Vec::new();
+    let mut played = 0;
+    for _ in 0..(30 * 120) {
+        harness.advance_clock(dt);
+        harness.with_drive(|d, ctx| {
+            let cut_out = d.truck().specs.air_governor_cut_out_psi;
+            d.truck_mut().set_air_pressure_psi(cut_out);
+            d.update_frame(ctx, dt);
+        });
+        let at = harness.read_drive(|d| d.trip.position_mi);
+        let calls = log.borrow().played.clone();
+        for (key, _, _) in &calls[played..] {
+            if key.starts_with("events/turn_") {
+                tones.push((key.clone(), at));
+            }
+        }
+        played = calls.len();
+        if at > corners[2].0 + 0.05 {
+            break;
+        }
+    }
+    assert_eq!(tones.len(), 3, "{tones:?}");
+    for ((key, at), (corner_mi, side)) in tones.iter().zip(&corners) {
+        assert_eq!(key, &format!("events/turn_{side}"), "{tones:?}");
+        assert!(
+            at - corner_mi < 0.01,
+            "the {side} turn at {corner_mi:.2} mile sounded at {at:.3}: {tones:?}"
+        );
+    }
+}
+
+#[test]
 fn test_the_chain_takes_the_truck_and_the_weather_with_it() {
     // Python aliased one truck object from both trips; the Rust `Trip` owns
     // its truck and weather, so the swap has to carry them across.

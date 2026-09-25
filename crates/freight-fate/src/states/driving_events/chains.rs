@@ -13,6 +13,16 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
+/// Whether a road stop's streets from its exit ramp to its lot are driven.
+/// OFF for 1.9 (owner decision, 2026-09-24): most exits have a ramp end
+/// baked for one direction only, so the same truck stop had streets one way
+/// and none the other (the Love's at Baird, I-20 exit 307, had none
+/// westbound). A stop keeps its entrance at the ramp's end, as before
+/// 2026-09-24, until the re-bake that finds each direction's ramp (2.0). A
+/// drive copies this into `DrivingState::stop_streets_on`, which the 2.0
+/// tests set.
+pub const STOP_STREETS_IN_PLAY: bool = false;
+
 impl DrivingState {
     /// The spoken state name for a city key, or "" when the world is silent.
     ///
@@ -275,7 +285,7 @@ impl DrivingState {
     /// The streets from the end of a road stop's exit ramp to its lot, for
     /// this trip's direction, or None when the stop has none baked.
     pub fn stop_chain_route(&self, stop: &RoadStop) -> Option<Route> {
-        if stop.stop_type == "delivery_destination" {
+        if !self.stop_streets_on || stop.stop_type == "delivery_destination" {
             return None;
         }
         let highway = if self.stop_chain.is_some() {

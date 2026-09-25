@@ -813,3 +813,22 @@ fn test_g_keeps_clear_road_report_when_no_grade_is_ahead() {
         spoken(&harness)
     );
 }
+
+#[test]
+fn test_g_under_a_mile_from_the_end_says_nothing_steep_ahead() {
+    // The streets to a gate are under a mile of road: whole miles said
+    // "Nothing steep in the next 0 miles" (live drive into Abilene,
+    // 2026-09-24).
+    let mut harness = cruising("G Last Streets", 20.0, 30.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| {
+        d.trip.position_mi = d.trip.total_miles() - 0.4;
+        d.speak_grade(ctx);
+    });
+    assert!(
+        said_any(&harness, "Nothing steep ahead."),
+        "{:?}",
+        spoken(&harness)
+    );
+    assert!(!said_any(&harness, "0 miles"), "{:?}", spoken(&harness));
+}

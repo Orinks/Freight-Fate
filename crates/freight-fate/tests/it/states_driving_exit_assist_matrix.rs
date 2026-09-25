@@ -298,6 +298,9 @@ fn bench(d: &mut DrivingState, kind: Kind) {
     d.reset_turn_state_for_trip();
     d.destination_exit_taken = true;
     d.trip.position_mi = STOP_MI - 2.0;
+    // A road stop's streets are off in 1.9; this case drives them as 2.0
+    // will, and every other kind is a stop with none.
+    d.stop_streets_on = kind == Kind::FreeFlow5x;
 }
 
 pub(crate) fn start(preset: Preset, kind: Kind) -> PlaytestHarness {
@@ -535,7 +538,10 @@ fn street_bar_keys(d: &mut DrivingState, preset: Preset, braking: bool) -> Optio
 
 /// Put a traffic light and a stop sign on the destination's streets, in
 /// place of whatever the map has there, so every run meets the same two.
+/// The street controls are off in 1.9; this case switches them on as 2.0
+/// plays them.
 fn lay_street_controls(d: &mut DrivingState) {
+    d.street_controls_on = true;
     let streets: Vec<usize> = (1..d.trip.route.legs.len())
         .filter(|i| !d.trip.route.legs[*i].local_yard)
         .collect();

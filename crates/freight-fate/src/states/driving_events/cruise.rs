@@ -300,11 +300,16 @@ impl DrivingState {
             // exactly the thing that holds speed here, and a driver who has
             // never turned it on hears only that cruise "is not available"
             // and concludes the ramp kills speed control (Shane, 2026-08-15).
+            let place = if ff_core::sim::trip::is_street_zone_reason(zone_reason) {
+                "on city streets".to_string()
+            } else {
+                format!("in a {zone_reason} zone")
+            };
             self.say_plain(
                 ctx,
                 format!(
-                    "No adaptive cruise in a {zone_reason} zone. The speed keeper holds speed \
-                     here; turn it on in Settings, Controls."
+                    "No adaptive cruise {place}. The speed keeper holds speed here; turn it on \
+                     in Settings, Controls."
                 ),
             );
             return;
@@ -330,10 +335,7 @@ impl DrivingState {
         if announce {
             ctx.audio.play_with("ui/notify", 0.5, 0.0);
             let held = ctx.settings.speed_text(self.keeper_mph.unwrap_or(0.0));
-            self.say_plain(
-                ctx,
-                format!("Speed keeper holding {held} through the {zone_reason} zone."),
-            );
+            self.say_plain(ctx, keeper_holding_line(&held, zone_reason));
         }
     }
 
@@ -714,7 +716,7 @@ impl DrivingState {
         } else if zone_reason == KEEPER_OPEN_ROAD_BRIDGE {
             format!("Speed keeper building to {held}.")
         } else {
-            format!("Speed keeper holding {held} through the {zone_reason} zone.")
+            keeper_holding_line(&held, zone_reason)
         };
         self.say_route_confirmation(ctx, &spoken);
     }
@@ -823,5 +825,14 @@ impl DrivingState {
         }
         self.trip.truck.throttle = 0.0; // never brake against our own throttle
         self.trip.truck.brake = self.trip.truck.brake.max(self.keeper_snub);
+    }
+}
+
+/// "Speed keeper holding 30 miles per hour through the work zone", or no
+/// zone at all on a street, which is just a street (`spoken_zone`).
+pub(crate) fn keeper_holding_line(held: &str, zone_reason: &str) -> String {
+    match ff_core::sim::trip::spoken_zone(zone_reason) {
+        Some(zone) => format!("Speed keeper holding {held} through {zone}."),
+        None => format!("Speed keeper holding {held}."),
     }
 }

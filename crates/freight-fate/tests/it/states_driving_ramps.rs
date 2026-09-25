@@ -2449,11 +2449,15 @@ fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp()
     eprintln!("{}", trace.join("\n"));
     eprintln!("{lines:#?}");
     assert!(forced, "never reached the ramp light");
-    // Twice: the seeded red on the way down, and again for the yellow after
-    // the green stood the assist down. The second take used to be silent.
+    // Twice: for the first yellow on the way down, and again for the late
+    // yellow after the green stood the assist down. The second take used to
+    // be silent. A line a flush cut before its first word is handed straight
+    // back to the voice, so the pair it leaves is one occurrence.
+    let braking = "Route-transition assistance braking for the light.";
     let announced = lines
         .iter()
-        .filter(|line| *line == "Route-transition assistance braking for the light.")
+        .enumerate()
+        .filter(|(i, line)| *line == braking && (*i == 0 || lines[i - 1] != braking))
         .count();
     assert_eq!(announced, 2, "{lines:?}");
     assert!(!lines.iter().any(|line| line.contains("ran the red light")));
