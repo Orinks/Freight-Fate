@@ -546,7 +546,7 @@ fn test_the_ramp_cap_is_the_number_once_on_the_ramp() {
 fn test_the_exit_lane_is_never_ready_from_the_left_lane() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.lane.lane = 1;
     d.lane_change_target = None;
     assert!(!d.exit_lane_ready());
@@ -560,18 +560,18 @@ fn test_the_exit_lane_is_never_ready_from_the_left_lane() {
 fn test_resetting_the_exit_lane_clears_every_latch() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
-    d.exit_lane_alignment = 1.0;
-    d.exit_lane_prompt_said = true;
-    d.exit_lane_ready_said = true;
+    d.exit_lane_entered = true;
+    d.exit_taper_said = true;
+    d.lane.exit_lane_open = true;
     d.exit_cancel_armed = true;
     d.exit_right_taps = 3;
     d.exit_countdown_said.push(2.0);
 
     d.reset_exit_lane_state();
 
-    assert_eq!(d.exit_lane_alignment, 0.0);
-    assert!(!d.exit_lane_prompt_said);
-    assert!(!d.exit_lane_ready_said);
+    assert!(!d.exit_lane_entered);
+    assert!(!d.exit_taper_said);
+    assert!(!d.lane.exit_lane_open);
     assert!(!d.exit_cancel_armed);
     assert_eq!(d.exit_right_taps, 0);
     assert!(d.exit_countdown_said.is_empty());

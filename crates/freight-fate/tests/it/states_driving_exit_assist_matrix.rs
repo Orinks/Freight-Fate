@@ -650,10 +650,6 @@ fn drive(preset: Preset, kind: Kind) -> Run {
                 }
             });
         }
-        if preset == Preset::LanePartial && !on_ramp_seen {
-            // Holding Right for the exit lane, as the countdown asks.
-            harness.with_drive(|d, _| d.exit_lane_alignment = 1.0);
-        }
         let assist_braking = harness.read_drive(|d| d.truck().brake > 0.01);
         let (brake, go) = harness.with_drive(|d, _| driver_keys(d, preset, kind, braking));
         braking = brake;
@@ -685,15 +681,18 @@ fn drive(preset: Preset, kind: Kind) -> Run {
             // driver follows the lean, which is what the cue is for.
             // Following it the way a driver does: into the bend while the
             // truck sits outside the lane's centre, and off again once it is
-            // over. The streets are left to lane keeping.
-            let (lean, offset, ramp) = harness.read_drive(|d| {
+            // over. The streets are left to lane keeping. And on the approach,
+            // Right into the exit lane where the cab says it opens -- the
+            // truck is already in the right lane, so that is all it asks.
+            let (lean, offset, ramp, exit_lane_open) = harness.read_drive(|d| {
                 (
                     d.maneuver_steer_demand(None),
                     d.lane.offset,
                     d.on_laid_out_ramp(),
+                    d.lane.exit_lane_open,
                 )
             });
-            let right = ramp && lean > 0.1 && offset < 0.1;
+            let right = (ramp && lean > 0.1 && offset < 0.1) || exit_lane_open;
             let left = ramp && offset > 0.5;
             for (key, held) in [(Key::Right, right), (Key::Left, left)] {
                 if held {

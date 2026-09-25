@@ -293,7 +293,7 @@ fn test_exit_missed_when_too_fast() {
     d.trip.truck.velocity_mps = too_fast_mph / 2.2369362920544;
     d.toggle_exit_signal(&mut app.ctx);
     assert_eq!(d.exit_stop.as_ref().map(|s| s.key()), Some(stop.key()));
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.trip.position_mi = stop.at_mi;
 
     d.update_frame(&mut app.ctx, 1.0 / 60.0);
@@ -326,7 +326,7 @@ fn test_taking_the_exit_puts_the_truck_on_the_ramp() {
     d.trip.position_mi = stop.at_mi - 1.0;
     d.trip.truck.velocity_mps = 13.0; // ~29 mph: inside gore acceptance
     d.toggle_exit_signal(&mut app.ctx);
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.trip.position_mi = stop.at_mi;
 
     d.update_frame(&mut app.ctx, 1.0 / 60.0);

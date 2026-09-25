@@ -342,7 +342,7 @@ fn test_nothing_on_the_approach_names_the_ramp_speed() {
     let armed = harness
         .transcript()
         .into_iter()
-        .find(|line| line.contains("Signal on for exit 42"))
+        .find(|line| line.contains("Signal set for exit 42"))
         .expect("the signal-on line");
     assert!(!armed.contains("for the ramp"), "{armed}");
     assert!(!armed.contains("49"), "{armed}");

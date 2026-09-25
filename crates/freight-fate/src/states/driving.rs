@@ -417,12 +417,13 @@ pub struct DrivingState {
     pub exit_signal_on: bool,
     pub exit_signal_canceled: bool,
     pub canceled_exit_key: Option<String>, // do not rediscover a deliberately canceled exit
-    pub exit_lane_alignment: f64,
-    pub exit_lane_prompt_said: bool,
-    pub exit_lane_ready_said: bool,
-    /// How long the exit lane has been lost since "Exit lane set." was said.
-    /// Debounces the line that takes it back; see `update_exit_preparation`.
-    pub exit_lane_lost_s: f64,
+    /// The truck is in the exit lane: steered into it where it opened at the
+    /// taper, or -- with lane keeping on full -- handed to lane keeping, which
+    /// takes it at the gore. See `update_exit_preparation`.
+    pub exit_lane_entered: bool,
+    /// "Exit lane opening." has been said for this approach: the lane is open
+    /// from here to the end of the gore window.
+    pub exit_taper_said: bool,
     pub exit_cancel_armed: bool,
     pub exit_right_hold_s: f64,
     pub exit_right_taps: i64,

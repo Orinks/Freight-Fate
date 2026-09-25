@@ -149,8 +149,15 @@ impl DrivingState {
             // The signal first, because it is the gate: the lane and the ramp
             // speed are both wasted if it is never set. See
             // `DrivingState::exit_signal_instruction`.
+            // Then the right lane, only if the truck is not in it; the exit
+            // lane itself is called where it opens.
             let signal = self.exit_signal_instruction();
-            return format!("{core} {signal} Move right for the exit lane.");
+            let lane = if self.in_right_lane_for_exit() {
+                ""
+            } else {
+                " Move to the right lane."
+            };
+            return format!("{core} {signal}{lane}");
         }
         // Lane keeping takes this exit with no signal and no lane work, so
         // the one thing the driver must not have to infer is that it is
@@ -204,8 +211,7 @@ impl DrivingState {
             self.exit_signal_canceled = false;
             self.reset_exit_lane_state();
             if ctx.settings.lane_is_automated() {
-                self.exit_lane_alignment = EXIT_LANE_READY;
-                self.exit_lane_ready_said = true;
+                self.exit_lane_entered = true;
             }
         }
     }

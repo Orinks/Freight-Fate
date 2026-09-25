@@ -378,7 +378,7 @@ impl DrivingState {
             format!(" at {}", stop.exit_label)
         };
         let assist = if ctx.settings.destination_approach_assist {
-            "Facility stopping assistance on. Once you signal and set the exit lane, it stops \
+            "Facility stopping assistance on. Once you signal and take the exit lane, it stops \
              at the entrance."
         } else {
             "Facility stopping assistance off. Stop at the entrance."

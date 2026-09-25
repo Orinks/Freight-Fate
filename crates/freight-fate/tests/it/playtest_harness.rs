@@ -683,9 +683,10 @@ fn test_realistic_cruise_eases_for_destination_exit_without_speeding_fine() {
     );
     // The exit speed is named once the truck is in the deceleration lane.
     assert!(text.contains("Exit speed "), "{text}");
-    // The exit key is a turn signal now: "Signal on for ..." replaced the
-    // older "Signaling for ..." callout when the cancel/confirm model landed.
-    assert!(text.contains("Signal on for"), "{text}");
+    // The exit key is a turn signal now: "Signal set for ..." (the blinker
+    // waits for half a mile) replaced the older "Signaling for ..." callout
+    // when the cancel/confirm model landed.
+    assert!(text.contains("Signal set for"), "{text}");
     assert!(text.contains("You take"), "{text}");
     assert!(
         !text.to_lowercase().contains("missed the destination exit"),
@@ -737,8 +738,8 @@ fn test_delayed_x_takes_announced_destination_exit_after_window_shrinks() {
     });
     let text = harness.transcript_text();
     assert!(text.contains("destination exit"), "{text}");
-    // "Signal on for ..." is the 1.9 wording of the old "Signaling for ...".
-    assert!(text.contains("Signal on for"), "{text}");
+    // "Signal set for ..." is the 1.9 wording of the old "Signaling for ...".
+    assert!(text.contains("Signal set for"), "{text}");
     assert!(!text.contains("No exit coming up"), "{text}");
     assert!(
         !text.to_lowercase().contains("missed the destination exit"),
