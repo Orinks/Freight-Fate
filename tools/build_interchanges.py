@@ -3,8 +3,9 @@
 
 Development-time helper (never called at runtime). For every Interstate leg it:
 
-1. Fetches densified OSRM geometry through the leg's checked-in ``route_points``
-   so each exit can be snapped to an accurate ``at_mi``.
+1. Reads the leg's archived polyline (``leg_geometry``; OSRM through the
+   checked-in ``route_points`` only for a leg with none) and projects each
+   exit onto it for an accurate ``at_mi``.
 2. Reads a local OSM PBF extract when ``--pbf`` is passed, streaming only
    ``highway=motorway_junction`` nodes and ``highway=motorway_link`` ways with
    ``destination`` tags. Without ``--pbf`` it falls back to the slower Overpass
@@ -39,6 +40,7 @@ import urllib.parse
 import urllib.request
 import importlib
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -75,6 +77,9 @@ PROBE_RADIUS_M = 9_000  # search radius per probe
 RAMP_NEAR_M = 350.0  # a ramp this close to a junction belongs to it
 LOCAL_CORRIDOR_M = 200.0  # local PBF features must snap this close to a leg
 LOCAL_PBF_PREFILTER_PAD_M = PROBE_RADIUS_M
+# Polyline piece per prefilter box: about the route-point spacing the boxes
+# used to follow, so a national run tests each OSM node against as many.
+LOCAL_PBF_PREFILTER_CHUNK_MI = 25.0
 MIN_EXIT_SPACING_MI = 2.0  # collapse exits closer than this (keep the richer)
 MAX_DESTINATIONS = 3  # cap control cities per exit for speech brevity
 LOCAL_INDEX_CACHE_VERSION = 1
@@ -206,20 +211,61 @@ def _ors_geometry(
     return out
 
 
-def _snap_at_mi(
-    lat: float, lon: float, geom: list[tuple[float, float, float]], leg_miles: float
-) -> tuple[float, float]:
-    """Nearest geometry vertex -> (at_mi scaled into the leg's frame, dist_mi)."""
-    best_d = float("inf")
-    best_cum = 0.0
-    for glat, glon, cum in geom:
-        d = _haversine_mi(lat, lon, glat, glon)
-        if d < best_d:
-            best_d = d
-            best_cum = cum
+SNAP_CELL_DEG = 0.1  # grid cell of the snapper's segment index
+INTERCHANGE_SOURCE = (
+    "Exit ref, name and destination signs read from OpenStreetMap "
+    "highway=motorway_junction nodes and motorway_link destination tags, "
+    f"accessed {ACCESSED_DATE}. at_mi derived: the mean of the exit's junction "
+    "nodes projected onto the leg's route polyline (its archived geometry; "
+    "OSRM only where none is archived), rescaled to the leg's miles: "
+    "https://www.openstreetmap.org/"
+)
+
+
+def _polyline_snapper(
+    geom: list[tuple[float, float, float]], leg_miles: float
+) -> Callable[[float, float], tuple[float, float]]:
+    """(lat, lon) -> (at_mi in the leg's frame, dist_mi) at the nearest point
+    ON the polyline.
+
+    Projects onto segments, not vertices: the archive keeps every vertex a
+    curve needs and thins the straights (the longest gap on the median one of
+    the 81 legs re-derived on 2026-09-25 was 6 miles), so a junction halfway
+    down a tangent sits miles from any vertex. Snapping to vertices lost 60
+    percent of those legs' junctions at 200 m and put the rest up to half a
+    gap off. Segments are indexed by grid cell, padded one cell, so any
+    segment within about 7 km of the query is tried; farther answers inf.
+    """
     total = geom[-1][2] or leg_miles
-    at_mi = best_cum / total * leg_miles
-    return at_mi, best_d
+    scale = leg_miles / total if total else 1.0
+    cells: dict[tuple[int, int], list[int]] = {}
+    for i in range(len(geom) - 1):
+        (a_lat, a_lon, _), (b_lat, b_lon, _) = geom[i], geom[i + 1]
+        y0, y1 = sorted((math.floor(a_lat / SNAP_CELL_DEG), math.floor(b_lat / SNAP_CELL_DEG)))
+        x0, x1 = sorted((math.floor(a_lon / SNAP_CELL_DEG), math.floor(b_lon / SNAP_CELL_DEG)))
+        for y in range(y0 - 1, y1 + 2):
+            for x in range(x0 - 1, x1 + 2):
+                cells.setdefault((y, x), []).append(i)
+
+    def snap(lat: float, lon: float) -> tuple[float, float]:
+        best_d, best_cum = float("inf"), 0.0
+        key = (math.floor(lat / SNAP_CELL_DEG), math.floor(lon / SNAP_CELL_DEG))
+        for i in cells.get(key, ()):
+            (a_lat, a_lon, a_mi), (b_lat, b_lon, b_mi) = geom[i], geom[i + 1]
+            # Local equirectangular plane around the query; exact enough for
+            # a segment tens of miles long and a match radius under two.
+            kx = math.cos(math.radians(lat))
+            ax, ay = (a_lon - lon) * kx, a_lat - lat
+            dx, dy = (b_lon - a_lon) * kx, b_lat - a_lat
+            seg2 = dx * dx + dy * dy
+            t = 0.0 if seg2 == 0 else min(1.0, max(0.0, -(ax * dx + ay * dy) / seg2))
+            p_lat, p_lon = a_lat + (b_lat - a_lat) * t, a_lon + (b_lon - a_lon) * t
+            d = _haversine_mi(lat, lon, p_lat, p_lon)
+            if d < best_d:
+                best_d, best_cum = d, a_mi + (b_mi - a_mi) * t
+        return best_cum * scale, best_d
+
+    return snap
 
 
 def _geometry_bounds(
@@ -268,9 +314,34 @@ def _route_corridor_bounds(
     ]
 
 
+def _polyline_bounds(
+    geom: list[tuple[float, float, float]],
+    pad_m: float = LOCAL_PBF_PREFILTER_PAD_M,
+    chunk_mi: float = LOCAL_PBF_PREFILTER_CHUNK_MI,
+) -> list[LocalBounds]:
+    """Padded boxes over consecutive ~chunk_mi pieces of a polyline. Each
+    piece shares its end vertex with the next, so no stretch falls between."""
+    out: list[LocalBounds] = []
+    start = 0
+    for i in range(1, len(geom)):
+        if geom[i][2] - geom[start][2] >= chunk_mi or i == len(geom) - 1:
+            out.append(_geometry_bounds(geom[start : i + 1], pad_m))
+            start = i
+    return out
+
+
 def _local_prefilter_bounds(legs: list[dict[str, Any]]) -> list[LocalBounds]:
+    """PBF prefilter boxes along the road each leg drives: its archived
+    polyline, route_points only for a leg with none. Route points can leave
+    the polyline entirely -- on 7 of the 81 legs re-derived on 2026-09-25
+    they boxed as little as 23 percent of it -- and a junction outside every
+    box is never read."""
     bounds: list[LocalBounds] = []
     for leg in legs:
+        geom = lg.corridor_geometry(leg)
+        if geom:
+            bounds.extend(_polyline_bounds(geom))
+            continue
         route_points = list(leg.get("corridor", {}).get("route_points", ()))
         bounds.extend(_route_corridor_bounds(route_points))
     return bounds
@@ -637,12 +708,13 @@ def _local_candidates(
     index: LocalOsmIndex, geom: list[tuple[float, float, float]], leg_miles: float
 ) -> tuple[dict[int, dict[str, Any]], list[dict[str, Any]]]:
     bounds = _geometry_bounds(geom, max(PROBE_RADIUS_M, 2_000.0))
+    snap = _polyline_snapper(geom, leg_miles)
     junctions: dict[int, dict[str, Any]] = {}
     ramps: list[dict[str, Any]] = []
     for i, feature in enumerate(index.junctions):
         if not _inside_bounds(feature.lat, feature.lon, bounds):
             continue
-        at_mi, dist = _snap_at_mi(feature.lat, feature.lon, geom, leg_miles)
+        _, dist = snap(feature.lat, feature.lon)
         if dist * 1609.34 > LOCAL_CORRIDOR_M:
             continue
         junctions[i] = {
@@ -654,7 +726,7 @@ def _local_candidates(
     for feature in index.ramps:
         if not _inside_bounds(feature.lat, feature.lon, bounds):
             continue
-        _, dist = _snap_at_mi(feature.lat, feature.lon, geom, leg_miles)
+        _, dist = snap(feature.lat, feature.lon)
         if dist * 1609.34 > max(RAMP_NEAR_M, LOCAL_CORRIDOR_M):
             continue
         ramps.append(
@@ -798,7 +870,7 @@ def discover_leg(
 ) -> list[dict[str, Any]]:
     highway = str(leg.get("highway", ""))
     shield_rx = _shield_pattern(highway)
-    if shield_rx is None:
+    if shield_rx is None and local_index is None:
         return []
     if geom is None:
         # The archived polyline is the road this leg drives; ask OSRM only for
@@ -857,17 +929,31 @@ def _assemble(
 ) -> list[dict[str, Any]]:
     # Collapse the two per-carriageway junction nodes that share an exit ref
     # into one logical exit; ref-less nodes are grouped by their snapped mile.
+    snap = _polyline_snapper(geom, leg_miles)
     by_key: dict[str, list[dict[str, Any]]] = {}
     for node in junctions.values():
-        at_mi, dist = _snap_at_mi(node["lat"], node["lon"], geom, leg_miles)
+        at_mi, dist = snap(node["lat"], node["lon"])
         if dist > 1.5 or not (1.0 < at_mi < leg_miles - 1.0):
             continue  # off-corridor match or too close to an endpoint
         node["at_mi"] = at_mi
         key = f"ref:{node['ref']}" if node["ref"] else f"mi:{round(at_mi / 0.5)}"
         by_key.setdefault(key, []).append(node)
 
+    # A leg across a state line can pass two exits with one number, since
+    # each state counts its own. Nodes of one ref farther apart than exits
+    # may stand are two exits; averaged, they were one exit at a mile
+    # between them where there is none.
+    groups: list[list[dict[str, Any]]] = []
+    for same_key in by_key.values():
+        same_key.sort(key=lambda n: n["at_mi"])
+        groups.append([same_key[0]])
+        for node in same_key[1:]:
+            if node["at_mi"] - groups[-1][-1]["at_mi"] > MIN_EXIT_SPACING_MI:
+                groups.append([])
+            groups[-1].append(node)
+
     exits: list[dict[str, Any]] = []
-    for group in by_key.values():
+    for group in groups:
         at_mi = sum(n["at_mi"] for n in group) / len(group)
         # Collapse stray internal spaces in OSM exit refs ("103 B" -> "103B").
         ref = re.sub(r"\s+", "", next((n["ref"] for n in group if n["ref"]), ""))
@@ -897,12 +983,7 @@ def _assemble(
                 "destinations": dests[:MAX_DESTINATIONS],
                 "via": via,
                 "highway": highway,
-                "source": (
-                    "OpenStreetMap highway=motorway_junction exit ref and "
-                    "destination sign tags on the leg's Interstate shield, snapped "
-                    f"to checked-in OSRM route geometry, accessed {ACCESSED_DATE}: "
-                    "https://www.openstreetmap.org/"
-                ),
+                "source": INTERCHANGE_SOURCE,
             }
         )
 
@@ -1074,12 +1155,19 @@ def main(argv: list[str] | None = None) -> int:
     eligible = 0
     index_legs: list[dict[str, Any]] = []
     process_legs: list[dict[str, Any]] = []
+    local_mode = bool(args.pbf or args.local_index_cache)
     for leg in legs:
-        if _shield_pattern(str(leg.get("highway", ""))) is None:
+        corridor = leg.setdefault("corridor", {})
+        # The local extract matches junctions by position, not by shield, so
+        # a leg that already carries exits under a label that is no longer
+        # an Interstate (relabelled for the road it drives now) is re-derived
+        # like any other. Only the Overpass crawl needs the shield.
+        if _shield_pattern(str(leg.get("highway", ""))) is None and not (
+            local_mode and corridor.get("interchanges")
+        ):
             continue
         eligible += 1
         index_legs.append(leg)
-        corridor = leg.setdefault("corridor", {})
         if corridor.get("interchanges") and not args.force:
             continue
         if not args.max_legs or len(process_legs) < args.max_legs:
@@ -1136,6 +1224,17 @@ def main(argv: list[str] | None = None) -> int:
                 continue
         found = discover_leg(leg, args.rate_limit, local_index, geom=geom)
         print(f"    {len(found)} interchanges", flush=True)
+        if not found and local_index is not None and corridor.get("interchanges"):
+            # The local index answers for every junction within reach of the
+            # polyline, so nothing found means the leg drives no exits; what
+            # it carried belongs to a road it left. (An Overpass miss can be a
+            # busy server, so that path keeps what it had.)
+            print(
+                f"    CLEARED {len(corridor['interchanges'])} exits: no junction on the polyline",
+                flush=True,
+            )
+            corridor["interchanges"] = []
+            updated_legs += 1
         if found:
             corridor["interchanges"] = found
             total_added += len(found)
@@ -1147,7 +1246,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"    ...checkpointed the world source ({updated_legs} legs so far)", flush=True)
 
     print(
-        f"\n{eligible} Interstate legs eligible; "
+        f"\n{eligible} legs eligible; "
         f"{processed} processed, {updated_legs} populated, "
         f"{total_added} interchanges total."
     )
