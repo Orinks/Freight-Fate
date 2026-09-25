@@ -1208,8 +1208,9 @@
                   "cue": "Start on Highway 112 (LA 112).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -1218,7 +1219,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -1263,8 +1265,9 @@
                   "cue": "Start on State Route 29 (LA 29).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -1273,7 +1276,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -3117,8 +3121,9 @@
                   "cue": "Start on River Road (PR 23).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -3127,8 +3132,9 @@
                   "cue": "Turn right onto LA 1.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.6,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -3147,7 +3153,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.38,
@@ -4843,8 +4850,9 @@
                   "cue": "Start on South Frost Road (LA 63).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4863,7 +4871,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.47,
@@ -4946,7 +4955,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -6345,7 +6355,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -8765,8 +8776,9 @@
                   "cue": "Start on River Road (PR 23).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8775,8 +8787,9 @@
                   "cue": "Turn right onto LA 1.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.6,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8795,7 +8808,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -8848,8 +8862,9 @@
                   "cue": "Start on University Parkway (LA 6).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8878,7 +8893,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -9829,7 +9845,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -9905,8 +9922,9 @@
                   "cue": "Start on South Frost Road (LA 63).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -9925,7 +9943,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.47,
@@ -9977,6 +9996,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -9987,6 +10007,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.42,
@@ -10010,7 +10031,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 50
+                "street_edges": 50,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.48,
@@ -12546,6 +12568,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12556,6 +12579,7 @@
                   "turn_deg": 87.7,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12574,7 +12598,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -12660,6 +12685,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12670,6 +12696,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12680,6 +12707,7 @@
                   "turn_deg": 94.2,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12698,7 +12726,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.28,
@@ -13600,6 +13629,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -13618,7 +13648,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,
@@ -13676,6 +13707,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -13686,6 +13718,7 @@
                   "turn_deg": 70.6,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -13704,7 +13737,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -13757,8 +13791,9 @@
                   "cue": "Start on Estherwood Highway (LA 91).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13767,8 +13802,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 107.9,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13777,8 +13813,9 @@
                   "cue": "Turn right onto Jasmine Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 50.7,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13797,7 +13834,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -13936,8 +13974,9 @@
                   "cue": "Start on US 90.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -13946,7 +13985,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -15797,6 +15837,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15807,6 +15848,7 @@
                   "turn_deg": 87.7,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15825,7 +15867,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -15916,6 +15959,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15926,6 +15970,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15936,6 +15981,7 @@
                   "turn_deg": 94.2,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15954,7 +16000,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.28,
@@ -16027,7 +16074,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -18627,8 +18675,9 @@
                   "cue": "Start on State Route 383 (LA 383).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18637,8 +18686,9 @@
                   "cue": "Turn right onto East Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 104.5,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18657,7 +18707,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -18715,8 +18766,9 @@
                   "cue": "Start on State Route 383 (LA 383).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18725,8 +18777,9 @@
                   "cue": "Continue onto Lowe-Grout Road (LA 383).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18745,7 +18798,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -18801,8 +18855,9 @@
                   "cue": "Start on Estherwood Highway (LA 91).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18811,8 +18866,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 107.9,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18821,8 +18877,9 @@
                   "cue": "Turn right onto Jasmine Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 50.7,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18841,7 +18898,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -18896,6 +18954,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18906,6 +18965,7 @@
                   "turn_deg": 51.3,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18924,7 +18984,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.12,
@@ -19602,8 +19663,9 @@
                   "cue": "Start on US 90.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -19612,7 +19674,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -20538,8 +20601,9 @@
                   "cue": "Start on US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20548,8 +20612,9 @@
                   "cue": "Continue onto South Julia Street (US 425).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -20563,8 +20628,9 @@
                   "cue": "Turn left onto US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 44.5,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20573,8 +20639,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.6,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20593,7 +20660,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 26
+                "street_edges": 26,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -20617,8 +20685,9 @@
                   "cue": "Start on South Julia Street (US 425).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20627,8 +20696,9 @@
                   "cue": "Turn left onto US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 44.5,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -20642,8 +20712,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.6,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20662,7 +20733,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -21952,8 +22024,9 @@
                   "cue": "Start on US 84.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -21962,8 +22035,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 92.6,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -21972,8 +22046,9 @@
                   "cue": "Turn left onto US 84.",
                   "speed_mph": 25.0,
                   "turn_deg": 94.6,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -21992,7 +22067,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -26227,7 +26303,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -26295,6 +26372,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26305,6 +26383,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26315,6 +26394,7 @@
                   "turn_deg": 94.2,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26333,7 +26413,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.28,
@@ -26419,6 +26500,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26429,6 +26511,7 @@
                   "turn_deg": 87.7,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26447,7 +26530,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -26533,6 +26617,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26543,6 +26628,7 @@
                   "turn_deg": 70.6,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -26561,7 +26647,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -26617,8 +26704,9 @@
                   "cue": "Start on Estherwood Highway (LA 91).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26627,8 +26715,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 107.9,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26637,8 +26726,9 @@
                   "cue": "Turn right onto Jasmine Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 50.7,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26657,7 +26747,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -26796,8 +26887,9 @@
                   "cue": "Start on US 90.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -26806,7 +26898,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -27567,6 +27660,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27577,6 +27671,7 @@
                   "turn_deg": 90.4,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27587,6 +27682,7 @@
                   "turn_deg": 162.9,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27597,6 +27693,7 @@
                   "turn_deg": 90.8,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27615,7 +27712,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 30
+                "street_edges": 30,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.77,
@@ -27641,6 +27739,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27651,6 +27750,7 @@
                   "turn_deg": 47.2,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27661,6 +27761,7 @@
                   "turn_deg": 83.9,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -27679,7 +27780,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.45,
@@ -31115,6 +31217,7 @@
                   "turn_deg": 95.4,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31133,7 +31236,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 27
+                "street_edges": 27,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -31214,8 +31318,9 @@
                   "cue": "Start on Interstate 20 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31224,8 +31329,9 @@
                   "cue": "Turn left onto Barber Road (CR 3101).",
                   "speed_mph": 25.0,
                   "turn_deg": 103.9,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31244,7 +31350,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 25
+                "street_edges": 25,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.47,
@@ -32614,7 +32721,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -32663,7 +32771,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -32718,6 +32827,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -32726,8 +32836,9 @@
                   "cue": "Turn right onto Industrial Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 70.9,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -32751,7 +32862,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 78
+                "street_edges": 78,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 2.86,
@@ -34110,8 +34222,9 @@
                   "cue": "Start on Mira Myrtis Road (PR 16).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34120,8 +34233,9 @@
                   "cue": "Turn left onto Atlanta Mira Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 109.4,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34140,7 +34254,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -34164,8 +34279,9 @@
                   "cue": "Start on Mira Myrtis Road (PR 16).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34174,8 +34290,9 @@
                   "cue": "Turn left onto Atlanta Mira Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 108.3,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34194,7 +34311,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,

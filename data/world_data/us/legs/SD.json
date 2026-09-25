@@ -5864,8 +5864,9 @@
                   "cue": "Start on South Main Street (SD 45).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -5884,7 +5885,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -6016,7 +6018,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -6124,8 +6127,9 @@
                   "cue": "Turn left onto Reagan Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 92.2,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6144,7 +6148,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -6217,7 +6222,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -14294,7 +14300,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -14397,8 +14404,9 @@
                   "cue": "Start on I 90 Bus;MT 47.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14437,7 +14445,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -18308,7 +18317,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -18371,8 +18381,9 @@
                   "cue": "Turn left onto Reagan Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 92.2,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18391,7 +18402,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -18510,7 +18522,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -18611,8 +18624,9 @@
                   "cue": "Start on South Main Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18631,7 +18645,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -28513,6 +28528,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -28523,6 +28539,7 @@
                   "turn_deg": 73.9,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -28531,7 +28548,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -28628,7 +28646,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,

@@ -45,8 +45,9 @@
                   "cue": "Start on Interstate 20 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -55,8 +56,9 @@
                   "cue": "Turn left onto Cherry Street (US 283).",
                   "speed_mph": 25.0,
                   "turn_deg": 92.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -70,8 +72,9 @@
                   "cue": "Continue onto US 283.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -80,8 +83,9 @@
                   "cue": "Turn right onto Interstate 20 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 93.1,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -100,7 +104,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.41,
@@ -153,8 +158,9 @@
                   "cue": "Start on East Interstate 20.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -163,8 +169,9 @@
                   "cue": "Turn left onto US Highway 183 (US 183).",
                   "speed_mph": 25.0,
                   "turn_deg": 108.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -173,8 +180,9 @@
                   "cue": "Turn left onto East Interstate 20.",
                   "speed_mph": 25.0,
                   "turn_deg": 71.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -193,7 +201,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.37,
@@ -8139,7 +8148,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 35
+                "street_edges": 35,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -18026,7 +18036,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 44
+                "street_edges": 44,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 2.18,
@@ -18171,6 +18182,7 @@
                   "turn_deg": 57.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18181,6 +18193,7 @@
                   "turn_deg": 29.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18199,7 +18212,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.35,
@@ -18257,6 +18271,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18285,7 +18300,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -27101,7 +27117,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 44
+                "street_edges": 44,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 2.18,
@@ -33316,8 +33333,9 @@
                   "cue": "Start on North Access Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33326,8 +33344,9 @@
                   "cue": "Turn right onto North FM 707 (FM 707).",
                   "speed_mph": 25.0,
                   "turn_deg": 76.9,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33351,7 +33370,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.4,
@@ -33419,8 +33439,9 @@
                   "cue": "Start on Interstate 69E Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33429,8 +33450,9 @@
                   "cue": "Turn right onto Templeton Street (FM 508).",
                   "speed_mph": 25.0,
                   "turn_deg": 93.9,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33449,7 +33471,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -51364,6 +51387,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -51374,6 +51398,7 @@
                   "turn_deg": 102.6,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -51401,7 +51426,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.56,
@@ -88311,6 +88337,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -88321,6 +88348,7 @@
                   "turn_deg": 58.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -88339,7 +88367,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -88418,8 +88447,9 @@
                   "cue": "Start on East Motel Drive (I 10 Bus).",
                   "speed_mph": 35.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -88438,7 +88468,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.45,
@@ -88548,8 +88579,9 @@
                   "cue": "Continue onto Virginia Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -88568,7 +88600,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.24,
@@ -90087,6 +90120,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -90097,6 +90131,7 @@
                   "turn_deg": 104.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -90112,6 +90147,7 @@
                   "turn_deg": 91.1,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -90139,7 +90175,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 38
+                "street_edges": 38,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.99,
@@ -91598,8 +91635,9 @@
                   "cue": "Start on Northeast Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -91608,7 +91646,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -95648,6 +95687,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -95658,6 +95698,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -95666,8 +95707,9 @@
                   "cue": "Turn left onto Corsicana Highway (TX 22; TX 171).",
                   "speed_mph": 25.0,
                   "turn_deg": 95.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -95683,6 +95725,7 @@
                   "turn_deg": 86.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -95706,7 +95749,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -95816,6 +95860,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -95844,7 +95889,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -95965,7 +96011,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.13,
               "driveway": {
@@ -96010,8 +96057,9 @@
                   "cue": "Turn right onto West Main Street (FM 935).",
                   "speed_mph": 25.0,
                   "turn_deg": 88.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -96050,7 +96098,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 61
+                "street_edges": 61,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.13,
               "driveway": {
@@ -96192,8 +96241,9 @@
                   "cue": "Turn right onto TX 130 Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -96202,8 +96252,9 @@
                   "cue": "Turn left onto I-35 Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 87.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -96221,8 +96272,9 @@
                   "cue": "Continue onto North Interstate 35.",
                   "speed_mph": 55.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.78,
@@ -96250,7 +96302,8 @@
                 "controlled": 4,
                 "ambiguous": 1,
                 "conflicts": 0,
-                "street_edges": 70
+                "street_edges": 70,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 2.43,
@@ -100451,8 +100504,9 @@
                   "cue": "Start on North Interstate 35.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -100463,6 +100517,7 @@
                   "turn_deg": 90.5,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -100473,6 +100528,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -100491,7 +100547,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.69,
@@ -100572,6 +100629,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -100610,7 +100668,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.44,
@@ -105965,6 +106024,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.52,
@@ -105980,6 +106040,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -105993,8 +106054,9 @@
                   "cue": "Turn left onto Holland Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 65.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -106013,7 +106075,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 30
+                "street_edges": 30,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.75,
@@ -106037,8 +106100,9 @@
                   "cue": "Start on Interstate 45 North.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -106049,6 +106113,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -106062,8 +106127,9 @@
                   "cue": "Turn left onto Holland Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 65.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -106082,7 +106148,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 24
+                "street_edges": 24,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 1.11,
@@ -106166,6 +106233,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -106203,7 +106271,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.69,
@@ -106229,6 +106298,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -106247,7 +106317,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.62,
@@ -108410,8 +108481,9 @@
                   "cue": "Start on US 90.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -108420,7 +108492,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -108468,8 +108541,9 @@
                   "cue": "Start on West Street (LA 3063).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -108478,8 +108552,9 @@
                   "cue": "Continue onto State Route 3063 (LA 3063).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -108488,8 +108563,9 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -108508,7 +108584,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -111687,8 +111764,9 @@
                   "cue": "Turn left onto West Interstate 10.",
                   "speed_mph": 25.0,
                   "turn_deg": 114.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -111717,7 +111795,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -113870,7 +113949,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -115013,8 +115093,9 @@
                   "cue": "Start on North Segovia Access Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -115023,7 +115104,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 1
+                "street_edges": 1,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -118890,6 +118972,7 @@
                   "turn_deg": 57.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -118900,6 +118983,7 @@
                   "turn_deg": 29.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -118918,7 +119002,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.35,
@@ -118976,6 +119061,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -119004,7 +119090,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -125946,8 +126033,9 @@
                   "cue": "Start on I-35 Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -125956,7 +126044,8 @@
                 "controlled": 0,
                 "ambiguous": 1,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -126002,8 +126091,9 @@
                   "cue": "Start on Interstate 35 North.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -126012,8 +126102,9 @@
                   "cue": "Turn left onto FM 471 South (FM 471).",
                   "speed_mph": 25.0,
                   "turn_deg": 99.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -126032,7 +126123,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 34
+                "street_edges": 34,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.64,
@@ -129737,6 +129829,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -129755,7 +129848,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -135192,6 +135286,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135202,6 +135297,7 @@
                   "turn_deg": 82.8,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -135217,6 +135313,7 @@
                   "turn_deg": 72.1,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -135232,6 +135329,7 @@
                   "turn_deg": 84.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -135255,7 +135353,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.34,
@@ -135281,6 +135380,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135291,6 +135391,7 @@
                   "turn_deg": 87.5,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135311,6 +135412,7 @@
                   "turn_deg": 90.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135321,6 +135423,7 @@
                   "turn_deg": 90.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135331,6 +135434,7 @@
                   "turn_deg": 47.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -135351,6 +135455,7 @@
                   "turn_deg": 90.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -135374,6 +135479,7 @@
                   "turn_deg": 98.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -135397,7 +135503,8 @@
                 "controlled": 4,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 62
+                "street_edges": 62,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.35,
@@ -143751,6 +143858,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -143761,6 +143869,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -143769,8 +143878,9 @@
                   "cue": "Turn left onto Corsicana Highway (TX 22; TX 171).",
                   "speed_mph": 25.0,
                   "turn_deg": 95.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -143786,6 +143896,7 @@
                   "turn_deg": 86.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -143809,7 +143920,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -147082,6 +147194,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -147100,7 +147213,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -150762,8 +150876,9 @@
                   "cue": "Turn right onto North Lamesa Highway (TX 137).",
                   "speed_mph": 25.0,
                   "turn_deg": 91.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -150787,7 +150902,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.15,
@@ -154301,8 +154417,9 @@
                   "cue": "Start on Toomey Road (US 90).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -154311,8 +154428,9 @@
                   "cue": "Continue onto US 90.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -154321,7 +154439,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -154366,8 +154485,9 @@
                   "cue": "Start on West Street (LA 3063).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -154376,8 +154496,9 @@
                   "cue": "Continue onto State Route 3063 (LA 3063).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -154386,8 +154507,9 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -154406,7 +154528,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -170217,7 +170340,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 44
+                "street_edges": 44,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 2.18,
@@ -170355,6 +170479,7 @@
                   "turn_deg": 57.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -170365,6 +170490,7 @@
                   "turn_deg": 29.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -170383,7 +170509,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.35,
@@ -170441,6 +170568,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -170469,7 +170597,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -175784,8 +175913,9 @@
                   "cue": "Start on Interstate 10 West.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -175804,8 +175934,9 @@
                   "cue": "Turn right onto Loop 1087.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.01,
@@ -175829,7 +175960,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.41,
@@ -205320,8 +205452,9 @@
                   "cue": "Start on OK 49.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -205340,7 +205473,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,

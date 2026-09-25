@@ -1414,10 +1414,23 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       after their exits were discovered; Charlotte to Knoxville by a median
       8 miles). Unpinned exits there keep old ramp data and get no terminal
       (`ramp_length_bake.position_screen`). Re-derive their interchanges.
-- [ ] **Statutory district fill on rural numbered routes.** An untagged
-      state route outside town takes the district default (IA 175 at 20
-      near a Love's); a district statute does not reach it. Needs an
-      urban-area test before the fill.
+- [x] **In-town and rural statutory limits kept apart.** An untagged street
+      takes the in-town district default only inside the boundary its
+      state's code keys on (Census 2020 Urban Areas for a density district,
+      incorporated places for corporate limits); outside it, the state's
+      rural default for a numbered highway or a local road
+      (`tools/statutory_rural.py`, 49 cited rows; the median 55 where a code
+      sets none, labelled assumed). Each fill records its `limit_basis`. IA
+      175 by the Love's off I-35 is now 55, not 20. 2,115 street segments
+      (1,185 mi) changed.
+- [ ] **Minority speed tags on a street.** 995 filled streets (1,286 mi)
+      carry an OSM maxspeed on some of their own ways but under half their
+      miles, so the fill wins for the whole street. Splitting a street into
+      read and filled stretches needs a per-stretch limit in the record.
+      (The Wichita Falls "Waurika Freeway" 30 is not this: the chain drives
+      the untagged frontage road; the 55 and 70 tags belong to the TX 79
+      main lanes, which share the name. 24 filled streets share a name only
+      with a freeway.)
 - [ ] **3,630 road stops have no decided exit**, among them every travel
       center the stop snap could not link; they get no street chain.
 - [ ] **394 older chains still carry no street detail** (above).

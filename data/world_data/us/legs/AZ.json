@@ -70,7 +70,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -4980,8 +4981,9 @@
                   "cue": "Start on South Sunshine Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -5000,7 +5002,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -11510,7 +11513,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -11536,6 +11540,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -11554,7 +11559,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -11633,8 +11639,9 @@
                   "cue": "Start on Grand Canyon Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11653,7 +11660,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.24,
@@ -11716,8 +11724,9 @@
                   "cue": "Turn right onto Nellie Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 99.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11736,7 +11745,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -11770,8 +11780,9 @@
                   "cue": "Turn right onto Nellie Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 102.6,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11790,7 +11801,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,
@@ -11868,7 +11880,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -13624,6 +13637,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -13642,7 +13656,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -13691,7 +13706,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -13741,8 +13757,9 @@
                   "cue": "Start on Winona Ranch Road / Walking Cane Ranch Road (US 66 Hist).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13761,7 +13778,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -13785,8 +13803,9 @@
                   "cue": "Start on a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -13795,7 +13814,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -16134,8 +16154,9 @@
                   "cue": "Start on St. Johns-Sanders Highway (US 191).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -16154,7 +16175,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 30
+                "street_edges": 30,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -16260,7 +16282,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -16304,7 +16327,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -26451,8 +26475,9 @@
                   "cue": "Start on Arcosanti Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26481,7 +26506,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.36,
@@ -31005,8 +31031,9 @@
                   "cue": "Start on Quartzsite Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.16,
@@ -31030,7 +31057,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -31097,8 +31125,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 47.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31117,7 +31146,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 28
+                "street_edges": 28,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.36,
@@ -31205,8 +31235,9 @@
                   "cue": "Turn left onto Vista Del Norte.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31215,8 +31246,9 @@
                   "cue": "Continue onto Vista del Norte.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31235,7 +31267,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -42456,8 +42489,9 @@
                   "cue": "Start on West Sahuarita Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.12,
@@ -42471,8 +42505,9 @@
                   "cue": "Turn right onto South Rancho Sahuarita Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 86.1,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -42496,7 +42531,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -43671,8 +43707,9 @@
                   "cue": "Start on Main Street (I 40 BUS;US 66 Hist).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -43691,7 +43728,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -45834,6 +45872,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -45844,6 +45883,7 @@
                   "turn_deg": 90.7,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -45857,8 +45897,9 @@
                   "cue": "Turn left onto South Avenue 3 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.2,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -45869,6 +45910,7 @@
                   "turn_deg": 90.7,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -45892,7 +45934,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.36,

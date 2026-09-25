@@ -3015,7 +3015,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -6991,6 +6992,7 @@
                   "turn_deg": 86.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -7006,6 +7008,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -7029,7 +7032,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.44,
@@ -7082,8 +7086,9 @@
                   "cue": "Start on State Highway 24 (MN 24).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7092,8 +7097,9 @@
                   "cue": "Turn right onto Nelson Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 45.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7102,8 +7108,9 @@
                   "cue": "Turn right onto Shorty Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7122,7 +7129,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.34,
@@ -7174,6 +7182,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -7184,6 +7193,7 @@
                   "turn_deg": 86.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -7202,7 +7212,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -7228,6 +7239,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -7238,6 +7250,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -7253,6 +7266,7 @@
                   "turn_deg": 86.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -7271,7 +7285,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -11824,8 +11839,9 @@
                   "cue": "Start on US Highway 12 (US 12).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11844,7 +11860,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -13828,8 +13845,9 @@
                   "cue": "Start on 32nd Avenue South.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13848,7 +13866,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -13872,8 +13891,9 @@
                   "cue": "Start on 32nd Avenue South.",
                   "speed_mph": 40.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.17,
@@ -13897,7 +13917,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.37,
@@ -15354,8 +15375,9 @@
                   "cue": "Turn right onto 37th Street Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.2,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -15364,7 +15386,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               }
             }
           ],

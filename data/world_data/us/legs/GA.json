@@ -9519,8 +9519,9 @@
                   "cue": "Start on Old Allatoona Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -9539,7 +9540,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,
@@ -9653,6 +9655,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.2,
@@ -9668,6 +9671,7 @@
                   "turn_deg": 83.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.01,
@@ -9691,7 +9695,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -13361,7 +13366,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -20338,8 +20344,9 @@
                   "cue": "Start on Liberty Road (CR 245).",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20358,7 +20365,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -32880,8 +32888,9 @@
                   "cue": "Continue onto Kelley Creek Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -32900,7 +32909,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -33112,8 +33122,9 @@
                   "cue": "Start on Old Highway 80 West.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33122,8 +33133,9 @@
                   "cue": "Continue onto US 80.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33142,7 +33154,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -33198,8 +33211,9 @@
                   "cue": "Start on Lake-Norris Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33218,7 +33232,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -33454,8 +33469,9 @@
                   "cue": "Start on South Julia Street (US 425).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33464,8 +33480,9 @@
                   "cue": "Turn left onto US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 44.5,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33479,8 +33496,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.6,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33499,7 +33517,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -33523,8 +33542,9 @@
                   "cue": "Start on US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33533,8 +33553,9 @@
                   "cue": "Continue onto South Julia Street (US 425).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33548,8 +33569,9 @@
                   "cue": "Turn left onto US 425.",
                   "speed_mph": 25.0,
                   "turn_deg": 44.5,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33558,8 +33580,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.6,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33578,7 +33601,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 26
+                "street_edges": 26,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -33794,8 +33818,9 @@
                   "cue": "Start on US Highway 271 (US 271).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.12,
@@ -33823,7 +33848,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -33847,8 +33873,9 @@
                   "cue": "Start on Interstate 20 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33900,7 +33927,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 50
+                "street_edges": 50,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.86,
@@ -33953,8 +33981,9 @@
                   "cue": "Start on Interstate 20 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33963,8 +33992,9 @@
                   "cue": "Turn left onto State Park Highway (FM 14).",
                   "speed_mph": 55.0,
                   "turn_deg": 108.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 70.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33998,7 +34028,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 43
+                "street_edges": 43,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.61,
@@ -34051,8 +34082,9 @@
                   "cue": "Start on I 20 East Access Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34061,8 +34093,9 @@
                   "cue": "Turn right onto Wilson Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 79.7,
-                  "limit_mph": 30.0,
+                  "limit_mph": 60.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34081,7 +34114,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 26
+                "street_edges": 26,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.36,
@@ -36857,8 +36891,9 @@
                   "cue": "Start on Siloam Union Point Road (GA 77).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -36877,7 +36912,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,
@@ -36955,7 +36991,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 34
+                "street_edges": 34,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.5,
@@ -38667,6 +38704,7 @@
                   "turn_deg": 76.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -38690,7 +38728,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -44443,8 +44482,9 @@
                   "cue": "Start on South Coastal Highway (US 17;GA 25).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -44453,8 +44493,9 @@
                   "cue": "Continue onto Ocean Highway (US 17;GA 25).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -44463,8 +44504,9 @@
                   "cue": "Turn left onto Montague Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.1,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -44483,7 +44525,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -44538,6 +44581,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -44566,7 +44610,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 33
+                "street_edges": 33,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.26,
@@ -46161,8 +46206,9 @@
                   "cue": "Start on Old Allatoona Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -46181,7 +46227,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -52837,7 +52884,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,
@@ -52945,7 +52993,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -54175,7 +54224,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -54236,6 +54286,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.2,
@@ -54251,6 +54302,7 @@
                   "turn_deg": 83.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.01,
@@ -54274,7 +54326,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -54327,8 +54380,9 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -54339,6 +54393,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -54349,6 +54404,7 @@
                   "turn_deg": 61.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -54367,7 +54423,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 46
+                "street_edges": 46,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.54,
@@ -62349,8 +62406,9 @@
                   "cue": "Turn left onto Bass Cross Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 107.9,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -62374,7 +62432,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -62426,6 +62485,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -62436,6 +62496,7 @@
                   "turn_deg": 90.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -62461,6 +62522,7 @@
                   "turn_deg": 89.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -62479,7 +62541,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.51,
@@ -68448,7 +68511,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -68531,8 +68595,9 @@
                   "cue": "Turn right onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 78.6,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -68541,8 +68606,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 105.7,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -68561,7 +68627,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.4,
@@ -75038,6 +75105,7 @@
                   "turn_deg": 73.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -75046,7 +75114,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 1
               }
             }
           ],
@@ -75101,8 +75170,9 @@
                   "cue": "Turn right onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 78.6,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -75111,8 +75181,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 105.7,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -75131,7 +75202,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.24,
@@ -77470,7 +77542,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.41,
@@ -77514,7 +77587,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -77567,8 +77641,9 @@
                   "cue": "Start on West Jim Bilton Boulevard (US 78).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77577,8 +77652,9 @@
                   "cue": "Turn right onto Doyle Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 93.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -77602,7 +77678,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -77626,8 +77703,9 @@
                   "cue": "Start on West Jim Bilton Boulevard (US 78).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77636,8 +77714,9 @@
                   "cue": "Turn right onto Doyle Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 93.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -77661,7 +77740,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.34,
@@ -77714,8 +77794,9 @@
                   "cue": "Start on Buff Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77734,7 +77815,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -77758,8 +77840,9 @@
                   "cue": "Start on Buff Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77778,7 +77861,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -77831,8 +77915,9 @@
                   "cue": "Start on Paxville Highway (SC 261).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77851,7 +77936,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -77875,8 +77961,9 @@
                   "cue": "Start on Paxville Highway (SC 261).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -77895,7 +77982,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -81239,7 +81327,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.06,
@@ -85777,7 +85866,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.41,
@@ -85830,7 +85920,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 38
+                "street_edges": 38,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -85908,7 +85999,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,

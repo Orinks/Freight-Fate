@@ -1177,6 +1177,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -1185,7 +1186,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 1
               }
             }
           ],
@@ -10086,7 +10088,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.51,
@@ -10164,6 +10167,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -10182,7 +10186,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.06,
@@ -12418,7 +12423,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 31
+                "street_edges": 31,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.37,
@@ -12481,8 +12487,9 @@
                   "cue": "Turn left onto Puritan Way.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.1,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -12506,7 +12513,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -19759,7 +19767,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.09,
@@ -19894,8 +19903,9 @@
                   "cue": "Start on Johnson Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19914,7 +19924,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -20012,7 +20023,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -20095,6 +20107,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -20113,7 +20126,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.06,
@@ -20171,6 +20185,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -20181,6 +20196,7 @@
                   "turn_deg": 65.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -20199,7 +20215,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 2
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -20397,7 +20414,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -25453,6 +25471,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -25471,7 +25490,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -28085,8 +28105,9 @@
                   "cue": "Start on Johnson Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -28105,7 +28126,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.12,
@@ -28203,7 +28225,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -28276,8 +28299,9 @@
                   "cue": "Start on WY 377.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -28286,8 +28310,9 @@
                   "cue": "Turn left onto Point of Rocks I- 80 Srv Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 102.1,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -28296,8 +28321,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 90.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -28306,7 +28332,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -31681,7 +31708,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -31763,8 +31791,9 @@
                   "cue": "Start on Johnson Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -31783,7 +31812,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -31910,6 +31940,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31928,7 +31959,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -35398,6 +35430,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -35408,6 +35441,7 @@
                   "turn_deg": 65.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -35426,7 +35460,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 2
               },
               "driveway": {
                 "at_mi": 0.46,
@@ -35584,7 +35619,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -35657,7 +35693,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 1
+                "street_edges": 1,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,

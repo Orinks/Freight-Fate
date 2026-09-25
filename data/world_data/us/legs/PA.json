@@ -12596,8 +12596,9 @@
                   "cue": "Start on I-99 Access (SR 4041).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12606,8 +12607,9 @@
                   "cue": "Continue onto US 220 Business.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12618,6 +12620,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12628,6 +12631,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12651,7 +12655,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 34
+                "street_edges": 34,
+                "crosses_town_line": 2
               }
             }
           ],
@@ -15678,8 +15683,9 @@
                   "cue": "Start on Shortman Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -15688,7 +15694,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -17784,7 +17791,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 1
+                "street_edges": 1,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -60440,8 +60448,9 @@
                   "cue": "Start on State Route 848 (PA 848).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -60450,8 +60459,9 @@
                   "cue": "Turn left onto Oliver Road (SR 2081).",
                   "speed_mph": 25.0,
                   "turn_deg": 106.9,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -60480,7 +60490,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,

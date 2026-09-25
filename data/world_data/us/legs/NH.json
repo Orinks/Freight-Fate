@@ -3539,7 +3539,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.12,
@@ -3565,6 +3566,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -3575,6 +3577,7 @@
                   "turn_deg": 89.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -3603,7 +3606,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 39
+                "street_edges": 39,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,

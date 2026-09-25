@@ -3115,7 +3115,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -3170,6 +3171,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.21,
@@ -3193,7 +3195,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.24,
@@ -4641,8 +4644,9 @@
                   "cue": "Start on Upton Talley Road (KY 224).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4651,8 +4655,9 @@
                   "cue": "Turn right onto Weldon Loop Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.8,
-                  "limit_mph": 35.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4671,7 +4676,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.12,
@@ -4724,8 +4730,9 @@
                   "cue": "Start on KY 218.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4734,8 +4741,9 @@
                   "cue": "Turn left onto L and N Turnpike Road (KY 335).",
                   "speed_mph": 25.0,
                   "turn_deg": 97.8,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4754,7 +4762,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 17
+                "street_edges": 17,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -4807,8 +4816,9 @@
                   "cue": "Start on Smiths Grove- Scottsville Road (KY 101).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4827,7 +4837,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -8539,8 +8550,9 @@
                   "cue": "Start on Porter Road (KY 32).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8559,7 +8571,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.22,
@@ -11791,8 +11804,9 @@
                   "cue": "Start on Waddy Road (KY 395).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11811,7 +11825,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -13401,7 +13416,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -13445,7 +13461,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -17338,6 +17355,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.11,
@@ -17361,7 +17379,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -17387,6 +17406,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -17397,6 +17417,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -17424,7 +17445,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -17483,6 +17505,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -17506,7 +17529,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -17532,6 +17556,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -17555,7 +17580,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -17625,8 +17651,9 @@
                   "cue": "Start on Norris Freeway (US 441).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 65.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -17660,7 +17687,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.44,
@@ -17684,8 +17712,9 @@
                   "cue": "Start on North Main Street (US 25W;SR 116).",
                   "speed_mph": 30.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 65.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -17704,7 +17733,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.31,
@@ -17756,6 +17786,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 40.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.2,
@@ -17783,7 +17814,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,
@@ -19340,8 +19372,9 @@
                   "cue": "Start on Memphis-Blue Lick Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19360,7 +19393,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.08,
@@ -19413,8 +19447,9 @@
                   "cue": "Start on Memphis-Blue Lick Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19433,7 +19468,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.22,
@@ -19498,6 +19534,7 @@
                   "turn_deg": 95.5,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -19521,7 +19558,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -19557,6 +19595,7 @@
                   "turn_deg": 95.5,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -19580,7 +19619,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -20798,8 +20838,9 @@
                   "cue": "Start on John Harper Highway (KY 1526).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -20808,8 +20849,9 @@
                   "cue": "Turn left onto East Blue Lick Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 104.8,
-                  "limit_mph": 35.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -20833,7 +20875,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 20
+                "street_edges": 20,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -22325,7 +22368,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 25
+                "street_edges": 25,
+                "crosses_town_line": 0
               }
             },
             {
@@ -22364,7 +22408,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -22409,8 +22454,9 @@
                   "cue": "Start on KY 180.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -22419,8 +22465,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 77.5,
-                  "limit_mph": 35.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -22444,7 +22491,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -22468,8 +22516,9 @@
                   "cue": "Start on KY 180.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.29,
@@ -22483,8 +22532,9 @@
                   "cue": "Turn left onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 90.7,
-                  "limit_mph": 35.0,
-                  "limit_source": "statutory",
+                  "limit_mph": 55.0,
+                  "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -22508,7 +22558,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 25
+                "street_edges": 25,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.5,
@@ -24709,6 +24760,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -24732,7 +24784,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -28413,8 +28466,9 @@
                   "cue": "Start on Cadiz Road (KY 139).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -28433,7 +28487,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.28,
@@ -33943,6 +33998,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -33968,6 +34024,7 @@
                   "turn_deg": 93.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33991,7 +34048,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -34027,6 +34085,7 @@
                   "turn_deg": 93.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -34050,7 +34109,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -34102,6 +34162,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -34112,6 +34173,7 @@
                   "turn_deg": 108.5,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -34125,7 +34187,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -34167,8 +34230,9 @@
                   "cue": "Start on Richmond Street (US 25).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -34177,7 +34241,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               }
             },
             {
@@ -34193,8 +34258,9 @@
                   "cue": "Start on Richmond Street (US 25).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -34203,7 +34269,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -34250,6 +34317,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -34260,6 +34328,7 @@
                   "turn_deg": 84.6,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -34278,7 +34347,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -34304,6 +34374,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.26,
@@ -34319,6 +34390,7 @@
                   "turn_deg": 84.6,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -34337,7 +34409,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 25
+                "street_edges": 25,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.35,

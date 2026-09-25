@@ -6367,8 +6367,9 @@
                   "cue": "Start on South Chestnut Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6377,8 +6378,9 @@
                   "cue": "Turn right onto Sunset Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 86.6,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6387,8 +6389,9 @@
                   "cue": "Turn right onto South East Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 74.9,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6407,7 +6410,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.36,
@@ -8559,8 +8563,9 @@
                   "cue": "Start on IL 47.",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8569,8 +8574,9 @@
                   "cue": "Turn right onto West Northbrook.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8579,8 +8585,9 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8599,7 +8606,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -8672,7 +8680,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 17
+                "street_edges": 17,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -8745,7 +8754,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -8800,6 +8810,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8810,6 +8821,7 @@
                   "turn_deg": 93.8,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -8825,6 +8837,7 @@
                   "turn_deg": 88.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8835,6 +8848,7 @@
                   "turn_deg": 88.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8845,6 +8859,7 @@
                   "turn_deg": 82.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -8868,7 +8883,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 46
+                "street_edges": 46,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.8,
@@ -10914,8 +10930,9 @@
                   "cue": "Start on IL 48.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.46,
@@ -10929,8 +10946,9 @@
                   "cue": "Turn left onto East Boyd Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 95.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -10949,7 +10967,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -10973,8 +10992,9 @@
                   "cue": "Start on IL 48.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -10983,8 +11003,9 @@
                   "cue": "Turn left onto East Boyd Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 95.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -11003,7 +11024,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -12791,8 +12813,9 @@
                   "cue": "Start on SR 32.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.31,
@@ -12816,7 +12839,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -14339,8 +14363,9 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14349,8 +14374,9 @@
                   "cue": "Continue onto North Oakwood Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14369,7 +14395,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -16221,6 +16248,7 @@
                   "turn_deg": 84.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -16239,7 +16267,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -16294,6 +16323,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.33,
@@ -16317,7 +16347,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -16341,8 +16372,9 @@
                   "cue": "Start on South Schuyler Avenue (US 45;US 52).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.17,
@@ -16366,7 +16398,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -18301,6 +18334,7 @@
                   "turn_deg": 87.8,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18319,7 +18353,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.43,
@@ -18374,6 +18409,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18384,6 +18420,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18394,6 +18431,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.05,
@@ -18409,6 +18447,7 @@
                   "turn_deg": 104.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18419,6 +18458,7 @@
                   "turn_deg": 84.8,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18437,7 +18477,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 43
+                "street_edges": 43,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.54,
@@ -18503,6 +18544,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18513,6 +18555,7 @@
                   "turn_deg": 93.8,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -18528,6 +18571,7 @@
                   "turn_deg": 88.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18538,6 +18582,7 @@
                   "turn_deg": 88.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -18548,6 +18593,7 @@
                   "turn_deg": 82.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -18571,7 +18617,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 46
+                "street_edges": 46,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.8,
@@ -18680,8 +18727,9 @@
                   "cue": "Start on IL 47.",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18690,8 +18738,9 @@
                   "cue": "Turn right onto West Northbrook.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18700,8 +18749,9 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18720,7 +18770,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.57,
@@ -18779,6 +18830,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.01,
@@ -18802,7 +18854,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -18937,7 +18990,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -19010,8 +19064,9 @@
                   "cue": "Start on IL 10.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19022,6 +19077,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.39,
@@ -19037,6 +19093,7 @@
                   "turn_deg": 87.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -19064,7 +19121,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.51,
@@ -19168,8 +19226,9 @@
                   "cue": "Start on County Road 1200 North (IL 16).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19180,6 +19239,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -19190,6 +19250,7 @@
                   "turn_deg": 44.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -19208,7 +19269,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.55,
@@ -25557,6 +25619,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -25567,6 +25630,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -25577,6 +25641,7 @@
                   "turn_deg": 160.3,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -25595,7 +25660,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.38,
@@ -25668,7 +25734,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -25726,6 +25793,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -25746,6 +25814,7 @@
                   "turn_deg": 79.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -25754,7 +25823,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -28357,6 +28427,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -28365,8 +28436,9 @@
                   "cue": "Turn right onto East 1600th Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 77.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -28390,7 +28462,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -29544,6 +29617,7 @@
                   "turn_deg": 87.1,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -29554,6 +29628,7 @@
                   "turn_deg": 69.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -29572,7 +29647,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.44,
@@ -33094,8 +33170,9 @@
                   "cue": "Start on North Kickapoo-Edwards Road.",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -33104,7 +33181,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -33203,8 +33281,9 @@
                   "cue": "Start on North 43rd Road (US 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -33213,8 +33292,9 @@
                   "cue": "Turn left onto East 525th Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.7,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -33223,7 +33303,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -33270,6 +33351,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -33280,6 +33362,7 @@
                   "turn_deg": 91.9,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33295,6 +33378,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -33310,6 +33394,7 @@
                   "turn_deg": 89.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -33318,7 +33403,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 17
+                "street_edges": 17,
+                "crosses_town_line": 1
               }
             }
           ],
@@ -39189,6 +39275,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -39199,6 +39286,7 @@
                   "turn_deg": 85.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -39217,7 +39305,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -40881,8 +40970,9 @@
                   "cue": "Start on U.S. Grant Memorial Highway (US 20).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.22,
@@ -40896,8 +40986,9 @@
                   "cue": "Turn left onto Tang Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.5,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -40916,7 +41007,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -40940,8 +41032,9 @@
                   "cue": "Start on U.S. Grant Memorial Highway (US 20).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.22,
@@ -40955,8 +41048,9 @@
                   "cue": "Turn left onto Tang Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.5,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -40975,7 +41069,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -43990,7 +44085,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.45,
@@ -44064,7 +44160,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.61,
@@ -44135,8 +44232,9 @@
                   "cue": "Start on IL 10.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -44147,6 +44245,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.39,
@@ -44162,6 +44261,7 @@
                   "turn_deg": 87.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -44189,7 +44289,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.51,
@@ -44272,7 +44373,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -46811,6 +46913,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -46831,6 +46934,7 @@
                   "turn_deg": 79.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 }
               ],
@@ -46839,7 +46943,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               }
             }
           ],

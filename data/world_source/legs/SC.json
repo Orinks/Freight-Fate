@@ -4473,8 +4473,9 @@
                   "cue": "Start on Burke Road (S-9-22).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -4493,7 +4494,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.14,
@@ -6596,8 +6598,9 @@
                   "cue": "Start on State Highway 200 (SC 200).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6616,7 +6619,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -6692,7 +6696,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -6747,6 +6752,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6770,7 +6776,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.26,
@@ -8893,8 +8900,9 @@
                   "cue": "Start on Whyte Hardee Boulevard (US 17).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8923,7 +8931,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 18
+                "street_edges": 18,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.38,
@@ -8947,8 +8956,9 @@
                   "cue": "Start on Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8957,8 +8967,9 @@
                   "cue": "Turn left onto Main Street (SC 46).",
                   "speed_mph": 25.0,
                   "turn_deg": 88.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8967,8 +8978,9 @@
                   "cue": "Turn left onto Bush Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 94.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8977,8 +8989,9 @@
                   "cue": "Turn right onto Barker Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8987,8 +9000,9 @@
                   "cue": "Turn left onto Coburn Lane.",
                   "speed_mph": 25.0,
                   "turn_deg": 87.1,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8997,8 +9011,9 @@
                   "cue": "Turn right onto Boyd Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 100.5,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -9007,8 +9022,9 @@
                   "cue": "Turn left onto Ulman Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 83.2,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -9017,8 +9033,9 @@
                   "cue": "Turn left onto Whyte Hardee Boulevard (US 17).",
                   "speed_mph": 25.0,
                   "turn_deg": 52.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -9047,7 +9064,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 84
+                "street_edges": 84,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 2.17,
@@ -12850,8 +12868,9 @@
                   "cue": "Start on State Highway 773 (SC 773).",
                   "speed_mph": 50.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -12860,7 +12879,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -12910,6 +12930,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12920,6 +12941,7 @@
                   "turn_deg": 90.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12938,7 +12960,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -14456,8 +14479,9 @@
                   "cue": "Start on White Pond Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14466,8 +14490,9 @@
                   "cue": "Turn right onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 79.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14476,8 +14501,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 91.6,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -14496,7 +14522,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,
@@ -15495,6 +15522,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.29,
@@ -15518,7 +15546,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -15544,6 +15573,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15562,7 +15592,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.09,
@@ -15635,7 +15666,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.29,
@@ -15659,8 +15691,9 @@
                   "cue": "Start on State Highway 34 (SC 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -15679,7 +15712,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,
@@ -18959,8 +18993,9 @@
                   "cue": "Start on Herring Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18969,8 +19004,9 @@
                   "cue": "Turn right onto Old Dobbins Bridge Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 41.3,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -18989,7 +19025,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -19042,8 +19079,9 @@
                   "cue": "Start on GA 106;GA 145.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19052,8 +19090,9 @@
                   "cue": "Continue onto GA 106; GA 145.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -19062,7 +19101,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -19107,8 +19147,9 @@
                   "cue": "Start on Old Federal Road (GA 51).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19127,7 +19168,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -21519,8 +21561,9 @@
                   "cue": "Start on Highway 56 North (SC 56).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -21539,7 +21582,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -21609,6 +21653,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -21619,6 +21664,7 @@
                   "turn_deg": 90.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -21637,7 +21683,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -21690,8 +21737,9 @@
                   "cue": "Start on State Highway 773 (SC 773).",
                   "speed_mph": 50.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -21700,7 +21748,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -25108,7 +25157,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,

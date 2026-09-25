@@ -12939,6 +12939,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -12957,7 +12958,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.08,

@@ -8783,6 +8783,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8793,6 +8794,7 @@
                   "turn_deg": 117.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -8816,7 +8818,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.62,
@@ -8842,6 +8845,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8852,6 +8856,7 @@
                   "turn_deg": 80.4,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -8867,6 +8872,7 @@
                   "turn_deg": 35.3,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -8890,7 +8896,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.47,
@@ -8942,6 +8949,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8952,6 +8960,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8962,6 +8971,7 @@
                   "turn_deg": 90.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -8980,7 +8990,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.31,
@@ -13857,8 +13868,9 @@
                   "cue": "Turn right onto County Farm Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 99.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -13877,7 +13889,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.42,
@@ -15036,6 +15049,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -15054,7 +15068,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -16564,8 +16579,9 @@
                   "cue": "Start on West Union Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -16574,7 +16590,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 1
+                "street_edges": 1,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -16712,8 +16729,9 @@
                   "cue": "Start on Airport Fernwood Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -16732,7 +16750,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -22781,6 +22800,7 @@
                   "turn_deg": 92.4,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -22799,7 +22819,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.72,
@@ -22876,8 +22897,9 @@
                   "cue": "Start on Lake-Norris Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -22896,7 +22918,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -22952,8 +22975,9 @@
                   "cue": "Start on Old Highway 80 West.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -22962,8 +22986,9 @@
                   "cue": "Continue onto US 80.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -22982,7 +23007,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -23034,6 +23060,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23044,6 +23071,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23054,6 +23082,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23064,6 +23093,7 @@
                   "turn_deg": 69.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23074,6 +23104,7 @@
                   "turn_deg": 87.5,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23084,6 +23115,7 @@
                   "turn_deg": 98.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23094,6 +23126,7 @@
                   "turn_deg": 128.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23112,7 +23145,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 64
+                "street_edges": 64,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.27,
@@ -23138,6 +23172,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23148,6 +23183,7 @@
                   "turn_deg": 93.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23158,6 +23194,7 @@
                   "turn_deg": 69.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23168,6 +23205,7 @@
                   "turn_deg": 87.5,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23178,6 +23216,7 @@
                   "turn_deg": 98.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23188,6 +23227,7 @@
                   "turn_deg": 128.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -23206,7 +23246,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 69
+                "street_edges": 69,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.28,
@@ -23315,8 +23356,9 @@
                   "cue": "Start on Airport Fernwood Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -23335,7 +23377,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -26170,8 +26213,9 @@
                   "cue": "Start on Lake-Norris Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26190,7 +26234,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -26246,8 +26291,9 @@
                   "cue": "Start on Old Highway 80 West.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26256,8 +26302,9 @@
                   "cue": "Continue onto US 80.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -26276,7 +26323,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.25,
@@ -31031,6 +31079,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31041,6 +31090,7 @@
                   "turn_deg": 93.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31051,6 +31101,7 @@
                   "turn_deg": 69.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31061,6 +31112,7 @@
                   "turn_deg": 87.5,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31071,6 +31123,7 @@
                   "turn_deg": 98.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31081,6 +31134,7 @@
                   "turn_deg": 103.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31099,7 +31153,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 59
+                "street_edges": 59,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.26,
@@ -31125,6 +31180,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31135,6 +31191,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31145,6 +31202,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31155,6 +31213,7 @@
                   "turn_deg": 69.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31165,6 +31224,7 @@
                   "turn_deg": 87.5,
                   "limit_mph": 15.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31175,6 +31235,7 @@
                   "turn_deg": 98.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31185,6 +31246,7 @@
                   "turn_deg": 103.0,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -31203,7 +31265,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 54
+                "street_edges": 54,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.25,
@@ -31273,8 +31336,9 @@
                   "cue": "Start on US 11.",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 45.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -31283,7 +31347,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 1
               }
             },
             {
@@ -31299,8 +31364,9 @@
                   "cue": "Start on US 11.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -31309,7 +31375,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -34764,8 +34831,9 @@
                   "cue": "Start on Will Garrett Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34784,7 +34852,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,
@@ -34808,8 +34877,9 @@
                   "cue": "Start on Will Garrett Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -34828,7 +34898,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.17,
@@ -42323,7 +42394,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -43321,8 +43393,9 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -43341,7 +43414,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -43365,8 +43439,9 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 15.0,
-                  "limit_source": "assumed",
+                  "limit_mph": 55.0,
+                  "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -43385,7 +43460,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.08,

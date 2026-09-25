@@ -958,6 +958,7 @@
                   "turn_deg": 94.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -981,7 +982,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -6035,8 +6037,9 @@
                   "cue": "Start on Durkee Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6045,8 +6048,9 @@
                   "cue": "Continue onto Vandecar Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -6055,7 +6059,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -6103,8 +6108,9 @@
                   "cue": "Start on Huntington Highway (US 30).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -6123,7 +6129,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,
@@ -6202,6 +6209,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6212,6 +6220,7 @@
                   "turn_deg": 116.8,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6230,7 +6239,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -6256,6 +6266,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6266,6 +6277,7 @@
                   "turn_deg": 116.8,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6284,7 +6296,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 23
+                "street_edges": 23,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.61,
@@ -12300,8 +12313,9 @@
                   "cue": "Start on Sherman Highway (US 97).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12310,8 +12324,9 @@
                   "cue": "Turn right onto Biggs-Rufus Highway (OR 206SP).",
                   "speed_mph": 25.0,
                   "turn_deg": 102.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -12335,7 +12350,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -12394,8 +12410,9 @@
                   "cue": "Start on Tower Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12414,7 +12431,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -19348,8 +19366,9 @@
                   "cue": "Start on Coyote Creek Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19358,8 +19377,9 @@
                   "cue": "Turn right onto Old Highway 99.",
                   "speed_mph": 25.0,
                   "turn_deg": 60.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -19368,7 +19388,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 36
+                "street_edges": 36,
+                "crosses_town_line": 0
               }
             },
             {
@@ -19384,8 +19405,9 @@
                   "cue": "Start on Old Highway 99.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -19394,7 +19416,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -23578,8 +23601,9 @@
                   "cue": "Start on 2nd Street (OR 237).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -23598,7 +23622,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 1
+                "street_edges": 1,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -25162,6 +25187,7 @@
                   "turn_deg": 84.6,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -25185,7 +25211,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -47125,8 +47152,9 @@
                   "cue": "Start on Sherman Highway (US 97).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -47135,8 +47163,9 @@
                   "cue": "Turn right onto Biggs-Rufus Highway (OR 206SP).",
                   "speed_mph": 25.0,
                   "turn_deg": 102.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -47160,7 +47189,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.16,
@@ -47214,8 +47244,9 @@
                   "cue": "Start on Tower Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -47234,7 +47265,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -47496,8 +47528,9 @@
                   "cue": "Start on Campbell Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -47516,7 +47549,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,
@@ -47572,8 +47606,9 @@
                   "cue": "Start on Campbell Street (OR 7).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -47592,7 +47627,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.22,
@@ -47694,8 +47730,9 @@
                   "cue": "Start on Huntington Highway (US 30).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -47714,7 +47751,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -47797,6 +47835,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -47807,6 +47846,7 @@
                   "turn_deg": 116.8,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -47825,7 +47865,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.39,
@@ -47851,6 +47892,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -47861,6 +47903,7 @@
                   "turn_deg": 116.8,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -47879,7 +47922,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 23
+                "street_edges": 23,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.61,
@@ -48122,8 +48166,9 @@
                   "cue": "Start on I 84 Business.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -48132,8 +48177,9 @@
                   "cue": "Turn right onto South 750 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.8,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -48142,7 +48188,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -48367,7 +48414,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.16,
               "driveway": {
@@ -55530,8 +55578,9 @@
                   "cue": "Start on Ehlen Road Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -55550,7 +55599,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -57723,6 +57773,7 @@
                   "turn_deg": 84.6,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -57746,7 +57797,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -63288,8 +63340,9 @@
                   "cue": "Start on Sherman Highway (US 97).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -63298,8 +63351,9 @@
                   "cue": "Turn right onto Biggs-Rufus Highway (OR 206SP).",
                   "speed_mph": 25.0,
                   "turn_deg": 102.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -63323,7 +63377,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.23,
@@ -63377,8 +63432,9 @@
                   "cue": "Start on Tower Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -63397,7 +63453,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.2,
@@ -63457,8 +63514,9 @@
                   "cue": "Start on Umatilla-Stanfield Highway (US 395).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -63477,7 +63535,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -64051,8 +64110,9 @@
                   "cue": "Start on Brooklake Road Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -64071,7 +64131,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.18,
               "driveway": {
