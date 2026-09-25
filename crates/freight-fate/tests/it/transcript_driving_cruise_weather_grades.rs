@@ -287,12 +287,12 @@ fn test_predictive_cruise_banks_speed_before_a_climb() {
     hill_road(&mut harness, 0.5, 0.04, 1.0);
     harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
     harness.app.ctx.settings.predictive_cruise = true;
-    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0)) > 1.0);
+    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0).0) > 1.0);
 
     // Turned off, cruise plans nothing and holds the number it was given.
     harness.app.ctx.settings.predictive_cruise = false;
     assert!(approx(
-        harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0)),
+        harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0).0),
         0.0
     ));
 }
@@ -311,8 +311,8 @@ fn test_predictive_cruise_cue_names_the_grade_it_is_building_for() {
     harness.app.ctx.settings.predictive_cruise = true;
     harness.clear_speech();
     let bias = harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0));
-    assert!(bias > 0.5, "{bias}");
-    harness.with_drive(move |d, ctx| d.say_predictive_cruise(ctx, 0.0, bias));
+    assert!(bias.0 > 0.5, "{:?}", bias);
+    harness.with_drive(move |d, ctx| d.say_predictive_cruise(ctx, 0.0, bias.0, bias.1));
     assert!(
         said_any(&harness, "2.0 percent upgrade"),
         "{:#?}",
@@ -338,7 +338,7 @@ fn holds_predictive_crest(harness: &PlaytestHarness) -> bool {
 fn preview_then_badges(harness: &mut PlaytestHarness) {
     harness.with_drive(|d, ctx| {
         let bias = d.predictive_cruise_bias(ctx, 62.0);
-        d.say_predictive_cruise(ctx, 0.0, bias);
+        d.say_predictive_cruise(ctx, 0.0, bias.0, bias.1);
         d.track_driving_badges(ctx, 1.0 / 60.0);
     });
 }
@@ -384,7 +384,7 @@ fn test_predictive_cruise_finds_a_short_hill() {
     harness.app.ctx.settings.predictive_cruise = true;
     let (climb_ahead, _descent) = harness.read_drive(|d| d.grade_extremes_ahead());
     assert!(climb_ahead >= 0.03, "{climb_ahead}");
-    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0)) > 1.0);
+    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0).0) > 1.0);
 }
 
 #[test]
@@ -402,17 +402,39 @@ fn test_predictive_cruise_holds_at_a_crest_but_never_slows_the_truck() {
         d.truck_mut().velocity_mps = 55.0 * MPS_PER_MPH;
     });
     let bias = harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0));
-    assert!(bias < 0.0, "{bias}");
+    assert!(bias.0 < 0.0, "{:?}", bias);
     // It brings the target down to the speed on the clock, no further.
-    assert!(62.0 + bias >= harness.read_drive(|d| d.truck().speed_mph()) - 0.01);
-    assert!(bias >= -PCC_CREST_SAG_MPH, "{bias}");
+    assert!(62.0 + bias.0 >= harness.read_drive(|d| d.truck().speed_mph()) - 0.01);
+    assert!(bias.0 >= -PCC_CREST_SAG_MPH, "{:?}", bias);
 
     // A truck still holding its number at a crest is left alone.
     harness.with_drive(|d, _| d.truck_mut().velocity_mps = 62.0 * MPS_PER_MPH);
     assert!(approx(
-        harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0)),
+        harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0).0),
         0.0
     ));
+}
+
+#[test]
+fn test_the_crest_hold_stays_silent() {
+    // The crest hold eases nothing -- it only stops chasing the number -- so
+    // "easing" was a lie (silence over redundant speech). It still tracks the
+    // phase, so the next real change speaks.
+    let mut harness = cruising("Crest Quiet", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    let start = hill_road(&mut harness, 0.0, 0.04, 0.2);
+    harness.app.ctx.settings.predictive_cruise = true;
+    harness.with_drive(move |d, _| {
+        d.trip.position_mi = start;
+        d.truck_mut().grade = 0.04;
+        d.truck_mut().velocity_mps = 55.0 * MPS_PER_MPH;
+    });
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| {
+        let (bias, reason) = d.predictive_cruise_bias(ctx, 62.0);
+        d.say_predictive_cruise(ctx, 0.0, bias, reason);
+    });
+    assert!(!said_any(&harness, "easing"), "{:#?}", spoken(&harness));
+    assert_eq!(harness.read_drive(|d| d.pcc_phase.clone()), "holding");
 }
 
 #[test]
@@ -422,7 +444,18 @@ fn test_predictive_cruise_shaves_before_a_descent() {
     hill_road(&mut harness, 0.4, -0.05, 1.0);
     harness.with_drive(|d, _| d.truck_mut().grade = 0.0);
     harness.app.ctx.settings.predictive_cruise = true;
-    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0)) < 0.0);
+    assert!(harness.with_drive(|d, ctx| d.predictive_cruise_bias(ctx, 62.0).0) < 0.0);
+    // The cue names the downgrade and its number, not a vague "road ahead".
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| {
+        let (bias, reason) = d.predictive_cruise_bias(ctx, 62.0);
+        d.say_predictive_cruise(ctx, 0.0, bias, reason);
+    });
+    assert!(
+        said_any(&harness, "percent downgrade ahead"),
+        "{:#?}",
+        spoken(&harness)
+    );
 }
 
 #[test]
