@@ -283,7 +283,7 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     # route with curl rather than checking that its file deployed.
     assert build_release.music_download_config() == (
         "https://www.orinks.net/downloads/music.pak",
-        "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
+        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d",
     )
 
 

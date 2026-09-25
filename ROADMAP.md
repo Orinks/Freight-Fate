@@ -205,8 +205,11 @@ The owner's:
       workaround (enumerate voices only on a voice change) is the fix; any
       upstream report stays the owner's call
       ([September 12](#september-12-long-sessions-and-speech)).
-- [ ] Download the eight remaining jazz songs and 19 station jingles from
-      Suno, then integrate them ([September 13](#september-13-driver-directory)).
+- [x] The eight remaining jazz songs, in the pack and on Nashville After
+      Hours since 2026-09-25 ([September 13](#september-13-driver-directory)).
+- [ ] New station IDs for the 16 stations still without them; the
+      Roadhouse, Desert Rock and Neon Drive got theirs 2026-09-25
+      ([September 13](#september-13-driver-directory)).
 - [ ] The radio stream sweep (`--recheck-dead`) on release day.
 - [ ] Push the `v1.9.0` tag on the commit to ship, last, after every other
       item here is closed.
@@ -1316,6 +1319,9 @@ its status or release decision.
       request, and still in the classic rock station playlist.
 - (Release gate) Download and integrate the eight remaining jazz songs, then 19 station
       jingles, after the September 21 Suno allowance refresh.
+- [x] 2026-09-25 pack: the eight jazz songs, ten station IDs (Roadhouse
+      and Neon Drive four each, Desert Rock two) and hiring ads for
+      Northstar, Prairie Link and Summit Value. 405 -> 426 entries, re-pinned.
 
 - [x] Two owner-supplied instrumentals in the music pack: D-Major Medley
       in the menu rotation, From Bossa to Blues in the day drive pool (so
