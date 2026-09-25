@@ -1,6 +1,6 @@
 # ELD Depth and Home Terminal Design
 
-This is the design plan for two interlocking 1.10-line features: making the
+This is the design plan for two interlocking 2.0-line features: making the
 electronic logging device model the parts of the real regulation that shape
 a driver's *week* (not just their day), and making the home terminal a
 gameplay anchor instead of a spawn point. They ship together because in the
@@ -66,7 +66,7 @@ The centerpiece. `HosClock` gains a rolling 8-day on-duty ledger:
 
 - **Persist it.** `Profile.home_terminal_city` (slug key), set at career
   creation from the chosen home city. Old saves default it to
-  `current_city` on first 1.10 load with a one-time spoken note ("Your
+  `current_city` on first 2.0 load with a one-time spoken note ("Your
   home terminal is on record as Fort Wayne; change it at any company
   terminal.").
 - **ELD time zone.** The duty log and ELD readouts speak home-terminal
@@ -127,7 +127,7 @@ Smaller, staged events once the cycle exists:
 
 ## Sequencing and scope guards
 
-Phase 1 and the Phase 2 persistence/restart work are the 1.10 centerpiece
+Phase 1 and the Phase 2 persistence/restart work are the 2.0 centerpiece
 and land together (the cycle is dull without the home restart, and home is
 toothless without the cycle). The local board is next -- it reuses the
 dispatch board plumbing. Phase 4 events are independent garnishes, each

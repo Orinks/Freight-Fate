@@ -873,8 +873,11 @@ fn run_with_staged(
         // dropped at the door as well. `--operator-keys` is the owner's
         // opt-in to play alongside the agent (asked for 2026-09-11): the
         // window stays up and every key counts, so the keyboard belongs to
-        // the game for the whole session.
+        // the game for the whole session. Restoring shows a window the
+        // launcher's STARTUPINFO kept hidden (the desktop app spawns MCP
+        // servers that way) and gives it focus.
         if operator_keys {
+            app.restore_window();
             eprintln!("Operator keys are live: the keyboard reaches the game.");
         } else {
             app.minimize_window();

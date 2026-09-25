@@ -83,7 +83,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "exit_speed_assist",
         "Exit speed assistance",
-        "For a signalled exit: slows a truck too fast for the gore, keeps the approach within 10 miles per hour of road speed, and brakes in the deceleration lane to the exit speed. You still take the exit.",
+        "For a signalled exit: slows a truck too fast for the gore, keeps the approach within 10 miles per hour of road speed, and brakes in the exit lane to the exit speed. You still take the exit.",
     ),
     (
         "destination_approach_assist",

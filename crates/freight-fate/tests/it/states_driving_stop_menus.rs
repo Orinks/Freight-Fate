@@ -449,13 +449,23 @@ fn test_exit_flow_reaches_the_rest_stop_menu() {
         harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.at_mi)),
         Some(stop_mi)
     );
+    // Where the exit lane opens, steer right into it.
+    harness.with_drive(move |drive, _| {
+        drive.trip.position_mi = stop_mi - freight_fate::states::driving_core::EXIT_TAPER_MI / 2.0;
+    });
     harness
         .app
         .ctx
         .input
         .press(Key::Right, freight_fate::states::base::Mods::NONE);
-    for _ in 0..75 {
-        harness.with_drive(|drive, ctx| drive.update_exit_preparation(ctx, DT));
+    for _ in 0..(60 * 5) {
+        harness.with_drive(|drive, ctx| {
+            drive.update_lane(ctx, DT);
+            drive.update_exit_preparation(ctx, DT);
+        });
+        if harness.read_drive(|d| d.exit_lane_ready()) {
+            break;
+        }
     }
     assert!(harness.read_drive(|d| d.exit_lane_ready()));
 

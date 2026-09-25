@@ -389,7 +389,7 @@ fn arrive_with(
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true; // signalled for it, like a driver
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -783,7 +783,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     let exit_at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = exit_at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -994,7 +994,7 @@ fn arrive_from_the_sign(
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;

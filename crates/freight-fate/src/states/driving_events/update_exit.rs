@@ -47,8 +47,13 @@ impl DrivingState {
         // the clock the lane went by in about two real seconds and a truck
         // met a 25 mph loop at 55 (review of the realistic exit, 2026-09-24);
         // see `on_laid_out_ramp` for the entrance.
+        //
+        // And while the exit lane stands open beside the truck: the seconds
+        // between "Exit lane opening" and the steer into it are the driver's
+        // to use, past the gore marker included.
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
             || self.departure_merge_recovery
+            || self.lane.exit_lane_open
             || self.on_laid_out_ramp()
             || self.street_control_on_real_time()
             || (self.ramp_mi.is_some()
@@ -363,8 +368,20 @@ impl DrivingState {
         let Some(stop) = self.exit_stop.clone() else {
             return;
         };
-        if self.trip.position_mi < stop.at_mi {
+        // Steered into the exit lane where it opened: that lane is the start
+        // of the ramp, so the truck is on it now, a few hundred feet short of
+        // the gore marker or not.
+        let steered_in = self.exit_lane_entered && self.exit_taper_said;
+        if self.trip.position_mi < stop.at_mi && !steered_in {
             self.update_exit_countdown(ctx, &stop);
+            return;
+        }
+        // In the right lane with the signal on and the exit lane open beside
+        // it: the lane runs on past the marker, so the steer into it is still
+        // the driver's to make until the gore window closes.
+        if self.exit_lane_due(ctx, &stop)
+            && self.trip.position_mi <= stop.at_mi + EXIT_COMMIT_WINDOW_MI
+        {
             return;
         }
         self.exit_stop = None;
@@ -373,7 +390,10 @@ impl DrivingState {
         // leave automatic control crawling at ramp speed down the open highway.
         self.cruise_exit_mph = None;
         self.exit_signal_canceled = false;
-        if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI {
+        // Lined up but carried past the whole window in one step (a resumed
+        // or compressed frame). A truck that never took the lane hears why
+        // below instead.
+        if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI && self.exit_lane_ready() {
             self.reset_exit_lane_state();
             self.exit_signal_on = false;
             if self.is_selected_stop(Some(&stop)) {

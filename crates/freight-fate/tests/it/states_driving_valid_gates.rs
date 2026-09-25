@@ -274,14 +274,14 @@ fn the_exit_confirmation_is_not_handed_back_past_the_gore() {
     app.clear_speech();
 
     d.toggle_exit_signal(&mut app.ctx);
-    assert_eq!(heard(&app, "Signal on for"), 1);
+    assert_eq!(heard(&app, "Signal set for"), 1);
 
     d.trip.position_mi = stop.at_mi + 0.5; // the gore is behind the truck
     d.refresh_live_facts();
     app.ctx.say_event(CUTTER);
 
     assert_eq!(
-        heard(&app, "Signal on for"),
+        heard(&app, "Signal set for"),
         1,
         "the exit confirmation was handed back past the gore: {:?}",
         app.event_lines()
@@ -302,7 +302,7 @@ fn the_exit_confirmation_is_still_handed_back_before_the_gore() {
     app.ctx.say_event(CUTTER);
 
     assert_eq!(
-        heard(&app, "Signal on for"),
+        heard(&app, "Signal set for"),
         2,
         "an exit still ahead must survive being cut: {:?}",
         app.event_lines()

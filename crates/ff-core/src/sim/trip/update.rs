@@ -693,9 +693,7 @@ impl Trip {
         let side = &pressure.direction;
         match pressure.kind.as_str() {
             "exit" => SpokenMessage::with_terse(
-                format!(
-                    "Exit traffic building in {distance}. Hold the {side} exit lane, near {speed}."
-                ),
+                format!("Exit traffic building in {distance}. Hold the {side} lane, near {speed}."),
                 format!("Exit traffic, {distance}. Hold {side}, {speed}."),
             ),
             // No target speed: the taper's posted limit is spoken separately.

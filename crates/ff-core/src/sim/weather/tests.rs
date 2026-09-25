@@ -2474,7 +2474,7 @@ fn test_traffic_pressure_gps_cue_deduplicates() {
     let cues: Vec<_> = first.iter().filter(|e| is_ours(e)).collect();
     assert_eq!(cues.len(), 1);
     assert!(cues[0].text().contains("Exit traffic building"));
-    assert!(cues[0].text().contains("Hold the right exit lane"));
+    assert!(cues[0].text().contains("Hold the right lane"));
     assert!(!second.iter().any(is_ours));
 }
 
