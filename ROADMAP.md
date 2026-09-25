@@ -29,8 +29,11 @@
 
 ## Reading this roadmap
 
-Start with the [1.9 release gate](#release-gate----what-stands-between-here-and-a-public-190),
-including its cutover checklist, remaining bugs, and owner decisions.
+Start with the [1.9 release gate](#release-gate-190), the fixed list of
+what stands between here and 1.9.0, and
+[Found along the way](#found-along-the-way-not-blocking-190), open work
+that does not block it. The [release gate record](#release-gate-record)
+keeps the cutover checklist, the closed blockers and the owner decisions.
 The [1.10 plan](#110-planned----the-working-week-and-home) follows it.
 The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
@@ -79,7 +82,7 @@ bookmarks usable.
       stations are off the dial in Synthesized mode.
       - [x] Typed-in music seeds: Enter on Music seed opens the text field
             and takes a whole number; Left and Right still roll one.
-      - [ ] More synth voices per style: built, awaiting the owner's
+      - (Release gate) More synth voices per style: built, awaiting the owner's
             listening pass. A strummed guitar, drawbar organ, bell and reed,
             two or three per style (the higher rungs get three); the reed
             takes the B sections' tune. Tick once Josh has heard them.
@@ -101,16 +104,120 @@ bookmarks usable.
       backup the site already holds unmarked is accepted without a manual
       review and listed once in the owner's digest.
 
-### Release gate -- what stands between here and a public 1.9.0
+### Release gate: 1.9.0
 
-The checklist below retains the recorded open release gates. Verification here
-covers the September 11 corrections; other items have not been revalidated. The
+What stands between here and a public 1.9.0, and nothing else. It holds the
+work that was open on the morning of 2026-09-24, plus later findings that
+cost the drive: the truck ignores an instruction, progress or cargo is lost,
+or a spoken line is untrue in a way that causes the mistake. Anything else
+found goes under [Found along the way](#found-along-the-way-not-blocking-190);
+the owner can promote any of it. Landing an item ticks it here. The details
+stay in the dated sections linked from each line, marked "(Release gate)".
+
+Costs the drive (found 2026-09-24):
+
+- [x] A half-full tank's swing from one bend into the next: the plan now
+      counts the swing the liquid carries; Lookout Pass's closest call went
+      from 0.98 unwarned to 0.74 with two warnings
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] An empty truck under partial lane keeping left the pavement in US-62's
+      tight esses: calls no longer hide the bends behind them or cut a
+      warning, and stale warnings are dropped
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Adaptive cruise sloshed a half-full tank on a climb: the slug now stops
+      against the tank head instead of rebounding
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Rural roads take the in-town statutory limit: an untagged state route
+      outside town gets the district default (IA 175 at 20 near a Love's).
+      Needs an urban-area test before the fill (PR #232).
+- [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
+      their exits were found (Charlotte to Knoxville by a median 8 miles),
+      so those exits keep old ramp data and get no ramp terminal. Re-derive
+      their interchanges (PR #232).
+
+World data:
+
+- [ ] 995 sourced facility endpoints are not freight sites; the owner
+      decides on unnamed warehouses ([record](#release-gate-record)).
+- [ ] Two facility endpoints reached only over miles of private road want
+      an endpoint fix ([record](#release-gate-record)).
+- [ ] Wholesale and trade sites are refused as retail
+      ([September 11](#september-11-trucking-corrections)).
+- [ ] 196 legs have no sleep stop a loaded truck can use
+      ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] Rest areas are stored for both directions, so a pair is announced
+      twice within a mile ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] Chain truck stops' mile markers are loose
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] Truck stops whose ramp control is still seeded
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] Where the state scale houses are
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] The Flying J listed at exit 286A belongs on an I-20 Abilene leg
+      ([September 23](#september-23-agent-drive-into-abilene)).
+
+Driving and platform:
+
+- [ ] The speed keeper builds back to the zone limit between close street
+      turns ([September 23](#september-23-agent-drive-into-abilene); fixed
+      in PR #232).
+- [ ] Drop the whole-archive Prism link once a `prismer` release vendors
+      ethindp/prism#135
+      ([September 21](#september-21-prism-from-the-prismer-crate)).
+
+The owner's:
+
+- [ ] Listening pass on the new synth voices per style
+      ([above](#19-in-flight-featcareer-19)).
+- [ ] Listening pass and a longer drive over wear thresholds and
+      interrupted warnings ([September 11](#september-11-trucking-corrections)).
+- [ ] Verify the OneCore leak with Prism's author
+      ([September 12](#september-12-long-sessions-and-speech)).
+- [ ] Download the eight remaining jazz songs and 19 station jingles from
+      Suno, then integrate them ([September 13](#september-13-driver-directory)).
+- [ ] The radio stream sweep (`--recheck-dead`) on release day.
+- [ ] Push the `v1.9.0` tag on the commit to ship, last, after every other
+      item here is closed.
+
+### Found along the way (not blocking 1.9.0)
+
+Open work found since the morning of 2026-09-24 that does not cost the
+drive. New findings land here by default; the owner can promote any of them
+into the release gate. Details stay in the linked dated sections, marked
+"(Found along the way)".
+
+- [ ] Per-exit ramp grade: past the deceleration lane a ramp is assumed
+      level ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Price curve signs by the MUTCD's ball-bank criteria, once the bake's
+      minimum radii are re-measured
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Catch an axle over while the gross is legal: needs load placement and
+      an axle check at the scale house
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] 234 travel centers have no mapped CAT Scale within 0.25 mi; check
+      them against CAT's locator
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] Check the street signal numbers against the Signal Timing Manual 2nd
+      ed. (NCHRP 812), whose text could not be fetched (PR #232).
+- [ ] Street controls on the way out: a departure chain drops the signals
+      and signs, which face the inbound truck (PR #232).
+- [ ] Gate and dock are one point, where a real arrival checks in, drives
+      the yard and backs into a door. The owner has not decided; not to be
+      built unasked (PR #232).
+- [ ] 3,630 road stops have no decided exit, so no street chain (PR #232).
+- [ ] 394 older facility chains still carry no street detail (PR #232).
+
+### Release gate record
+
+What closed on the way to 1.9.0, and the owner decisions still pending. The
+open items are in the [release gate](#release-gate-190). The
 [detailed backlog](docs/roadmap-details.md) retains the supporting notes and
 [completed gate work](docs/roadmap-details.md#completed-19-release-gate-work).
 
 #### Release cutover checklist
 
-These steps remain open even where a related implementation bullet is checked:
+The two cutover steps still open, the radio stream sweep and the tag push,
+are in the [release gate](#release-gate-190).
 
 - [x] Revert-the-revert on dev for the driving-assists withdrawal
       (2026-09-20, `d00faad1`), and public career selection the same
@@ -148,7 +255,6 @@ These steps remain open even where a related implementation bullet is checked:
 - [x] The place-callouts ladder is on dev (`e340995e`): `place_callouts`
       is off, sparse or all, sparse by default, and split from the
       sitting-budget chatter.
-- [ ] The radio stream sweep (`--recheck-dead`) runs before the release.
 - [x] **The 1.9 stable-release path is written; pushing a `v*.*.*` tag
       cuts the release** (`9bbe8f12`). The tag push drops `--prerelease`,
       takes the version and tag from the tag, and writes the notes with
@@ -168,8 +274,6 @@ These steps remain open even where a related implementation bullet is checked:
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
-- [ ] The owner pushes the `v1.9.0` tag on the commit to ship, last, after
-      every other gate here is closed.
 - [x] The owner voice pass over seven achievement titles (2026-09-22).
       The category-description cut landed and the owner accepted all
       seven titles as-is. The physical-Mac VoiceOver listening pass was
@@ -334,7 +438,7 @@ These items are part of the release-gate sweep:
       merge and can be re-run a state at a time. The approach builder
       rebuilds a chain whose endpoint was replaced and labels the ones it
       could not. Numbers are in the item above.
-- [ ] 995 sourced endpoints are still not freight sites, 560 of them under
+- (Release gate) 995 sourced endpoints are still not freight sites, 560 of them under
       a chain. Named sites ran out: OpenStreetMap names few warehouses in
       small towns. OWNER DECISION: 365 of the 995 have an UNNAMED
       building=warehouse, works or rail yard of their own family inside the
@@ -373,7 +477,7 @@ These items are part of the release-gate sweep:
       a clear gap before 1.49, so the cut is one mile; the owner allowed
       three sites past it by name (Gary Works steel mill 1.49, Tampa cold
       storage 1.94, Port Tampa Bay bulk docks 1.97).
-- [ ] Two endpoints reached only over five to eight miles of private road,
+- (Release gate) Two endpoints reached only over five to eight miles of private road,
       left unbuilt by owner ruling 2026-09-17 because that reads like a
       wrong endpoint: Huntsville cross-dock (endpoint "Kuskokwin Building",
       tagged only building=warehouse, whose coordinates put it inside
@@ -461,7 +565,7 @@ its status or release decision.
       links the archive whole on Linux and macOS, and the nightly now fails
       when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
       missing from `--list-speech-backends`.
-- [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
+- (Release gate) Prism's backend anchors cover MSVC only; a GCC static link drops
       every backend unless linked whole. Reported with a standalone
       reproduction as ethindp/prism#130, fixed upstream 2026-09-22 by
       ethindp/prism#135 (anchors for GCC and Clang). Waiting on a `prismer`
@@ -572,7 +676,7 @@ its status or release decision.
       announcing the defect before the walk-around its copy names, and
       "dropped_the_bad_one" read the origin yard's trailer, so a driver who
       refused it at pickup still earned it at the receiver.
-- [ ] Complete the owner's listening pass and longer gameplay verification
+- (Release gate) Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
 
@@ -675,7 +779,7 @@ its status or release decision.
       a generated road: no snapped real street stands in for a site that is
       not there. Drive-throughs, parking aisles, fire lanes and permit-only
       ways left the routing graph in the same pass.
-- [ ] Wholesale and trade sites are refused as retail. `shop=wholesale` is
+- (Release gate) Wholesale and trade sites are refused as retail. `shop=wholesale` is
       how OSM tags a distributor -- Shamrock Foodservice Warehouse in
       Billings is a bare node carrying it and nothing else -- and the screen
       refuses any `shop` object outright. Accepting the tag alone would also
@@ -948,12 +1052,12 @@ its status or release decision.
       is playing, the same as a station on the dial. The song readout
       answered for every playlist that it sends no song information,
       which is only true of a file off the player's own disk.
-- [ ] 196 legs still have no sleep stop a loaded truck can use and no
+- (Release gate) 196 legs still have no sleep stop a loaded truck can use and no
       inventory record on the road. US-12 Willmar to Minneapolis is one:
       its only stop is a Kwik Trip typed bobtail-only. Needs another
       source, state DOT rest-area lists or truck parking read from the OSM
       extracts, before the rest key can plan a stop on them.
-- [ ] Inventory rest areas are one per carriageway (Heath Creek serves
+- (Release gate) Inventory rest areas are one per carriageway (Heath Creek serves
       I-35 north, New Market I-35 south) and the map stores each as serving
       both directions, so a pair is announced twice within a mile. The
       runtime only knows forward and reverse relative to a leg; deriving
@@ -1050,7 +1154,7 @@ its status or release decision.
       the twin screen now drops 2 records where it dropped 90, and the retype
       acts on 52 where it acted on 1,317 (counted with a Python mirror of both
       rules that reproduces the 90 and the 1,317 on the map before).
-- [ ] Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
+- (Release gate) Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
       percentile of 3.4 from where the store projects onto the leg's own
       line, and 5 to 40 miles for about 110 curated records on long legs.
       Exit numbers and ramp controls are found by mile marker, so re-project
@@ -1098,7 +1202,7 @@ its status or release decision.
       2,136 (56.6%), and the mile marker had named another exit for 527 of
       the 1,506 now decided by identity. 41 stops name an exit their leg
       puts elsewhere.
-- [ ] What still leaves a truck stop's ramp to the seeded control, in order
+- (Release gate) What still leaves a truck stop's ramp to the seeded control, in order
       of size: 1,353 stops are on the 532 legs with no interchange records
       (the interchange build only reads Interstate shields); 390 snapped to
       an exit their leg does not record, because the build drops an exit
@@ -1175,7 +1279,7 @@ its status or release decision.
       The music pack preserves its prior 380 entries and adds 25.
 - [x] Lights Over Superior borrowed into the day menu rotation, by owner
       request, and still in the classic rock station playlist.
-- [ ] Download and integrate the eight remaining jazz songs, then 19 station
+- (Release gate) Download and integrate the eight remaining jazz songs, then 19 station
       jingles, after the September 21 Suno allowance refresh.
 
 - [x] Two owner-supplied instrumentals in the music pack: D-Major Medley
@@ -1199,7 +1303,7 @@ its status or release decision.
       a session with no screen reader running, where OneCore is the automatic
       main voice and the probe re-acquired it on every pass. 1.8 never
       enumerated outside the settings menu.
-- [ ] Owner verifies the OneCore leak with Prism's author before anything
+- (Release gate) Owner verifies the OneCore leak with Prism's author before anything
       goes upstream; no issue or PR from this side (owner rule 2026-09-12).
       Hand-off is the probe, which left the tree with the in-tree Prism
       crates on 2026-09-21: `git show f9c06a7f:crates/prism/examples/handle_leak_probe.rs`.
@@ -1243,15 +1347,15 @@ against.
       1,667 truck-stop records within 0.25 mi of one (calibrated: 844 of 1,102
       travel centers within 0.1 mi, 868 within 0.25, 880 within 0.5), on top
       of the 176 read from brand pages. Stop details now say "CAT Scale".
-- [ ] An axle cannot go over while the gross is legal: the game has no load
+- (Found along the way) An axle cannot go over while the gross is legal: the game has no load
       placement, fifth-wheel slide or tandem slide, so the axle model is fixed
       per truck and a state scale still judges gross only. Real drivers weigh
       mostly to catch a heavy drive tandem at a legal gross; that needs load
       placement and an axle check at the scale house.
-- [ ] 234 travel-center records with a coordinate have no mapped CAT Scale
+- (Found along the way) 234 travel-center records with a coordinate have no mapped CAT Scale
       within 0.25 mi, and records with no coordinate are never matched. CAT
       Scale's own locator is the check on both.
-- [ ] Where the state scale houses are is still unsolved. 78 of 1,283 legs
+- (Release gate) Where the state scale houses are is still unsolved. 78 of 1,283 legs
       carry one, every one of them found off an exit sign rather than looked
       for, and no keyless national source beats that -- OpenStreetMap's
       weighbridge tag holds 72 enforcement scales against 2,127 commercial
@@ -1376,11 +1480,11 @@ gate, turned up these on dev's own code.
 - [x] **Ramp readouts.** The route readout on a destination ramp adds the
       street chain to the gate; U drops highway stops off the highway; the
       unrecorded ramp control is seeded by the exit, not by each stop.
-- [ ] **Data: the Flying J listed at exit 286A** on the Wichita Falls to
+- (Release gate) **Data: the Flying J listed at exit 286A** on the Wichita Falls to
       Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
       miles off this road by its own source note. Move it to an I-20
       Abilene leg and re-bake.
-- [ ] **The speed keeper between close street turns.** It builds back to
+- (Release gate) **The speed keeper between close street turns.** It builds back to
       the zone limit between turns a quarter mile apart (9 to 21 mph), then
       eases in the last 0.07 mile at about 0.3 g. Hold the lower number
       when the next turn is inside the keeper's own build-and-shed
@@ -1421,7 +1525,7 @@ mainline behaviour.
       300 ft and 47 over 1.5 miles were dropped. The OSM length starts at
       the gore, so `Trip::ramp_length_mi` adds the deceleration lane in
       front of it; exits without a length keep the derived default.
-- [ ] **Per-exit ramp grade.** The ramp past the deceleration lane is
+- (Found along the way) **Per-exit ramp grade.** The ramp past the deceleration lane is
       assumed level because nothing records its climb or drop. Needs an
       elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
 - [x] **Truck rollover, on ramp curves and mapped bends alike**
@@ -1532,7 +1636,7 @@ mainline behaviour.
       `driving_record.crashes`, the profile page lists "N crash(es)" after the
       out-of-service orders, and the validator checks `crash_times` against
       the career clock like `out_of_service_times`.
-- [ ] **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
+- (Found along the way) **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
       every advisory at 0.30 g plus bank, so a full trailer at the number the
       cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
       2C.59's ball-bank criteria read as 0.26 / 0.21 / 0.18 g
