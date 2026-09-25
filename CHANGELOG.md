@@ -158,6 +158,8 @@
 
 ### Fixed
 
+- **Exits on several routes are announced at the right mile.** Charlotte to Knoxville and Dallas to St. Louis no longer name another highway's exits.
+
 - **Exit announcements no longer name your own Interstate as the exit.** Southbound at Ardmore, exit 31B is toward Waurika, not I-35 North.
 
 - **On facility streets the next turn is called after you are round the last.** The turn chime and the words agree again.
