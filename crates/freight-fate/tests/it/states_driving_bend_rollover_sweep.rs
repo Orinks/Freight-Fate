@@ -21,18 +21,20 @@
 //! - **Daring**: no speed assists (lane keeping full, so the road is steered),
 //!   a full trailer, and a driver who takes each bend 10 mph over its sign.
 //!
-//! Every setup but Daring owes: no rollover, and no freight moved by a bend
-//! (a frame where the bend asks past the warning share; the driver's own
-//! braking is reported but is the driver's). The assisted ones also owe no
-//! "too fast" warning (the assist owns the speed), no trip off the pavement,
-//! no more than one full application of the pedal per bend, and air above the
+//! Every setup but Daring owes: no rollover, no freight moved by a bend (a
+//! frame where the bend asks past the warning share; the driver's own
+//! braking is reported but is the driver's), no trip off the pavement, no
+//! bend asking more than `SHARE_CEILING` of the threshold, and none asking
+//! past the warning share without a "too fast" heard first. The assisted
+//! ones also owe no "too fast" warning (the assist owns the speed), no more
+//! than one full application of the pedal per bend, and air above the
 //! low-air warning. Daring owes a warning before any cost, and a roll only at
 //! the roll model's own threshold -- the proof that this sweep can see a roll.
 //!
 //! `BEND_SWEEP_DUMP=1` prints every run's transcript; `BEND_SWEEP_ONLY=` a
 //! substring of the stretch name narrows the roads;
-//! `BEND_SWEEP_TRACE=Siskiyou/CurveAssist/Full` traces one run. All need
-//! `--nocapture`.
+//! `BEND_SWEEP_TRACE=Siskiyou/CurveAssist/Full` traces one run, twice a
+//! second or with `BEND_SWEEP_EVERY=1` every frame. All need `--nocapture`.
 
 use ff_core::data::curves::RouteCurve;
 use ff_core::sim::lane::OFF_ROAD;
@@ -54,6 +56,13 @@ const STRETCH_MI: f64 = 3.0;
 const TOO_FAST: &str = ", too fast. Slow to";
 /// The unassisted drivers' steady service application.
 const DRIVER_BRAKE: f64 = 0.35;
+/// The most of its rollover threshold any bend may ask of the truck in a
+/// setup that is not trying to roll it: the warning share (0.857) plus the
+/// frame or two the load needs to be slowed, well short of 1.0.
+const SHARE_CEILING: f64 = 0.90;
+/// A bend asking past the warning share has to follow a "too fast" heard
+/// within this many seconds, or the driver was never told.
+const WARNED_WITHIN_S: f64 = 10.0;
 
 /// A bend-dense stretch of a real leg: its endpoints in bake direction and
 /// where the stretch starts on it. Ranked 2026-09-24 by mapped bends in three
@@ -219,6 +228,9 @@ struct Run {
     /// The lowest the air tanks fell to, and where the low-air warning is.
     min_psi: f64,
     low_air_psi: f64,
+    /// The highest roll share reached past the warning share with no "too
+    /// fast" heard in the `WARNED_WITHIN_S` before it; 0 if none.
+    silent_over_warn: f64,
     bends: usize,
     heard: Vec<String>,
 }
@@ -392,6 +404,8 @@ fn drive(stretch: &Stretch, setup: Setup, load: Load) -> Run {
     let mut lines_traced = 0;
     let mut foot = 0.0f64;
     let mut last_speed = 0.0f64;
+    let mut warnings_seen = 0;
+    let mut last_warned_at = f64::NEG_INFINITY;
     // `BEND_SWEEP_TRACE=Siskiyou/CurveAssist/Full` prints the pedals, the
     // bend and the roll share twice a second down that run.
     let trace = std::env::var("BEND_SWEEP_TRACE").is_ok_and(|v| {
@@ -507,7 +521,7 @@ fn drive(stretch: &Stretch, setup: Setup, load: Load) -> Run {
                 let (limit, _) = d.trip.speed_limit_at(position);
                 let bend = d.trip.curve_at(position).filter(|c| !c.connector);
                 format!(
-                    "t {clock:6.1} mi {position:7.3} v {:5.1} lim {limit:3.0} gr {:+5.1} cargo {:.2} bend {:?} share {:.3} live {:.3} brk {:.2} thr {:.2} servo {:?} cruise {:?}/{:?} jake {} keys {brake}/{go}",
+                    "t {clock:6.1} mi {position:7.3} v {:5.2} lim {limit:3.0} gr {:+5.1} cargo {:.2} bend {:?} share {:.3} live {:.3} brk {:.2} thr {:.2} servo {:?} cruise {:?}/{:?} jake {} keys {brake}/{go} slosh {:?} gear {} edge {:.2}",
                     d.truck().speed_mph(),
                     d.truck().grade * 100.0,
                     d.truck().cargo_damage_pct,
@@ -520,9 +534,21 @@ fn drive(stretch: &Stretch, setup: Setup, load: Load) -> Run {
                     d.cruise_mph,
                     d.cruise_curve_mph,
                     d.truck().engine_brake_stage,
+                    d.truck().liquid.as_ref().map(|l| (
+                        (l.longitudinal.x * 100.0).round() / 100.0,
+                        (l.longitudinal.v * 100.0).round() / 100.0,
+                        (d.truck().surge_force_n() / 100.0).round() / 10.0,
+                    )),
+                    d.truck().transmission.gear,
+                    d.lane.edge_excursion(),
                 )
             });
-            if (clock * 30.0).round() as i64 % 15 == 0 {
+            let every = if std::env::var("BEND_SWEEP_EVERY").is_ok() {
+                1
+            } else {
+                15
+            };
+            if (clock * 30.0).round() as i64 % every == 0 {
                 eprintln!("{line}");
             }
             recent.push_back(line);
@@ -578,7 +604,15 @@ fn drive(stretch: &Stretch, setup: Setup, load: Load) -> Run {
         }
         run.cargo_pct = run.cargo_pct.max(cargo);
         run.off_road |= off_road;
-        let warned_now = text.contains(TOO_FAST);
+        let warned = text.matches(TOO_FAST).count();
+        if warned > warnings_seen {
+            warnings_seen = warned;
+            last_warned_at = clock;
+        }
+        if share > ROLL_WARN_SHARE && clock - last_warned_at > WARNED_WITHIN_S {
+            run.silent_over_warn = run.silent_over_warn.max(share);
+        }
+        let warned_now = warned > 0;
         if warned_now && run.warnings == 0 {
             if trace {
                 eprintln!("FIRST WARNING HEARD at t {clock:.1}");
@@ -615,21 +649,7 @@ fn drive(stretch: &Stretch, setup: Setup, load: Load) -> Run {
     run
 }
 
-/// How far a bend may move the load before it is a fault here: nothing,
-/// except where a gap is recorded in ROADMAP.md and capped so it cannot grow
-/// unseen. A half-full tank carries its sideways swing from one bend of
-/// Lookout Pass's pairs into the next, and the planning threshold prices a
-/// bend entered from rest (2026-09-24: 0.01 percent with the assists, 0.12
-/// with a driver on the spoken number).
-fn known_gap_pct(stretch: &Stretch, load: Load) -> f64 {
-    if stretch.name.contains("Lookout") && load == Load::Tank50 {
-        0.2
-    } else {
-        0.0
-    }
-}
-
-fn faults(stretch: &Stretch, setup: Setup, load: Load, run: &Run) -> Vec<String> {
+fn faults(setup: Setup, run: &Run) -> Vec<String> {
     let mut faults = Vec::new();
     if run.bends == 0 {
         faults.push("no bends on the stretch".to_string());
@@ -653,10 +673,29 @@ fn faults(stretch: &Stretch, setup: Setup, load: Load, run: &Run) -> Vec<String>
             if run.rolled {
                 faults.push("rolled over".to_string());
             }
-            if run.bend_cargo_pct > known_gap_pct(stretch, load) {
+            if run.bend_cargo_pct > 0.0 {
                 faults.push(format!(
                     "the bend moved the load {:.2} percent",
                     run.bend_cargo_pct
+                ));
+            }
+            // A half-full tank's swing carried from one bend into the next
+            // reached 0.98 on Lookout Pass with nothing said, and US-62's
+            // esses put a bobtail off the pavement on the spoken numbers
+            // (bend sweep, 2026-09-24).
+            if run.off_road {
+                faults.push("left the pavement".to_string());
+            }
+            if run.max_share > SHARE_CEILING {
+                faults.push(format!(
+                    "a bend asked {:.3} of the threshold",
+                    run.max_share
+                ));
+            }
+            if run.silent_over_warn > 0.0 {
+                faults.push(format!(
+                    "a bend asked {:.3} of the threshold with no warning heard",
+                    run.silent_over_warn
                 ));
             }
         }
@@ -665,9 +704,6 @@ fn faults(stretch: &Stretch, setup: Setup, load: Load, run: &Run) -> Vec<String>
         let warned = text.matches(TOO_FAST).count();
         if warned > 0 {
             faults.push(format!("heard \"too fast\" {warned} times"));
-        }
-        if run.off_road {
-            faults.push("left the pavement".to_string());
         }
         // One application per bend is the servo's own design ("holds a bend
         // on a downgrade on one application", ROADMAP 2026-09-18); pumping
@@ -712,10 +748,10 @@ fn test_the_assists_hold_every_mapped_bend_without_rolling_the_truck() {
         cases.push((Setup::Daring, Load::Full));
         for (setup, load) in cases {
             let run = drive(stretch, setup, load);
-            let found = faults(stretch, setup, load, &run);
+            let found = faults(setup, &run);
             control_rolls += usize::from(setup == Setup::Daring && run.rolled);
             let row = format!(
-                "{:28} {:12} {:7} bends {:2} share {:.3} warn {} rolled {} cargo {:5.1} (bend {:5.1}) rises {:5.2} psi {:5.1}",
+                "{:28} {:12} {:7} bends {:2} share {:.3} warn {} rolled {} off {} cargo {:5.1} (bend {:5.1}) rises {:5.2} psi {:5.1}",
                 stretch.name,
                 format!("{setup:?}"),
                 format!("{load:?}"),
@@ -723,6 +759,7 @@ fn test_the_assists_hold_every_mapped_bend_without_rolling_the_truck() {
                 run.max_share,
                 run.heard.iter().filter(|l| l.contains(TOO_FAST)).count(),
                 run.rolled,
+                run.off_road,
                 run.cargo_pct,
                 run.bend_cargo_pct,
                 run.rises,
