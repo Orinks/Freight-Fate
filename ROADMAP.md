@@ -172,6 +172,13 @@ Costs the drive (found 2026-09-24):
       before and 2 after
       ([September 24](#september-24-realistic-interstate-exit)).
 
+Costs the drive (found 2026-09-25, gate drive on I-70):
+
+- [x] J refused the engine brake whenever cruise was pulling, with
+      "Release the accelerator" though no pedal was down, right after the
+      downgrade call asked for J. Only the driver's own accelerator refuses
+      it now.
+
 World data (the rest of the 1.9 world-data list moved to
 [2.0](#world-data-deferred-from-19) on 2026-09-25):
 

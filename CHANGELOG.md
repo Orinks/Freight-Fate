@@ -155,6 +155,8 @@
 
 ### Fixed
 
+- **J turns the engine brake on while cruise is holding the throttle.** It no longer asks you to release an accelerator you are not pressing.
+
 - **Exits on several routes are announced at the right mile.** Charlotte to Knoxville and Dallas to St. Louis no longer name another highway's exits.
 - **Descent control holds a steep downgrade at a safe speed for your load.** It slows before the steep part, holds the gear, and names the speed once.
 
