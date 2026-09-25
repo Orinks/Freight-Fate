@@ -828,7 +828,7 @@ pub fn policy(
 /// stays up and the operator's keyboard reaches the game, so a human can
 /// take the wheel alongside the agent; off, the keys are dropped at the
 /// door (see [`run_with_staged`]).
-pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, online: bool) -> i32 {
+pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, staging: bool) -> i32 {
     // Discover BEFORE the window opens: pure world data, and a failed
     // search should refuse cleanly rather than boot a game.
     let staged = match launch {
@@ -844,7 +844,7 @@ pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, online: b
             }
         },
     };
-    run_with_staged(reset, staged, operator_keys, online)
+    run_with_staged(reset, staged, operator_keys, staging)
 }
 
 fn run_with_staged(
@@ -854,7 +854,7 @@ fn run_with_staged(
         crate::playtest::road::RoadOptions,
     )>,
     operator_keys: bool,
-    online: bool,
+    staging: bool,
 ) -> i32 {
     use crate::playtest::sandbox;
     let (requests, rx) = mpsc::channel();
@@ -868,7 +868,7 @@ fn run_with_staged(
             finish_serving(&server);
             return 0;
         };
-        let (mut app, mut guard) = match boot(reset, online) {
+        let (mut app, mut guard) = match boot(reset, staging) {
             Ok(booted) => booted,
             Err(text) => {
                 // Answered, not fatal: "already running" clears when the
@@ -932,24 +932,28 @@ fn finish_serving(server: &std::thread::JoinHandle<()>) {
 /// An error leaves nothing held, so the next play request can try again.
 fn boot(
     reset: bool,
-    online: bool,
+    staging: bool,
 ) -> Result<(App, crate::single_instance::SingleInstanceGuard), String> {
     use crate::playtest::sandbox;
     let source = sandbox::real_saves();
-    let dir = if online {
-        sandbox::online_sandbox()
+    let dir = if staging {
+        sandbox::staging_sandbox()
     } else {
         sandbox::default_sandbox()
     };
-    if online {
-        sandbox::prepare_online(&dir, reset, &source)
-            .map_err(|e| format!("Could not prepare the online agent session: {e}"))?;
-        eprintln!("ONLINE: cloud backups reach the site as the real driver.");
+    if staging {
+        sandbox::prepare_staging(&dir, reset, &source)
+            .map_err(|e| format!("Could not prepare the staging agent session: {e}"))?;
+        eprintln!(
+            "STAGING: this session's own driver backs up to {}; connect it from the \
+             Online menu the first time.",
+            sandbox::STAGING_URL
+        );
     } else {
         sandbox::prepare(&dir, reset, true, &source)
             .map_err(|e| format!("Could not prepare the agent sandbox: {e}"))?;
     }
-    let problems = if online {
+    let problems = if staging {
         Vec::new()
     } else {
         sandbox::audit(&dir)

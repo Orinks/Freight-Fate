@@ -28,10 +28,10 @@ required-features = ["agent-server"]
 
 [features]
 default = ["agent-server"]
-# `--agent-server`: the MCP server that lets an agent play, including an
-# `--online` mode that carries the real driver identity with cloud backups
-# on. Dev builds have it; player builds leave it out, because
-# tools/build_release.py builds with --no-default-features.
+# `--agent-server`: the MCP server that lets an agent play, including a
+# `--staging` mode that backs up to the staging site. Dev builds have it;
+# player builds leave it out, because tools/build_release.py builds with
+# --no-default-features.
 agent-server = []
 
 [lints]

@@ -321,9 +321,12 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   agent a player's capabilities only -- keys in through the normal input
   seam, ears out (both speech channels plus every earcon and cue) -- in the
   audited playtest sandbox, never against the owner's careers. The one
-  exception is `--online`, only when the owner asks for a site check: its
-  own `saves-agent-online` directory, no careers copied in, the real driver
-  identity, cloud backup on, presence and Mastodon off.
+  exception is `--staging`, only when the owner asks for a site check: its
+  own `saves-agent-staging` directory, no careers and no identity copied in,
+  its own driver on the staging site (dev.orinks.net; the owner enters its
+  spoken code there the first time), cloud backup on, presence and Mastodon
+  off. No agent session ever reaches production: `--online`, which carried
+  the real driver identity, was removed on 2026-09-25.
 
 ## World and route data
 

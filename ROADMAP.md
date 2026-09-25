@@ -226,6 +226,18 @@ Everything found before 2026-09-25 moved to
       backups on, where `scenario` sets any level, money or credentials. It
       is the `agent-server` Cargo feature now, and `tools/build_release.py`
       builds without it (2026-09-25).
+- [x] A source build still has the agent server, so `--online` is gone: no
+      agent session reaches production. Site checks use `--staging`, its
+      own driver on dev.orinks.net, connected once by the owner, with no
+      identity copied from the real saves (2026-09-25).
+- [ ] The site cannot tell an invented career from an earned one. Anyone
+      who builds from source can set their own money or level before a
+      backup, agent or not, and every client-side mark can be edited out.
+      The check has to live in the cloud validator: earnings against the
+      miles, hours and deliveries that paid them; level and experience
+      against deliveries; credentials against their level gates and the
+      clock. Calibrate against real backups, then mark rather than refuse
+      (owner, 2026-09-25).
 
 ### Release gate record
 

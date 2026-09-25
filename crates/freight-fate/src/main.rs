@@ -204,7 +204,7 @@ fn agent_server(args: &[String]) -> i32 {
         has(args, "--reset"),
         launch,
         has(args, "--operator-keys"),
-        has(args, "--online"),
+        has(args, "--staging"),
     )
 }
 
@@ -224,7 +224,7 @@ fn agent_server(_args: &[String]) -> i32 {
 const KNOWN_SWITCHES: &[&str] = &[
     "--agent-server",
     "--operator-keys",
-    "--online",
+    "--staging",
     "--ai",
     "--assists",
     "--at",
@@ -320,9 +320,9 @@ Drive tools:
                                     to boot straight into a staged drive;
                                     --operator-keys keeps the window up and
                                     lets the operator's keyboard in, to play
-                                    alongside the agent; --online uses its
-                                    own directory with the real driver
-                                    identity and cloud backup on)
+                                    alongside the agent; --staging uses its
+                                    own directory and its own driver on the
+                                    staging site, cloud backup on)
   --log PATH                        session log for the watcher
 ";
 
