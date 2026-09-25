@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Space and U say how far away your signalled exit is.** Space ends with it, and U names it first.
+
 - **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
 
 - **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
@@ -51,6 +53,10 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **The exit lane opens just before the gore, and you steer into it there.** Already in the right lane, you hear no lane instructions before that.
+
+- **The exit blinker starts clicking half a mile out.** X still sets the signal from miles away, and the game says "Signal set" until then.
 
 - **Each city street keeps its own speed limit.** The cab says the new number when the street changes, and delivery times are planned on them.
 

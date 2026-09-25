@@ -1647,7 +1647,9 @@ impl PlaytestHarness {
                 remaining > 0.0 && speed < target_mph - 1.0,
             )
         });
-        for (key, held) in [(Key::Down, down), (Key::Up, up)] {
+        // Right into the exit lane where the cab says it opens.
+        let right = self.read_drive(|drive| drive.lane.exit_lane_open);
+        for (key, held) in [(Key::Down, down), (Key::Up, up), (Key::Right, right)] {
             if held {
                 self.app.ctx.input.press(key, Mods::NONE);
             } else {

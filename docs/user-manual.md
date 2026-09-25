@@ -665,7 +665,7 @@ wherever the pad has one.
 | Alt+T | Switch between automatic and manual transmission on the road. This changes your whole control scheme, so it is worth knowing you pressed it. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
-| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. With the turn signal on for an exit, it ends with that exit and how far away it is. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding, pulling, or losing it -- including whether the engine brake has the descent or is about to lose it. G also names the next grade ahead worth planning for, how far off and how long it runs -- including one that steepens without flattening out first, and the gentler pull automatic speed control is building speed for when nothing steep is coming. |
@@ -687,7 +687,7 @@ wherever the pad has one.
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
-| U | Report the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
+| U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
@@ -1234,20 +1234,26 @@ has its entrance at the end of the ramp.
 
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
-up for it. As an announced exit approaches, use X to signal or cancel your intent,
-and set up the exit lane unless lane keeping is on full. Keep road speed to
-the gore: it accepts anything up to the speed the posted limit allows. Past the
-gore you are in the deceleration lane, a short lane beside the highway, and
-the game says the exit speed there. Brake to it before the ramp curve at the
-end of that lane; a loaded truck taking that curve too fast shifts its load
-and can run wide. The signal-on announcement also names how the ramp ends -- a traffic
+up for it. As an announced exit approaches, use X to signal or cancel your intent.
+X commits you to the exit wherever you press it, and the game says "Signal
+set"; the blinker itself starts clicking half a mile out, the way a driver
+flicks it on near the exit.
+Unless lane keeping is on full, move to the right lane and stay centered there;
+the game asks for that move only while you are out of the right lane. Just
+before the gore the exit lane opens beside the right lane, and the game says
+"Exit lane opening. Steer right into it." Steer right across the line and you
+are in the exit lane, the start of the ramp. On full, lane keeping takes it for
+you. Keep road speed until then: the gore accepts anything up to the speed the
+posted limit allows. The exit lane, which road engineers call the deceleration
+lane, is where you slow down, and the game says the exit speed as you enter it.
+Brake to it before the ramp curve at the end of that lane; a loaded truck
+taking that curve too fast shifts its load and can run wide. The signal-on announcement also names how the ramp ends -- a traffic
 light or a stop sign -- so the braking plan can start on the mainline, and the
 U upcoming readout carries the same warning. Once you are on a ramp that ends
 in a light or a sign, the game clock runs in real time until you are through
 the intersection, so the warning buys real reaction seconds instead of
-compressed ones. If your speed, lane setup, and route intent are valid at the marker,
-the truck takes the ramp automatically. If you reach the gore too fast, without
-signaling, or without the exit lane set, you stay on the
+compressed ones. If you reach the gore too fast or without signaling, or the
+gore goes by without you steering into the exit lane, you stay on the
 highway and the game tells you what went wrong. The timing is generous so the
 sequence is about preparation, not twitch input. The game can also tell you when
 traffic boxes you out of the lane, so you know to recover at the next safe exit
@@ -1258,11 +1264,12 @@ Arrow to brake does not skip the first menu option.
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to set up for it. With lane keeping on partial
-or off, use X to signal and move right for the exit lane. On full, lane keeping
+or off, use X to signal, keep to the right lane, and steer into the exit lane
+where it opens. On full, lane keeping
 takes the destination exit for you, and the first call of each approach says so. If automatic speed control is
 active, it holds road speed and eases at most 10 miles per hour below it just
 before the gore. Press X to take the exit; automatic speed control pauses as
-you enter the deceleration lane, then you brake to the exit speed for the ramp
+you enter the exit lane, then you brake to the exit speed for the ramp
 curve and on to the stop. If you miss the destination
 exit, continue to the next safe turnaround. Dispatch loops you back onto the
 approach so you can hear the exit call again and press X to take it. On full,
@@ -1318,7 +1325,7 @@ When a sleep-capable stop is close enough ahead, press T to plan that exact
 stop. The game names it, its exit, and the next action. Press X separately to
 signal for the exit; T never chooses to leave the highway by itself. The
 default-off Planned rest-stop stopping assistance setting can then brake to a
-complete stop at the entrance after you have set the exit lane and cleared any
+complete stop at the entrance after you have taken the exit lane and cleared any
 ramp light or stop sign. It never selects, signals, takes, or cancels an exit.
 
 ## Enforcement, your record, and your CDL
@@ -1548,7 +1555,7 @@ Use these keys when you need status without leaving the road:
 
 | Key | Information |
 | --- | --- |
-| Space | Speed, gear, RPM, air pressure, and brake state. |
+| Space | Speed, gear, RPM, air pressure, and brake state, and with the signal on, how far to the exit. |
 | F | Fuel level and estimated range. |
 | C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
 | Alt+A | Time at the wheel so far this shift, and time on duty. |
@@ -1682,7 +1689,7 @@ Interactive is a descent-control level, not a preset.
 
 #### Exit and stopping assistance
 
-Exit speed assistance brakes in the deceleration lane of an already-selected
+Exit speed assistance brakes in the exit lane of an already-selected
 exit, so the truck reaches the exit speed by the ramp curve. On the highway it
 only slows a truck the gore would refuse. Route-transition, curve, or
 facility stopping assistance does the same braking when exit speed assistance
@@ -1721,7 +1728,7 @@ Predictive cruise sits outside the presets. It lets cruise read the road about a
 
 #### Lane keeping
 
-Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel, bends included, and every exit needs your turn signal set and the exit lane held.
+Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel, bends included, and every exit needs your turn signal set and a steer into the exit lane where it opens.
 
 On partial or off, with lane-departure warning on, the engine leans back toward lane center when you drift, and you steer the way it leans; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. The road noise underneath leans to where you sit in your lane whichever way you are drifting, so it tells you position, not direction. On full the engine still leans for the bends and corners ahead, and the road noise stays centered because the truck is.
 

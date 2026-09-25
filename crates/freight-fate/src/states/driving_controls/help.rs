@@ -101,9 +101,10 @@ impl DrivingState {
         text.push_str(&format!(
             "{exit} signals for the next announced route exit, by number when "
         ));
-        text.push_str("known, or cancels that signal. Hold the exit lane unless lane ");
-        text.push_str("keeping is on full, keep road speed to the gore, then brake to the ");
-        text.push_str("exit speed before the ramp curve. Ramps usually end ");
+        text.push_str("known, or cancels that signal. Unless lane keeping is on full, move ");
+        text.push_str("to the right lane, then steer right into the exit lane where it ");
+        text.push_str("opens, just before the gore. Keep road speed to there, then brake to ");
+        text.push_str("the exit speed before the ramp curve. Ramps usually end ");
         text.push_str(&format!(
             "at a traffic light or stop sign, called out on the way down. {exit} "
         ));
@@ -148,7 +149,8 @@ impl DrivingState {
         ));
         text.push_str(&objective_help);
         text.push_str(&format!(
-            "{} speed, active speed-control mode, and target. ",
+            "{} speed, active speed-control mode, and target, and with the signal on, \
+             how far to the exit. ",
             n(Action::Speed)
         ));
         text.push_str(&format!(
@@ -219,7 +221,8 @@ impl DrivingState {
         );
         text.push_str("Control C copies the message you are on. ");
         text.push_str(&format!(
-            "{} reads the road ahead that no other key answers: the ramp ",
+            "{} reads the road ahead that no other key answers: the exit your \
+             signal is on for, the ramp ",
             n(Action::Upcoming)
         ));
         text.push_str("control coming up, the next imposed limit, the next stop, and ");

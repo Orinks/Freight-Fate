@@ -6,7 +6,7 @@ use crate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_GUIDE_LEAD_MI};
 use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
 use ff_core::data::curves::{min_radius_ft, RouteCurve};
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
-use ff_core::sim::lane::OFF_ROAD;
+use ff_core::sim::lane::{CROSS_AT, OFF_ROAD};
 use ff_core::sim::lane_guidance::{
     classify_boundaries, cue_loudness, edge_rung, GuidanceFrame, CURVE_LEAD_MI, TRANSVERSE_KEY,
 };
@@ -257,21 +257,19 @@ impl DrivingState {
         ctx.audio.play_with("vehicle/lane_locator", volume, pan);
     }
 
-    /// How far along the exit-lane position is, 0 to 1.
-    ///
-    /// Either route to ready counts, the same two the exit itself accepts:
-    /// the commitment built by holding Right, and simply sitting far enough
-    /// over. Whichever is further along is what the driver is hearing.
+    /// How far across into the exit lane the truck is, 0 to 1: nothing
+    /// until the lane opens at its taper, then the way to its line.
     pub fn exit_alignment_progress(&self) -> f64 {
         if self.exit_stop.is_none() || !self.exit_signal_on {
             return 0.0;
         }
-        if self.lane.lane != 0 && self.lane_change_target != Some(0) {
-            return 0.0; // ramps peel off the right lane; in-lane position cannot help
+        if self.exit_lane_ready() {
+            return 1.0;
         }
-        (self.exit_lane_alignment / EXIT_LANE_READY)
-            .max(self.lane.offset / EXIT_LANE_OFFSET_READY)
-            .clamp(0.0, 1.0)
+        if !self.lane.exit_lane_open {
+            return 0.0;
+        }
+        (self.lane.offset / CROSS_AT).clamp(0.0, 1.0)
     }
 
     /// Is a lane move underway that the driver should hear their position for?
@@ -372,8 +370,21 @@ impl DrivingState {
         ctx.audio.play_if_idle("vehicle/turn_signal", volume, pan);
     }
 
+    /// Whether the turn signal is clicking for an exit.
+    ///
+    /// Signalled with X, or taken by lane keeping on full, and only from
+    /// `EXIT_BLINKER_MI` out. X commits the truck wherever it is pressed, but
+    /// a real driver flicks the signal on a quarter to half a mile out; eight
+    /// miles of blinker is what gets a trucker flashed (owner ruling,
+    /// 2026-09-24, after agent drives that blinked 7.3 miles to the gore).
     pub fn exit_blinker_on(&self) -> bool {
-        self.exit_signal_on && self.exit_stop.is_some() && self.ramp_mi.is_none()
+        let Some(stop) = self.exit_stop.as_ref() else {
+            return false;
+        };
+        self.ramp_mi.is_none()
+            && !self.exit_signal_canceled
+            && (self.exit_signal_on || self.exit_lane_entered)
+            && stop.at_mi - self.trip.position_mi <= EXIT_BLINKER_MI
     }
 
     /// Run the edge-boundary ladder: structural loops, not louder beeps.

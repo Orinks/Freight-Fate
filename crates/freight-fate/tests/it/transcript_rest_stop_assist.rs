@@ -218,9 +218,8 @@ fn test_canceling_a_planned_stop_resets_its_armed_exit_approach() {
         d.truck_mut().brake = 0.2;
         d.cruise_exit_mph = Some(31.0);
         d.exit_signal_canceled = true;
-        d.exit_lane_alignment = 0.75;
-        d.exit_lane_prompt_said = true;
-        d.exit_lane_ready_said = true;
+        d.exit_lane_entered = true;
+        d.exit_taper_said = true;
         d.exit_cancel_armed = true;
         d.exit_right_hold_s = 0.8;
         d.exit_right_taps = 3;
@@ -243,9 +242,8 @@ fn test_canceling_a_planned_stop_resets_its_armed_exit_approach() {
     assert!(!harness.read_drive(|d| d.exit_signal_on));
     assert!(!harness.read_drive(|d| d.exit_signal_canceled));
     assert!(harness.read_drive(|d| d.cruise_exit_mph.is_none()));
-    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.0));
-    assert!(!harness.read_drive(|d| d.exit_lane_prompt_said));
-    assert!(!harness.read_drive(|d| d.exit_lane_ready_said));
+    assert!(!harness.read_drive(|d| d.exit_lane_entered));
+    assert!(!harness.read_drive(|d| d.exit_taper_said));
     assert!(!harness.read_drive(|d| d.exit_cancel_armed));
     assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.0));
     assert_eq!(harness.read_drive(|d| d.exit_right_taps), 0);
@@ -284,9 +282,8 @@ fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
         d.selected_stop_assist_brake = 0.3;
         d.truck_mut().brake = 0.2;
         d.cruise_exit_mph = Some(31.0);
-        d.exit_lane_alignment = 0.75;
-        d.exit_lane_prompt_said = true;
-        d.exit_lane_ready_said = true;
+        d.exit_lane_entered = true;
+        d.exit_taper_said = true;
         d.exit_cancel_armed = true;
         d.exit_right_hold_s = 0.8;
         d.exit_right_taps = 3;
@@ -312,9 +309,8 @@ fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
     assert!(harness.read_drive(|d| d.exit_signal_on));
     assert!(harness.read_drive(|d| d.exit_signal_canceled));
     assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(31.0));
-    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.75));
-    assert!(harness.read_drive(|d| d.exit_lane_prompt_said));
-    assert!(harness.read_drive(|d| d.exit_lane_ready_said));
+    assert!(harness.read_drive(|d| d.exit_lane_entered));
+    assert!(harness.read_drive(|d| d.exit_taper_said));
     assert!(harness.read_drive(|d| d.exit_cancel_armed));
     assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.8));
     assert_eq!(harness.read_drive(|d| d.exit_right_taps), 3);
