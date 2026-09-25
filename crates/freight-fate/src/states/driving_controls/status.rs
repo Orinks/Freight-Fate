@@ -56,8 +56,10 @@ impl DrivingState {
             self.trip.progress_summary(imperial)
         };
         let zone = match reason {
-            Some(reason) => format!(" in a {reason} zone"),
-            None => String::new(),
+            Some(reason) if !ff_core::sim::trip::is_street_zone_reason(&reason) => {
+                format!(" in a {reason} zone")
+            }
+            _ => String::new(),
         };
         let calendar = self.calendar_phrase(ctx);
         let calendar = if calendar.is_empty() {

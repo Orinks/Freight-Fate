@@ -608,13 +608,14 @@ fn test_a_stale_flush_never_steps_on_a_safety_call() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
-    // A safety call starts speaking.
+    // A safety call starts speaking, chatter queued behind it.
     pacer.note_interrupt(
         "Brake now! Stopped traffic ahead.",
         EventPriority::Critical,
         None,
         None,
     );
+    pacer.note_queued(CHATTER, EventPriority::Ambient, None, None);
     // A route line arrives while it is still mid-sentence, far enough
     // behind the projection to flush.
     clock.advance(0.05);
@@ -664,10 +665,12 @@ fn test_a_stale_flush_still_discards_an_aged_route_backlog() {
 /// ramp-exit briefing was purged 22 ms into its own delivery -- by this
 /// pacer's own duration model, before the voice had uttered a character
 /// -- and the turn it named was never spoken at all. A line that young
-/// is not a stale backlog; it is the same instant of road as the line
-/// cutting it, so it comes back behind that line instead of dying.
+/// is not a stale backlog; it is the same instant of road as the lines
+/// after it, which queue behind it: nothing purged, nothing handed back to
+/// be logged and submitted a second time (every burst of the live drive into
+/// Abilene, 2026-09-24, and "Off the ramp" lost under the second flush).
 #[test]
-fn test_a_flush_hands_back_a_route_line_that_never_got_a_word_out() {
+fn test_a_burst_of_route_lines_in_one_instant_queues_whole() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
@@ -675,54 +678,38 @@ fn test_a_flush_hands_back_a_route_line_that_never_got_a_word_out() {
                         public road. Then turn right now onto Halleck Street. \
                         1 mile to the facility gate.";
     pacer.note_queued(briefing, EventPriority::Route, None, None);
-    // The next route line lands in the same frame.
+    // The next route lines land in the same frame and the one after.
     clock.advance(0.022);
-    assert!(
-        flush_at(
-            &mut pacer,
-            "Start on unnamed public road.",
-            EventPriority::Route
-        ),
-        "the burst did not flush"
-    );
-    assert_eq!(
-        pacer.take_flush_cut(),
-        cut(briefing, EventPriority::Route),
-        "the turn instruction was destroyed before it said anything"
-    );
-    // Collected once only, exactly as a safety call's hand-back is.
-    assert_eq!(pacer.take_flush_cut(), None);
+    let zone = "Speed limit 25.";
+    assert!(!flush_at(&mut pacer, zone, EventPriority::Route));
+    clock.advance(0.015);
+    assert!(!flush_at(
+        &mut pacer,
+        "Slow semi 1.7 miles ahead, at 42 miles per hour.",
+        EventPriority::Route
+    ));
+    assert_eq!(pacer.take_flush_cut(), None, "a burst line was purged");
+    // All of it is still to be spoken, in the order it came.
+    heard(&clock, briefing, 1.0);
+    heard(&clock, zone, 0.9);
+    assert!(pacer.busy());
 }
 
-/// And it is a hand-back, not a licence to replay: the cap that stops a
-/// run of urgent lines reciting the same words still applies.
+/// The same instant only: a backlog behind a line that has been speaking
+/// past its pause is a backlog, and a route line still flushes it.
 #[test]
-fn test_a_handed_back_route_line_is_not_handed_back_twice() {
+fn test_a_backlog_older_than_the_pause_still_flushes() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
-
-    let briefing = "Off the ramp and onto city streets: start on unnamed \
-                        public road. Then turn right now onto Halleck Street.";
-    pacer.note_queued(briefing, EventPriority::Route, None, None);
-    clock.advance(0.02);
-    flush_at(
+    let stop = "Next stop in 5 miles: service plaza.";
+    pacer.note_queued(stop, EventPriority::Route, None, None);
+    pacer.note_queued("Speed limit 45.", EventPriority::Route, None, None);
+    clock.advance(EventSpeechPacer::BASE_UTTERANCE_S + 0.1);
+    assert!(flush_at(
         &mut pacer,
-        "Start on unnamed public road.",
-        EventPriority::Route,
-    );
-    let (text, priority) = pacer.take_flush_cut().expect("the first hand-back");
-    pacer.note_queued(&text, priority, None, None); // the app requeues it
-    clock.advance(0.015);
-    flush_at(
-        &mut pacer,
-        "In half a mile, facility gate ahead. Speed limit 15.",
-        EventPriority::Route,
-    );
-    assert_eq!(
-        pacer.take_flush_cut(),
-        None,
-        "the same line was handed back a second time"
-    );
+        "Zone ahead; speed limit 45.",
+        EventPriority::Route
+    ));
 }
 
 /// Darren and Jerry, 2026-08-21: the repeat the build note describes at

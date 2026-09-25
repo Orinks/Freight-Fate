@@ -1130,6 +1130,35 @@ def screen_ramp_length_ft(length_ft: float | None, stats: dict[str, int]) -> flo
     return length_ft
 
 
+# How far from the exit's pinned junction node another node carrying the
+# same exit number is still this exit: its other direction's off-ramp,
+# which leaves from the far side of the crossroad. Until 2026-09-24 the
+# gores were searched only within RAMP_FAR_END_NEAR_JUNCTION_M of the one
+# pinned node, so an exit's other direction went unmeasured wherever its
+# junction stood farther off -- I-20 exit 307 at Baird, 1.07 km apart, had
+# no westbound terminal and no street chain -- and only 3,456 of 18,165
+# exits had a terminal each way. CALIBRATED on the junction index: of 34,230
+# ref-tagged junction nodes with a same-ref neighbour inside 8 km, the
+# nearest such neighbour is a median 857 m off and 95 % are within 2 km.
+RAMP_SIBLING_JUNCTION_M = 2000.0
+
+
+def _sibling_junctions(
+    ix: dict[str, Any],
+    pinned: tuple[float, float],
+    junction_refs: dict[str, list[tuple[float, float]]],
+) -> list[tuple[float, float]]:
+    """The other junction nodes carrying this exit's number near its pinned
+    one: where the other direction's off-ramp leaves the mainline."""
+    ref = re.sub(r"\s+", "", str(ix.get("exit_ref", "")).strip())
+    return [
+        (lat, lon)
+        for lat, lon in (junction_refs.get(ref, ()) if ref else ())
+        if (lat, lon) != pinned
+        and _gore_distance_m(pinned[0], pinned[1], lat, lon) <= RAMP_SIBLING_JUNCTION_M
+    ]
+
+
 def bake_ramp_lengths_for_leg(
     leg: dict[str, Any],
     topo: dict[str, Any],
@@ -1144,8 +1173,9 @@ def bake_ramp_lengths_for_leg(
     not pinned to its own junction gets no length or terminal: read at the
     wrong place they would describe some other ramp.
 
-    The candidate gores are exactly the ones the far-end walk judges for
-    the exit (same radii). Each is assigned to the leg's A->B or B->A
+    The candidate gores are the ones the far-end walk judges for the exit
+    (same radii), and those near the exit's other junction nodes
+    (``RAMP_SIBLING_JUNCTION_M``). Each is assigned to the leg's A->B or B->A
     direction by its first ramp edge, the same rule the advisory bake uses,
     and the gore nearest the exit wins its direction. Every run re-derives
     the fields from the topology, so a length the screen now rejects
@@ -1181,19 +1211,35 @@ def bake_ramp_lengths_for_leg(
         after = geom[min(len(geom) - 1, nearest_i + 1)]
         leg_dx = (after[1] - before[1]) * math.cos(math.radians(lat))
         leg_dy = after[0] - before[0]
+        # Each direction's off-ramp leaves at its own junction node, on its
+        # own side of the crossroad; see RAMP_SIBLING_JUNCTION_M.
+        centers = [(lat, lon)]
+        if radius_m == RAMP_CONTROL_NEAR_JUNCTION_M:
+            centers += _sibling_junctions(ix, (lat, lon), junction_refs or {})
         nearest: dict[str, tuple[float, int]] = {}
-        for gore in topo["grid"].near(lat, lon, far_radius):
-            g = locs.get(gore)
-            nxt = next((n for n in graph["out"].get(gore, ()) if n in locs), None)
-            if g is None or nxt is None:
-                continue
-            n = locs[nxt]
-            ramp_dx = (n[1] - g[1]) * math.cos(math.radians(g[0]))
-            ramp_dy = n[0] - g[0]
-            direction = "forward" if leg_dx * ramp_dx + leg_dy * ramp_dy >= 0 else "backward"
-            dist = _gore_distance_m(lat, lon, g[0], g[1])
-            if direction not in nearest or dist < nearest[direction][0]:
-                nearest[direction] = (dist, gore)
+        seen: set[int] = set()
+        for c_lat, c_lon in centers:
+            for gore in topo["grid"].near(c_lat, c_lon, far_radius):
+                g = locs.get(gore)
+                nxt = next((n for n in graph["out"].get(gore, ()) if n in locs), None)
+                if gore in seen or g is None or nxt is None:
+                    continue
+                seen.add(gore)
+                n = locs[nxt]
+                ramp_dx = (n[1] - g[1]) * math.cos(math.radians(g[0]))
+                ramp_dy = n[0] - g[0]
+                along = leg_dx * ramp_dx + leg_dy * ramp_dy
+                if (c_lat, c_lon) != (lat, lon):
+                    # A sibling's gore must leave along this road, not
+                    # across it: a ramp's first edge runs within a few
+                    # degrees of its mainline.
+                    norms = math.hypot(leg_dx, leg_dy) * math.hypot(ramp_dx, ramp_dy)
+                    if norms <= 0 or abs(along) < 0.5 * norms:
+                        continue
+                direction = "forward" if along >= 0 else "backward"
+                dist = min(_gore_distance_m(a, o, g[0], g[1]) for a, o in centers)
+                if direction not in nearest or dist < nearest[direction][0]:
+                    nearest[direction] = (dist, gore)
         measured = False
         terminal = False
         for direction, (_, gore) in sorted(nearest.items()):

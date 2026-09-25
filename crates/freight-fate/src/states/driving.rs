@@ -490,6 +490,9 @@ pub struct DrivingState {
     // The live street signal's (red, green) seconds; None at a ramp end,
     // which keeps its own timing profile. It cycles on the trip's clock.
     pub street_light_split: Option<(f64, f64)>,
+    // Whether the streets play their lights and signs at all
+    // (`street_controls::STREET_CONTROLS_IN_PLAY`, off for 1.9).
+    pub street_controls_on: bool,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,

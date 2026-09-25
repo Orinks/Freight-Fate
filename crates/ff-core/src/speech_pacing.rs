@@ -406,6 +406,11 @@ pub struct EventSpeechPacer {
     /// caller can name it in the transcript. See `MOSTLY_HEARD_FRACTION`.
     mostly_heard: Option<String>,
     receipts: DeliveryReceipts,
+    /// When the voice last went from quiet to speaking: the start of the
+    /// backlog `clear_at` projects the end of. See `should_flush`.
+    busy_since: f64,
+    /// Whether every line in that backlog is ROUTE or CRITICAL.
+    backlog_urgent: bool,
 }
 
 impl Default for EventSpeechPacer {
@@ -488,7 +493,38 @@ impl EventSpeechPacer {
             rescued_until: HashMap::new(),
             mostly_heard: None,
             receipts: DeliveryReceipts::default(),
+            busy_since: 0.0,
+            backlog_urgent: false,
         }
+    }
+
+    /// Extend the projection by `text`, noting when a quiet voice starts
+    /// and whether everything it holds is a ROUTE or CRITICAL line.
+    fn extend_projection(&mut self, now: f64, text: &str, priority: EventPriority) {
+        if now >= self.clear_at {
+            self.busy_since = now;
+            self.backlog_urgent = true;
+        }
+        self.backlog_urgent &= priority >= EventPriority::Route;
+        self.clear_at = now.max(self.clear_at) + Self::duration_s(text);
+    }
+
+    /// Start the projection over with `text`: the purge silenced the voice.
+    fn restart_projection(&mut self, now: f64, text: &str, priority: EventPriority) {
+        self.clear_at = now;
+        self.extend_projection(now, text, priority);
+    }
+
+    /// Whether everything the voice holds is ROUTE or CRITICAL, started
+    /// inside its pre-utterance pause and still true: this same instant of
+    /// road, with nothing in it heard yet and nothing stale.
+    fn backlog_is_this_instant(&self, now: f64) -> bool {
+        self.backlog_urgent
+            && now - self.busy_since < Self::BASE_UTTERANCE_S
+            && self
+                .protected
+                .as_ref()
+                .is_none_or(|held| held.valid.as_ref().is_none_or(|valid| valid()))
     }
 
     /// Swap the clock under a live pacer (the Python tests poked
@@ -791,7 +827,8 @@ impl EventSpeechPacer {
         let cut = self.take_protected(Some(text));
         self.interrupt_deliveries();
         self.purge_next = false;
-        self.clear_at = self.now() + Self::duration_s(text);
+        let now = self.now();
+        self.restart_projection(now, text, priority);
         self.track(text, priority, category, valid);
         cut
     }
@@ -809,8 +846,8 @@ impl EventSpeechPacer {
         category: Option<SpeechCategory>,
         valid: Option<Valid>,
     ) {
-        let start = self.now().max(self.clear_at);
-        self.clear_at = start + Self::duration_s(text);
+        let now = self.now();
+        self.extend_projection(now, text, priority);
         self.track(text, priority, category, valid);
     }
 
@@ -933,13 +970,28 @@ impl EventSpeechPacer {
             // one really is stale, so it is dropped rather than rescued.
             self.purge_next = false;
             self.interrupt_deliveries();
-            self.clear_at = now + Self::duration_s(text);
+            self.restart_projection(now, text, priority);
             self.protected = None;
             self.track(text, priority, None, valid);
             return true;
         }
         let start = now.max(self.clear_at);
         let budget = Self::wait_budget_s(priority);
+        if start - now > budget && self.backlog_is_this_instant(now) {
+            // Everything the voice holds is route or safety, still true, and
+            // began inside its pre-utterance pause: nothing has been heard
+            // and nothing is stale; it is this same instant of road (chatter
+            // in it is still flushed, and a line gone untrue is still
+            // superseded). A flush here purged it only to hand the
+            // newest of it back ahead of this line -- the same order, the
+            // same wait -- and anything older than that newest line was lost
+            // without a word: "Off the ramp and onto city streets" gone
+            // under "Entering ... zone", and every burst logged twice as a
+            // requeue (live drive into Abilene, 2026-09-24). It queues.
+            self.extend_projection(now, text, priority);
+            self.track(text, priority, None, valid);
+            return false;
+        }
         if start - now > budget && self.only_a_live_line_ahead(now, text) {
             // Nothing stale is waiting: the wait is the rest of one ROUTE or
             // CRITICAL line the player is hearing, still true. A flush here
@@ -948,7 +1000,7 @@ impl EventSpeechPacer {
             // You take exit 113" heard twice, agent drives 2026-09-24) or
             // dropped its tail ("Light red." cutting the take line). Waiting
             // it out is shorter than the replay, and it is heard once.
-            self.clear_at = start + Self::duration_s(text);
+            self.extend_projection(now, text, priority);
             self.track(text, priority, None, valid);
             return false;
         }
@@ -1005,11 +1057,11 @@ impl EventSpeechPacer {
                 self.protected = None;
             }
             self.interrupt_deliveries();
-            self.clear_at = now + Self::duration_s(text);
+            self.restart_projection(now, text, priority);
             self.track(text, priority, None, valid);
             return true;
         }
-        self.clear_at = start + Self::duration_s(text);
+        self.extend_projection(now, text, priority);
         self.track(text, priority, None, valid);
         false
     }

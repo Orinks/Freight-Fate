@@ -109,7 +109,8 @@ fn test_street_zone_lines_say_the_change_and_the_yard() {
     let trip = trip_on(chain_legs("abilene_tx_us"), false);
     assert_eq!(
         trip.zone_entry_message(&trip.zones[0]),
-        "Entering facility access road zone. Speed limit 30."
+        // A street is not a zone: the line onto the streets named it.
+        "Speed limit 30."
     );
     assert_eq!(
         trip.zone_entry_message(&trip.zones[1]),

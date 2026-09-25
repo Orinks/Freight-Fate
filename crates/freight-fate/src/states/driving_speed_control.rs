@@ -392,8 +392,8 @@ impl DrivingState {
                 )
             } else {
                 format!(
-                    "Automatic speed control resuming. Speed keeper holding {held} through the \
-                     {zone_reason} zone."
+                    "Automatic speed control resuming. {}",
+                    crate::states::driving_events::cruise::keeper_holding_line(&held, &zone_reason)
                 )
             };
             ctx.say_event_with(

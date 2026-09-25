@@ -40,6 +40,14 @@ pub const STREET_CONTROL_START_SKIP_MI: f64 = 0.02;
 /// mile, 53 ft), narrower than a city block.
 pub const STREET_INTERSECTION_SPAN_MI: f64 = 0.03;
 
+/// Whether a facility's or road stop's streets play the lights and signs the
+/// street bake reads. OFF for 1.9 (owner decision, 2026-09-24): the streets
+/// drive as they did before 2026-09-24, with no controls but the ramp
+/// terminal's own, and the lights are finished for 2.0 (branch
+/// `feat/street-lights-2-0`). A drive copies this into
+/// `DrivingState::street_controls_on`, which the 2.0 regression tests set.
+pub const STREET_CONTROLS_IN_PLAY: bool = false;
+
 // -- street signal timing ------------------------------------------------------
 //
 // Sources. The Signal Timing Manual 2nd ed. (NCHRP Report 812, 2015) is the
@@ -173,7 +181,8 @@ impl DrivingState {
     }
 
     fn street_controls_apply(&self) -> bool {
-        self.ramp_mi.is_none()
+        self.street_controls_on
+            && self.ramp_mi.is_none()
             && !self.trip.outbound
             && !self.trip.finished
             && self.trip.has_street_detail()
