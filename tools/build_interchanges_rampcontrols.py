@@ -703,6 +703,8 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
                 f"({100.0 * stats.get('via_disagrees', 0) / judged:.1f}%)."
             )
     meta = ramp_length_meta(data["legs"], stats)
+    # The screen counts are this run's alone; an --only run judges few legs.
+    meta["screen"]["legs_this_run"] = processed
     meta["position_screen"] = {
         "rule": (
             "derived: per leg, the median gap between each labelled exit's at_mi and "
