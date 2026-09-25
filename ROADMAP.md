@@ -212,8 +212,13 @@ into the release gate. Details stay in the linked dated sections, marked
 "(Found along the way)".
 
 Everything found before 2026-09-25 moved to
-[2.0](#found-along-the-way-in-19-moved-to-20) that day; the list is empty
-until the next finding.
+[2.0](#found-along-the-way-in-19-moved-to-20) that day.
+
+- [x] Player builds carried the agent server: `freightfate --agent-server
+      --online` copied the driver's identity into a session with cloud
+      backups on, where `scenario` sets any level, money or credentials. It
+      is the `agent-server` Cargo feature now, and `tools/build_release.py`
+      builds without it (2026-09-25).
 
 ### Release gate record
 

@@ -211,7 +211,11 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   touches the operator's real settings, saves or keyring.
 - Agent-server testing: run `cargo run -p freight-fate --bin freightfate --
   --agent-server` when live gameplay verification is authorized. It provides
-  MCP tools over standard input/output. Use `listen`, `menu`, `press`,
+  MCP tools over standard input/output. It is the `agent-server` Cargo
+  feature, on by default and left out of player builds
+  (`tools/build_release.py` builds with `--no-default-features`), so a
+  packaged build in `target/release` has no agent server until the next
+  plain `cargo build`. Use `listen`, `menu`, `press`,
   `select`, `pedal`, `hold`, `release`, and `wait_for` to play one sandboxed
   game through the normal controls. `scenario` puts the sandbox career in
   any situation first (city, level, business status, cash, credentials,

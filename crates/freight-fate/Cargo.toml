@@ -24,6 +24,15 @@ path = "src/main.rs"
 name = "agent_server"
 path = "tests/agent_server.rs"
 test = false
+required-features = ["agent-server"]
+
+[features]
+default = ["agent-server"]
+# `--agent-server`: the MCP server that lets an agent play, including an
+# `--online` mode that carries the real driver identity with cloud backups
+# on. Dev builds have it; player builds leave it out, because
+# tools/build_release.py builds with --no-default-features.
+agent-server = []
 
 [lints]
 workspace = true

@@ -488,6 +488,8 @@ def test_cargo_command_honours_the_target_dir(tmp_path):
         "--release",
         "-p",
         "freight-fate",
+        # A player build carries no agent server.
+        "--no-default-features",
     ]
     target = tmp_path / "t53"
     assert build_release.cargo_build_command(target)[-2:] == ["--target-dir", str(target)]
