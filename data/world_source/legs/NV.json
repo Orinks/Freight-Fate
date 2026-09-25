@@ -5626,6 +5626,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5636,6 +5637,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5654,7 +5656,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -5713,8 +5716,9 @@
                   "cue": "Start on I 84 Business;US 26.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -5723,8 +5727,9 @@
                   "cue": "Continue onto I 84 Business.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -5733,8 +5738,9 @@
                   "cue": "Turn right onto South 750 East.",
                   "speed_mph": 25.0,
                   "turn_deg": 90.8,
-                  "limit_mph": 35.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -5743,7 +5749,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -5814,8 +5821,9 @@
                   "cue": "Start on Idaho Medal of Honor Highway (I 84 Business;US 20).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 35.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -5834,7 +5842,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 1
               }
             }
           ],
@@ -5937,7 +5946,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -6002,6 +6012,7 @@
                   "turn_deg": 88.2,
                   "limit_mph": 35.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -6025,7 +6036,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 27
+                "street_edges": 27,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.65,
@@ -15386,7 +15398,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.24,
@@ -16337,7 +16350,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.34,
@@ -16571,8 +16585,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -16591,7 +16606,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -24665,7 +24681,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 31
+                "street_edges": 31,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.55,
@@ -24729,8 +24746,9 @@
                   "cue": "Turn left onto Commerce Center Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 95.6,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -24739,7 +24757,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 11
+                "street_edges": 11,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -32998,8 +33017,9 @@
                   "cue": "Turn left onto Cobre Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 86.6,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -33008,7 +33028,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 17
+                "street_edges": 17,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -33074,7 +33095,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,
@@ -35287,7 +35309,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 12
+                "street_edges": 12,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,

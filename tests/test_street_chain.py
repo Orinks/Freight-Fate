@@ -15,6 +15,14 @@ if str(TOOLS) not in sys.path:
 
 import street_chain  # noqa: E402
 
+
+@pytest.fixture(autouse=True)
+def _in_town(monkeypatch):
+    """The fixtures stand in town unless a test says otherwise; the real
+    Census boundaries are a local download the suite does not need."""
+    monkeypatch.setattr(street_chain, "TOWN_TEST", lambda kind, lat, lon: True)
+
+
 FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
 <osm version="0.6" generator="fixture">
   <node id="100" lat="41.0000" lon="-87.0100" />
@@ -440,3 +448,81 @@ def test_a_stop_off_an_exit_gets_the_streets_from_its_ramp(tmp_path, monkeypatch
     found = stops.route_stops(tmp_path, work, None)[(0, 0)]
     assert found["approach_chains"] == []
     assert found["approach_chains_failed"][0]["route_failure"] == stops.ON_MAINLINE
+
+
+def _one_street(state, town, major=frozenset()):
+    segments = [
+        {
+            "road": "IA 175",
+            "miles": 0.3,
+            "speed_mph": 25.0,
+            "_first_edge": 0,
+            "_end_edge": 2,
+            "_raw_miles": 0.3,
+            "_read_miles": 0.0,
+        }
+    ]
+    street_chain.TOWN_TEST = lambda kind, lat, lon: town
+    street_chain.annotate(
+        segments,
+        [0, 1, 2],
+        [(42.31, -93.57)] * 3,
+        [0.15, 0.15],
+        ["street"] * 2,
+        set(),
+        {},
+        {},
+        state,
+        major,
+    )
+    return segments[0]
+
+
+def test_outside_town_the_rural_statute_governs_not_the_district_one():
+    """IA 175 beside the Love's off I-35: untagged, outside any Census urban
+    area. It read 20 mph -- Iowa's business-district figure -- which no sign
+    and no statute puts on that road; Iowa Code 321.285(3) says 55."""
+    street = _one_street("Iowa", town=False)
+    assert (street["limit_mph"], street["limit_source"], street["limit_basis"]) == (
+        55.0,
+        "statutory",
+        "rural",
+    )
+    in_town = _one_street("Iowa", town=True)
+    assert (in_town["limit_mph"], in_town["limit_basis"]) == (20.0, "town")
+
+
+def test_a_rural_numbered_highway_and_a_county_road_differ_where_the_code_says():
+    highway = _one_street("Kansas", town=False, major=frozenset({(0, 1), (1, 2)}))
+    county = _one_street("Kansas", town=False)
+    assert (highway["limit_mph"], county["limit_mph"]) == (65.0, 55.0)
+
+
+def test_a_state_without_a_rural_default_takes_the_labelled_median():
+    street = _one_street("Nevada", town=False)
+    if street["limit_source"] == "assumed":
+        assert street["limit_mph"] == street_chain.assumed_rural_mph()
+
+
+def test_the_real_boundary_puts_the_iowa_love_s_outside_town():
+    import census_boundaries
+
+    if not census_boundaries.available():
+        pytest.skip("Census boundaries are a local download")
+    # Iowa keys on a density district: the Census urban area, not the city
+    # limits the interchange was annexed into.
+    assert street_chain.town_basis("Iowa") == "urban_area"
+    assert not census_boundaries.in_town("urban_area", 42.3105, -93.5731)
+    assert census_boundaries.in_town("urban_area", 41.5868, -93.6250)  # Des Moines
+
+
+def test_every_state_has_a_cited_rural_row_and_the_table_is_current():
+    import json
+
+    import statutory_limits
+    import statutory_rural
+
+    assert statutory_rural.validate(statutory_rural.RURAL_LIMITS) == []
+    assert set(statutory_rural.RURAL_LIMITS) == set(statutory_limits.STATUTORY_LIMITS)
+    shipped = json.loads(statutory_limits.OUT_PATH.read_text(encoding="utf-8"))["limits"]
+    assert shipped == statutory_limits._with_rural(statutory_limits.STATUTORY_LIMITS)

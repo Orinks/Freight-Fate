@@ -6671,7 +6671,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 3
+                "street_edges": 3,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.07,
@@ -6737,6 +6738,7 @@
                   "turn_deg": 113.6,
                   "limit_mph": 25.0,
                   "limit_source": "assumed",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -6770,7 +6772,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 24
+                "street_edges": 24,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.58,
@@ -7541,8 +7544,9 @@
                   "cue": "Start on Lenwood Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7551,8 +7555,9 @@
                   "cue": "Turn right onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 45.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7561,8 +7566,9 @@
                   "cue": "Turn right onto Commerce Parkway.",
                   "speed_mph": 25.0,
                   "turn_deg": 100.1,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -7581,7 +7587,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.21,
@@ -8431,8 +8438,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 47.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8451,7 +8459,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 28
+                "street_edges": 28,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.36,
@@ -8509,8 +8518,9 @@
                   "cue": "Start on Quartzsite Boulevard.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.16,
@@ -8534,7 +8544,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -8588,8 +8599,9 @@
                   "cue": "Start on North 411th Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -8608,7 +8620,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.08,
@@ -9841,6 +9854,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -9859,7 +9873,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -12422,8 +12437,9 @@
                   "cue": "Start on Bowman Road (CR A5).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12432,8 +12448,9 @@
                   "cue": "Turn left onto Main Street (CR A17).",
                   "speed_mph": 25.0,
                   "turn_deg": 58.8,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -12452,7 +12469,8 @@
                 "controlled": 0,
                 "ambiguous": 1,
                 "conflicts": 0,
-                "street_edges": 22
+                "street_edges": 22,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.31,
@@ -27149,8 +27167,9 @@
                   "cue": "Turn left onto Vista Del Norte.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -27159,8 +27178,9 @@
                   "cue": "Continue onto Vista del Norte.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -27179,7 +27199,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.18,
@@ -37912,8 +37933,9 @@
                   "cue": "Start on 20th Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -37922,8 +37944,9 @@
                   "cue": "Turn left onto North Indian Canyon Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 101.9,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -37947,7 +37970,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.37,
@@ -38043,7 +38067,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 28
+                "street_edges": 28,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.65,
@@ -38171,6 +38196,7 @@
                   "turn_deg": 90.3,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -38186,6 +38212,7 @@
                   "turn_deg": 90.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -38219,7 +38246,8 @@
                 "controlled": 4,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 34
+                "street_edges": 34,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.74,
@@ -38255,6 +38283,7 @@
                   "turn_deg": 92.1,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -38265,6 +38294,7 @@
                   "turn_deg": 67.9,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -38275,6 +38305,7 @@
                   "turn_deg": 78.9,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -38312,7 +38343,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 28
+                "street_edges": 28,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.73,
@@ -46067,8 +46099,9 @@
                   "cue": "Start on South Lassen Avenue (CA 269).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -46087,7 +46120,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 5
+                "street_edges": 5,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.22,
@@ -46151,8 +46185,9 @@
                   "cue": "Turn left onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -46161,8 +46196,9 @@
                   "cue": "Turn left onto Plaza Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 68.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -46181,7 +46217,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.32,
@@ -49441,7 +49478,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -64786,8 +64824,9 @@
                   "cue": "Start on Castle Creek Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -64806,7 +64845,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 4
+                "street_edges": 4,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.1,
@@ -68839,8 +68879,9 @@
                   "cue": "Start on Main Street (US 99 Hist).",
                   "speed_mph": 45.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -68849,8 +68890,9 @@
                   "cue": "Turn right onto Fern Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 104.8,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -68859,7 +68901,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 29
+                "street_edges": 29,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -68908,8 +68951,9 @@
                   "cue": "Start on 20th Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -68918,8 +68962,9 @@
                   "cue": "Turn left onto North Indian Canyon Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 101.9,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -68943,7 +68988,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.37,
@@ -69036,7 +69082,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 28
+                "street_edges": 28,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.65,
@@ -76706,8 +76753,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -76726,7 +76774,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -85014,6 +85063,7 @@
                   "turn_deg": 55.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -85024,6 +85074,7 @@
                   "turn_deg": 48.1,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -85034,6 +85085,7 @@
                   "turn_deg": 113.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -85049,6 +85101,7 @@
                   "turn_deg": 96.2,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -85062,8 +85115,9 @@
                   "cue": "Turn right onto Three Lakes Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 59.8,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85072,8 +85126,9 @@
                   "cue": "Turn left onto Seven Mile Lane Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 36.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85082,8 +85137,9 @@
                   "cue": "Turn right onto Highway 34 Southeast (OR 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 91.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85102,7 +85158,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 159
+                "street_edges": 159,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 7.34,
@@ -85143,6 +85200,7 @@
                   "turn_deg": 104.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -85158,6 +85216,7 @@
                   "turn_deg": 113.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -85173,6 +85232,7 @@
                   "turn_deg": 96.2,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -85186,8 +85246,9 @@
                   "cue": "Turn right onto Three Lakes Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 59.8,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85196,8 +85257,9 @@
                   "cue": "Turn left onto Seven Mile Lane Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 36.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85206,8 +85268,9 @@
                   "cue": "Turn right onto Highway 34 Southeast (OR 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 91.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85226,7 +85289,8 @@
                 "controlled": 4,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 166
+                "street_edges": 166,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 7.16,
@@ -85313,7 +85377,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.48,
@@ -85376,8 +85441,9 @@
                   "cue": "Start on Brooklake Road Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -85396,7 +85462,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.18,
               "driveway": {
@@ -87584,8 +87651,9 @@
                   "cue": "Start on Road 8.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -87614,7 +87682,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.4,
@@ -87678,8 +87747,9 @@
                   "cue": "Turn right onto Margurite Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 81.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -87698,7 +87768,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 20
+                "street_edges": 20,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.62,
@@ -87750,6 +87821,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -87760,6 +87832,7 @@
                   "turn_deg": 91.4,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -87783,7 +87856,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.11,
@@ -98730,8 +98804,9 @@
                   "cue": "Turn left onto a service road.",
                   "speed_mph": 15.0,
                   "turn_deg": 54.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -98740,8 +98815,9 @@
                   "cue": "Turn left onto Plaza Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 68.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -98760,7 +98836,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 20
+                "street_edges": 20,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.62,
@@ -102888,8 +102965,9 @@
                   "cue": "Start on Manzanita Parkway (BIA 12).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -102898,8 +102976,9 @@
                   "cue": "Continue onto Old Highway 80.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -102918,7 +102997,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.52,
@@ -107049,8 +107129,9 @@
                   "cue": "Start on Manzanita Parkway (BIA 12).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -107059,8 +107140,9 @@
                   "cue": "Continue onto Old Highway 80.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -107079,7 +107161,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 9
+                "street_edges": 9,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.52,
@@ -109614,6 +109697,7 @@
                   "turn_deg": 110.6,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -109622,8 +109706,9 @@
                   "cue": "Turn right onto Pala Road (CA 76).",
                   "speed_mph": 25.0,
                   "turn_deg": 70.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -109647,7 +109732,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 15
+                "street_edges": 15,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.51,
@@ -118957,8 +119043,9 @@
                   "cue": "Start on Road 8.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -118987,7 +119074,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 6
+                "street_edges": 6,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.19,
@@ -119051,8 +119139,9 @@
                   "cue": "Turn right onto Margurite Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 81.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119071,7 +119160,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 20
+                "street_edges": 20,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.62,
@@ -119374,6 +119464,7 @@
                   "turn_deg": 55.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -119384,6 +119475,7 @@
                   "turn_deg": 48.1,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -119394,6 +119486,7 @@
                   "turn_deg": 113.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -119409,6 +119502,7 @@
                   "turn_deg": 96.2,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -119422,8 +119516,9 @@
                   "cue": "Turn right onto Three Lakes Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 59.8,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119432,8 +119527,9 @@
                   "cue": "Turn left onto Seven Mile Lane Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 36.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119442,8 +119538,9 @@
                   "cue": "Turn right onto Highway 34 Southeast (OR 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 91.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119462,7 +119559,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 159
+                "street_edges": 159,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 7.34,
@@ -119503,6 +119601,7 @@
                   "turn_deg": 104.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -119518,6 +119617,7 @@
                   "turn_deg": 113.9,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -119533,6 +119633,7 @@
                   "turn_deg": 96.2,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -119546,8 +119647,9 @@
                   "cue": "Turn right onto Three Lakes Road Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 59.8,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119556,8 +119658,9 @@
                   "cue": "Turn left onto Seven Mile Lane Southeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 36.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119566,8 +119669,9 @@
                   "cue": "Turn right onto Highway 34 Southeast (OR 34).",
                   "speed_mph": 25.0,
                   "turn_deg": 91.6,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119586,7 +119690,8 @@
                 "controlled": 4,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 166
+                "street_edges": 166,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 7.16,
@@ -119673,7 +119778,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.48,
@@ -119736,8 +119842,9 @@
                   "cue": "Start on Brooklake Road Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119756,7 +119863,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "yard_miles": 0.18,
               "driveway": {
@@ -119826,8 +119934,9 @@
                   "cue": "Start on Ehlen Road Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -119846,7 +119955,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 14
+                "street_edges": 14,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.15,
@@ -128956,6 +129066,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -128984,7 +129095,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.33,
@@ -129166,8 +129278,9 @@
                   "cue": "Turn left onto Commerce Center Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 101.2,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "assumed",
+                  "limit_basis": "rural",
                   "controls": []
                 }
               ],
@@ -129176,7 +129289,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 13
+                "street_edges": 13,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -129320,7 +129434,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 48
+                "street_edges": 48,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.86,
@@ -138315,6 +138430,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -138363,7 +138479,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.49,
@@ -144397,8 +144514,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -144417,7 +144535,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -144470,8 +144589,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -144490,7 +144610,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -160523,8 +160644,9 @@
                   "cue": "Start on CA 12.",
                   "speed_mph": 55.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -160533,8 +160655,9 @@
                   "cue": "Turn left onto Thornton Road (CR J8).",
                   "speed_mph": 25.0,
                   "turn_deg": 92.1,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -160558,7 +160681,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 20
+                "street_edges": 20,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -168905,6 +169029,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -168915,6 +169040,7 @@
                   "turn_deg": 86.4,
                   "limit_mph": 25.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -168938,7 +169064,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 21
+                "street_edges": 21,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.3,
@@ -169044,8 +169171,9 @@
                   "cue": "Start on South Wheeler Ridge Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -169054,8 +169182,9 @@
                   "cue": "Turn right onto Laval Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 71.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.13,
@@ -169079,7 +169208,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 17
+                "street_edges": 17,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.53,
@@ -169103,8 +169233,9 @@
                   "cue": "Start on Laval Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -169113,8 +169244,9 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 90.3,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -169123,8 +169255,9 @@
                   "cue": "Turn left onto Laval Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.7,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.12,
@@ -169148,7 +169281,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.27,
@@ -171947,8 +172081,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -171967,7 +172102,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -172026,8 +172162,9 @@
                   "cue": "Start on Joshua Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 25.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -172046,7 +172183,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 7
+                "street_edges": 7,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.05,
@@ -182049,6 +182187,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.12,
@@ -182064,6 +182203,7 @@
                   "turn_deg": 92.7,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -182079,6 +182219,7 @@
                   "turn_deg": 90.1,
                   "limit_mph": 20.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -182102,7 +182243,8 @@
                 "controlled": 3,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 62
+                "street_edges": 62,
+                "crosses_town_line": 1
               },
               "driveway": {
                 "at_mi": 0.74,

@@ -107,24 +107,48 @@ fn every_statutory_limit_is_the_games_own_statutory_answer() {
         "facility_approaches.json",
     ))
     .unwrap();
-    let mut checked = 0;
+    // The rural half is read straight off the table the bake used.
+    let table: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(ff_core::data::data_resources::data_path(
+            "street_limits.json",
+        ))
+        .unwrap(),
+    )
+    .unwrap();
+    let rural = |state: &str| -> Vec<f64> {
+        let row = &table["limits"][state]["rural"];
+        ["highway_mph", "local_mph"]
+            .iter()
+            .filter_map(|key| row[*key].as_f64())
+            .collect()
+    };
+    let (mut town, mut outside) = (0, 0);
     for approach in approaches.values() {
         let chains = std::iter::once(&approach.segments)
             .chain(approach.exit_chains.iter().map(|chain| &chain.segments));
         for segment in chains.flatten() {
-            if let Some(limit) = segment.limit.as_ref().filter(|l| l.source == "statutory") {
-                assert_eq!(
-                    Some(limit.mph),
-                    limits.statutory_mph(&approach.state),
-                    "{} {}",
-                    approach.facility_id,
-                    segment.road
-                );
-                checked += 1;
+            let Some(limit) = segment.limit.as_ref().filter(|l| l.source == "statutory") else {
+                continue;
+            };
+            let what = format!("{} {} {}", approach.facility_id, segment.road, limit.basis);
+            match limit.basis.as_str() {
+                "town" => {
+                    assert_eq!(
+                        Some(limit.mph),
+                        limits.statutory_mph(&approach.state),
+                        "{what}"
+                    );
+                    town += 1;
+                }
+                "rural" => {
+                    assert!(rural(&approach.state).contains(&limit.mph), "{what}");
+                    outside += 1;
+                }
+                other => panic!("{what}: basis {other:?}"),
             }
         }
     }
-    assert!(checked > 1000, "{checked}");
+    assert!(town > 1000 && outside > 100, "{town} {outside}");
 }
 
 #[test]
@@ -141,14 +165,23 @@ fn a_limit_without_its_kind_is_refused_at_load() {
     };
     let street = serde_json::json!({
         "road": "Main Street", "cue": "Start on Main Street.", "miles": 0.5,
-        "limit_mph": 30.0, "limit_source": "statutory",
+        "limit_mph": 30.0, "limit_source": "statutory", "limit_basis": "town",
         "controls": [{"at_mi": 0.2, "kind": "signal"}],
     });
     std::fs::write(&path, file(street.clone())).unwrap();
     let loaded = load_facility_approaches(&path).unwrap();
     let segment = &loaded["x"].segments[0];
-    assert_eq!(segment.limit.as_ref().unwrap().source, "statutory");
+    let limit = segment.limit.as_ref().unwrap();
+    assert_eq!(
+        (limit.source.as_str(), limit.basis.as_str()),
+        ("statutory", "town")
+    );
     assert_eq!(segment.controls[0].kind, "signal");
+    // Which statute a statutory figure follows is part of the figure.
+    let mut no_basis = street.clone();
+    no_basis["limit_basis"] = "".into();
+    std::fs::write(&path, file(no_basis)).unwrap();
+    assert!(load_facility_approaches(&path).is_err());
     let mut unlabelled = street.clone();
     unlabelled["limit_source"] = "".into();
     std::fs::write(&path, file(unlabelled)).unwrap();
@@ -250,4 +283,29 @@ fn stop_chains_without_a_source_are_refused() {
     assert!(parse_stop(&stop(false), 2.0, "A", "B").is_err());
     let parsed = parse_stop(&stop(true), 2.0, "A", "B").unwrap();
     assert_eq!(parsed.approach_chains[0].terminal_node, 7);
+}
+
+#[test]
+fn ia_175_beside_the_love_s_is_a_rural_road_at_55() {
+    // I-35 exit 144 northbound, Love's Travel Stop: the ramp ends on 330th
+    // Street (IA 175), untagged in OSM and outside any Census urban area. It
+    // read 20 mph -- Iowa's business-district figure, which no statute puts
+    // on a rural state highway; Iowa Code 321.285(3) makes it 55.
+    let w = world();
+    let trip = trip_on(first_route_option(w, "ames_ia_us", "mason_city_ia_us"));
+    let stop = trip
+        .place_stops()
+        .into_iter()
+        .find(|stop| stop.name == "Love's Travel Stop" && stop.interchange_mi.is_some())
+        .expect("the Love's is on the route");
+    let route = trip.stop_approach_route(&stop).expect("its chain");
+    assert_eq!(route.legs[0].local_cue, "Start on 330th Street (IA 175).");
+    let limit = trip_on(route)
+        .street_limit_at(0.01)
+        .cloned()
+        .expect("a limit");
+    assert_eq!(
+        (limit.mph, limit.source.as_str(), limit.basis.as_str()),
+        (55.0, "statutory", "rural")
+    );
 }

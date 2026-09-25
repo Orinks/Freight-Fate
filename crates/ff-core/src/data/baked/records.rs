@@ -352,7 +352,7 @@ mirror!(BakedFacilityEndpoint => FacilityEndpoint {
     dock_hint: bool, mapping: String,
 });
 
-mirror!(BakedStreetLimit => StreetLimit { mph: f64, source: String });
+mirror!(BakedStreetLimit => StreetLimit { mph: f64, source: String, basis: String });
 
 mirror!(BakedStreetControl => StreetControl { at_mi: f64, kind: String });
 

@@ -27,6 +27,7 @@ fn limit(mph: f64, source: &str) -> Option<StreetLimit> {
     Some(StreetLimit {
         mph,
         source: source.to_string(),
+        ..Default::default()
     })
 }
 

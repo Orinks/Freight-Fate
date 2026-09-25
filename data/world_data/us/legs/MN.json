@@ -5067,6 +5067,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5077,6 +5078,7 @@
                   "turn_deg": 89.4,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5087,6 +5089,7 @@
                   "turn_deg": 42.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5097,6 +5100,7 @@
                   "turn_deg": 46.5,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5115,7 +5119,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 8
+                "street_edges": 8,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.26,
@@ -5141,6 +5146,7 @@
                   "turn_deg": 0.0,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5151,6 +5157,7 @@
                   "turn_deg": 115.2,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5161,6 +5168,7 @@
                   "turn_deg": 89.6,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5171,6 +5179,7 @@
                   "turn_deg": 80.7,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": []
                 },
                 {
@@ -5181,6 +5190,7 @@
                   "turn_deg": 86.1,
                   "limit_mph": 30.0,
                   "limit_source": "statutory",
+                  "limit_basis": "town",
                   "controls": [
                     {
                       "at_mi": 0.43,
@@ -5204,7 +5214,8 @@
                 "controlled": 1,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 52
+                "street_edges": 52,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 1.0,
@@ -7768,7 +7779,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 10
+                "street_edges": 10,
+                "crosses_town_line": 0
               }
             }
           ],
@@ -7832,8 +7844,9 @@
                   "cue": "Start on Fire Monument Road (MN 48).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.15,
@@ -7847,8 +7860,9 @@
                   "cue": "Turn right onto Morris Avenue (CR 140).",
                   "speed_mph": 25.0,
                   "turn_deg": 90.5,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -7872,7 +7886,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 16
+                "street_edges": 16,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.38,
@@ -7926,8 +7941,9 @@
                   "cue": "Start on Lake Drive Northeast (CR 23).",
                   "speed_mph": 55.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.11,
@@ -7941,8 +7957,9 @@
                   "cue": "Turn right onto Hornsby Street Northeast.",
                   "speed_mph": 25.0,
                   "turn_deg": 88.8,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": [
                     {
                       "at_mi": 0.0,
@@ -7966,7 +7983,8 @@
                 "controlled": 2,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 68
+                "street_edges": 68,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.49,
@@ -19361,8 +19379,9 @@
                   "cue": "Start on 330th Street (IA 175).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 20.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -19381,7 +19400,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 2
+                "street_edges": 2,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.13,
@@ -30111,8 +30131,9 @@
                   "cue": "Start on State Highway 24 (MN 24).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -30121,8 +30142,9 @@
                   "cue": "Turn right onto Nelson Drive.",
                   "speed_mph": 25.0,
                   "turn_deg": 45.4,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -30131,8 +30153,9 @@
                   "cue": "Turn right onto Shorty Street.",
                   "speed_mph": 25.0,
                   "turn_deg": 85.0,
-                  "limit_mph": 30.0,
+                  "limit_mph": 55.0,
                   "limit_source": "statutory",
+                  "limit_basis": "rural",
                   "controls": []
                 },
                 {
@@ -30151,7 +30174,8 @@
                 "controlled": 0,
                 "ambiguous": 0,
                 "conflicts": 0,
-                "street_edges": 19
+                "street_edges": 19,
+                "crosses_town_line": 0
               },
               "driveway": {
                 "at_mi": 0.34,

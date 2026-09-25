@@ -8,10 +8,16 @@
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct StreetLimit {
     pub mph: f64,
-    /// `read` (OSM maxspeed on most of its miles), `statutory` (the state's
-    /// default for an unposted district street), or `assumed` (neither: the
-    /// old 25 named / 15 unnamed, and every stretch past the driveway).
+    /// `read` (OSM maxspeed on most of its miles), `statutory` (a state
+    /// default for an unposted road, which `basis` says), or `assumed`
+    /// (neither: the old 25 named / 15 unnamed in town, the table's median
+    /// rural default outside it, and every stretch past the driveway).
     pub source: String,
+    /// Which statute a filled limit follows: `town` (the in-town district
+    /// default, inside the Census boundary the state's code keys on) or
+    /// `rural` (the default for an unposted road outside town); "" for a
+    /// read limit or a stretch past the driveway.
+    pub basis: String,
 }
 
 /// A READ traffic control on a street. Where OSM is silent there is none.

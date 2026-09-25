@@ -187,7 +187,16 @@ def route_stops(
 
 
 def _clean(segment: dict[str, Any]) -> dict[str, Any]:
-    keys = ("road", "miles", "cue", "speed_mph", "turn_deg", "limit_mph", "limit_source")
+    keys = (
+        "road",
+        "miles",
+        "cue",
+        "speed_mph",
+        "turn_deg",
+        "limit_mph",
+        "limit_source",
+        "limit_basis",
+    )
     out = {key: segment[key] for key in keys if key in segment}
     out["miles"] = round(float(out["miles"]), 2)
     out["turn_deg"] = round(float(out.get("turn_deg", 0.0)), 1)

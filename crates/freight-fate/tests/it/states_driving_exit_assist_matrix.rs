@@ -227,6 +227,7 @@ fn bench(d: &mut DrivingState, kind: Kind) {
                     limit: Some(StreetLimit {
                         mph: 45.0,
                         source: "read".to_string(),
+                        ..Default::default()
                     }),
                     ..Default::default()
                 },
@@ -239,6 +240,7 @@ fn bench(d: &mut DrivingState, kind: Kind) {
                     limit: Some(StreetLimit {
                         mph: 15.0,
                         source: "assumed".to_string(),
+                        ..Default::default()
                     }),
                     ..Default::default()
                 },

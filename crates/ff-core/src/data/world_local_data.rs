@@ -324,6 +324,8 @@ struct RawSegment {
     #[serde(default)]
     limit_source: String,
     #[serde(default)]
+    limit_basis: String,
+    #[serde(default)]
     controls: Vec<RawControl>,
 }
 
@@ -359,6 +361,7 @@ fn default_speed() -> f64 {
 }
 
 const LIMIT_SOURCES: [&str; 3] = ["read", "statutory", "assumed"];
+const LIMIT_BASES: [&str; 3] = ["", "town", "rural"];
 const CONTROL_KINDS: [&str; 4] = ["signal", "all_way_stop", "stop", "give_way"];
 const DRIVEWAY_KINDS: [&str; 2] = ["service_road", "private_road"];
 
@@ -382,10 +385,19 @@ fn facility_segments(
             return Err(bad("segment exposes raw text"));
         }
         let source = s(&raw_segment.limit_source);
+        let basis = s(&raw_segment.limit_basis);
+        // A statutory figure is only true under the statute it came from:
+        // the in-town district default and the rural default differ, so a
+        // statutory limit with no basis is refused.
+        if !LIMIT_BASES.contains(&basis.as_str()) || (source == "statutory" && basis.is_empty()) {
+            return Err(bad(
+                "has a statutory street limit without its town or rural basis",
+            ));
+        }
         let limit = match raw_segment.limit_mph {
             None if source.is_empty() => None,
             Some(mph) if LIMIT_SOURCES.contains(&source.as_str()) && mph > 0.0 && mph <= 90.0 => {
-                Some(StreetLimit { mph, source })
+                Some(StreetLimit { mph, source, basis })
             }
             _ => return Err(bad("has a street limit without a known kind")),
         };

@@ -66,10 +66,17 @@ def street_sources(max_spoken_segments: int) -> dict[str, str]:
     return {
         "limit": (
             "Per segment: read = OpenStreetMap maxspeed on most of the street's "
-            "miles; statutory = no tag, the state's default for an unposted "
-            "district street (data/street_limits.json, cited per state); assumed "
-            "= neither (25 named, 15 unnamed; also every stretch past the "
-            "driveway, where no district statute reaches)."
+            "miles. Otherwise limit_basis says which statute governs, judged at "
+            "each edge's midpoint by the boundary the state's code keys on "
+            "(tools/census_boundaries.py: Census 2020 Urban Areas as the stand-in "
+            "for a frontage-density district, incorporated places for corporate "
+            "limits): town -> the state's in-town district default (statutory), "
+            "or 25 named / 15 unnamed where the code sets none (assumed); rural "
+            "-> the state's default for an unposted road outside town, numbered "
+            "highway or local road by OSM class (statutory), or the table's "
+            "median rural figure where the code sets none (assumed). Past the "
+            "driveway no statute reaches: assumed 25/15, no basis. Citations in "
+            "data/street_limits.json."
         ),
         "controls": CONTROLS_SOURCE,
         "driveway": DRIVEWAY_SOURCE,
@@ -121,6 +128,95 @@ def statutory_mph(state: str, limits: dict[str, Any] | None = None) -> float | N
     return None
 
 
+# Where a statutory or assumed fill applies, which of the state's two
+# statutory figures governs the street: the in-town district default, or
+# the default for an unposted road outside town (``limit_basis``).
+BASIS_TOWN = "town"
+BASIS_RURAL = "rural"
+# OSM classes standing in for a state or US numbered highway, where a code
+# sets a different rural default for those than for county roads. DERIVED:
+# OSM classes by function, the codes by who maintains the road.
+MAJOR_HIGHWAYS = frozenset(
+    ("trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link")
+)
+
+
+def rural_mph(state: str, highway: bool, limits: dict[str, Any] | None = None) -> tuple[float, str]:
+    """``(mph, kind)`` for an unposted road outside town: the state's rural
+    statutory default (``statutory``) for a numbered highway or a local road,
+    or, where the code has none or it is unconfirmed, the table's median
+    rural default (``assumed``; see ``assumed_rural_mph``)."""
+    rows = limits if limits is not None else _street_limits()
+    rural = (rows.get(state.strip()) or {}).get("rural") or {}
+    value = rural.get("highway_mph" if highway else "local_mph")
+    if rural.get("verified") and not rural.get("signs_required") and value is not None:
+        return float(value), LIMIT_STATUTORY
+    return assumed_rural_mph(rows), LIMIT_ASSUMED
+
+
+def assumed_rural_mph(limits: dict[str, Any] | None = None) -> float:
+    """The fill for a state whose code sets no rural default: the median of
+    every confirmed state's rural local-road figure. DERIVED from the table,
+    so it moves if the table does, and it is always labelled ``assumed``."""
+    rows = limits if limits is not None else _street_limits()
+    values = sorted(
+        float(row["rural"]["local_mph"])
+        for row in rows.values()
+        if (row.get("rural") or {}).get("verified") and row["rural"].get("local_mph") is not None
+    )
+    return values[len(values) // 2] if values else 55.0
+
+
+def town_basis(state: str, limits: dict[str, Any] | None = None) -> str:
+    """Which boundary the state's in-town default keys on: ``municipal``
+    (corporate limits) or ``urban_area`` (a density-defined district)."""
+    rows = limits if limits is not None else _street_limits()
+    return (rows.get(state.strip()) or {}).get("town_basis") or "urban_area"
+
+
+def _street_setting(
+    state: str,
+    coords: list[tuple[float, float]],
+    edge_miles: list[float],
+    edges: range,
+    major_edges: Any,
+    path_nodes: list[int],
+    limits: dict[str, Any],
+) -> tuple[float, float, float]:
+    """(miles in town, miles outside, miles on a numbered highway) over a
+    street's edges, each judged at its midpoint."""
+    in_town = TOWN_TEST or _census_in_town
+    kind = town_basis(state, limits)
+    town = rural = major = 0.0
+    for e in edges:
+        lat = round((coords[e][0] + coords[e + 1][0]) / 2, 4)
+        lon = round((coords[e][1] + coords[e + 1][1]) / 2, 4)
+        if in_town(kind, lat, lon):
+            town += edge_miles[e]
+        else:
+            rural += edge_miles[e]
+            if (path_nodes[e], path_nodes[e + 1]) in major_edges:
+                major += edge_miles[e]
+    return town, rural, major
+
+
+# Tests replace the town test with a function of (kind, lat, lon); the bake
+# always uses the Census boundaries and refuses to run without them.
+TOWN_TEST: Any = None
+
+
+def _census_in_town(kind: str, lat: float, lon: float) -> bool:
+    import census_boundaries
+
+    if not census_boundaries.available():
+        raise SystemExit(
+            "The Census boundaries are missing; see tools/census_boundaries.py for the "
+            "two files and where they go. A street limit cannot be judged in town or "
+            "out without them."
+        )
+    return census_boundaries.in_town(kind, lat, lon)
+
+
 _LIMITS_CACHE: dict[str, Any] | None = None
 
 
@@ -141,6 +237,7 @@ def annotate(
     controls: dict[int, tuple[str, str]],
     street_deg: dict[int, int],
     state: str,
+    major_edges: set[tuple[int, int]] | frozenset[tuple[int, int]] = frozenset(),
 ) -> tuple[dict[str, Any] | None, dict[str, int]]:
     """Fill ``limit_mph``/``limit_source``/``controls`` on each segment, in
     place, and return ``(driveway, counts)``.
@@ -203,7 +300,8 @@ def annotate(
     counts["controlled"] = len(chosen)
 
     limits = _street_limits()
-    fill = statutory_mph(state, limits)
+    town_fill = statutory_mph(state, limits)
+    counts["crosses_town_line"] = 0
     offset = 0.0
     driveway: dict[str, Any] | None = None
     for i, seg in enumerate(segments):
@@ -212,10 +310,23 @@ def annotate(
         past_driveway = driveway_edge is not None and first >= driveway_edge
         if read > 0 and read * 2 >= raw:
             seg["limit_mph"], seg["limit_source"] = seg["speed_mph"], LIMIT_READ
-        elif fill is not None and not past_driveway:
-            seg["limit_mph"], seg["limit_source"] = fill, LIMIT_STATUTORY
-        else:
+        elif past_driveway:
             seg["limit_mph"], seg["limit_source"] = seg["speed_mph"], LIMIT_ASSUMED
+        else:
+            town, rural, major = _street_setting(
+                state, coords, edge_miles, range(first, end), major_edges, path_nodes, limits
+            )
+            counts["crosses_town_line"] += 1 if town and rural else 0
+            if town >= rural:
+                seg["limit_basis"] = BASIS_TOWN
+                if town_fill is not None:
+                    seg["limit_mph"], seg["limit_source"] = town_fill, LIMIT_STATUTORY
+                else:
+                    seg["limit_mph"], seg["limit_source"] = seg["speed_mph"], LIMIT_ASSUMED
+            else:
+                seg["limit_basis"] = BASIS_RURAL
+                mph, source = rural_mph(state, major * 2 >= rural, limits)
+                seg["limit_mph"], seg["limit_source"] = mph, source
         entries = []
         for k in junctions:
             if k in chosen and (first < k < end or (i and k == first)):
@@ -269,7 +380,12 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
             # street names and miles (chain_match.py), not re-routed.
             "chains_matched_to_osm": 0,
             "limit_miles": {LIMIT_READ: 0.0, LIMIT_STATUTORY: 0.0, LIMIT_ASSUMED: 0.0},
+            # Filled limits by which statute governed (limit_basis).
+            "fill_miles_by_basis": {},
+            # Miles at each posted number, read or filled.
+            "limit_mph_miles": {},
             "screen_read_limit_not_multiple_of_5": 0,
+            "segments_crossing_town_line": 0,
             "turns": 0,
             "turns_with_control": 0,
             "controls_by_kind": {kind: 0 for kind in CONTROL_PRECEDENCE},
@@ -295,6 +411,14 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         for i, seg in enumerate(segments):
             source = seg.get("limit_source", "")
             out["limit_miles"][source] = out["limit_miles"].get(source, 0.0) + seg["miles"]
+            if source != LIMIT_READ:
+                key = f"{source}_{seg.get('limit_basis') or 'past_driveway'}"
+                out["fill_miles_by_basis"][key] = (
+                    out["fill_miles_by_basis"].get(key, 0.0) + seg["miles"]
+                )
+            out["limit_mph_miles"][str(seg.get("limit_mph"))] = (
+                out["limit_mph_miles"].get(str(seg.get("limit_mph")), 0.0) + seg["miles"]
+            )
             if source == LIMIT_READ and float(seg["limit_mph"]) % 5:
                 # MUTCD 11th ed. 2B.21 para 13: limits are posted in multiples
                 # of 5 mph. Counted and kept: a screen never edits the bake.
@@ -310,6 +434,7 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         out["intersections_with_control"] += counts.get("controlled", 0)
         out["screen_ambiguous_stop_on_intersection_node"] += counts.get("ambiguous", 0)
         out["screen_signal_and_sign_at_one_intersection"] += counts.get("conflicts", 0)
+        out["segments_crossing_town_line"] += counts.get("crosses_town_line", 0)
         out["driveways"] += 1 if chain.get("driveway") else 0
 
     default, exits = block(), block()
@@ -322,7 +447,8 @@ def street_coverage(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
         for miss in record.get("exit_chains_failed") or []:
             failed[miss["route_failure"] or "unknown"] += 1
     for out in (default, exits):
-        out["limit_miles"] = {k: round(v, 2) for k, v in out["limit_miles"].items()}
+        for key in ("limit_miles", "fill_miles_by_basis", "limit_mph_miles"):
+            out[key] = {k: round(v, 2) for k, v in sorted(out[key].items())}
         miles = sum(out["limit_miles"].values())
         out["limit_read_ratio"] = round(out["limit_miles"][LIMIT_READ] / miles, 4) if miles else 0.0
     exits["terminals_failed"] = dict(sorted(failed.items()))
