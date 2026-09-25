@@ -481,6 +481,8 @@ impl DrivingState {
             street_controls_played: HashSet::new(),
             street_controls_trip: 0,
             street_light_split: None,
+            street_controls_on:
+                crate::states::driving_events::street_controls::STREET_CONTROLS_IN_PLAY,
             critical_curve: None,
             critical_call_age_s: 0.0,
             critical_respeak_at: None,
@@ -494,6 +496,7 @@ impl DrivingState {
             surface_chain: false,
             stop_chain: None,
             stop_chain_end_said: false,
+            stop_streets_on: crate::states::driving_events::chains::STOP_STREETS_IN_PLAY,
             highway_trip: None,
             departure_chain: false,
             departure_checked: false,

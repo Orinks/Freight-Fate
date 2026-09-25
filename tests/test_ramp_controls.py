@@ -292,56 +292,6 @@ def test_ramp_lengths_bake_per_direction_from_the_nearest_gore():
     assert stats2["length_too_short"] == 1
 
 
-def test_the_other_direction_is_measured_at_its_own_junction():
-    """I-20 exit 307 at Baird: each direction's off-ramp leaves at its own
-    junction node, 1.07 km apart. Searched around the pinned one alone, the
-    westbound ramp was never found, so it had no terminal and no street chain
-    to the Love's (live drive, 2026-09-24). A ramp leaving across the leg
-    near a same-numbered node is some other road's, and is not taken."""
-    m = _topo_tools()
-    locs = {
-        10: (40.049, -80.0),  # forward gore, at the pinned junction
-        11: (40.051, -80.0005),
-        12: (40.053, -80.001),  # crossroad
-        20: (40.059, -80.0),  # backward gore, at the sibling junction 1.1 km on
-        21: (40.057, -80.0005),
-        22: (40.055, -80.001),  # crossroad
-        30: (40.0605, -80.0),  # a crossing road's gore
-        31: (40.0605, -80.0035),
-        32: (40.0605, -80.006),
-    }
-    graph = m.build_ramp_link_graph(
-        [([10, 11, 12], "yes"), ([20, 21, 22], "yes"), ([30, 31, 32], "yes")],
-        motorway_node_ids={10, 20, 30},
-        crossroad_node_ids={12, 22, 32},
-    )
-
-    def topo(gores):
-        return {
-            "graph": graph,
-            "node_locs": locs,
-            "grid": m._GoreGrid([(*locs[g], g) for g in gores]),
-        }
-
-    geom = [(40.0, -80.0, 0.0), (40.05, -80.0, 3.45), (40.1, -80.0, 6.9)]
-
-    def exit_at(refs, gores):
-        leg = {
-            "miles": 6.9,
-            "corridor": {"interchanges": [{"at_mi": 3.45, "exit_ref": "12", "name": "Test"}]},
-        }
-        m.bake_ramp_lengths_for_leg(leg, topo(gores), geom, refs, {})
-        return leg["corridor"]["interchanges"][0]
-
-    alone = exit_at({"12": [locs[10]]}, (10, 20, 30))
-    assert "ramp_terminal_backward" not in alone
-    both = exit_at({"12": [locs[10], locs[20]]}, (10, 20, 30))
-    assert both["ramp_terminal_forward"]["node"] == 12
-    assert both["ramp_terminal_backward"]["node"] == 22
-    crossing = exit_at({"12": [locs[10], locs[30]]}, (10, 30))
-    assert "ramp_terminal_backward" not in crossing
-
-
 def test_a_ramp_that_ends_in_a_merge_has_no_street_terminal():
     m = _topo_tools()
     locs = {1: (40.0, -80.0), 2: (40.002, -80.0), 4: (40.0025, -80.0)}

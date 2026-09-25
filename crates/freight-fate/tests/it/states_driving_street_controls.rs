@@ -3,6 +3,10 @@
 //! the ramp terminal's own machinery, the yard behind the driveway, the chain
 //! that starts where the ramp lands, and the speed keeper between corners too
 //! close to build up for (owner order, 2026-09-24).
+//!
+//! The lights and signs are off in 1.9 (`STREET_CONTROLS_IN_PLAY`) and come
+//! back in 2.0; the drives here switch them on (`street_controls_on`), so
+//! this file is the 2.0 suite for them.
 
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{Leg, Route, StreetControl, StreetLimit};
@@ -96,6 +100,7 @@ fn chain(
     d.reset_turn_state_for_trip();
     d.destination_exit_taken = true;
     d.trip_seed = 7;
+    d.street_controls_on = true;
 }
 
 /// A drive on [`chain`], rolling at `mph` from `at_mi`, with the assists as
@@ -206,14 +211,30 @@ fn test_a_new_street_says_its_limit_and_the_yard_says_the_yard_limit() {
     assert!(heard.contains("Speed limit raised to 40."), "{heard}");
     assert!(heard.contains("Into the yard. Yard limit 15."), "{heard}");
     assert!(!heard.contains("facility gate zone"), "{heard}");
-    // The street change is said as a change, not as a zone entered again.
-    assert_eq!(
-        heard.matches("Entering facility access road zone").count(),
-        heard
-            .matches("Entering facility access road zone. Speed limit 30.")
-            .count(),
+    // The street change is said as a change, and a street is never called
+    // a zone: "facility access road zone" named miles of city streets as one
+    // (live drive into Abilene, 2026-09-24).
+    assert!(!heard.contains("access road zone"), "{heard}");
+    assert!(!heard.contains("Access Road zone"), "{heard}");
+}
+
+#[test]
+fn test_cruise_handing_a_street_to_the_keeper_names_no_zone() {
+    // "Facility Access Road zone. Speed keeper holding 30" called a city
+    // street a zone when adaptive cruise handed it to the keeper.
+    let mut harness = on_the_streets("Street Handoff", Vec::new(), Vec::new(), false, 0.2, 25.0);
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.with_drive(|d, ctx| {
+        d.cruise_mph = Some(30.0);
+        d.speed_control_armed = true;
+        d.update_cruise(ctx, DT, false, false, false);
+    });
+    let heard = harness.transcript_text();
+    assert!(
+        heard.contains("Speed keeper holding 30 miles per hour."),
         "{heard}"
     );
+    assert!(!heard.contains("zone"), "{heard}");
 }
 
 /// A careful driver on their own: holds the street's number, takes each
@@ -472,6 +493,40 @@ fn test_an_intersection_with_no_mapped_control_has_none() {
 }
 
 #[test]
+fn test_a_1_9_drive_plays_no_street_controls() {
+    // Owner decision, 2026-09-24: the streets' lights and signs are off for
+    // 1.9 and the streets drive as they did before them. A drive starts with
+    // them off, and mapped ones then say and stop for nothing.
+    use freight_fate::states::driving_events::street_controls::STREET_CONTROLS_IN_PLAY;
+    assert!(!start_drive("Lights Off").read_drive(|d| d.street_controls_on));
+    let mut harness = on_the_streets(
+        "Lights Off",
+        vec![control(0.3, "signal"), control(0.6, "all_way_stop")],
+        vec![control(0.3, "stop"), control(0.5, "give_way")],
+        true,
+        0.1,
+        30.0,
+    );
+    harness.with_drive(|d, _| d.street_controls_on = STREET_CONTROLS_IN_PLAY);
+    let mut bar_seen = false;
+    run_until(&mut harness, 60 * 60 * 4, |d| {
+        bar_seen |= d.street_bar_mi.is_some();
+        d.trip.finished
+    });
+    assert!(!bar_seen, "a street control went on the bar");
+    let heard = harness.transcript_text();
+    for bad in [
+        "Traffic light",
+        "Stop sign",
+        "Yield sign",
+        "All-way stop",
+        "Stopped at",
+    ] {
+        assert!(!heard.contains(bad), "heard {bad:?}\n{heard}");
+    }
+}
+
+#[test]
 fn test_the_ramp_terminals_own_corner_is_not_played_again() {
     // A chain starts at the node its ramp ends on; a control baked there is
     // the terminal the ramp already played.
@@ -540,6 +595,7 @@ fn reds_on_the_arterial(seed: i64, mph: f64) -> usize {
         d.reset_turn_state_for_trip();
         d.destination_exit_taken = true;
         d.trip_seed = seed;
+        d.street_controls_on = true;
         d.tutorial = None;
         d.truck_mut().start_engine();
         d.truck_mut().transmission.automatic = true;

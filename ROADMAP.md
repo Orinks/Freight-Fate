@@ -136,6 +136,11 @@ Costs the drive (found 2026-09-24):
       that walked the owner onto the shoulder, across into the left lane and
       back into a semi is gone
       ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Street lights and signs, and road stops' streets, are off for 1.9 and
+      the streets drive as before 2026-09-24. A street is never called a
+      zone, G never says "the next 0 miles", lines raised in one moment are
+      said once in order, and a corner taken under its speed sounds at the
+      corner ([September 24](#september-24-realistic-interstate-exit)).
 - [ ] 81 legs' exits sit at the wrong mile. The legs were rerouted after
       their exits were found (Charlotte to Knoxville by a median 8 miles),
       so those exits keep old ramp data and get no ramp terminal. Re-derive
@@ -1855,6 +1860,25 @@ baked (`tools/street_chain.py`, `facility_approaches.json` coverage
       from the exit I am." With the signal on for the destination exit or a
       stop's exit, Space ends with that exit and its distance and U leads with
       it; neither is spoken unasked, and both drop it on the ramp.
+- [x] (Release gate) **Street lights off for 1.9, and the live drive's
+      street faults** (owner decision after the live drives into Abilene and
+      Ardmore, `fix/street-lights-live`). Street lights and signs sit behind
+      `STREET_CONTROLS_IN_PLAY`, road stops' streets behind
+      `STOP_STREETS_IN_PLAY`, both false; no code or data is removed, and the
+      street-control and truck-stop-street tests switch them on as the 2.0
+      suite. Road stops' streets are off because most exits have a ramp end
+      baked one way only (3,456 of 18,165 have both), so the Love's at Baird,
+      I-20 exit 307, had streets eastbound and none westbound; the builder
+      fix is on `feat/street-lights-2-0` and needs a re-bake
+      ([2.0](#street-traffic-controls)). Also: a street zone is never spoken
+      as a zone (`spoken_zone`); G says "Nothing steep ahead" with under a
+      mile to scan; route lines raised in the same instant queue whole
+      instead of each purging the one before and handing it back to be said
+      again; and a corner taken under its speed settles at once. Its grace
+      only defers a miss now: the Ardmore yard's off-the-ramp line held its
+      first corner for 71 s (its words at the slowest modelled voice) while
+      the truck drove the next two, 0.05 mile apart, and all three tones
+      sounded together 0.2 mile on.
 
 ## 2.0 planned -- the working week and home
 
@@ -1952,13 +1976,22 @@ onto exit signalling.
 
 ### Street traffic controls
 
-The street signals and signs baked for 1.9 are switched off for the 1.9
-release (`fix/street-lights-live`); the timing work is parked on
-`feat/street-lights-2-0`. Detail in
+The street signals and signs baked for 1.9, and road stops' streets, are
+switched off for the 1.9 release (`fix/street-lights-live`,
+`STREET_CONTROLS_IN_PLAY` and `STOP_STREETS_IN_PLAY`); the timing work is
+parked on `feat/street-lights-2-0`. Detail in
 [September 24](#september-24-realistic-interstate-exit).
 
 - [ ] **Turn street traffic controls back on.** Lights and signs on the
       approach chains play again once the items below hold up on a drive.
+- [ ] **Turn road stops' streets back on.** Most exits have a ramp end
+      baked for one direction only (3,456 of 18,165 have both), because the
+      other direction's ramp leaves at its own junction node. The search
+      around same-numbered junctions (`RAMP_SIBLING_JUNCTION_M`, with its
+      pytest, on `feat/street-lights-2-0`) adds 34 of 47 on the Abilene to
+      Fort Worth leg. Re-bake the ramp terminals, then the stop approaches
+      and facility exit chains, from one OSM set; I-20 exit 307 westbound
+      (the Love's at Baird) is the check.
 - [ ] **Arterial progression.** Signals along one street share a cycle
       and are offset for its posted limit, so a truck at the limit meets
       greens.
@@ -2026,6 +2059,20 @@ here 2026-09-25. Details stay in the linked dated sections.
 - [ ] 995 streets with an OSM speed tag on under half their miles take the
       statutory fill for the whole street; splitting them needs a
       per-stretch limit (PR #232).
+- [ ] Owner call: a rural statutory limit inside city limits. North Arnold
+      Boulevard (FM 3438), the last 0.27 mile before the Abilene Company
+      Yard's street, reads 70 (Tex. Transp. Code 545.352(b)(2), rural
+      basis): it is inside Abilene's corporate limits but outside the Census
+      2020 urban area that stands in for Texas's urban district, and OSM
+      tags no limit. Counting corporate limits as town would undo the IA 175
+      ruling (PR #232); the official source is TxDOT's posted speed zones.
+- [ ] Owner call: one limit for an older chain. The 394 chains with no
+      street detail post one limit for the whole chain: the state's in-town
+      figure, else the highest street's. Oklahoma sets no in-town figure, so
+      the Ardmore Company Yard's 3.06 miles post 55 from the ramp, service
+      road included; OSM reads 35, then 40, 45 and 55 along West Broadway
+      Street west of M Street. Options: each street's own number, or match
+      the chain to the map.
 
 ### Lanes and maneuvering
 

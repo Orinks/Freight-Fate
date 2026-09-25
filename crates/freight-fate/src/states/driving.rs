@@ -518,6 +518,9 @@ pub struct DrivingState {
     // right now (`begin_stop_chain`); the highway waits in `highway_trip`.
     pub stop_chain: Option<RoadStop>,
     pub stop_chain_end_said: bool,
+    // Whether a road stop's streets are driven at all
+    // (`chains::STOP_STREETS_IN_PLAY`, off for 1.9).
+    pub stop_streets_on: bool,
     pub highway_trip: Option<Trip>,
     // Departure chain: the mirror. A loaded run out of a chain-capable
     // origin facility starts on its streets and merges onto the highway.

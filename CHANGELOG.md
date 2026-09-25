@@ -41,11 +41,8 @@
 
 - **Real construction reports now cover California.** With real traffic on, lane closures Caltrans has in place right now appear on your route.
 
-- **City streets to a facility have traffic lights and stop signs.** Lights along one street are timed so a truck at the speed limit meets mostly greens.
-
 - **Past a facility's driveway you are in the yard.** "Into the yard. Yard limit 15." The gate where you check in is at its end.
 
-- **Many truck stops are now down the road from their exit.** You drive from the ramp to the lot, turn in at the driveway, and stop there.
 - **Taking a bend or ramp curve too fast can roll the truck over.** A full trailer or part-filled tank goes first, and the load is lost.
 
 ### Security
@@ -157,6 +154,14 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **City streets are no longer called a facility access road zone.** A street keeps its own name, and the speed keeper just says its number.
+
+- **G no longer says "the next 0 miles" on the last streets to a gate.** It says nothing steep is ahead.
+
+- **Lines the cab says in the same moment are each said once, in order.** The first is no longer cut off and started again by the next.
+
+- **Each street turn's sound plays as you make that turn.** Turns close together off the ramp no longer save their sounds and play them all at once.
 
 - **Curve assistance slows for any bend your load cannot take at your speed.** A full trailer or part-filled tank no longer rolls over on mountain bends.
 

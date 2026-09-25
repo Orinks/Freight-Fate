@@ -306,10 +306,11 @@ fn test_cruise_refuses_to_engage_in_a_facility_zone() {
 
     assert!(harness.read_drive(|d| d.cruise_mph).is_none());
     assert!(harness.read_drive(|d| d.keeper_mph).is_none());
+    // A street is not a zone: the refusal names city streets.
     assert!(
         spoken(&harness)
             .iter()
-            .any(|s| s.contains("No adaptive cruise") && s.contains("facility access road")),
+            .any(|s| s.starts_with("No adaptive cruise on city streets.")),
         "{:?}",
         spoken(&harness)
     );
