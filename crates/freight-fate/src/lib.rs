@@ -2,6 +2,7 @@
 //! the application shell, on top of `ff_core`.
 
 pub mod account_achievements;
+#[cfg(feature = "agent-server")]
 pub mod agent_server;
 pub mod app;
 pub mod audio;
