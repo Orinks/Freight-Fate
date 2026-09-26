@@ -289,10 +289,21 @@ impl DrivingState {
     /// reverse selection while rolling forward) need road speed, which the
     /// transmission has no way to know.
     pub fn manual_shift(&mut self, ctx: &mut GameContext, gear: i32) {
-        let rolling_reverse =
-            gear == REVERSE && self.trip.truck.speed_mph() > REVERSE_ENGAGE_MAX_MPH;
+        let doubles_refusal = if gear == REVERSE {
+            self.trip.truck.doubles_reverse_refusal()
+        } else {
+            None
+        };
+        let rolling_reverse = doubles_refusal.is_none()
+            && gear == REVERSE
+            && self.trip.truck.speed_mph() > REVERSE_ENGAGE_MAX_MPH;
         let result = self.trip.truck.request_gear(gear);
-        if result.ok {
+        if let Some(refusal) = doubles_refusal {
+            // A set of doubles cannot be backed; nothing ground or broke.
+            ctx.audio.play("ui/error");
+            self.set_status(refusal);
+            ctx.say(refusal);
+        } else if result.ok {
             // The lever: kachunk. The second half -- the gear taking as the
             // clutch comes back in -- is played by update_audio when it
             // actually happens, the way an automatic's engagement is.

@@ -485,6 +485,7 @@ impl DrivingState {
             ramp_green_roll_said: false,
             ramp_assist_brake: 0.0,
             approach_pull_ahead: false,
+            rear_whip_cooldown_s: 0.0,
             approach_pull_ahead_canceled: false,
             street_bar_mi: None,
             street_control_kind: String::new(),

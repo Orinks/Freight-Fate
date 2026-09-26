@@ -30,6 +30,8 @@
 
 - **Hooking a set of doubles takes longer.** A second hook-up and a walk-around of both trailers and the converter dolly add 25 minutes on duty at the shipper. You hear it at check-in and loading, and the pickup screen shows it. With doubles hooked, the walk-around at a stop covers both trailers and the dolly and takes 25 minutes instead of 15.
 
+- **The rear trailer of a set of doubles swings harder than the tractor.** At 40 miles per hour and up, a quick steer or lane change can whip the rear trailer and shift its freight, and you hear a warning to ease into lane changes. Crosswinds push a set of doubles harder than a single trailer. Reverse is refused with doubles hooked, and you hear why.
+
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
 - Phase A ALCAN inland: `prince_george_bc_ca`, `dawson_creek_bc_ca` (Mile 0), and `fort_st_john_bc_ca` pass-throughs with bidirectional Hwy 1/97 / John Hart / Alaska Highway legs (465 / 254 / 45 mi) from public Valhalla truck costing on `feat/career-2.0`.

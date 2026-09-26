@@ -3,6 +3,7 @@
 //! and keep-right pressure.
 
 use ff_core::data::curves::{advisory_with_bank_mph, superelevation_at};
+use ff_core::models::doubles::REAR_TRAILER_WHIP_TEXT;
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -411,11 +412,14 @@ impl DrivingState {
             .unwrap_or(0.0);
         let road = RoadConditions {
             curvature: curve,
-            wind,
+            // The rear trailer of a set of doubles amplifies what the wind
+            // does to the tractor (FHWA 2000 CTSW Vol III, Ch VIII).
+            wind: wind * self.trip.truck.crosswind_mult(),
             grip,
             bank,
         };
         let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
+        self.rear_trailer_whip(ctx, dt);
         if off_road_event {
             // The shoulder costs the truck whether or not anything warns about
             // it: the warning setting governs the sound and the line, never
@@ -910,3 +914,24 @@ impl DrivingState {
         }
     }
 }
+
+impl DrivingState {
+    /// A set of doubles: a quick steer swings the rear trailer harder than
+    /// the tractor. Past the whip threshold the freight shifts and the driver
+    /// hears why, once per swerve.
+    fn rear_trailer_whip(&mut self, ctx: &mut GameContext, dt: f64) {
+        self.rear_whip_cooldown_s = (self.rear_whip_cooldown_s - dt).max(0.0);
+        let steer_g = self.lane.transient_lateral_g();
+        let whipped = self.trip.truck.update_rear_trailer(dt, steer_g);
+        if whipped && self.rear_whip_cooldown_s <= 0.0 {
+            self.rear_whip_cooldown_s = REAR_WHIP_COOLDOWN_S;
+            self.set_status(REAR_TRAILER_WHIP_TEXT);
+            let mut opts = SayEvent::queued().priority(EventPriority::Route);
+            opts.category = Some(SpeechCategory::Safety);
+            ctx.say_event_with(REAR_TRAILER_WHIP_TEXT, opts);
+        }
+    }
+}
+
+/// Seconds between rear-trailer whip warnings.
+const REAR_WHIP_COOLDOWN_S: f64 = 20.0;

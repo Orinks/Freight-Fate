@@ -116,6 +116,14 @@ pub const ASSIST_OFFSET_GAIN: f64 = 0.7;
 pub const ASSIST_YAW_GAIN: f64 = 3.0;
 pub const FPS_PER_MPH: f64 = 1.466_667;
 pub const G_FPS2: f64 = 32.174;
+/// How slowly the "steady" part of the tractor's lateral acceleration
+/// follows the real one, seconds. What a bend holds for many seconds is
+/// steady and a set of doubles tracks it; what changes faster than this -- a
+/// lane change, a swerve, a sudden correction -- is the transient that swings
+/// the rear trailer of a set (rearward amplification). ASSUMED: a lane change
+/// takes a few seconds, and the SAE J2179 test FHWA cites runs one in 200 ft
+/// at 55 mph, about 2.5 seconds.
+pub const LATERAL_STEADY_TAU_S: f64 = 3.0;
 
 /// Only the modes where the driver does the lane work have a drift model.
 /// "full" is absent on purpose: it pins the offset to lane centre.
@@ -238,6 +246,10 @@ pub struct LaneKeeping {
     gust_timer: f64,
     off_road_timer: f64,
     event_cooldown: f64,
+    /// The tractor's lateral acceleration last update, g, signed like the
+    /// heading (positive to the right). Zero when no drift model runs.
+    pub lateral_g: f64,
+    steady_lateral_g: f64,
 }
 
 impl Default for LaneKeeping {
@@ -272,7 +284,21 @@ impl LaneKeeping {
             gust_timer: 0.0,
             off_road_timer: 0.0,
             event_cooldown: 0.0,
+            lateral_g: 0.0,
+            steady_lateral_g: 0.0,
         }
+    }
+
+    /// The part of the tractor's lateral acceleration that is a quick steer
+    /// rather than a bend held steady, g, unsigned. See
+    /// [`LATERAL_STEADY_TAU_S`].
+    pub fn transient_lateral_g(&self) -> f64 {
+        (self.lateral_g - self.steady_lateral_g).abs()
+    }
+
+    fn clear_lateral(&mut self) {
+        self.lateral_g = 0.0;
+        self.steady_lateral_g = 0.0;
     }
 
     pub fn lane_name(&self) -> &'static str {
@@ -346,12 +372,14 @@ impl LaneKeeping {
             self.offset = 0.0;
             self.yaw_rad = 0.0;
             self.off_road_timer = 0.0;
+            self.clear_lateral();
             return false;
         };
 
         let mph = speed_mps * MPH_PER_MPS;
         if mph < 2.0 {
             self.off_road_timer = 0.0;
+            self.clear_lateral();
             return false;
         }
         let fps = mph * FPS_PER_MPH;
@@ -408,6 +436,9 @@ impl LaneKeeping {
         // far as the wheel asked, so a bend taken on ice runs wide even with
         // the wheel into it. This is where load and grip live now.
         yaw_rate *= grip.clamp(0.0, 1.0);
+        self.lateral_g = yaw_rate * fps / G_FPS2;
+        self.steady_lateral_g +=
+            (self.lateral_g - self.steady_lateral_g) * (dt / LATERAL_STEADY_TAU_S).min(1.0);
 
         // The road turns underneath. Holding the wheel still in a bend leaves
         // the truck pointing where it was, so the RELATIVE heading opens up
@@ -501,6 +532,40 @@ mod tests {
     //! `tests/test_lane_discrete.py` (the DrivingState cases belong to the
     //! app-shell bucket).
     use super::*;
+
+    #[test]
+    fn a_held_bend_is_steady_and_a_quick_steer_is_transient() {
+        let mut lane = LaneKeeping::new(Some(7));
+        let speed = 60.0 / MPH_PER_MPS;
+        let bend = RoadConditions {
+            curvature: 1.0 / 3000.0,
+            ..RoadConditions::default()
+        };
+        // Curve assistance holds the bend: after a while it is all steady.
+        for _ in 0..600 {
+            lane.update(0.05, speed, bend, "partial", true);
+        }
+        assert!(lane.lateral_g > 0.05, "{}", lane.lateral_g);
+        assert!(
+            lane.transient_lateral_g() < 0.01,
+            "{}",
+            lane.transient_lateral_g()
+        );
+        // A sudden full-lock steer on a straight is a transient at once.
+        let mut swerve = LaneKeeping::new(Some(7));
+        swerve.steering = 1.0;
+        swerve.update(0.05, speed, RoadConditions::default(), "off", false);
+        assert!(
+            swerve.transient_lateral_g() > 0.15,
+            "{}",
+            swerve.transient_lateral_g()
+        );
+        // Full lane keeping runs no drift model and reports nothing.
+        let mut full = LaneKeeping::new(Some(7));
+        full.steering = 1.0;
+        full.update(0.05, speed, RoadConditions::default(), "full", false);
+        assert_eq!(full.transient_lateral_g(), 0.0);
+    }
 
     /// A left-hand bend of `radius_ft`, as the model now takes it.
     fn left_bend(radius_ft: f64) -> f64 {
