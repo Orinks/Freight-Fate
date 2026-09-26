@@ -236,7 +236,7 @@ The normal career loop is:
 1. Start or continue a career.
 2. Open your terminal's dispatch board. New company hires accept the load
    dispatch assigns; senior drivers and owner-operators pick their own.
-3. Drive from the terminal to the pickup facility.
+3. Deadhead from wherever your truck is parked to the pickup facility.
 4. Check in and load the cargo. Owner-operators then choose a destination
    route; company drivers run the route dispatch assigns.
 5. Drive the loaded trip.
@@ -581,8 +581,8 @@ project measured in real months of driving.
 
 ## Pickup, loading, and route planning
 
-After accepting a dispatch, you drive a local pickup leg from the terminal to
-the shipper. At the pickup gate:
+After accepting a dispatch, you deadhead on a local pickup leg from wherever
+your truck is parked to the shipper. At the pickup gate:
 
 1. Stop the truck.
 2. Open the pickup facility menu.
