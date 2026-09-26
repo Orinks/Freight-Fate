@@ -2105,6 +2105,12 @@ there, with the truck starting at that carrier's terminal.
 - [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
       national run band.** The dispatch bias asks for short rookie loads the
       band minimum would forbid once enforced. Revisit in slice 4.
+- [ ] **Knik Arm Cartage runs thin: two cities in its 25-150 mi band.**
+      The next AK map adds for an Anchorage local are the Kenai Peninsula
+      (Soldotna/Kenai, about 147 road mi) and Seward (about 125 road mi),
+      measured by road, not air. Skip Whittier until the Anton Anderson
+      Memorial Tunnel schedule and its hazmat limits are modeled. Slice 3
+      plan, §4.
 - [ ] **Port drayage into the LA/Long Beach terminals needs a TWIC card.**
       When drayage loads are real, a load into the marine terminals
       requires the driver to hold TWIC (Basin Harbor Drayage's port work
