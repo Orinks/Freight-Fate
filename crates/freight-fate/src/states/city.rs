@@ -35,7 +35,7 @@ use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
 use ff_core::models::enforcement;
-use ff_core::models::home_base::{ParkedAt, ParkedKind};
+use ff_core::models::home_base::{city_service_area, ParkedAt, ParkedKind};
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
     board_offer_count, dispatch_deadline_hours, job_from_payload, job_payload,
@@ -186,12 +186,12 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
     // where the truck is.
     let parked = parked_at(ctx);
     let at_terminal = parked.kind == ParkedKind::CarrierTerminal;
-    let city = ctx.world.spoken_city(&p.current_city, None);
+    let area = city_service_area(&ctx.world.spoken_city(&p.current_city, None));
     if option.is_owner_operator() {
         let first = if at_terminal {
             format!(
-                "{prefix}First-day briefing: leased to {}. Lease orientation is at {} in the \
-                 {city} service area, where your truck is parked.",
+                "{prefix}First-day briefing: leased to {}. Lease orientation is at {} in \
+                 {area}, where your truck is parked.",
                 option.carrier_name, parked.name
             )
         } else {
@@ -221,7 +221,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         ),
         if at_terminal {
             format!(
-                "Orientation and truck assignment are at {} in the {city} service area, \
+                "Orientation and truck assignment are at {} in {area}, \
                  where your assigned truck is parked.",
                 parked.name
             )

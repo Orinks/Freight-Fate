@@ -474,6 +474,21 @@ pub fn start_options_for_home_city(
         .collect()
 }
 
+/// How many distinct carriers hire in `city_key`. The owner-operator start
+/// leases to a carrier already listed, so it is not another carrier.
+pub fn hiring_carrier_count_for_home_city(
+    world: &crate::data::world::World,
+    city_key: &str,
+) -> usize {
+    let mut keys: Vec<&str> = start_options_for_home_city(world, city_key)
+        .into_iter()
+        .filter_map(|option| hiring_carrier_for_option(option).map(|c| c.key.as_str()))
+        .collect();
+    keys.sort_unstable();
+    keys.dedup();
+    keys.len()
+}
+
 /// Apply a start option to a freshly created or reset profile.
 pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &CareerStartOption) {
     profile.set_carrier_key(option.key);

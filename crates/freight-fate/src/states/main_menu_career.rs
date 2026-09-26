@@ -7,8 +7,8 @@ use ff_core::data::regions::region_label;
 use ff_core::models::carriers::{home_terminal_city_for, is_offerable_home_city};
 use ff_core::models::profile::{find_save_path, is_pre_1_9_save_file, Profile, DEFAULT_CITY};
 use ff_core::models::start_options::{
-    apply_start_option, hiring_carrier_for_option, start_option, start_options_for_home_city,
-    CareerStartOption,
+    apply_start_option, hiring_carrier_count_for_home_city, hiring_carrier_for_option,
+    start_option, start_options_for_home_city, CareerStartOption,
 };
 
 use crate::app::{GameContext, Say};
@@ -62,6 +62,11 @@ impl CareerStartState {
 
     pub fn intro_help(&self) -> &str {
         &self.menu.intro_help
+    }
+
+    /// How many distinct carriers hire in this home city.
+    pub fn carrier_count(&self, ctx: &GameContext) -> usize {
+        hiring_carrier_count_for_home_city(ctx.world, &self.home_city)
     }
 
     /// Start option keys offered for this home city, in menu order.
@@ -133,7 +138,7 @@ impl Menu for CareerStartState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let place = ctx.world.spoken_city(&self.home_city, Some(true));
-        let count = self.options.len();
+        let count = hiring_carrier_count_for_home_city(ctx.world, &self.home_city);
         let noun = if count == 1 {
             "carrier hires"
         } else {
@@ -341,7 +346,7 @@ impl Menu for HomeCityState {
                 continue;
             };
             let place = city.spoken_qualified();
-            let count = start_options_for_home_city(ctx.world, key).len();
+            let count = hiring_carrier_count_for_home_city(ctx.world, key);
             let noun = if count == 1 {
                 "carrier hires"
             } else {

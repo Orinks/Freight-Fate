@@ -102,9 +102,10 @@ fn the_main_menu_welcomes_and_walks_a_new_career_to_the_home_city() {
     assert!(is::<CareerStartState>(&app));
     assert!(current_label::<CareerStartState>(&app).starts_with("Northstar"));
     app.clear_speech();
-    key(&mut app, Key::Return); // default start: Northstar
-                                // The career exists, the welcome was spoken, and the whole new-career
-                                // chain is gone from the stack: main menu, then the city placeholder.
+    // Default start: Northstar. The career exists, the welcome was spoken,
+    // and the whole new-career chain is gone from the stack: main menu, then
+    // the city placeholder.
+    key(&mut app, Key::Return);
     let profile = app.ctx.profile.clone().expect("a career was created");
     assert_eq!(profile.name, "Smoke");
     assert_eq!(profile.current_city, DEFAULT_CITY);
@@ -916,4 +917,34 @@ fn test_an_owner_operator_hears_no_travel_line() {
     );
     assert!(briefing.contains("Lease orientation is at "), "{briefing}");
     assert!(!briefing.contains("covered your travel"), "{briefing}");
+}
+
+#[test]
+fn test_carrier_counts_name_distinct_carriers_not_start_rows() {
+    // Milwaukee: Northstar, Great Lakes Training, Summit Value (the
+    // owner-operator start leases to Northstar, so it is not a fourth).
+    // Wichita adds Prairie Link.
+    let mut app = TestApp::new();
+    for (city, carriers, rows) in [("milwaukee_wi_us", 3, 4), ("wichita_ks_us", 4, 5)] {
+        let picker = CareerStartState::new(&app.ctx, "Counter", city);
+        assert_eq!(picker.carrier_count(&app.ctx), carriers, "{city}");
+        assert_eq!(picker.option_keys().len(), rows, "{city}");
+    }
+    let picker = CareerStartState::new(&app.ctx, "Counter", "milwaukee_wi_us");
+    app.clear_speech();
+    app.push_state(picker);
+    assert!(
+        app.main_lines()
+            .iter()
+            .any(|l| l.starts_with("Career start. 3 carriers hire in Milwaukee")),
+        "{:?}",
+        app.main_lines()
+    );
+    let region = app.ctx.world.cities["wichita_ks_us"].region.clone();
+    let cities = HomeCityState::new(&app.ctx, "Counter", &region, &["wichita_ks_us".to_string()]);
+    app.push_state(cities);
+    let help = with_state::<HomeCityState, _>(&app, |s, ctx| {
+        freight_fate::states::base::Menu::current_help(s, ctx)
+    });
+    assert!(help.contains("4 carriers hire here."), "{help}");
 }
