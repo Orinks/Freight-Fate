@@ -2100,6 +2100,14 @@ there, with the truck starting at that carrier's terminal.
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds
       into the distance cap today. Slice 4 (board lane area) enforces it.
+- [ ] **Slice 4: hourly or per-move pay for local carriers.** Local pickup
+      and delivery and port drayage are not paid by the mile; Des Plaines
+      River Cartage, Basin Harbor Drayage, and Knik Arm Cartage use the
+      per-mile company pay plan today.
+- [ ] **Slice 4: a short-haul board bias for locals under its own
+      setting.** Locals carry no `short_haul_bias` today because that
+      setting's spoken summary says "training loads"; give locals their own
+      short-haul setting and summary instead of reusing it.
 - [x] **The 16 regionals plus an Alaska regional.** Slice 3: sixteen new
       regionals join Prairie Link, Chatanika Freight Lines hires across
       Alaska out of Anchorage and Fairbanks, and three locals (Des Plaines
@@ -2114,13 +2122,12 @@ there, with the truck starting at that carrier's terminal.
       Bay).** KEEP: Bismarck stays. Terminal span is not run length; its
       loads obey the regional 150-600 mi band like every regional's. Slice 3
       plan, §11.
-- [ ] **Fairbanks has no world `company_yard` or `terminal` pin.** Its old
-      stand-in yard became a travel center in the ALCAN public-lot cleanup,
-      and Carlile's Fairbanks terminal is a cross-dock shipper. Chatanika
-      Freight Lines' Fairbanks terminal is carrier-owned, so nothing reads
-      the pin today, and the carrier needs it: Fairbanks and Tok are past 250
-      air mi from Anchorage. Add a sourced Fairbanks yard pin if a feature
-      ever needs one; the slice 3 test names it as the one known gap.
+- [x] **Fairbanks terminal: no world pin needed; carrier-owned terminal.**
+      Home terminals are carrier-owned yards synthesized from
+      `terminal_city_keys` ("Chatanika Freight Lines Fairbanks terminal"),
+      never a world pin, so Fairbanks having no world `company_yard` or
+      `terminal` pin is not a gap. The slice 3 test checks that terminal
+      cities are real map cities with carrier-owned terminals.
 - [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
       national run band.** The dispatch bias asks for short rookie loads the
       band minimum would forbid once enforced. Revisit in slice 4.

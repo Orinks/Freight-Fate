@@ -277,37 +277,38 @@ fn test_tier_distance_bands() {
     }
 }
 
-/// Terminal cities with no world `company_yard` or `terminal` pin, each
-/// with its reason. Carrier terminals are carrier-owned ("{Carrier} {City}
-/// terminal"), so the world pin is not what homes a driver; this list keeps
-/// any new gap loud.
-///
-/// Fairbanks: its old stand-in yard was retyped to a travel center with the
-/// ALCAN public-lot cleanup, and Carlile's terminal there is a cross-dock
-/// shipper. Chatanika needs the Fairbanks terminal: Fairbanks (259 air mi)
-/// and Tok (266) are past 250 from Anchorage. ROADMAP debt row.
-const TERMINALS_WITHOUT_A_YARD_PIN: &[&str] = &["chatanika_freight: fairbanks_ak_us"];
-
+/// Terminal cities are real map cities, and carrier-owned terminals need no
+/// world yard pin. A home terminal is the carrier's own yard, synthesized
+/// from `terminal_city_keys` as "{Carrier} {City} terminal"; world
+/// `company_yard` and `terminal` pins are freight endpoints and never a
+/// home (carrier slice 1).
 #[test]
-fn test_every_terminal_city_is_a_real_map_city_with_a_yard() {
+fn test_terminal_cities_are_map_cities_with_carrier_owned_terminals() {
     let world = world();
-    let mut missing = Vec::new();
     for c in carrier_catalog().values() {
         assert!(!c.terminal_city_keys.is_empty(), "{}", c.key);
         for t in &c.terminal_city_keys {
-            assert!(
-                world.cities.contains_key(t),
-                "{}: {t} not a map city",
-                c.key
-            );
-            if world.default_facility(t).is_err() {
-                missing.push(format!("{}: {t}", c.key));
-            }
+            let city = world
+                .cities
+                .get(t)
+                .unwrap_or_else(|| panic!("{}: {t} not a map city", c.key));
+            let terminal = c
+                .home_terminal(world, t)
+                .unwrap_or_else(|| panic!("{}: no carrier-owned terminal in {t}", c.key));
+            assert_eq!(terminal.name, format!("{} {} terminal", c.name, city.name));
+            assert_eq!(terminal.city, city.name);
         }
     }
+    // No world pin needed: Fairbanks has no world company_yard or terminal
+    // pin, and Chatanika's Fairbanks terminal is still its own yard.
+    assert!(world.default_facility("fairbanks_ak_us").is_err());
+    let chatanika = carrier("chatanika_freight").expect("chatanika");
     assert_eq!(
-        missing, TERMINALS_WITHOUT_A_YARD_PIN,
-        "terminal cities with no company_yard or terminal pin"
+        chatanika
+            .home_terminal(world, "fairbanks_ak_us")
+            .map(|t| t.name)
+            .as_deref(),
+        Some("Chatanika Freight Lines Fairbanks terminal")
     );
 }
 
