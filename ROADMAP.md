@@ -2065,7 +2065,6 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
-
 ### Twin parcel / STAA doubles (Track A)
 
 STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
@@ -2250,7 +2249,6 @@ onto exit signalling.
       has never been wired to anything. `vehicle/lane_drift` is dead for a
       different reason -- the edge ladder took its job -- so it is a
       deletion, not a wiring job.
-
 
 ### Street traffic controls
 

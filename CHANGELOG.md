@@ -22,7 +22,7 @@
 
 - **Reefer and APU hotel power.** Turn the trailer reefer and the APU on or off; a cold pickup starts the reefer at 2 degrees, cargo warms slowly when it is off, and the tractor must be shut down before fueling at a stop or the terminal garage.
 
-- **Turnpike doubles pull 48-foot vans on listed turnpike corridors.** `turnpike_doubles` uses 48-foot turnpike doubles (about 102 ft of cargo length, 117 ft overall) on an explicit allowlist of Thruway, Mass Pike, Ohio Turnpike, Indiana Toll Road, and Kansas Turnpike legs, separate from the 28-foot parcel pups. Dispatch only clears them on the turnpike, and those jobs need the doubles endorsement as well as the LCV certificate.
+- **Turnpike doubles pull 48-foot vans on listed turnpike corridors.** `turnpike_doubles` uses 48-foot turnpike doubles (about 102 feet of cargo length, 117 feet overall) on an explicit allowlist of Thruway, Mass Pike, Ohio Turnpike, Indiana Toll Road, and Kansas Turnpike legs, separate from the 28-foot parcel pups. Dispatch only clears them on the turnpike, and those jobs need the doubles endorsement as well as the LCV certificate.
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
