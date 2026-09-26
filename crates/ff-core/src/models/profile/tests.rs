@@ -206,6 +206,64 @@ fn test_old_owner_operator_save_without_trailer_programs_gets_basic_program() {
 }
 
 #[test]
+fn test_old_turnpike_doubles_save_with_double_van_loads_as_turnpike_double() {
+    // Before turnpike_doubles got its own program, the load ran on the STAA
+    // `double_van` pups. The job payload never stored a trailer key (the box
+    // is derived from the cargo each time), so an old active trip that still
+    // carries a stale "double_van" field, from a driver leasing the
+    // double_van program, resolves to `turnpike_double` on load.
+    use crate::models::jobs::job_from_payload;
+    use crate::models::trailer_yard::{preloaded_trailer, DROP_YARD_FACILITY_TYPES};
+    use crate::models::trailers::trailer_keys_for_cargo;
+
+    with_data_dir(|_| {
+        let mut p = Profile::named("Old Turnpike Doubles");
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.owned_trucks = vec!["rig".to_string()];
+        p.trailer_programs = vec!["dry_van".to_string(), "double_van".to_string()];
+        p.active_trip = Some(json!({
+            "kind": "pickup",
+            "job": {
+                "cargo": "turnpike_doubles",
+                "trailer": "double_van",
+                "weight_tons": 18.0,
+                "origin": "toledo_oh_us",
+                "origin_location": "Toledo Cross-Dock",
+                "origin_type": DROP_YARD_FACILITY_TYPES[0],
+                "origin_facility_id": "toledo_cross_dock",
+                "destination": "elkhart_in_us",
+                "destination_location": "Elkhart Cross-Dock",
+                "destination_type": "cross_dock",
+                "distance_mi": 139.0,
+                "pay": 1200.0,
+                "deadline_game_h": 8.0
+            },
+            "checked_in": false,
+            "loaded": false,
+            "trailer_refused": false
+        }));
+        let mut data = p.to_dict();
+        data.remove(SIGNATURE_FIELD);
+        let path = p.path();
+        write_text(&path, &data);
+
+        let loaded = load(&path);
+
+        let trip = loaded.active_trip.as_ref().expect("active trip kept");
+        let job = job_from_payload(trip["job"].as_object().unwrap()).expect("job loads");
+        assert_eq!(job.cargo.key, "turnpike_doubles");
+        assert_eq!(trailer_keys_for_cargo(job.cargo.key), ["turnpike_double"]);
+        let unit = preloaded_trailer(&job).expect("a drop yard stages the box");
+        assert_eq!(unit.trailer_key, "turnpike_double");
+        // The leased double_van program is still the STAA pup program for
+        // parcel_doubles; it is kept, not rewritten.
+        assert!(loaded
+            .active_trailer_programs()
+            .contains(&"double_van".to_string()));
+    });
+}
+
+#[test]
 fn test_old_save_without_start_choice_fields_uses_northstar_company_start() {
     with_data_dir(|_| {
         let p = Profile::named("Old Start");
