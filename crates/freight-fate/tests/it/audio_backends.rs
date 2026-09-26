@@ -729,6 +729,25 @@ fn test_stop_world_drops_the_liquid_surge_wash() {
 }
 
 #[test]
+fn test_stop_world_drops_the_scale_bed_and_lane_guide_tone() {
+    // Both are plain per-frame loops with no dead-man's switch of their own
+    // (unlike the alert and siren): leaving the drive with either still
+    // running left it playing into the main menu until the game closed.
+    let Some(mut r) = bass_rig_with_recordings() else {
+        return;
+    };
+    r.engine
+        .start_loop_with(CH_SCALE, "poi/weigh_station_lane", 0.5, 90);
+    r.engine
+        .start_loop_with(CH_LANE_GUIDE, "ui/menu_select", 0.5, 90);
+    assert!(r.engine.backend().loop_entry(CH_SCALE).is_some());
+    assert!(r.engine.backend().loop_entry(CH_LANE_GUIDE).is_some());
+    r.engine.stop_world();
+    assert!(r.engine.backend().loop_entry(CH_SCALE).is_none());
+    assert!(r.engine.backend().loop_entry(CH_LANE_GUIDE).is_none());
+}
+
+#[test]
 fn test_bass_horn_sustains_then_rings_out_on_release() {
     let Some(mut r) = bass_rig_with_recordings() else {
         return;
