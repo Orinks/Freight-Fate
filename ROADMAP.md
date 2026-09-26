@@ -2246,6 +2246,10 @@ LCV turnpike doubles on permitted toll roads.
       127,400 lb turnpike doubles) and scaled up for a lighter set, at
       most 2x (`models::doubles::LIGHT_SET_SWAY_MAX`). Neither the push
       nor the clamp is calibrated against a measurement.
+      The rear trailer feels the tractor's steer rate-limited to 0.3 g/s
+      (`sim::lane::REAR_WHIP_STEER_SLEW_G_PER_S`, ASSUMED), because a
+      steering key is a switch that steps the tractor to its lateral cap in
+      one frame; the slew is not calibrated either.
 
 ### Travel-center bulk fuel (non-blocking)
 
