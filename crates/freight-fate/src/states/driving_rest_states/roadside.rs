@@ -557,7 +557,7 @@ impl_state_for_menu!(EnforcementStopState);
 
 // -- FelonyStopState ----------------------------------------------------------------------
 
-const FELONY_INTRO_HELP: &str = "Enter or Escape continues from the terminal.";
+const FELONY_INTRO_HELP: &str = "Enter or Escape continues.";
 
 /// Failure-to-stop outcome after the player ignores an active siren.
 pub struct FelonyStopState {
@@ -643,15 +643,11 @@ impl FelonyStopState {
         } else {
             "No loaded trailer to lose, but the assignment is canceled.".to_string()
         };
-        let terminal = profile_of(ctx)
-            .carrier_home_terminal(ctx.world)
-            .map(|t| t.spoken_name())
-            .unwrap_or_else(|| "the terminal".to_string());
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
              major reputation hit.{} Spike strips added {} percent truck damage, processing \
-             took {} hours. {load_text} You are released back to {terminal}.",
+             took {} hours. {load_text} You are released.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_f(FAILURE_TO_STOP_DAMAGE_PCT, 0),
@@ -675,7 +671,7 @@ impl Menu for FelonyStopState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
             MenuItem::new("Return to terminal", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Continue from the city terminal."),
+                .help("Continue from where the truck is parked."),
         ]
     }
 

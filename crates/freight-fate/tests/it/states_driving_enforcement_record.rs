@@ -174,6 +174,40 @@ fn test_running_from_the_stop_writes_a_major_offense_on_the_career() {
 }
 
 #[test]
+fn test_a_felony_stop_away_from_home_never_names_the_home_terminal() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Away");
+    let home = {
+        let world = app.ctx.world;
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.home_terminal_city = "chicago_il_us".to_string();
+        p.carrier_home_terminal(world)
+            .expect("a Chicago home terminal")
+            .spoken_name()
+    };
+    assert_ne!(
+        app.ctx
+            .world
+            .resolve_city_key(&app.ctx.profile.as_ref().expect("a career").current_city),
+        "chicago_il_us"
+    );
+    app.clear_speech();
+
+    let mut state = FelonyStopState::new(&mut app.ctx, &mut drive);
+    state.announce_entry(&mut app.ctx);
+
+    let summary = state.summary().to_string();
+    assert!(summary.contains("You are released."), "{summary}");
+    let said = said(&app);
+    for text in [&summary, &said] {
+        assert!(!text.contains(&home), "{text}");
+        assert!(!text.contains("Chicago"), "{text}");
+        assert!(!text.contains("released back"), "{text}");
+        assert!(!text.contains("from the terminal"), "{text}");
+    }
+}
+
+#[test]
 fn test_a_second_pursuit_ends_this_career_driving_for_good() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Jerry");
