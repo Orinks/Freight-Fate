@@ -12,12 +12,15 @@ pub(super) fn load_weight_margin(world: &World, p: &Profile, job: &Job) -> Strin
     let mut truck = TruckState::new(proposed.truck_specs());
     truck.fuel_gal = proposed.truck_fuel_gal();
     // A set of doubles weighs both trailers and the dolly and carries the
-    // gross cap of the route it runs, so the advice prices that set.
-    let route = world
-        .supported_route(&job.origin, &job.destination, None)
-        .ok()
-        .flatten();
-    truck.trailer_set = TrailerSet::for_cargo_on_route(job.cargo.key, world, route.as_ref());
+    // gross cap of the lanes it may run, so the advice prices that set.
+    let Some(set) =
+        TrailerSet::for_cargo_between(job.cargo.key, world, &job.origin, &job.destination)
+    else {
+        return "Load weight: this set of doubles is not legal on any lane dispatch can offer \
+                between these cities."
+            .to_string();
+    };
+    truck.trailer_set = set;
     let margin_kg = truck.gross_weight_margin_with_cargo_kg(job.weight_tons * KG_PER_TON);
     let side = if margin_kg >= 0.0 { "under" } else { "over" };
     let mut text = format!(

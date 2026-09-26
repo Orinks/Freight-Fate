@@ -6,6 +6,7 @@ use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 
+use crate::data::lcv_turnpikes::cargo_requires_lcv_turnpike;
 use crate::data::world::World;
 use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
@@ -248,7 +249,7 @@ impl<'w> JobBoard<'w> {
             let dest_location = dest_location.clone();
             let origin_name = location.name.clone();
             let location = location.clone();
-            jobs.push(self.make_job(
+            if let Some(job) = self.make_job(
                 cargo,
                 &city,
                 &origin_name,
@@ -260,7 +261,9 @@ impl<'w> JobBoard<'w> {
                 &dest_location,
                 carrier_key,
                 opts.direct_freight,
-            ));
+            ) {
+                jobs.push(job);
+            }
         }
         jobs.sort_by(|a, b| {
             a.distance_mi
@@ -321,7 +324,7 @@ impl<'w> JobBoard<'w> {
             let dest_location = dest_location.clone();
             let origin_name = location.name.clone();
             let location = location.clone();
-            return Some(self.make_job(
+            if let Some(job) = self.make_job(
                 cargo,
                 &city,
                 &origin_name,
@@ -333,7 +336,9 @@ impl<'w> JobBoard<'w> {
                 &dest_location,
                 carrier_key,
                 opts.direct_freight,
-            ));
+            ) {
+                return Some(job);
+            }
         }
         None
     }
@@ -430,9 +435,7 @@ impl<'w> JobBoard<'w> {
     /// stays on a listed LCV turnpike (plus staging stubs). See
     /// `data::lcv_turnpikes`.
     pub(crate) fn lcv_lane(&self, origin: &str, destination: &str) -> bool {
-        use crate::data::lcv_turnpikes::{
-            city_allows_lcv_turnpike_endpoint, filter_lcv_turnpike_routes,
-        };
+        use crate::data::lcv_turnpikes::city_allows_lcv_turnpike_endpoint;
         if !city_allows_lcv_turnpike_endpoint(origin)
             || !city_allows_lcv_turnpike_endpoint(destination)
         {
@@ -450,10 +453,9 @@ impl<'w> JobBoard<'w> {
         {
             return false;
         }
-        match self.world.supported_route_options(origin, destination, 3) {
-            Ok(routes) => !filter_lcv_turnpike_routes(&routes).is_empty(),
-            Err(_) => false,
-        }
+        // A listed turnpike lane with a recorded LCV cap in every state it
+        // touches; a state with no cap makes the lane illegal, not 80,000 lb.
+        TrailerSet::for_cargo_between("turnpike_doubles", self.world, origin, destination).is_some()
     }
 
     /// Whether any supported corridor option from origin to destination stays
@@ -780,7 +782,7 @@ impl<'w> JobBoard<'w> {
         destination_facility: &Location,
         carrier_key: &str,
         direct_freight: bool,
-    ) -> Job {
+    ) -> Option<Job> {
         let route = self
             .world
             .supported_route(origin, destination, None)
@@ -792,8 +794,14 @@ impl<'w> JobBoard<'w> {
         // converter dolly in the tare. Heavier catalog ranges exist, but a
         // dispatched load that starts illegal is a lie; the live overweight
         // check still red-lights a truck that ends up over (a heavier
-        // tractor, a test load).
-        let set = TrailerSet::for_cargo_on_route(cargo.key, self.world, route.as_ref());
+        // tractor, a test load). Turnpike doubles are priced on the lanes
+        // the route menu will offer, and a lane with no recorded LCV cap in
+        // every state is no job at all, never an 80,000 lb one.
+        let set = if cargo_requires_lcv_turnpike(cargo.key) {
+            TrailerSet::for_cargo_between(cargo.key, self.world, origin, destination)?
+        } else {
+            TrailerSet::for_cargo_on_route(cargo.key, self.world, route.as_ref())?
+        };
         let tare = combination_tare_kg(&TruckSpecs::default()) - TRAILER_TARE_KG + set.tare_kg;
         let max_tons = ((set.legal_gvw_kg - tare) / KG_PER_TON).max(0.0);
         let hi = cargo.weight_tons.1.min(max_tons);
@@ -856,6 +864,6 @@ impl<'w> JobBoard<'w> {
         job.deadline_covers_rest = covers_rest;
         job.origin_spoken = self.world.spoken_city(origin, Some(true));
         job.destination_spoken = self.world.spoken_city(destination, Some(true));
-        job
+        Some(job)
     }
 }

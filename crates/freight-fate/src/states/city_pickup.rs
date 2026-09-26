@@ -33,7 +33,7 @@ use ff_core::sim::route_roadwork::{
 use ff_core::sim::season::{adjust_for_calendar, real_clock_game_hours, temperature_c};
 use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
-use ff_core::sim::vehicle::TruckState;
+use ff_core::sim::vehicle::{TrailerSet, TruckState};
 use ff_core::sim::weather::WeatherSystem;
 
 use crate::app::GameContext;
@@ -807,7 +807,17 @@ impl PickupFacilityState {
             (filtered, note)
         } else if cargo_requires_lcv_turnpike(self.job.cargo.key) {
             let before = routes.len();
-            let filtered = filter_lcv_turnpike_routes(&routes);
+            // The turnpike allowlist, and a recorded LCV cap in every state
+            // the lane touches: a state without one makes the lane illegal
+            // for this set at any weight, so it is dropped, never capped at
+            // 80,000 lb.
+            let filtered: Vec<_> = filter_lcv_turnpike_routes(&routes)
+                .into_iter()
+                .filter(|route| {
+                    TrailerSet::for_cargo_on_route(self.job.cargo.key, ctx.world, Some(route))
+                        .is_some()
+                })
+                .collect();
             if filtered.is_empty() {
                 ctx.audio.play("ui/error");
                 ctx.say(LCV_TURNPIKE_ROUTE_REFUSAL);

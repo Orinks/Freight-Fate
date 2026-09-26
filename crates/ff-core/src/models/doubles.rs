@@ -198,25 +198,23 @@ pub fn rearward_amplification(trailer_key: &str) -> f64 {
 ///
 /// Turnpike doubles take the lowest recorded turnpike cap among the states
 /// the route touches, so a Thruway-to-Mass-Pike run is held to the Mass Pike
-/// figure. A state with no recorded cap, or no states at all, falls back to
-/// the federal 80,000 lb: the conservative answer. Everything else,
-/// STAA twin 28s included, is 80,000 lb.
-pub fn legal_gvw_lb_for_route<'a, I>(cargo_key: &str, state_codes: I) -> f64
+/// figure. A state with no recorded cap, or no states at all, is None: two
+/// 48-foot trailers are not legal off the LCV turnpikes at any length or
+/// weight, so such a route is refused rather than held to 80,000 lb.
+/// Everything else, STAA twin 28s included, is 80,000 lb.
+pub fn legal_gvw_lb_for_route<'a, I>(cargo_key: &str, state_codes: I) -> Option<f64>
 where
     I: IntoIterator<Item = &'a str>,
 {
     if !cargo_requires_lcv_turnpike(cargo_key) {
-        return STANDARD_GVW_LB;
+        return Some(STANDARD_GVW_LB);
     }
     let mut cap: Option<f64> = None;
     for state in state_codes {
-        let Some(state_cap) = lcv_turnpike_gvw_cap_lb(state) else {
-            return STANDARD_GVW_LB;
-        };
-        let state_cap = f64::from(state_cap);
+        let state_cap = f64::from(lcv_turnpike_gvw_cap_lb(state)?);
         cap = Some(cap.map_or(state_cap, |c: f64| c.min(state_cap)));
     }
-    cap.unwrap_or(STANDARD_GVW_LB)
+    cap
 }
 
 /// The walk-around and hook-up clause for a set of doubles, spoken and shown
@@ -320,39 +318,45 @@ mod tests {
         // Twin 28s stay at the federal cap wherever they run.
         assert_eq!(
             legal_gvw_lb_for_route("parcel_doubles", ["OH", "IN"]),
-            80_000.0
+            Some(80_000.0)
         );
-        assert_eq!(legal_gvw_lb_for_route("general", ["NY"]), 80_000.0);
+        assert_eq!(legal_gvw_lb_for_route("general", ["NY"]), Some(80_000.0));
         // Turnpike doubles take the recorded turnpike caps.
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["OH", "IN"]),
-            127_400.0
+            Some(127_400.0)
         );
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["MA"]),
-            127_400.0
+            Some(127_400.0)
         );
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["NY", "NY"]),
-            143_000.0
+            Some(143_000.0)
         );
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["KS"]),
-            120_000.0
+            Some(120_000.0)
         );
         // A Thruway run into Massachusetts is held to the lower cap.
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["NY", "MA"]),
-            127_400.0
+            Some(127_400.0)
         );
-        // Unknown state or no route: the federal cap.
+        // A state with no recorded cap, or no route: refused, never held to
+        // 80,000 lb -- 48-foot doubles are not legal there at any weight.
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", ["NY", "PA"]),
-            80_000.0
+            None
         );
         assert_eq!(
             legal_gvw_lb_for_route("turnpike_doubles", std::iter::empty()),
-            80_000.0
+            None
+        );
+        // Twin 28s keep 80,000 lb with or without a route.
+        assert_eq!(
+            legal_gvw_lb_for_route("parcel_doubles", std::iter::empty()),
+            Some(80_000.0)
         );
     }
 }

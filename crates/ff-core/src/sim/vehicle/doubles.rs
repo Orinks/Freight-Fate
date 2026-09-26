@@ -73,11 +73,18 @@ impl TrailerSet {
     /// What a load of this cargo hooks on this route: a set of doubles with
     /// the route's legal gross for doubles freight, the stock single
     /// otherwise. The legal gross reads the states of every city the route
-    /// passes (`models::doubles::legal_gvw_lb_for_route`); no route, or a
-    /// city the world does not know, holds turnpike doubles to 80,000 lb.
-    pub fn for_cargo_on_route(cargo_key: &str, world: &World, route: Option<&Route>) -> Self {
+    /// passes (`models::doubles::legal_gvw_lb_for_route`).
+    ///
+    /// None when the set is not legal on this route at any weight: turnpike
+    /// doubles on a route through a state with no recorded LCV cap, or with
+    /// no route at all. Callers refuse that route or offer no job.
+    pub fn for_cargo_on_route(
+        cargo_key: &str,
+        world: &World,
+        route: Option<&Route>,
+    ) -> Option<Self> {
         let Some(trailer_key) = doubles_trailer_for_cargo(cargo_key) else {
-            return TrailerSet::default();
+            return Some(TrailerSet::default());
         };
         let states: Vec<&str> = route
             .map(|r| {
@@ -87,7 +94,43 @@ impl TrailerSet {
                     .collect()
             })
             .unwrap_or_default();
-        TrailerSet::for_trailer(trailer_key, legal_gvw_lb_for_route(cargo_key, states))
+        legal_gvw_lb_for_route(cargo_key, states)
+            .map(|cap_lb| TrailerSet::for_trailer(trailer_key, cap_lb))
+    }
+
+    /// What a load of this cargo hooks between two cities, priced on the
+    /// routes dispatch will offer for it. Turnpike doubles look at the same
+    /// three options the route menu does, keep the ones on the LCV turnpike
+    /// allowlist with a recorded cap in every state, and take the lowest cap
+    /// among them, so whichever lane is driven the load is legal. None when
+    /// no such lane exists. Everything else reads the shortest route.
+    pub fn for_cargo_between(
+        cargo_key: &str,
+        world: &World,
+        origin: &str,
+        destination: &str,
+    ) -> Option<Self> {
+        if !cargo_requires_lcv_turnpike(cargo_key) {
+            let route = world
+                .supported_route(origin, destination, None)
+                .ok()
+                .flatten();
+            return Self::for_cargo_on_route(cargo_key, world, route.as_ref());
+        }
+        let routes = world.supported_route_options(origin, destination, 3).ok()?;
+        filter_lcv_turnpike_routes(&routes)
+            .iter()
+            .filter_map(|route| Self::for_cargo_on_route(cargo_key, world, Some(route)))
+            .min_by(|a, b| a.legal_gvw_kg.total_cmp(&b.legal_gvw_kg))
+    }
+
+    /// A set hooked on a road it is not legal on at any weight: the legal
+    /// gross is zero, so the live overweight check red-lights it and the
+    /// scale ticket says so. Only reachable if a route slipped past the
+    /// refusals (an old save); never a silent 80,000 lb.
+    pub fn not_legal_on_route(cargo_key: &str) -> Self {
+        let trailer_key = doubles_trailer_for_cargo(cargo_key).unwrap_or("");
+        TrailerSet::for_trailer(trailer_key, 0.0)
     }
 
     pub fn is_doubles(&self) -> bool {
@@ -205,7 +248,9 @@ impl TruckState {
         let lb = |kg: f64| (kg / KG_PER_LB).round();
         let gross = lb(self.gross_mass_kg());
         let limit = self.trailer_set.legal_gvw_lb().round();
-        let verdict = if gross > limit {
+        let verdict = if limit <= 0.0 {
+            "This set is not legal on this route at any weight.".to_string()
+        } else if gross > limit {
             format!(
                 "{} pounds over the {} pound gross limit for this set on this route.",
                 fmt_grouped(gross - limit, 0),
@@ -218,8 +263,7 @@ impl TruckState {
             )
         };
         format!(
-            "Gross {} pounds, both trailers and the converter dolly included. {verdict} \
-             Axle groups on a set of doubles are not broken out on this ticket.",
+            "Gross {} pounds, both trailers and the converter dolly included. {verdict}",
             fmt_grouped(gross, 0)
         )
     }

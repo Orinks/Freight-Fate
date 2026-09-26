@@ -1615,11 +1615,13 @@ fn doubles_loads_stay_under_their_route_cap_with_both_trailers_and_the_dolly() {
                 },
             );
             for job in jobs {
-                let set = TrailerSet::for_cargo_on_route(
+                let set = TrailerSet::for_cargo_between(
                     job.cargo.key,
                     world(),
-                    supported(&job).as_ref(),
-                );
+                    &job.origin,
+                    &job.destination,
+                )
+                .expect("an offered load has a legal set on its lanes");
                 if !set.is_doubles() {
                     continue;
                 }
@@ -1637,7 +1639,8 @@ fn doubles_loads_stay_under_their_route_cap_with_both_trailers_and_the_dolly() {
                     }
                     "turnpike_doubles" => {
                         turnpike += 1;
-                        assert!(set.legal_gvw_lb().round() >= 80_000.0);
+                        // A recorded turnpike cap, never the 80,000 fallback.
+                        assert!(set.legal_gvw_lb().round() >= 120_000.0);
                     }
                     _ => {}
                 }
@@ -1648,4 +1651,67 @@ fn doubles_loads_stay_under_their_route_cap_with_both_trailers_and_the_dolly() {
         pups + turnpike > 0,
         "no seeded board offered a set of doubles"
     );
+}
+
+#[test]
+fn every_offered_turnpike_doubles_lane_has_a_cap_in_every_state() {
+    // Two 48-foot trailers are illegal off the LCV turnpikes at any weight,
+    // so there is no 80,000 lb fallback: every lane the route menu can offer
+    // for an offered load must touch only states with a recorded cap.
+    use crate::data::lcv_turnpikes::{filter_lcv_turnpike_routes, lcv_turnpike_gvw_cap_lb};
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    let mut checked = 0;
+    for city in [
+        "Toledo",
+        "Elkhart",
+        "Gary",
+        "South Bend",
+        "Buffalo",
+        "Syracuse",
+        "Albany",
+        "Rochester",
+        "Wichita",
+        "Topeka",
+        "Boston",
+        "Springfield",
+    ] {
+        for seed in 0..8 {
+            let jobs = board(seed).offers(
+                city,
+                &every_credential,
+                OfferOptions {
+                    count: 12,
+                    level: 30,
+                    ..Default::default()
+                },
+            );
+            for job in jobs.iter().filter(|j| j.cargo.key == "turnpike_doubles") {
+                let routes = world()
+                    .supported_route_options(&job.origin, &job.destination, 3)
+                    .expect("the world routes");
+                let lanes = filter_lcv_turnpike_routes(&routes);
+                assert!(
+                    !lanes.is_empty(),
+                    "{} offered with no turnpike lane",
+                    job.origin
+                );
+                for lane in &lanes {
+                    for key in &lane.cities {
+                        let state = world()
+                            .cities
+                            .get(key)
+                            .map_or("", |c| c.state_code.as_str());
+                        assert!(
+                            lcv_turnpike_gvw_cap_lb(state).is_some(),
+                            "{} -> {} runs through {key} ({state}) with no recorded LCV cap",
+                            job.origin,
+                            job.destination
+                        );
+                    }
+                }
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 0, "no seeded board offered turnpike doubles");
 }
