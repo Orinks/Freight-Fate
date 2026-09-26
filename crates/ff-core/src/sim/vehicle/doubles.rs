@@ -22,8 +22,9 @@ use crate::data::lcv_turnpikes::{cargo_requires_lcv_turnpike, filter_lcv_turnpik
 use crate::data::world::World;
 use crate::data::world_models::Route;
 use crate::models::doubles::{
-    doubles_trailer_for_cargo, legal_gvw_lb_for_route, rearward_amplification,
-    trailer_set_extra_tare_kg, trailer_units, DOUBLES_NO_REVERSE_TEXT, REAR_TRAILER_FREIGHT_SHARE,
+    doubles_trailer_for_cargo, legacy_trip_legal_gvw_lb, legal_gvw_lb_for_route,
+    rearward_amplification, trailer_set_extra_tare_kg, trailer_units, DOUBLES_NO_REVERSE_TEXT,
+    REAR_TRAILER_FREIGHT_SHARE,
 };
 use crate::pyfmt::fmt_grouped;
 use crate::sim::transmission::ShiftResult;
@@ -124,13 +125,25 @@ impl TrailerSet {
             .min_by(|a, b| a.legal_gvw_kg.total_cmp(&b.legal_gvw_kg))
     }
 
-    /// A set hooked on a road it is not legal on at any weight: the legal
-    /// gross is zero, so the live overweight check red-lights it and the
-    /// scale ticket says so. Only reachable if a route slipped past the
-    /// refusals (an old save); never a silent 80,000 lb.
-    pub fn not_legal_on_route(cargo_key: &str) -> Self {
+    /// The set for a trip already under way that [`Self::for_cargo_on_route`]
+    /// refuses: turnpike doubles dispatched under the old rules on a lane
+    /// through a state with no recorded cap. The trip is grandfathered and
+    /// finishes clean (`models::doubles::legacy_trip_legal_gvw_lb`): the
+    /// lowest recorded cap among its capped states, or 80,000 lb.
+    pub fn legacy_trip_on_route(cargo_key: &str, world: &World, route: Option<&Route>) -> Self {
+        if let Some(set) = Self::for_cargo_on_route(cargo_key, world, route) {
+            return set;
+        }
         let trailer_key = doubles_trailer_for_cargo(cargo_key).unwrap_or("");
-        TrailerSet::for_trailer(trailer_key, 0.0)
+        let states: Vec<&str> = route
+            .map(|r| {
+                r.cities
+                    .iter()
+                    .map(|key| world.cities.get(key).map_or("", |c| c.state_code.as_str()))
+                    .collect()
+            })
+            .unwrap_or_default();
+        TrailerSet::for_trailer(trailer_key, legacy_trip_legal_gvw_lb(states))
     }
 
     pub fn is_doubles(&self) -> bool {
@@ -248,9 +261,7 @@ impl TruckState {
         let lb = |kg: f64| (kg / KG_PER_LB).round();
         let gross = lb(self.gross_mass_kg());
         let limit = self.trailer_set.legal_gvw_lb().round();
-        let verdict = if limit <= 0.0 {
-            "This set is not legal on this route at any weight.".to_string()
-        } else if gross > limit {
+        let verdict = if gross > limit {
             format!(
                 "{} pounds over the {} pound gross limit for this set on this route.",
                 fmt_grouped(gross - limit, 0),

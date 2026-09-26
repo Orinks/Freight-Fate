@@ -87,13 +87,13 @@ impl DrivingState {
         // A loaded run pulls the trailer set the job was booked on: a set of
         // doubles weighs two trailers and a dolly, carries its route's gross
         // cap, and handles like doubles. Pickup deadheads haul one empty.
-        // A route the set is not legal on at any weight was refused at the
-        // route menu; one that slipped past (an old save) red-lights as
-        // overweight rather than borrowing an 80,000 lb limit.
+        // New jobs on a lane through a state with no recorded turnpike cap
+        // are refused at the board and the route menu. A trip already under
+        // way on one (an old save, dispatched under the old rules) is
+        // grandfathered and finishes clean at its legacy limit.
         if phase == DRIVE_PHASE_DELIVERY && !job.bobtail {
             truck.trailer_set =
-                TrailerSet::for_cargo_on_route(job.cargo.key, ctx.world, Some(&route))
-                    .unwrap_or_else(|| TrailerSet::not_legal_on_route(job.cargo.key));
+                TrailerSet::legacy_trip_on_route(job.cargo.key, ctx.world, Some(&route));
         }
         truck.transmission.automatic = ctx.settings.automatic_transmission;
         // How well this freight survives being thrown about. Fed to the truck

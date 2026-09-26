@@ -217,6 +217,24 @@ where
     cap
 }
 
+/// The legal gross, pounds, for a turnpike-doubles trip already under way on
+/// a lane dispatched under the old rules, before routes through uncapped
+/// states were refused. That trip finishes clean, the way a double_van
+/// lessee's trip under way does: it takes the lowest recorded cap among the
+/// states on its route that have one, or 80,000 lb if none does. New jobs on
+/// such lanes are still refused ([`legal_gvw_lb_for_route`]).
+pub fn legacy_trip_legal_gvw_lb<'a, I>(state_codes: I) -> f64
+where
+    I: IntoIterator<Item = &'a str>,
+{
+    state_codes
+        .into_iter()
+        .filter_map(lcv_turnpike_gvw_cap_lb)
+        .map(f64::from)
+        .reduce(f64::min)
+        .unwrap_or(STANDARD_GVW_LB)
+}
+
 /// The walk-around and hook-up clause for a set of doubles, spoken and shown
 /// at the shipper. Empty for single-trailer freight.
 pub fn doubles_hook_text(cargo_key: &str) -> String {
@@ -368,5 +386,13 @@ mod tests {
             legal_gvw_lb_for_route("parcel_doubles", std::iter::empty()),
             Some(80_000.0)
         );
+    }
+
+    #[test]
+    fn a_legacy_trip_takes_its_lowest_recorded_cap_or_eighty_thousand() {
+        assert_eq!(legacy_trip_legal_gvw_lb(["NY", "PA"]), 143_000.0);
+        assert_eq!(legacy_trip_legal_gvw_lb(["NY", "PA", "KS"]), 120_000.0);
+        assert_eq!(legacy_trip_legal_gvw_lb(["IL", "WI"]), 80_000.0);
+        assert_eq!(legacy_trip_legal_gvw_lb([]), 80_000.0);
     }
 }

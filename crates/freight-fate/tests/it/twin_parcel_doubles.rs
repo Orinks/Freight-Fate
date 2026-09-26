@@ -257,3 +257,29 @@ fn full_lane_keeping_changes_lanes_gently_with_no_whip() {
     assert_eq!(d.trip.truck.cargo_damage_pct, damage);
     assert!(!app.main_lines().iter().any(|l| l == REAR_TRAILER_WHIP_TEXT));
 }
+
+#[test]
+fn a_legacy_turnpike_doubles_trip_on_an_uncapped_lane_finishes_clean() {
+    // Dispatched under the old rules, before lanes through uncapped states
+    // were refused: Buffalo to Erie crosses into Pennsylvania (no recorded
+    // cap), and Chicago to Milwaukee has no capped state at all. The trip
+    // already under way is grandfathered, not red-lighted.
+    let mut app = TestApp::new();
+    for (origin, destination, cap) in [
+        ("Buffalo", "Erie", 143_000.0),
+        ("Chicago", "Milwaukee", 80_000.0),
+    ] {
+        let legacy = drive(&mut app, "turnpike_doubles", origin, destination, 14.0);
+        let truck = &legacy.trip.truck;
+        assert!(truck.doubles_hooked());
+        assert_eq!(truck.trailer_set.legal_gvw_lb().round(), cap);
+        assert!(!truck.is_over_legal_gvw());
+        // The scale verdict that decides a red light and a fine.
+        assert!(!legacy.cargo_is_overweight());
+        let ticket = truck.scale_ticket_text();
+        assert!(!ticket.contains("not legal"), "{ticket}");
+        let cap_text = if cap > 100_000.0 { "143,000" } else { "80,000" };
+        assert!(ticket.contains(cap_text), "{ticket}");
+        assert!(ticket.contains("Legal"), "{ticket}");
+    }
+}
