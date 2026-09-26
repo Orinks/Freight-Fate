@@ -26,7 +26,7 @@ use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::truck_parking::TruckParkingProvider;
 use ff_core::sim::turn_guide::TurnGuide;
-use ff_core::sim::vehicle::TruckState;
+use ff_core::sim::vehicle::{TrailerSet, TruckState};
 use ff_core::sim::weather::WeatherProvider;
 
 use crate::app::GameContext;
@@ -84,6 +84,17 @@ impl DrivingState {
         // A reposition run is the tractor alone -- nothing on the fifth
         // wheel. Pickup deadheads haul their empty box.
         truck.trailer_attached = !job.bobtail;
+        // A loaded run pulls the trailer set the job was booked on: a set of
+        // doubles weighs two trailers and a dolly, carries its route's gross
+        // cap, and handles like doubles. Pickup deadheads haul one empty.
+        // New jobs on a lane through a state with no recorded turnpike cap
+        // are refused at the board and the route menu. A trip already under
+        // way on one (an old save, dispatched under the old rules) is
+        // grandfathered and finishes clean at its legacy limit.
+        if phase == DRIVE_PHASE_DELIVERY && !job.bobtail {
+            truck.trailer_set =
+                TrailerSet::legacy_trip_on_route(job.cargo.key, ctx.world, Some(&route));
+        }
         truck.transmission.automatic = ctx.settings.automatic_transmission;
         // How well this freight survives being thrown about. Fed to the truck
         // because the forces that move a load are the truck's, but what the
@@ -478,6 +489,7 @@ impl DrivingState {
             ramp_green_roll_said: false,
             ramp_assist_brake: 0.0,
             approach_pull_ahead: false,
+            rear_whip_cooldown_s: 0.0,
             approach_pull_ahead_canceled: false,
             street_bar_mi: None,
             street_control_kind: String::new(),

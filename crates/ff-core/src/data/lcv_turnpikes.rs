@@ -41,7 +41,9 @@ pub const LCV_TURNPIKE_ROUTE_REFUSAL: &str = "Dispatch only clears long doubles 
 pub const LCV_TURNPIKE_REROUTE_NOTE: &str = "Dispatch dropped a lane that leaves the turnpike.";
 
 /// Per-state LCV GVW caps on the classic turnpike systems, in pounds.
-/// Recorded for FIX 5; not enforced by routing or the job board yet.
+/// Enforced as the legal gross for a turnpike double through
+/// `models::doubles::legal_gvw_lb_for_route`: the job board caps the load
+/// and the live overweight check and scale ticket use the route's cap.
 ///
 /// OH / IN / MA: 127,400 lb. NY: 143,000 lb. KS: 120,000 lb.
 pub const LCV_TURNPIKE_GVW_CAP_LB: &[(&str, u32)] = &[
@@ -143,7 +145,7 @@ fn route_has_forbidden_endpoint(route: &Route) -> bool {
     false
 }
 
-/// GVW cap in pounds for a turnpike state, when one is recorded for FIX 5.
+/// GVW cap in pounds for a turnpike state, when one is recorded.
 pub fn lcv_turnpike_gvw_cap_lb(state_code: &str) -> Option<u32> {
     let state = state_code.trim().to_uppercase();
     LCV_TURNPIKE_GVW_CAP_LB

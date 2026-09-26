@@ -94,7 +94,7 @@ impl RestStopState {
             profile_mut_of(ctx).spend(price);
         }
         let Some((text, now)) = self.driving.clone().with(ctx, |d, ctx| {
-            let ticket = d.trip.truck.axle_loads().ticket_text();
+            let ticket = d.trip.truck.scale_ticket_text();
             advance_rest_clock(
                 d,
                 ctx,

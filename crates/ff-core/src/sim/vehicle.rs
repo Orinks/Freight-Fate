@@ -19,6 +19,7 @@ mod air;
 mod axles;
 mod condition;
 mod descent;
+mod doubles;
 mod forces;
 mod hotel;
 mod mass;
@@ -28,6 +29,7 @@ mod updates;
 
 pub use axles::{AxleLoads, TANDEM_LIMIT_LB};
 pub use descent::{DESCENT_SPEED_STEP_MPH, GSRS_BRAKE_LIMIT_C};
+pub use doubles::{combination_tare_for_trailer_kg, TrailerSet, REAR_WHIP_MIN_MPH};
 pub use hotel::{
     cargo_needs_reefer_key, reefer_running_announcement, spoken_cargo_temp_degrees, HotelEvents,
     APU_BURN_GAL_PER_S, REEFER_BAND_C, REEFER_BURN_GAL_PER_S, REEFER_DRIFT_RATE, REEFER_HOLD_RATE,
@@ -543,6 +545,10 @@ pub struct TruckState {
     /// Deadheading with an empty box keeps this True; the difference is the
     /// trailer's tare, its air line, and how a light box gets shifted.
     pub trailer_attached: bool,
+    /// What is on the fifth wheel when `trailer_attached`: one box, or a set
+    /// of doubles with its own tare, legal gross and handling. Not persisted;
+    /// the driving layer sets it from the job, as it does `liquid`.
+    pub trailer_set: TrailerSet,
 
     // environment, set each frame by the trip/weather layer
     /// +uphill, e.g. 0.06 = 6%
@@ -678,6 +684,7 @@ impl TruckState {
             odometer_mi: 0.0,
             cargo_kg: REFERENCE_CARGO_KG,
             trailer_attached: true,
+            trailer_set: TrailerSet::default(),
             grade: 0.0,
             grip: 1.0,
             water_mm: 0.0,
@@ -935,10 +942,17 @@ impl TruckState {
         self.tare_kg() + self.cargo_kg.max(0.0)
     }
 
-    /// Whether this combination is over the federal 80,000 lb GVW cap.
-    /// Includes the tractor, attached trailer, cargo, and remaining diesel.
+    /// Whether this combination is over its legal gross: the federal
+    /// 80,000 lb cap, or a turnpike-doubles set's route cap
+    /// (`trailer_set.legal_gvw_kg`). Includes the tractor, attached
+    /// trailers and dolly, cargo, and remaining diesel.
     pub fn is_over_legal_gvw(&self) -> bool {
-        self.gross_mass_kg() > LEGAL_GVW_KG
+        self.gross_mass_kg() > self.legal_gvw_kg()
+    }
+
+    /// The legal gross for what is hooked, kilograms.
+    pub fn legal_gvw_kg(&self) -> f64 {
+        self.trailer_set.legal_gvw_kg
     }
 
     /// Engine RPM implied by road speed in the given gear (the current gear

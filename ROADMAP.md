@@ -2119,8 +2119,7 @@ there, with the truck starting at that carrier's terminal.
 ### Twin parcel / STAA doubles (Track A)
 
 STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
-LCV turnpike doubles on permitted toll roads. FIX 3–5 are intentionally
-not started here.
+LCV turnpike doubles on permitted toll roads.
 
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
@@ -2196,13 +2195,69 @@ not started here.
       Turnpike's east end,** so an I-70 Topeka–Kansas City, KS leg can exist.
       Missouri stays outside the LCV gate. Needs a realism review before it
       lands.
-- [ ] **FIX 3: Dual hook time** (not started).
-- [ ] **FIX 4: Pup handling** (not started).
-- [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
-      shares the stock trailer tare / legal-GVW clamp. Per-corridor LCV
-      GVW caps are recorded in `data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`
-      (OH/IN/MA 127,400 lb; NY 143,000 lb; KS 120,000 lb) but not enforced
-      yet.
+- [x] **FIX 3: Dual hook time (landed).** A set of doubles adds a second
+      hook-up (15 min) and a walk-around of both trailers and the converter
+      dolly (10 min) at the shipper: 25 extra on-duty minutes, spoken at
+      check-in and loading and shown on the pickup screen. The walk-around at
+      a stop takes 25 minutes with doubles hooked. Both minute figures are
+      ASSUMED (`models::doubles`); no public time study was found.
+      Breaking the set at delivery adds 15 minutes on duty, spoken and
+      shown at the receiver.
+- [x] **FIX 4: Pup handling (landed).** The rear trailer's lateral
+      acceleration is the tractor's quick-steer acceleration times the
+      rearward amplification (STAA pups 1.7, READ from FHWA 2000 CTSW Vol III
+      Ch VIII; turnpike doubles about 1.36, DERIVED from Figure VIII-11).
+      Above 40 mph a whip past the roll-warning share of the loaded
+      threshold shifts the rear trailer's freight and speaks a warning. Gusts
+      sway the rear trailer (amplified, harder on a light set); the tractor's
+      own drift is unchanged. Reverse is refused with doubles hooked.
+- [x] **FIX 5: Twin tare and GVW (landed).** Gross weight counts both
+      trailers and the converter dolly: pups 2 × 6,185 lb + a 2,740 lb dolly
+      (DERIVED from FHWA 2014 CTSW Table 4 and the Silver Eagle VAST-20 spec
+      sheet); turnpike doubles the stock trailer plus 16,200 lb (DERIVED from
+      FHWA 2000 CTSW Table V-3). Legal gross is 80,000 lb for pups and the
+      lowest recorded turnpike cap along the route for turnpike doubles
+      (`data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`); a turnpike-doubles
+      route through a state with no cap is refused, never held to 80,000 lb.
+      A trip already under way on one from an older save is grandfathered:
+      the lowest recorded cap among its capped states, or 80,000 lb.
+      The job board clamp, live overweight check, board weight line and CAT
+      Scale ticket use it.
+- [x] **Realism review of FIX 3–5 (landed).** Kept: 15 / 10 minute pickup
+      times, the 6,185 lb pup tare (light against real 28s at about 6,500
+      to 7,500 lb, but inside tolerance), the unsplit 16,200 lb turnpike
+      set, the 1.36 amplification reading and the minimum-cap rule. Fixed:
+      breaking the set at delivery takes 15 minutes on duty; amplification
+      applies to the rear trailer's sway and whip only, never the tractor's
+      drift; the whip threshold is floored at the loaded pup's and a light
+      set sways harder in a gust; the doubles scale ticket drops its axle
+      sentence; turnpike doubles on a route through a state with no
+      recorded cap are refused, never held to 80,000 lb.
+- [x] **Second realism rulings on FIX 3–5 (landed).** A legacy
+      turnpike-doubles trip on an uncapped lane finishes clean at the
+      lowest recorded cap among its capped states, or 80,000 lb; new jobs
+      stay refused. Gust sway uses a fixed reference mass per program
+      (80,000 lb pups, 127,400 lb turnpike doubles), never the route cap,
+      with the reference-over-actual ratio clamped to 1.0–2.0.
+- [ ] **Honesty debt: deadhead to a doubles pickup.** The run to a
+      doubles shipper pulls one empty trailer. It should be bobtail or an
+      empty set of doubles.
+- [ ] **Honesty debt: gross only on a doubles scale ticket.** Real tickets
+      print each platform; the three-group axle model does not cover a
+      set's extra axles, so the game reads gross and the legal limit only.
+- [ ] **Honesty debt: assumed doubles handling figures.** The 40 mph whip
+      floor and the 3 s steady-state filter are assumed. The gust shove is
+      the lane model's gust read as an acceleration, taken as the push on a
+      combination at the program's fixed reference mass (80,000 lb pups,
+      127,400 lb turnpike doubles) and scaled up for a lighter set, at
+      most 2x (`models::doubles::LIGHT_SET_SWAY_MAX`). Neither the push
+      nor the clamp is calibrated against a measurement.
+      The rear trailer feels the driver's share of the tractor's steer
+      (keys, stick and the lane-keeping helper, never a bend's tracking
+      steer) rate-limited to 0.3 g/s
+      (`sim::lane::REAR_WHIP_STEER_SLEW_G_PER_S`, ASSUMED), because a
+      steering key is a switch that steps the tractor to its lateral cap in
+      one frame; the slew is not calibrated either.
 
 ### Travel-center bulk fuel (non-blocking)
 

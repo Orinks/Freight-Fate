@@ -93,7 +93,7 @@ impl TruckState {
     /// The tractor alone, with whatever diesel is aboard.
     fn tractor_kg(&self) -> f64 {
         let trailer = if self.trailer_attached {
-            TRAILER_TARE_KG
+            self.trailer_set.tare_kg
         } else {
             0.0
         };
