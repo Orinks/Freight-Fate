@@ -1628,10 +1628,6 @@
 - **The nearest town, the grade, the zone, and the next maneuver left the R
   readout.** Each has its own key or lives in the Tab status menu.
 
-- **Shorter driving readouts that fit a braille display.** The clock, route,
-  weather, and fuel reports put the answer in the first few words, and C
-  leads with the time and whether you are on schedule.
-
 - **Rest stops no longer let you sleep twice for nothing.** Already fully
   rested, a sleep option warns it would only move the clock and your
   deadline forward and asks for Enter again.
@@ -4932,14 +4928,6 @@
 - **The lane-drift rumble is now directional.** When you wander toward a lane
   edge, the rumble strip plays from that side -- drift right and you hear it on
   the right -- so the ear it lands in tells you which way to steer back.
-- **Safety announcements no longer get buried, and you get more warning.** Zone
-  entries, construction and traffic warnings, and checkpoints now preempt
-  ambient chatter (weather, tolls, state lines) on the event voice instead of
-  queuing behind it -- so a "construction ahead" never arrives after you have
-  already entered the zone. Zone warnings also lead by real time now, not a
-  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
-  high time compression gets a usefully earlier callout instead of a couple of
-  seconds.
 
 ### Added
 - **Repeat the market watch on the dispatch board.** The board speaks which

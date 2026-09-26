@@ -21,7 +21,7 @@
 > conveyance controls remain in the 2.0 plan.
 
 > Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release: **1.9.0**, in
-> flight on the `feat/career-1.9` branch -- driving realism between the exits
+> flight on `dev`, released from `main` -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
 > highway-spider world expansion, roadside narration, and real time zones.
 > `pyproject` is set to 1.9.0 so developer snapshots report it; the stable tag
@@ -40,7 +40,7 @@ The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
 bookmarks usable.
 
-## 1.9 in flight (`feat/career-1.9`)
+## 1.9 in flight (ships from `dev` and `main`)
 
 - [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
       intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
@@ -199,7 +199,7 @@ Driving and platform:
 The owner's:
 
 - [ ] Listening pass on the new synth voices per style
-      ([above](#19-in-flight-featcareer-19)).
+      ([above](#19-in-flight-ships-from-dev-and-main)).
 - [ ] Listening pass and a longer drive over wear thresholds and
       interrupted warnings ([September 11](#september-11-trucking-corrections)).
 - [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
