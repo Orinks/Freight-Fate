@@ -29,7 +29,7 @@ pub(super) fn load_weight_margin(world: &World, p: &Profile, job: &Job) -> Strin
     );
     if truck.trailer_set.is_doubles() {
         text.push_str(&format!(
-            " The limit for this set of doubles on this route is {} pounds, counting both \
+            " The limit for this set of doubles on the lanes offered is {} pounds, counting both \
              trailers and the converter dolly.",
             fmt_grouped(truck.trailer_set.legal_gvw_lb().round(), 0)
         ));
