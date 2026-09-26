@@ -116,7 +116,8 @@ pub struct DrivingStatusScreenState {
 /// Map screen can mention opening a stop's details. The radio screen stays.
 fn screen_intro_help(screen: &str) -> &'static str {
     if screen == "map" {
-        return "Up and down review the lines. Enter repeats a line, or opens details on a stop line. Escape goes back.";
+        return "Up and down review the lines. Enter repeats a line, or opens details on a \
+                stop line. Escape goes back.";
     }
     "Up and down review the lines. Enter repeats a line. Escape goes back."
 }
@@ -405,25 +406,32 @@ impl DrivingStatusScreenState {
                         "Streamer-safe mode on, with Music source set to Synthesized.".to_string(),
                     );
                     lines.push(format!(
-                        "Streamer-safe mode keeps the radio on the Roadhouse. Station keys do nothing. {} turns the radio on or off. Shift with Page Down and Page Up, or semicolon and apostrophe, changes radio volume by 10 percent.",
+                        "Streamer-safe mode keeps the radio on the Roadhouse. Station keys do \
+                         nothing. {} turns the radio on or off. Shift with Page Down and Page \
+                         Up, or semicolon and apostrophe, changes radio volume by 10 percent.",
                         ctx.bindings.spoken(Action::Radio)
                     ));
                 } else {
                     lines.push(if !ctx.settings.radio_streamer_safe {
-                        "Streamer-safe mode off. Real public streams and personal playlists are on the dial."
+                        "Streamer-safe mode off. Real public streams and personal playlists are \
+                         on the dial."
                             .to_string()
                     } else {
-                        "Streamer-safe mode on. Real public streams and personal playlists are hidden."
+                        "Streamer-safe mode on. Real public streams and personal playlists are \
+                         hidden."
                             .to_string()
                     });
                     if ctx.settings.synth_music && !ctx.settings.radio_streamer_safe {
                         lines.push(
-                            "Music source Synthesized: Freight Fate's own stations are off the dial."
+                            "Music source Synthesized: Freight Fate's own stations are off \
+                             the dial."
                                 .to_string(),
                         );
                     }
                     lines.push(
-                        "Page Down and Page Up tune stations, or semicolon and apostrophe. With Control they jump categories. With Shift they change radio volume by 10 percent. O saves the station as a favorite. M toggles the radio."
+                        "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
+                         Control they jump categories. With Shift they change radio volume by \
+                         10 percent. O saves the station as a favorite. M toggles the radio."
                             .to_string(),
                     );
                 }

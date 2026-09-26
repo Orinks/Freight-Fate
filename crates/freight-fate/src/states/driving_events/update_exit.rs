@@ -338,7 +338,8 @@ impl DrivingState {
     /// Rodick, Hattiesburg, 2026-08-26: "it never rerouted me").
     fn missed_exit_recovery(stop: &RoadStop) -> &'static str {
         if stop.stop_type == "delivery_destination" {
-            "Stay on the highway. You loop back through the safe turnaround and the destination exit comes around again."
+            "Stay on the highway. You loop back through the safe turnaround and the destination \
+             exit comes around again."
         } else {
             "Stay on the highway and recover at the next safe exit."
         }
@@ -349,7 +350,8 @@ impl DrivingState {
     /// deliberately leave the driver to choose whether to come back at all.
     fn missed_destination_note(stop: &RoadStop) -> &'static str {
         if stop.stop_type == "delivery_destination" {
-            " You loop back through the safe turnaround, and the destination exit comes around again."
+            " You loop back through the safe turnaround, and the destination exit comes around \
+             again."
         } else {
             ""
         }
@@ -434,7 +436,8 @@ impl DrivingState {
                 self.say_confirmation_event(
                     ctx,
                     &format!(
-                        "Traffic boxed you out of the exit lane at the gore, so you missed {missed}. {recovery}"
+                        "Traffic boxed you out of the exit lane at the gore, so you missed \
+                         {missed}. {recovery}"
                     ),
                 );
             } else {
@@ -676,11 +679,13 @@ impl DrivingState {
         let place = stop.name.clone();
         let mut message = if self.terse_speech(ctx) {
             format!(
-                "Drove past {place}; you never stopped. Safe turnaround. {place} ahead again; stop this time."
+                "Drove past {place}; you never stopped. Safe turnaround. {place} ahead again; \
+                 stop this time."
             )
         } else {
             format!(
-                "Drove past {place} without stopping. You loop back through the next safe turnaround. {place} is ahead again, stop this time. The clock is still running."
+                "Drove past {place} without stopping. You loop back through the next safe \
+                 turnaround. {place} is ahead again, stop this time. The clock is still running."
             )
         };
         if self.ramp_terminal_miss_count >= 2 {

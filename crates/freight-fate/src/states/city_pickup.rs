@@ -129,7 +129,8 @@ pub fn route_planning_summary(route: &Route) -> String {
         "No known tolls on this route.".to_string()
     };
     format!(
-        "{hos_summary} Fuel-capable stops: {fuel_stops}. Sleep-capable stops: {sleep_stops}. {toll_text} Terrain: {}. Parking notes are not a guaranteed open space.",
+        "{hos_summary} Fuel-capable stops: {fuel_stops}. Sleep-capable stops: {sleep_stops}. \
+         {toll_text} Terrain: {}. Parking notes are not a guaranteed open space.",
         route.terrain_summary()
     )
 }
@@ -182,7 +183,8 @@ pub fn route_departure_summary(route: &Route, settings: &Settings) -> String {
         String::new()
     };
     format!(
-        "Loaded trip is {} via {}.{toll_text}",
+        "Loaded trip is {} \
+         via {}.{toll_text}",
         settings.distance_text(route.miles(), false),
         route.highways().join(", then ")
     )
@@ -375,7 +377,8 @@ impl PickupFacilityState {
             menu: MenuCore::new("Pickup facility")
                 .with_open_sound(Some("facility/dock_gate"))
                 .with_intro_help(
-                    "Check in, then load cargo with the truck stopped. Escape repeats the pickup status.",
+                    "Check in, then load cargo with the truck stopped. Escape repeats the \
+                     pickup status.",
                 ),
             job,
             checked_in: opts.checked_in,
@@ -443,7 +446,8 @@ impl PickupFacilityState {
             None => "the posted limit when the open road begins".to_string(),
         };
         format!(
-            " Automatic speed control is paused; open-road target {target}. It will resume after departure once the truck is rolling."
+            " Automatic speed control is paused; open-road target \
+             {target}. It will resume after departure once the truck is rolling."
         )
     }
 
@@ -472,7 +476,8 @@ impl PickupFacilityState {
                 .map(|t| t.describe())
                 .unwrap_or_default();
             ctx.say(&format!(
-                "You already had the yard swap that one. {described} It checks out."
+                "You already had the yard swap that one. {described} \
+                 It checks out."
             ));
             return;
         }
@@ -487,7 +492,9 @@ impl PickupFacilityState {
         };
         ctx.audio.play("ui/warning");
         ctx.say(&format!(
-            "Walking {}, you find a {defect}. The trailer is {}. Pull out with it and the write-up is yours at the first scale. Refuse this trailer has the yard swap it, about {} minutes.{}",
+            "Walking {}, you find a {defect}. The trailer is {}. Pull out with it and the \
+             write-up is yours at the first scale. Refuse this trailer has the yard swap it, \
+             about {} minutes.{}",
             trailer.spoken_name(),
             trailer.condition_text(),
             fmt_f(TRAILER_SWAP_MIN, 0),
@@ -609,7 +616,8 @@ impl PickupFacilityState {
         let plan = self.pickup_plan(ctx);
         if plan.is_drop_hook() {
             ctx.say(&format!(
-                "Checked in at {facility}. Your load is on {} in the drop yard. Stop, then drop and hook.",
+                "Checked in at {facility}. Your load is on {} in the drop yard. Stop, then \
+                 drop and hook.",
                 plan.trailer
                     .as_ref()
                     .map(|t| t.spoken_name())
@@ -650,7 +658,8 @@ impl PickupFacilityState {
             (
                 "Hooking the loaded trailer",
                 format!(
-                    "Dropping your empty at {facility} and hooking {}, loaded with {} tons of {}.",
+                    "Dropping your empty at {facility} and hooking {}, loaded with {} tons \
+                     of {}.",
                     plan.trailer
                         .as_ref()
                         .map(|t| t.spoken_name())
@@ -900,7 +909,8 @@ impl PickupFacilityState {
             "Engine off"
         };
         let text = format!(
-            "Pickup at {}: {state}. {} tons of {}. Destination {}. Speed {}. {engine}. Air pressure {} psi, {brake}.{}",
+            "Pickup at {}: {state}. {} tons of {}. Destination {}. Speed {}. {engine}. Air \
+             pressure {} psi, {brake}.{}",
             self.facility(),
             fmt_f(self.job.weight_tons, 0),
             self.job.spoken_cargo_label(),
@@ -993,7 +1003,8 @@ impl Menu for PickupFacilityState {
         let facility = self.facility();
         let lead = if self.loaded {
             let mut lead = format!(
-                "Loaded at {facility}. The trailer is sealed for {}.",
+                "Loaded at {facility}. The trailer is sealed for \
+                 {}.",
                 self.job.spoken_destination()
             );
             if self.just_loaded {
@@ -1008,11 +1019,13 @@ impl Menu for PickupFacilityState {
                     let wait = fmt_f(plan.detention_minutes, 0);
                     if is_owner_operator(&profile(ctx).business_status) {
                         lead.push_str(&format!(
-                            " {wait} minutes past the free time, {dollars} dollars detention owed to you at settlement."
+                            " {wait} minutes past the free time, {dollars} dollars detention \
+                             owed to you at settlement."
                         ));
                     } else {
                         lead.push_str(&format!(
-                            " {wait} minutes past the free time, {dollars} dollars detention owed to the carrier."
+                            " {wait} minutes past the free time, {dollars} dollars detention \
+                             owed to the carrier."
                         ));
                     }
                 }
@@ -1069,13 +1082,15 @@ impl Menu for PickupFacilityState {
             .help("Starts the loaded run.")
         } else if self.checked_in && plan.is_drop_hook() {
             MenuItem::new("Drop and hook in the yard", |s: &mut Self, ctx| s.load(ctx)).help(
-                "Hooks the trailer the shipper already loaded. Quicker than a dock, but the trailer is whatever the yard has.",
+                "Hooks the trailer the shipper already loaded. Quicker than a dock, but the \
+                 trailer is whatever the yard has.",
             )
         } else if self.checked_in {
             let dock_help = if is_owner_operator(&profile(ctx).business_status) {
                 "Past two hours at the dock earns detention pay on this settlement."
             } else {
-                "Past two hours at the dock is billed as detention on the carrier settlement, not to you."
+                "Past two hours at the dock is billed as detention on the carrier settlement, \
+                 not to you."
             };
             MenuItem::new("Load cargo at dock", |s: &mut Self, ctx| s.load(ctx)).help(dock_help)
         } else {
@@ -1091,7 +1106,8 @@ impl Menu for PickupFacilityState {
                     s.walk_around(ctx)
                 })
                 .help(
-                    "Lamps, brake adjustment, and tires. Anything wrong is yours once you pull out of the gate.",
+                    "Lamps, brake adjustment, and tires. Anything wrong is yours once you pull \
+                     out of the gate.",
                 ),
             );
         }
@@ -1101,7 +1117,8 @@ impl Menu for PickupFacilityState {
                     s.refuse_trailer(ctx)
                 })
                 .help(format!(
-                    "The yard brings a sound one. About {} minutes, and the write-up stays with them.",
+                    "The yard brings a sound one. About {} minutes, and the write-up stays \
+                     with them.",
                     fmt_f(TRAILER_SWAP_MIN, 0)
                 )),
             );
@@ -1162,7 +1179,8 @@ impl Menu for PickupFacilityState {
                 }
             ),
             format!(
-                "Air: {} psi {}",
+                "Air: {} psi   \
+                 {}",
                 fmt_f(self.truck.air_pressure_psi(), 0),
                 if self.truck.parking_brake {
                     "parking set"
@@ -1176,7 +1194,9 @@ impl Menu for PickupFacilityState {
                 Some(mph) => ctx.settings.speed_text(mph),
                 None => "posted limit when the open road begins".to_string(),
             };
-            lines.push(format!("Speed control: paused. Open-road target: {target}"));
+            lines.push(format!(
+                "Speed control: paused   Open-road target: {target}"
+            ));
         }
         lines.push(String::new());
         for (i, item) in self.menu.items.iter().enumerate() {
@@ -1393,7 +1413,8 @@ impl Menu for RouteSelectState {
             format!("{} ", self.opts.dispatch_note)
         };
         ctx.say(&format!(
-            "Route planning to {}. {} route option{}. {dispatch_note}{current}",
+            "Route planning to {}. \
+             {} route option{}. {dispatch_note}{current}",
             self.job.spoken_destination(),
             self.routes.len(),
             if self.routes.len() != 1 { "s" } else { "" }
@@ -1411,7 +1432,10 @@ impl Menu for RouteSelectState {
                 .map(|note| format!(" {note}"))
                 .unwrap_or_default();
             let label = format!(
-                "Route {}: {}, {}. {}{note}",
+                "Route {}: \
+                 {}, \
+                 {}. \
+                 {}{note}",
                 i + 1,
                 route.describe(&ctx.settings.distance_text(route.miles(), false)),
                 Self::via_text(ctx, route),

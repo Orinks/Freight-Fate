@@ -254,7 +254,8 @@ impl DrivingState {
             let out_of_service = self.fatigue_out_of_service(ctx);
             ctx.say_event_with(
                 format!(
-                    "You cannot stay awake. You drift onto the shoulder and jolt awake on the brakes. {standing} {out_of_service}"
+                    "You cannot stay awake. You drift onto the shoulder and jolt awake on the \
+                     brakes. {standing} {out_of_service}"
                 ),
                 SayEvent::new().category(SpeechCategory::Safety),
             );
@@ -262,7 +263,8 @@ impl DrivingState {
             let damage = self.trip.truck.damage_pct;
             ctx.say_event_with(
                 format!(
-                    "You nodded off and drifted onto the rumble strip. Truck damage {damage:.0} percent. {standing}"
+                    "You nodded off and drifted onto the rumble strip. Truck damage {damage:.0} \
+                     percent. {standing}"
                 ),
                 SayEvent::new().category(SpeechCategory::Safety),
             );
@@ -297,7 +299,8 @@ impl DrivingState {
         self.trip.truck.set_parking_brake();
         self.place_out_of_service(ctx);
         format!(
-            "Out of service for fatigue, {:.0} hours off duty. It is now {}. Hours of service reset, and the delivery deadline kept counting.",
+            "Out of service for fatigue, {:.0} hours off duty. It is now {}. Hours of service \
+             reset, and the delivery deadline kept counting.",
             enforcement::FATIGUE_OUT_OF_SERVICE_HOURS,
             clock_text(self.trip.local_hour())
         )

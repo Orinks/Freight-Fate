@@ -88,7 +88,8 @@ impl Menu for ShoulderSleepConfirmationState {
                 s.sleep(ctx)
             })
             .help(
-                "Poor rest, possible ticket, possible minor truck damage, and deadline time lost.",
+                "Poor rest, possible ticket, possible minor truck damage, and deadline time \
+                 lost.",
             ),
         ]
     }
@@ -98,7 +99,9 @@ impl Menu for ShoulderSleepConfirmationState {
         let reason = self.reason.clone();
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{title}. {reason} Shoulder sleep is emergency-only. Ten hours of poor rest. Hours of service reset if enforced. Possible parking ticket, possible minor truck damage, and the deadline keeps counting. {current}"
+            "{title}. {reason} Shoulder sleep is emergency-only. Ten hours of poor rest. Hours \
+             of service reset if enforced. Possible parking ticket, possible minor truck damage, and the \
+             deadline keeps counting. {current}"
         ));
     }
 
@@ -113,7 +116,8 @@ impl Menu for ShoulderSleepConfirmationState {
         let hint = ctx.control_hint("parking_brake");
         ctx.say_with(
             format!(
-                "Shoulder sleep canceled. Back on the road. Parking brake set, {hint} releases it."
+                "Shoulder sleep canceled. Back on the road. Parking brake set, {hint} releases \
+                 it."
             ),
             Say::new(),
         );

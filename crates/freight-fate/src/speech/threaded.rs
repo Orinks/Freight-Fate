@@ -583,7 +583,8 @@ impl ThreadedSpeech {
     fn respawn(&mut self, stale_s: f64) {
         self.respawns += 1;
         log::error!(
-            "speech worker abandoned after {stale_s:.0}s inside a stuck speech call; starting a replacement with fresh voices (attempt {} of {})",
+            "speech worker abandoned after {stale_s:.0}s inside a stuck speech call; \
+             starting a replacement with fresh voices (attempt {} of {})",
             self.respawns,
             self.max_respawns
         );
@@ -712,7 +713,8 @@ impl SpeechSink for ThreadedSpeech {
         if stale > self.wedge_after_s && !self.wedged {
             self.wedged = true;
             log::error!(
-                "speech backend stopped responding {stale:.0}s ago (a wedged screen reader or SAPI call); the game continues without speech until it returns"
+                "speech backend stopped responding {stale:.0}s ago (a wedged screen reader \
+                 or SAPI call); the game continues without speech until it returns"
             );
         } else if stale <= self.wedge_after_s
             && self.wedged

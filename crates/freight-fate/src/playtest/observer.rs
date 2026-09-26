@@ -52,7 +52,8 @@ impl AutonomousObserver {
     pub fn new(hit: Hit) -> Result<Self, String> {
         if hit.origin_location.is_none() && hit.at_mi <= 0.0 {
             return Err(
-                "AI boundary: this selected mile has no approach distance. Choose a discovered feature with --pick N so the observer has a player-visible stopping point."
+                "AI boundary: this selected mile has no approach distance. Choose a discovered \
+                 feature with --pick N so the observer has a player-visible stopping point."
                     .to_string(),
             );
         }

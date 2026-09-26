@@ -110,7 +110,8 @@ pub fn speeding_past_staffed_posts() -> Outcome {
     let expected = speeding_citation_fine(20.0, citations_before, false);
     if charged > 0.0 && (charged - expected).abs() > 1.0 {
         findings.push(format!(
-            "speeding stop charges {charged:.0} where the model prices twenty over at {expected:.0} for {citations_before} priors"
+            "speeding stop charges {charged:.0} where the model prices twenty over at \
+             {expected:.0} for {citations_before} priors"
         ));
     }
     let note = format!(
@@ -201,7 +202,8 @@ pub fn work_zone_speeding_doubles_the_fine() -> Outcome {
         let zone = speeding_citation_fine(over, 0, true);
         if (zone - plain * CONSTRUCTION_ZONE_FINE_MULTIPLIER).abs() > 0.01 {
             findings.push(format!(
-                "{over:.0} over: roadwork charges {zone:.0} against {plain:.0} plain, not the {CONSTRUCTION_ZONE_FINE_MULTIPLIER}x the model promises"
+                "{over:.0} over: roadwork charges {zone:.0} against {plain:.0} plain, not the \
+                 {CONSTRUCTION_ZONE_FINE_MULTIPLIER}x the model promises"
             ));
         }
     }
@@ -213,7 +215,8 @@ pub fn work_zone_speeding_doubles_the_fine() -> Outcome {
     let ceiling = base * CITATION_REPEAT_MAX_MULTIPLIER * CONSTRUCTION_ZONE_FINE_MULTIPLIER;
     if worst > ceiling + 0.01 {
         findings.push(format!(
-            "fifty priors inside roadwork charges {worst:.0}, past the {ceiling:.0} the cap and the zone doubling allow together"
+            "fifty priors inside roadwork charges {worst:.0}, past the {ceiling:.0} the cap and \
+             the zone doubling allow together"
         ));
     }
     let note = format!("roadwork doubles cleanly and a career offender tops out at {ceiling:.0}");
@@ -281,7 +284,8 @@ pub fn honk_the_air_down_to_the_valve() -> Outcome {
         .min(rig.drive.truck().secondary_air_psi);
     if with_engine < TruckState::HORN_PROTECTION_PSI {
         findings.push(format!(
-            "a long blast with the engine running pulled the tanks from {before:.0} to {with_engine:.0} psi, through the protection valve"
+            "a long blast with the engine running pulled the tanks from {before:.0} to \
+             {with_engine:.0} psi, through the protection valve"
         ));
     }
 
@@ -321,7 +325,8 @@ pub fn honk_the_air_down_to_the_valve() -> Outcome {
     }
     if floor < TruckState::HORN_PROTECTION_PSI - 1.0 {
         findings.push(format!(
-            "the horn pulled the tanks to {floor:.0} psi, past the {:.0} psi the protection valve is supposed to hold",
+            "the horn pulled the tanks to {floor:.0} psi, past the {:.0} psi the protection \
+             valve is supposed to hold",
             TruckState::HORN_PROTECTION_PSI
         ));
     }
@@ -367,7 +372,8 @@ pub fn prepass_green_is_not_a_bypass_charge() -> Outcome {
         .cloned();
     match verdict.as_deref() {
         None => findings.push(format!(
-            "a level {WEIGH_STATION_TRANSPONDER_LEVEL} company driver got no weigh-in-motion verdict at an open scale"
+            "a level {WEIGH_STATION_TRANSPONDER_LEVEL} company driver got no weigh-in-motion \
+             verdict at an open scale"
         )),
         Some("green") => {
             let spoke = rig.said("Cleared past the scale");

@@ -54,7 +54,10 @@ impl Menu for SaveModifiedNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "This save was changed outside the game, or copied from another computer, so it is marked as modified. Your career still works on this computer, but profile sharing may not accept a modified profile. {}",
+            "This save was changed outside the game, or copied from another \
+             computer, so it is marked as modified. Your career still works on \
+             this computer, but profile sharing may not accept a modified \
+             profile. {}",
             self.current_text(ctx)
         );
         ctx.say(&text);
@@ -88,7 +91,8 @@ impl LegacyCareerNoticeState {
     pub fn new(driver_name: &str) -> Self {
         Self {
             menu: MenuCore::new("Career from an earlier version").with_intro_help(
-                "This career cannot continue in version 1.9. Escape goes back to the career list.",
+                "This career cannot continue in version 1.9. Escape goes back to \
+                 the career list.",
             ),
             driver_name: driver_name.to_string(),
         }
@@ -110,7 +114,11 @@ impl Menu for LegacyCareerNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "{} was made in an earlier version of Freight Fate. Version 1.9 rebalances the whole career, from pay to trucks to levels, so every driver starts fresh. Nothing was lost: the save is still on this computer, untouched, and it still works in Freight Fate 1.8. {}",
+            "{} was made in an earlier version of Freight Fate. Version 1.9 \
+             rebalances the whole career, from pay to trucks to levels, so \
+             every driver starts fresh. Nothing was lost: the save is still \
+             on this computer, untouched, and it still works in Freight Fate \
+             1.8. {}",
             self.driver_name,
             self.current_text(ctx)
         );
@@ -184,7 +192,13 @@ impl Menu for DrivingRecordNoticeState {
             None => (String::new(), String::new()),
         };
         let text = format!(
-            "Freight Fate now keeps a driving record for your career: citations, serious violations, and whether your CDL is clear. Two serious violations in three years suspend it; running from a police stop is a major offense that disqualifies it for a year. Reputation also decides how much freight dispatch shows you and how much choice you get. Nothing was reset or taken. {standing} {trust} {}",
+            "Freight Fate now keeps a driving record for your career: \
+             citations, serious violations, and whether your CDL is clear. \
+             Two serious violations in three years suspend it; running from a \
+             police stop is a major offense that disqualifies it for a year. \
+             Reputation also decides how much freight dispatch shows you and \
+             how much choice you get. Nothing was reset or taken. {standing} \
+             {trust} {}",
             self.current_text(ctx)
         );
         ctx.say(&text);
@@ -243,7 +257,11 @@ impl Menu for SaveMigrationNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Save file updated. This career was converted from an older version: every truck you own now keeps its own fuel, damage, tire wear, and road grime. The truck you were driving keeps its condition; your other trucks start fueled and fresh. The updated save no longer opens in older versions of the game. {}",
+            "Save file updated. This career was converted from an older \
+             version: every truck you own now keeps its own fuel, damage, tire \
+             wear, and road grime. The truck you were driving keeps its \
+             condition; your other trucks start fueled and fresh. The updated \
+             save no longer opens in older versions of the game. {}",
             self.current_text(ctx)
         );
         ctx.say(&text);

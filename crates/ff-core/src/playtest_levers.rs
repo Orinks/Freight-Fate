@@ -109,7 +109,8 @@ pub fn apply_continue_levers<C: LeverContext + ?Sized>(ctx: &mut C) -> Vec<Strin
             return Vec::new();
         }
         return vec![
-            "Playtest lever ignored: this career has a load in progress. Deliver or abandon it first."
+            "Playtest lever ignored: this career has a load in progress. \
+             Deliver or abandon it first."
                 .to_string(),
         ];
     }
@@ -123,7 +124,8 @@ pub fn apply_continue_levers<C: LeverContext + ?Sized>(ctx: &mut C) -> Vec<Strin
     if !persist_requested() {
         ctx.set_playtest_sandbox(true);
         notes.push(
-            "Playtest sandbox: nothing this session is saved. Your career resumes untouched next time you play normally."
+            "Playtest sandbox: nothing this session is saved. Your career \
+             resumes untouched next time you play normally."
                 .to_string(),
         );
     } else if !notes.is_empty() {

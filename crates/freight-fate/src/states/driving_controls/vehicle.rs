@@ -231,7 +231,8 @@ impl DrivingState {
                     );
                 } else {
                     ctx.say(&format!(
-                        "Parking brake stays set. Air pressure {psi:.0} psi. It releases at 100 psi with the engine running."
+                        "Parking brake stays set. Air pressure {psi:.0} psi. It releases at 100 \
+                         psi with the engine running."
                     ));
                 }
             }
@@ -257,7 +258,8 @@ impl DrivingState {
             self.set_status("Parking brake dynamited at speed!");
             let spoken = ctx.settings.speed_text(speed);
             ctx.say(&format!(
-                "You dynamited the parking brake at {spoken}! The spring brakes slam the drive axle and the tires grind flat spots into the tread."
+                "You dynamited the parking brake at {spoken}! The spring brakes slam the drive \
+                 axle and the tires grind flat spots into the tread."
             ));
             return;
         }

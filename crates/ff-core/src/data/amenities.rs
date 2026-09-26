@@ -26,7 +26,9 @@
 //! famously bans big rigs; the parody keeps the joke and drops the trademark.
 
 pub const AMENITIES_SOURCE: &str =
-    "Brand service identity derived at runtime from the stop name; grounded in public brand service listings (Love's/Speedco tire care, TravelCenters of America truck service, Pilot Flying J shower network).";
+    "Brand service identity derived at runtime from the stop name; grounded in \
+     public brand service listings (Love's/Speedco tire care, TravelCenters of \
+     America truck service, Pilot Flying J shower network).";
 
 /// Spoken label for each signature service key. Kept here (not shared with
 /// the generic POI service labels) because these are brand differentiators

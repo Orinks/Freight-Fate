@@ -388,7 +388,8 @@ pub fn spoken_rejection(violations: &[Violation]) -> String {
     match violations.first() {
         None => String::new(),
         Some(first) => format!(
-            "This profile fails the game's integrity checks and was not loaded. First problem: {}",
+            "This profile fails the game's integrity checks and was not \
+             loaded. First problem: {}",
             first.detail
         ),
     }

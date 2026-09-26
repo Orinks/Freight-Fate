@@ -127,11 +127,16 @@ pub fn env_lock() -> EnvGuard {
             Err(TryLockError::WouldBlock) => {
                 assert!(
                     ENV_OWNER.load(std::sync::atomic::Ordering::SeqCst) != me,
-                    "this thread already holds the test environment lock. A TestApp holds it until it is dropped, so building a second one in the same scope deadlocks -- shadowing the binding does not drop the first. Call drop(app) before building the next TestApp."
+                    "this thread already holds the test environment lock. A \
+                     TestApp holds it until it is dropped, so building a \
+                     second one in the same scope deadlocks -- shadowing the \
+                     binding does not drop the first. Call drop(app) before \
+                     building the next TestApp."
                 );
                 assert!(
                     Instant::now() < deadline,
-                    "the test environment lock was held by another thread for over ten minutes; something in this binary is hung."
+                    "the test environment lock was held by another thread for \
+                     over ten minutes; something in this binary is hung."
                 );
                 std::thread::sleep(Duration::from_millis(5));
             }
@@ -235,7 +240,11 @@ impl TestApp {
     pub fn with_speech(speech: CaptureSpeech) -> TestApp {
         assert!(
             !APP_ALIVE.with(|alive| alive.replace(true)),
-            "this thread already has a live TestApp. A TestApp pins the thread's save directory and save-listener hook until it is dropped, so building a second one in the same scope would let the two share both -- shadowing the binding does not drop the first. Call drop(app) before building the next TestApp."
+            "this thread already has a live TestApp. A TestApp pins the \
+             thread's save directory and save-listener hook until it is \
+             dropped, so building a second one in the same scope would let \
+             the two share both -- shadowing the binding does not drop the \
+             first. Call drop(app) before building the next TestApp."
         );
         set_headless_env();
         let data_dir = TempDir::new("ff-rust-app");

@@ -123,7 +123,8 @@ fn test_first_week_and_load_choice_bands_name_the_level() {
     assert_eq!(rookie.title, "Build first-week trust");
     assert_eq!(
         rookie.spoken_summary(),
-        "Build first-week trust. Use trainer support and safer freight to start a clean service record. Short, forgiving freight is still the smartest first move."
+        "Build first-week trust. Use trainer support and safer freight to start a clean \
+         service record. Short, forgiving freight is still the smartest first move."
     );
     let regional = career_level_guidance(&company(4));
     assert!(regional

@@ -32,7 +32,10 @@ pub use slot::{CloudSlotState, SlotHandle};
 // same fresh-start rule as the local load gate, said kindly, with the backup
 // left exactly where it is.
 pub const LEGACY_BACKUP_NOTICE: &str =
-    "This backup was made by an earlier version of Freight Fate. Version 1.9 rebalances the whole career, so every driver starts fresh, and earlier careers cannot be restored here. The backup stays safe in your orinks.net account, and Freight Fate 1.8 can still restore it.";
+    "This backup was made by an earlier version of Freight Fate. Version \
+1.9 rebalances the whole career, so every driver starts fresh, and \
+earlier careers cannot be restored here. The backup stays safe in \
+your orinks.net account, and Freight Fate 1.8 can still restore it.";
 
 /// Whether a cloud revision's metadata says it predates the 1.9 line.
 ///
@@ -51,7 +54,13 @@ pub fn is_legacy_snapshot(entry: &Value) -> bool {
 }
 
 pub const CLOUD_DISCLOSURE: &str =
-    "Your full career is stored privately in your orinks.net account. orinks.net validates and signs accepted backups before they can be restored. If Profile sharing is also on, approved facts from your public career's latest accepted backup may appear in your public profile; you choose your public career here, and every other career stays a private cloud backup. The backup itself is never public. The last ten accepted backups of each career are kept.";
+    "Your full career is stored privately in your orinks.net account. orinks.net \
+validates and signs accepted backups before they can be restored. If \
+Profile sharing is also on, approved facts from your public career's \
+latest accepted backup may appear in your public profile; you choose \
+your public career here, and every other career stays a private cloud \
+backup. The backup itself is never public. The last ten accepted \
+backups of each career are kept.";
 
 /// This computer's copy of `save_name`, in the same words the cloud
 /// copy is described with, or "" if it cannot be read.
@@ -513,7 +522,10 @@ impl Menu for ConfirmRestoreState {
         };
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Restore the backup of {}, {}?{summary} replacing this computer's save for that career. The replaced save is kept as a fallback file. {current}",
+            "Restore the backup of {}, \
+             {}?{summary} replacing \
+             this computer's save for that career. The replaced save is kept \
+             as a fallback file. {current}",
             self.slot.save_name,
             backed_up_text(created_at_ms(&self.entry))
         ));
@@ -533,7 +545,9 @@ impl Menu for ConfirmRestoreState {
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
             .help(
-                "Goes back without downloading, this computer's save left as it is. To send this computer's save up instead, choose Keep this computer's save and back it up.",
+                "Goes back without downloading, this computer's save left as it is. To send \
+                 this computer's save up instead, choose Keep this computer's save and back \
+                 it up.",
             ),
             MenuItem::new("Yes, restore this backup", |s: &mut Self, ctx| s.yes(ctx)),
         ]
@@ -644,7 +658,9 @@ impl Menu for ConfirmDeleteCloudState {
         };
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Delete every cloud backup of {} from your orinks.net account? The deleted backups cannot be brought back. {local} {current}",
+            "Delete every cloud backup of {} \
+             from your orinks.net account? The deleted backups cannot be \
+             brought back. {local} {current}",
             self.slot.save_name
         ));
     }
@@ -706,7 +722,8 @@ impl Menu for ConfirmPublicCareerState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Make {} your public career? Your public profile shows one career, and the others stay private cloud backups. {current}",
+            "Make {} your public career? Your public profile shows one career, and the \
+             others stay private cloud backups. {current}",
             self.slot.save_name
         ));
     }
@@ -762,7 +779,8 @@ impl Menu for ConfirmKeepMineState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Replace the accepted cloud copy with this computer's save? The server will validate it first. {current}"
+            "Replace the accepted cloud copy with this computer's save? \
+             The server will validate it first. {current}"
         ));
     }
 
@@ -778,7 +796,8 @@ impl Menu for ConfirmKeepMineState {
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
             .help(
-                "Goes back without uploading. The career stays unbacked up until you choose which copy to keep.",
+                "Goes back without uploading. The career stays unbacked up until you choose \
+                 which copy to keep.",
             ),
             MenuItem::new(
                 "Yes, validate and replace the cloud backup",

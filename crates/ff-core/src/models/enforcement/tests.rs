@@ -355,7 +355,8 @@ fn the_trust_ladder_matches_the_python_tables() {
     );
     assert_eq!(
         trust_text(30.0),
-        "Dispatch trust: guarded. Dispatch is holding back some of the freight and fewer refusals. Clean on-time runs rebuild it."
+        "Dispatch trust: guarded. Dispatch is holding back some of the freight and \
+         fewer refusals. Clean on-time runs rebuild it."
     );
     assert_eq!(board_reputation_note(50.0), "");
     assert_eq!(board_reputation_note(20.0), trust_text(20.0));
@@ -489,7 +490,8 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     assert_eq!(
         suspension_refusal_line(&p),
         format!(
-            "You cannot take this job while your CDL is disqualified. It clears {clears}. Escape goes back to the board."
+            "You cannot take this job while your CDL is disqualified. It clears {clears}. \
+             Escape goes back to the board."
         )
     );
     // A calendar offset moves the spoken date.
@@ -505,11 +507,13 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     assert_eq!(career_menu_status(&p), "CDL: disqualified for life");
     assert_eq!(
         suspension_board_line(&p),
-        "Dispatch board. Your CDL is disqualified for life, so there is no driving work here. The board is listed for reference only."
+        "Dispatch board. Your CDL is disqualified for life, so there is no driving work \
+         here. The board is listed for reference only."
     );
     assert_eq!(
         suspension_refusal_line(&p),
-        "You cannot take driving work with a lifetime CDL disqualification. Escape goes back to the terminal."
+        "You cannot take driving work with a lifetime CDL disqualification. Escape goes \
+         back to the terminal."
     );
 
     let mut clean = profile();
@@ -522,7 +526,8 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     let text = standing_text(&clean);
     assert!(
         text.starts_with(
-            "Record: two serious violations, one major offense. One more major offense disqualifies your CDL for life."
+            "Record: two serious violations, one major offense. One more major offense \
+             disqualifies your CDL for life."
         ),
         "{text}"
     );

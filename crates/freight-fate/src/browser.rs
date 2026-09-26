@@ -119,6 +119,10 @@ fn refuse(url: &str) -> ! {
         .unwrap_or_else(|e| e.into_inner())
         .push(url.to_string());
     panic!(
-        "refusing to open {url} in a real web browser: this process never called browser::allow_real_browser(), so it is not the game. If this is a test, install a browser seam for the thread that opens the page -- states_online_support::install_browser(true) -- and assert on what it recorded."
+        "refusing to open {url} in a real web browser: this process never \
+         called browser::allow_real_browser(), so it is not the game. If \
+         this is a test, install a browser seam for the thread that opens \
+         the page -- states_online_support::install_browser(true) -- and \
+         assert on what it recorded."
     );
 }

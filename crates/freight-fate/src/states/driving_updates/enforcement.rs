@@ -166,7 +166,8 @@ impl DrivingState {
             None => "no zone".to_string(),
         };
         log::info!(
-            "overspeed {event}: {speed:.1} mph, limit {limit:.0} ({:+.1} over, arms at {:+.0}), mile {:.2}, {zone}",
+            "overspeed {event}: {speed:.1} mph, limit {limit:.0} ({:+.1} over, arms at {:+.0}), \
+             mile {:.2}, {zone}",
             speed - limit,
             OVERSPEED_WARN_MPH,
             self.trip.position_mi,
@@ -200,7 +201,8 @@ impl DrivingState {
         };
         let signal_hint = ctx.control_hint("take_exit");
         let message = format!(
-            "Lights and siren behind you. A trooper on this {where_} clocked you at {} in a {} zone. Signal with {signal_hint} and stop on the shoulder.",
+            "Lights and siren behind you. A trooper on this {where_} clocked you at {} in a {} \
+             zone. Signal with {signal_hint} and stop on the shoulder.",
             ctx.settings.speed_text(self.trip.truck.speed_mph()),
             ctx.settings.speed_text(limit)
         );
@@ -346,7 +348,8 @@ impl DrivingState {
                     "Your transponder answers it at road speed.".to_string()
                 } else {
                     format!(
-                        "All trucks must pull in. Signal for the scale exit with {}. Stopped at the scale, press {} to check in.",
+                        "All trucks must pull in. Signal for the scale exit with {}. Stopped at \
+                         the scale, press {} to check in.",
                         ctx.control_hint("take_exit"),
                         ctx.control_hint("rest")
                     )
@@ -592,7 +595,8 @@ impl DrivingState {
             return;
         }
         let lights_message = format!(
-            "Scale bypass enforcement. Lights and siren behind you. Signal with {} and stop on the shoulder.",
+            "Scale bypass enforcement. Lights and siren behind you. Signal with {} and stop on \
+             the shoulder.",
             ctx.control_hint("take_exit")
         );
         self.begin_enforcement_pull_over(
@@ -633,11 +637,13 @@ impl DrivingState {
         self.unsafe_damage_stop_key = key.clone();
         self.enforcement_events.insert(key);
         let summary = format!(
-            "A trooper in this {reason} saw visible truck damage at {:.0} percent and ordered a roadside safety inspection.",
+            "A trooper in this {reason} saw visible truck damage at {:.0} percent and ordered a \
+             roadside safety inspection.",
             self.trip.truck.damage_pct
         );
         let lights_message = format!(
-            "Unsafe equipment stop. Lights and siren behind you. Signal with {} and stop on the shoulder.",
+            "Unsafe equipment stop. Lights and siren behind you. Signal with {} and stop on the \
+             shoulder.",
             ctx.control_hint("take_exit")
         );
         self.begin_enforcement_pull_over(

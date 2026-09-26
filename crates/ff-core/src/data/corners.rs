@@ -240,7 +240,8 @@ mod tests {
         let square = corner_speed_mph(Some(90.0), 1.0);
         assert!(
             (5.0..=12.0).contains(&square),
-            "a 90-degree corner came out at {square} mph, outside the 5-12 band CDL practice and the TTI distribution point at"
+            "a 90-degree corner came out at {square} mph, outside the 5-12 band \
+             CDL practice and the TTI distribution point at"
         );
         // The car ceiling holds at every load, not just the loaded one: an
         // empty trailer is more stable than a full one, never more stable
@@ -251,7 +252,8 @@ mod tests {
                 let truck = corner_speed_mph(Some(deg), load);
                 assert!(
                     truck < car,
-                    "a {deg}-degree corner at {load} load priced the truck at {truck} mph, at or above the {car} mph cars were measured taking it"
+                    "a {deg}-degree corner at {load} load priced the truck at {truck} mph, \
+                     at or above the {car} mph cars were measured taking it"
                 );
             }
         }
@@ -266,7 +268,8 @@ mod tests {
         let full = corner_speed_mph(Some(90.0), 1.0);
         assert!(
             empty > full + 3.0,
-            "empty came out at {empty} mph against {full} loaded -- the load is not reaching the corner model"
+            "empty came out at {empty} mph against {full} loaded -- the load is \
+             not reaching the corner model"
         );
         assert!(close(EMPTY_ROLLOVER_G, 0.70, 1e-9));
         assert!(
@@ -322,11 +325,13 @@ mod tests {
             let modelled = composite_speed(load);
             assert!(
                 shipped <= modelled + 1e-9,
-                "at {load} load the shipped {shipped:.2} mph is FASTER than the {modelled:.2} mph the composite centre allows"
+                "at {load} load the shipped {shipped:.2} mph is FASTER than the \
+                 {modelled:.2} mph the composite centre allows"
             );
             assert!(
                 modelled - shipped < 1.0,
-                "at {load} load the shipped {shipped:.2} mph is {:.2} mph under the composite model's {modelled:.2}",
+                "at {load} load the shipped {shipped:.2} mph is {:.2} mph under the \
+                 composite model's {modelled:.2}",
                 modelled - shipped
             );
         }

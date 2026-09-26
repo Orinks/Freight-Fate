@@ -108,7 +108,8 @@ impl ParkingFullState {
                 |s: &mut Self, ctx| s.motel(ctx),
             )
             .help(
-                "A motel near the exit, paid from your own pocket. Legal 10-hour reset, you wake fresh.",
+                "A motel near the exit, paid from your own pocket. Legal 10-hour reset, you \
+                 wake fresh.",
             ),
         );
         items.push(
@@ -116,7 +117,8 @@ impl ParkingFullState {
                 s.shoulder(ctx)
             })
             .help(
-                "Ten hours of poor sleep. Resets hours of service. Risks a parking fine or minor truck damage.",
+                "Ten hours of poor sleep. Resets hours of service. Risks a parking fine or minor \
+                 truck damage.",
             ),
         );
         items
@@ -131,7 +133,8 @@ impl ParkingFullState {
         let brake = ctx.control_hint("parking_brake");
         ctx.say_with(
             format!(
-                "Back on the road. Parking brake set. {engine} starts the engine, {brake} releases the brake."
+                "Back on the road. Parking brake set. {engine} starts the engine, {brake} \
+                 releases the brake."
             ),
             Say::new(),
         );
@@ -165,7 +168,9 @@ impl ParkingFullState {
             }
             let money = profile_of(ctx).money();
             format!(
-                "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It is {}. Hours of service reset and you wake fresh. You have {} dollars. {} starts the engine.",
+                "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
+                 is {}. Hours of service reset and you wake fresh. You have {} dollars. {} \
+                 starts the engine.",
                 fmt_grouped(MOTEL_COST, 0),
                 clock_text(d.trip.current_hour()),
                 fmt_grouped(money, 0),

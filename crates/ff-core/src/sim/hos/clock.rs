@@ -748,7 +748,8 @@ impl HosClock {
                         priority,
                         rem,
                         format!(
-                            "Hours of service violation: {due}. Driving on risks fines at inspections."
+                            "Hours of service violation: {due}. \
+                             Driving on risks fines at inspections."
                         ),
                     ));
                 }
@@ -801,11 +802,14 @@ impl HosClock {
                 .map(|s| s.kind)
                 .collect();
             if blown == ["break"] {
-                return "Hours of service: past your break limit. Take a 30-minute break at a rest stop."
+                return "Hours of service: past your break limit. \
+                        Take a 30-minute break at a rest stop."
                     .to_string();
             }
             if blown == ["cycle"] {
-                return "Hours of service: your 70-hour cycle is used up. Take a 34-hour restart, or wait for hours to age off your 8-day ledger."
+                return "Hours of service: your 70-hour cycle is used up. \
+                        Take a 34-hour restart, or wait for hours to age off your \
+                        8-day ledger."
                     .to_string();
             }
             return "Hours of service: past your limit. Sleep 10 hours at a rest stop to reset."
@@ -826,13 +830,18 @@ impl HosClock {
         };
         if duty_left <= break_left {
             return format!(
-                "ELD status {status}. Hours of service: {} of driving left, {} of duty window left.{cycle_clause}{suffix}",
+                "ELD status {status}. Hours of service: \
+                 {} of driving left, \
+                 {} of duty window left.{cycle_clause}{suffix}",
                 duration_text(drive_left),
                 duration_text(duty_left),
             );
         }
         format!(
-            "ELD status {status}. Hours of service: {} of driving left, break due in {}, duty window closes in {}.{cycle_clause}{suffix}",
+            "ELD status {status}. Hours of service: \
+             {} of driving left, \
+             break due in {}, \
+             duty window closes in {}.{cycle_clause}{suffix}",
             duration_text(drive_left),
             duration_text(break_left),
             duration_text(duty_left),

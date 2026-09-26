@@ -557,7 +557,8 @@ impl ControllerManager {
             .collect();
         if !missing.is_empty() {
             log::warn!(
-                "Controller {:?} reconnected without {} mapped; brake/throttle and bumpers may not respond",
+                "Controller {:?} reconnected without {} mapped; \
+                 brake/throttle and bumpers may not respond",
                 self.name,
                 missing.join(", ")
             );

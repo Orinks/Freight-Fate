@@ -152,7 +152,9 @@ pub fn save_root_in(roots: &SaveRoots) -> PathBuf {
     let fallback = roots.legacy_data_dir.clone();
     if !UNWRITABLE_WARNED.swap(true, Ordering::SeqCst) {
         log::warn!(
-            "Game directory {} is not writable; saving to the per-user folder {} instead. Move Freight Fate out of a protected location such as Program Files to keep saves beside the game.",
+            "Game directory {} is not writable; saving to the per-user folder {} instead. \
+             Move Freight Fate out of a protected location such as Program Files to keep \
+             saves beside the game.",
             roots.game_root.display(),
             fallback.display()
         );

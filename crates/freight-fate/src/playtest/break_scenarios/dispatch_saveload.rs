@@ -70,7 +70,8 @@ pub fn dispatch_decline_budget() -> Outcome {
     let jobs_after = board_offers(&mut harness);
     if jobs_before != jobs_after {
         findings.push(
-            "leaving and re-entering the dispatch board rerolled the offers -- board-reroll farming is open (dispatch_board_cache failed)"
+            "leaving and re-entering the dispatch board rerolled the offers -- board-reroll \
+             farming is open (dispatch_board_cache failed)"
                 .to_string(),
         );
     }
@@ -139,7 +140,9 @@ pub fn save_scum_enforcement() -> Outcome {
     };
     if rig.drive.pull_over.is_some() && resumed.pull_over.is_none() {
         findings.push(
-            "save-and-reload during a traffic stop erases the stop: the trooper, the ticket, and the felony ladder all vanish -- quit-to-menu is a get-out-of-jail-free card (pull-over state is not in the snapshot)"
+            "save-and-reload during a traffic stop erases the stop: the trooper, the ticket, and \
+             the felony ladder all vanish -- quit-to-menu is a get-out-of-jail-free card \
+             (pull-over state is not in the snapshot)"
                 .to_string(),
         );
     }
@@ -151,7 +154,9 @@ pub fn save_scum_enforcement() -> Outcome {
     // round-trip.
     if !rig.drive.enforcement_busy() {
         findings.push(
-            "a live hazard no longer makes the cab busy, so a traffic stop can begin mid-hazard -- that stop snapshots itself, which would put a live hazard into a save the reload cannot speak"
+            "a live hazard no longer makes the cab busy, so a traffic stop can begin mid-hazard \
+             -- that stop snapshots itself, which would put a live hazard into a save the reload \
+             cannot speak"
                 .to_string(),
         );
     }

@@ -129,14 +129,16 @@ pub trait FuelPump: Menu {
         if carrier_card {
             // the carrier fuel card covers road fuel for company drivers
             ctx.say(&format!(
-                "Refueled {} gallons on the carrier fuel card. Fueling took {} minutes. {margin}. {loyalty_text}",
+                "Refueled {} gallons on the carrier fuel card. Fueling took {} minutes. \
+                 {margin}. {loyalty_text}",
                 fmt_f(need, 0),
                 fmt_f(FUEL_STOP_MIN, 0)
             ));
         } else {
             let money = profile_of(ctx).money();
             ctx.say(&format!(
-                "Refueled {} gallons for {} dollars. You have {} dollars. Fueling took {} minutes. {margin}. {loyalty_text}",
+                "Refueled {} gallons for {} dollars. You have {} dollars. Fueling took {} \
+                 minutes. {margin}. {loyalty_text}",
                 fmt_f(need, 0),
                 fmt_grouped(cost, 0),
                 fmt_grouped(money, 0),

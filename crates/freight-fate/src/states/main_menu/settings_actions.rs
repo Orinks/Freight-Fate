@@ -568,7 +568,8 @@ impl SettingsCategoryState {
             // Said after the row, queued, so the player hears both and is
             // never left guessing why speech carried on.
             ctx.say_with(
-                "Only NVDA and JAWS can send the game to a braille display. Speech stays on until one of them is running.",
+                "Only NVDA and JAWS can send the game to a braille display. \
+                 Speech stays on until one of them is running.",
                 Say::queued(),
             );
         }

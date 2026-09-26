@@ -1452,9 +1452,12 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     let (limit, reason) = trip.speed_limit_at(start_mi);
     let s = &ctx.settings;
     println!("\n=== playtest: {} -> {} ===", hit.origin, hit.destination);
-    println!("  target : {} at mile {:.1}", hit.label, hit.at_mi);
     println!(
-        "  trip seed : {:?}  (--trip-seed to drive this exact run again)",
+        "  target            : {} at mile {:.1}",
+        hit.label, hit.at_mi
+    );
+    println!(
+        "  trip seed         : {:?}  (--trip-seed to drive this exact run again)",
         hit.trip_seed
     );
     if hit.origin_location.is_some() {
@@ -1471,12 +1474,12 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     }
     if hit.origin_location.is_some() {
         println!(
-            "  starting state : stopped at the facility gate, {:.0} t aboard",
+            "  starting state    : stopped at the facility gate, {:.0} t aboard",
             opts.cargo
         );
     } else {
         println!(
-            "  rolling at : {:.0} mph, {:.0} t aboard",
+            "  rolling at        : {:.0} mph, {:.0} t aboard",
             opts.speed, opts.cargo
         );
     }
@@ -1498,16 +1501,16 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     );
     println!("  your real settings:");
     println!(
-        " transmission : {}",
+        "    transmission    : {}",
         if s.automatic_transmission {
             "automatic"
         } else {
             "manual"
         }
     );
-    println!(" driving speech  : {}", s.driving_speech);
+    println!("    driving speech  : {}", s.driving_speech);
     println!(
-        " units : {}",
+        "    units           : {}",
         if s.imperial_units {
             "miles"
         } else {
@@ -1515,22 +1518,25 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
         }
     );
     println!(
-        " speed keeper : {}",
+        "    speed keeper    : {}",
         if s.speed_keeper { "on" } else { "off" }
     );
-    println!(" descent control : {}", s.descent_speed_control);
+    println!("    descent control : {}", s.descent_speed_control);
     println!(
-        " predictive cruise: {}",
+        "    predictive cruise: {}",
         if s.predictive_cruise { "on" } else { "off" }
     );
-    println!(" assists preset  : {}", s.driving_assistance_preset);
-    println!(" time scale : {}", s.time_scale);
+    println!("    assists preset  : {}", s.driving_assistance_preset);
+    println!("    time scale      : {}", s.time_scale);
     if hit.origin_location.is_none() {
-        println!("  grade ahead :");
+        println!("  grade ahead       :");
         for ahead in [0.0, 1.0, 2.0, 3.0, 5.0, 8.0] {
             let at = start_mi + ahead;
             if at < total {
-                println!(" +{ahead:4.1} mi {:+5.1}%", trip.grade_at(at) * 100.0);
+                println!(
+                    "    +{ahead:4.1} mi      {:+5.1}%",
+                    trip.grade_at(at) * 100.0
+                );
             }
         }
     }
@@ -1540,7 +1546,7 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
             .as_deref()
             .unwrap_or("the selected facility");
         println!(
-            "  departure : loaded at {facility}; accelerate until automatic speed control takes over, then listen for the speed keeper to hand off to adaptive cruise on the acceleration lane before you merge"
+            "  departure         : loaded at {facility}; accelerate until automatic speed control takes over, then listen for the speed keeper to hand off to adaptive cruise on the acceleration lane before you merge"
         );
     }
 }
@@ -1663,7 +1669,7 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
                     .trip_seed
                     .expect("data-driven hits carry a stable trip seed");
                 println!(
-                    " launch: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find departure --from {:?} --to {:?} --facility {:?} --trip-seed {seed} --ai",
+                    "       launch: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find departure --from {:?} --to {:?} --facility {:?} --trip-seed {seed} --ai",
                     found.origin, found.destination, facility
                 );
             }

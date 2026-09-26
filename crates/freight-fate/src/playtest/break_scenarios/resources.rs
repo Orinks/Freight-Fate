@@ -67,7 +67,8 @@ pub fn fuel_rescue_farming() -> Outcome {
         }
         if reputation == 0.0 && rep_before <= 6.0 {
             findings.push(
-                "company driver: after reputation bottoms out at 0, roadside rescue is 30 free gallons with NO remaining cost -- fuel stops are optional forever"
+                "company driver: after reputation bottoms out at 0, roadside rescue is 30 free \
+                 gallons with NO remaining cost -- fuel stops are optional forever"
                     .to_string(),
             );
         } else if rep_before - reputation < 5.9 {
@@ -265,7 +266,10 @@ pub fn microsleep_throttle_through() -> Outcome {
     let speed = rig.drive.truck().speed_mph();
     if forced_stop_frame.is_some() && speed > 40.0 {
         findings.push(format!(
-            "\"You cannot stay awake ... jolt awake on the brakes. Stop and sleep before you wreck\" -- but the forced stop is a one-frame brake tap: with the throttle held the truck is doing {speed:.0} mph five seconds later and the exhausted driver just keeps going"
+            "\"You cannot stay awake ... jolt awake on the brakes. Stop and sleep before you \
+             wreck\" -- but the forced stop is a one-frame brake tap: with the throttle held the \
+             truck is doing {speed:.0} mph five seconds later and the exhausted driver just keeps \
+             going"
         ));
     }
     let fatigue = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.fatigue);
@@ -312,7 +316,8 @@ pub fn hos_rest_minute_cheese() -> Outcome {
     let after_second = split.driving_min;
     if after_second < after_first {
         findings.push(format!(
-            "split-sleeper credit double-dipped: driving {drive_before_credit:.0} -> {after_first:.0} -> {after_second:.0} minutes"
+            "split-sleeper credit double-dipped: driving {drive_before_credit:.0} -> \
+             {after_first:.0} -> {after_second:.0} minutes"
         ));
     }
     for (label, value) in [
@@ -413,14 +418,16 @@ pub fn motel_rest_deadline_crunch() -> Outcome {
     }
     if rig.drive.job.deadline_game_h != deadline_before_h {
         findings.push(format!(
-            "deadline moved during a rest ({deadline_before_h} -> {}); a motel room must never buy back deadline time",
+            "deadline moved during a rest ({deadline_before_h} -> {}); a motel room must never \
+             buy back deadline time",
             rig.drive.job.deadline_game_h
         ));
     }
     let remaining_after = deadline_text(&rig.drive, &rig.app.ctx);
     if !remaining_after.contains("past the deadline") {
         findings.push(format!(
-            "took a 10-hour rest 1 minute from the deadline and the honesty line reads {remaining_after:?} instead of admitting the load is now overdue"
+            "took a 10-hour rest 1 minute from the deadline and the honesty line reads \
+             {remaining_after:?} instead of admitting the load is now overdue"
         ));
     }
     // The motel confirmation is followed by an achievement announcement
@@ -434,7 +441,8 @@ pub fn motel_rest_deadline_crunch() -> Outcome {
         .unwrap_or_default();
     if !confirmation.contains(&remaining_after) {
         findings.push(format!(
-            "the motel confirmation line does not carry the blown-deadline warning ({remaining_after:?} missing): {sleep_lines:?}"
+            "the motel confirmation line does not carry the blown-deadline warning \
+             ({remaining_after:?} missing): {sleep_lines:?}"
         ));
     }
     if !confirmation.contains("wake fresh") {

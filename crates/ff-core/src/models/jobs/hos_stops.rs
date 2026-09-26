@@ -93,7 +93,8 @@ impl HosStopAdvice {
     pub fn summary(&self, suggested_distance: &str, fallback_distance: &str) -> String {
         if self.destination_reachable {
             return format!(
-                "Destination estimated reachable before your next hours limit, about {:.0} minutes including access. No HOS stop is needed first. Traffic can change.",
+                "Destination estimated reachable before your next hours limit, about {:.0} \
+                 minutes including access. No HOS stop is needed first. Traffic can change.",
                 self.destination_travel_min.ceil()
             );
         }

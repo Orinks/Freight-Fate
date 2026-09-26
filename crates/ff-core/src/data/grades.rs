@@ -145,7 +145,9 @@ pub fn hpms_terrain_label(hpms_terrain: i64) -> Option<&'static str> {
 fn clamp_note(raw: f64, capped: f64, ceiling: f64, road_class: &str, terrain: &str) -> String {
     // Python: `{raw:+.2f}` / `{capped:+.2f}` / `{ceiling:.0f}`.
     format!(
-        " Slope clamped at load from {} to {} percent -- derived, not read: above the {} percent ceiling for {road_class} in {terrain} terrain (freight_fate.data.grades).",
+        " Slope clamped at load from {} to {} percent -- derived, not read: \
+         above the {} percent ceiling for {road_class} in {terrain} terrain \
+         (freight_fate.data.grades).",
         signed(raw, 2),
         signed(capped, 2),
         fmt_f(ceiling, 0)
@@ -161,7 +163,14 @@ fn level_by_both_sources(hpms_label: Option<&str>, bake_label: &str) -> bool {
 
 fn reject_note(raw: f64, ceiling: f64, road_class: &str) -> String {
     format!(
-        " Slope rejected at load, assumed level, not read: {} percent on ground both FHWA HPMS and the profile's own label class as level, above the {} percent ceiling for {road_class} there. Level terrain holds short grades of no more than 1 to 2 percent (HPMS Field Manual, Terrain_Type) and freeways are designed to at most 3 to 4 percent on it (AASHTO Green Book Table 8-1), so this is a structure or building the elevation surface read, not the road (freight_fate.data.grades).",
+        " Slope rejected at load, assumed level, not read: {} percent on \
+         ground both FHWA HPMS and the profile's own label class as level, \
+         above the {} percent ceiling for {road_class} there. Level terrain \
+         holds short grades of no more than 1 to 2 percent (HPMS Field \
+         Manual, Terrain_Type) and freeways are designed to at most 3 to 4 \
+         percent on it (AASHTO Green Book Table 8-1), so this is a structure \
+         or building the elevation surface read, not the road \
+         (freight_fate.data.grades).",
         signed(raw, 2),
         fmt_f(ceiling, 0)
     )
@@ -523,7 +532,8 @@ mod tests {
 
         assert!(
             last["avg_grade_pct"].as_f64().unwrap().abs() < 1.0,
-            "the skyline segment is measured flat; a spike here means the 3DEP reading was lost in a re-bake"
+            "the skyline segment is measured flat; a spike here means the \
+             3DEP reading was lost in a re-bake"
         );
         assert!(
             last["source"].as_str().unwrap().contains("USGS 3DEP"),

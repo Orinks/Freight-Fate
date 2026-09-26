@@ -22,7 +22,8 @@ impl BobtailDestState {
     pub fn new(cities: Vec<String>) -> Self {
         BobtailDestState {
             menu: MenuCore::new("Bobtail to a nearby city").with_intro_help(
-                "Drive empty to a nearby city for its dispatch board. No load and no pay, costs fuel and hours of service. Escape returns to the terminal.",
+                "Drive empty to a nearby city for its dispatch board. No load and no pay, costs \
+                 fuel and hours of service. Escape returns to the terminal.",
             ),
             cities,
         }
@@ -48,7 +49,8 @@ impl BobtailDestState {
         profile_mut(ctx).dispatch_board_cache = None;
         let spoken_dest = job.spoken_destination().to_string();
         let line = format!(
-            "Bobtailing empty to {spoken_dest}, {} on {}. No load and no pay. The {spoken_dest} dispatch board opens on arrival.",
+            "Bobtailing empty to {spoken_dest}, {} on {}. No load and no pay. The \
+             {spoken_dest} dispatch board opens on arrival.",
             ctx.settings.distance_text(route.miles(), false),
             route.highways().first().cloned().unwrap_or_default()
         );
@@ -158,7 +160,8 @@ impl PayDebtState {
             // driving_rest_states.py.
             ctx.pop_state();
             ctx.say(&format!(
-                "Paid {} and your account is clear. Every settlement reaches you whole. You have {}.",
+                "Paid {} and your account is clear. Every settlement reaches you whole. You \
+                 have {}.",
                 solvency::money_text(paid),
                 solvency::money_text(money)
             ));
@@ -190,7 +193,8 @@ impl Menu for PayDebtState {
         };
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "You owe {} and have {}. {current}",
+            "You owe {} and have \
+             {}. {current}",
             solvency::money_text(owed),
             solvency::money_text(money)
         ));

@@ -117,7 +117,9 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "a manual-spec pay differential on drives made on a manual gearbox",
-        announcement: "You retook the skills test in a manual truck, and the automatic-only restriction is off your license. Drives made on a manual gearbox now pay a small manual-spec differential in the settlement.",
+        announcement: "You retook the skills test in a manual truck, and the automatic-only \
+             restriction is off your license. Drives made on a manual gearbox now \
+             pay a small manual-spec differential in the settlement.",
     },
     // -- Certificates: carrier training ------------------------------------
     Credential {
@@ -133,7 +135,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "fresh food and refrigerated goods",
-        announcement: "You earned the refrigerated certificate. Food and refrigerated cargo jobs are now available.",
+        announcement: "You earned the refrigerated certificate. \
+             Food and refrigerated cargo jobs are now available.",
     },
     Credential {
         key: "flatbed_securement",
@@ -148,7 +151,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "steel products, and lumber and paper products",
-        announcement: "You earned the flatbed securement certificate. Steel and lumber jobs are now available.",
+        announcement: "You earned the flatbed securement certificate. Steel and lumber \
+             jobs are now available.",
     },
     Credential {
         key: "heavy_haul",
@@ -163,7 +167,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "heavy machinery",
-        announcement: "You earned the heavy-haul certificate. Heavy machinery jobs are now available.",
+        announcement: "You earned the heavy-haul certificate. Heavy machinery jobs are now \
+             available.",
     },
     Credential {
         key: "high_value",
@@ -178,7 +183,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "electronics and packaged industrial chemicals",
-        announcement: "You earned the high-value certificate. Electronics jobs are now available.",
+        announcement: "You earned the high-value certificate. Electronics jobs are now \
+             available.",
     },
     // -- Endorsements: the CDL letters -------------------------------------
     Credential {
@@ -194,7 +200,9 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "twin-trailer parcel freight",
-        announcement: "You passed the written test for the doubles endorsement, the letter T on a real license. Twin-trailer parcel freight is now available. Two short trailers, legal nationwide, and the rear one wanders.",
+        announcement: "You passed the written test for the doubles endorsement, the letter \
+             T on a real license. Twin-trailer parcel freight is now available. \
+             Two short trailers, legal nationwide, and the rear one wanders.",
     },
     Credential {
         key: "tank",
@@ -209,7 +217,9 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         unlocks: "liquid food products from level 21, and bulk fuel once the hazmat endorsement joins it",
-        announcement: "You earned the tank vehicle endorsement, the letter N on a real license. Liquid bulk opens from here, bulk fuel once the hazmat endorsement joins it, and liquid food at level 21.",
+        announcement: "You earned the tank vehicle endorsement, the letter N on a real \
+             license. Liquid bulk opens from here, bulk fuel once the hazmat \
+             endorsement joins it, and liquid food at level 21.",
     },
     Credential {
         key: "hazmat",
@@ -227,7 +237,9 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 30.0,
         needs_clean_record: false,
         unlocks: "placarded hazardous materials, and bulk fuel once the tank vehicle endorsement joins it",
-        announcement: "Your hazmat background check cleared, and the hazmat endorsement, the letter H, is on your license. Placarded chemical freight is now available. Placards mean every scale is watching.",
+        announcement: "Your hazmat background check cleared, and the hazmat endorsement, \
+             the letter H, is on your license. Placarded chemical freight is now \
+             available. Placards mean every scale is watching.",
     },
     // -- Specialist credentials --------------------------------------------
     Credential {
@@ -243,7 +255,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 20.0,
         needs_clean_record: false,
         unlocks: "port containers",
-        announcement: "Your TWIC enrollment cleared. Container freight out of the port terminals is now available.",
+        announcement: "Your TWIC enrollment cleared. Container freight out of the port \
+             terminals is now available.",
     },
     Credential {
         key: "lcv",
@@ -258,7 +271,9 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: true,
         unlocks: "turnpike doubles freight, between the states whose networks allow them",
-        announcement: "You finished LCV training and hold the longer-combination-vehicle certificate. Turnpike doubles are now available, only between the states whose networks allow them.",
+        announcement: "You finished LCV training and hold the longer-combination-vehicle \
+             certificate. Turnpike doubles are now available, only between the \
+             states whose networks allow them.",
     },
 ];
 
@@ -311,7 +326,8 @@ pub fn course_eligibility(
     }
     if pending.iter().any(|k| k == cred.key) {
         reasons.push(format!(
-            "Your {} is already in the works. The background check has not cleared yet.",
+            "Your {} is already in the works. The background check has not \
+             cleared yet.",
             cred.gate_label
         ));
     }
@@ -330,7 +346,8 @@ pub fn course_eligibility(
     }
     if cred.needs_clean_record && !clean_record {
         reasons.push(
-            "Requires a clean recent driving record, no recent serious violations and no live suspension."
+            "Requires a clean recent driving record, no recent serious \
+             violations and no live suspension."
                 .to_string(),
         );
     }
@@ -348,7 +365,8 @@ pub fn course_help_text(cred: &Credential) -> String {
     let mut text = format!("Unlocks {}. ", cred.unlocks);
     match cred.grant_level {
         Some(level) => text.push_str(&format!(
-            "The carrier sponsors it free at level {level}, or you can pay {} dollars for it yourself from level {}.",
+            "The carrier sponsors it free at level {level}, or you can pay {} dollars for it \
+             yourself from level {}.",
             fmt_grouped(cred.course_cost, 0),
             cred.min_level
         )),
@@ -424,7 +442,9 @@ mod tests {
         let help = course_help_text(credential("refrigerated").unwrap());
         assert_eq!(
             help,
-            "Unlocks fresh food and refrigerated goods. The carrier sponsors it free at level 2, or you can pay 900 dollars for it yourself from level 1. Enter books it, or says why you do not qualify."
+            "Unlocks fresh food and refrigerated goods. The carrier sponsors it free at \
+             level 2, or you can pay 900 dollars for it yourself from level 1. Enter books \
+             it, or says why you do not qualify."
         );
         let help = course_help_text(credential("hazmat").unwrap());
         assert!(

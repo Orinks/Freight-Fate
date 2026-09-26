@@ -688,7 +688,8 @@ impl Inner {
                 continue;
             }
             log::info!(
-                "Cloud sync state for {name}: a conflict was waiting for a career this computer no longer has; forgetting it so the slot starts clean"
+                "Cloud sync state for {name}: a conflict was waiting for a career this \
+computer no longer has; forgetting it so the slot starts clean"
             );
             self.sync_state.forget(&name);
         }
@@ -711,7 +712,8 @@ impl Inner {
             match slot_conflict(&entry) {
                 None => log::info!("Cloud sync state for {name}: {synced}"),
                 Some(conflict) => log::info!(
-                    "Cloud sync state for {name}: {synced}; a conflict against cloud revision {} is waiting in the Cloud backup menu",
+                    "Cloud sync state for {name}: {synced}; a conflict against cloud \
+revision {} is waiting in the Cloud backup menu",
                     conflict
                         .get("latestRevision")
                         .map(py_str)
@@ -948,7 +950,8 @@ impl Inner {
                     return;
                 }
                 log::info!(
-                    "Cloud backup of {name} was blocked by a conflict whose cloud copy no longer exists; restarting the slot fresh"
+                    "Cloud backup of {name} was blocked by a conflict whose cloud \
+copy no longer exists; restarting the slot fresh"
                 );
                 self.sync_state.forget(name);
                 slot = Map::new();
@@ -1013,7 +1016,8 @@ impl Inner {
                 self.state.lock().unwrap().retry_at = Some((self.clock)() + self.retry);
                 self.note_outcome(name, token, "network");
                 log::info!(
-                    "Cloud backup of {name} named a revision the cloud no longer has; restarting the slot fresh"
+                    "Cloud backup of {name} named a revision the cloud no longer \
+has; restarting the slot fresh"
                 );
                 return;
             }

@@ -674,7 +674,9 @@ fn test_a_burst_of_route_lines_in_one_instant_queues_whole() {
     let clock = FakeClock::at(0.0);
     let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
-    let briefing = "Off the ramp and onto city streets: start on unnamed public road. Then turn right now onto Halleck Street. 1 mile to the facility gate.";
+    let briefing = "Off the ramp and onto city streets: start on unnamed \
+                        public road. Then turn right now onto Halleck Street. \
+                        1 mile to the facility gate.";
     pacer.note_queued(briefing, EventPriority::Route, None, None);
     // The next route lines land in the same frame and the one after.
     clock.advance(0.022);
