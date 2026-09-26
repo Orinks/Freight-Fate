@@ -613,7 +613,7 @@ fn test_accepting_a_retired_pickup_says_so_instead_of_crashing() {
 
 #[test]
 fn test_job_board_help_names_drivable_pickup_before_route_planning() {
-    assert!(JOB_BOARD_INTRO_HELP.contains("deadhead from your terminal"));
+    assert!(JOB_BOARD_INTRO_HELP.contains("starts the deadhead to its origin facility"));
     assert!(!JOB_BOARD_INTRO_HELP.contains("route planning"));
 }
 

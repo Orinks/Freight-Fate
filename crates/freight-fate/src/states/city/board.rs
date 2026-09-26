@@ -50,13 +50,13 @@ pub use details::{describe_job, JobDetailState};
 /// The board's class-level `intro_help` (the browsable board; an assigned
 /// board swaps in its own on construction).
 pub const JOB_BOARD_INTRO_HELP: &str =
-    "Enter accepts a dispatch and starts the deadhead from your terminal to its origin \
-     facility. F1 reads the job details. Tab repeats the freight market watch. Escape returns \
+    "Enter accepts a dispatch and starts the deadhead to its origin facility. \
+     F1 reads the job details. Tab repeats the freight market watch. Escape returns \
      to the terminal.";
 
 const ASSIGNED_INTRO_HELP: &str =
-    "Dispatch assigned this load. Enter accepts it and starts the deadhead from your terminal \
-     to its origin facility. Declining draws another load, but refusals cost reputation from a \
+    "Dispatch assigned this load. Enter accepts it and starts the deadhead to its origin \
+     facility. Declining draws another load, but refusals cost reputation from a \
      budget that refills at your next promotion. F1 reads the job details. Escape returns to \
      the terminal.";
 
@@ -278,8 +278,8 @@ impl JobBoardState {
              Route inspection after accepting covers rest, fuel, toll, weather, and \
              restrictions."
         } else {
-            "Dispatch assigned this load. Accepting starts the deadhead from your terminal to \
-             its origin facility. Route inspection after pickup covers rest, fuel, toll, \
+            "Dispatch assigned this load. Accepting starts the deadhead to its \
+             origin facility. Route inspection after pickup covers rest, fuel, toll, \
              weather, and restrictions."
         };
         let mut items = vec![MenuItem::new(

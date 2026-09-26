@@ -368,6 +368,30 @@ fn test_full_game_flow_headless() {
         parked.name
     );
 
+    // The next dispatch deadheads from the delivered facility, not a
+    // terminal, and the pickup line must not claim otherwise.
+    key(&mut app, Key::Return); // job board
+    assert!(is::<JobBoardState>(&app));
+    accept_assigned_freight_with_deadhead(&mut app);
+    assert_eq!(
+        with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
+        DRIVE_PHASE_PICKUP
+    );
+    let spoken: Vec<String> = app
+        .main_lines()
+        .into_iter()
+        .chain(app.event_lines())
+        .collect();
+    assert!(
+        spoken
+            .iter()
+            .any(|l| l.contains("Pickup dispatch: deadhead to ")),
+        "{spoken:?}"
+    );
+    for line in &spoken {
+        assert!(!line.contains("from the terminal"), "{line}");
+    }
+
     // render a frame of every reachable lines() output
     app.render();
 }
