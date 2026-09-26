@@ -35,7 +35,7 @@ use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
 use ff_core::models::enforcement;
-use ff_core::models::home_base::{ParkedAt, ParkedKind};
+use ff_core::models::home_base::ParkedAt;
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
     board_offer_count, dispatch_deadline_hours, job_from_payload, job_payload,
@@ -222,13 +222,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
 /// chicago_il_us service area" (found by the first agent-driven playtest,
 /// 2026-08-30).
 pub(crate) fn first_day_parked_location(ctx: &GameContext) -> String {
-    let p = profile(ctx);
-    let parked = parked_at(ctx);
-    let city = ctx.world.spoken_city(&p.current_city, None);
-    match parked.kind {
-        ParkedKind::City => format!("in the {city} service area"),
-        _ => format!("at {} in the {city} service area", parked.name),
-    }
+    parked_at(ctx).service_area_phrase(ctx.world)
 }
 
 /// What the terminal says about the first-day / career objective on entry

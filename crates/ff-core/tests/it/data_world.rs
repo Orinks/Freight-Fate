@@ -244,11 +244,50 @@ fn test_home_base_offerability_follows_carrier_hiring() {
     // Chicago: offered, into Northstar's own Chicago terminal.
     assert!(is_offerable_home_city(world, "chicago_il_us"));
     let northstar = carrier("northstar").expect("northstar");
-    let home = home_terminal_city_for(Some(northstar), world, "Chicago");
+    let home = home_terminal_city_for(Some(northstar), world, "Chicago").expect("home");
     assert_eq!(home, "chicago_il_us");
     let terminal = northstar.home_terminal(world, &home).expect("terminal");
     assert_eq!(terminal.name, "Northstar Freight Lines Chicago terminal");
     assert_eq!(terminal.service_area(), "Chicago, Illinois");
+}
+
+#[test]
+fn test_regional_home_terminal_stays_inside_the_hiring_radius() {
+    use ff_core::models::carriers::{carrier, carrier_catalog, home_terminal_city_for};
+    let world = world();
+    let prairie = carrier("prairie_link").expect("prairie link");
+    // Out of range (and, for Surrey, out of country): no Prairie Link home,
+    // never KC or Omaha.
+    for city in ["seattle_wa_us", "surrey_bc_ca"] {
+        assert!(world.cities.contains_key(city), "{city} missing");
+        assert_eq!(
+            home_terminal_city_for(Some(prairie), world, city),
+            None,
+            "{city}"
+        );
+    }
+    assert_eq!(
+        home_terminal_city_for(Some(prairie), world, "wichita_ks_us").as_deref(),
+        Some("wichita_ks_us")
+    );
+    // No Alaska, BC, or Yukon city is ever a home terminal.
+    for c in carrier_catalog().values() {
+        for city in [
+            "healy_ak_us",
+            "anchorage_ak_us",
+            "surrey_bc_ca",
+            "whitehorse_yt_ca",
+        ] {
+            if let Some(home) = home_terminal_city_for(Some(c), world, city) {
+                let st = world.cities[&home].state_code.to_ascii_uppercase();
+                assert!(
+                    !matches!(st.as_str(), "AK" | "BC" | "YT"),
+                    "{} -> {home}",
+                    c.key
+                );
+            }
+        }
+    }
 }
 
 #[test]

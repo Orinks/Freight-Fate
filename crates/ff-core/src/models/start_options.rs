@@ -463,7 +463,10 @@ pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
             "company_driver"
         },
     );
-    let home = carriers::home_terminal_city_for(hiring, world, &base);
+    // A regional out of range falls back to the national fallback carrier's
+    // terminal city (the slice 2 start picker offers only carriers that hire
+    // in the picked city).
+    let home = carriers::home_terminal_city_or_fallback(hiring, world, &base);
     profile.set_home_terminal_city(&home);
     profile.set_money(option.starting_money);
     profile.set_business_status(if option.is_owner_operator() {

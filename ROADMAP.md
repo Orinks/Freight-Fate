@@ -2074,7 +2074,10 @@ instead of a spawn point.
 ### Career carriers (slices 2–4)
 
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
-("{Carrier} {City} terminal"), and the hub's "parked at" rule.
+("{Carrier} {City} terminal"), the hub's "parked at" rule, and the
+offerability and hiring-radius rule (`is_offerable_home_city`; regionals
+home drivers only within their radius). That rule is defined and tested but
+not yet used by the new-career picker; the start picker adopts it in slice 2.
 
 - [ ] **Slice 2: start flow places the truck at the hiring carrier's
       terminal.** Orientation and truck assignment happen at the carrier

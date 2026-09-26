@@ -83,10 +83,8 @@ impl SolvencyProfile for Profile {
         &mut self.driving_record
     }
     fn set_carrier(&mut self, key: &str, name: &str) {
-        self.carrier_key = key.to_string();
-        self.carrier_name = name.to_string();
         // A new carrier means that carrier's terminal; the truck stays put.
-        self.rehome_to_carrier();
+        self.change_carrier(key, name);
     }
     fn set_pay_advance(&mut self, amount: f64) {
         self.pay_advance = amount;

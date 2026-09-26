@@ -305,23 +305,29 @@ impl Profile {
         // gate already vouched for.
         let money = f("money", defaults.money);
 
+        let saved_home = s("home_terminal_city", "");
+        let home_terminal_city = migrate_home_terminal_city(
+            crate::models::carriers::hiring_carrier(
+                &s("carrier_key", &defaults.carrier_key),
+                &s("carrier_name", &defaults.carrier_name),
+                &s("business_status", &defaults.business_status),
+            ),
+            &saved_home,
+            &s("current_city", &defaults.current_city),
+        );
+        // A stale saved home (not the carrier's terminal city) was corrected:
+        // write the correction back on the next save.
+        if !saved_home.is_empty()
+            && crate::data::world::get_world().resolve_city_key(&saved_home) != home_terminal_city
+        {
+            migrated = true;
+        }
         let mut profile = Profile {
             name: s("name", &defaults.name),
             money,
             money_guard: MoneyGuard::seeded(money),
             current_city: s("current_city", &defaults.current_city),
-            home_terminal_city: {
-                let carrier = crate::models::carriers::hiring_carrier(
-                    &s("carrier_key", &defaults.carrier_key),
-                    &s("carrier_name", &defaults.carrier_name),
-                    &s("business_status", &defaults.business_status),
-                );
-                migrate_home_terminal_city(
-                    carrier,
-                    &s("home_terminal_city", ""),
-                    &s("current_city", &defaults.current_city),
-                )
-            },
+            home_terminal_city: home_terminal_city.clone(),
             parked_facility: s("parked_facility", ""),
             created_line: s("created_line", &defaults.created_line),
             migration_notice_pending: b("migration_notice_pending", false),
@@ -383,7 +389,7 @@ impl Profile {
 
 /// Home terminal city for a (possibly old) save: the hiring carrier's
 /// terminal city nearest the saved home (or `current_city` when the save has
-/// none). A saved home that is already one of the carrier's terminal cities
+/// none), within the hiring radius for a regional. A saved home that is already one of the carrier's terminal cities
 /// is kept. No world-pin search: world `terminal`/`company_yard` pins are
 /// freight endpoints, never homes. With no hiring carrier (own authority)
 /// the saved home, or else the current city, is kept as a city key.
@@ -406,5 +412,7 @@ pub(crate) fn migrate_home_terminal_city(
     if carrier.terminal_city_keys.contains(&key) {
         return key;
     }
-    carrier.nearest_terminal_city(world, &key).unwrap_or(key)
+    // A regional out of its hiring radius has no home there: the national
+    // fallback carrier's terminal city, never a terminal out of range.
+    crate::models::carriers::home_terminal_city_or_fallback(Some(carrier), world, &key)
 }

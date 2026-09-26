@@ -226,12 +226,12 @@ impl ArrivalState {
         self.summary_parts.insert(
             0,
             format!(
-                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}Parked at {}. \
+                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}Parked {}. \
                  {} dispatch board available. Fuel {} percent.",
                 job.spoken_destination(),
                 fmt_f(hours, 1),
                 clock_text(to_local(game_hours, destination_timezone)),
-                self.terminal.name,
+                self.terminal.service_area_phrase(ctx.world),
                 job.spoken_destination(),
                 fmt_f(fuel_fraction * 100.0, 0)
             ),
@@ -732,8 +732,7 @@ impl ArrivalState {
                  Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. \
                  {accessorial_clause} \
                  Business status: {}. Business costs {} dollars. Fines carried over {} dollars. \
-                 Net driver pay {} dollars, you now have {}. Parked at {} for the {} service \
-                 area.",
+                 Net driver pay {} dollars, you now have {}. Parked {}.",
                 fmt_f(job.weight_tons, 0),
                 job.spoken_cargo_label(),
                 job.spoken_destination(),
@@ -750,8 +749,7 @@ impl ArrivalState {
                 fmt_grouped(driver_charges, 0),
                 fmt_grouped(net_pay, 0),
                 fmt_grouped(money, 0),
-                self.terminal.name,
-                job.spoken_destination(),
+                self.terminal.service_area_phrase(ctx.world),
             ),
         );
         if on_time_bonus_paid >= 1.0 {
@@ -941,11 +939,7 @@ impl ArrivalState {
                 "It is {}.",
                 clock_text(to_local(game_hours, destination_timezone))
             ),
-            format!(
-                "Parked at {} for the {} service area.",
-                self.terminal.name,
-                job.spoken_destination()
-            ),
+            format!("Parked {}.", self.terminal.service_area_phrase(ctx.world)),
             format!(
                 "{}: {} dollars.",
                 pay_label(&business_status),

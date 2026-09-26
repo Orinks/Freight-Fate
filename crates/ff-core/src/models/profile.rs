@@ -604,13 +604,23 @@ impl Profile {
     /// Re-derive `home_terminal_city` for the current hiring carrier: kept
     /// when it is already one of that carrier's terminal cities, otherwise
     /// the carrier's nearest terminal city to it (or to `current_city` when
-    /// empty). Never moves the truck.
+    /// empty). Never moves the truck. A carrier change also clears
+    /// `parked_facility` (see [`Profile::change_carrier`]).
     pub fn rehome_to_carrier(&mut self) {
         self.home_terminal_city = serialize::migrate_home_terminal_city(
             self.hiring_carrier(),
             &self.home_terminal_city,
             &self.current_city,
         );
+    }
+
+    /// Switch to another carrier: its terminal becomes home (the truck stays
+    /// put) and the last delivered/dropped facility no longer applies.
+    pub fn change_carrier(&mut self, key: &str, name: &str) {
+        self.carrier_key = key.to_string();
+        self.carrier_name = name.to_string();
+        self.parked_facility.clear();
+        self.rehome_to_carrier();
     }
 
     /// The carrier's home terminal ("{Carrier} {City} terminal"), if any.

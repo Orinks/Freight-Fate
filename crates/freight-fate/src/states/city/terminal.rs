@@ -490,10 +490,11 @@ impl CityMenuState {
             let p = profile_mut(ctx);
             let former = p.carrier_name.clone();
             p.driving_record.carrier_terminations += 1;
-            p.carrier_key = enforcement::LAST_CHANCE_CARRIER_KEY.to_string();
-            p.carrier_name = enforcement::LAST_CHANCE_CARRIER_NAME.to_string();
             // The new carrier's terminal becomes home; the truck stays put.
-            p.rehome_to_carrier();
+            p.change_carrier(
+                enforcement::LAST_CHANCE_CARRIER_KEY,
+                enforcement::LAST_CHANCE_CARRIER_NAME,
+            );
             p.dispatch_board_cache = None;
             former
         };

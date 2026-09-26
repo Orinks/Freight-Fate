@@ -1227,19 +1227,35 @@ fn test_healy_save_migrates_home_to_carrier_nearest_terminal() {
         Profile::from_dict(&data).home_terminal_city,
         "chicago_il_us"
     );
-    // A regional's nearest terminal wins for its drivers.
+    // A regional never homes a driver outside its hiring radius: Healy is
+    // far out of Prairie Link's range, so the national fallback carrier's
+    // terminal city stands in, never KC, Omaha, or Wichita.
     let data = old_save("healy_ak_us", "prairie_link");
     let loaded = Profile::from_dict(&data);
-    assert!(
-        ["kansas_city_mo_us", "omaha_ne_us", "wichita_ks_us"]
-            .contains(&loaded.home_terminal_city.as_str()),
-        "{}",
-        loaded.home_terminal_city
-    );
+    assert_eq!(loaded.home_terminal_city, "milwaukee_wi_us");
     // Parked in Healy away from home: the Healy travel center, not a yard.
     let parked = loaded.parked_at(crate::data::world::get_world());
     assert_eq!(parked.kind, crate::models::home_base::ParkedKind::PublicLot);
     assert_eq!(parked.city_key, "healy_ak_us");
+}
+
+#[test]
+fn test_a_corrected_stale_home_is_written_back() {
+    use serde_json::Value;
+    with_data_dir(|_| {
+        let p = Profile::named_in("Stale", "Chicago");
+        let clean = Profile::from_dict(&p.to_dict());
+        assert_eq!(clean.home_terminal_city, "chicago_il_us");
+        assert!(
+            !clean.needs_migration_resave,
+            "a current home is left alone"
+        );
+        let mut d = p.to_dict();
+        d.insert("home_terminal_city".into(), Value::from("nenana_ak_us"));
+        let fixed = Profile::from_dict(&d);
+        assert_eq!(fixed.home_terminal_city, "chicago_il_us");
+        assert!(fixed.needs_migration_resave, "the correction is resaved");
+    });
 }
 
 #[test]

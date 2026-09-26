@@ -56,6 +56,17 @@ impl ParkedAt {
         }
     }
 
+    /// "at {name} in the {city} service area", or "in the {city} service
+    /// area" when only the city is known, so a sentence reads "Parked {}."
+    /// without inventing a place.
+    pub fn service_area_phrase(&self, world: &World) -> String {
+        let city = world.spoken_city(&self.city_key, None);
+        match self.kind {
+            ParkedKind::City => format!("in the {city} service area"),
+            _ => format!("at {} in the {city} service area", self.name),
+        }
+    }
+
     /// The name a logbook line or menu title uses.
     pub fn place(&self) -> &str {
         &self.name
@@ -141,7 +152,8 @@ fn carrier_terminal_here(
 
 /// The career's carrier home terminal, when it has a hiring carrier. A stale
 /// `home_terminal_city` (not one of this carrier's terminal cities, e.g.
-/// after a carrier change) reads as that carrier's nearest terminal to it.
+/// after a carrier change) reads as that carrier's nearest terminal to it,
+/// within the hiring radius for a regional.
 pub fn carrier_home_terminal(
     world: &World,
     carrier_key: &str,
@@ -153,8 +165,8 @@ pub fn carrier_home_terminal(
     carrier
         .home_terminal(world, home_terminal_city)
         .or_else(|| {
-            let nearest = carrier.nearest_terminal_city(world, home_terminal_city)?;
-            carrier.home_terminal(world, &nearest)
+            let home = carrier.home_terminal_city(world, home_terminal_city)?;
+            carrier.home_terminal(world, &home)
         })
 }
 

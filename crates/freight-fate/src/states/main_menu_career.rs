@@ -329,7 +329,7 @@ impl Menu for HomeCityState {
             // The hiring carrier's own terminal nearest this home base.
             let help = hiring
                 .and_then(|c| {
-                    let home = home_terminal_city_for(Some(c), ctx.world, key);
+                    let home = home_terminal_city_for(Some(c), ctx.world, key)?;
                     c.home_terminal(ctx.world, &home)
                 })
                 .map(|t| format!("Start in {place}. Home terminal: {}.", t.spoken_name()))

@@ -5,9 +5,11 @@
 ### Changed
 
 - Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals).
-- **Your home terminal is your carrier's own yard.** It is named for the carrier and the city, like Northstar Freight Lines Chicago terminal, and it is the carrier terminal nearest your home base. Regional carriers hire within their hiring radius, and national carriers hire anywhere in the lower 48. Alaska, British Columbia, and Yukon are not offered as home bases yet. A city's freight yards are pickup and delivery points only, never a home.
+- **Your home terminal is your carrier's own yard.** It is named for the carrier and the city, like Northstar Freight Lines Chicago terminal, and it is the carrier terminal nearest your home base. A city's freight yards are pickup and delivery points only, never a home.
+- The home-base rule is defined: national carriers hire anywhere in the lower 48, and a regional carrier hires only within its hiring radius, so it never homes a driver at a terminal out of range. A home base is offerable only where some carrier hires, which leaves out Alaska, British Columbia, and Yukon for now. The new-career picker adopts this rule in the next carrier update; until then a regional pick outside its range falls back to the Great Lakes Training terminal nearest you.
 - **The terminal says where your truck really is.** In your home terminal city it is parked at the carrier terminal. Anywhere else it is at the facility where you last delivered or dropped, or at the city's travel center or truck parking, or the terminal just names the city. It never names a yard in another city or a bare "Terminal".
-- Careers saved before this update get the home terminal of their carrier's nearest terminal city. The truck stays where it was parked.
+- Careers saved before this update get the home terminal of their carrier's nearest terminal city (within the hiring radius for a regional). The truck stays where it was parked.
+- A company-yard load in your home terminal city now deadheads from the carrier terminal instead of starting staged there, since the carrier terminal is its own yard.
 
 - `travel_center` and `truck_parking` city lots are fuel, parking, and rest only (no freight cargo roles); the default freight facility picks only `company_yard` or `terminal`.
 

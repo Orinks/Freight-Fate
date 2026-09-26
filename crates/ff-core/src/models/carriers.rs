@@ -88,8 +88,8 @@ impl Carrier {
     }
 
     /// Terminal city nearest to `city_key` (air miles), regardless of the
-    /// hiring area. Existing careers already work here, so save migration
-    /// and carrier changes use this.
+    /// hiring area or tier. Homes go through [`Carrier::home_terminal_city`],
+    /// which keeps regionals inside their hiring radius.
     pub fn nearest_terminal_city(&self, world: &World, city_key: &str) -> Option<String> {
         let key = world.resolve_city_key(city_key);
         let origin = world.cities.get(&key)?;
@@ -130,6 +130,20 @@ impl Carrier {
             .map(|(_, k)| k)
     }
 
+    /// Terminal city this carrier homes a career based near `city_key` in:
+    /// a national's nearest terminal (all are in the lower 48, so an existing
+    /// Alaska career maps there), a regional's nearest terminal only within
+    /// its hiring radius. `None` means this carrier has no home for that
+    /// city; the caller falls back to a carrier that does, never to a
+    /// regional terminal out of range.
+    pub fn home_terminal_city(&self, world: &World, city_key: &str) -> Option<String> {
+        if self.is_national() {
+            self.nearest_terminal_city(world, city_key)
+        } else {
+            self.hiring_terminal_city(world, city_key)
+        }
+    }
+
     pub fn hires_in(&self, world: &World, city_key: &str) -> bool {
         self.hiring_terminal_city(world, city_key).is_some()
     }
@@ -143,9 +157,15 @@ impl Carrier {
                 Some((air_miles(origin.lat, origin.lon, t.lat, t.lon), k.clone()))
             })
             .collect();
-        out.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+        sort_nearest_first(&mut out);
         out
     }
+}
+
+/// Nearest first; an exact tie goes to the lower city key, so the answer
+/// never depends on the order terminals are listed in `carriers.json`.
+fn sort_nearest_first(terminals: &mut [(f64, String)]) {
+    terminals.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
 }
 
 /// `HomeTerminal::kind` for a carrier-owned terminal (spoken by name only).
@@ -377,17 +397,38 @@ pub fn is_offerable_home_city(world: &World, city_key: &str) -> bool {
         .any(|c| c.hires_in(world, city_key))
 }
 
-/// Home terminal city for a career: the hiring carrier's nearest terminal
-/// city to `city_key`. Keeps `city_key` when there is no hiring carrier.
-pub fn home_terminal_city_for(carrier: Option<&Carrier>, world: &World, city_key: &str) -> String {
+/// Home terminal city for a career based near `city_key`: the hiring
+/// carrier's terminal city from [`Carrier::home_terminal_city`]. `None` when
+/// there is no hiring carrier, or a regional's hiring radius does not reach
+/// the city (Prairie Link has no home for Seattle or Surrey, BC). Callers
+/// fall back to a carrier that hires there (the start picker offers only
+/// those; a termination moves the driver to the national last-chance
+/// carrier), never to an out-of-range regional terminal.
+pub fn home_terminal_city_for(
+    carrier: Option<&Carrier>,
+    world: &World,
+    city_key: &str,
+) -> Option<String> {
+    carrier?.home_terminal_city(world, &world.resolve_city_key(city_key))
+}
+
+/// Home terminal city a career must store: the hiring carrier's (see
+/// [`home_terminal_city_for`]), else, for a regional out of its hiring
+/// radius, the national solvency-fallback carrier's terminal city (never an
+/// Alaska, BC, or Yukon city, never an out-of-range regional terminal).
+/// With no hiring carrier (own authority) the city key itself.
+pub fn home_terminal_city_or_fallback(
+    carrier: Option<&Carrier>,
+    world: &World,
+    city_key: &str,
+) -> String {
     let key = world.resolve_city_key(city_key);
-    match carrier {
-        Some(c) => c
-            .hiring_terminal_city(world, &key)
-            .or_else(|| c.nearest_terminal_city(world, &key))
-            .unwrap_or(key),
-        None => key,
+    if carrier.is_none() {
+        return key;
     }
+    home_terminal_city_for(carrier, world, &key)
+        .or_else(|| solvency_fallback_carrier().home_terminal_city(world, &key))
+        .unwrap_or(key)
 }
 
 /// Pay plan for a carrier key; unknown keys fall back to Northstar wages.
@@ -432,6 +473,53 @@ mod tests {
         let summit = carrier("summit_value").expect("summit");
         assert_eq!(summit.tier, "national");
         assert_eq!(summit.home_time_policy, "inert");
+    }
+
+    #[test]
+    fn test_terminal_tie_break_goes_to_the_lower_city_key() {
+        let mut v = vec![
+            (120.0, "wichita_ks_us".to_string()),
+            (80.0, "omaha_ne_us".to_string()),
+            (120.0, "kansas_city_mo_us".to_string()),
+        ];
+        sort_nearest_first(&mut v);
+        let keys: Vec<&str> = v.iter().map(|(_, k)| k.as_str()).collect();
+        assert_eq!(keys, ["omaha_ne_us", "kansas_city_mo_us", "wichita_ks_us"]);
+        // The listed order of terminals never changes a carrier's answer.
+        let world = get_world();
+        let prairie = carrier("prairie_link").unwrap();
+        let mut reversed = prairie.clone();
+        reversed.terminal_city_keys.reverse();
+        for city in [
+            "topeka_ks_us",
+            "lincoln_ne_us",
+            "wichita_ks_us",
+            "salina_ks_us",
+        ] {
+            assert_eq!(
+                prairie.home_terminal_city(world, city),
+                reversed.home_terminal_city(world, city),
+                "{city}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_regional_out_of_range_falls_back_to_the_national_fallback_carrier() {
+        let world = get_world();
+        let prairie = carrier("prairie_link").unwrap();
+        for city in ["seattle_wa_us", "surrey_bc_ca", "healy_ak_us"] {
+            assert_eq!(prairie.home_terminal_city(world, city), None, "{city}");
+            assert_eq!(
+                home_terminal_city_or_fallback(Some(prairie), world, city),
+                "milwaukee_wi_us",
+                "{city}"
+            );
+        }
+        assert_eq!(
+            home_terminal_city_or_fallback(Some(prairie), world, "wichita_ks_us"),
+            "wichita_ks_us"
+        );
     }
 
     #[test]
