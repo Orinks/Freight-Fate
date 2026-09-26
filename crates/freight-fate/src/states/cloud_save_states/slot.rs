@@ -377,13 +377,15 @@ impl CloudSlotState {
             Ok(profile) => Value::Object(profile.to_dict()),
             Err(Some(LoadError::LegacyCareer(_))) => {
                 ctx.say(
-                    "This computer's save is from an earlier version of Freight Fate and cannot be uploaded. The cloud copy can still be used.",
+                    "This computer's save is from an earlier version of Freight Fate and \
+                     cannot be uploaded. The cloud copy can still be used.",
                 );
                 return;
             }
             Err(_) => {
                 ctx.say(
-                    "This computer's save could not be read, so it cannot be uploaded. The cloud copy can still be used.",
+                    "This computer's save could not be read, so it cannot be uploaded. The \
+                     cloud copy can still be used.",
                 );
                 return;
             }
@@ -444,7 +446,8 @@ impl CloudSlotState {
             Ok(profile) => profile,
             Err(Some(LoadError::LegacyCareer(_))) => {
                 ctx.say(
-                    "This computer's save is from an earlier version of Freight Fate and cannot be backed up. The save stays as it is.",
+                    "This computer's save is from an earlier version of Freight Fate and \
+                     cannot be backed up. The save stays as it is.",
                 );
                 return;
             }
@@ -497,7 +500,8 @@ impl CloudSlotState {
                 self.status =
                     "The cloud copy changed on another computer. Nothing was changed.".to_string();
                 ctx.say(
-                    "The cloud copy changed on another computer, so nothing was changed. Choose which copy to keep from the rows below.",
+                    "The cloud copy changed on another computer, so nothing was \
+                     changed. Choose which copy to keep from the rows below.",
                 );
             }
             "auth" => {
@@ -515,7 +519,8 @@ impl CloudSlotState {
                     "The backup has not gone through yet. Still trying in the background."
                         .to_string();
                 ctx.say(
-                    "The backup has not gone through yet. The game keeps trying in the background, and the cloud copy was not changed.",
+                    "The backup has not gone through yet. The game keeps trying in the \
+                     background, and the cloud copy was not changed.",
                 );
             }
         }
@@ -549,7 +554,9 @@ impl CloudSlotState {
                 self.reload_active_profile(ctx);
                 ctx.audio.play("ui/menu_select");
                 ctx.say(&format!(
-                    "Backup restored. {} on this computer now matches the cloud copy, and the save it replaced was kept beside it as a fallback file.",
+                    "Backup restored. {} on this computer now \
+                     matches the cloud copy, and the save it replaced was kept \
+                     beside it as a fallback file.",
                     self.save_name
                 ));
             }
@@ -557,7 +564,8 @@ impl CloudSlotState {
                 self.status = "This computer's save is now the accepted cloud backup.".to_string();
                 ctx.audio.play("ui/menu_select");
                 ctx.say(
-                    "Done. The cloud copy now matches this computer's save, and backups for this career are on again.",
+                    "Done. The cloud copy now matches this computer's save, and \
+                     backups for this career are on again.",
                 );
             }
             "deleted" => {
@@ -570,7 +578,8 @@ impl CloudSlotState {
                 };
                 ctx.audio.play("ui/menu_select");
                 ctx.say(&format!(
-                    "Deleted. Every cloud backup of {} was removed from your orinks.net account.{local}",
+                    "Deleted. Every cloud backup of {} was \
+                     removed from your orinks.net account.{local}",
                     self.save_name
                 ));
             }
@@ -581,7 +590,8 @@ impl CloudSlotState {
             "delete_auth_failed" => {
                 self.status = "Reconnect needed. Nothing was deleted.".to_string();
                 ctx.say(&format!(
-                    "{AUTH_HELP} Nothing was deleted, and the cloud backups were not changed."
+                    "{AUTH_HELP} Nothing was deleted, and the cloud \
+                     backups were not changed."
                 ));
             }
             "public_set" => {
@@ -596,7 +606,8 @@ impl CloudSlotState {
                 self.status = "This is now your public career.".to_string();
                 ctx.audio.play("ui/menu_select");
                 ctx.say(&format!(
-                    "Done. {} is now your public career. Your other careers stay private cloud backups.",
+                    "Done. {} is now your public career. Your other careers stay private \
+                     cloud backups.",
                     self.save_name
                 ));
             }
@@ -640,7 +651,8 @@ impl CloudSlotState {
             "keep_mine_failed_conflict" => {
                 self.status = "The cloud copy changed again. Nothing was changed.".to_string();
                 ctx.say(
-                    "The cloud copy changed again since this conflict was recorded. Nothing was changed. Open this career again for the current conflict.",
+                    "The cloud copy changed again since this conflict was recorded. Nothing \
+                     was changed. Open this career again for the current conflict.",
                 );
             }
             "unverified" => {
@@ -673,7 +685,8 @@ impl CloudSlotState {
             "auth_failed" => {
                 self.status = "Reconnect needed. Nothing was restored.".to_string();
                 ctx.say(&format!(
-                    "{AUTH_HELP} Nothing was restored, and your local career is unchanged."
+                    "{AUTH_HELP} Nothing was restored, and your \
+                     local career is unchanged."
                 ));
             }
             "invalid_profile" | "restore_failed" => {
@@ -714,7 +727,8 @@ impl Menu for CloudSlotState {
                         s.speak_current(ctx)
                     })
                     .help(
-                        "Backups stopped because the cloud copy changed on another computer. Nothing changes until you choose.",
+                        "Backups stopped because the cloud copy changed on another computer. \
+                         Nothing changes until you choose.",
                     ),
                 );
                 let mine = self.local_summary();
@@ -739,7 +753,8 @@ impl Menu for CloudSlotState {
                         |s: &mut Self, ctx| s.confirm_keep_mine(ctx),
                     )
                     .help(
-                        "Uploads this computer's save over the cloud copy and turns backups for this career back on.",
+                        "Uploads this computer's save over the cloud copy \
+                         and turns backups for this career back on.",
                     ),
                 );
                 items.push(
@@ -754,7 +769,9 @@ impl Menu for CloudSlotState {
                         },
                     )
                     .help(
-                        "Downloads the cloud copy over this computer's save. The current local save is kept as a fallback file beside it.",
+                        "Downloads the cloud copy over this computer's \
+                         save. The current local save is kept as a fallback \
+                         file beside it.",
                     ),
                 );
             }
@@ -770,7 +787,8 @@ impl Menu for CloudSlotState {
                             s.start_backup_now(ctx)
                         })
                         .help(
-                            "Sends this computer's save to your orinks.net account now and says the result. Nothing on this computer changes.",
+                            "Sends this computer's save to your orinks.net account now and \
+                             says the result. Nothing on this computer changes.",
                         ),
                     );
                 }
@@ -783,7 +801,9 @@ impl Menu for CloudSlotState {
                         },
                     )
                     .help(
-                        "Replaces this career's local save with the cloud backup. The current local save is kept as a fallback file beside it.",
+                        "Replaces this career's local save with the cloud \
+                         backup. The current local save is kept as a fallback \
+                         file beside it.",
                     ),
                 );
                 for entry in self.revisions.clone().into_iter().skip(1) {
@@ -813,7 +833,10 @@ impl Menu for CloudSlotState {
                         s.speak_current(ctx)
                     })
                     .help(
-                        "When Profile sharing is on, approved facts from this career's accepted backups appear on your public profile. Your other careers stay private cloud backups.",
+                        "When Profile sharing is on, approved facts from \
+                             this career's accepted backups appear on your public \
+                             profile. Your other careers stay private cloud \
+                             backups.",
                     ),
                 );
             } else {
@@ -822,7 +845,8 @@ impl Menu for CloudSlotState {
                         s.confirm_public(ctx)
                     })
                     .help(
-                        "Your public profile shows one career. The others stay private cloud backups.",
+                        "Your public profile shows one career. The others stay private cloud \
+                         backups.",
                     ),
                 );
             }
@@ -831,7 +855,9 @@ impl Menu for CloudSlotState {
                     s.confirm_delete(ctx)
                 })
                 .help(
-                    "Removes every kept cloud backup of this career from your orinks.net account. The save on this computer is not touched.",
+                    "Removes every kept cloud backup of this career from \
+                     your orinks.net account. The save on this computer is \
+                     not touched.",
                 ),
             );
         }

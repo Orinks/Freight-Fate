@@ -353,7 +353,8 @@ pub fn screen_lane_contradictions(
     for i in suspect {
         let bad = &repaired[i];
         log::warn!(
-            "{} to {}: traffic sample at mile {} claims {} lane(s) for {} AADT; reading {} lanes from the rest of the leg instead",
+            "{} to {}: traffic sample at mile {} claims {} lane(s) for {} AADT; \
+             reading {} lanes from the rest of the leg instead",
             from_city,
             to_city,
             fmt_f(bad.at_mi, 1),

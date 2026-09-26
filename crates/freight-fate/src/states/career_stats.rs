@@ -28,7 +28,8 @@ impl CareerStatsState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Career stats").with_intro_help(
-                "Up and down review the lines. Enter repeats a line. Escape returns to the terminal.",
+                "Up and down review the lines. Enter repeats a line. Escape returns to the \
+                 terminal.",
             ),
         }
     }
@@ -191,7 +192,10 @@ impl Menu for CareerStatsState {
                 let lines = record_lines(ctx);
                 ctx.push_state(SimpleMenuState::readout("Citations and violations", lines));
             })
-            .help("Open the list, newest first: what it was, why, what it cost, when, and where."),
+            .help(
+                "Open the list, newest first: what it was, why, what it cost, when, \
+                 and where.",
+            ),
         );
         items.push(
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx))

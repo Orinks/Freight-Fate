@@ -133,7 +133,7 @@ pub const TRAILER_CATALOG: &[TrailerType] = &[
         key: "turnpike_double",
         label: "48-foot turnpike doubles",
         equipment_text: "48-foot turnpike doubles",
-        description: "LCV turnpike-doubles program: two 48-foot vans and a converter dolly, about 102 ft of cargo length and 117 ft overall, staged on and off at turnpike exits.",
+        description: "LCV turnpike-doubles program: two 48-foot vans and a converter dolly, about 102 feet of cargo length and 117 feet overall, staged on and off at turnpike exits.",
         lease_deposit: 16_000.0,
         per_mile_reserve: 0.28,
         purchase_price: 110_000.0,

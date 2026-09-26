@@ -114,7 +114,8 @@ impl FacilityArrivalState {
                 |s: &mut Self, ctx| s.dock(ctx),
             )
             .help(
-                "The receiver takes the whole trailer. Quicker than a dock, and a write-up leaves with the trailer.",
+                "The receiver takes the whole trailer. Quicker than a dock, and a write-up \
+                 leaves with the trailer.",
             )
         } else {
             MenuItem::new("Dock and deliver", |s: &mut Self, ctx| s.dock(ctx))
@@ -214,7 +215,8 @@ impl FacilityArrivalState {
             (
                 "Dropping the trailer",
                 format!(
-                    "Dropping the loaded trailer at {facility}, {} tons of {cargo_label}. Hooking an empty.",
+                    "Dropping the loaded trailer at {facility}, {} tons of {cargo_label}. \
+                     Hooking an empty.",
                     fmt_f(weight_tons, 0)
                 ),
                 "Dropping the trailer.",
@@ -329,7 +331,11 @@ impl FacilityArrivalState {
                 "Those charges do not reduce driver pay."
             };
             format!(
-                "Paperwork for {facility}: {} tons of {}. Rate sheet {} dollars, current gross {} dollars. Carrier-paid or reimbursed charges so far {} dollars, tolls {}, accessorials {}. {charge_fate} Fines carried over {} dollars. Estimated net driver pay {} dollars.{advance_note} {timing}. {cargo_condition} {finish} to settle.",
+                "Paperwork for {facility}: {} tons of {}. Rate sheet {} dollars, current gross \
+                 {} dollars. Carrier-paid or reimbursed charges so far {} dollars, tolls {}, \
+                 accessorials {}. {charge_fate} Fines carried over {} dollars. Estimated net \
+                 driver pay {} dollars.{advance_note} {timing}. {cargo_condition} {finish} to \
+                 settle.",
                 fmt_f(job.weight_tons, 0),
                 job.spoken_cargo_label(),
                 fmt_grouped(job.pay, 0),

@@ -236,7 +236,12 @@ fn refuse_request(method: &str, url: &str) -> ! {
         .unwrap_or_else(|e| e.into_inner())
         .push(format!("{method} {url}"));
     panic!(
-        "refusing to send {method} {url} over the real network: this process never called net::allow_real_network(), so it is not the game. If this is a test, inject a transport -- net::testing::FakeTransport for an orinks.net service, a fake fetch or provider for a live feed -- into whatever is reaching for the wire, and assert on what it recorded."
+        "refusing to send {method} {url} over the real network: this process \
+         never called net::allow_real_network(), so it is not the game. If \
+         this is a test, inject a transport -- net::testing::FakeTransport \
+         for an orinks.net service, a fake fetch or provider for a live feed \
+         -- into whatever is reaching for the wire, and assert on what it \
+         recorded."
     );
 }
 

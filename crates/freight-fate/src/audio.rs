@@ -708,7 +708,7 @@ mod tests {
             Some("Caf\u{e9} del Mar".to_string())
         );
         assert_eq!(
-            parse_icy_stream_title(Some(b"StreamTitle='  Artist - Title  ';")),
+            parse_icy_stream_title(Some(b"StreamTitle='  Artist   -   Title  ';")),
             Some("Artist - Title".to_string())
         );
         assert_eq!(parse_icy_stream_title(Some(b"StreamTitle='';")), None);

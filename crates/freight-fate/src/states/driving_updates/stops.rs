@@ -138,7 +138,8 @@ impl DrivingState {
             // The one line that has to be heard: what running is, and what
             // it costs this driver. The pursuit tracker starts on it.
             let cost = if profile_of(ctx).driving_record.major_count() >= 1 {
-                "A second major offense disqualifies your CDL for life, and this career will not drive again."
+                "A second major offense disqualifies your CDL for life, and this career will \
+                 not drive again."
             } else {
                 "It is a felony, it cancels this load, and it disqualifies your CDL for a year."
             };
@@ -327,7 +328,8 @@ impl DrivingState {
             ctx,
             EnforcementStopParams {
                 title: "Failure-to-stop stop".to_string(),
-                summary: "Troopers boxed you in and stopped the truck. Failing to pull over promptly for an officer is a serious violation."
+                summary: "Troopers boxed you in and stopped the truck. Failing to pull over \
+                          promptly for an officer is a serious violation."
                     .to_string(),
                 fine: FAILURE_TO_STOP_CITATION_FINE,
                 reputation_hit: hos::HOS_REPUTATION_HIT * 2.0,

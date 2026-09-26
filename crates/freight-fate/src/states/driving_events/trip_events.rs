@@ -1216,11 +1216,13 @@ impl DrivingState {
                 "Back on the highway with a reset clock. Keep the logbook clean."
             };
             let summary = format!(
-                "{} Evidence: {evidence_text}. The officer writes the order: out of service, {oos_phrase}, right here.",
+                "{} Evidence: {evidence_text}. The officer writes the order: out of service, \
+                 {oos_phrase}, right here.",
                 event.text()
             );
             let lights = format!(
-                "Lights and siren behind you for a log check. Signal with {} and stop on the shoulder.",
+                "Lights and siren behind you for a log check. Signal with {} and stop on the \
+                 shoulder.",
                 ctx.control_hint("take_exit")
             );
             self.begin_enforcement_pull_over(

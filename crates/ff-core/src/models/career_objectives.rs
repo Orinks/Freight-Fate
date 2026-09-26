@@ -121,7 +121,9 @@ fn company_driver_objective<P: CareerProfile + ?Sized>(profile: &P) -> CareerObj
         return CareerObjective::new(
             "Owner-operator preparation",
             format!(
-                "Work toward level {OWNER_OPERATOR_LEVEL}, {OWNER_OPERATOR_DELIVERIES} deliveries, {} reputation, and a cash cushion.",
+                "Work toward level {OWNER_OPERATOR_LEVEL}, \
+                 {OWNER_OPERATOR_DELIVERIES} deliveries, \
+                 {} reputation, and a cash cushion.",
                 fmt_f(OWNER_OPERATOR_REPUTATION, 0)
             ),
             "Choose freight that protects reputation and builds savings.",
@@ -152,7 +154,8 @@ fn owner_operator_objective<P: CareerProfile + ?Sized>(profile: &P) -> CareerObj
         return CareerObjective::new(
             "Authority preparation",
             format!(
-                "Build reputation, deliveries, and at least {} dollars in working capital.",
+                "Build reputation, deliveries, and at least \
+                 {} dollars in working capital.",
                 fmt_grouped(AUTHORITY_READY_WORKING_CAPITAL, 0)
             ),
             "The strongest loads are the ones that leave room for fuel, repairs, and trailer costs.",

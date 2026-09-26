@@ -155,6 +155,10 @@ impl Profile {
         d.insert("trailer_programs".into(), strings(&self.trailer_programs));
         d.insert("owned_trailers".into(), strings(&self.owned_trailers));
         d.insert(
+            "turnpike_program_notice_seen".into(),
+            Value::from(self.turnpike_program_notice_seen),
+        );
+        d.insert(
             "owner_operator_declined".into(),
             Value::from(self.owner_operator_declined),
         );
@@ -297,7 +301,7 @@ impl Profile {
         // gate already vouched for.
         let money = f("money", defaults.money);
 
-        Profile {
+        let mut profile = Profile {
             name: s("name", &defaults.name),
             money,
             money_guard: MoneyGuard::seeded(money),
@@ -339,6 +343,8 @@ impl Profile {
             weigh_station_transponder: b("weigh_station_transponder", false),
             trailer_programs: list("trailer_programs"),
             owned_trailers: list("owned_trailers"),
+            // Missing on every save written before the notice existed.
+            turnpike_program_notice_seen: b("turnpike_program_notice_seen", false),
             owner_operator_declined: b("owner_operator_declined", false),
             career,
             driving_record,
@@ -355,7 +361,15 @@ impl Profile {
             // A save that had to be migrated on load is rewritten on the next
             // save, so the conversion is not redone on every launch.
             needs_migration_resave: migrated,
+        };
+        // A save written before the flag owes the notice only if it leases
+        // double_van without turnpike_double right now; latch it otherwise so a
+        // later double_van lease never triggers it.
+        if !d.contains_key("turnpike_program_notice_seen") && !profile.turnpike_program_notice_due()
+        {
+            profile.turnpike_program_notice_seen = true;
         }
+        profile
     }
 }
 

@@ -22,7 +22,9 @@
 
 - **Reefer and APU hotel power.** Turn the trailer reefer and the APU on or off; a cold pickup starts the reefer at 2 degrees, cargo warms slowly when it is off, and the tractor must be shut down before fueling at a stop or the terminal garage.
 
-- **Turnpike doubles pull 48-foot vans on listed turnpike corridors.** `turnpike_doubles` uses 48-foot turnpike doubles (about 102 ft of cargo length, 117 ft overall) on an explicit allowlist of Thruway, Mass Pike, Ohio Turnpike, Indiana Toll Road, and Kansas Turnpike legs, separate from the 28-foot parcel pups. Dispatch only clears them on the turnpike, and those jobs need the doubles endorsement as well as the LCV certificate.
+- **Turnpike doubles pull 48-foot vans on listed turnpike corridors.** `turnpike_doubles` uses 48-foot turnpike doubles (about 102 feet of cargo length, 117 feet overall) on an explicit allowlist of Thruway, Mass Pike, Ohio Turnpike, Indiana Toll Road, and Kansas Turnpike legs, separate from the 28-foot parcel pups. Dispatch only clears them on the turnpike, and those jobs need the doubles endorsement as well as the LCV certificate.
+
+- **Double van lessees hear once that turnpike doubles need their own program.** Your double van program still covers parcel doubles; trips under way finish as before.
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
@@ -183,6 +185,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Save notices show their text on screen.** The driving record, save conversion, and turnpike program notices were spoken but showed only their title and OK.
 
 - Job board distance uses the tighter of the level cap and the carrier run-band max; the run-band minimum is not applied on the board yet (saved for later lane-area work).
 
@@ -1627,10 +1631,6 @@
 
 - **The nearest town, the grade, the zone, and the next maneuver left the R
   readout.** Each has its own key or lives in the Tab status menu.
-
-- **Shorter driving readouts that fit a braille display.** The clock, route,
-  weather, and fuel reports put the answer in the first few words, and C
-  leads with the time and whether you are on schedule.
 
 - **Rest stops no longer let you sleep twice for nothing.** Already fully
   rested, a sleep option warns it would only move the clock and your
@@ -4932,14 +4932,6 @@
 - **The lane-drift rumble is now directional.** When you wander toward a lane
   edge, the rumble strip plays from that side -- drift right and you hear it on
   the right -- so the ear it lands in tells you which way to steer back.
-- **Safety announcements no longer get buried, and you get more warning.** Zone
-  entries, construction and traffic warnings, and checkpoints now preempt
-  ambient chatter (weather, tolls, state lines) on the event voice instead of
-  queuing behind it -- so a "construction ahead" never arrives after you have
-  already entered the zone. Zone warnings also lead by real time now, not a
-  flat distance: the heads-up scales with your speed and pacing, so 70 mph at
-  high time compression gets a usefully earlier callout instead of a couple of
-  seconds.
 
 ### Added
 - **Repeat the market watch on the dispatch board.** The board speaks which

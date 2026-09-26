@@ -136,7 +136,8 @@ fn test_the_two_quietest_rungs_are_not_the_same_setting() {
         differ
             .iter()
             .any(|c| audible.contains(&row_disposition(quiet, *c).unwrap())),
-        "quiet and urgent_only differ only in categories quiet already silences, so a player switching between them hears no change"
+        "quiet and urgent_only differ only in categories quiet already \
+             silences, so a player switching between them hears no change"
     );
 }
 
@@ -202,7 +203,8 @@ fn test_only_standard_can_reach_the_already_said_gate() {
             .collect();
         assert!(
             offenders.is_empty(),
-            "{rung} now reaches the already-said gate for {offenders:?}; that gate is standard's alone (Darren, 2026-08-19)"
+            "{rung} now reaches the already-said gate for {offenders:?}; \
+                 that gate is standard's alone (Darren, 2026-08-19)"
         );
     }
 }

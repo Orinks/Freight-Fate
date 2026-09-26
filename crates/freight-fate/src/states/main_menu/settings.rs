@@ -85,7 +85,8 @@ impl Menu for SettingsState {
         items.insert(
             3,
             MenuItem::new("Online", |s: &mut Self, ctx| s.open_online_hub(ctx)).help(
-                "Online options have moved to the Online menu on the main menu; this opens it.",
+                "Online options have moved to the Online menu on the \
+                 main menu; this opens it.",
             ),
         );
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
@@ -119,15 +120,29 @@ pub(super) fn save_settings(settings: &Settings) {
 pub const SETTINGS_LAYOUT_NOTICES: [(i64, &str); 3] = [
     (
         1,
-        "Gameplay is now a category with its own submenu: Driving assistance, Difficulty and hours of service, World and traffic, and Controls. Weather, traffic, and parking sources moved into World and traffic from Speech and weather. Nothing about your settings changed.",
+        "Gameplay is now a category with its own submenu: Driving assistance, \
+         Difficulty and hours of service, World and traffic, and Controls. \
+         Weather, traffic, and parking sources moved into World and traffic \
+         from Speech and weather. Nothing about your settings changed.",
     ),
     (
         2,
-        "Two rows moved. Speed keeper is now in Driving assistance instead of Controls. Lane and edge cue prominence is now Lane and edge cue volume, in Audio under Gameplay cues volume. Your choices came with them. Overspeed warning no longer has a row: it stays quiet until you are heading for a ticket.",
+        "Two rows moved. Speed keeper is now in Driving assistance instead of \
+         Controls. Lane and edge cue prominence is now Lane and edge cue \
+         volume, in Audio under Gameplay cues volume. Your choices came with \
+         them. Overspeed warning no longer has a row: it stays quiet until you \
+         are heading for a ticket.",
     ),
     (
         3,
-        "Speech verbosity is now Driving speech, in the Speech category, with two more steps. Normal is now standard and terse is now quiet; your choice came with you. Both still speak every safety call, route instruction, and money consequence. Quiet keeps short confirmations and status updates, including lane openings. Urgent only speaks safety warnings and directions requiring action; road heads-ups and confirmations become sounds, while routine costs and status are silent. Events silenced by your setting stay out of message review.",
+        "Speech verbosity is now Driving speech, in the Speech category, with \
+         two more steps. Normal is now standard and terse is now quiet; your \
+         choice came with you. Both still speak every safety call, route \
+         instruction, and money consequence. Quiet keeps short confirmations \
+         and status updates, including lane openings. Urgent only speaks \
+         safety warnings and directions requiring action; road heads-ups and \
+         confirmations become sounds, while routine costs and status are silent. \
+         Events silenced by your setting stay out of message review.",
     ),
 ];
 
@@ -293,7 +308,8 @@ impl SettingsCategoryState {
             .unwrap_or("Settings");
         Self {
             menu: MenuCore::new(title).with_intro_help(
-                "Up and Down pick a setting. Right arrow or Enter changes it forward, Left arrow backward. Escape goes back.",
+                "Up and Down pick a setting. Right arrow or Enter changes it forward, \
+                 Left arrow backward. Escape goes back.",
             ),
             category: category.to_string(),
         }
@@ -336,7 +352,10 @@ impl SettingsCategoryState {
         ctx.settings.pace_retired_notice_left -= 1;
         save_settings(&ctx.settings);
         ctx.say_with(
-            "This row used to offer Realistic, and yours was set to it. That setting is retired: it was the fastest here, not the most true to life. You are on Standard now, so the game clock runs at half the speed it did.",
+            "This row used to offer Realistic, and yours was set to it. \
+             That setting is retired: it was the fastest here, not the most \
+             true to life. You are on Standard now, so the game clock runs \
+             at half the speed it did.",
             Say::queued(),
         );
     }
@@ -371,7 +390,8 @@ impl SettingsCategoryState {
         };
         ctx.say_with(
             format!(
-                "This row used to be Lane drift, and yours read {was}. Nothing about your driving changed: {unchanged}."
+                "This row used to be Lane drift, and yours read {was}. \
+                 Nothing about your driving changed: {unchanged}."
             ),
             Say::queued(),
         );
@@ -404,12 +424,15 @@ impl SettingsCategoryState {
     /// honestly instead of naming a file that is not there.
     pub fn log_location_lines(&self) -> Vec<String> {
         let Some(path) = active_log_path() else {
-            return vec!["This copy is not writing a log file. Packaged downloads always write one; a copy run from source prints to its console instead."
+            return vec!["This copy is not writing a log file. Packaged downloads \
+                 always write one; a copy run from source prints to its console \
+                 instead."
                 .to_string()];
         };
         let mut out = vec![
             format!("The game log is saved as {}.", path.display()),
-            "It records this session, including everything the game said out loud. Attach it to a bug report."
+            "It records this session, including everything the game said out loud. \
+             Attach it to a bug report."
                 .to_string(),
         ];
         let stem = path

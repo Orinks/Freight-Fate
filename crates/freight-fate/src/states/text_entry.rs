@@ -91,7 +91,9 @@ pub trait TextEntry: Sized + 'static {
     fn enter(&mut self, ctx: &mut GameContext) {
         let heading = self.entry().heading.clone();
         ctx.say(&format!(
-            "{heading}. Type, then press Enter. Left and right arrows review the letters you have typed, Home and End jump to the start or end. Press Escape to cancel."
+            "{heading}. Type, then press Enter. \
+             Left and right arrows review the letters you have typed, \
+             Home and End jump to the start or end. Press Escape to cancel."
         ));
     }
 
@@ -147,7 +149,8 @@ pub trait TextEntry: Sized + 'static {
             field.heading.clone(),
             String::new(),
             format!("{}: {before}|{after}", field.field_label),
-            "Left and right arrows review letters, Home and End jump to the ends. Enter to confirm, Escape to cancel, F2 to hear the whole text."
+            "Left and right arrows review letters, Home and End jump to the \
+             ends. Enter to confirm, Escape to cancel, F2 to hear the whole text."
                 .to_string(),
         ]
     }

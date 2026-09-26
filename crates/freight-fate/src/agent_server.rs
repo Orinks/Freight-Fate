@@ -372,12 +372,14 @@ impl AgentPolicy {
                 let Some(set) = observed.cruise_set_mph else {
                     let _ = plan.reply.send(Ok(if observed.keeper_mph.is_some() {
                         format!(
-                            "The speed keeper has this zone, so adaptive cruise is not available here; the dial is not walked.\n{}",
+                            "The speed keeper has this zone, so adaptive cruise is not \
+                             available here; the dial is not walked.\n{}",
                             drain_ears(&self.ears)
                         )
                     } else {
                         format!(
-                            "Adaptive cruise did not engage; listen for why (engine, air, speed, or the zone).\n{}",
+                            "Adaptive cruise did not engage; listen for why (engine, air, \
+                             speed, or the zone).\n{}",
                             drain_ears(&self.ears)
                         )
                     }));
@@ -390,7 +392,8 @@ impl AgentPolicy {
                 };
                 let Some(wanted) = wanted else {
                     let _ = plan.reply.send(Ok(format!(
-                        "Cruise is set at {set:.0}; no posted limit has been read yet, so the dial was left there.\n{}",
+                        "Cruise is set at {set:.0}; no posted limit has been read yet, so \
+                         the dial was left there.\n{}",
                         drain_ears(&self.ears)
                     )));
                     return;
@@ -536,7 +539,8 @@ impl AgentPolicy {
                             .push_back(vec![InputEvent::KeyUp { key, mods }]);
                     }
                     let _ = reply.send(Ok(
-                        "pressed. Wait a moment (wait tool) then listen; the game speaks on its own time."
+                        "pressed. Wait a moment (wait tool) then listen; the game \
+                         speaks on its own time."
                             .to_string(),
                     ));
                 }
@@ -700,14 +704,18 @@ impl AgentPolicy {
                             })
                             .collect::<Vec<_>>()
                             .join("\n")),
-                        None => Err("No menu is on screen right now. If you are at the wheel, the driving keys and spoken readouts are the interface."
+                        None => Err("No menu is on screen right now. If you are at the wheel, \
+                             the driving keys and spoken readouts are the interface."
                             .to_string()),
                     });
                 }
                 Command::Observe => {
                     let _ = reply.send(Ok(match input.driving_observation() {
                         Some(o) => format!(
-                            "INSPECTOR (ground truth, not ears): mile {:.2}. Speed {:.0} mph, limit {}. Air ready: {}. Parking brake: {}. Speed control armed: {}. Keeper: {}. Cruise: {}. Hazard active: {}. Pull-over active: {}. Off pavement: {}. Truck damage: {:.0}%. Cargo damage: {:.0}%.",
+                            "INSPECTOR (ground truth, not ears): mile {:.2}. Speed {:.0} mph, \
+                             limit {}. Air ready: {}. Parking brake: {}. Speed control armed: \
+                             {}. Keeper: {}. Cruise: {}. Hazard active: {}. Pull-over active: \
+                             {}. Off pavement: {}. Truck damage: {:.0}%. Cargo damage: {:.0}%.",
                             o.position_mi,
                             o.speed_mph,
                             o.speed_limit_mph
@@ -952,7 +960,8 @@ fn boot(
     };
     if !problems.is_empty() {
         return Err(format!(
-            "{}\nRefusing to boot: an agent must never reach the real account. Restart the server with --reset.",
+            "{}\nRefusing to boot: an agent must never reach the real account. \
+             Restart the server with --reset.",
             problems.join("\n")
         ));
     }
@@ -960,7 +969,8 @@ fn boot(
     let mut guard = crate::single_instance::SingleInstanceGuard::new();
     if !guard.acquire() {
         return Err(
-            "Freight Fate is already running; one game at a time, agent or human. Call again once it has quit."
+            "Freight Fate is already running; one game at a time, agent or human. \
+             Call again once it has quit."
                 .to_string(),
         );
     }

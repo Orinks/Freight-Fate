@@ -104,7 +104,8 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= OWNER_OPERATOR_LEVEL && profile.owner_operator_declined() {
         return CareerLevelGuidance::new(
             "Company driver by choice",
-            "You chose to stay on carrier equipment; the buy-in stays open under Business status if you ever want it.",
+            "You chose to stay on carrier equipment; the buy-in stays open under Business \
+             status if you ever want it.",
             "Run the premium freight your record earned; nothing on the board is above your standing.",
             "top-seniority company lane",
             "A company career past the buy-in gate is the safest version of the ladder.",
@@ -140,7 +141,9 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= 18 {
         return CareerLevelGuidance::new(
             "Protect owner-operator readiness",
-            "Treat better freight as practice for fuel, maintenance, and reserve decisions. The late-career credentials are open now: the TWIC port card, and LCV training once you hold the doubles endorsement with a clean record.",
+            "Treat better freight as practice for fuel, maintenance, and reserve decisions. \
+             The late-career credentials are open now: the TWIC port card, and LCV \
+             training once you hold the doubles endorsement with a clean record.",
             "Pick freight with clean take-home and enough room to keep savings growing.",
             "reserve-building freight",
             "Owner-operator readiness depends on margin discipline before the truck is yours.",
@@ -158,7 +161,10 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= 10 {
         return CareerLevelGuidance::new(
             "Run like a senior company driver",
-            "Dispatch trusts you with premium lanes, specialized freight, and mentoring-level judgment. The CDL letters are worth booking now under Licenses and training: the doubles endorsement opens twin-trailer freight, and the hazmat background check clears while you keep driving.",
+            "Dispatch trusts you with premium lanes, specialized freight, and mentoring-level judgment. \
+             The CDL letters are worth booking now under Licenses and training: the doubles \
+             endorsement opens twin-trailer freight, and the hazmat background check clears \
+             while you keep driving.",
             "premium freight still needs clean timing, low damage, and steady service.",
             "senior company lane",
             "Senior company status is about consistency under better freight.",
@@ -167,7 +173,8 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= SENIOR_LOAD_CHOICE_LEVEL {
         return CareerLevelGuidance::new(
             "Choose your own freight",
-            "Dispatch now trusts you to pick loads from the board; routing stays assigned until you run your own truck.",
+            "Dispatch now trusts you to pick loads from the board; routing \
+             stays assigned until you run your own truck.",
             "Pick freight that protects on-time service while you build toward senior lanes.",
             "self-picked reliable lane",
             "Load choice is new trust: keep the service record clean.",
@@ -177,7 +184,8 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
         return CareerLevelGuidance::new(
             "Build a regional service record",
             format!(
-                "broader company lanes are opening, and reputation decides how good the board feels. Dispatch still assigns your loads until level {SENIOR_LOAD_CHOICE_LEVEL}."
+                "broader company lanes are opening, and reputation decides how good the board feels. \
+                 Dispatch still assigns your loads until level {SENIOR_LOAD_CHOICE_LEVEL}."
             ),
             "Run assigned freight cleanly so endorsements and service turn into better dispatch trust.",
             "reputation-building lane",

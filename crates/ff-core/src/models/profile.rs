@@ -159,6 +159,7 @@ pub const PROFILE_FIELDS: &[&str] = &[
     "weigh_station_transponder",
     "trailer_programs",
     "owned_trailers",
+    "turnpike_program_notice_seen",
     "owner_operator_declined",
     "career",
     "driving_record",
@@ -430,6 +431,11 @@ pub struct Profile {
     pub weigh_station_transponder: bool,
     pub trailer_programs: Vec<String>,
     pub owned_trailers: Vec<String>,
+    /// The one-time notice that turnpike doubles loads moved off the
+    /// `double_van` program onto `turnpike_double` has been heard (or was
+    /// never owed). Old saves load it as false; new careers start true, since
+    /// they never ran turnpike doubles on the pups.
+    pub turnpike_program_notice_seen: bool,
     /// The driver chose to stay a company driver with the buy-in open
     /// (Business status, "Stay a company driver"): the buy-in row stays,
     /// the nudges toward it stop. Cleared by buying in or by reopening the
@@ -516,6 +522,7 @@ impl Default for Profile {
             weigh_station_transponder: false,
             trailer_programs: Vec::new(),
             owned_trailers: Vec::new(),
+            turnpike_program_notice_seen: true,
             owner_operator_declined: false,
             career: Career::new(),
             driving_record: DrivingRecord::new(),
@@ -712,6 +719,18 @@ impl Profile {
             .iter()
             .map(|k| k.to_string())
             .collect()
+    }
+
+    /// An old save that leases the `double_van` program but not
+    /// `turnpike_double` has not yet heard that turnpike doubles loads now need
+    /// their own program. Owed once per save.
+    pub fn turnpike_program_notice_due(&self) -> bool {
+        if self.turnpike_program_notice_seen {
+            return false;
+        }
+        let programs = self.active_trailer_programs();
+        programs.iter().any(|k| k == "double_van")
+            && !programs.iter().any(|k| k == "turnpike_double")
     }
 
     /// Player-owned trailers to show in menus.

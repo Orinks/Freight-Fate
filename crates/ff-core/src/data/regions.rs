@@ -269,7 +269,9 @@ pub fn classify_region(state: &str, lat: f64, lon: f64) -> Result<&'static str, 
             .map(|(_, region)| *region)
             .ok_or_else(|| {
                 DataError::Value(format!(
-                    "No region mapping for state {}; add it to STATE_REGION or a coordinate split rule in classify_region (see docs/osm-routing-plan.md).",
+                    "No region mapping for state {}; add it to STATE_REGION or \
+                     a coordinate split rule in classify_region (see \
+                     docs/osm-routing-plan.md).",
                     crate::data::world_parsing::py_repr_str(state)
                 ))
             }),

@@ -266,7 +266,9 @@ pub fn parse_street_limits(raw: &Value, path: &Path) -> Result<StreetLimits, Dat
             && !entry.no_district_default
         {
             return Err(DataError::value(format!(
-                "{p} {state} carries no district figure and does not declare no_district_default -- an empty row must say whether that is a finding or an omission"
+                "{p} {state} carries no district figure and does not declare \
+                 no_district_default -- an empty row must say whether that is a \
+                 finding or an omission"
             )));
         }
         let rule_type = entry.rule_type.trim().to_string();

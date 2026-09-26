@@ -22,7 +22,8 @@
 use crate::pyrandom::PyRandom;
 
 pub const WELCOME_SIGNS_SOURCE: &str =
-    "Original welcome-sign copy pairing each state's well-known nickname with a widely-documented fact or landmark; roadside register, facts not invented.";
+    "Original welcome-sign copy pairing each state's well-known nickname with a \
+     widely-documented fact or landmark; roadside register, facts not invented.";
 
 /// One welcome line per state today; kept as slices so the picker and tests
 /// match the billboard pools and a state can grow a small pool later without a

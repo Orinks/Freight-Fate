@@ -526,12 +526,16 @@ pub fn trust_band_text(band: &str) -> &'static str {
         return "Dispatch trust: full. You get the whole board.";
     }
     if band == TRUST_GUARDED {
-        return "Dispatch trust: guarded. Dispatch is holding back some of the freight and fewer refusals.";
+        return "Dispatch trust: guarded. Dispatch is holding back some of the \
+                freight and fewer refusals.";
     }
     if band == TRUST_POOR {
-        return "Dispatch trust: poor. You are back to assigned loads whatever your level, the board is down to two, and the good freight is going to other drivers.";
+        return "Dispatch trust: poor. You are back to assigned loads whatever your \
+                level, the board is down to two, and the good freight is going to \
+                other drivers.";
     }
-    "Dispatch trust: last chance. One assigned load at a time, no refusals, and the carrier is deciding whether to keep you."
+    "Dispatch trust: last chance. One assigned load at a time, no refusals, \
+     and the carrier is deciding whether to keep you."
 }
 
 /// Where the driver stands with dispatch on service alone, in one line.
@@ -745,7 +749,8 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
         }
         let percent = round_py_int((surcharge - 1.0) * 100.0);
         return format!(
-            "Your insurance reserve is up {percent} percent for it, on every settlement, until the oldest ages out {}.",
+            "Your insurance reserve is up {percent} percent for it, on every settlement, \
+             until the oldest ages out {}.",
             record_ages_out_text(profile)
         );
     }
@@ -755,12 +760,14 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     if record_past_termination_floor(record, game_hours) {
         if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
             return format!(
-                "The carrier's insurer will not carry a record like that; {} keeps you on sufferance until the oldest ages out {}.",
+                "The carrier's insurer will not carry a record like that; {} keeps you on \
+                 sufferance until the oldest ages out {}.",
                 LAST_CHANCE_CARRIER_NAME,
                 record_ages_out_text(profile)
             );
         }
-        return "The carrier's insurer will not carry that record. The carrier ends your employment at the next terminal."
+        return "The carrier's insurer will not carry that record. The carrier ends your \
+                employment at the next terminal."
             .to_string();
     }
     if record_over_review_floor(record, game_hours) {
@@ -777,7 +784,8 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
             )
         };
         return format!(
-            "The carrier's record review holds your equipment back until the oldest ages out {}. {next}",
+            "The carrier's record review holds your equipment back until the oldest ages \
+             out {}. {next}",
             record_ages_out_text(profile)
         );
     }
@@ -807,7 +815,10 @@ pub fn career_ended<P: StandingProfile + ?Sized>(profile: &P) -> bool {
 
 /// The terminal greeting's sentence for a career that is over.
 pub fn career_ended_text() -> &'static str {
-    "Your driving career is over: the CDL is disqualified for life. There is no dispatch, no board and no buy-in. Your money, levels, achievements, road journal and record stay as they are, and Close out this career on this menu removes the save and its cloud backups when you want them gone."
+    "Your driving career is over: the CDL is disqualified for life. There is no dispatch, no \
+     board and no buy-in. Your money, levels, achievements, road journal and record stay as \
+     they are, and Close out this career on this menu removes the save and its cloud backups \
+     when you want them gone."
 }
 
 /// The notice the terminal reads once, the first time the driver comes in
@@ -816,13 +827,21 @@ pub fn career_ended_text() -> &'static str {
 /// should not be a line gone to the first keypress.
 pub fn disqualification_notice_lines() -> Vec<String> {
     vec![
-        "That was the second major offense on your CDL. Under the federal rules a second major offense disqualifies a commercial licence for life, and there is no waiting it out."
+        "That was the second major offense on your CDL. Under the federal rules a second \
+         major offense disqualifies a commercial licence for life, and there is no waiting \
+         it out."
             .to_string(),
-        "No carrier can put you in a seat, the dispatch board is closed to you, and the owner-operator buy-in is off the table. Rest, the garage, the truck dealer, the logbook and your stats still work here."
+        "No carrier can put you in a seat, the dispatch board is closed to you, and the \
+         owner-operator buy-in is off the table. Rest, the garage, the truck dealer, the \
+         logbook and your stats still work here."
             .to_string(),
-        "Nothing is taken away. Your money, your levels, your achievements, your road journal and your whole record stay, and this career can be opened and read any time."
+        "Nothing is taken away. Your money, your levels, your achievements, your road journal \
+         and your whole record stay, and this career can be opened and read any time."
             .to_string(),
-        "When you are done with it, Close out this career on the terminal menu removes the save from this computer and every cloud backup of it from your account. Nothing does that for you. When you want the road again, start a new career from the title menu."
+        "When you are done with it, Close out this career on the terminal menu removes the \
+         save from this computer and every cloud backup of it from your account. Nothing \
+         does that for you. When you want the road again, start a new career from the title \
+         menu."
             .to_string(),
     ]
 }
@@ -851,7 +870,8 @@ pub fn standing_way_back<P: StandingProfile + ?Sized>(profile: &P) -> String {
     if cause == CAUSE_RECORD {
         let record = record_of(profile);
         return format!(
-            "Your driving record is what is holding it: {}. The carrier's review keeps it there until the oldest ages out {}; keep the record clean until then.",
+            "Your driving record is what is holding it: {}. The carrier's review keeps it \
+             there until the oldest ages out {}; keep the record clean until then.",
             record_window_phrase(record, profile.game_hours()),
             record_ages_out_text(profile)
         );
@@ -1050,7 +1070,8 @@ pub fn standing_text<P: StandingProfile + ?Sized>(profile: &P) -> String {
 pub fn suspension_board_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);
     if record.lifetime_disqualified {
-        return "Dispatch board. Your CDL is disqualified for life, so there is no driving work here. The board is listed for reference only."
+        return "Dispatch board. Your CDL is disqualified for life, so there is no \
+                driving work here. The board is listed for reference only."
             .to_string();
     }
     format!(
@@ -1064,7 +1085,8 @@ pub fn suspension_board_line<P: StandingProfile + ?Sized>(profile: &P) -> String
 pub fn suspension_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);
     if record.lifetime_disqualified {
-        return "You cannot take driving work with a lifetime CDL disqualification. Escape goes back to the terminal."
+        return "You cannot take driving work with a lifetime CDL disqualification. \
+                Escape goes back to the terminal."
             .to_string();
     }
     format!(

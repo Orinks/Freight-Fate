@@ -30,7 +30,8 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "High idle, {rpm:.0} RPM. Plus and minus adjust it; releasing the parking brake cancels."
+                        "High idle, {rpm:.0} RPM. Plus and minus adjust it; releasing the parking \
+                         brake cancels."
                     ),
                 );
             } else {

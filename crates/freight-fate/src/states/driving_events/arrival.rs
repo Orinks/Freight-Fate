@@ -49,7 +49,8 @@ impl DrivingState {
         opts.category = Some(SpeechCategory::Safety);
         ctx.say_event_with(
             format!(
-                "Out of fuel. Roadside rescue brought thirty gallons {billing}. Press {engine} to restart the engine."
+                "Out of fuel. Roadside rescue brought thirty gallons {billing}. Press {engine} \
+                 to restart the engine."
             ),
             opts,
         );
@@ -123,11 +124,13 @@ impl DrivingState {
             // instruction to take it themselves -- which is what "I was about
             // to hit X when the truck took the exit" is describing. Never
             // name a control the driver's own settings have taken off them.
-            "You loop back through the next safe turnaround. The destination exit is ahead again, and lane keeping will take it."
+            "You loop back through the next safe turnaround. The destination exit is ahead \
+             again, and lane keeping will take it."
                 .to_string()
         } else {
             format!(
-                "You loop back through the next safe turnaround. The destination exit is ahead again. Press {} to signal for it.",
+                "You loop back through the next safe turnaround. The destination exit is ahead \
+                 again. Press {} to signal for it.",
                 ctx.control_hint("take_exit")
             )
         };
@@ -609,7 +612,7 @@ impl DrivingState {
             None => String::new(),
         };
         let cruise = match self.cruise_mph {
-            Some(mph) => format!(" CRUISE {mph:.0}"),
+            Some(mph) => format!("   CRUISE {mph:.0}"),
             None => String::new(),
         };
         let air_state = if t.air_low_warning() {
@@ -641,13 +644,13 @@ impl DrivingState {
             title,
             String::new(),
             format!(
-                "Speed: {} (limit {}{reason_text}) Lane: {}",
+                "Speed: {} (limit {}{reason_text})   Lane: {}",
                 s.hud_speed_text(t.speed_mph()),
                 s.distance_value(limit, 0, false),
                 self.lane.lane_name()
             ),
             format!(
-                "Gear: {gear} RPM: {:.0} {}{cruise}",
+                "Gear: {gear}   RPM: {:.0}   {}{cruise}",
                 t.rpm,
                 if t.engine_on {
                     "ENGINE ON"
@@ -656,11 +659,11 @@ impl DrivingState {
                 }
             ),
             format!(
-                "Air: {:.0} psi {air_state} {brake_state}",
+                "Air: {:.0} psi   {air_state}   {brake_state}",
                 t.air_pressure_psi()
             ),
             format!(
-                "Fuel: {:.0}% Damage: {:.0}%",
+                "Fuel: {:.0}%   Damage: {:.0}%",
                 t.fuel_fraction() * 100.0,
                 t.damage_pct
             ),
@@ -668,7 +671,7 @@ impl DrivingState {
             format!("Weather: {}", self.trip.weather.current.value()),
             format!("Date: {calendar}"),
             format!(
-                "Clock: {} {} ({}) Fatigue: {fatigue:.0}%",
+                "Clock: {} {} ({})   Fatigue: {fatigue:.0}%",
                 clock_text(self.trip.local_hour()),
                 self.clock_zone_label(ctx),
                 time_of_day(self.trip.local_hour())

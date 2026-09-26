@@ -517,7 +517,9 @@ impl MastodonLinkState {
                 ctx.say("The browser could not be opened. The link is on your clipboard.");
             } else {
                 ctx.say(
-                    "The browser could not be opened and the clipboard did not take the link. In your browser, go to orinks.net, then Freight Fate, then Online, then Mastodon.",
+                    "The browser could not be opened and the clipboard did \
+                     not take the link. In your browser, go to orinks.net, \
+                     then Freight Fate, then Online, then Mastodon.",
                 );
             }
             // The player may still get there by hand; keep the return
@@ -543,7 +545,8 @@ impl MastodonLinkState {
         }
         let Some(identity) = load_identity() else {
             ctx.say(
-                "This needs your orinks.net account. Choose Set up orinks.net account on the Online menu.",
+                "This needs your orinks.net account. Choose Set up orinks.net account on the \
+                 Online menu.",
             );
             return;
         };
@@ -583,7 +586,8 @@ impl Menu for MastodonLinkState {
                 |s: &mut Self, ctx| s.open_page(ctx),
             )
             .help(
-                "Sign in on orinks.net, enter your Mastodon server, and authorize Freight Fate there.",
+                "Sign in on orinks.net, enter your Mastodon server, and authorize Freight Fate \
+                 there.",
             ),
             MenuItem::new(
                 Label::dynamic(|s: &Self, ctx| s.status_label(ctx)),
@@ -665,11 +669,13 @@ impl Menu for MastodonLinkState {
                 ctx.settings.mastodon_linked_handle.clone()
             };
             ctx.say(&format!(
-                "Linked: {spoken}. Share notable deliveries to Mastodon can go on from the Online menu."
+                "Linked: {spoken}. Share notable deliveries to Mastodon can go on from the \
+                 Online menu."
             ));
         } else {
             ctx.say(
-                "No Mastodon account linked yet. Open the link page, authorize there, then check again.",
+                "No Mastodon account linked yet. Open the link page, authorize there, then \
+                 check again.",
             );
         }
     }

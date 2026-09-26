@@ -65,7 +65,8 @@ pub fn assists_fight_descent() -> Outcome {
     let speed = rig.drive.truck().speed_mph();
     if speed > 80.0 {
         findings.push(format!(
-            "assists lost the mountain: {speed:.0} mph with cruise, curve assist, and descent control all engaged"
+            "assists lost the mountain: {speed:.0} mph with cruise, curve assist, and descent \
+             control all engaged"
         ));
     }
     let note = format!(
@@ -98,7 +99,9 @@ pub fn jake_toggle_fine_dodge() -> Outcome {
     let fines = rig.drive.jake_zone_fines;
     if fines == 0 && warnings >= cycles {
         findings.push(format!(
-            "jake toggled off just inside the grace {cycles} times: retarder barking ~90% of the time in town, {warnings} warnings spoken, zero dollars fined -- the ordinance is a rhythm game, and the warning repeats forever"
+            "jake toggled off just inside the grace {cycles} times: retarder barking ~90% of \
+             the time in town, {warnings} warnings spoken, zero dollars fined -- the ordinance \
+             is a rhythm game, and the warning repeats forever"
         ));
     } else if fines > 0 {
         let money_delta = STARTING_MONEY - rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money());
@@ -154,13 +157,15 @@ pub fn gate_overshoot_with_assists() -> Outcome {
     }
     if hos_of(&rig.app.ctx).driving_min == driving_min_before {
         findings.push(
-            "the 20 lost minutes of the loop-back never touched the HOS driving clock: a scripted reposition is free of hours-of-service cost"
+            "the 20 lost minutes of the loop-back never touched the HOS driving clock: a \
+             scripted reposition is free of hours-of-service cost"
                 .to_string(),
         );
     }
     if rig.drive.truck().fuel_gal >= fuel_before {
         findings.push(
-            "looping back through the safe turnaround burned zero fuel -- a scripted reposition with no fuel cost while the player's odometer clearly moved"
+            "looping back through the safe turnaround burned zero fuel -- a scripted \
+             reposition with no fuel cost while the player's odometer clearly moved"
                 .to_string(),
         );
     }
@@ -302,12 +307,14 @@ pub fn ramp_speed_control_handback() -> Outcome {
     }
     if let Some(short) = stopped_short_mi {
         findings.push(format!(
-            "came to a dead stop {short:.2} miles short of the gore, in the through lane: the approach slowed the truck and then nothing drove it"
+            "came to a dead stop {short:.2} miles short of the gore, in the through lane: the \
+             approach slowed the truck and then nothing drove it"
         ));
     }
     if let Some(shed) = early_shed_mi {
         findings.push(format!(
-            "the exit cap fell under the {cruise:.0} mph set speed {shed:.1} miles from the gore: signalling early is itself what slows the truck"
+            "the exit cap fell under the {cruise:.0} mph set speed {shed:.1} miles from the \
+             gore: signalling early is itself what slows the truck"
         ));
     }
     let Some(entry_mph) = entry_mph else {
@@ -323,7 +330,8 @@ pub fn ramp_speed_control_handback() -> Outcome {
     // 2. The ramp takes the pedals, never the session.
     if !rig.drive.speed_control_armed {
         findings.push(
-            "taking the exit disarmed automatic speed control outright, so nothing can bring it back but the resume key"
+            "taking the exit disarmed automatic speed control outright, so nothing can bring \
+             it back but the resume key"
                 .to_string(),
         );
     }
@@ -369,7 +377,8 @@ pub fn ramp_speed_control_handback() -> Outcome {
     rig.release(Key::Up);
     if rig.drive.cruise_mph.is_none() && rig.drive.keeper_mph.is_none() {
         findings.push(
-            "past the stop bar and back up to road speed with automatic speed control still dead: the driver has to switch it on by hand"
+            "past the stop bar and back up to road speed with automatic speed control still \
+             dead: the driver has to switch it on by hand"
                 .to_string(),
         );
     }
@@ -398,7 +407,8 @@ pub fn ramp_speed_control_handback() -> Outcome {
     }
 
     let note = format!(
-        "signalled {armed_mi:.1} mi out with no early shed, entered the gore at {entry_mph:.0} mph, and speed control came back past the bar unaided"
+        "signalled {armed_mi:.1} mi out with no early shed, entered the gore at {entry_mph:.0} \
+         mph, and speed control came back past the bar unaided"
     );
     outcome(NAME, &rig, findings, &note)
 }

@@ -2011,6 +2011,7 @@
     "trailer_programs",
     "truck",
     "truck_conditions",
+    "turnpike_program_notice_seen",
     "tutorial_done",
     "upgrades",
     "version",

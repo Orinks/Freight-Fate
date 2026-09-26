@@ -186,7 +186,8 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "rig",
             "standard rig",
             0.0,
-            "The dependable tractor you started with: better fuel economy and a calmer highway feel than the heavy hauler.",
+            "The dependable tractor you started with: better fuel economy and \
+             a calmer highway feel than the heavy hauler.",
             TruckSpecs::default(),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -195,7 +196,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "heavy_hauler",
             "heavy hauler",
             52_000.0,
-            "A brute for heavy loads and long stretches: a quarter more torque and a two hundred gallon tank, but blunt aerodynamics and a thirstier engine.",
+            "A brute for heavy loads and long stretches: a quarter more torque \
+             and a two hundred gallon tank, but blunt aerodynamics and a \
+             thirstier engine.",
             specs(3_000.0, 200.0, 0.75, 1.2, 37_500.0),
             CAB_SLEEPER,
             SPEC_HEAVY,
@@ -217,7 +220,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "trainer_day_cab",
             "trainer day cab",
             26_000.0,
-            "The tractor every new hire learns on: a plain day cab with soft power, light steering, and nowhere to sleep. Forgiving, slow, and impossible to be precious about.",
+            "The tractor every new hire learns on: a plain day cab with soft \
+             power, light steering, and nowhere to sleep. Forgiving, slow, and \
+             impossible to be precious about.",
             specs(2_050.0, 150.0, 0.70, 0.94, 34_800.0),
             CAB_DAY,
             SPEC_LIGHT,
@@ -226,7 +231,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "yard_mule",
             "yard mule",
             24_000.0,
-            "A stubby day cab that spends most of its life shoving trailers around the lot. Grunt down low, no manners above fifty, and it drinks like it is being punished.",
+            "A stubby day cab that spends most of its life shoving trailers \
+             around the lot. Grunt down low, no manners above fifty, and it \
+             drinks like it is being punished.",
             specs(2_450.0, 150.0, 0.78, 1.18, 35_900.0),
             CAB_DAY,
             SPEC_HEAVY,
@@ -235,7 +242,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "hand_me_down_sleeper",
             "hand-me-down sleeper",
             31_000.0,
-            "A tired flat-roof sleeper handed down the seniority list until it reached you. The bunk is thin and the paint is faded, but it will get you there and back.",
+            "A tired flat-roof sleeper handed down the seniority list until it \
+             reached you. The bunk is thin and the paint is faded, but it will \
+             get you there and back.",
             specs(2_250.0, 150.0, 0.69, 1.06, 35_600.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -244,7 +253,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "plain_jane_conventional",
             "plain jane conventional",
             34_000.0,
-            "No chrome, no fairings, no nonsense: a base-spec conventional sleeper bought by the dozen. Nothing about it is special and nothing about it breaks.",
+            "No chrome, no fairings, no nonsense: a base-spec conventional \
+             sleeper bought by the dozen. Nothing about it is special and \
+             nothing about it breaks.",
             specs(2_350.0, 155.0, 0.67, base.fuel_burn_factor, 35_900.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -254,7 +265,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "city_shuttle",
             "city shuttle",
             36_000.0,
-            "A short, light day cab built for stop-and-go: it turns inside its own trailer, sips diesel in traffic, and leaves every pound it saves for the freight.",
+            "A short, light day cab built for stop-and-go: it turns inside its \
+             own trailer, sips diesel in traffic, and leaves every pound it \
+             saves for the freight.",
             specs(2_200.0, 150.0, 0.68, 0.90, 34_600.0),
             CAB_DAY,
             SPEC_LIGHT,
@@ -263,7 +276,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "dock_hopper",
             "dock hopper",
             39_000.0,
-            "The everyday city day cab: enough pull for a full trailer, tight mirrors, and air seats that have seen a thousand docks. Home every night by design.",
+            "The everyday city day cab: enough pull for a full trailer, tight \
+             mirrors, and air seats that have seen a thousand docks. Home \
+             every night by design.",
             specs(2_400.0, 155.0, 0.66, base.fuel_burn_factor, 35_600.0),
             CAB_DAY,
             SPEC_STANDARD,
@@ -272,7 +287,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "short_haul_stubnose",
             "short-haul stubnose",
             44_000.0,
-            "A heavy-spec day cab for the loads nobody wants on a light tractor: gravel, steel, and drum mixers. All driveline, no comfort, and it will pull a building off its footings.",
+            "A heavy-spec day cab for the loads nobody wants on a light \
+             tractor: gravel, steel, and drum mixers. All driveline, no \
+             comfort, and it will pull a building off its footings.",
             TruckSpecs {
                 brake_fade_temp_c: 430.0,
                 ..specs(2_850.0, 155.0, 0.74, 1.14, 37_400.0)
@@ -284,7 +301,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "midroof_runner",
             "mid-roof runner",
             54_000.0,
-            "A light mid-roof sleeper for drivers who live on two-day lanes: quick, economical, and just tall enough to stand up and change a shirt.",
+            "A light mid-roof sleeper for drivers who live on two-day lanes: \
+             quick, economical, and just tall enough to stand up and change a \
+             shirt.",
             specs(2_400.0, 160.0, 0.61, 0.92, 35_200.0),
             CAB_SLEEPER,
             SPEC_LIGHT,
@@ -293,7 +312,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "farm_road_workhorse",
             "farm road workhorse",
             57_000.0,
-            "Built for grain country: heavy driveline, tall gearing, and a chassis that shrugs off washboard county roads. It hauls hoppers in spring and complains about it all summer.",
+            "Built for grain country: heavy driveline, tall gearing, and a \
+             chassis that shrugs off washboard county roads. It hauls hoppers \
+             in spring and complains about it all summer.",
             specs(2_800.0, 170.0, 0.71, 1.10, 37_200.0),
             CAB_SLEEPER,
             SPEC_HEAVY,
@@ -302,7 +323,8 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "sunset_day_cab",
             "sunset day cab",
             38_000.0,
-            "A tidy regional day cab: light, easy on diesel, and happy on short lanes. No bunk, no long-haul pretensions.",
+            "A tidy regional day cab: light, easy on diesel, and happy on \
+             short lanes. No bunk, no long-haul pretensions.",
             specs(2_300.0, 150.0, 0.62, 0.95, 35_500.0),
             CAB_DAY,
             SPEC_LIGHT,
@@ -311,7 +333,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "ridgeline_sleeper",
             "ridgeline sleeper",
             58_000.0,
-            "A mid-roof regional sleeper with a little more pull and a bigger tank: the workhorse most fleets hand a proven regional driver.",
+            "A mid-roof regional sleeper with a little more pull and a \
+             bigger tank: the workhorse most fleets hand a proven regional \
+             driver.",
             specs(2_500.0, 165.0, 0.64, base.fuel_burn_factor, 36_200.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -320,7 +344,8 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "old_longnose",
             "old longnose",
             49_000.0,
-            "A classic long-hood conventional: strong pull and a proud profile, but it fights the wind and drinks for the privilege.",
+            "A classic long-hood conventional: strong pull and a proud \
+             profile, but it fights the wind and drinks for the privilege.",
             specs(2_700.0, 165.0, 0.72, 1.12, 36_800.0),
             CAB_SLEEPER,
             SPEC_HEAVY,
@@ -330,7 +355,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "long_run_midroof",
             "long run mid-roof",
             74_000.0,
-            "A no-drama mid-roof built for the middle of the country: honest range, honest power, and a bunk you can actually sleep a full ten hours in.",
+            "A no-drama mid-roof built for the middle of the country: honest \
+             range, honest power, and a bunk you can actually sleep a full ten \
+             hours in.",
             specs(2_550.0, 185.0, 0.62, 0.96, 36_100.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -339,7 +366,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "dry_lightning",
             "dry lightning",
             86_000.0,
-            "A light-spec aero sleeper that runs the desert lanes: it gives up torque for tare weight and mileage, and it will out-run anything in the yard on flat ground.",
+            "A light-spec aero sleeper that runs the desert lanes: it gives up \
+             torque for tare weight and mileage, and it will out-run anything \
+             in the yard on flat ground.",
             specs(2_450.0, 180.0, 0.56, 0.87, 34_900.0),
             CAB_SLEEPER,
             SPEC_LIGHT,
@@ -348,7 +377,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "interstate_condo",
             "interstate condo",
             99_000.0,
-            "A raised-roof sleeper with room to stand, cook, and live: the truck drivers move into rather than drive. Heavy on comfort, steady everywhere else.",
+            "A raised-roof sleeper with room to stand, cook, and live: the \
+             truck drivers move into rather than drive. Heavy on comfort, \
+             steady everywhere else.",
             specs(2_650.0, 205.0, 0.63, 1.02, 36_700.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -357,7 +388,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "steel_hauler",
             "steel hauler",
             97_000.0,
-            "A heavy-spec flatbed tractor with a headache rack and a driveline sized for coil and plate. Rides like a brick empty and like it was born to it loaded.",
+            "A heavy-spec flatbed tractor with a headache rack and a driveline \
+             sized for coil and plate. Rides like a brick empty and like it \
+             was born to it loaded.",
             TruckSpecs {
                 brake_fade_temp_c: 430.0,
                 ..specs(2_900.0, 195.0, 0.70, 1.09, 37_600.0)
@@ -369,7 +402,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "mountain_spec_hauler",
             "mountain spec hauler",
             104_000.0,
-            "Spec'd for the western grades: deep gearing, a big retarder, and brakes that stay cool where other trucks start smelling hot. Slow up, unbothered down.",
+            "Spec'd for the western grades: deep gearing, a big retarder, and \
+             brakes that stay cool where other trucks start smelling hot. \
+             Slow up, unbothered down.",
             TruckSpecs {
                 brake_fade_temp_c: 470.0,
                 engine_brake_torque_nm: 2_050.0,
@@ -382,7 +417,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "highline_sleeper",
             "highline sleeper",
             82_000.0,
-            "A raised-roof long-haul sleeper with a two hundred gallon tank and honest aerodynamics: built to live on the interstate for days at a time.",
+            "A raised-roof long-haul sleeper with a two hundred gallon tank \
+             and honest aerodynamics: built to live on the interstate for \
+             days at a time.",
             specs(2_600.0, 200.0, 0.60, 0.97, 36_400.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -391,7 +428,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "big_bunk_conventional",
             "big bunk conventional",
             89_000.0,
-            "A big-bunk conventional with serious torque for mountain corridors and heavy long-haul freight. Comfortable, capable, and a little thirsty.",
+            "A big-bunk conventional with serious torque for mountain \
+             corridors and heavy long-haul freight. Comfortable, capable, \
+             and a little thirsty.",
             specs(2_800.0, 210.0, 0.66, 1.05, 37_000.0),
             CAB_SLEEPER,
             SPEC_HEAVY,
@@ -400,7 +439,8 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "aero_cruiser",
             "aero cruiser",
             95_000.0,
-            "A slippery fleet aero tractor tuned for fuel economy: modest torque, long legs, and the best mileage of the long-haul pool.",
+            "A slippery fleet aero tractor tuned for fuel economy: modest \
+             torque, long legs, and the best mileage of the long-haul pool.",
             specs(2_500.0, 190.0, 0.55, 0.90, 35_800.0),
             CAB_SLEEPER,
             SPEC_LIGHT,
@@ -410,7 +450,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "cabover_revival",
             "cabover revival",
             118_000.0,
-            "A modern cabover: short, light, and startlingly quick, with the whole road laid out under the windscreen. Every pound it saves goes to the load, and it turns where nothing else will.",
+            "A modern cabover: short, light, and startlingly quick, with the \
+             whole road laid out under the windscreen. Every pound it saves \
+             goes to the load, and it turns where nothing else will.",
             specs(2_600.0, 200.0, 0.59, 0.91, 34_700.0),
             CAB_SLEEPER,
             SPEC_LIGHT,
@@ -419,7 +461,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "chrome_shop_special",
             "chrome shop special",
             124_000.0,
-            "Every light the catalog sells and a stack of polished pipe: a senior driver's reward truck. It is genuinely good, and it knows exactly how good it looks.",
+            "Every light the catalog sells and a stack of polished pipe: a \
+             senior driver's reward truck. It is genuinely good, and it knows \
+             exactly how good it looks.",
             specs(2_800.0, 210.0, 0.68, 1.06, 36_900.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -428,7 +472,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "deep_sleeper_custom",
             "deep sleeper custom",
             132_000.0,
-            "A stretched custom sleeper with a proper bed and a wardrobe: for drivers who are out for a month at a time and have stopped pretending otherwise.",
+            "A stretched custom sleeper with a proper bed and a wardrobe: for \
+             drivers who are out for a month at a time and have stopped \
+             pretending otherwise.",
             specs(2_850.0, 215.0, 0.64, 1.00, 37_100.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -437,7 +483,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "wide_glide_tourer",
             "wide glide tourer",
             136_000.0,
-            "A wide-cab highway tourer built around the seat and the sound system: quiet at speed, easy over a long day, and no trouble at all in a crosswind.",
+            "A wide-cab highway tourer built around the seat and the sound \
+             system: quiet at speed, easy over a long day, and no trouble at \
+             all in a crosswind.",
             specs(2_800.0, 220.0, 0.58, 0.94, 36_500.0),
             CAB_SLEEPER,
             SPEC_STANDARD,
@@ -446,7 +494,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "granite_grade_king",
             "granite grade king",
             146_000.0,
-            "A heavy-spec premium tractor for the worst grades on the map: enormous torque, oversized brakes, and a retarder that holds a loaded trailer down a six percent without a word.",
+            "A heavy-spec premium tractor for the worst grades on the map: \
+             enormous torque, oversized brakes, and a retarder that holds a \
+             loaded trailer down a six percent without a word.",
             TruckSpecs {
                 brake_fade_temp_c: 480.0,
                 engine_brake_torque_nm: 2_150.0,
@@ -459,7 +509,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "summit_flagship",
             "summit flagship",
             128_000.0,
-            "A premium flagship sleeper: big power, a two hundred twenty gallon tank, and clean aerodynamics. The truck senior drivers ask the shop about.",
+            "A premium flagship sleeper: big power, a two hundred twenty \
+             gallon tank, and clean aerodynamics. The truck senior drivers \
+             ask the shop about.",
             specs(2_900.0, 220.0, 0.57, 0.95, 36_600.0),
             CAB_SLEEPER,
             SPEC_HEAVY,
@@ -468,7 +520,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "silver_aero",
             "silver aero",
             142_000.0,
-            "A polished premium aero tractor: the slipperiest shape in the catalog with plenty of pull, sipping diesel at cruise like a truck half its size.",
+            "A polished premium aero tractor: the slipperiest shape in the \
+             catalog with plenty of pull, sipping diesel at cruise like a \
+             truck half its size.",
             specs(2_750.0, 220.0, 0.52, 0.88, 36_000.0),
             CAB_SLEEPER,
             SPEC_LIGHT,
@@ -478,7 +532,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "midnight_flyer",
             "midnight flyer",
             176_000.0,
-            "A light-spec flagship for drivers who run nights: the quietest cab on the property, a huge tank, and mileage that makes a dispatcher smile.",
+            "A light-spec flagship for drivers who run nights: the quietest \
+             cab on the property, a huge tank, and mileage that makes a \
+             dispatcher smile.",
             TruckSpecs {
                 brake_fade_temp_c: 450.0,
                 ..specs(2_800.0, 230.0, 0.53, 0.86, 35_400.0)
@@ -490,7 +546,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "owner_spec_showpiece",
             "owner spec showpiece",
             188_000.0,
-            "Ordered the way an owner would order it, then handed to the driver the carrier least wants to lose. Everything on it is the good version.",
+            "Ordered the way an owner would order it, then handed to the \
+             driver the carrier least wants to lose. Everything on it is the \
+             good version.",
             TruckSpecs {
                 brake_fade_temp_c: 455.0,
                 ..specs(2_900.0, 235.0, 0.56, 0.92, 36_500.0)
@@ -502,7 +560,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "centurion_longhood",
             "centurion longhood",
             204_000.0,
-            "A flagship long-hood with a hood you could land a plane on: monstrous torque, brakes to match, and an unapologetic thirst. The truck people photograph at the fuel island.",
+            "A flagship long-hood with a hood you could land a plane on: \
+             monstrous torque, brakes to match, and an unapologetic thirst. \
+             The truck people photograph at the fuel island.",
             TruckSpecs {
                 brake_fade_temp_c: 470.0,
                 engine_brake_torque_nm: 2_100.0,
@@ -515,7 +575,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "continental_expedition",
             "continental expedition",
             216_000.0,
-            "Built to cross the continent without a scheduled stop: two hundred fifty gallons, mountain-grade brakes, and enough torque to make a loaded pull feel like an errand.",
+            "Built to cross the continent without a scheduled stop: two \
+             hundred fifty gallons, mountain-grade brakes, and enough torque \
+             to make a loaded pull feel like an errand.",
             TruckSpecs {
                 brake_fade_temp_c: 480.0,
                 engine_brake_torque_nm: 2_200.0,
@@ -528,7 +590,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "presidential_sleeper",
             "presidential sleeper",
             185_000.0,
-            "The top of the yard: huge torque, a two hundred forty gallon tank, and brakes that shrug off long mountain descents. First pick goes to the carrier's best.",
+            "The top of the yard: huge torque, a two hundred forty gallon \
+             tank, and brakes that shrug off long mountain descents. First \
+             pick goes to the carrier's best.",
             TruckSpecs {
                 brake_fade_temp_c: 450.0,
                 ..specs(3_100.0, 240.0, 0.58, 0.98, 37_200.0)
@@ -540,7 +604,9 @@ pub static TRUCK_CATALOG: Lazy<IndexMap<&'static str, TruckModel>> = Lazy::new(|
             "night_flag_aero",
             "night flag aero",
             198_000.0,
-            "A flagship aero sleeper for drivers who live out west: enormous range, upgraded brakes, and the lowest drag on the road. It turns fuel islands into scenery.",
+            "A flagship aero sleeper for drivers who live out west: enormous \
+             range, upgraded brakes, and the lowest drag on the road. It \
+             turns fuel islands into scenery.",
             TruckSpecs {
                 brake_fade_temp_c: 450.0,
                 ..specs(2_950.0, 240.0, 0.50, 0.85, 36_200.0)
@@ -583,25 +649,33 @@ pub const UPGRADE_CATALOG: &[Upgrade] = &[
     Upgrade {
         key: "engine_tune",
         label: "Engine tune",
-        description: "Gives the truck more pulling power. It helps with heavy freight, hill climbs, mountain grades, and starting from a stop with a load. Buy it when heavy loads and steep routes feel sluggish.",
+        description: "Gives the truck more pulling power. It helps with heavy freight, \
+                      hill climbs, mountain grades, and starting from a stop with a load. \
+                      Buy it when heavy loads and steep routes feel sluggish.",
         prices: &[12_000.0, 26_000.0],
     },
     Upgrade {
         key: "aero_kit",
         label: "Aerodynamic kit",
-        description: "Makes the truck burn less fuel at highway speed. It does not add more fuel capacity; it makes the same tank last longer. Buy it to save diesel money over long highway miles.",
+        description: "Makes the truck burn less fuel at highway speed. It does not add \
+                      more fuel capacity; it makes the same tank last longer. Buy it to \
+                      save diesel money over long highway miles.",
         prices: &[9_000.0],
     },
     Upgrade {
         key: "long_range_tank",
         label: "Long-range tank",
-        description: "Adds fifty gallons of fuel capacity. It does not make the truck more efficient; it lets you carry more fuel. Buy it for more distance between fuel stops and more route flexibility.",
+        description: "Adds fifty gallons of fuel capacity. It does not make the truck more \
+                      efficient; it lets you carry more fuel. Buy it for more distance \
+                      between fuel stops and more route flexibility.",
         prices: &[7_500.0],
     },
     Upgrade {
         key: "reinforced_brakes",
         label: "Reinforced brakes",
-        description: "Keeps braking power strong for longer when the brakes get hot. It helps on mountain descents, with heavy freight, and during emergency stops. Buy it when downhill control matters more than speed or range.",
+        description: "Keeps braking power strong for longer when the brakes get hot. It \
+                      helps on mountain descents, with heavy freight, and during emergency \
+                      stops. Buy it when downhill control matters more than speed or range.",
         prices: &[6_500.0],
     },
 ];

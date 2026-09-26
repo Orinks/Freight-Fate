@@ -21,7 +21,7 @@
 > conveyance controls remain in the 2.0 plan.
 
 > Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release: **1.9.0**, in
-> flight on the `feat/career-1.9` branch -- driving realism between the exits
+> flight on `dev`, released from `main` -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
 > highway-spider world expansion, roadside narration, and real time zones.
 > `pyproject` is set to 1.9.0 so developer snapshots report it; the stable tag
@@ -40,7 +40,7 @@ The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
 bookmarks usable.
 
-## 1.9 in flight (`feat/career-1.9`)
+## 1.9 in flight (ships from `dev` and `main`)
 
 - [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
       intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
@@ -199,7 +199,7 @@ Driving and platform:
 The owner's:
 
 - [ ] Listening pass on the new synth voices per style
-      ([above](#19-in-flight-featcareer-19)).
+      ([above](#19-in-flight-ships-from-dev-and-main)).
 - [ ] Listening pass and a longer drive over wear thresholds and
       interrupted warnings ([September 11](#september-11-trucking-corrections)).
 - [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
@@ -2065,7 +2065,6 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
-
 ### Twin parcel / STAA doubles (Track A)
 
 STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
@@ -2112,8 +2111,9 @@ not started here.
       doubles are not offered. Rocky Mountain / other Western LCV routes
       outside the classic turnpike list are not modeled.
 - [ ] **Honesty debt: staging lots.** Break-bulk yards at turnpike exits
-      are approximated as same-city locals / end approaches / ≤ 1.0 mi
-      stubs, not curated LCV staging facilities.
+      are approximated as same-city locals or first/last end legs of
+      ≤ 1.0 mi (cue'd approaches share the stub cap, as on the STAA
+      National Network gate), not curated LCV staging facilities.
 - [ ] **Honesty debt: no LCV driver certification or carrier permit gate
       (49 CFR 380).** Holding the in-game LCV certificate opens the
       freight; federal driver entry-level LCV training and carrier
@@ -2249,7 +2249,6 @@ onto exit signalling.
       has never been wired to anything. `vehicle/lane_drift` is dead for a
       different reason -- the edge ladder took its job -- so it is a
       deletion, not a wiring job.
-
 
 ### Street traffic controls
 

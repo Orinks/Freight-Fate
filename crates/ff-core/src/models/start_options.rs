@@ -30,7 +30,10 @@ pub struct CompanyPayPlan {
 impl CompanyPayPlan {
     pub fn summary(&self) -> String {
         format!(
-            "{} percent pay share, {} dollars per mile floor, {} dollar stop pay, {} percent on-time bonus",
+            "{} percent pay share, \
+             {} dollars per mile floor, \
+             {} dollar stop pay, \
+             {} percent on-time bonus",
             fmt_f(self.pay_share * 100.0, 0),
             fmt_f(self.min_per_mile, 2),
             fmt_f(self.stop_pay, 0),
@@ -201,8 +204,11 @@ pub const START_OPTIONS: [CareerStartOption; 5] = [
         label: "Northstar Freight Lines: balanced company driver",
         carrier_name: STARTER_CARRIER_NAME,
         mode: START_MODE_COMPANY,
-        menu_summary: "Balanced company-driver start with steady wages, normal training support, and assigned carrier equipment.",
-        help_text: "A balanced company-driver path. The carrier assigns and maintains the tractor, pays fuel and routine repairs, and offers steady wage math without a sharp specialty.",
+        menu_summary: "Balanced company-driver start with steady wages, normal training \
+                       support, and assigned carrier equipment.",
+        help_text: "A balanced company-driver path. The carrier assigns and maintains \
+                    the tractor, pays fuel and routine repairs, and offers steady wage \
+                    math without a sharp specialty.",
         default_city: "Chicago",
         company_pay: Some(NORTHSTAR_PAY),
         ..DEFAULTS
@@ -212,8 +218,12 @@ pub const START_OPTIONS: [CareerStartOption; 5] = [
         label: "Great Lakes Training Transport: trainer-friendly company driver",
         carrier_name: "Great Lakes Training Transport",
         mode: START_MODE_COMPANY,
-        menu_summary: "Trainer-friendly company start with stronger stop pay, more short rookie loads, and a little more appointment slack.",
-        help_text: "A practical training-fleet start. Stop pay is better on short loads, and dispatch leans toward shorter training work with a little more deadline room. Equipment and routine costs stay carrier-paid.",
+        menu_summary: "Trainer-friendly company start with stronger stop pay, more short \
+                       rookie loads, and a little more appointment slack.",
+        help_text: "A practical training-fleet start. Stop pay is better on short \
+                    loads, and dispatch leans toward shorter training work with a \
+                    little more deadline room. Equipment and routine costs stay \
+                    carrier-paid.",
         default_city: "Milwaukee",
         company_pay: Some(CompanyPayPlan {
             pay_share: 0.33,
@@ -233,8 +243,12 @@ pub const START_OPTIONS: [CareerStartOption; 5] = [
         label: "Prairie Link Regional: mile-focused company driver",
         carrier_name: "Prairie Link Regional",
         mode: START_MODE_COMPANY,
-        menu_summary: "Regional carrier with a better per-mile floor, lower stop pay, and more same-region grain and bulk lanes.",
-        help_text: "A mile-focused company start. The per-mile wage floor is higher, but stop pay is lower, so it favors steady regional mileage over very short hops. Dispatch leans toward same-region grain and bulk work. The carrier still assigns and maintains the tractor.",
+        menu_summary: "Regional carrier with a better per-mile floor, lower stop pay, \
+                       and more same-region grain and bulk lanes.",
+        help_text: "A mile-focused company start. The per-mile wage floor is higher, \
+                    but stop pay is lower, so it favors steady regional mileage over \
+                    very short hops. Dispatch leans toward same-region grain and \
+                    bulk work. The carrier still assigns and maintains the tractor.",
         default_city: "Kansas City",
         company_pay: Some(CompanyPayPlan {
             pay_share: 0.34,
@@ -255,8 +269,12 @@ pub const START_OPTIONS: [CareerStartOption; 5] = [
         label: "Summit Value Logistics: appointment-bonus company driver",
         carrier_name: "Summit Value Logistics",
         mode: START_MODE_COMPANY,
-        menu_summary: "Higher percentage and on-time bonus for careful freight, with a smaller wage floor and more long-haul/high-value lanes.",
-        help_text: "A performance-sensitive company start. Good on-time runs pay better, but the guaranteed floor is smaller. Dispatch leans toward longer and higher-value lanes. The carrier still supplies equipment, authority, insurance, fuel, and repairs.",
+        menu_summary: "Higher percentage and on-time bonus for careful freight, with a \
+                       smaller wage floor and more long-haul/high-value lanes.",
+        help_text: "A performance-sensitive company start. Good on-time runs pay \
+                    better, but the guaranteed floor is smaller. Dispatch leans \
+                    toward longer and higher-value lanes. The carrier still supplies \
+                    equipment, authority, insurance, fuel, and repairs.",
         default_city: "Denver",
         company_pay: Some(CompanyPayPlan {
             pay_share: 0.38,
@@ -276,8 +294,15 @@ pub const START_OPTIONS: [CareerStartOption; 5] = [
         label: "Owner-operator start: higher risk, higher responsibility",
         carrier_name: "Northstar Freight Lines",
         mode: START_MODE_OWNER_OPERATOR,
-        menu_summary: "Leased-on owner-operator from day one: a brand-new truck of your own, and every operating cost is yours.",
-        help_text: "The hardest way to begin. You start leased on with a brand-new truck you have just bought -- full tank, no damage, nothing worn -- and limited working capital, and the operating costs -- fuel, repairs, reserves, and settlement fees -- come out of your own cash instead of the carrier's. You still start at level one and climb the same career as everyone else: this changes who pays, not how far along you are.",
+        menu_summary: "Leased-on owner-operator from day one: a brand-new truck of your \
+                       own, and every operating cost is yours.",
+        help_text: "The hardest way to begin. You start leased on with a brand-new \
+                    truck you have just bought -- full tank, no damage, nothing worn \
+                    -- and limited working capital, and the operating costs -- fuel, \
+                    repairs, reserves, and settlement fees -- come out of your own \
+                    cash instead of the carrier's. You still start at level one and \
+                    climb the same career as everyone else: this changes who pays, \
+                    not how far along you are.",
         default_city: "Chicago",
         // The career itself starts at zero. This option is about ECONOMICS --
         // your truck, your costs -- and never about skipping the ladder. It

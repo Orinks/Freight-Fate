@@ -105,7 +105,8 @@ pub fn waiting_time_warp() -> Outcome {
     let duty_gained = hos_of(&rig.app.ctx).duty_min - duty_before;
     if (duty_gained - gm).abs() > 0.2f64.max(gm * 0.05) {
         findings.push(format!(
-            "trip clock moved {gm:.2} game-min while the HOS ledger logged {duty_gained:.2} -- the two clocks disagree while waiting"
+            "trip clock moved {gm:.2} game-min while the HOS ledger logged {duty_gained:.2} -- \
+             the two clocks disagree while waiting"
         ));
     }
     rig.drive.toggle_parking_brake(&mut rig.app.ctx); // release
@@ -183,7 +184,8 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
     for (said_pct, actual_pct) in &spoken_vs_actual {
         if (said_pct - actual_pct.round()).abs() > 1.0 {
             findings.push(format!(
-                "a collision spoke {said_pct:.0}% total damage while the truck was at {actual_pct:.0}%"
+                "a collision spoke {said_pct:.0}% total damage while the truck was at \
+                 {actual_pct:.0}%"
             ));
             break;
         }
@@ -193,7 +195,9 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
     }
     if replays_after_impact > 0 {
         findings.push(format!(
-            "{replays_after_impact} hazard warnings were spoken again after the truck had already hit the hazard, telling the driver to brake for something that had already happened"
+            "{replays_after_impact} hazard warnings were spoken again after the truck had \
+             already hit the hazard, telling the driver to brake for something that had \
+             already happened"
         ));
     }
     let damage = rig.drive.truck().damage_pct;
@@ -204,7 +208,9 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
         rig.run_frames(300);
         if rig.drive.truck().speed_mph() > 30.0 && rig.drive.pull_over.is_none() {
             findings.push(
-                "at 100% damage the wreck still cruises at highway speed; the unsafe-equipment stop only exists inside patrol windows, so on an empty road a totaled truck is street-legal forever"
+                "at 100% damage the wreck still cruises at highway speed; the unsafe-equipment \
+                 stop only exists inside patrol windows, so on an empty road a totaled truck is \
+                 street-legal forever"
                     .to_string(),
             );
         }

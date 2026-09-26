@@ -393,7 +393,8 @@ impl DrivingState {
             let held = ctx.settings.speed_text(self.keeper_mph.unwrap_or(0.0));
             let resuming = if zone_reason == "acceleration lane" {
                 format!(
-                    "Automatic speed control resuming. Speed keeper building to {held} for the merge."
+                    "Automatic speed control resuming. Speed keeper building to {held} for the \
+                     merge."
                 )
             } else {
                 format!(
@@ -427,7 +428,8 @@ impl DrivingState {
                     let floor = ctx.settings.speed_text(CRUISE_MIN_MPH);
                     ctx.say_event_with(
                         format!(
-                            "Automatic speed control resumes at {floor}. You have the pedals until then."
+                            "Automatic speed control resumes at {floor}. You have the pedals \
+                             until then."
                         ),
                         SayEvent::queued()
                             .priority(EventPriority::Route)
@@ -440,7 +442,8 @@ impl DrivingState {
             let floor = ctx.settings.speed_text(CRUISE_MIN_MPH);
             ctx.say_event_with(
                 format!(
-                    "Automatic speed control resuming. Speed keeper building speed; adaptive cruise takes over at {floor}."
+                    "Automatic speed control resuming. Speed keeper building speed; adaptive \
+                     cruise takes over at {floor}."
                 ),
                 SayEvent::queued()
                     .priority(EventPriority::Route)

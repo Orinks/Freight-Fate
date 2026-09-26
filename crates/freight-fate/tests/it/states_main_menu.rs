@@ -21,7 +21,9 @@ use freight_fate::states::main_menu::{
     ManageCareersState, NameEntryState,
 };
 use freight_fate::states::save_notice::{
-    LegacyCareerNoticeState, SaveMigrationNoticeState, SaveModifiedNoticeState,
+    driving_record_notice, DrivingRecordNoticeState, LegacyCareerNoticeState,
+    SaveMigrationNoticeState, SaveModifiedNoticeState, TurnpikeProgramNoticeState,
+    SAVE_MIGRATION_NOTICE, TURNPIKE_PROGRAM_NOTICE,
 };
 use freight_fate::updater;
 
@@ -334,6 +336,10 @@ fn test_migration_notice_shows_once_then_enters_world() {
         .iter()
         .any(|text| text.contains("older versions")));
     assert_eq!(labels::<SaveMigrationNoticeState>(&app)[0], "OK");
+    assert!(app
+        .visible_lines()
+        .iter()
+        .any(|line| line == SAVE_MIGRATION_NOTICE));
 
     key(&mut app, Key::Return);
     assert!(is::<CityMenuState>(&app));
@@ -346,6 +352,125 @@ fn test_migration_notice_shows_once_then_enters_world() {
     enter_world(&mut app.ctx, false);
     app.ctx.run_deferred();
     assert!(is::<CityMenuState>(&app));
+}
+
+#[test]
+fn test_driving_record_notice_is_shown_as_well_as_spoken() {
+    let mut app = TestApp::new();
+    let mut p = Profile::named("Record Notice");
+    p.driving_record.notice_pending = true;
+    app.ctx.profile = Some(Profile::load(&p.save().unwrap()).unwrap());
+
+    enter_world(&mut app.ctx, false);
+    app.ctx.run_deferred();
+    assert!(is::<DrivingRecordNoticeState>(&app));
+    let body = driving_record_notice(&app.ctx);
+    assert!(body.contains("driving record"));
+    assert!(app.main_lines().iter().any(|text| text.contains(&body)));
+    assert!(app.visible_lines().contains(&body));
+
+    key(&mut app, Key::Return);
+    assert!(is::<CityMenuState>(&app));
+    assert!(
+        !app.ctx
+            .profile
+            .as_ref()
+            .unwrap()
+            .driving_record
+            .notice_pending
+    );
+}
+
+// -- turnpike doubles program notice ----------------------------------------------------
+
+/// A leased-on owner-operator save as an older build left it: the notice
+/// flag false, the given trailer programs leased.
+fn old_save_leasing(name: &str, programs: &[&str]) -> Profile {
+    let mut p = Profile::named(name);
+    p.business_status = "leased_owner_operator".to_string();
+    p.owned_trucks = vec!["rig".to_string()];
+    p.trailer_programs = programs.iter().map(|k| k.to_string()).collect();
+    p.turnpike_program_notice_seen = false;
+    Profile::load(&p.save().unwrap()).unwrap()
+}
+
+#[test]
+fn test_turnpike_program_notice_shows_once_for_a_double_van_lessee() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(old_save_leasing("Pup Lessee", &["dry_van", "double_van"]));
+
+    enter_world(&mut app.ctx, false);
+    app.ctx.run_deferred();
+    assert!(is::<TurnpikeProgramNoticeState>(&app));
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|text| text.contains(TURNPIKE_PROGRAM_NOTICE)));
+    assert_eq!(labels::<TurnpikeProgramNoticeState>(&app)[0], "OK");
+    // Shown on screen as well as spoken.
+    assert!(app
+        .visible_lines()
+        .iter()
+        .any(|line| line.contains(TURNPIKE_PROGRAM_NOTICE)));
+
+    key(&mut app, Key::Return);
+    assert!(is::<CityMenuState>(&app));
+    assert!(
+        app.ctx
+            .profile
+            .as_ref()
+            .unwrap()
+            .turnpike_program_notice_seen
+    );
+
+    // Heard once per save: the flag survives a save-load round trip and the
+    // next entry goes straight into the world.
+    let path = app.ctx.profile.as_ref().unwrap().path();
+    app.ctx.profile = Some(Profile::load(&path).unwrap());
+    assert!(
+        app.ctx
+            .profile
+            .as_ref()
+            .unwrap()
+            .turnpike_program_notice_seen
+    );
+    app.clear_speech();
+    enter_world(&mut app.ctx, false);
+    app.ctx.run_deferred();
+    assert!(is::<CityMenuState>(&app));
+    assert!(!app
+        .main_lines()
+        .iter()
+        .any(|text| text.contains(TURNPIKE_PROGRAM_NOTICE)));
+}
+
+#[test]
+fn test_turnpike_program_notice_skips_a_driver_without_double_van() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(old_save_leasing("Van Lessee", &["dry_van", "reefer"]));
+    enter_world(&mut app.ctx, false);
+    app.ctx.run_deferred();
+    assert!(is::<CityMenuState>(&app));
+    assert!(!app
+        .main_lines()
+        .iter()
+        .any(|text| text.contains(TURNPIKE_PROGRAM_NOTICE)));
+}
+
+#[test]
+fn test_turnpike_program_notice_skips_a_driver_already_leasing_turnpike_double() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(old_save_leasing(
+        "Both Lessee",
+        &["dry_van", "double_van", "turnpike_double"],
+    ));
+    enter_world(&mut app.ctx, false);
+    app.ctx.run_deferred();
+    assert!(is::<CityMenuState>(&app));
+    assert!(!app
+        .main_lines()
+        .iter()
+        .any(|text| text.contains(TURNPIKE_PROGRAM_NOTICE)));
 }
 
 #[test]

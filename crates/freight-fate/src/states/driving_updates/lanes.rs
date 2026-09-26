@@ -752,7 +752,8 @@ impl DrivingState {
             ctx.controller.rumble.impact(MERGE_BARRELS_DAMAGE);
             self.trip.truck.apply_collision(MERGE_BARRELS_DAMAGE, true);
             let text = format!(
-                "You plowed through the barrels and lurched into the {open_name} lane. The truck took damage, now {:.0} percent.",
+                "You plowed through the barrels and lurched into the {open_name} lane. The truck \
+                 took damage, now {:.0} percent.",
                 self.trip.truck.damage_pct
             );
             ctx.say_event_with(text, SayEvent::new().category(SpeechCategory::Safety));
@@ -831,7 +832,8 @@ impl DrivingState {
             // No doubled-for-the-zone clause: this citation is not doubled,
             // because its amount is already the roadwork penalty.
             format!(
-                "{saw_it}. Driving through the barrels is a citation, {} dollars, and it goes on your safety record. You have {} dollars.{tail}",
+                "{saw_it}. Driving through the barrels is a citation, {} dollars, and it goes on \
+                 your safety record. You have {} dollars.{tail}",
                 fmt_grouped(fine, 0),
                 fmt_grouped(money, 0)
             ),
@@ -885,7 +887,8 @@ impl DrivingState {
         }
         self.keep_right_nags += 1;
         if self.keep_right_nags == 1 {
-            let grumble = "CB chatter: you have been riding the left lane a while. Keep right except to pass.";
+            let grumble = "CB chatter: you have been riding the left lane a while. Keep right \
+                           except to pass.";
             // Repeatable with Alt C like any other CB call. No post and no
             // distance in it, so the repeat says it back word for word.
             self.last_cb_chatter = Some(CbChatterRecall {

@@ -221,12 +221,14 @@ impl PlayerInputFrame<'_> {
         if live {
             self.app.allow_operator_keys();
             self.app.restore_window();
-            "Operator keys are live: the game window is up and the keyboard reaches the game. Anything typed elsewhere while it has focus is truck input."
+            "Operator keys are live: the game window is up and the keyboard reaches the \
+             game. Anything typed elsewhere while it has focus is truck input."
                 .to_string()
         } else {
             self.app.ignore_operator_keys();
             self.app.minimize_window();
-            "Operator keys are off: the window is minimized and the keyboard is dropped at the door."
+            "Operator keys are off: the window is minimized and the keyboard is dropped \
+             at the door."
                 .to_string()
         }
     }
@@ -794,7 +796,8 @@ impl App {
         self.ctx.speech.poll(dt);
         if self.ctx.controller.take_disconnect() {
             self.ctx.say(
-                "Controller disconnected. You can keep playing with the keyboard, or reconnect your controller.",
+                "Controller disconnected. You can keep playing with the \
+                 keyboard, or reconnect your controller.",
             );
             if let Some(state) = self.ctx.state() {
                 state.borrow_mut().on_controller_disconnect(&mut self.ctx);

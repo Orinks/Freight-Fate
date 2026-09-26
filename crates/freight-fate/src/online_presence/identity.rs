@@ -87,7 +87,12 @@ fn refuse_secret_key(service: &str, user: &str) -> ! {
         .unwrap_or_else(|e| e.into_inner())
         .push(format!("{service}/{user}"));
     panic!(
-        "refusing to reach the platform secret store for {service}/{user}: this process never called online_presence::allow_real_secret_store(), so it is not the game. If this is a test, build the store over MemoryStore (or RefusingStore for the no-backend shape) instead of IdentityStore::platform."
+        "refusing to reach the platform secret store for {service}/{user}: \
+         this process never called \
+         online_presence::allow_real_secret_store(), so it is not the game. \
+         If this is a test, build the store over MemoryStore (or \
+         RefusingStore for the no-backend shape) instead of \
+         IdentityStore::platform."
     );
 }
 

@@ -497,7 +497,8 @@ pub fn curve_assist_slowing(pacenote: &SpokenMessage) -> SpokenMessage {
 pub fn cruise_curve_paused_assisted(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
         format!(
-            "{pacenote} Adaptive cruise paused for the bend, curve assistance slowing. Cruise resumes past the bend."
+            "{pacenote} Adaptive cruise paused for the bend, curve assistance slowing. \
+             Cruise resumes past the bend."
         ),
         format!(
             "{} Cruise paused; assistance slowing.",
@@ -956,7 +957,8 @@ mod tests {
         let pair = toll_charged("E-ZPass", "New York State Thruway settlement", "15", true);
         assert_eq!(
             pair.normal,
-            "E-ZPass toll at New York State Thruway settlement, estimated 15 dollars, billed to carrier settlement."
+            "E-ZPass toll at New York State Thruway settlement, \
+             estimated 15 dollars, billed to carrier settlement."
         );
         assert_eq!(pair.terse.as_deref(), Some("Toll, 15 dollars, carrier."));
     }
@@ -976,7 +978,8 @@ mod tests {
         );
         assert_eq!(
             pair.normal,
-            "Sharp left, half a mile. Advise 35 miles per hour. Adaptive cruise easing to 35 miles per hour."
+            "Sharp left, half a mile. Advise 35 miles per hour. \
+             Adaptive cruise easing to 35 miles per hour."
         );
         assert_eq!(
             pair.terse.as_deref(),
@@ -1128,7 +1131,8 @@ mod tests {
             ),
             // Prose keeps its opening clause: the name and the fact.
             (
-                "You are passing Ozark beside Fort Novosel, the home of Army Aviation, where every Army helicopter pilot learns to fly.",
+                "You are passing Ozark beside Fort Novosel, the home of Army Aviation, \
+                 where every Army helicopter pilot learns to fly.",
                 "Ozark beside Fort Novosel.",
             ),
             // The lead-in stripping itself, on a billboard-shaped line. Real
@@ -1174,8 +1178,11 @@ mod tests {
     #[test]
     fn test_a_billboard_is_never_cut_down() {
         let signs = [
-            "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
-            "Billboard: Idaho panhandle country. Colby Acuff and the Western White Pines both grew up here.",
+            "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile \
+             wide that was punched out by a rock from space. It is bigger than it \
+             sounds. Much bigger.",
+            "Billboard: Idaho panhandle country. Colby Acuff and the Western White \
+             Pines both grew up here.",
         ];
         for category in UNCUT_CHATTER_CATEGORIES {
             for spoken in signs {
@@ -1246,7 +1253,8 @@ mod tests {
         let paused = cruise_curve_paused(&pacenote);
         assert_eq!(
             paused.normal,
-            "Sharp right, half a mile. Advise 35 miles per hour. Adaptive cruise paused for the bend. Resumes past it."
+            "Sharp right, half a mile. Advise 35 miles per hour. Adaptive cruise paused for the \
+             bend. Resumes past it."
         );
         assert_eq!(
             paused.terse.as_deref(),

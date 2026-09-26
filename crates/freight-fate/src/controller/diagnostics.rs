@@ -208,11 +208,11 @@ pub fn run_controller_diagnostics() -> i32 {
                     value as f64 / AXIS_MAX
                 )),
                 Event::ControllerButtonDown { which, button, .. } => log.info(&format!(
-                    "[GC ] BTN {:<13} DOWN (device {which})",
+                    "[GC ] BTN   {:<13} DOWN (device {which})",
                     button.string()
                 )),
                 Event::ControllerButtonUp { which, button, .. } => log.info(&format!(
-                    "[GC ] BTN {:<13} UP (device {which})",
+                    "[GC ] BTN   {:<13} UP   (device {which})",
                     button.string()
                 )),
                 Event::ControllerDeviceAdded { which, .. } => {
@@ -234,12 +234,12 @@ pub fn run_controller_diagnostics() -> i32 {
                 Event::JoyButtonDown {
                     which, button_idx, ..
                 } => log.info(&format!(
-                    "[JOY] BTN index={button_idx:<2} DOWN (device {which})"
+                    "[JOY] BTN   index={button_idx:<2} DOWN (device {which})"
                 )),
                 Event::JoyButtonUp {
                     which, button_idx, ..
                 } => log.info(&format!(
-                    "[JOY] BTN index={button_idx:<2} UP (device {which})"
+                    "[JOY] BTN   index={button_idx:<2} UP   (device {which})"
                 )),
                 Event::JoyHatMotion {
                     which,
@@ -247,7 +247,7 @@ pub fn run_controller_diagnostics() -> i32 {
                     state,
                     ..
                 } => log.info(&format!(
-                    "[JOY] HAT index={hat_idx:<2} {:?} ({}) (device {which})",
+                    "[JOY] HAT   index={hat_idx:<2} {:?} ({}) (device {which})",
                     state,
                     hat_str(state)
                 )),

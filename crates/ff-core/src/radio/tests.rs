@@ -2191,7 +2191,7 @@ fn test_search_finds_the_whole_dial_in_range_first() {
     assert!(total >= 1);
     assert_eq!(hits[0].0.id, "fix-near");
     assert!(hits[0].1.is_some());
-    assert_eq!(radio.search(" ", 40), (Vec::new(), 0));
+    assert_eq!(radio.search("   ", 40), (Vec::new(), 0));
     let (capped, total) = radio.search("radio", 5);
     assert_eq!(capped.len(), 5);
     assert!(total > 5);

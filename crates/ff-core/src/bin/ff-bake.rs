@@ -17,13 +17,14 @@ use std::process::ExitCode;
 
 use ff_core::data::baked::{bake, bake_bytes, BAKED_FILE_NAME};
 
-const USAGE: &str = "usage: ff-bake --data-dir <dir> --out <file> [--check] [--quiet]
+const USAGE: &str = "\
+usage: ff-bake --data-dir <dir> --out <file> [--check] [--quiet]
 
   --data-dir <dir>  the world data folder (data/ in a checkout)
-  --out <file> where to write world.ffdata; a directory is allowed and
- the file is named world.ffdata inside it
-  --check do not write: re-bake and compare bytes with --out
-  --quiet suppress the size table
+  --out <file>      where to write world.ffdata; a directory is allowed and
+                    the file is named world.ffdata inside it
+  --check           do not write: re-bake and compare bytes with --out
+  --quiet           suppress the size table
 ";
 
 struct Args {

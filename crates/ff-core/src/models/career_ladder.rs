@@ -59,7 +59,9 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         4,
         "Regional Company Driver",
         "Company driver",
-        "High-value freight certificate, and dispatch moves you up to the regional fleet: you slip-seat between a few newer spare tractors, matched to each load.",
+        "High-value freight certificate, and dispatch moves you up to the \
+         regional fleet: you slip-seat between a few newer spare tractors, \
+         matched to each load.",
         "Working broader lanes while the carrier still owns the business risk.",
     ),
     rank(
@@ -87,21 +89,26 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         8,
         "Heavy Freight Driver",
         "Company driver",
-        "Dispatch now lets you choose your own loads from the board, with more machinery, construction, and bulk opportunities. The doubles endorsement course opens under Licenses and training.",
+        "Dispatch now lets you choose your own loads from the board, \
+         with more machinery, construction, and bulk opportunities. The \
+         doubles endorsement course opens under Licenses and training.",
         "Trusted with heavier freight while the carrier covers operating costs.",
     ),
     rank(
         9,
         "High-Value Company Driver",
         "Company driver",
-        "A dedicated long-haul sleeper tractor of your own, so slip-seating ends, with priority access to fragile and high-value lanes.",
+        "A dedicated long-haul sleeper tractor of your own, so slip-seating \
+         ends, with priority access to fragile and high-value lanes.",
         "Dispatch trusts the driver with higher-consequence freight.",
     ),
     rank(
         10,
         "Lead Company Driver",
         "Company driver",
-        "Senior company-driver status, the dispatch board grows to seven offers per visit, and the hazmat endorsement course opens under Licenses and training.",
+        "Senior company-driver status, the dispatch board grows to seven \
+         offers per visit, and the hazmat endorsement course opens under \
+         Licenses and training.",
         "A veteran company driver, still protected from tractor operating costs.",
     ),
     rank(
@@ -150,14 +157,16 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         17,
         "Tractor Buy-In Candidate",
         "Owner-operator preparation",
-        "First pick of the yard: dispatch assigns the carrier's best tractor, and the buy-in target is active.",
+        "First pick of the yard: dispatch assigns the carrier's best \
+         tractor, and the buy-in target is active.",
         "Close to a leased-on tractor position, but still on company settlement.",
     ),
     rank(
         18,
         "Leased-On Owner-Operator",
         "Owner-operator",
-        "Leased-on owner-operator buy-in unlocks when other gates are met, and TWIC port card enrollment opens under Licenses and training.",
+        "Leased-on owner-operator buy-in unlocks when other gates are met, \
+         and TWIC port card enrollment opens under Licenses and training.",
         "Eligible to buy into a tractor position and pay operating costs.",
     ),
     rank(
@@ -171,7 +180,8 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         20,
         "Established Owner-Operator",
         "Owner-operator",
-        "Specialty trailer programs matter more, and LCV training opens for doubles-endorsed drivers with a clean recent record.",
+        "Specialty trailer programs matter more, and LCV training opens for \
+         doubles-endorsed drivers with a clean recent record.",
         "Running as a steady leased-on business with clearer upside and costs.",
     ),
     rank(
@@ -275,7 +285,9 @@ pub const COMPANY_CAREER_RANKS: [CareerRank; 30] = [
         4,
         "Regional Company Driver",
         "Company driver",
-        "High-value freight certificate, and dispatch moves you up to the regional fleet: you slip-seat between a few newer spare tractors, matched to each load.",
+        "High-value freight certificate, and dispatch moves you up to the \
+         regional fleet: you slip-seat between a few newer spare tractors, \
+         matched to each load.",
         "Working broader lanes while the carrier still owns the business risk.",
     ),
     rank(
@@ -303,21 +315,26 @@ pub const COMPANY_CAREER_RANKS: [CareerRank; 30] = [
         8,
         "Heavy Freight Driver",
         "Company driver",
-        "Dispatch now lets you choose your own loads from the board, with more machinery, construction, and bulk opportunities. The doubles endorsement course opens under Licenses and training.",
+        "Dispatch now lets you choose your own loads from the board, \
+         with more machinery, construction, and bulk opportunities. The \
+         doubles endorsement course opens under Licenses and training.",
         "Trusted with heavier freight while the carrier covers operating costs.",
     ),
     rank(
         9,
         "High-Value Company Driver",
         "Company driver",
-        "A dedicated long-haul sleeper tractor of your own, so slip-seating ends, with priority access to fragile and high-value lanes.",
+        "A dedicated long-haul sleeper tractor of your own, so slip-seating \
+         ends, with priority access to fragile and high-value lanes.",
         "Dispatch trusts the driver with higher-consequence freight.",
     ),
     rank(
         10,
         "Lead Company Driver",
         "Company driver",
-        "Senior company-driver status, the dispatch board grows to seven offers per visit, and the hazmat endorsement course opens under Licenses and training.",
+        "Senior company-driver status, the dispatch board grows to seven \
+         offers per visit, and the hazmat endorsement course opens under \
+         Licenses and training.",
         "A veteran company driver, still protected from tractor operating costs.",
     ),
     rank(
@@ -366,7 +383,8 @@ pub const COMPANY_CAREER_RANKS: [CareerRank; 30] = [
         17,
         "Lead Fleet Driver",
         "Career company driver",
-        "First pick of the yard: dispatch assigns the carrier's best tractor for a company driver who stayed on the payroll.",
+        "First pick of the yard: dispatch assigns the carrier's best tractor \
+         for a company driver who stayed on the payroll.",
         "Top of the assigned-fleet ladder while the carrier still owns the risk.",
     ),
     rank(

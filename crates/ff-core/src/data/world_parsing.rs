@@ -316,7 +316,8 @@ fn template_location(
         .unwrap_or_else(|| panic!("no cargo roles for {facility_type:?}"));
     let cargo = dedupe(ships.iter().chain(receives.iter()).map(|s| s.to_string()));
     let source_note = format!(
-        "{} Generated offline as a representative {spoken_city} metro-market facility; not a claim about a specific real-world shipper.",
+        "{} Generated offline as a representative {spoken_city} metro-market facility; \
+         not a claim about a specific real-world shipper.",
         lookup(FACILITY_SOURCE_NOTES, facility_type).unwrap_or_default()
     );
     let (jitter_lat, jitter_lon) = jittered_coordinates(city_key, facility_type, lat, lon);

@@ -122,7 +122,8 @@ impl Default for UpdateCheckState {
 impl State for UpdateCheckState {
     fn enter(&mut self, ctx: &mut GameContext) {
         if !updater::is_frozen() {
-            self.message = "Updates are only available in the packaged game. This copy runs from source; update it with git."
+            self.message = "Updates are only available in the packaged game. \
+                            This copy runs from source; update it with git."
                 .to_string();
             ctx.say(&format!("{} Escape goes back.", self.message));
             return;
@@ -185,7 +186,8 @@ impl UpdatePromptState {
     pub fn new(info: UpdateInfo) -> Self {
         Self {
             menu: MenuCore::new("Update available").with_intro_help(
-                "Download and restart installs it now. What's new reads the changes. Skip this version stops asking about this update.",
+                "Download and restart installs it now. What's new reads the \
+                 changes. Skip this version stops asking about this update.",
             ),
             info,
         }
@@ -288,7 +290,8 @@ impl WhatsNewState {
 impl State for WhatsNewState {
     fn enter(&mut self, ctx: &mut GameContext) {
         ctx.say(&format!(
-            "What's new in {}. {} lines. Up and Down arrows read line by line, Enter reads everything, Escape goes back.",
+            "What's new in {}. {} lines. Up and Down arrows read line \
+             by line, Enter reads everything, Escape goes back.",
             self.info.title,
             self.notes.len()
         ));
@@ -481,7 +484,8 @@ impl State for UpdateDownloadState {
             .map(|mb| format!(", {mb} megabytes"))
             .unwrap_or_default();
         ctx.say(&format!(
-            "Downloading {}{size}. The game restarts when the download finishes. Escape cancels.",
+            "Downloading {}{size}. The game restarts when the download \
+             finishes. Escape cancels.",
             self.info.title
         ));
         self.started = true;
@@ -534,7 +538,9 @@ impl State for UpdateDownloadState {
             // findable and say where instead of dead-ending on restart.
             let dest = (self.stash_for_manual_install)(&new_root);
             ctx.say(&format!(
-                "Download complete, but this install cannot update itself. The new version is saved at {}. Install it yourself, then restart the game.",
+                "Download complete, but this install cannot update itself. \
+                 The new version is saved at {}. Install it yourself, then \
+                 restart the game.",
                 dest.display()
             ));
             ctx.pop_state();

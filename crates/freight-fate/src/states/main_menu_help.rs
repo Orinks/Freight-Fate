@@ -393,7 +393,9 @@ impl Default for HelpState {
 impl State for HelpState {
     fn enter(&mut self, ctx: &mut GameContext) {
         ctx.say(&format!(
-            "How to play. Left and Right arrows change pages, Up and Down read line by line, Enter reads the whole page, Left or Right Control stops speech, Escape goes back. {}",
+            "How to play. Left and Right arrows change pages, Up and Down read line \
+             by line, Enter reads the whole page, Left or Right Control stops \
+             speech, Escape goes back. {}",
             self.page_title()
         ));
     }

@@ -122,7 +122,9 @@ fn test_assignment_text_is_spoken_plainly() {
     }
     assert_eq!(
         text,
-        "Dispatch has you in a highline sleeper from the long-haul fleet: A raised-roof long-haul sleeper with a two hundred gallon tank and honest aerodynamics: built to live on the interstate for days at a time."
+        "Dispatch has you in a highline sleeper from the long-haul fleet: A raised-roof \
+         long-haul sleeper with a two hundred gallon tank and honest aerodynamics: built to \
+         live on the interstate for days at a time."
     );
 }
 
@@ -343,7 +345,8 @@ fn test_the_assignment_reason_is_spoken_plainly() {
     }
     assert_eq!(
         text,
-        "Dispatch put you in the mid-roof runner for this run: this one is too far to finish in a shift, so you need the bunk."
+        "Dispatch put you in the mid-roof runner for this run: this one is too far to \
+         finish in a shift, so you need the bunk."
     );
     let heavy = job(140.0, 24.0);
     assert!(assignment_reason_text::<FakeProfile, _>(
@@ -388,7 +391,8 @@ fn test_a_dedicated_driver_hears_why_the_yard_held_their_truck_back() {
     assert!(spoken.contains("comes back to you"));
     assert_eq!(
         spoken,
-        "Your level earns a tractor from the long-haul fleet, but your dispatch trust is down. Bring it back up with clean on-time runs and the long-haul fleet comes back to you."
+        "Your level earns a tractor from the long-haul fleet, but your dispatch trust is down. \
+         Bring it back up with clean on-time runs and the long-haul fleet comes back to you."
     );
     assert_eq!(
         equipment_hold_text(&profile, true),
@@ -396,7 +400,8 @@ fn test_a_dedicated_driver_hears_why_the_yard_held_their_truck_back() {
     );
     assert_eq!(
         equipment_hold_clause(&profile),
-        "The yard is also holding your equipment back: your tractor comes from the yard standard, not the long-haul fleet your level earns."
+        "The yard is also holding your equipment back: your tractor comes from the yard \
+         standard, not the long-haul fleet your level earns."
     );
     assert!(withheld_promotion_text(&profile)
         .starts_with("You keep the standard rig you are in, exactly as it stands. "));
@@ -425,7 +430,8 @@ fn test_fleet_upgrade_announcement_hands_the_truck_over_serviced() {
     assert_eq!(
         text,
         format!(
-            "Dispatch upgraded your assigned tractor. Now running a {}: {} Handed over fueled, serviced, and washed.",
+            "Dispatch upgraded your assigned tractor. Now running a {}: {} Handed over \
+             fueled, serviced, and washed.",
             model.label, model.description
         )
     );

@@ -119,7 +119,9 @@ pub fn xp_rate_clause(band: &str) -> String {
         return String::new();
     }
     format!(
-        "While your dispatch trust is {band}, the carrier keeps you on routine freight, so career experience comes in more slowly until it is back up."
+        "While your dispatch trust is {band}, the carrier keeps you on \
+         routine freight, so career experience comes in more slowly until it \
+         is back up."
     )
 }
 
@@ -181,7 +183,8 @@ pub fn endorsement_announcement(key: &str) -> Option<&'static str> {
 /// license: on a real CDL the pair prints as the single letter X
 /// (49 CFR 383.153(a)(9)(v)), and it is what the fuel-tanker fleet hires on.
 pub const X_COMBINATION_ANNOUNCEMENT: &str =
-    "You now hold both the tank vehicle and hazmat endorsements -- the X combination on a real license. Bulk fuel freight is open.";
+    "You now hold both the tank vehicle and hazmat endorsements -- the X \
+     combination on a real license. Bulk fuel freight is open.";
 
 /// Experience still owed before the next level, or None at the ceiling.
 ///
@@ -465,7 +468,12 @@ impl Career {
             None => String::new(),
         };
         format!(
-            "Level {level}, {}. {} experience.{owed_text} Reputation {} out of 100. {} deliveries, {} percent on time. {} lifetime miles, {} dollars earned. Career stage: {}. {}.{next_text}",
+            "Level {level}, {}. {} experience.{owed_text} \
+             Reputation {} out of 100. \
+             {} deliveries, {} percent on time. \
+             {} lifetime miles, \
+             {} dollars earned. \
+             Career stage: {}. {}.{next_text}",
             rank.title,
             fmt_f(self.xp, 0),
             fmt_f(self.reputation, 0),

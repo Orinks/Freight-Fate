@@ -463,7 +463,8 @@ impl DrivingState {
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
                 format!(
-                    "Out of the gate and onto city streets. {street}. {distance} to the {merge_highway} on-ramp."
+                    "Out of the gate and onto city streets. {street}. {distance} to the \
+                     {merge_highway} on-ramp."
                 ),
                 opts,
             );

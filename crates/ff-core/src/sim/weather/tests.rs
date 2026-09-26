@@ -210,7 +210,7 @@ fn test_force_weather_accepts_every_python_spelling() {
         std::env::set_var(VAR, spelling);
         assert_eq!(forced_weather(), Some(kind), "{spelling:?}");
     }
-    std::env::set_var(VAR, " ");
+    std::env::set_var(VAR, "   ");
     assert_eq!(forced_weather(), None);
     std::env::remove_var(VAR);
     assert_eq!(forced_weather(), None);
@@ -474,7 +474,8 @@ fn test_observation_age_text_rounds_down_to_whole_minutes() {
     assert_eq!(ws.source_conditions(true), "neutral conditions");
     assert_eq!(
         ws.report_lead(true),
-        "Live weather is loading for your current route position. Temporary neutral driving conditions in use"
+        "Live weather is loading for your current route position. \
+         Temporary neutral driving conditions in use"
     );
 }
 

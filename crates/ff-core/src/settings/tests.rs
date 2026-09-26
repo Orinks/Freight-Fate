@@ -172,7 +172,8 @@ fn the_file_text_is_what_json_dump_wrote() {
     let text = s.to_file_text();
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
     assert!(text.ends_with(
-        "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \"steering_assist\": \"light\"\n}"
+        "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \
+         \"steering_assist\": \"light\"\n}"
     ));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));

@@ -167,7 +167,8 @@ impl DrivingState {
                 format!("Air ready: {psi:.0} psi.")
             } else {
                 format!(
-                    "Air pressure ready at {psi:.0} psi. Press {brake_hint} to release the parking brake."
+                    "Air pressure ready at {psi:.0} psi. Press {brake_hint} to release the \
+                     parking brake."
                 )
             };
             // ROUTE, not the ambient default: same reasoning as the lockout

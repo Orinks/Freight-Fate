@@ -75,7 +75,8 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "On the ramp for {name}. Stop at the scale, then press {rest_hint} to check in."
+                    "On the ramp for {name}. Stop at the scale, then press {rest_hint} to check \
+                     in."
                 ),
             );
             return;
@@ -109,7 +110,8 @@ impl DrivingState {
         if let Some(active) = self.ramp_stop.clone() {
             let active_is_selected = self.is_selected_stop(Some(&active));
             let assist = if ctx.settings.destination_approach_assist {
-                "Facility stopping assistance armed. It stops at the entrance once the ramp control is clear."
+                "Facility stopping assistance armed. It stops at the entrance once the ramp \
+                 control is clear."
             } else {
                 "Facility stopping assistance off. Stop at the entrance."
             };
@@ -253,7 +255,9 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "No sleep-capable route stop is ahead on this route. Press {status_hint} for the upcoming route points. Away from a route point, emergency shoulder sleep is available."
+                    "No sleep-capable route stop is ahead on this route. Press {status_hint} for \
+                     the upcoming route points. Away from a route point, emergency shoulder \
+                     sleep is available."
                 ),
             );
             return;
@@ -264,7 +268,8 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "Your planned stop remains {}. {} is also ahead. Move the plan from its stop details on the route map.",
+                        "Your planned stop remains {}. {} is also ahead. Move the plan from its \
+                         stop details on the route map.",
                         current.spoken_name(),
                         candidate.spoken_name()
                     ),
