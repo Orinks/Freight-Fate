@@ -392,6 +392,30 @@ fn test_garage_refuel_requires_engine_off() {
 }
 
 #[test]
+fn test_garage_full_tank_with_engine_on_speaks_the_engine_refusal() {
+    // Engine first, then the tank, as at the fuel island.
+    let mut app = TestApp::new();
+    career(&mut app, "Garage Engine Order", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.set_money(5_000.0);
+        p.set_truck_fuel_gal(10_000.0);
+        p.set_truck_engine_on(true);
+    }
+    app.push_state(GarageState::new());
+
+    app.clear_speech();
+    select::<GarageState>(&mut app, "Fuel: tank is full");
+    let said = app.main_lines().last().cloned().unwrap_or_default();
+    assert!(
+        said.contains("Shut the engine off before you fuel."),
+        "{said}"
+    );
+    assert!(profile(&app).truck_engine_on());
+}
+
+#[test]
 fn test_garage_help_strings_have_no_double_spaces() {
     let mut app = TestApp::new();
     career(&mut app, "Garage Help", "Chicago");

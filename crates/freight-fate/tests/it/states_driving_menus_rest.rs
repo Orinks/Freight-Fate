@@ -15,11 +15,13 @@ use ff_core::sim::trip_models::RoadStop;
 use freight_fate::controller::ControllerButton;
 
 use ff_core::sim::roadside_inspection::{InspectionLevel, DECAL_VALID_HOURS, OUT_OF_SERVICE_FINE};
+use ff_core::sim::vehicle::{APU_BURN_GAL_PER_S, REEFER_BURN_GAL_PER_S};
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{InputEvent, Menu};
 use freight_fate::states::driving_core::{
-    FIELD_REPAIR_DAMAGE_PCT, INSPECTION_MIN, MECHANIC_WAIT_MIN, ROAD_BRAKE_COST_PER_PCT,
-    ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_SPECIALIST_COST_PER_PCT, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
+    FIELD_REPAIR_DAMAGE_PCT, FUEL_STOP_MIN, INSPECTION_MIN, MECHANIC_WAIT_MIN,
+    ROAD_BRAKE_COST_PER_PCT, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_SPECIALIST_COST_PER_PCT,
+    WALK_AROUND_MIN, WAVE_THROUGH_MIN,
 };
 use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_pause_states::{
@@ -1194,6 +1196,29 @@ fn test_refuel_is_allowed_once_the_tractor_engine_is_off() {
 }
 
 #[test]
+fn test_refuel_with_a_full_tank_and_engine_on_speaks_the_engine_refusal() {
+    // Engine first, then the tank: a full tank does not hide the refusal.
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = d.trip.truck.specs.fuel_tank_gal;
+        d.trip.truck.engine_on = true;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, travel_center("Pilot Travel Center", at));
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Fuel: tank is full");
+    assert_eq!(last(&app), "Shut the engine off before you fuel.");
+    assert!(
+        !app.main_lines()
+            .iter()
+            .any(|line| line == "The tank is already full."),
+        "{:?}",
+        app.main_lines()
+    );
+}
+
+#[test]
 fn test_refuel_is_allowed_with_the_reefer_and_apu_running() {
     // Only the tractor engine blocks the island: hotel power stays on.
     let mut app = TestApp::new();
@@ -1215,9 +1240,11 @@ fn test_refuel_is_allowed_with_the_reefer_and_apu_running() {
     activate(&mut state, &mut app.ctx, "Refuel");
     with_drive(&drive, |d| {
         // The hotel units keep burning through the fueling minutes, so the
-        // tank reads a fraction under full rather than exactly full.
+        // tank reads a fraction under full: at most what the reefer and APU
+        // burn over the stop, plus a little float slack.
+        let hotel_burn_gal = (REEFER_BURN_GAL_PER_S + APU_BURN_GAL_PER_S) * FUEL_STOP_MIN * 60.0;
         assert!(
-            d.trip.truck.fuel_gal > d.trip.truck.specs.fuel_tank_gal - 1.0,
+            d.trip.truck.fuel_gal >= d.trip.truck.specs.fuel_tank_gal - hotel_burn_gal - 0.01,
             "{} of {}",
             d.trip.truck.fuel_gal,
             d.trip.truck.specs.fuel_tank_gal
