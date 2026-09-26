@@ -77,11 +77,10 @@ pub trait RoadsideExit: Menu {
         } else {
             "There is no loaded trailer to hand back, and the assignment is canceled".to_string()
         };
-        let terminal = ctx
-            .world
-            .home_terminal(&profile.current_city)
+        let terminal = profile
+            .carrier_home_terminal(ctx.world)
             .map(|t| t.spoken_name())
-            .unwrap_or_else(|_| "the terminal".to_string());
+            .unwrap_or_else(|| "the terminal".to_string());
         if profile.driving_record.lifetime_disqualified {
             return format!(
                 " The licence is gone for good, so the truck stays here. {load}, and a relief \
@@ -644,11 +643,10 @@ impl FelonyStopState {
         } else {
             "No loaded trailer to lose, but the assignment is canceled.".to_string()
         };
-        let terminal = ctx
-            .world
-            .home_terminal(&profile_of(ctx).current_city)
+        let terminal = profile_of(ctx)
+            .carrier_home_terminal(ctx.world)
             .map(|t| t.spoken_name())
-            .unwrap_or_else(|_| "the terminal".to_string());
+            .unwrap_or_else(|| "the terminal".to_string());
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \

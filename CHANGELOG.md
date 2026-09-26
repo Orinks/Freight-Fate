@@ -4,10 +4,14 @@
 
 ### Changed
 
-- Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals). Home terminal resolves to a real company yard or terminal within 250 air miles — no synthetic yards.
-- `home_terminal_city` is persisted on the profile; old saves migrate from the current city via the nearest real yard.
+- Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals).
+- **Your home terminal is your carrier's own yard.** It is named for the carrier and the city, like Northstar Freight Lines Chicago terminal, and it is the carrier terminal nearest your home base. A city's freight yards are pickup and delivery points only, never a home.
+- The home-base rule is defined: national carriers hire anywhere in the lower 48, and a regional carrier hires only within its hiring radius, so it never homes a driver at a terminal out of range. A home base is offerable only where some carrier hires, which leaves out Alaska, British Columbia, and Yukon for now. The new-career picker adopts this rule in the next carrier update; until then a regional pick outside its range keeps its carrier (for example Prairie Link) with no home terminal named, and the carrier start flow update resolves it.
+- **The terminal says where your truck really is.** In your home terminal city it is parked at the carrier terminal. Anywhere else it is at the facility where you last delivered or dropped, or at the city's travel center or truck parking, or the terminal just names the city. It never names a yard in another city or a bare "Terminal".
+- Careers saved before this update get the home terminal of their carrier's nearest terminal city (within the hiring radius for a regional). The truck stays where it was parked.
+- A company-yard load in your home terminal city now deadheads from the carrier terminal instead of starting staged there, since the carrier terminal is its own yard.
 
-- `travel_center` and `truck_parking` city lots are fuel, parking, and rest only (no freight cargo roles); home terminal and default facility pick only `company_yard` or `terminal`.
+- `travel_center` and `truck_parking` city lots are fuel, parking, and rest only (no freight cargo roles); the default freight facility picks only `company_yard` or `terminal`.
 
 - City facilities may be typed `travel_center` or `truck_parking` for public tractor lots; ALCAN corridor public stops retyped off `company_yard`.
 - Phase A ALCAN: Tok and Fairbanks resolve to Alaska Time on the shipped-city timezone gate (CONUS-only check widened for the AK terminus).

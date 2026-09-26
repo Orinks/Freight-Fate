@@ -215,20 +215,12 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     let Some(p) = ctx.profile.as_ref() else {
         return String::new();
     };
-    let terminal = ctx
-        .world
-        .home_terminal(&p.current_city)
-        .map(|t| t.spoken_name())
-        .unwrap_or_default();
     let option = option_for_profile(p);
-    // Spoken city, never the map key (same fix as the states::city copy).
-    let location = format!(
-        "{terminal} in the {} service area",
-        ctx.world.spoken_city(&p.current_city, None)
-    );
+    // Where the truck really is, spoken city (same as the states::city copy).
+    let location = crate::states::city::first_day_parked_location(ctx);
     if option.is_owner_operator() {
         return format!(
-            "{prefix}First-day briefing: leased to {}, parked at {location}. You own a new \
+            "{prefix}First-day briefing: leased to {}, parked {location}. You own a new \
              truck with a full tank and {} dollars of working capital. Fuel, repairs, truck \
              wear, trailer programs, and business reserves come out of your cash. First \
              objective: open the dispatch board and choose an unlocked load with a deadline \
@@ -238,7 +230,7 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
         );
     }
     format!(
-        "{prefix}First-day briefing: welcome aboard {}. Your assigned truck is parked at \
+        "{prefix}First-day briefing: welcome aboard {}. Your assigned truck is parked \
          {location}. The carrier covers fuel, repairs, insurance, and trailer support. \
          Dispatch style: {}. As a new hire, dispatch assigns your load and route, and \
          refusing an assignment goes on your service record. First objective: open the \
@@ -491,14 +483,7 @@ pub fn career_location(ctx: &GameContext, profile: &Profile) -> String {
         }
         return format!("on the road to {facility}");
     }
-    match ctx.world.home_terminal(&profile.current_city) {
-        Ok(terminal) => format!(
-            "at {} in {}",
-            terminal.name,
-            ctx.world.spoken_city(&profile.current_city, None)
-        ),
-        Err(_) => format!("in {}", profile.current_city),
-    }
+    profile.parked_at(ctx.world).phrase(ctx.world)
 }
 
 /// `Mon D, YYYY at H:MM AM` for a save file's modification time.
@@ -596,15 +581,10 @@ impl MainMenuState {
         let welcome = if p.active_trip.is_some() {
             format!("Welcome back, {}.", p.name)
         } else {
-            let terminal_name = ctx
-                .world
-                .home_terminal(&p.current_city)
-                .map(|t| t.name)
-                .unwrap_or_default();
             format!(
-                "Welcome back, {}. You are parked at {terminal_name} in {} with {} dollars.",
+                "Welcome back, {}. You are parked {} with {} dollars.",
                 p.name,
-                ctx.world.spoken_city(&p.current_city, None),
+                p.parked_at(ctx.world).phrase(ctx.world),
                 fmt_grouped(p.money(), 0)
             )
         };

@@ -14,6 +14,7 @@ pub mod dispatch_policy;
 pub mod doubles;
 pub mod economy;
 pub mod enforcement;
+pub mod home_base;
 pub mod jobs;
 pub mod loyalty;
 pub mod market;

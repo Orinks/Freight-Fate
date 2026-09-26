@@ -2064,6 +2064,51 @@ instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
+- [ ] **BLOCKER (2.0 tester release): orinks.net profile integrity export.**
+      The validator's exact save-field list must be updated from
+      `crates/ff-core/tests/profile_integrity_invariants.json` for the new
+      save fields `parked_facility`, `home_terminal_city`, and
+      `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
+      be rejected as a schema mismatch.
+
+### Career carriers (slices 2–4)
+
+Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
+("{Carrier} {City} terminal"), the hub's "parked at" rule, and the
+offerability and hiring-radius rule (`is_offerable_home_city`; regionals
+home drivers only within their radius). That rule is defined and tested but
+not yet used by the new-career picker; the start picker adopts it in slice 2.
+
+- [ ] **Slice 2: start flow places the truck at the hiring carrier's
+      terminal.** Orientation and truck assignment happen at the carrier
+      terminal in `home_terminal_city`, so a new hire's first "parked at" is
+      that terminal rather than the picked city.
+- [ ] **Slice 2: the home-base picker lists only offerable cities.** Only
+      cities where `is_offerable_home_city` is true (some carrier hires
+      there) appear in the start picker.
+
+- [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
+      is stored per carrier but not applied on the board; only the max folds
+      into the distance cap today. Slice 4 (board lane area) enforces it.
+- [ ] **The 16 regionals plus an Alaska regional.** Only Prairie Link
+      exists today. Alaska home bases stay blocked until an AK regional with
+      an Alaska terminal is in `data/carriers.json`; BC and YT stay blocked.
+- [ ] **Home-base coverage test.** Pin which map cities are offerable home
+      bases (some carrier hires there) so a carrier or map change that drops
+      coverage fails loudly instead of silently shrinking the start list.
+- [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
+      national run band.** The dispatch bias asks for short rookie loads the
+      band minimum would forbid once enforced. Revisit in slice 4.
+- [ ] **`retail_store` facility type.** Costco and Fred Meyer are pinned as
+      distribution centers today; a retail store type lets them receive as
+      stores instead.
+- [ ] **Low priority: retire or retype the ~628 synthesized "{City} Company
+      Yard" freight pins.** A yard is not a shipper or receiver; these
+      template pins still act as freight endpoints on the board.
+- [ ] **Low priority: name the fallback garage as a truck repair shop.** The
+      fallback garage borrows `yard_pin_name` for its label; it should be
+      named as a truck repair shop in that city instead.
+
 
 ### Twin parcel / STAA doubles (Track A)
 
@@ -2132,6 +2177,18 @@ LCV turnpike doubles on permitted toll roads.
       `new_york`–`albany` I-87 leg is omitted rather than treated as a
       legal turnpike-doubles lane. A Yonkers (or Exit 6A) node would be
       needed before that corridor can be offered honestly.
+- [ ] **Map debt (medium priority): Ohio Turnpike I-80 leg, Toledo through
+      the Elyria split to Youngstown or the PA line, avoiding Cleveland.** A
+      long-doubles lane. Needs an Elyria node and I-80 city-pair legs.
+      Needs a realism review before it lands.
+- [ ] **Map debt (low priority): Newburgh, NY on I-87 between NYC and
+      Albany (not on the map today).** Thruway Exit 17 is a tandem lot in a
+      distribution-center cluster and would become the downstate end for
+      turnpike doubles. Needs a realism review before it lands.
+- [ ] **Map debt (low priority): Kansas City, KS map city as the Kansas
+      Turnpike's east end,** so an I-70 Topeka–Kansas City, KS leg can exist.
+      Missouri stays outside the LCV gate. Needs a realism review before it
+      lands.
 - [x] **FIX 3: Dual hook time (landed).** A set of doubles adds a second
       hook-up (15 min) and a walk-around of both trailers and the converter
       dolly (10 min) at the shipper: 25 extra on-duty minutes, spoken at

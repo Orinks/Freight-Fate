@@ -1183,28 +1183,93 @@ fn test_active_buffs_round_trip_through_a_saved_profile() {
     });
 }
 
-#[test]
-fn test_home_terminal_city_migrates_from_current_city() {
-    use serde_json::{json, Map, Value};
-    let mut data: Map<String, Value> = json!({
+fn old_save(current_city: &str, carrier_key: &str) -> serde_json::Map<String, serde_json::Value> {
+    serde_json::json!({
         "name": "Pat",
-        "current_city": "healy_ak_us",
-        "carrier_key": "northstar",
+        "current_city": current_city,
+        "carrier_key": carrier_key,
         "version": 5
     })
     .as_object()
     .unwrap()
-    .clone();
-    // No home_terminal_city field — old save.
-    assert!(!data.contains_key("home_terminal_city"));
-    let loaded = Profile::from_dict(&data);
-    assert_eq!(
-        loaded.home_terminal_city, "nenana_ak_us",
-        "Healy migrates home to nearest real yard city"
-    );
-    assert!(loaded.needs_migration_resave);
+    .clone()
+}
 
-    data.insert("home_terminal_city".into(), Value::from("healy_ak_us"));
+#[test]
+fn test_chicago_save_migrates_home_to_carrier_terminal_city() {
+    let data = old_save("Chicago", "northstar");
+    assert!(!data.contains_key("home_terminal_city"), "old save");
     let loaded = Profile::from_dict(&data);
-    assert_eq!(loaded.home_terminal_city, "nenana_ak_us");
+    assert_eq!(loaded.home_terminal_city, "chicago_il_us");
+    assert_eq!(loaded.current_city, "Chicago", "the truck does not move");
+    assert!(loaded.needs_migration_resave);
+    let terminal = loaded
+        .carrier_home_terminal(crate::data::world::get_world())
+        .expect("northstar terminal");
+    assert_eq!(terminal.name, "Northstar Freight Lines Chicago terminal");
+}
+
+#[test]
+fn test_healy_save_migrates_home_to_carrier_nearest_terminal() {
+    use serde_json::Value;
+    // Northstar is national with one terminal: Chicago. No 250 mi pin
+    // search, no Nenana stand-in, no Healy fuel stop.
+    let mut data = old_save("healy_ak_us", "northstar");
+    let loaded = Profile::from_dict(&data);
+    assert_eq!(loaded.home_terminal_city, "chicago_il_us");
+    assert_eq!(
+        loaded.current_city, "healy_ak_us",
+        "the truck stays in Healy"
+    );
+    // A save carrying the old stand-in home is corrected the same way.
+    data.insert("home_terminal_city".into(), Value::from("nenana_ak_us"));
+    assert_eq!(
+        Profile::from_dict(&data).home_terminal_city,
+        "chicago_il_us"
+    );
+    // A regional never homes a driver outside its hiring radius: Healy is
+    // far out of Prairie Link's range, so the national fallback carrier's
+    // terminal city stands in, never KC, Omaha, or Wichita.
+    let data = old_save("healy_ak_us", "prairie_link");
+    let loaded = Profile::from_dict(&data);
+    assert_eq!(loaded.home_terminal_city, "milwaukee_wi_us");
+    // Parked in Healy away from home: the Healy travel center, not a yard.
+    let parked = loaded.parked_at(crate::data::world::get_world());
+    assert_eq!(parked.kind, crate::models::home_base::ParkedKind::PublicLot);
+    assert_eq!(parked.city_key, "healy_ak_us");
+}
+
+#[test]
+fn test_a_corrected_stale_home_is_written_back() {
+    use serde_json::Value;
+    with_data_dir(|_| {
+        let p = Profile::named_in("Stale", "Chicago");
+        let clean = Profile::from_dict(&p.to_dict());
+        assert_eq!(clean.home_terminal_city, "chicago_il_us");
+        assert!(
+            !clean.needs_migration_resave,
+            "a current home is left alone"
+        );
+        let mut d = p.to_dict();
+        d.insert("home_terminal_city".into(), Value::from("nenana_ak_us"));
+        let fixed = Profile::from_dict(&d);
+        assert_eq!(fixed.home_terminal_city, "chicago_il_us");
+        assert!(fixed.needs_migration_resave, "the correction is resaved");
+    });
+}
+
+#[test]
+fn test_home_terminal_city_round_trips_unchanged() {
+    let p = Profile::named_in("Round", "Milwaukee");
+    // Northstar (the default start) hires into its Chicago terminal.
+    assert_eq!(p.home_terminal_city, "chicago_il_us");
+    assert_eq!(p.current_city, "Milwaukee");
+    with_data_dir(|_| {
+        let mut p = p.clone();
+        p.parked_facility = "Milwaukee Dry Warehouse".to_string();
+        let back = load(&p.save().unwrap());
+        assert_eq!(back.home_terminal_city, p.home_terminal_city);
+        assert_eq!(back.parked_facility, p.parked_facility);
+        assert_eq!(back.current_city, "Milwaukee");
+    });
 }
