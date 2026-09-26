@@ -2105,6 +2105,10 @@ there, with the truck starting at that carrier's terminal.
 - [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
       national run band.** The dispatch bias asks for short rookie loads the
       band minimum would forbid once enforced. Revisit in slice 4.
+- [ ] **Port drayage into the LA/Long Beach terminals needs a TWIC card.**
+      When drayage loads are real, a load into the marine terminals
+      requires the driver to hold TWIC (Basin Harbor Drayage's port work
+      waits on it). Slice 3 plan, §9.
 - [ ] **`retail_store` facility type.** Costco and Fred Meyer are pinned as
       distribution centers today; a retail store type lets them receive as
       stores instead.
