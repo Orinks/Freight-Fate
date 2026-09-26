@@ -1237,6 +1237,27 @@ instead of a spawn point.
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
 
+### Career carriers (slices 2–4)
+
+Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
+("{Carrier} {City} terminal"), and the hub's "parked at" rule.
+
+- [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
+      is stored per carrier but not applied on the board; only the max folds
+      into the distance cap today. Slice 4 (board lane area) enforces it.
+- [ ] **The 16 regionals plus an Alaska regional.** Only Prairie Link
+      exists today. Alaska home bases stay blocked until an AK regional with
+      an Alaska terminal is in `data/carriers.json`; BC and YT stay blocked.
+- [ ] **Home-base coverage test.** Pin which map cities are offerable home
+      bases (some carrier hires there) so a carrier or map change that drops
+      coverage fails loudly instead of silently shrinking the start list.
+- [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
+      national run band.** The dispatch bias asks for short rookie loads the
+      band minimum would forbid once enforced. Revisit in slice 4.
+- [ ] **`retail_store` facility type.** Costco and Fred Meyer are pinned as
+      distribution centers today; a retail store type lets them receive as
+      stores instead.
+
 
 ### Twin parcel / STAA doubles (Track A)
 
@@ -1305,6 +1326,18 @@ not started here.
       `new_york`–`albany` I-87 leg is omitted rather than treated as a
       legal turnpike-doubles lane. A Yonkers (or Exit 6A) node would be
       needed before that corridor can be offered honestly.
+- [ ] **Map debt (medium priority): Ohio Turnpike I-80 leg, Toledo through
+      the Elyria split to Youngstown or the PA line, avoiding Cleveland.** A
+      long-doubles lane. Needs an Elyria node and I-80 city-pair legs.
+      Needs a realism review before it lands.
+- [ ] **Map debt (low priority): Newburgh, NY on I-87 between NYC and
+      Albany (not on the map today).** Thruway Exit 17 is a tandem lot in a
+      distribution-center cluster and would become the downstate end for
+      turnpike doubles. Needs a realism review before it lands.
+- [ ] **Map debt (low priority): Kansas City, KS map city as the Kansas
+      Turnpike's east end,** so an I-70 Topeka–Kansas City, KS leg can exist.
+      Missouri stays outside the LCV gate. Needs a realism review before it
+      lands.
 - [ ] **FIX 3: Dual hook time** (not started).
 - [ ] **FIX 4: Pup handling** (not started).
 - [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
