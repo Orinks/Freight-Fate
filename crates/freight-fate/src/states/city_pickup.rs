@@ -1194,9 +1194,7 @@ impl Menu for PickupFacilityState {
                 Some(mph) => ctx.settings.speed_text(mph),
                 None => "posted limit when the open road begins".to_string(),
             };
-            lines.push(format!(
-                "Speed control: paused   Open-road target: {target}"
-            ));
+            lines.push(format!("Speed control: paused. Open-road target: {target}"));
         }
         lines.push(String::new());
         for (i, item) in self.menu.items.iter().enumerate() {
