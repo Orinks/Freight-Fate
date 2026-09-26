@@ -77,6 +77,26 @@ fn test_settings_menu_cycles_hours_of_service() {
 }
 
 #[test]
+fn hos_planning_hints_row_explains_and_persists_the_opt_in() {
+    let mut app = TestApp::new();
+    assert!(!app.ctx.settings.hos_planning_hints);
+    open_settings_category(&mut app, "Difficulty and hours of service");
+    move_to::<Cat>(&mut app, "HOS planning hints");
+    assert_eq!(current_label::<Cat>(&app), "HOS planning hints: Off");
+    let help = cat_rows(&mut app, "difficulty")
+        .into_iter()
+        .find(|(label, _)| label.starts_with("HOS planning hints"))
+        .map(|(_, help)| help)
+        .unwrap();
+    assert!(help.contains("Quiet and Urgent only"), "{help}");
+    key(&mut app, Key::Return);
+    assert_eq!(current_label::<Cat>(&app), "HOS planning hints: On");
+    assert!(Settings::load().hos_planning_hints);
+    key(&mut app, Key::Left);
+    assert!(!Settings::load().hos_planning_hints);
+}
+
+#[test]
 fn test_settings_menu_cycles_lane_keeping() {
     let mut app = TestApp::new();
     assert_eq!(app.ctx.settings.lane_keeping, "partial"); // the balanced default
@@ -195,7 +215,12 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
             "Following gap",
             "Back",
         ],
-        "difficulty" => &["Driving mode", "Hours of service", "Back"],
+        "difficulty" => &[
+            "Driving mode",
+            "Hours of service",
+            "HOS planning hints",
+            "Back",
+        ],
         "world" => &[
             "Weather source",
             "Traffic source",
@@ -345,6 +370,7 @@ fn test_every_gameplay_setting_stays_reachable_after_the_split() {
     assert!(!reachable("controls", "Speed keeper"));
     assert!(reachable("difficulty", "Driving mode"));
     assert!(reachable("difficulty", "Hours of service"));
+    assert!(reachable("difficulty", "HOS planning hints"));
     // The overspeed warning lost its row: it no longer fires at speeds
     // cruise itself picks, so there is nothing to turn off.
     assert!(!rows

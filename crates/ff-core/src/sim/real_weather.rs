@@ -377,7 +377,11 @@ impl NwsFetcher {
     /// returns the first fresh observation. If every station within the walk
     /// limit is stale, the freshest of them is returned and the caller's stale
     /// handling takes over. Temperature and visibility are None when the
-    /// station reports no current value. Errors on network failure.
+    /// station reports no current value. A station that fails outright is
+    /// walked past too: NWS answers 404 for a station with no current
+    /// observation (Casa Grande's KCGZ, 2026-09-24, while KA39 and KCHD next
+    /// door reported), and one such station used to end the whole walk.
+    /// Errors only when no station in the walk answered.
     pub fn default_fetch(&self, lat: f64, lon: f64) -> Result<Observation, String> {
         let key = Self::coarse_key(lat, lon);
         let urls = self.resolve_station_urls(lat, lon)?;
@@ -390,11 +394,19 @@ impl NwsFetcher {
             .collect();
         let now = (self.wall_clock)();
         let mut freshest: Option<(f64, Observation)> = None;
+        let mut last_error = None;
         for i in order {
             let Some(url) = urls.get(i) else {
                 continue;
             };
-            let parsed = parse_observation(&self.get_json(url).map_err(|e| e.message)?)?;
+            let fetched = self.get_json(url).map_err(|e| e.message);
+            let parsed = match fetched.and_then(|doc| parse_observation(&doc)) {
+                Ok(parsed) => parsed,
+                Err(error) => {
+                    last_error = Some(error);
+                    continue;
+                }
+            };
             // No timestamp reads as current: the worker treats it as now.
             let age_s = parsed.observed_at.map(|observed| now - observed);
             if age_s.is_none_or(|age| age <= OBSERVATION_MAX_AGE_S) {
@@ -408,7 +420,7 @@ impl NwsFetcher {
         }
         freshest
             .map(|(_, parsed)| parsed)
-            .ok_or_else(|| "no station answered".to_string())
+            .ok_or_else(|| last_error.unwrap_or_else(|| "no station answered".to_string()))
     }
 }
 
@@ -612,12 +624,13 @@ impl RealWeatherProvider {
     ///
     /// Lets callers tell a still-loading first fetch (hold steady, no warm-up
     /// flicker) apart from a genuine offline state (fall back to simulated
-    /// weather). False while a request is in flight or data is cached.
+    /// weather). False while data is cached or the first request is in
+    /// flight. A retry after a failure stays unavailable while it runs: the
+    /// player is still on simulated weather, and reading the retry as
+    /// "loading" flipped the source every minute, re-announcing the fallback
+    /// after each failed retry (agent drive, 2026-09-24).
     pub fn unavailable(&self, city: &str) -> bool {
         let inner = lock_unpoisoned(&self.ctx.inner);
-        if inner.inflight.contains(city) {
-            return false;
-        }
         if Self::entry_for(&inner, city).is_some_and(|entry| Self::usable(&self.ctx, entry)) {
             return false;
         }

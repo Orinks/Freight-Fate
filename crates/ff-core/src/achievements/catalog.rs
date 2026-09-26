@@ -1,9 +1,9 @@
 //! The achievement catalog: every badge and category. Originally generated
 //! from `src/freight_fate/achievements.py`; since the Python gameplay
-//! mirror retired (2026-08-29) this file is the source of truth, and new
-//! badges are added here AND to the Python module (whose id list still
-//! feeds the invariants export). The digest test pins the content against
-//! accidental edits -- update it deliberately with each catalog change.
+//! mirror retired (2026-08-29) this file is the source of truth, and the
+//! `ff-invariants` exporter reads it for the server's copy. The digest test
+//! pins the content against accidental edits -- update it deliberately with
+//! each catalog change, then regenerate the invariants export.
 //!
 //! Copy note (from the Python source): each badge has a specific
 //! inspiration, but player-facing text uses song-title-level allusions and
@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "afd69d7a9418d2e80c02235fded66a0a0d5f2e7c72c434d3b629d7831f986b03";
+pub const CATALOG_DIGEST: &str = "ef5b9f75da0d37c75db0a57c0f1dd7c06793d2924955e2f966d9163c920c3c45";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -34,7 +34,7 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
     AchievementCategory {
         id: "road",
         title: "Out on the Road",
-        description: "Clean runs, hard climbs, and the everyday craft of hauling freight.",
+        description: "Clean runs, hard climbs, and the everyday work of hauling freight.",
     },
     AchievementCategory {
         id: "working_day",
@@ -44,22 +44,22 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
     AchievementCategory {
         id: "career",
         title: "Career and Rank",
-        description: "Levels, money, and trucks -- the long climb from rookie to owner-operator.",
+        description: "Levels, money, and trucks -- the long climb from hire to owner-operator.",
     },
     AchievementCategory {
         id: "radio_songs",
         title: "The Dial and Song Towns",
-        description: "Stations chased down the dial, and the towns the old songs already knew.",
+        description: "Stations you catch on the dial, and the towns those songs put on the map.",
     },
     AchievementCategory {
         id: "weather_seasons",
         title: "Weather and the Calendar",
-        description: "Rain, snow, fog, and the seasons that turned while you kept driving.",
+        description: "Rain, snow, fog, and the seasons while you kept driving.",
     },
     AchievementCategory {
         id: "places",
         title: "Places on the Map",
-        description: "Cities, states, and regions where your freight found a home.",
+        description: "Cities, states, and regions you hauled into.",
     },
     AchievementCategory {
         id: "hidden",
@@ -922,7 +922,7 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
     Achievement {
         id: "weather_collector",
         name: "Every Sky in the Logbook",
-        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did.",
+        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, freezing rain, fog, and wind. None of it lasted; you did.",
         category: "weather_seasons",
         inspiration: "Waylon Jennings & Jessi Colter - Storms Never Last",
         hidden: false,

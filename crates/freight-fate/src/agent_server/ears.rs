@@ -19,6 +19,14 @@ pub struct Ears {
     road_noise_mps: Option<f64>,
     /// The alert currently held, so a per-frame re-assert is heard once.
     held_alert: Option<String>,
+    /// Where the engine and the road bed sit in the stereo field right now.
+    /// The pan lines above report a lean only when it moves a step, so after
+    /// a quiet stretch an agent steering by ear did not know where it stood
+    /// -- a driver hears the pan continuously -- and steered off old news:
+    /// with lane keeping off, even in lockstep, the truck swung lane to lane
+    /// and left the pavement (agent drive, 2026-09-23).
+    engine_lean: i32,
+    road_bed_lean: Option<i32>,
 }
 
 pub type SharedEars = Rc<RefCell<Ears>>;
@@ -63,6 +71,10 @@ fn pan_step_text(step: i32) -> String {
 }
 
 // -- the speech tee -------------------------------------------------------------------
+
+/// How an interrupting driving-channel line starts in the ears: the cab
+/// cutting in with something to answer now (`wait_for` stops on it).
+pub(super) const CAB_CUT_IN: &str = "[spoken:event] (interrupting) ";
 
 /// Passes every call to the real sink (the words still reach the screen
 /// reader) while recording what was said.
@@ -207,6 +219,9 @@ impl TeeAudio {
     fn loop_stopped(&mut self, channel: u32) {
         self.loop_keys.remove(&channel);
         self.loop_pan_steps.remove(&channel);
+        if channel == CH_ROAD {
+            self.ears.borrow_mut().road_bed_lean = None;
+        }
     }
 }
 
@@ -292,11 +307,15 @@ impl Audio for TeeAudio {
         if self.loop_pan_steps.insert(channel, step) != Some(step) {
             self.hear(format!("[bed] {key} pans {}", pan_step_text(step)));
         }
+        if channel == CH_ROAD {
+            self.ears.borrow_mut().road_bed_lean = Some(step);
+        }
         self.inner.set_loop_pan(channel, pan);
     }
 
     fn set_engine_pan(&mut self, pan: f64) {
         let step = pan_step(pan);
+        self.ears.borrow_mut().engine_lean = step;
         if step != self.engine_pan_step {
             self.engine_pan_step = step;
             self.hear(format!("[engine] pans {}", pan_step_text(step)));
@@ -543,6 +562,14 @@ pub(super) fn drain_ears(ears: &SharedEars) -> String {
                 "[road] rolling at about {:.0} miles per hour by ear",
                 mps * 2.236_936
             ));
+            // Where the two leans stand at this moment, heard or not.
+            let bed = e
+                .road_bed_lean
+                .map_or_else(|| "silent".to_string(), pan_step_text);
+            lines.push(format!(
+                "[now] engine lean {}, road bed {bed}",
+                pan_step_text(e.engine_lean)
+            ));
         }
     }
     if lines.is_empty() {
@@ -622,6 +649,36 @@ mod tests {
     }
 
     #[test]
+    fn every_listen_says_where_the_leans_stand_now() {
+        // A lean held steady says nothing, so after a quiet stretch an agent
+        // steering by ear did not know where it stood and steered off old
+        // news (agent drive with lane keeping off, 2026-09-23). Each listen
+        // ends with where both stand, whether they moved or not.
+        let ears = Ears::shared();
+        {
+            let mut audio = tee_audio(&ears);
+            audio.set_road_noise(25.0);
+            audio.set_loop_pan(CH_ROAD, 0.26);
+            audio.set_engine_pan(-0.5);
+        }
+        let first = drain_ears(&ears);
+        assert!(
+            first.contains("[now] engine lean left 2, road bed right 1"),
+            "{first}"
+        );
+        {
+            let mut audio = tee_audio(&ears);
+            audio.set_road_noise(25.0);
+        }
+        let quiet = drain_ears(&ears);
+        assert!(!quiet.contains("[engine] pans"), "{quiet}");
+        assert!(
+            quiet.contains("[now] engine lean left 2, road bed right 1"),
+            "held steady, the lean is still reported: {quiet}"
+        );
+    }
+
+    #[test]
     fn a_bed_that_stops_forgets_its_lean_and_a_pan_with_no_bed_is_not_heard() {
         // `loop_pan_steps` was never cleared with `loop_keys`, so a bed that
         // stopped leaning left and came back centred said nothing about it,
@@ -664,6 +721,21 @@ mod tests {
             3,
             "{heard}"
         );
+    }
+
+    #[test]
+    fn only_an_interrupting_cab_line_reads_as_cutting_in() {
+        let ears = Ears::shared();
+        let mut tee = TeeSpeech {
+            inner: Box::new(crate::speech::capture::NullSpeech),
+            ears: Rc::clone(&ears),
+        };
+        tee.say_event("Exit lane opening. Steer right into it.", true);
+        tee.say_event("Billboard: truck parking.", false);
+        tee.say("Speed limit 60 miles per hour.", true);
+        let lines = ears.borrow().lines.clone();
+        let cut: Vec<bool> = lines.iter().map(|l| l.starts_with(CAB_CUT_IN)).collect();
+        assert_eq!(cut, vec![true, false, false], "{lines:#?}");
     }
 
     #[test]

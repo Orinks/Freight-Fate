@@ -111,6 +111,13 @@ code, in the same change:
 - Discovering follow-up work worth doing (deferred wiring, a needed data
   re-sweep, a known gap): record it as an unchecked bullet rather than
   leaving it only in commit messages or session memory.
+- The release line's open work lives in two lists (owner rule 2026-09-24).
+  "Release gate" is fixed: a new finding goes there only if it costs the
+  drive (tier 1 under "Working with the owner" below). Everything else goes
+  to "Found along the way" by default. The owner can promote any item. Keep
+  the detail in the dated section, marked "(Release gate)" or "(Found along
+  the way)", with a one-line checkbox in the list; landing a gate item ticks
+  it in the gate.
 
 ## Commands
 
@@ -162,10 +169,14 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   build is shared). Integration tests live in `crates/<crate>/tests/it/*.rs`,
   wired in through that directory's `main.rs` -- one test binary named `it`
   per crate, deliberately, so add a `mod` line there rather than a new
-  top-level file. The three exceptions: `crates/ff-core/tests/data_baked.rs`
+  top-level file. The exceptions: `crates/ff-core/tests/data_baked.rs`
   and `data_map_correction.rs` each point the process at a different data
   root, and `crates/freight-fate/tests/classic_startup.rs` needs a process
   where the 1.5 classics are not yet registered, so each keeps its own binary.
+  `crates/freight-fate/tests/agent_server.rs` is agent tooling, not the game:
+  `test = false` in the crate's Cargo.toml keeps it out of a plain
+  `cargo test`, so run it by name (`cargo test -p freight-fate --test
+  agent_server`) after touching the agent server. CI runs it as its own step.
 - One test: `cargo test -p freight-fate --test it <name_filter> -- --nocapture`
   (`--test it` skips the unit-test and doc-test binaries; the filter is a
   substring of the test path).
@@ -200,13 +211,21 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   touches the operator's real settings, saves or keyring.
 - Agent-server testing: run `cargo run -p freight-fate --bin freightfate --
   --agent-server` when live gameplay verification is authorized. It provides
-  MCP tools over standard input/output. Use `listen`, `menu`, `press`,
+  MCP tools over standard input/output. It is the `agent-server` Cargo
+  feature, on by default and left out of player builds
+  (`tools/build_release.py` builds with `--no-default-features`), so a
+  packaged build in `target/release` has no agent server until the next
+  plain `cargo build`. Use `listen`, `menu`, `press`,
   `select`, `pedal`, `hold`, `release`, and `wait_for` to play one sandboxed
   game through the normal controls. `scenario` puts the sandbox career in
   any situation first (city, level, business status, cash, credentials,
   clock, fuel, damage, rest, seeds, any setting) and reopens the terminal;
   `start_at` stages a drive at a road feature. Neither is limited: the
-  sandbox is a throwaway copy. Check spoken readouts and event output
+  sandbox is a throwaway copy. `lockstep` (on) freezes the world between
+  tool calls, so time passes only inside `wait`, `pedal` and `wait_for`.
+  Use it wherever a round trip would cost road, such as steering with lane
+  keeping off or braking for a hazard. Leave it off when the owner is
+  driving alongside. Check spoken readouts and event output
   for the changed behavior, then end the session with `quit_game`. Treat
   `observe` as diagnostic state, and record any information the driver needed
   but could not hear. By default the window is minimized and the operator's
@@ -302,9 +321,12 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   agent a player's capabilities only -- keys in through the normal input
   seam, ears out (both speech channels plus every earcon and cue) -- in the
   audited playtest sandbox, never against the owner's careers. The one
-  exception is `--online`, only when the owner asks for a site check: its
-  own `saves-agent-online` directory, no careers copied in, the real driver
-  identity, cloud backup on, presence and Mastodon off.
+  exception is `--staging`, only when the owner asks for a site check: its
+  own `saves-agent-staging` directory, no careers and no identity copied in,
+  its own driver on the staging site (dev.orinks.net; the owner enters its
+  spoken code there the first time), cloud backup on, presence and Mastodon
+  off. No agent session ever reaches production: `--online`, which carried
+  the real driver identity, was removed on 2026-09-25.
 
 ## World and route data
 

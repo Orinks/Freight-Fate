@@ -98,7 +98,9 @@ fn the_first_play_call_is_what_wakes_the_game() {
 }
 
 #[test]
-fn quitting_before_the_game_exists_needs_no_game() {
+fn quitting_before_the_game_exists_ends_the_server() {
+    // An idle server still holds the release executable open, so a quit with
+    // no game up has to end the process too, not wait for the next call.
     let script = [call(1, "quit_game", "{}"), call(2, "listen", "{}")].join("\n");
     let (tx, rx) = mpsc::channel();
     let server = std::thread::spawn(move || {
@@ -107,19 +109,24 @@ fn quitting_before_the_game_exists_needs_no_game() {
         out
     });
 
-    let request = await_play_request(&rx).expect("the listen is the first play request");
-    assert!(matches!(request.command(), Command::Listen));
-    request.answer(Ok("heard".to_string()));
+    assert!(
+        await_play_request(&rx).is_none(),
+        "a quit with no game ends the server instead of booting one"
+    );
 
     let answered = results(&server.join().unwrap());
+    assert_eq!(
+        answered.len(),
+        1,
+        "nothing after the quit is read: {answered:?}"
+    );
     let quit_text = answered[0]["result"]["content"][0]["text"]
         .as_str()
         .unwrap_or_default();
     assert!(
-        quit_text.contains("not running"),
-        "quit with no game is answered, not booted: {quit_text:?}"
+        quit_text.contains("server has ended"),
+        "the quit is answered before the process goes: {quit_text:?}"
     );
-    assert_eq!(answered[1]["result"]["content"][0]["text"], "heard");
 }
 
 #[test]
@@ -402,6 +409,52 @@ fn operator_keys_parse_as_a_boolean_and_refuse_anything_else() {
 }
 
 #[test]
+fn lockstep_holds_the_world_between_calls_and_lets_a_wait_run() {
+    // The agent's thinking time is a round trip of a second or two; with
+    // lane keeping off that was the truck across half a lane before its
+    // answer to a cue landed (agent drive, 2026-09-23). Lockstep holds the
+    // world whenever no call is working, and a wait still runs its frames.
+    let script = [
+        call(1, "lockstep", r#"{"on":true}"#),
+        call(2, "wait", r#"{"seconds":0.1}"#),
+    ]
+    .join("\n");
+    let mut app = TestApp::new();
+    let (tx, server, mut agent) = wake(script);
+    let mut held = Vec::new();
+    app.run_with_player_input(Some(600), |input, _dt| {
+        let running = agent.step(input, FRAME);
+        held.push(input.world_is_held());
+        running
+    });
+    drop(tx);
+    let answered = results(&server.join().unwrap());
+    assert_eq!(answered.len(), 2, "both calls answered: {answered:?}");
+    assert!(held[0], "idle after switching on: the world waits");
+    let ran = held.iter().filter(|h| !**h).count();
+    assert!(
+        (5..=7).contains(&ran),
+        "a 0.1 s wait runs about six frames; ran {ran}"
+    );
+    assert!(held[held.len() - 1], "and the world waits again after it");
+}
+
+#[test]
+fn lockstep_parses_as_a_boolean_and_is_listed() {
+    let on = |args: &str| {
+        let args = serde_json::from_str(args).unwrap();
+        match build_command("lockstep", &args) {
+            Ok(Command::Lockstep { on }) => Ok(on),
+            Ok(_) => panic!("not a lockstep command"),
+            Err(text) => Err(text),
+        }
+    };
+    assert_eq!(on(r#"{"on":true}"#), Ok(true));
+    assert_eq!(on(r#"{"on":false}"#), Ok(false));
+    assert!(on(r#"{}"#).is_err());
+}
+
+#[test]
 fn pedal_and_wait_for_refuse_a_missing_duration() {
     let args = serde_json::from_str(r#"{"key":"up"}"#).unwrap();
     assert!(build_command("pedal", &args).is_err());
@@ -431,6 +484,7 @@ fn the_tool_list_carries_the_driving_tools() {
         "cruise",
         "status",
         "operator_keys",
+        "lockstep",
     ] {
         assert!(names.iter().any(|n| n == name), "{name} in {names:?}");
     }

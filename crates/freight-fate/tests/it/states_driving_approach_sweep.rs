@@ -34,8 +34,7 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
-    DOCKING_MAX_MPH, FACILITY_LANE_ROLL_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S,
-    RED_STOP_MPH,
+    DOCKING_MAX_MPH, FACILITY_LANE_ROLL_MPH, RAMP_ACCESS_MI, RED_STOP_MPH,
 };
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
@@ -293,6 +292,13 @@ fn regrade_chain(d: &mut DrivingState, grade_pct: f64) {
     d.trip.route = Route::from_legs(cities, legs);
 }
 
+/// Take the traffic controls off the chain under the truck.
+pub fn clear_street_controls(d: &mut DrivingState) {
+    for leg in d.trip.route.legs.iter_mut() {
+        std::sync::Arc::make_mut(leg).local_controls.clear();
+    }
+}
+
 /// [`arrive`], with the facility's street chain re-laid on a constant grade.
 pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> Arrival {
     arrive_with(destination, chain_grade_pct, None, 18.0)
@@ -383,7 +389,7 @@ fn arrive_with(
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true; // signalled for it, like a driver
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -446,6 +452,10 @@ fn arrive_with(
         }
         let now_on_chain = harness.read_drive(|d| d.surface_chain);
         if now_on_chain && !on_chain {
+            // The streets' own lights and signs have an assist of their own
+            // and their own suite (`states_driving_street_controls.rs`), the
+            // way the ramp's terminal does: cleared for the same reason.
+            harness.with_drive(|d, _| clear_street_controls(d));
             if let Some(grade_pct) = chain_grade_pct {
                 harness.with_drive(move |d, _| regrade_chain(d, grade_pct));
             }
@@ -773,7 +783,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     let exit_at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = exit_at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -786,7 +796,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
         d.ramp_terminal_done = false;
         d.ramp_light_announced = true;
         d.ramp_light_last_phase = "green".to_string();
-        d.ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 2.0;
+        d.ramp_light_offset_s = d.ramp_light_red_s() + d.ramp_light_green_s() - 2.0;
         d.ramp_light_timer = 0.0;
         d.ramp_waiting_at_light = false;
         d.ramp_assist_said = false;
@@ -826,7 +836,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
                 d.ramp_light_offset_s = 1.0;
                 d.ramp_light_timer = 0.0;
             } else if waiting {
-                d.ramp_light_offset_s = RAMP_LIGHT_RED_S;
+                d.ramp_light_offset_s = d.ramp_light_red_s();
                 d.ramp_light_timer = 0.0;
                 d.ramp_light_last_phase = "red".to_string();
             }
@@ -880,8 +890,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     assert!(
         !heard
             .iter()
-            .any(|line| line.contains("Pull ahead to the entrance")
-                || line.contains("taking the pedals")),
+            .any(|line| line.contains("Pull ahead ") || line.contains("taking the pedals")),
         "{}",
         harness.transcript_text()
     );
@@ -985,7 +994,7 @@ fn arrive_from_the_sign(
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -1105,7 +1114,7 @@ fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
     println!("{}", release.report(destination));
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you to the entrance."),
+        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1185,7 +1194,7 @@ fn test_with_the_assist_off_the_clear_sign_still_hands_the_last_stretch_to_the_d
     let release = arrive_from_the_sign(destination, false, false);
     assert!(release.stopped_at_sign, "{}", release.report(destination));
     assert!(
-        release.said("Stopped at the sign. Clear; pull ahead to the entrance."),
+        release.said("Stopped at the sign. Clear; pull ahead onto the streets."),
         "{}",
         release.report(destination)
     );
@@ -1212,7 +1221,11 @@ fn test_the_drivers_brake_cancels_the_automatic_pull_ahead() {
         println!("{}", release.report(destination));
         assert!(release.moved_off_alone, "{}", release.report(destination));
         assert!(
-            release.said("Facility stopping assistance released; pull ahead to the entrance."),
+            release.said(if destination.chain {
+                "Facility stopping assistance released; pull ahead onto the streets."
+            } else {
+                "Facility stopping assistance released; pull ahead to the entrance."
+            }),
             "{}",
             release.report(destination)
         );

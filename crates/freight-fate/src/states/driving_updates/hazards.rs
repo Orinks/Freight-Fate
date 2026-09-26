@@ -280,9 +280,24 @@ impl DrivingState {
     /// box gives them: brake, and the transmission holds a lower gear for
     /// them (`auto_shift` picks the tallest gear landing in the 1050-1700
     /// band while braking, and never upshifts off the pedal).
+    ///
+    /// And in terms of the state they are in: with the jake already on (or
+    /// the automatic jake armed), J turns it OFF, so "Set the engine brake
+    /// with J" told the driver to switch off the thing the hill needs (agent
+    /// drive, Silverthorne to Edwards, 2026-09-24). Then the jake clause
+    /// goes, and on an automatic nothing is left to advise.
     pub fn descend_advice(&self, ctx: &GameContext) -> String {
+        let jake_set = self.trip.truck.engine_brake() || self.auto_jake;
+        let automatic = self.trip.truck.transmission.automatic;
+        if jake_set {
+            return if automatic {
+                String::new()
+            } else {
+                "Pick your gear before it starts.".to_string()
+            };
+        }
         let jake = ctx.control_hint("engine_brake");
-        if self.trip.truck.transmission.automatic {
+        if automatic {
             return format!("Set the engine brake with {jake} before it starts.");
         }
         format!("Pick your gear and set the engine brake with {jake} before it starts.")
@@ -292,7 +307,23 @@ impl DrivingState {
     ///
     /// Sampled at the stride the baked grade segments use, so the answer is
     /// the run the road data actually has rather than an interpolation of it.
+    ///
+    /// The ONE length a steep grade has. The advisory, the G key's "running
+    /// 2 miles" for the grade ahead and its "for another" for the grade
+    /// underneath all read it here. The G key used to measure until the
+    /// road stopped going downhill at all, so one seven percent pitch was
+    /// "running 2 miles" from the top and "for another 10 miles" a minute
+    /// later, on it (agent drive into Denver, 2026-09-24): the gentle grade
+    /// below it was being counted as the seven percent.
     pub fn grade_run_mi(&self, start_mi: f64, sign: i32) -> f64 {
+        self.grade_run_over_mi(start_mi, sign, GRADE_WARN_CLEAR_PCT)
+    }
+
+    /// [`Self::grade_run_mi`] with the floor named: the run lasts while the
+    /// grade holds at least `floor_pct` in the direction of `sign`. Only a
+    /// grade already gentler than the steep line's release is measured on a
+    /// lower floor, and it has no steep run to disagree with.
+    pub fn grade_run_over_mi(&self, start_mi: f64, sign: i32, floor_pct: f64) -> f64 {
         let mut run = 0.0;
         let mut probe = start_mi;
         while run < GRADE_WARN_SCAN_MI {
@@ -300,7 +331,7 @@ impl DrivingState {
             if probe >= self.trip.total_miles() {
                 break;
             }
-            if self.trip.grade_at(probe) * sign as f64 * 100.0 < GRADE_WARN_CLEAR_PCT {
+            if self.trip.grade_at(probe) * sign as f64 * 100.0 < floor_pct {
                 break;
             }
             run += GRADE_WARN_STEP_MI;
@@ -395,7 +426,9 @@ impl DrivingState {
             format!(
                 "{:.1} percent {direction} ahead{length}. {advice}",
                 pct.abs()
-            ),
+            )
+            .trim_end()
+            .to_string(),
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation),

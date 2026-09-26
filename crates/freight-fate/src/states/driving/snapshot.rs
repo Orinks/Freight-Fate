@@ -4,6 +4,11 @@
 
 use serde_json::{json, Map, Value};
 
+use ff_core::models::jobs::{
+    remaining_route_hos_plan, ACTIVE_TRIP_FAIRNESS_SLACK, DEADLINE_DISPATCH_MIN_SLACK_H,
+};
+use ff_core::pyfmt::round_py_n;
+use ff_core::sim::hos::limits;
 use ff_core::sim::hos::HosClock;
 
 use crate::app::GameContext;
@@ -14,7 +19,7 @@ use super::DrivingState;
 /// Bumped when the meaning of a snapshot's deadline changes. A snapshot
 /// written under an older model gets the one-time fair-deadline floor on
 /// resume; one at the current model keeps the deadline exactly as saved.
-pub const ACTIVE_TRIP_DEADLINE_MODEL: i64 = 1;
+pub const ACTIVE_TRIP_DEADLINE_MODEL: i64 = 2;
 
 fn f(data: &Map<String, Value>, key: &str, fallback: f64) -> f64 {
     data.get(key).and_then(Value::as_f64).unwrap_or(fallback)
@@ -190,7 +195,13 @@ impl DrivingState {
         out.insert("trailer_repaired".to_string(), json!(self.trailer_repaired));
         out.insert("trip_seed".to_string(), json!(self.trip_seed));
         out.insert("start_hour".to_string(), json!(self.trip.start_hour));
-        out.insert("position_mi".to_string(), json!(self.trip.position_mi));
+        // On a road stop's streets the saved place is the highway's, at the
+        // stop's exit, where a ramp in progress is saved too.
+        let position_mi = match (&self.stop_chain, &self.highway_trip) {
+            (Some(_), Some(highway)) => highway.position_mi,
+            _ => self.trip.position_mi,
+        };
+        out.insert("position_mi".to_string(), json!(position_mi));
         out.insert("game_minutes".to_string(), json!(self.trip.game_minutes));
         out.insert("toll_charges".to_string(), json!(tolls));
         out.insert("start_damage".to_string(), json!(self.start_damage));
@@ -290,6 +301,10 @@ impl DrivingState {
             "selected_stop_key".to_string(),
             json!(self.selected_stop_key),
         );
+        out.insert(
+            "selected_stop_break".to_string(),
+            json!(self.selected_stop_break),
+        );
         // Kept for a save opened by an older build, which knows only the name.
         out.insert(
             "planned_stop".to_string(),
@@ -350,7 +365,8 @@ impl DrivingState {
         // saving at a stop and continuing. Snapshots now carry the deadline
         // model they were written under, so the floor is applied once to a
         // save that predates the marker and never again.
-        if i(data, "deadline_model", 0) < ACTIVE_TRIP_DEADLINE_MODEL {
+        let deadline_model = i(data, "deadline_model", 0);
+        if deadline_model < 1 {
             job.deadline_game_h = fair_active_deadline(
                 &job,
                 &route,
@@ -358,6 +374,30 @@ impl DrivingState {
                 position_mi,
                 Some(ctx.world),
             );
+        }
+        // Version 1 snapshots predate the loaded-departure HOS reconciliation.
+        // Repair only a still-on-time delivery whose remaining legal route
+        // requires sleep and will overrun its saved deadline. This runs once;
+        // the resume owner persists the new marker immediately.
+        if deadline_model < ACTIVE_TRIP_DEADLINE_MODEL
+            && phase == DRIVE_PHASE_DELIVERY
+            && limits(&ctx.settings.hos_mode).is_some()
+        {
+            if let Some(clock) = ctx.profile.as_ref().map(|p| &p.hos) {
+                let hours_used = game_minutes / 60.0;
+                let hours_left = job.deadline_game_h - hours_used;
+                if hours_left > 0.0 {
+                    let legal =
+                        remaining_route_hos_plan(&route, position_mi, Some(ctx.world), clock);
+                    if legal.sleeps > 0 && legal.total_h() > hours_left {
+                        let floor = hours_used
+                            + legal.total_h() * ACTIVE_TRIP_FAIRNESS_SLACK
+                            + DEADLINE_DISPATCH_MIN_SLACK_H;
+                        job.deadline_game_h = round_py_n(job.deadline_game_h.max(floor), 1);
+                        job.deadline_covers_rest = true;
+                    }
+                }
+            }
         }
 
         let trip_seed = data.get("trip_seed").and_then(Value::as_i64)?;
@@ -450,6 +490,8 @@ impl DrivingState {
             (Some(selected), Some(planned)) if selected == planned => selected_key,
             _ => None,
         };
+        state.selected_stop_break =
+            state.selected_stop_key.is_some() && b(data, "selected_stop_break", false);
         let tolls: Vec<Value> = data
             .get("toll_charges")
             .and_then(Value::as_array)

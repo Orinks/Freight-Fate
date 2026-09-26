@@ -27,10 +27,9 @@ won't have it -- that's fine, the tool falls back to encoding every track
 from the shipped Ogg. Point ``FREIGHT_FATE_WAV_MASTERS`` at your own copy of
 the zip to get the WAV path instead.
 
-Usage: ``uv run --with av python tools/encode_music_opus.py`` (``av`` is not
-a project dependency, so it's supplied per-invocation rather than pinned in
-pyproject). Add ``--write`` to actually encode; without it this only prints
-the plan.
+Usage: ``uv run --group tooling python tools/encode_music_opus.py`` (``av``
+lives in the ``tooling`` dependency group). Add ``--write`` to actually
+encode; without it this only prints the plan.
 """
 
 from __future__ import annotations

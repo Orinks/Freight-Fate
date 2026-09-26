@@ -4,11 +4,14 @@
 //! and one process, with the tests running as parallel threads inside it.
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
-//! them. A new test file needs a line here. The one exception,
-//! `tests/classic_startup.rs`, needs a process nothing has touched yet.
+//! them. A new test file needs a line here. The exceptions:
+//! `tests/classic_startup.rs` needs a process nothing has touched yet, and
+//! `tests/agent_server.rs` tests agent tooling rather than the game, so it
+//! is its own binary that a plain `cargo test` leaves out (see Cargo.toml).
 
 mod account_achievements;
 mod audio_support;
+mod badge_moments_support;
 mod dispatch_relay;
 mod live_fuel_prices;
 mod live_weather_alerts;
@@ -22,7 +25,6 @@ mod transcript_cruise_support;
 mod trucking_weight_braking;
 
 mod adversarial;
-mod agent_server;
 mod app_achievements;
 mod app_controller;
 mod app_controls_reference;
@@ -45,6 +47,12 @@ mod audio_radio_now_playing;
 mod audio_sound_pack;
 mod audio_speech_audio;
 mod audio_speech_ducking;
+mod badge_moments_career;
+mod badge_moments_places;
+mod badge_moments_road;
+mod badge_moments_runs;
+mod badge_moments_stops;
+mod badge_moments_terminal;
 mod bench_drive;
 mod browser_guard;
 mod cloud_backup_review;
@@ -61,6 +69,7 @@ mod online_profile_switch;
 mod playtest_harness;
 mod playtest_road_departure;
 mod playtest_road_destination;
+mod playtest_road_settle;
 mod playtest_sandbox;
 mod playtest_scenario;
 mod playtest_state_lines;
@@ -82,15 +91,20 @@ mod states_driver_profile;
 mod states_drivers_board;
 mod states_driving_air_brakes;
 mod states_driving_approach_sweep;
+mod states_driving_armed_exit_readout;
 mod states_driving_arrival_gate;
+mod states_driving_bend_rollover_sweep;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
+mod states_driving_cat_scale;
 mod states_driving_chain_law;
 mod states_driving_controls;
 mod states_driving_core;
 mod states_driving_damage;
+mod states_driving_decel_lane;
 mod states_driving_departure_merge;
 mod states_driving_departure_sweep;
+mod states_driving_descent_live;
 mod states_driving_descent_truth;
 mod states_driving_destination_exit;
 mod states_driving_direction;
@@ -100,6 +114,9 @@ mod states_driving_engine_audio;
 mod states_driving_engine_lean;
 mod states_driving_events;
 mod states_driving_events_chains;
+mod states_driving_exit_assist_cases;
+mod states_driving_exit_assist_matrix;
+mod states_driving_exit_lane;
 mod states_driving_exit_windows;
 mod states_driving_exits;
 mod states_driving_facility;
@@ -109,6 +126,7 @@ mod states_driving_hazard_dodge;
 mod states_driving_hazards;
 mod states_driving_help_text;
 mod states_driving_hos;
+mod states_driving_hos_hints;
 mod states_driving_jake_line;
 mod states_driving_jake_sweep;
 mod states_driving_lane_guidance;
@@ -119,12 +137,15 @@ mod states_driving_menus_roadside;
 mod states_driving_menus_tablet;
 mod states_driving_multilane_speech;
 mod states_driving_ramps;
+mod states_driving_rest_choice_scenarios;
 mod states_driving_retarder;
 mod states_driving_road;
+mod states_driving_rollover;
 mod states_driving_speech_ladder;
 mod states_driving_speed_keeper_sweep;
 mod states_driving_status_screens;
 mod states_driving_stop_menus;
+mod states_driving_street_controls;
 mod states_driving_traffic_rate;
 mod states_driving_trip_resume;
 mod states_driving_troopers;
@@ -168,5 +189,7 @@ mod updater;
 mod windows_subsystem;
 
 mod states_ramp_assist_control;
+mod states_ramp_signal_timing;
 
 mod states_driving_hos_planning;
+mod states_driving_hos_rest_stretch;

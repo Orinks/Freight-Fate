@@ -148,6 +148,45 @@ fn a_facility_with_an_early_corner(world: &'static World) -> Option<(String, Str
     None
 }
 
+#[test]
+fn test_the_route_readout_at_a_ramp_with_streets_after_it_counts_to_the_gate() {
+    // Agent drive, exit 286A into Abilene, 2026-09-23: stopped at the ramp's
+    // stop sign, R said "50 feet to the Abilene metro freight market" with
+    // five miles of streets still to drive to the gate.
+    let world = get_world();
+    let Some((city, location)) = a_facility_with_an_early_corner(world) else {
+        return; // no baked chain facility to stand in for Abilene
+    };
+    let streets = world
+        .facility_approach_route(&city, &location)
+        .expect("a chain route")
+        .miles();
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.job.destination = city;
+    d.job.destination_location = location;
+    d.destination_chain_ahead = None;
+    d.destination_exit_taken = true;
+    let mut stop = ff_core::sim::trip_models::RoadStop::new(
+        "destination",
+        d.trip.position_mi,
+        "delivery_destination",
+    );
+    stop.interchange_mi = None;
+    d.ramp_stop = Some(stop);
+    d.ramp_mi = Some(0.01);
+    app.clear_speech();
+
+    d.speak_route_status(&mut app.ctx);
+
+    let line = app.main_lines().pop().expect("R said nothing");
+    assert!(line.contains("to the gate at"), "{line}");
+    assert!(
+        !line.contains("feet") || streets < 0.1,
+        "the ramp's end read as the destination: {line}"
+    );
+}
+
 /// `_at_gate`: put the truck right at the finished route end, rolling at
 /// `mph`.
 fn at_gate(d: &mut DrivingState, mph: f64, warned: bool) {
@@ -361,6 +400,33 @@ fn test_pre_gate_warning_names_a_target_speed() {
     assert!(d.gate_grace_s > 0.0);
     d.check_gate_approach_warning(&mut app.ctx, 0.016);
     assert_eq!(app.event_lines().len(), 1); // said once, not every frame
+}
+
+/// Agent drive A (2026-09-24): "Facility gate in 0.2 miles. Slow to 15
+/// miles per hour." and the warning tone, while the keeper already held 15
+/// and facility stopping assistance was on. An assist doing the job is not
+/// told to do it.
+#[test]
+fn test_no_pre_gate_warning_when_an_assist_has_the_gate() {
+    for assist in [true, false] {
+        let mut app = TestApp::new();
+        let mut d = a_drive(&mut app);
+        app.ctx.settings.destination_approach_assist = assist;
+        if !assist {
+            // The keeper, already holding the gate's number.
+            d.keeper_mph = Some(25.0);
+            d.keeper_held_mph = Some(15.0);
+        }
+        app.clear_speech();
+        d.destination_exit_taken = true;
+        d.trip.position_mi = d.trip.total_miles() - 0.3;
+        d.trip.truck.engine_on = true;
+        d.trip.truck.velocity_mps = 16.0 / 2.23694;
+        d.check_gate_approach_warning(&mut app.ctx, 0.016);
+        assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
+        drop(d);
+        drop(app);
+    }
 }
 
 #[test]
@@ -862,7 +928,7 @@ fn test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it() {
     // And the same ramp IS the arrival when nothing follows it: the
     // ramp-to-dock delivery the 2026-08-19 fix was made for still stops.
     d.destination_chain_ahead = Some(false);
-    d.ramp_mi = Some(RAMP_LENGTH_MI * 0.1);
+    d.ramp_mi = Some(0.05);
     d.update_destination_approach_assist(&mut app.ctx);
     assert!(d.destination_arrival_active);
     assert!(d.trip.truck.brake > 0.0);
@@ -1023,10 +1089,31 @@ fn test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back() {
     // Spoken here, so the commitment loop must not raise it again.
     let corner = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.turn_advised.contains(&corner.key));
-    assert!(d.trip.controlled_turn);
+    // The clock goes real at the corner's brake point, which a truck still
+    // at the stop bar has not reached (states_driving_turns pins that).
+    assert_eq!(
+        d.trip.controlled_turn,
+        corner.at_mi - d.trip.position_mi <= d.turn_brake_point_mi(&corner)
+    );
     // And the pause is gone: the next frame may hand the streets to the
     // keeper without waiting on a driver who is off the brake.
     assert!(!d.speed_control_paused_at_stop);
+    // "Then turn left now onto North 1st Street" said it: the route's own
+    // call at the corner is not said again on top (agent drive, exit 286A,
+    // 2026-09-23).
+    if message.contains(" now onto ") {
+        let before = app.event_lines().len();
+        let near = ff_core::sim::trip_models::TripEvent {
+            kind: ff_core::sim::trip_models::TripEventKind::GpsCue,
+            message: ff_core::speech_text::SpokenMessage::new(corner.near_text.clone()),
+            data: ff_core::sim::trip_models::TripEventData {
+                cue: Some(corner.clone()),
+                ..Default::default()
+            },
+        };
+        d.handle_trip_event(&mut app.ctx, &near);
+        assert_eq!(app.event_lines().len(), before, "{:?}", app.event_lines());
+    }
 }
 
 // -- the pickup gate (tests/test_pickup_loading.py, drive half) -----------------------
@@ -1379,7 +1466,12 @@ fn test_the_lateral_hit_has_its_own_voice() {
     let mut truck = a_tank_truck(Some(LiquidLoad::new(0.5, false)), 20.0);
     truck.corner_advisory_mph = 25.0;
     let (mut d, log, clock) = a_tank_drive(&mut app, truck, false);
-    for _ in 0..500 {
+    // A reversal, not one steady bend: the pull builds in over a transition,
+    // so a single bend held hot sets the liquid against the wall without a
+    // slam (NTSB HAR-11/01 2.3.4 -- it is a quick succession of inputs that
+    // throws it). A bend and a straight, a second each.
+    for step in 0..500 {
+        d.trip.truck.corner_advisory_mph = if (step / 50) % 2 == 0 { 25.0 } else { 0.0 };
         clock.advance(0.02);
         d.trip.truck.update(0.02);
         d.update_liquid_cues(&mut app.ctx, 0.02);
@@ -1685,33 +1777,34 @@ fn a_drive_to_facility(app: &mut TestApp, city: &str, location_name: &str) -> Dr
 }
 
 #[test]
-fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
+fn test_the_gate_warning_speaks_once_as_a_street_gate_comes_up() {
     // Tyler Cross-Dock by ear (agent playtest, 2026-09-03): "Gate in 0.8
-    // kilometers" four corners before the yard, because the warning still
-    // measured a fixed half mile back from the end while the gate zone had
-    // become the chain's LAST STREET (2026-08-18). Then every corner's
-    // slowdown retired the warning and the first straight at 30 fired it
-    // again, inside the zone this time. The warning now waits for the gate
-    // zone plus the braking a loaded truck needs to reach the gate speed by
-    // it, and it speaks once per approach; obeying it still earns the gate's
-    // own window at contact (the 2026-09-02 rule).
+    // kilometers" four corners before the yard, and then a second time after
+    // every corner's slowdown had retired the first. Tyler Company Yard's
+    // streets end at its gate with no driveway mapped, so no stretch of that
+    // public street is signed at the gate's 15 any more: the street keeps its
+    // own limit to the gate, and the warning is the braking a loaded truck
+    // needs to be down to the gate speed there, spoken once per approach;
+    // obeying it still earns the gate's own window at contact (the 2026-09-02
+    // rule).
     let mut app = TestApp::new();
     let mut d = a_drive_to_facility(&mut app, "tyler_tx_us", "Tyler Company Yard");
     d.destination_exit_taken = true;
     assert!(d.begin_surface_chain(&mut app.ctx, false));
-    let gate = d
-        .trip
-        .zones
-        .iter()
-        .find(|zone| zone.reason == "facility gate")
-        .expect("a chain posts its own gate zone")
-        .clone();
-    let total = d.trip.total_miles();
-    let zone_mi = gate.end_mi - gate.start_mi;
     assert!(
-        zone_mi < 0.4,
-        "the case needs a last street shorter than the old fixed window: {zone_mi}"
+        d.trip.gate_zone().is_none(),
+        "no gate zone on a public street: {:?}",
+        d.trip.zones
     );
+    assert!(
+        d.trip
+            .zones
+            .iter()
+            .all(|zone| zone.limit_mph > FACILITY_GATE_LIMIT_MPH),
+        "{:?}",
+        d.trip.zones
+    );
+    let total = d.trip.total_miles();
     d.trip.truck.engine_on = true;
     d.trip.truck.velocity_mps = 30.0 / 2.23694;
     app.clear_speech();
@@ -1725,9 +1818,9 @@ fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
         app.event_lines()
     );
 
-    // Coming up on the last street: a loaded truck braking at its normal
-    // rate from 30 reaches 15 by the zone within a tenth of a mile.
-    d.trip.position_mi = gate.start_mi - 0.05;
+    // Inside the braking a loaded truck needs from 30 to 15 (about a tenth
+    // of a mile at the normal rate): one warning.
+    d.trip.position_mi = total - 0.09;
     d.check_gate_approach_warning(&mut app.ctx, 0.016);
     assert_eq!(
         lines_with(&app, "ate in").len(),
@@ -1739,8 +1832,8 @@ fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
     let grace = d.gate_grace_s;
     assert!(grace > 0.0);
 
-    // The corner onto the last street: slow, window spent, warning obeyed.
-    d.trip.position_mi = gate.start_mi + 0.01;
+    // Slowed as told, window spent: the warning is obeyed.
+    d.trip.position_mi = total - 0.05;
     d.trip.truck.velocity_mps = 8.0 / 2.23694;
     d.check_gate_approach_warning(&mut app.ctx, grace + 1.0);
     assert!(
@@ -1748,8 +1841,8 @@ fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
         "obeying the warning retires its window"
     );
 
-    // Back up to 30 on the last street: no second line...
-    d.trip.position_mi = total - zone_mi * 0.5;
+    // Back up to 30: no second line...
+    d.trip.position_mi = total - 0.03;
     d.trip.truck.velocity_mps = 30.0 / 2.23694;
     d.check_gate_approach_warning(&mut app.ctx, 0.016);
     assert_eq!(
@@ -1760,6 +1853,47 @@ fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
     );
     // ...and the gate itself still opens a fresh window on contact.
     assert!(!d.gate_speed_warned);
+}
+
+#[test]
+fn test_behind_a_driveway_the_gate_warning_waits_for_the_yard() {
+    // Abilene Company Yard's chain leaves the public street at a service
+    // road. Up to that driveway the street keeps its own limit and the
+    // driveway is a turn with its own call; the yard limit, and the check-in
+    // warning, begin past it.
+    let mut app = TestApp::new();
+    let mut d = a_drive_to_facility(&mut app, "abilene_tx_us", "Abilene Company Yard");
+    d.destination_exit_taken = true;
+    assert!(d.begin_surface_chain(&mut app.ctx, false));
+    let driveway = d.trip.driveway_mi().expect("this chain has a driveway");
+    let yard = d.trip.gate_zone().expect("the yard is posted").clone();
+    assert_eq!(yard.reason, "yard");
+    assert_eq!(yard.limit_mph, FACILITY_GATE_LIMIT_MPH);
+    assert!((yard.start_mi - driveway).abs() < 1e-9);
+    // The street up to the driveway keeps its own number.
+    let (street, reason) = d.trip.speed_limit_at(driveway - 0.02);
+    assert_eq!(reason.as_deref(), Some("facility access road"));
+    assert!(street > FACILITY_GATE_LIMIT_MPH, "{street}");
+
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = 30.0 / 2.23694;
+    app.clear_speech();
+    d.trip.position_mi = driveway - 0.05;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    assert!(
+        lines_with(&app, "ate in").is_empty(),
+        "the gate warned on the public street: {:?}",
+        app.event_lines()
+    );
+    d.trip.position_mi = driveway + 0.01;
+    d.trip.truck.velocity_mps = 20.0 / 2.23694;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    assert_eq!(
+        lines_with(&app, "ate in").len(),
+        1,
+        "{:?}",
+        app.event_lines()
+    );
 }
 
 #[test]

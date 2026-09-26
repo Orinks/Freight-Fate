@@ -30,6 +30,7 @@ use ff_core::sim::enforcement_posts::{
 };
 use ff_core::sim::traffic_manager::TrafficVehicle;
 use ff_core::sim::trip_models::RoadStop;
+use freight_fate::states::base::State;
 
 use freight_fate::app::testing::{AudioLog, TestApp};
 use freight_fate::states::driving::DrivingState;
@@ -1294,7 +1295,7 @@ fn test_a_signaled_speed_valid_open_scale_enters_its_ramp() {
     drive.trip.truck.velocity_mps = mph_to_mps(33.0);
     drive.exit_stop = Some(scale.clone());
     drive.exit_signal_on = true;
-    drive.exit_lane_alignment = EXIT_LANE_READY;
+    drive.exit_lane_entered = true;
 
     drive.update_exit(&mut app.ctx, 0.02, 0.1);
 
@@ -1312,7 +1313,7 @@ fn test_a_scale_ramp_uses_real_time_so_the_driver_can_stop_at_the_bar() {
     let mut drive = a_drive(&mut app, "Scale Clock");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     drive.ramp_stop = Some(scale);
-    drive.ramp_mi = Some(RAMP_LENGTH_MI);
+    drive.ramp_mi = Some(0.5);
     drive.ramp_control.clear();
 
     drive.update_exit(&mut app.ctx, 0.0, 0.1);
@@ -1501,6 +1502,7 @@ fn test_the_safety_record_line_says_a_band_and_never_a_trade_acronym() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }
@@ -1541,6 +1543,7 @@ fn test_a_clean_record_is_waved_through_and_a_dirty_one_is_not() {
     {
         let profile = app.ctx.profile.as_mut().expect("a profile");
         profile.driving_record.citations = 5;
+        profile.driving_record.citation_times = vec![0.0; 5];
         profile.driving_record.serious_violations = vec![0.0; 5];
         profile.career.reputation = 10.0;
     }
@@ -1714,4 +1717,21 @@ fn test_overweight_cargo_is_a_real_check_and_red_lights_the_scale() {
     assert!(drive.cargo_is_overweight());
     let verdict = drive.roll_transponder_verdict(&scale, "weigh:heavy");
     assert_eq!(verdict, "red");
+}
+
+#[test]
+fn test_leaving_the_drive_mid_stop_releases_the_siren() {
+    // The siren's own dead-man's switch only ticks from inside update(), so
+    // it can never time itself out once the state stops running -- leaving
+    // to the menu (or a save load, which exits the same way) mid pull-over
+    // used to leave it playing until the game closed.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Presence");
+    drive.pull_over = Some(PULL_OVER_LIGHTS.to_string());
+    drive.hold_stop_siren(&mut app.ctx);
+    assert!(drive.siren.active);
+
+    State::exit(&mut drive, &mut app.ctx);
+
+    assert!(!drive.siren.active);
 }

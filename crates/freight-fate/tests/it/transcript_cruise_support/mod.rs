@@ -232,6 +232,7 @@ pub fn press_shift(harness: &mut PlaytestHarness, key: Key) {
                 key,
                 mods: Mods::SHIFT,
                 text: None,
+                repeat: false,
             },
         )
     });

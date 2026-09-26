@@ -69,28 +69,26 @@ pub trait FuelPump: Menu {
     }
 
     fn refuel(&mut self, ctx: &mut GameContext) {
-        let Some((mut need, region)) = self.drive().with(ctx, |d, _| {
+        let Some((mut need, region, engine_on)) = self.drive().with(ctx, |d, _| {
             (
                 d.trip.truck.specs.fuel_tank_gal - d.trip.truck.fuel_gal,
                 d.trip.current_region().to_string(),
+                d.trip.truck.engine_on,
             )
         }) else {
             return;
         };
+        // Same bar as a car pump: tractor must be off before the nozzle goes
+        // in. Reefer/APU is not this flag and is not required off here.
+        if engine_on {
+            ctx.audio.play("ui/error");
+            ctx.say(REFUEL_ENGINE_ON_REFUSAL);
+            return;
+        }
         if need < 1.0 {
             ctx.say("The tank is already full.");
             return;
         }
-        let engine_on = self
-            .drive()
-            .with(ctx, |d, _| d.trip.truck.engine_on)
-            .unwrap_or(false);
-        if let Some(msg) = refuel_engine_gate_message(engine_on) {
-            ctx.audio.play("ui/error");
-            ctx.say(msg);
-            return;
-        }
-        // Reefer and APU may stay on at the island; only the tractor must be off.
         let stop_name = self.stop().name.clone();
         let carrier_card = !player_pays_operating_costs(&profile_of(ctx).business_status);
         let mut cost = 0.0;
@@ -165,10 +163,14 @@ pub trait FuelPump: Menu {
     }
 }
 
+/// The one spoken refusal for fueling with the tractor running, shared by the
+/// fuel island and the terminal garage.
+pub const REFUEL_ENGINE_ON_REFUSAL: &str = "Shut the engine off before you fuel.";
+
 /// Tractor must be off to fuel. Reefer and APU are not part of this gate.
 pub fn refuel_engine_gate_message(engine_on: bool) -> Option<&'static str> {
     if engine_on {
-        Some("Shut the engine off before you fuel.")
+        Some(REFUEL_ENGINE_ON_REFUSAL)
     } else {
         None
     }
@@ -176,13 +178,17 @@ pub fn refuel_engine_gate_message(engine_on: bool) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use super::refuel_engine_gate_message;
+    use super::{refuel_engine_gate_message, REFUEL_ENGINE_ON_REFUSAL};
 
     #[test]
     fn refuel_refused_with_engine_on() {
         assert_eq!(
             refuel_engine_gate_message(true),
-            Some("Shut the engine off before you fuel.")
+            Some(REFUEL_ENGINE_ON_REFUSAL)
+        );
+        assert_eq!(
+            REFUEL_ENGINE_ON_REFUSAL,
+            "Shut the engine off before you fuel."
         );
     }
 

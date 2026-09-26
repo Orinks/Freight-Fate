@@ -295,6 +295,30 @@ fn test_full_off_duty_and_sleeper_resets_clear_split_pending_summary() {
 }
 
 #[test]
+fn test_back_to_back_berth_rests_are_one_period() {
+    // Two 3-hour picks at one stop are 6 hours in a row, not two 3-hour
+    // halves (tester report, 2026-09-23).
+    let mut c = HosClock::new();
+    c.drive(500.0);
+    c.on_duty(235.0);
+    c.sleeper_split_rest(180.0);
+    c.sleeper_split_rest(180.0);
+    assert_eq!(c.split_rest_history.len(), 1);
+    assert_eq!(c.split_rest_history[0].minutes, 360.0);
+    assert_eq!(c.reset_minutes_left(), Some(240.0));
+
+    // Reaching 7 hours takes the whole period off the window.
+    c.sleeper_split_rest(60.0);
+    assert_eq!(c.duty_min, 735.0);
+
+    // And ten in a row is a full reset.
+    c.sleeper_split_rest(180.0);
+    assert_eq!(c.driving_min, 0.0);
+    assert_eq!(c.duty_min, 0.0);
+    assert_eq!(c.reset_minutes_left(), None);
+}
+
+#[test]
 fn test_split_long_period_must_be_sleeper_berth() {
     let mut c = HosClock::new();
     c.drive(300.0);
@@ -1239,7 +1263,8 @@ fn rest_sleeper_split_floors_by_completion() {
     assert_eq!(rest_sleeper_split(50.0, 120.0, false), 32.0);
     assert_eq!(rest_sleeper_split(50.0, 480.0, false), 20.0);
     assert_eq!(rest_sleeper_split(50.0, 480.0, true), 10.0);
-    assert_eq!(rest_sleeper_split(5.0, 120.0, true), 10.0);
+    assert_eq!(rest_sleeper_split(5.0, 120.0, true), 5.0);
+    assert_eq!(rest_sleeper_split(0.0, 180.0, false), 0.0);
 }
 
 #[test]

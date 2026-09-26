@@ -128,9 +128,10 @@ tools/.radio_voices.json
 # Manual-playtest sandbox data dir (freightfate --playtest-sandbox). Throwaway
 # careers, no driver identity, never for commit.
 saves-playtest/
-# Online agent-server data dir (freightfate --agent-server --online). Holds a
-# real driver identity and signing key -- never for commit.
+# Agent-server data dirs: the retired --online one held a real driver
+# identity; --staging's holds a staging driver. Never for commit.
 saves-agent-online/
+saves-agent-staging/
 
 # Rust
 target/

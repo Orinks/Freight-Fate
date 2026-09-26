@@ -16,6 +16,7 @@ use super::settings::{save_settings, SettingsCategoryState};
 use super::settings_items::assist_flag;
 use crate::app::{version, GameContext, Say};
 use crate::audio::VolumeUpdate;
+use crate::states::text_entry::TextEntryState;
 use crate::updater;
 
 /// Python `f"{x:g}"` for the values these rows read (whole numbers bare,
@@ -345,6 +346,11 @@ impl SettingsCategoryState {
         self.announce(ctx);
     }
 
+    pub(super) fn toggle_hos_planning_hints(&mut self, ctx: &mut GameContext, _d: i64) {
+        ctx.settings.hos_planning_hints = !ctx.settings.hos_planning_hints;
+        self.announce(ctx);
+    }
+
     pub(super) fn toggle_steering_guide_inverted(&mut self, ctx: &mut GameContext, _d: i64) {
         ctx.settings.steering_guide_inverted = !ctx.settings.steering_guide_inverted;
         save_settings(&ctx.settings);
@@ -422,6 +428,33 @@ impl SettingsCategoryState {
         ctx.say(&format!(
             "New music seed, {seed}. Every synthesized piece is new."
         ));
+    }
+
+    /// The field Enter on Music seed opens: digits only, so a shared seed
+    /// can be typed back in. Confirming returns to the row, which the menu
+    /// reads again with the new seed.
+    pub(super) fn music_seed_entry() -> TextEntryState {
+        let mut entry = TextEntryState::new("Music seed", "Seed", |ctx, text| {
+            let text = text.trim();
+            // 18 digits always fit an i64.
+            let seed = text
+                .parse::<i64>()
+                .ok()
+                .filter(|_| text.bytes().all(|b| b.is_ascii_digit()));
+            let Some(seed) = seed else {
+                ctx.audio.play("ui/error");
+                ctx.say_with("Type a whole number.", Say::new().review(false));
+                return;
+            };
+            if seed != ctx.settings.music_seed {
+                ctx.settings.music_seed = seed;
+                save_settings(&ctx.settings);
+                ctx.restart_music();
+            }
+            ctx.pop_state();
+        });
+        entry.entry.max_len = 18;
+        entry
     }
 
     pub(super) fn toggle_radio_streamer_safe(&mut self, ctx: &mut GameContext, _d: i64) {

@@ -34,23 +34,22 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | Pool | Exact text | SignAnchor | Research |
 |---|---|---|---|
 | GENERIC | Next exit: homemade jerky and a gift shop that sells the same jerky. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | If you can read this, you are not in the sleeper. Eyes up. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | We have ice. We have bait. We have opinions about your bumper sticker. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Diesel, showers, and a fried pie that will change your itinerary. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | All-you-can-eat catfish. The catfish retained counsel. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | All-you-can-eat catfish. Bring a bigger belt. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | World's largest frying pan. Breakfast is served. Bring a forklift. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Homemade pie, next exit. Made this morning. The coffee is older. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | Fresh peaches, next exit. Or possibly just a painted peach. Worth the look. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | Fresh peaches, next exit. Pick your own or grab a bag. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Antiques and ammunition. One building. Two hobbies. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | If you lived here, you'd be home by now. Nobody lives here. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | Truck wash, next exit. Your dispatcher can see this color from space. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | Truck wash, next exit. Your trailer used to be white. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | The coffee is fine. The pie is better. The gossip is unbeatable. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | Yard gnomes, concrete animals, and a very confident fountain. Next exit. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | We have a gift shop. You have a dashboard. Let's talk. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | Concrete deer and yard gnomes, next exit. We help you load them. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | Gift shop, next exit. Dashboard hula girls, half off. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Local honey. Local jam. Local opinions, free with every purchase. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | The steak is bigger than the plate. The plate is bigger than your budget. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Next exit: homemade ice cream. The cows are local. The freezer is older than you. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| GENERIC | Gun show this weekend, craft fair the next. Same tent, better judgment sold separately. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
+| GENERIC | Gun show this weekend, craft fair the next. Same tent. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Buffet: if it isn't on a steam table, it isn't dinner. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | FIREWORKS | Fireworks, fireworks, fireworks. You're already past it. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
 | FIREWORKS | Fireworks barn, next exit. If you can still hear, you haven't shopped enough. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
@@ -92,7 +91,7 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | ADULT | Stage is small. Tips are not. Gentleman's club, next exit. | Anywhere | gentleman's-club stage/tips register; not graphic (Grok Build) |
 | ADULT | Come for the magazines. Leave with a bag you will hide. Bookstore, next exit. | Anywhere | adult-bookstore bag-in-the-cab tease (Grok Build) |
 | ATTORNEY | Big Jim saw that lane change. He is not mad. He is drafting. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
-| ATTORNEY | Rollover? Call Big Jim. He has a vest for every settlement. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
+| ATTORNEY | Rollover? Call Big Jim. He answers on the first ring. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
 | ATTORNEY | Big Jim Tolliver: because your insurance company has a lawyer too. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
 | ATTORNEY | Whiplash? Big Jim has a cousin who had that. Call him anyway. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
 | ATTORNEY | Big Jim does not sleep. Big Jim's paralegal does not sleep. The bill does not sleep. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
@@ -117,20 +116,20 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | ODDITIES | Mystery house. Crooked floors. Straight prices. Nine ninety-five. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Live rattlesnakes. Dead air conditioning. Next exit. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Petrified wood, petrified staff, very lively gift shop. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
-| ODDITIES | The cave is real. The gift crystals are optimistic. Next exit. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
+| ODDITIES | Cave tours, next exit. The crystals in the gift shop are glass. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | World's largest ketchup bottle. French fries not included. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Two-headed calf, stuffed. One-headed cashier, not. Next exit. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | See the thing in a jar. We will not say which jar. Nine dollars. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Miniature village, next exit. Your rig will not fit down Main Street. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
-| ODDITIES | Tornado museum. Indoor winds. Outdoor regret if you skip it. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
+| ODDITIES | Tornado museum, next exit. Step inside the storm cellar. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | TRUCKER | Showers with actual hot water. We are as surprised as you are. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | Idle here. The lot is full of promises and one open spot behind the dumpster. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | DEF, diesel, and a sandwich that has seen things. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | Parking for trucks. Cars will still take the spots. We have cones and a dream. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER | Truck parking, next exit. One spot left, behind the dumpster. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER | Diesel and a hot dog that's been on the roller grill since Tuesday. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER | We put out cones for truck parking. Cars park in them anyway. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | Tire shop that does not flinch at your recaps. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | We wash bugs off. We cannot wash the dispatch off. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER | Bugs on the windshield? Free squeegee with every fill-up. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER (KILLED) | Lumper service, next warehouse. Bring cash and patience, not in that order. | KILLED | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | CB shop, next exit. Your skip is skippier than you think. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER | CB shop, next exit. New antennas, and a guy who will talk your ear off. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | Reefer repair. If it is warm, we can tell from here. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | The lot has spaces. They are occupied by people who said they would only be a minute. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | Fuel desk open all night. The smile closes at ten. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
@@ -143,7 +142,7 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | RADIO | AM trucking radio. Static included at no extra charge. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | The station that plays only driving songs. You are the whole audience. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | Tune us in. Tune the other guy out. All request, no sleep. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
-| RADIO | Night dispatch radio. We cannot fix your load. We can play fiddle. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
+| RADIO | Overnight trucker radio. Road reports and old country till sunrise. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | Ten thousand watts of somebody's uncle with a stack of records. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | If your radio still has a knob, we still have a tower. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | Weather, crop reports, and a hymn at sunrise. You know the station. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
@@ -157,20 +156,20 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | TRAVEL_PLAZA | Travel center: showers, diesel, and a gift shop selling hats you already own. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Motel vacancy. Free ice. Free Wi-Fi. Free regret about the mattress. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Chain hotel, next exit. Continental breakfast starts when the waffle iron wakes up. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | Cracker Barrel next exit. Rocking chairs out front. Your break clock out back. | States South/Midwest (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | QSR drive-thru, next exit. The bag is small. The line is not. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | Cracker Barrel, next exit. Rocking chairs out front, biscuits inside. | States South/Midwest (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | Burger drive-thru, next exit. The bag is small. The line is not. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Exit food: burgers, fries, and a soda the size of a fuel can. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Truck parking and a sit-down special. The special is that they still have parking. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | POP_CULTURE | Now showing: a movie about a truck. You are living the sequel. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
-| POP_CULTURE | Coming soon to a theater near an exit. Bring cash for popcorn, not the load. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
+| POP_CULTURE | Coming soon to the drive-in: a movie about a truck. You've seen the real thing. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
 | POP_CULTURE | Weekend double feature at the drive-in. Windows up if it rains. Windows down if it smells. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
-| POP_CULTURE | Now playing: something with explosions. Your dispatcher already filed the complaint. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
+| POP_CULTURE | Now playing: something with explosions. Popcorn is extra. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
 | POP_CULTURE | Coming Friday: the one with the car chase. Please do not practice on this interstate. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
 | POP_CULTURE | Matinee special. Matinee is when you should be sleeping. We know. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
-| POP_CULTURE | Streaming soon, somehow also on a billboard. The future is confusing. Eyes on the road. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
+| POP_CULTURE | Streaming now, and somehow also on a billboard. Eyes on the road. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
 | POP_CULTURE | Now showing: a comedy about a road trip. You already know how it ends. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
-| POP_CULTURE | Coming soon: a documentary about highways. You are the research assistant. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
-| POP_CULTURE | Drive-in, next weekend only. Classic cars welcome. Classic trailers, negotiate. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
+| POP_CULTURE | Coming soon: a documentary about highways. You could have narrated it. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
+| POP_CULTURE | Drive-in movies, weekends only. Two features for one ticket. | Anywhere | dated theatrical/streaming promo register (Universal/Disney OOH rotates; not permanent franchise-country) |
 | BIG_BUCKS | Big Buck's. The beaver has a restroom. You have a bladder. Race is on. One hundred twenty miles. | Big Buck's approach pool only | Buc-ee's countdown / restroom / food-wall register; original parody; approach-only |
 | BIG_BUCKS | Kolaches at Big Buck's. You do not know what that is. You will. | Big Buck's approach pool only | Buc-ee's countdown / restroom / food-wall register; original parody; approach-only |
 | BIG_BUCKS | The beaver says the coffee is fresh. The beaver says a lot of things. Eighty miles. | Big Buck's approach pool only | Buc-ee's countdown / restroom / food-wall register; original parody; approach-only |

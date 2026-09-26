@@ -29,8 +29,10 @@
 //!
 //! Submodules: `driving/init.rs` (`new`), `driving/snapshot.rs` (save and
 //! resume), `driving/lifecycle.rs` (enter/exit and the facade's own
-//! helpers).
+//! helpers), `driving/facade.rs` (the trip accessors, the trip swap and the
+//! `State` impl).
 
+mod facade;
 mod init;
 mod lifecycle;
 mod snapshot;
@@ -48,14 +50,9 @@ use ff_core::sim::lane::LaneKeeping;
 use ff_core::sim::lane_guidance::LaneGuidance;
 use ff_core::sim::pedal_latch::PedalLatch;
 use ff_core::sim::trip::Trip;
-use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::trip_models::{ExitRampLayout, RoadStop};
 use ff_core::sim::turn_guide::TurnGuide;
-use ff_core::sim::vehicle::TruckState;
-use ff_core::sim::weather::WeatherSystem;
 
-use crate::app::GameContext;
-use crate::discord_presence::PresenceState;
-use crate::states::base::{InputEvent, State};
 use crate::states::driving_core::{
     CbChatterRecall, CurveRun, Instructor, PendingAmbient, PendingSound, RigBuffs, SirenLoop,
 };
@@ -194,6 +191,8 @@ pub struct DrivingState {
     /// intentionally session-only; only a warning actually spoken is saved.
     pub hos_stop_check_key: Option<String>,
     pub hos_stop_warning_pending: Option<String>,
+    pub hos_plan_hint_check_key: Option<String>,
+    pub hos_plan_hint_pending: Option<String>,
     pub enforcement_events: HashSet<String>,
     pub out_of_service_count: i64,
     pub drowsy_said: bool,
@@ -258,9 +257,9 @@ pub struct DrivingState {
     pub chains_fast_active: bool, // spoken chains-over-speed warning edge tracking
     pub chain_law_warned: HashSet<(i64, i64)>, // (area, level) spoken warnings
     pub chain_law_cited: HashSet<(i64, i64)>, // checkpoint rolls already taken
-    // Curve management: whether a hot-entry slip warning has been spoken
-    // for the current curve.
-    pub curve_slip_active: bool,
+    // Curve management: the curve the too-fast warning has been spoken for
+    // (its start milepost; the ramp curve has its own id), `driving_rollover`.
+    pub curve_warned_mi: Option<f64>,
 
     // ---- driving.py: enforcement counters and the live stop (driving_updates) ----------
     // Trooper pull-overs: a strike inside a patrol window may get you stopped
@@ -371,6 +370,8 @@ pub struct DrivingState {
     pub held_observation: Option<(Observation, f64)>,
     // Miles each pacing unit has held station behind the truck.
     pub pacing_mi: HashMap<String, f64>,
+    // Reused buffer for per-frame post-id lookups into the sets above.
+    pub post_id_scratch: String,
     pub rescue_offered: bool,
 
     // ---- driving_damage.py --------------------------------------------------------------
@@ -404,23 +405,25 @@ pub struct DrivingState {
     // ---- driving_events.py: exits, ramps, the destination ---------------------------------
     pub signal_timer: f64,
     pub exit_stop: Option<RoadStop>, // active route exit
-    // Stable proof that the player explicitly selected an optional sleep
+    // Stable proof that the player explicitly selected an optional rest
     // stop with T. _exit_stop is not enough: destination approaches infer
     // it automatically, and a canceled signal can leave it populated.
     pub selected_stop_key: Option<String>,
+    /// Whether T selected this stop for the next 30-minute HOS break.
+    pub selected_stop_break: bool,
     pub selected_stop_assist_armed: bool,
     pub selected_stop_assist_said: bool,
     pub selected_stop_assist_brake: f64,
     pub exit_signal_on: bool,
     pub exit_signal_canceled: bool,
     pub canceled_exit_key: Option<String>, // do not rediscover a deliberately canceled exit
-    pub exit_lane_alignment: f64,
-    pub exit_lane_prompt_said: bool,
-    pub exit_lane_ready_said: bool,
-    /// How long the exit lane has been lost since "Exit lane set." was said.
-    /// Debounces the line that takes it back; see `update_exit_preparation`.
-    pub exit_lane_lost_s: f64,
-    pub exit_commit_said: bool,
+    /// The truck is in the exit lane: steered into it where it opened at the
+    /// taper, or -- with lane keeping on full -- handed to lane keeping, which
+    /// takes it at the gore. See `update_exit_preparation`.
+    pub exit_lane_entered: bool,
+    /// "Exit lane opening." has been said for this approach: the lane is open
+    /// from here to the end of the gore window.
+    pub exit_taper_said: bool,
     pub exit_cancel_armed: bool,
     pub exit_right_hold_s: f64,
     pub exit_right_taps: i64,
@@ -428,6 +431,13 @@ pub struct DrivingState {
     /// `set[float]` of the `EXIT_COUNTDOWN_MILESTONES_MI` already spoken.
     pub exit_countdown_said: Vec<f64>,
     pub ramp_mi: Option<f64>, // ramp distance left, once taken
+    /// The ramp taken at the gore, piece by piece: the deceleration lane, the
+    /// curve, the run to the stop bar. See `driving_events/decel_lane.rs`.
+    pub ramp_layout: Option<ExitRampLayout>,
+    /// The exit assists' held application in the deceleration lane, a pedal
+    /// floor like the terminal servo's (`ramp_assist_brake`).
+    pub decel_lane_brake: f64,
+    pub decel_lane_assist_said: bool,
     pub ramp_stop: Option<RoadStop>,
     pub ramp_end_said: bool,
     pub ramp_arrival_grace_s: f64,
@@ -438,8 +448,9 @@ pub struct DrivingState {
     // ramp joins the surface road, and the light's cycle state if a signal.
     // "signal" | "stop" | "yield" | "roundabout" | "none" | "" (no ramp)
     pub ramp_control: String,
+    pub ramp_light_profile: u8, // seeded fixed timing plan for this terminal
     pub ramp_light_offset_s: f64, // seeded phase into the light cycle
-    pub ramp_light_timer: f64,    // real seconds since the ramp was taken
+    pub ramp_light_timer: f64,  // real seconds since the ramp was taken
     pub ramp_light_announced: bool,
     pub ramp_light_last_phase: String, // "red" | "yellow" | "green", once announced
     pub ramp_terminal_done: bool,
@@ -451,10 +462,13 @@ pub struct DrivingState {
     // built per ramp by _begin_ramp_terminal, None between ramps.
     pub cross_bubble: Option<CrossTraffic>,
     pub ramp_creep_prompt_said: bool,
+    // The gap to the bar the last "Stopped N short" line named.
+    pub ramp_creep_prompt_gap_mi: f64,
     pub ramp_gap_milestones_said: HashSet<i64>,
     pub ramp_bar_tick_timer: f64,
     pub bar_solid_on: bool, // the bar's continuous final-zone tone
     pub ramp_assist_said: bool,
+    pub ramp_green_roll_said: bool, // "slowing for the green" spoken this terminal
     // The pedal route-transition assistance is currently holding for the
     // terminal, so it can follow the demand up without letting go and
     // re-making the application every few frames.
@@ -466,6 +480,20 @@ pub struct DrivingState {
     // cancel holds for the rest of this ramp.
     pub approach_pull_ahead: bool,
     pub approach_pull_ahead_canceled: bool,
+    // A street control on a facility chain, played through the ramp
+    // terminal's own state above (`driving_events/street_controls.rs`): the
+    // route mile of its stop bar while it is live, its baked kind, and the
+    // bars this trip has already played, by trip generation.
+    pub street_bar_mi: Option<f64>,
+    pub street_control_kind: String,
+    pub street_controls_played: HashSet<i64>,
+    pub street_controls_trip: u64,
+    // The live street signal's (red, green) seconds; None at a ramp end,
+    // which keeps its own timing profile. It cycles on the trip's clock.
+    pub street_light_split: Option<(f64, f64)>,
+    // Whether the streets play their lights and signs at all
+    // (`street_controls::STREET_CONTROLS_IN_PLAY`, off for 1.9).
+    pub street_controls_on: bool,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,
@@ -486,6 +514,13 @@ pub struct DrivingState {
     // arrival. The highway trip is kept for records; the active trip
     // becomes the surface route.
     pub surface_chain: bool,
+    // The road stop whose streets from its exit ramp to its lot are the trip
+    // right now (`begin_stop_chain`); the highway waits in `highway_trip`.
+    pub stop_chain: Option<RoadStop>,
+    pub stop_chain_end_said: bool,
+    // Whether a road stop's streets are driven at all
+    // (`chains::STOP_STREETS_IN_PLAY`, off for 1.9).
+    pub stop_streets_on: bool,
     pub highway_trip: Option<Trip>,
     // Departure chain: the mirror. A loaded run out of a chain-capable
     // origin facility starts on its streets and merges onto the highway.
@@ -498,6 +533,10 @@ pub struct DrivingState {
     pub ladder_leg_index: i64,
     // (position when computed, scan result) -- see _destination_exit_details
     pub destination_exit_cache: Option<DestinationExitScan>,
+    /// Whether this trip's route has a labeled destination exit at all, keyed
+    /// by `trip_generation`: only a route without one may fall back to the
+    /// estimated exit before the end.
+    pub destination_exit_labeled: Option<(u64, bool)>,
 
     // ---- driving_events.py / driving_speed_control.py: cruise and the keeper -----------
     pub cruise_mph: Option<f64>,
@@ -518,13 +557,20 @@ pub struct DrivingState {
     pub cruise_trim: f64,       // integral trim on top of the grade feed-forward
     pub cruise_jake_stage: i32, // retarder stages cruise itself commanded
     pub cruise_jake_cooldown_s: f64, // quiet time between those stage steps
+    pub cruise_jake_reverse_s: f64, // ...and the longer one before a step back
+    pub cruise_jake_last_step: i32, // +1 raised, -1 lowered, 0 released
     pub cruise_snubbing: bool,  // a service-brake snub is in progress
     pub pcc_phase: String,      // what the grade preview is doing, for the cue
     pub pcc_cue_s: f64,         // quiet time between preview cues
     pub climb_cue_said: bool,   // cruise has already owned up to this pull
     pub climb_cue_s: f64,       // quiet time between hand-back cues
     pub climb_beaten_s: f64,    // how long the grade has genuinely been winning
-    pub descent_cue_s: f64,     // quiet time between descent-control cues
+    pub descent_said_mph: Option<f64>, // the descent-control number last spoken
+    // The safe descent speed of the hill under and just ahead of the truck
+    // (`refresh_descent_safe`), and the grade it was worked out for.
+    pub descent_safe_mph: Option<f64>,
+    pub descent_safe_key: Option<i64>,
+    pub descent_posted_cap_mph: Option<f64>, // the posted cap cruise keeps here
     // A trailer refused at the shipper: the yard swapped it, so the box
     // under the truck is sound and no scale house should say otherwise.
     pub trailer_refused: bool,
@@ -621,6 +667,9 @@ pub struct DrivingState {
     // and holds it through the bend (see driving_updates::curve_servo). The
     // fields above are the reactive half, inside the bend.
     pub curve_servo: Option<CurveServo>,
+    // Where the servo the driver's own brake cancelled would have let go:
+    // the bends up to here are theirs, so its lookahead leaves them alone.
+    pub curve_servo_declined_to_mi: Option<f64>,
     pub transition_assist_active: bool,
     pub keeper_mph: Option<f64>,
     pub keeper_throttle: f64,
@@ -715,6 +764,9 @@ pub struct DrivingState {
     /// was told nothing about a corner is not chimed at for it either
     /// (owner, 2026-09-20).
     pub turn_announced: HashSet<String>,
+    /// Corners whose own call already said "now": the route's call at the
+    /// corner would only say the turn again.
+    pub turn_called_now: HashSet<String>,
     pub turn_grace_s: f64,
 
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------
@@ -830,12 +882,15 @@ pub struct DrivingState {
     pub reverse_cue_active: bool,
     pub air_cue_active: bool, // compressor fill loop below governor release
     pub jake_cue_key: Option<String>, // jake growl loop currently playing
+    pub jake_cue_idle_s: f64, // seconds that loop has been held silent
     pub curve_assist_jake: bool, // jake engaged BY the assist (not the player)
     pub auto_jake: bool,      // automatic-box retarder management (J on an AMT)
     pub auto_jake_enabled: bool, // Alt+J: whether J arms auto mode on an AMT
     pub resume_target_mph: Option<f64>, // Shift+K brings this speed back
     pub auto_jake_hold_mph: Option<f64>, // speed auto mode holds
     pub auto_jake_cooldown_s: f64, // rate limit between stage steps
+    pub auto_jake_reverse_s: f64, // ...and the longer one before a step back
+    pub auto_jake_last_step: i32, // +1 raised, -1 lowered, 0 released
     pub shift_recover_t: f64, // 0->1 recovery progress after an automatic shift ends
     pub shift_hold_rpm: Option<f64>, // engine voice held here through a shift
     pub manual_engage_clunk_pending: bool, // a manual shift's second clunk, owed at engagement
@@ -871,128 +926,9 @@ pub struct DrivingState {
     pub entered_once: bool,
 }
 
-impl DrivingState {
-    /// `self.truck`: the truck rides on the trip.
-    #[inline]
-    pub fn truck(&self) -> &TruckState {
-        &self.trip.truck
-    }
-
-    #[inline]
-    pub fn truck_mut(&mut self) -> &mut TruckState {
-        &mut self.trip.truck
-    }
-
-    /// `self.weather`: the weather system rides on the trip.
-    #[inline]
-    pub fn weather(&self) -> &WeatherSystem {
-        &self.trip.weather
-    }
-
-    #[inline]
-    pub fn weather_mut(&mut self) -> &mut WeatherSystem {
-        &mut self.trip.weather
-    }
-
-    /// Replace the active trip (surface or departure chain) and bump the
-    /// generation the turn latches compare against (`id(self.trip)`).
-    pub fn replace_trip(&mut self, trip: Trip) -> Trip {
-        self.trip_generation += 1;
-        // The keeper's "keep aiming at the corner already being slowed for"
-        // memory is a milepost on the OLD trip. Carried across the swap it
-        // held the street chain's last corner -- 20 mph, to a mile the new
-        // road reaches much later -- through the whole acceleration lane, so
-        // the truck merged at 19 into 40 mph traffic (Brandon, Waco onto
-        // TX-31, 2026-09-01: "speed keeper didn't build up to traffic
-        // speed"). The corner latches reset on the same generation bump.
-        self.keeper_ease_target = None;
-        // The curve servo is the same kind of memory and needs the same
-        // treatment: its start and hold mileposts belong to the road just
-        // swapped out. A servo armed for a bend near a destination exit is
-        // never past its hold point on a short street chain, so it stayed
-        // armed for the whole approach -- braking the surface streets down to
-        // a highway bend's advisory, and, since it now pins the clock and
-        // holds a downgrade, doing both of those on a road it never saw
-        // (review finding, 2026-09-19).
-        self.curve_servo = None;
-        self.trip.curve_shed_active = false;
-        std::mem::replace(&mut self.trip, trip)
-    }
-}
-
-// -- the State facade ---------------------------------------------------------------------
+// The accessors onto the trip, the trip swap and the `State` facade live in
+// `driving/facade.rs`.
 //
-// Forwards to the mixin modules' methods:
-//   driving_controls.rs : handle_key_event, handle_controller_event,
-//                         handle_controller_disconnect
-//   driving_updates.rs  : update_frame, tick_drive_music, apply_radio_settings_to_drive
-//   driving_events.rs   : visible_lines, presence_state, online_presence_state
-
-impl State for DrivingState {
-    // At the wheel, main-channel lines (achievements, assist notices, info
-    // replies) queue instead of cutting whatever is mid-air -- the event
-    // channel's discipline, extended to the other voice (research doc, R2).
-    fn paces_main_speech(&self) -> bool {
-        true
-    }
-
-    fn enter(&mut self, ctx: &mut GameContext) {
-        self.enter_drive(ctx);
-    }
-
-    fn exit(&mut self, ctx: &mut GameContext) {
-        self.exit_drive(ctx);
-    }
-
-    fn handle_event(&mut self, ctx: &mut GameContext, event: &InputEvent) {
-        self.handle_key_event(ctx, event);
-    }
-
-    fn handle_controller(&mut self, ctx: &mut GameContext, event: &InputEvent) {
-        self.handle_controller_event(ctx, event);
-    }
-
-    fn on_controller_disconnect(&mut self, ctx: &mut GameContext) {
-        self.handle_controller_disconnect(ctx);
-    }
-
-    fn update(&mut self, ctx: &mut GameContext, dt: f64) {
-        self.update_frame(ctx, dt);
-    }
-
-    fn lines(&self, ctx: &GameContext) -> Vec<String> {
-        self.visible_lines(ctx)
-    }
-
-    fn presence(&self, ctx: &GameContext) -> Option<PresenceState> {
-        self.presence_state(ctx)
-    }
-
-    fn online_presence(&self, ctx: &GameContext) -> Option<PresenceState> {
-        self.online_presence_state(ctx)
-    }
-
-    fn ticks_covered_music(&self) -> bool {
-        true
-    }
-
-    fn tick_covered_music(&mut self, ctx: &mut GameContext, dt: f64) {
-        self.tick_drive_music(ctx, dt);
-    }
-
-    fn applies_radio_settings(&self) -> bool {
-        true
-    }
-
-    fn apply_radio_settings_now(&mut self, ctx: &mut GameContext) {
-        self.apply_radio_settings_to_drive(ctx);
-    }
-
-    fn radio(&self) -> Option<&RadioState> {
-        Some(&self.radio)
-    }
-}
-
 // The TEMPORARY stub module that stood here while the mixins landed is gone:
 // every block in it has been deleted by the module that took it over, this
 // task's (`driving_updates.rs`) last of all.

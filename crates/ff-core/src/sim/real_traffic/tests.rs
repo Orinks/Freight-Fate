@@ -521,7 +521,15 @@ fn test_fetch_construction_for_no_api_state() {
 
 #[test]
 fn test_all_states_have_parser() {
-    let valid_parsers = ["ohgo", "iteris", "wzdx", "cars", "list511", "no_api"];
+    let valid_parsers = [
+        "ohgo",
+        "iteris",
+        "wzdx",
+        "cars",
+        "list511",
+        "caltrans_lcs",
+        "no_api",
+    ];
     for (key, config) in STATE_APIS {
         assert!(
             valid_parsers.contains(&config.parser),
@@ -545,7 +553,7 @@ fn test_cars_states_have_bounds_and_layer_slugs() {
         .collect();
     let mut sorted = cars_keys.clone();
     sorted.sort();
-    assert_eq!(sorted, vec!["colorado", "indiana", "minnesota"]);
+    assert_eq!(sorted, vec!["indiana", "minnesota"]);
     for key in cars_keys {
         let config = state_api(key).unwrap();
         let bounds: Vec<f64> = config
@@ -626,6 +634,17 @@ fn test_wzdx_states_in_state_apis() {
         assert_eq!(config.events_endpoint, Some("/api/wzdx"), "{key}");
         assert_eq!(config.construction_endpoint, Some("/api/wzdx"), "{key}");
     }
+}
+
+/// COtrip's CARS GraphQL is retired and its WZDx feed wants a key: every
+/// refresh of the owner's I-70 drive logged "Failed to fetch traffic data for
+/// colorado: invalid JSON" (2026-09-24). Benched, it is never asked.
+#[test]
+fn test_colorado_is_benched_and_never_fetched() {
+    let config = state_api("colorado").unwrap();
+    assert_eq!(config.parser, "no_api");
+    assert!(!fetches(config, "colorado", false));
+    assert!(!fetches(config, "colorado", true));
 }
 
 #[test]
@@ -808,4 +827,48 @@ fn urlencode_is_quote_plus() {
         ]),
         "columns%5B0%5D%5Bdata%5D=description&search%5Bvalue%5D=a+b%26c"
     );
+}
+
+#[test]
+fn a_feed_being_fetched_is_not_fetched_again_alongside() {
+    /// Holds every GET until the test lets it go.
+    struct Gate {
+        release: StdMutex<std::sync::mpsc::Receiver<()>>,
+        calls: StdMutex<usize>,
+    }
+    impl HttpTransport for Gate {
+        fn get(&self, url: &str, _: &[(&str, &str)], _: f64) -> Result<Vec<u8>, TransportError> {
+            *self.calls.lock().unwrap() += 1;
+            let _ = self.release.lock().unwrap().recv();
+            Err(TransportError::new(url))
+        }
+        fn post(
+            &self,
+            url: &str,
+            _: &[u8],
+            _: &[(&str, &str)],
+            _: f64,
+        ) -> Result<Vec<u8>, TransportError> {
+            Err(TransportError::new(url))
+        }
+    }
+    let (release, gate_rx) = std::sync::mpsc::channel();
+    let gate = Arc::new(Gate {
+        release: StdMutex::new(gate_rx),
+        calls: StdMutex::new(0),
+    });
+    let provider = RealTrafficProvider::new(gate.clone());
+    provider.fetch_construction("georgia");
+    provider.fetch_construction("georgia");
+    release.send(()).unwrap();
+    drop(release);
+    provider.join_background();
+    assert_eq!(*gate.calls.lock().unwrap(), 1);
+
+    // The failed fetch cleared its mark: once the cooldown lapses, it
+    // fetches again.
+    provider.set_failed_until("georgia", 0.0);
+    provider.fetch_construction("georgia");
+    provider.join_background();
+    assert_eq!(*gate.calls.lock().unwrap(), 2);
 }

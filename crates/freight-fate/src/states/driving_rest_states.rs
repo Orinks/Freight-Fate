@@ -20,6 +20,7 @@
 mod fuel_pump;
 mod loyalty;
 mod parking_full;
+mod rest_preview;
 mod rest_stop;
 mod roadside;
 mod shoulder;
@@ -27,7 +28,7 @@ mod shoulder;
 pub use fuel_pump::{refuel_engine_gate_message, FuelPump};
 pub use loyalty::LoyaltyRewardsState;
 pub use parking_full::ParkingFullState;
-pub use rest_stop::RestStopState;
+pub use rest_stop::{RestFocus, RestStopState};
 pub use roadside::{EnforcementStopState, FelonyStopState, RoadsideExit, TrafficStopState};
 pub use shoulder::ShoulderSleepConfirmationState;
 
@@ -193,14 +194,14 @@ impl DrivingState {
         text
     }
 
-    /// `ctx.push_state(RestStopState(ctx, self, stop, prefer_sleep=...))`.
+    /// `ctx.push_state(RestStopState(ctx, self, stop, preferred_rest=...))`.
     pub fn push_rest_stop_state(
         &mut self,
         ctx: &mut GameContext,
         stop: &RoadStop,
-        prefer_sleep: bool,
+        preferred_rest: RestFocus,
     ) {
-        let mut state = RestStopState::new(ctx, stop.clone(), prefer_sleep);
+        let mut state = RestStopState::new(ctx, stop.clone(), preferred_rest);
         state.enter_over_drive(ctx, self);
         push_over_drive(ctx, state);
     }

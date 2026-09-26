@@ -769,6 +769,55 @@ pub static JAZZ_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             "Thoughtful brushed-drums jazz instrumental",
             195.0,
         ),
+        // 2026-09-25 batch, tools/radio_content_pools.py SONG_PLAN "jazz".
+        (
+            "radio_jazz_lower_broad_lullaby",
+            "Lower Broad Lullaby",
+            "Hushed after-close stroll past dark honky-tonks",
+            212.0,
+        ),
+        (
+            "radio_jazz_velvet_downbeat",
+            "Velvet Downbeat",
+            "Plush mid-tempo swing for late sets",
+            198.4,
+        ),
+        (
+            "radio_jazz_neon_and_nylon",
+            "Neon and Nylon",
+            "Nylon-string jazz under neon light",
+            206.8,
+        ),
+        (
+            "radio_jazz_printers_alley_last_call",
+            "Printer's Alley Last Call",
+            "Smoky last-call blues-jazz crawl",
+            220.0,
+        ),
+        (
+            "radio_jazz_brushed_steel",
+            "Brushed Steel",
+            "Jazz-meets-pedal-steel crossover piece",
+            189.6,
+        ),
+        (
+            "radio_jazz_midnight_mezzanine",
+            "Midnight Mezzanine",
+            "Elegant solo-piano-led nocturne",
+            216.4,
+        ),
+        (
+            "radio_jazz_blue_neon_glow",
+            "Blue Neon Glow",
+            "Smoky female vocal ballad for the small hours",
+            227.6,
+        ),
+        (
+            "radio_jazz_cumberland_moonrise",
+            "Cumberland Moonrise",
+            "Riverside moonrise meditation",
+            234.1,
+        ),
     ])
 });
 

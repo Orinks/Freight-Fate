@@ -27,7 +27,9 @@ type IdRow = (
 // call sign, and several stations can share a host). Sung jingles (_01, _02
 // and the second-wave _04), a spoken legal ID (_03) and spoken liners (_05,
 // _06) per station, matching tools/radio_content_plan.py STATIONS'
-// jingle_prompts and id_lines. A row only exists once its clip ships: a key
+// jingle_prompts and id_lines; the Roadhouse, Desert Rock and Neon Drive
+// carry extra IDs (_04 to _07) added straight to the pack on 2026-09-25.
+// A row only exists once its clip ships: a key
 // with no file behind it would play as dead air.
 const STATION_ID_ROWS: &[IdRow] = &[
     (
@@ -50,6 +52,30 @@ const STATION_ID_ROWS: &[IdRow] = &[
                 "Freight Fate Roadhouse legal ID",
                 "Spoken call-sign ID",
                 4.4,
+            ),
+            (
+                "id_roadhouse_04",
+                "Freight Fate Roadhouse ID 4",
+                "Station ID",
+                8.8,
+            ),
+            (
+                "id_roadhouse_05",
+                "Freight Fate Roadhouse ID 5",
+                "Station ID",
+                8.6,
+            ),
+            (
+                "id_roadhouse_06",
+                "Freight Fate Roadhouse ID 6",
+                "Station ID",
+                8.2,
+            ),
+            (
+                "id_roadhouse_07",
+                "Freight Fate Roadhouse ID 7",
+                "Station ID",
+                8.8,
             ),
         ],
     ),
@@ -211,6 +237,18 @@ const STATION_ID_ROWS: &[IdRow] = &[
                 "Desert Rock 101.5 legal ID",
                 "Spoken call-sign ID",
                 4.2,
+            ),
+            (
+                "id_desertrock_04",
+                "Desert Rock 101.5 ID 4",
+                "Station ID",
+                8.4,
+            ),
+            (
+                "id_desertrock_05",
+                "Desert Rock 101.5 ID 5",
+                "Station ID",
+                8.4,
             ),
         ],
     ),
@@ -465,6 +503,10 @@ const STATION_ID_ROWS: &[IdRow] = &[
                 "Spoken call-sign ID",
                 3.4,
             ),
+            ("id_neondrive_04", "Neon Drive 88.5 ID 4", "Station ID", 9.2),
+            ("id_neondrive_05", "Neon Drive 88.5 ID 5", "Station ID", 8.4),
+            ("id_neondrive_06", "Neon Drive 88.5 ID 6", "Station ID", 8.4),
+            ("id_neondrive_07", "Neon Drive 88.5 ID 7", "Station ID", 8.8),
         ],
     ),
 ];
@@ -503,6 +545,13 @@ const AD_ROWS: &[(&str, &str, f64)] = &[
     ("ad_quietcab_headsets", "QuietCab Headsets", 20.4),
     ("ad_truelane_navigation", "TrueLane Navigation", 21.5),
     ("ad_smokestack_jerky", "Smokestack Jerky Company", 24.4),
+    (
+        "ad_northstar_freight_hiring",
+        "Northstar Freight Lines",
+        22.4,
+    ),
+    ("ad_prairie_link_hiring", "Prairie Link Regional", 28.0),
+    ("ad_summit_value_hiring", "Summit Value Logistics", 24.2),
 ];
 
 // Which STATION_PLAYLISTS pools each spot may air on, from
@@ -605,6 +654,40 @@ const AD_FORMAT_ROWS: &[(&str, &[&str])] = &[
             "tejano",
             "jazz",
             "night",
+        ],
+    ),
+    // The three starting carriers' hiring spots air where Meridian's does.
+    (
+        "ad_northstar_freight_hiring",
+        &[
+            "country",
+            "classic_rock",
+            "gospel",
+            "tejano",
+            "blues",
+            "jazz",
+        ],
+    ),
+    (
+        "ad_prairie_link_hiring",
+        &[
+            "country",
+            "classic_rock",
+            "gospel",
+            "tejano",
+            "blues",
+            "jazz",
+        ],
+    ),
+    (
+        "ad_summit_value_hiring",
+        &[
+            "country",
+            "classic_rock",
+            "gospel",
+            "tejano",
+            "blues",
+            "jazz",
         ],
     ),
 ];
@@ -1059,8 +1142,8 @@ mod tests {
                 );
             }
         }
-        assert_eq!(station_ids("route_playlist").len(), 3);
-        assert_eq!(ad_spots().len(), 18);
+        assert_eq!(station_ids("route_playlist").len(), 7);
+        assert_eq!(ad_spots().len(), 21);
         assert!(ad_format_tags("ad_wagon_wheel_inn").contains(&"night".to_string()));
         assert!(
             station_ads("route").is_empty(),

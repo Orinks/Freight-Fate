@@ -205,9 +205,10 @@ fn regrade(harness: &mut PlaytestHarness, grade: f64) {
 #[test]
 fn test_engine_brake_cannot_be_enabled_while_accelerating() {
     let mut harness = a_drive("Jake Accel");
-    harness.with_drive(|drive, _| {
+    harness.with_drive(|drive, ctx| {
         drive.truck_mut().set_engine_brake(false);
         drive.truck_mut().throttle = 0.4;
+        ctx.input.press(Key::Up, Mods::NONE);
     });
     harness.clear_speech();
 
@@ -217,6 +218,29 @@ fn test_engine_brake_cannot_be_enabled_while_accelerating() {
     let spoken = harness.app.main_lines();
     assert!(
         spoken.iter().any(|t| t.contains("Release the accelerator")),
+        "{spoken:#?}"
+    );
+}
+
+/// Cruise pulling up to a crest is not the driver's foot: the downgrade
+/// call asks for J right there (agent drive, I-70, 2026-09-25).
+#[test]
+fn test_engine_brake_arms_while_cruise_holds_the_throttle() {
+    let mut harness = a_drive("Jake Cruise");
+    harness.with_drive(|drive, _| {
+        drive.truck_mut().set_engine_brake(false);
+        drive.auto_jake = false;
+        drive.truck_mut().throttle = 0.6;
+    });
+    harness.clear_speech();
+
+    harness.with_drive(|drive, ctx| drive.handle_key_event(ctx, &key_event(Key::J, None)));
+
+    let armed = harness.read_drive(|d| d.trip.truck.engine_brake() || d.auto_jake);
+    let spoken = harness.app.main_lines();
+    assert!(armed, "{spoken:#?}");
+    assert!(
+        !spoken.iter().any(|t| t.contains("Release the accelerator")),
         "{spoken:#?}"
     );
 }
@@ -424,6 +448,27 @@ fn test_curve_assist_jakes_a_bend_on_a_real_downgrade() {
 
     assert_eq!(harness.read_drive(|d| d.truck().engine_brake_stage), 2);
     assert!(assist_jake(&harness));
+}
+
+#[test]
+fn test_curve_assist_does_not_pump_the_drums_at_ten_over() {
+    // With the retarder slowing the truck, the drums join the curve assist
+    // from ten over. Switched at ten, a truck riding that line had the pedal
+    // pressed and released on alternate frames, and every application costs
+    // air (the pedal-fanning class, 2026-09-24).
+    let mut harness = assist_rig("Ten Over", 45, -6.0);
+    assist_frame(&mut harness, 52.0); // raise the assist's jake
+    assert!(assist_jake(&harness));
+    let mut rises = 0.0;
+    let mut last_brake = 0.0;
+    for step in 0..60 {
+        let mph = if step % 2 == 0 { 54.9 } else { 55.1 };
+        same_bend_frame(&mut harness, mph);
+        let brake = service_brake(&harness);
+        rises += (brake - last_brake).max(0.0);
+        last_brake = brake;
+    }
+    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
 }
 
 #[test]

@@ -762,18 +762,23 @@ def main(argv: list[str] | None = None) -> int:
     for leg in legs:
         for stop in leg.get("stops", ()):
             old = {key: stop.get(key) for key in FIELDS}
-            for key in FIELDS:
-                stop.pop(key, None)
+            new: dict[str, Any] = {}
             snap = snaps.get(id(stop))
             if snap is not None:
                 kinds[
                     snap.kind
                     + (" with a record" if snap.interchange_mi is not None else ", number only")
                 ] += 1
-                stop["exit_ref"] = snap.exit_ref
+                new["exit_ref"] = snap.exit_ref
                 if snap.interchange_mi is not None:
-                    stop["interchange_mi"] = snap.interchange_mi
-                stop["exit_source"] = snap.source
+                    new["interchange_mi"] = snap.interchange_mi
+                new["exit_source"] = snap.source
+            # A key already there keeps its place, so a stop the run does not
+            # change is not rewritten in a different order.
+            for key in FIELDS:
+                if key not in new:
+                    stop.pop(key, None)
+            stop.update(new)
             changed += old != {key: stop.get(key) for key in FIELDS}
     after = measure(legs, use_fields=True)
 

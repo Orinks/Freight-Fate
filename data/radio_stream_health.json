@@ -1,15 +1,36 @@
 {
  "counts": {
-  "dead": 214,
-  "ok": 5141,
-  "playlist": 71
+  "dead": 21,
+  "ok": 719,
+  "playlist": 11
  },
  "dead": [
   {
-   "detail": "HTTP 404",
+   "detail": "HTTP 503",
    "id": "kwsc-norfolk",
    "name": "91.9 The Cat",
    "stream_url": "https://icecast.wsc.edu/thecat",
+   "tier": "curated"
+  },
+  {
+   "detail": "HTTP 403",
+   "id": "abc-classic",
+   "name": "ABC Classic",
+   "stream_url": "https://live-radio01.mediahubaustralia.com/2FMW/aac/",
+   "tier": "curated"
+  },
+  {
+   "detail": "HTTP 403",
+   "id": "abc-jazz",
+   "name": "ABC Jazz",
+   "stream_url": "https://live-radio01.mediahubaustralia.com/JAZW/aac/",
+   "tier": "curated"
+  },
+  {
+   "detail": "HTTP 403",
+   "id": "abc-triple-j",
+   "name": "ABC triple j",
+   "stream_url": "https://live-radio01.mediahubaustralia.com/2TJW/aac/",
    "tier": "curated"
   },
   {
@@ -27,7 +48,7 @@
    "tier": "curated"
   },
   {
-   "detail": "[Errno 11001] getaddrinfo failed",
+   "detail": "[Errno -2] Name or service not known",
    "id": "afn-global-fans",
    "name": "AFN Global Fans",
    "stream_url": "http://22213.live.streamtheworld.com:3690/AFN_FAN_SC",
@@ -62,17 +83,24 @@
    "tier": "curated"
   },
   {
-   "detail": "HTTP 503",
-   "id": "bpr-news-asheville",
-   "name": "Blue Ridge Public Radio News 88.1",
-   "stream_url": "https://live.amperwave.net/direct/wncpr-wcqshd1aac128-ibc4",
+   "detail": "[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)",
+   "id": "wbhm-birmingham",
+   "name": "Birmingham",
+   "stream_url": "https://audio.wbhm.org/live.mp3",
    "tier": "curated"
   },
   {
    "detail": "HTTP 404",
-   "id": "wsmc-chattanooga",
-   "name": "Classical 90.5 WSMC",
-   "stream_url": "https://s4.voscast.com:8813/stream",
+   "id": "darren-duff-radio",
+   "name": "Darren Duff radio",
+   "stream_url": "http://darrenduff.com:1979/stream.mp3",
+   "tier": "curated"
+  },
+  {
+   "detail": "HTTP 403",
+   "id": "abc-double-j",
+   "name": "Double J",
+   "stream_url": "https://live-radio01.mediahubaustralia.com/DJDW/aac/",
    "tier": "curated"
   },
   {
@@ -84,16 +112,16 @@
   },
   {
    "detail": "HTTP 404",
-   "id": "kwsb-gunnison",
-   "name": "Gunnison",
-   "stream_url": "https://kwsb.streamguys1.com/live",
+   "id": "wurc-holly-springs",
+   "name": "Holly Springs",
+   "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3",
    "tier": "curated"
   },
   {
-   "detail": "HTTP 404",
-   "id": "kwcr-ogden",
-   "name": "KWCR 88.1 Wildcat Radio",
-   "stream_url": "https://kwcrstream.weber.edu:8443/kwcr",
+   "detail": "[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)",
+   "id": "wyxr-memphis",
+   "name": "Memphis",
+   "stream_url": "https://crosstown.streamguys1.com:80/live",
    "tier": "curated"
   },
   {
@@ -104,10 +132,24 @@
    "tier": "curated"
   },
   {
-   "detail": "HTTP 503",
-   "id": "koya-rosebud",
-   "name": "Rosebud",
-   "stream_url": "https://ais-sa1.streamon.fm/7057_24k.aac",
+   "detail": "HTTP 404",
+   "id": "kios-omaha",
+   "name": "Omaha",
+   "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KIOSFM.mp3",
+   "tier": "curated"
+  },
+  {
+   "detail": "[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)",
+   "id": "kxci-tucson",
+   "name": "Tucson",
+   "stream_url": "https://kxci.broadcasttool.stream:80/play",
+   "tier": "curated"
+  },
+  {
+   "detail": "[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)",
+   "id": "wprk-orlando",
+   "name": "WPRK 91.5",
+   "stream_url": "https://wprk.broadcasttool.stream:80/stream",
    "tier": "curated"
   },
   {

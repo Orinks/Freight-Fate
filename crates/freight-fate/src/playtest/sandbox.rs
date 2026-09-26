@@ -35,13 +35,20 @@ pub fn default_sandbox() -> PathBuf {
     game_root().join("saves-playtest")
 }
 
-/// `saves-agent-online` beside the game: the online agent session's own
-/// directory, kept apart so its identity never reaches the offline sandbox.
-pub fn online_sandbox() -> PathBuf {
-    game_root().join("saves-agent-online")
+/// `saves-agent-staging` beside the game: the staging agent session's own
+/// directory. Its driver is one connected on the staging site, never the
+/// real saves' identity (the old `saves-agent-online` held a copy of that).
+pub fn staging_sandbox() -> PathBuf {
+    game_root().join("saves-agent-staging")
 }
 
-/// The settings an online session turns on: the master switch and cloud
+/// The only site an agent session talks to: staging, the owner's own
+/// deployment. Production is for players; a source build that could reach
+/// it with an agent would hand anyone a ready-made way to back up an
+/// invented career under their own driver.
+pub const STAGING_URL: &str = "https://dev.orinks.net";
+
+/// The settings a staging session turns on: the master switch and cloud
 /// backup, the one path it exists to exercise. Presence and Mastodon stay
 /// off -- an agent session is not the owner on duty, and a post is public.
 pub const ONLINE_SETTINGS: [&str; 2] = ["online_services", "cloud_saves"];
@@ -229,30 +236,23 @@ pub fn prepare(sandbox: &Path, reset: bool, careers: bool, source: &Path) -> std
     Ok(())
 }
 
-/// Build the online agent directory and point this process's game at it.
+/// Build the staging agent directory and point this process's game at it,
+/// and at the staging site.
 ///
-/// Careers are never copied in: a copy of a real career would back itself
-/// up into the same cloud slot as the original. The session starts with no
-/// careers and makes its own. Only `online.json` is copied, and only when
-/// the directory has none, so a session that connected itself from the
-/// Online menu keeps that identity; the token it names is looked up in the
-/// platform keyring by driver ID. The cloud ledger and outboxes are not
-/// copied: this directory keeps its own.
-pub fn prepare_online(dir: &Path, reset: bool, source: &Path) -> Result<(), String> {
+/// Nothing identity-class is copied in: no careers (a copy would back itself
+/// up into the original's cloud slot) and no `online.json`. The first
+/// session connects its own staging driver from the Online menu, the owner
+/// entering the spoken code on the staging site; that identity stays in this
+/// directory across relaunches, its token in the platform keyring.
+pub fn prepare_staging(dir: &Path, reset: bool, source: &Path) -> Result<(), String> {
     if dir == source {
-        return Err("the online agent directory is the real save directory".to_string());
+        return Err("the staging agent directory is the real save directory".to_string());
     }
     if reset && dir.exists() {
         std::fs::remove_dir_all(dir).map_err(|e| e.to_string())?;
     }
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
-    // A session that connected itself keeps that identity across relaunches.
-    if !dir.join("online.json").exists() {
-        std::fs::copy(source.join("online.json"), dir.join("online.json")).map_err(|_| {
-            "no driver identity to go online with: connect this computer in the game first"
-                .to_string()
-        })?;
-    }
+    std::env::set_var(crate::online_presence::ONLINE_URL_ENV, STAGING_URL);
     if !dir.join("settings.json").exists() {
         seed_settings(dir, source);
     }
@@ -263,7 +263,7 @@ pub fn prepare_online(dir: &Path, reset: bool, source: &Path) -> Result<(), Stri
         .and_then(|text| serde_json::from_str::<Value>(&text).ok())
     {
         Some(Value::Object(data)) => data,
-        _ => return Err("the online agent settings are unreadable".to_string()),
+        _ => return Err("the staging agent settings are unreadable".to_string()),
     };
     for key in OFFLINE_SETTINGS {
         data.insert(key.to_string(), Value::Bool(ONLINE_SETTINGS.contains(&key)));

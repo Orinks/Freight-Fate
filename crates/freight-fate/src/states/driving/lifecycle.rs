@@ -277,6 +277,12 @@ impl DrivingState {
     /// radio's dial written to settings, the world's audio silenced.
     pub fn exit_drive(&mut self, ctx: &mut GameContext) {
         ctx.audio.horn_stop();
+        // The siren's dead-man's switch only ticks from inside update(), so
+        // once this state stops running it can never time itself out --
+        // leave to the menu mid pull-over and it outlived every drive that
+        // followed, until the game closed. Stop it explicitly, the same call
+        // a resolved stop already makes (`end_stop_audio`).
+        self.siren.stop(ctx.audio.as_mut());
         self.stop_liquid_cues(ctx);
         {
             let mut settings = RadioSettingsMut(&mut ctx.settings);

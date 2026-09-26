@@ -175,18 +175,19 @@ impl GarageState {
     }
 
     pub fn refuel(&mut self, ctx: &mut GameContext) {
+        // Engine first, then the tank: the same order as the fuel island.
+        // Reefer and APU may stay on; only the tractor must be off.
+        if let Some(msg) = refuel_engine_gate_message(profile(ctx).truck_engine_on()) {
+            ctx.audio.play("ui/error");
+            ctx.say(msg);
+            return;
+        }
         let tank = Self::tank_gal(ctx);
         let need = tank - profile(ctx).truck_fuel_gal();
         if need < 1.0 {
             ctx.say("The tank is already full.");
             return;
         }
-        if let Some(msg) = refuel_engine_gate_message(profile(ctx).truck_engine_on()) {
-            ctx.audio.play("ui/error");
-            ctx.say(msg);
-            return;
-        }
-        // Reefer and APU may stay on; only the tractor must be off.
         if !player_pays_operating_costs(&profile(ctx).business_status) {
             let money = {
                 let p = profile_mut(ctx);

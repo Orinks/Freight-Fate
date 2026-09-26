@@ -22,11 +22,13 @@ mod hazards;
 mod ramps;
 pub use hazards::{eligible_hazards, hazard_is_in_lane, hazard_name, HazardDef, OpenSide, HAZARDS};
 pub use ramps::{
-    acceleration_lane_capability_mph, acceleration_lane_mi, deceleration_lane_mi,
-    merge_traffic_target_mph, ramp_speed_mph, truck_merge_speed_mph, RampAdvisorySpeed,
-    ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
-    GRADE_MODEL_MAX_PCT, GRADE_MODEL_MIN_PCT, MERGE_TRAFFIC_SPEED_SHARE, RAMP_DIRECTIONAL_SHARE,
-    RAMP_MIN_DESIGN_MPH, RAMP_SURFACE_SHARE, TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
+    acceleration_lane_capability_mph, acceleration_lane_mi, deceleration_lane_mi, exit_ramp_layout,
+    merge_traffic_target_mph, ramp_curve_mi, ramp_speed_mph, truck_merge_speed_mph, ExitRampLayout,
+    RampAdvisorySpeed, ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
+    DECELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_RAMP_MPH, GRADE_MODEL_MAX_PCT,
+    GRADE_MODEL_MIN_PCT, MERGE_TRAFFIC_SPEED_SHARE, RAMP_CURVE_DEFLECTION_RAD,
+    RAMP_DIRECTIONAL_SHARE, RAMP_MIN_DESIGN_MPH, RAMP_QUEUE_FT, RAMP_SURFACE_SHARE,
+    RAMP_TANGENT_CLIMB_FT, TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
 };
 
 pub const BASE_SPEED_LIMIT_MPH: f64 = 70.0;
@@ -274,6 +276,16 @@ pub const DESTINATION_APPROACH_LIMIT_MPH: f64 = RAMP_MAX_MPH;
 /// private facility, so this is the game's number, chosen at the top of the
 /// observed 5-15 range.
 pub const FACILITY_GATE_LIMIT_MPH: f64 = 15.0;
+/// The yard limit: past the driveway, on the facility's own way, up to the
+/// check-in stop at the gate. INDUSTRY PRACTICE, ASSUMED for any one yard: no
+/// public law reaches inside a private gate, and operators post their own --
+/// New Orleans Terminal "15 MPH in the yard" (notml.com/trucker-information),
+/// Northwest Seaport Alliance terminals 10-15 (nwseaportalliance.com terminal
+/// safety rules), Port Houston Bayport 20 (HSSE SAF401 driver manual), the
+/// Amazon carrier SOP 10 mph on site (Pan-EU/GB, Dec 2025; not US). 15 is the
+/// middle of that spread, and the gate's own number, so the check-in rules
+/// and the yard agree.
+pub const YARD_LIMIT_MPH: f64 = FACILITY_GATE_LIMIT_MPH;
 pub const FACILITY_GATE_ZONE_MI: f64 = 0.5;
 /// ...but never more than this share of the approach.
 pub const FACILITY_GATE_MAX_SHARE: f64 = 0.35;
@@ -455,6 +467,13 @@ pub const ZONE_WARNING_MAX_MI: f64 = 10.0;
 /// Clock multiplier when stopped or crawling; full pacing resumes at cruise.
 pub const LOW_SPEED_TIME_SCALE: f64 = 4.0;
 pub const FULL_COMPRESSION_MPH: f64 = 50.0;
+/// A pacing change made mid-trip waits until the truck is slower than this.
+/// Motion integrates on real seconds while the road passes at the pace, and
+/// fuel is billed at the pace, so at any one pace a hill, a coast and a
+/// climb each cost what they should per mile. Speed a hill gave on one clock
+/// and spent on another is free: descend in Real time, switch to Standard,
+/// and coast for miles (flight, 2026-09-22).
+pub const PACE_CHANGE_MAX_MPH: f64 = 0.5;
 /// Parked with the brake set, waiting runs at double the configured pacing.
 pub const PARKED_TIME_SCALE_MULT: f64 = 2.0;
 pub const CONSTRUCTION_ENFORCEMENT_GRACE_MI: f64 = 1.5;

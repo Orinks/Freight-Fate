@@ -18,6 +18,10 @@
 ///                list layer name (e.g. "Incidents"); text rides
 ///                POST /List/GetData/<layer> and coordinates come from
 ///                GET /map/mapIcons/<layer>, joined on the event id.
+///   "caltrans_lcs" — Caltrans's Lane Closure System, one CSV per district
+///                under `base_url` (see `real_traffic::caltrans`). Only
+///                construction, and only for a district feed key
+///                (`california/d7`); the whole state never fetches.
 ///   "no_api"  — No working public 511 API.  Returns empty data so the
 ///                simulation falls back to procedurally generated construction
 ///                zones without log warnings.
@@ -153,15 +157,23 @@ pub static STATE_APIS: &[(&str, StateApi)] = &[
             "Minnesota 511MN",
         ),
     ),
+    // Colorado is benched: COtrip retired its CARS GraphQL (every fetch came
+    // back "invalid JSON", logged on every refresh of the owner's I-70 drive,
+    // 2026-09-24), and its WZDx feed wants a registered key. Waiting on
+    // ROADMAP.md, 2.0, "Deferred from 1.9: live feeds that need a key"; the
+    // old query stays listed for when a key story exists.
     (
         "colorado",
-        cars(
-            "https://www.cotrip.org",
-            "roadReports",
-            "roadWork",
-            "36.9,-109.1,41.1,-102.0",
-            "Colorado COtrip",
-        ),
+        StateApi {
+            parser: "no_api",
+            ..cars(
+                "https://www.cotrip.org",
+                "roadReports",
+                "roadWork",
+                "36.9,-109.1,41.1,-102.0",
+                "Colorado COtrip",
+            )
+        },
     ),
     // ── WZDx standard (GeoJSON FeatureCollection) ────────────────────────
     // The old per-site /api/events endpoints are gone everywhere, but these
@@ -342,9 +354,23 @@ pub static STATE_APIS: &[(&str, StateApi)] = &[
             "Massachusetts CARS WZDx",
         ),
     ),
+    // ── Caltrans Lane Closure System, per district (2026-09-24) ──────────
+    // 511.ca.gov no longer resolves and California's WZDx feed needs a key,
+    // but every district publishes its lane closures keyless. A route
+    // fetches only the districts it crosses; see `real_traffic::caltrans`.
+    (
+        "california",
+        StateApi {
+            base_url: Some("https://cwwp2.dot.ca.gov/data"),
+            events_endpoint: None,
+            construction_endpoint: None,
+            bounds: None,
+            name: "Caltrans Lane Closure System",
+            parser: "caltrans_lcs",
+            construction_parser: None,
+        },
+    ),
     // ── Dead APIs (live-swept 2026-08-09; fallback to simulated data) ────
-    // california: 511.ca.gov no longer resolves in DNS; no statewide feed found.
-    ("california", no_api("California Caltrans 511")),
     // michigan: michigan.gov/mdot answers 403 on every API-looking path.
     ("michigan", no_api("Michigan MDOT")),
     // oregon: tripcheck.com serves HTML for every path incl. the old
@@ -380,8 +406,11 @@ pub static STATE_APIS: &[(&str, StateApi)] = &[
     ("district of columbia", no_api("District of Columbia")),
 ];
 
-/// The registry entry for a lower-case state key.
+/// The registry entry for a lower-case state key. A feed key naming one
+/// part of a state's feed (`california/d7`, a Caltrans district) finds the
+/// state's entry.
 pub fn state_api(state_key: &str) -> Option<&'static StateApi> {
+    let state_key = state_key.split('/').next().unwrap_or(state_key);
     STATE_APIS
         .iter()
         .find(|(key, _)| *key == state_key)

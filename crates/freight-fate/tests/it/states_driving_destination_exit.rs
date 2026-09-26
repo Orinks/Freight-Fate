@@ -33,7 +33,7 @@ use ff_core::speech_text::SpokenMessage;
 use freight_fate::app::testing::TestApp;
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
+use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, EXIT_MAINLINE_EASE_MPH};
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
 const DT: f64 = 1.0 / 60.0;
@@ -132,12 +132,13 @@ fn test_armed_exit_counts_down() {
 
     walk_the_countdown(&mut harness, at_mi, &[2.5, 1.9, 1.9, 0.9, 0.4, 0.3]);
 
-    // Each anchor speaks once, in order. A driver doing their own lane work
-    // already gets the two-mile exit-lane prep prompt, so the countdown starts
-    // at one mile for them.
+    // Each anchor speaks once, in order, in every lane-keeping mode: the
+    // separate two-mile "exit lane" prompt is gone, since the exit lane is
+    // asked for where it opens.
     assert_eq!(
         countdown_calls(&harness),
         vec![
+            "Destination exit in 2 miles".to_string(),
             "Destination exit in 1 mile".to_string(),
             "Destination exit in half a mile".to_string(),
         ]
@@ -467,6 +468,9 @@ fn test_destination_exit_announcement_names_lane_move_when_drift_is_on() {
             .destination_exit_stop(ctx)
             .expect("a delivery run has a destination exit");
         drive.trip.position_mi = destination.at_mi - 4.0;
+        // Out of the right lane: the move is owed.
+        drive.lane.lane_count = 2;
+        drive.lane.lane = 1;
     });
     harness.clear_speech();
 
@@ -474,7 +478,7 @@ fn test_destination_exit_announcement_names_lane_move_when_drift_is_on() {
 
     let said = last_event(&harness);
     assert!(
-        said.to_lowercase().contains("move right for the exit lane"),
+        said.to_lowercase().contains("move to the right lane"),
         "{said}"
     );
     // The lane move is the second half of the instruction; the signal is the
@@ -617,10 +621,20 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     drive.check_destination_exit(&mut app.ctx);
 
     assert_eq!(drive.cruise_mph, Some(60.0));
-    // The ramp's own number, not a flat 40 for every exit in the country: it
-    // comes off the corridor limit and whether the ramp is directional
-    // (owner, 2026-08-21).
-    let ramp_mph = drive.armed_ramp_cruise_mph(None);
+    // The exit's own floor, not a flat 40 for every exit in the country, and
+    // not the ramp's number either: at most ten under road speed at the gore,
+    // because the ramp's speed is braked for past it (realistic exit,
+    // 2026-09-24).
+    let ramp_mph = 60.0f64.min(drive.exit_approach_floor_mph(Some(&destination)));
+    let (road, _) = drive.trip.speed_limit_at(destination.at_mi);
+    assert!(
+        ramp_mph >= road - EXIT_MAINLINE_EASE_MPH,
+        "{ramp_mph} on a {road}"
+    );
+    assert!(
+        ramp_mph < 59.0,
+        "this corridor's exit floor sits under the set speed"
+    );
     assert_eq!(drive.cruise_exit_mph, Some(ramp_mph));
     let (message, interrupt) = app
         .event_calls()
@@ -631,10 +645,9 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     assert!(message.contains("exit "), "{message}");
     assert!(message.contains("toward"), "{message}");
     assert!(message.contains("destination exit"), "{message}");
-    assert!(
-        message.contains("Move right for the exit lane"),
-        "{message}"
-    );
+    // Already in the right lane: no lane instruction at all, the exit lane
+    // is called where it opens (owner's drive into Denver West, 2026-09-24).
+    assert!(!message.contains("lane"), "{message}");
     // And the gate the lane work is in aid of. Doing everything this line
     // asks except the signal is still a miss, so the line has to ask for it
     // (agent drive into Payson, 2026-09-19).
@@ -642,7 +655,8 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     assert!(!message.contains("X takes"), "{message}");
     assert!(
         message.contains(&format!(
-            "Adaptive cruise holds road speed, then eases to {ramp_mph:.0} miles per hour at the ramp"
+            "Adaptive cruise holds road speed, eases to {ramp_mph:.0} miles per hour for the exit, \
+             and pauses on the ramp."
         )),
         "{message}"
     );
@@ -685,18 +699,23 @@ fn test_taking_the_announced_exit_does_not_repeat_the_ramp_cap() {
             .expect("a delivery run has a destination exit");
         drive.trip.position_mi = stop.at_mi - 3.0;
         drive.truck_mut().start_engine();
-        drive.truck_mut().velocity_mps = 60.0 / MPH_PER_MPS;
-        drive.engage_cruise(ctx, 60.0, false);
+        // At road speed, so the exit floor sits under it.
+        let (road, _) = drive.trip.speed_limit_at(stop.at_mi);
+        drive.truck_mut().velocity_mps = road / MPH_PER_MPS;
+        drive.engage_cruise(ctx, road, false);
     });
     harness.clear_speech();
 
     // Announces the exit and caps cruise.
     harness.with_drive(|drive, ctx| drive.check_destination_exit(ctx));
-    let ramp_mph = harness.read_drive(|d| d.armed_ramp_cruise_mph(None));
-    assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(ramp_mph));
+    let ramp_mph = harness
+        .read_drive(|d| d.cruise_exit_mph)
+        .expect("the callout capped cruise");
+    let set = harness.read_drive(|d| d.cruise_mph).expect("cruise");
+    assert!(ramp_mph < set - 1.0, "{ramp_mph} under {set}");
     assert!(
         last_said(&harness).contains(&format!(
-            "Adaptive cruise holds road speed, then eases to {ramp_mph:.0} miles per hour at the ramp"
+            "Adaptive cruise holds road speed, eases to {ramp_mph:.0} miles per hour for the exit"
         )),
         "{}",
         last_said(&harness)
@@ -706,27 +725,30 @@ fn test_taking_the_announced_exit_does_not_repeat_the_ramp_cap() {
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.take_exit(ctx));
 
-    // The exit key is a turn signal now: "Signal on for ..." replaced the
-    // older "Signaling for ..." callout when the cancel/confirm model landed.
+    // The exit key is a turn signal now: "Signal set for ..." (the blinker
+    // itself waits for half a mile) replaced the older "Signaling for ..."
+    // callout when the cancel/confirm model landed.
     let confirmation = last_said(&harness);
-    assert!(confirmation.contains("Signal on for"), "{confirmation}");
+    assert!(confirmation.contains("Signal set for"), "{confirmation}");
     // Already said, and already capped.
     assert!(!confirmation.contains("Adaptive cruise"), "{confirmation}");
     assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(ramp_mph));
 }
 
 #[test]
-fn test_signaling_for_an_exit_eases_cruise_to_ramp_speed() {
+fn test_signaling_for_an_exit_eases_cruise_at_most_ten_under_road_speed() {
     // Pressing X is the commitment to leave the highway, so adaptive cruise
-    // takes a ramp target with it -- for a truck stop exit just as much as for
-    // the destination, and it lets go again on a cancel.
+    // takes an exit target with it -- for a truck stop exit just as much as
+    // for the destination, and it lets go again on a cancel.
     //
     // The target is where the truck has to BE at the gore, not where it goes
     // the moment the signal is on. Signalling used to start the shed
     // immediately, so a driver who signalled early watched automatic control
-    // slow with the exit nowhere in sight (Shane, 2026-08-15).
+    // slow with the exit nowhere in sight (Shane, 2026-08-15). And it is ten
+    // under road speed at most, never the ramp's own number: that is braked
+    // for past the gore (realistic exit, 2026-09-24).
     let mut harness = a_drive("Signal Eases");
-    harness.with_drive(|drive, ctx| {
+    let road = harness.with_drive(|drive, ctx| {
         // The invented stop is reached through the real lookup: the
         // destination exit is out of the way and this is the only route stop.
         drive.destination_exit_taken = true;
@@ -736,14 +758,13 @@ fn test_signaling_for_an_exit_eases_cruise_to_ramp_speed() {
         drive.trip.position_mi = 37.0;
         drive.truck_mut().start_engine();
         drive.truck_mut().grade = 0.0;
-        // Pin the low-corridor case that exposes the approach boundary. The
-        // route selected by a fresh career can vary as the world grows, and a
-        // 45 mph cruise reaches the braking window later than a faster road.
-        let limit = 45.0;
+        // At road speed, the way a drive arrives at an exit.
+        let (limit, _) = drive.trip.speed_limit_at(40.0);
         drive.truck_mut().velocity_mps = limit / MPH_PER_MPS;
         // Holding the road, the way a drive arrives here.
         drive.truck_mut().throttle = 0.4;
         drive.engage_cruise(ctx, limit, false);
+        limit
     });
     let set_mph = harness
         .read_drive(|d| d.cruise_mph)
@@ -756,11 +777,18 @@ fn test_signaling_for_an_exit_eases_cruise_to_ramp_speed() {
         harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.name.clone())),
         Some("Petro Knoxville".to_string())
     );
-    let ramp_mph = harness.read_drive(|d| d.armed_ramp_cruise_mph(None));
+    let ramp_mph = harness.with_drive(|d, _| d.exit_approach_floor_mph(None));
+    let ramp_cruise = harness.read_drive(|d| d.armed_ramp_cruise_mph(None));
+    assert_eq!(ramp_mph, ramp_cruise.max(road - EXIT_MAINLINE_EASE_MPH));
+    assert!(
+        ramp_mph >= road - EXIT_MAINLINE_EASE_MPH,
+        "{ramp_mph} on a {road}"
+    );
     assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(ramp_mph));
     assert!(
         last_said(&harness).contains(&format!(
-            "Adaptive cruise holds road speed, then eases to {ramp_mph:.0} miles per hour at the ramp"
+            "Adaptive cruise holds road speed, eases to {ramp_mph:.0} miles per hour for the exit, \
+             and pauses on the ramp."
         )),
         "{}",
         last_said(&harness)
@@ -1060,7 +1088,7 @@ fn take_destination_exit(harness: &mut PlaytestHarness) {
             .destination_exit_stop(ctx)
             .expect("a delivery run has a destination exit");
         drive.exit_stop = Some(destination.clone());
-        drive.exit_lane_alignment = 1.0;
+        drive.exit_lane_entered = true;
         drive.trip.position_mi = destination.at_mi;
         drive.truck_mut().velocity_mps = 0.0;
         drive.update_exit(ctx, 0.0, DT);
@@ -1122,6 +1150,37 @@ fn test_destination_exit_completion_clears_remaining_route_miles() {
     assert!(
         lines.iter().any(|line| line.contains("0 miles remaining")),
         "{lines:#?}"
+    );
+}
+
+#[test]
+fn test_the_gore_of_a_labeled_exit_never_invents_a_second_destination_exit() {
+    // Agent drive into Abilene, 2026-09-22: inside the last 0.05 mile before
+    // exit 286A the scan found nothing ahead, the drive fell back to an
+    // estimated exit near the route's end, and the cab said "In 3 miles, the
+    // destination exit" seconds before the truck took 286A.
+    let mut harness = a_drive("Gore");
+    let labeled = harness.with_drive(|drive, ctx| drive.scan_destination_exit_details(ctx, false));
+    let (exit_at, _, _) = labeled.expect("the default delivery route has a labeled exit");
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = exit_at - 0.03;
+        drive.destination_exit_cache = None;
+        assert!(
+            drive.destination_exit_stop(ctx).is_none(),
+            "no second destination exit at the gore of the real one"
+        );
+        drive.trip.position_mi = exit_at + 0.2;
+        drive.destination_exit_cache = None;
+        assert!(drive.destination_exit_stop(ctx).is_none());
+    });
+    harness.with_drive(|drive, ctx| drive.check_destination_exit(ctx));
+    assert!(
+        !events(&harness)
+            .iter()
+            .any(|line| line.contains("destination exit")),
+        "{:?}",
+        events(&harness)
     );
 }
 

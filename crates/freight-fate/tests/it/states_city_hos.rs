@@ -9,15 +9,23 @@
 
 use crate::states_city_support::*;
 use ff_core::models::career::LEVEL_XP;
-use ff_core::models::jobs::{route_drive_hours, Job, JobBoard, OfferOptions};
+use ff_core::models::jobs::{
+    plan_hos, remaining_route_hos_plan, route_drive_hours, Job, JobBoard, OfferOptions,
+};
 use ff_core::models::profile::Profile;
+use ff_core::pyfmt::fmt_f;
 use ff_core::sim::hos::limits;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::city::{CityMenuState, JobBoardState};
 use freight_fate::states::city_pickup::{
-    PickupFacilityState, PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN,
+    start_loaded_drive, LoadedDriveOptions, PickupFacilityState, PICKUP_CHECK_IN_MIN,
+    PICKUP_LOADING_MIN,
 };
+use freight_fate::states::driving_menu_states::DriveRef;
+use freight_fate::states::driving_rest_states::RestStopState;
+
+use super::states_driving_menus_support::{activate, with_drive};
 
 fn approx(a: f64, b: f64) -> bool {
     (a - b).abs() <= 1e-6 * b.abs().max(1.0)
@@ -57,6 +65,142 @@ fn job_with_supported_route(app: &TestApp, city: &str, level: i64, jobs: &[Job])
 fn austin_offers(app: &TestApp) -> Vec<Job> {
     let mut board = JobBoard::seeded(app.ctx.world, 2);
     board.offers("Austin", &[] as &[&str], OfferOptions::level(2))
+}
+
+#[test]
+fn loaded_departure_with_mandatory_sleep_has_an_achievable_deadline() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Near HOS", "Austin"));
+    app.ctx.settings.hos_mode = "realistic".to_string();
+    let offers = austin_offers(&app);
+    let job = offers
+        .into_iter()
+        .filter(|job| job.deadline_game_h < 10.0 && job.cargo.credentials.is_empty())
+        .find(|job| {
+            matches!(
+                app.ctx
+                    .world
+                    .supported_route(&job.origin, &job.destination, None),
+                Ok(Some(_))
+            )
+        })
+        .expect("short cached offer with under ten hours to deliver");
+    let route = app
+        .ctx
+        .world
+        .supported_route(&job.origin, &job.destination, None)
+        .unwrap()
+        .unwrap();
+    let stop_mi = route
+        .accessible_stop_details(false)
+        .iter()
+        .find(|stop| stop.name == "Walburg Travel Center & Food Court")
+        .expect("a real sleep-capable route stop")
+        .at_mi;
+    let to_stop_h = route_drive_hours(Some(&route), 0.0, Some(app.ctx.world))
+        - route_drive_hours(Some(&route), stop_mi, Some(app.ctx.world));
+    assert!(to_stop_h > 0.0 && to_stop_h < 1.0);
+    // The board may have cached the offer before loading consumed most of
+    // the duty window. The driver can legally reach Walburg, then must sleep.
+    let original_deadline = job.deadline_game_h;
+    app.ctx.profile.as_mut().unwrap().hos.duty_min = 13.0 * 60.0;
+    let clock = &app.ctx.profile.as_ref().unwrap().hos;
+    let legal = plan_hos(
+        route.miles(),
+        Some(&route),
+        Some(app.ctx.world),
+        Some(clock),
+    );
+    assert_eq!(legal.sleeps, 1);
+    assert!(legal.total_h() > 10.0);
+    assert!(original_deadline < 10.0);
+    assert!(job.payout_default(legal.total_h(), 0.0) < job.pay);
+
+    start_loaded_drive(&mut app.ctx, job, route, LoadedDriveOptions::default());
+    let saved = app
+        .ctx
+        .profile
+        .as_ref()
+        .unwrap()
+        .active_trip
+        .as_ref()
+        .unwrap();
+    let offered = saved["job"]["deadline_game_h"].as_f64().unwrap();
+    println!(
+        "cached deadline {original_deadline:.1}h; legal trip {:.1}h; adjusted deadline {offered:.1}h",
+        legal.total_h()
+    );
+    assert!(
+        offered >= legal.total_h(),
+        "cached deadline {original_deadline:.1}h; legal trip {:.1}h; loaded deadline {offered:.1}h",
+        legal.total_h()
+    );
+    assert!(saved["job"]["deadline_covers_rest"].as_bool().unwrap());
+    assert!(app
+        .main_lines()
+        .join(" ")
+        .contains("adjusted the delivery deadline"));
+    assert!(app
+        .main_lines()
+        .join(" ")
+        .contains("current hours require a 10-hour sleep en route"));
+    assert!(app.main_lines().join(" ").contains("selects a rest stop"));
+    let drive = app.ctx.state().expect("loaded driving state");
+    let stop = with_drive(&drive, |d| {
+        d.trip.position_mi = stop_mi;
+        d.trip.game_minutes = to_stop_h * 60.0;
+        d.trip
+            .stops
+            .iter()
+            .find(|stop| stop.name == "Walburg Travel Center & Food Court")
+            .expect("the stop is available to the truck")
+            .clone()
+    });
+    app.ctx
+        .profile
+        .as_mut()
+        .unwrap()
+        .hos
+        .drive(to_stop_h * 60.0);
+    assert!(app.ctx.profile.as_ref().unwrap().hos.duty_min < 14.0 * 60.0);
+    let mut rest = RestStopState::with_drive(DriveRef::of(&drive), stop, false);
+    Menu::enter(&mut rest, &mut app.ctx);
+    app.clear_speech();
+    activate(&mut rest, &mut app.ctx, "Sleep 10 hours");
+    let preview = app.main_lines().join(" ");
+    assert!(
+        preview.contains(&format!(
+            "The delivery deadline will be in {} hours",
+            fmt_f(offered - to_stop_h - 10.0, 1)
+        )),
+        "{preview}"
+    );
+    activate(&mut rest, &mut app.ctx, "Sleep 10 hours");
+    assert_eq!(app.ctx.profile.as_ref().unwrap().hos.duty_min, 0.0);
+    assert_eq!(
+        app.ctx
+            .profile
+            .as_ref()
+            .unwrap()
+            .active_trip
+            .as_ref()
+            .unwrap()["job"]["deadline_game_h"]
+            .as_f64(),
+        Some(offered)
+    );
+    with_drive(&drive, |d| {
+        assert!(approx(d.trip.game_minutes, (to_stop_h + 10.0) * 60.0));
+        assert_eq!(d.job.deadline_game_h, offered);
+        let remaining = remaining_route_hos_plan(
+            &d.route,
+            stop_mi,
+            Some(app.ctx.world),
+            &app.ctx.profile.as_ref().unwrap().hos,
+        );
+        let lawful_arrival = to_stop_h + 10.0 + remaining.total_h();
+        assert!(lawful_arrival < offered);
+        assert!(d.job.payout_default(lawful_arrival, 0.0) > d.job.pay);
+    });
 }
 
 // -- the terminal bunk room ------------------------------------------------------------

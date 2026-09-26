@@ -17,6 +17,23 @@ path = "src/lib.rs"
 name = "freightfate"
 path = "src/main.rs"
 
+# The agent server is tooling for playtesting agents, not the game, so its
+# tests stay out of a plain `cargo test`. Run them with
+# `cargo test -p freight-fate --test agent_server`; CI runs that as its own step.
+[[test]]
+name = "agent_server"
+path = "tests/agent_server.rs"
+test = false
+required-features = ["agent-server"]
+
+[features]
+default = ["agent-server"]
+# `--agent-server`: the MCP server that lets an agent play, including a
+# `--staging` mode that backs up to the staging site. Dev builds have it;
+# player builds leave it out, because tools/build_release.py builds with
+# --no-default-features.
+agent-server = []
+
 [lints]
 workspace = true
 

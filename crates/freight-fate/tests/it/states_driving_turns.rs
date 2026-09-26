@@ -8,7 +8,7 @@
 use std::sync::Arc;
 
 use ff_core::data::corners::corner_speed_mph;
-use ff_core::data::curves::{curve_severity, leg_curves, route_curves, RouteCurve};
+use ff_core::data::curves::{curve_severity, leg_curves, min_radius_ft, route_curves, RouteCurve};
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{CorridorDetail, Landmark, Leg, Route, RouteCheckpoint};
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
@@ -188,6 +188,65 @@ fn test_approach_call_names_the_side_street_distance_and_speed() {
     assert_eq!(app.event_lines().len(), 1); // said once, not every frame
 }
 
+/// Owner, Abilene streets, 2026-09-23: "That left turn announced at least
+/// twice before the turn. Necessary?" The route's quarter-mile lead and the
+/// turn's own approach call named the same corner seconds apart.
+fn the_route_lead_for(d: &mut DrivingState) -> ff_core::sim::trip_models::TripEvent {
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    ff_core::sim::trip_models::TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: ff_core::speech_text::SpokenMessage::new(format!(
+            "In a quarter mile, {}.",
+            cue.text
+        )),
+        data: ff_core::sim::trip_models::TripEventData {
+            cue: Some(cue),
+            advance: Some(true),
+            ..Default::default()
+        },
+    }
+}
+
+#[test]
+fn test_the_route_lead_stays_quiet_for_a_turn_already_called() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    app.clear_speech();
+    d.trip.position_mi = 0.4;
+    mph(&mut d, 30.0);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert_eq!(app.event_lines().len(), 1, "the approach call");
+    let lead = the_route_lead_for(&mut d);
+    d.handle_trip_event(&mut app.ctx, &lead);
+    assert_eq!(app.event_lines().len(), 1, "{:?}", app.event_lines());
+}
+
+#[test]
+fn test_a_turn_call_after_the_route_lead_adds_only_the_advisory() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    app.clear_speech();
+    d.trip.position_mi = 0.4;
+    mph(&mut d, 30.0);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let lead = the_route_lead_for(&mut d);
+    d.trip
+        .announced_navigation
+        .insert(format!("{}:advance", cue.key));
+    d.handle_trip_event(&mut app.ctx, &lead);
+    clock.advance(5.0); // the lead has been heard
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert_eq!(
+        app.event_lines().last().map(String::as_str),
+        Some("Advise 11 miles per hour."),
+        "{:?}",
+        app.event_lines()
+    );
+}
+
 #[test]
 fn test_terse_keeps_direction_street_and_distance_but_drops_the_advisory() {
     let mut app = TestApp::new();
@@ -332,6 +391,148 @@ fn test_the_turn_earcon_waits_for_the_corner_itself() {
 }
 
 #[test]
+fn test_a_turn_taken_at_a_crawl_still_chimes_when_the_route_called_it() {
+    // A truck already under a turn's speed gets no approach call, only the
+    // route's own "Turn left onto 3rd Avenue Southeast" -- and that never
+    // counted as telling the driver, so the turn went by without its chime
+    // (agent drive, Aberdeen yard, 2026-09-23).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let near = ff_core::sim::trip_models::TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: ff_core::speech_text::SpokenMessage::new(cue.near_text.clone()),
+        data: ff_core::sim::trip_models::TripEventData {
+            cue: Some(cue.clone()),
+            ..Default::default()
+        },
+    };
+    d.handle_trip_event(&mut app.ctx, &near);
+    assert!(d.turn_announced.contains(&cue.key));
+}
+
+#[test]
+fn test_a_turn_inside_the_last_ones_tail_is_called_before_it() {
+    // One street turn speaks at a time, and a turn just taken stayed the
+    // "nearest" for the tenth of a mile past it: a second turn inside that
+    // tenth was called only once the truck was round it (agent drive,
+    // Aberdeen yard, 2026-09-23).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    street_chain(&mut d, 1.0, 0.06);
+    let corners: Vec<_> = d
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| is_judged_turn(cue))
+        .cloned()
+        .collect();
+    assert!(corners.len() >= 2, "the chain has two turns");
+    let (first, second) = (&corners[0], &corners[1]);
+    assert!(
+        second.at_mi - first.at_mi < 0.1,
+        "the second is inside the tail"
+    );
+    // Called but not yet taken, the first keeps the floor: nothing about the
+    // second is said over it.
+    d.trip.position_mi = first.at_mi - 0.05;
+    d.trip.check_navigation_cues();
+    assert!(d
+        .trip
+        .announced_navigation
+        .contains(&format!("{}:near", first.key)));
+    for half in ["advance", "near"] {
+        assert!(
+            !d.trip
+                .announced_navigation
+                .contains(&format!("{}:{half}", second.key)),
+            "the second turn's {half} was said over the first"
+        );
+    }
+    d.trip.position_mi = first.at_mi + 0.001;
+    d.trip.check_navigation_cues();
+    d.trip.position_mi = second.at_mi - 0.02;
+    d.trip.check_navigation_cues();
+    assert!(
+        d.trip
+            .announced_navigation
+            .contains(&format!("{}:near", second.key)),
+        "the second turn was not called before it"
+    );
+}
+
+/// Run the route's own street calls for this spot and hand them to the drive.
+fn route_calls(d: &mut DrivingState, app: &mut TestApp) {
+    d.trip.check_navigation_cues();
+    for event in std::mem::take(&mut d.trip.events) {
+        d.handle_trip_event(&mut app.ctx, &event);
+    }
+}
+
+#[test]
+fn test_the_next_turn_waits_until_the_truck_is_round_the_last() {
+    // The chime for the corner being taken and the call for the next corner
+    // went out on the same tick, so "Turn right onto North Freeway Road" was
+    // heard over the left-turn chime, four turns out of four (agent drive,
+    // Tucson streets, 2026-09-24).
+    let mut app = TestApp::new();
+    let audio = app.record_audio();
+    let mut d = a_drive(&mut app);
+    street_chain(&mut d, 1.0, 0.06);
+    assert!(d.trip.truck.trailer_attached);
+    let corners: Vec<_> = d
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| is_judged_turn(cue))
+        .cloned()
+        .collect();
+    let (first, second) = (corners[0].clone(), corners[1].clone());
+    // The first corner, called by the route and approached at a crawl.
+    mph(&mut d, 8.0);
+    d.trip.position_mi = first.at_mi - 0.05;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    app.clear_speech();
+
+    // At the corner: its own chime, and not a word about the next one, from
+    // the route or from the corner's approach call.
+    d.trip.position_mi = first.at_mi + 0.001;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    let chimes = |audio: &freight_fate::app::testing::AudioLog| {
+        audio
+            .borrow()
+            .played
+            .iter()
+            .filter(|(key, _, _)| key.starts_with("events/turn_"))
+            .map(|(key, _, _)| key.clone())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(chimes(&audio), vec!["events/turn_left".to_string()]);
+    mph(&mut d, 20.0); // over the next corner's speed, so it has a call owed
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        lines_with(&app, "West Sample Street").is_empty(),
+        "the next turn was called over this one's chime: {:?}",
+        app.event_lines()
+    );
+
+    // With the trailer round (a WB-67 is 73.5 feet), the next turn is called.
+    d.trip.position_mi = first.at_mi + 0.015;
+    route_calls(&mut d, &mut app);
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        !lines_with(&app, "West Sample Street").is_empty(),
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(second.at_mi > d.trip.position_mi);
+}
+
+#[test]
 fn test_a_cold_arrival_at_the_turn_still_gets_its_window() {
     // A resumed save can reach the turn without ever hearing the approach.
     let mut app = TestApp::new();
@@ -363,16 +564,45 @@ fn test_the_window_is_real_seconds_not_a_fixed_distance() {
 }
 
 #[test]
-fn test_the_approach_decompresses_the_clock() {
+fn test_the_clock_waits_for_the_brake_point() {
+    // The call is sized in real seconds on the compressed clock, so it opens
+    // far out; dropping the clock there crawled a 30 mph approach for four
+    // real minutes (flight, and the agent drive into Abilene, 2026-09-23).
+    // The call still comes early. The clock stays paced past it, slides down
+    // ahead of the brake point, and is real time from the brake point on.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     street_chain(&mut d, 40.0, 0.5);
-    d.trip.position_mi = 0.4;
     mph(&mut d, 30.0);
-    assert!(d.trip.effective_time_scale() > 1.0);
+    let paced = d.trip.effective_time_scale();
+    assert!(paced > 1.0);
+    let cue = d.turn_cue_in_play().expect("a corner is in play");
+    let brake_mi = d.turn_brake_point_mi(&cue);
+
+    d.trip.position_mi = 0.0;
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    assert!(
+        !last_with(&app, "North Michigan Street").is_empty(),
+        "the call comes at the window"
+    );
+    assert!(!d.trip.controlled_turn);
+    assert_eq!(
+        d.trip.effective_time_scale(),
+        paced,
+        "still paced past the call"
+    );
+
+    // Easing: between the trip's pacing and real time.
+    d.trip.position_mi = cue.at_mi - brake_mi - 0.05;
+    d.update_turn_commitment(&mut app.ctx, 0.016);
+    let easing = d.trip.effective_time_scale();
+    assert!(1.0 < easing && easing < paced, "easing at {easing:.1}x");
+
+    d.trip.position_mi = cue.at_mi - brake_mi + 0.001;
     d.update_turn_commitment(&mut app.ctx, 0.016);
     assert!(d.trip.controlled_turn);
     assert_eq!(d.trip.effective_time_scale(), 1.0);
+
     d.trip.position_mi = 0.6;
     mph(&mut d, 18.0);
     let dt = d.turn_grace_s + 1.0;
@@ -753,18 +983,25 @@ fn test_a_corner_you_are_already_slow_enough_for_still_buys_real_seconds() {
     //
     // Being slow enough to MAKE the corner is not the same as being given time
     // to HEAR about it. The advisory may stay quiet; the clock may not stay
-    // compressed.
+    // compressed. It goes real at the brake point, which for a truck with no
+    // speed to shed is the reaction seconds alone.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     street_chain(&mut d, 40.0, 0.5);
-    d.trip.position_mi = 0.4;
     // Under the corner's own advised speed, the way the keeper holds a
     // truck through a facility zone.
     mph(&mut d, 8.0);
     let cue = d.turn_cue_in_play().expect("a corner is in play");
     assert!(d.trip.truck.speed_mph() <= d.turn_speed_mph(&cue));
     assert!(d.trip.effective_time_scale() > 1.0);
+    let brake_mi = d.turn_brake_point_mi(&cue);
+    let real_s = brake_mi / 8.0 * 3600.0;
+    assert!(
+        real_s >= 8.0,
+        "only {real_s:.1} real seconds to act on the corner"
+    );
 
+    d.trip.position_mi = cue.at_mi - brake_mi + 0.001;
     d.update_turn_commitment(&mut app.ctx, 0.016);
 
     assert!(d.trip.controlled_turn);
@@ -954,10 +1191,14 @@ fn test_pacenote_stays_silent_when_already_slow() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     let pos = d.trip.position_mi;
+    // A radius a 55 sign is really built on: 307 ft asked 0.54 g at 50,
+    // past where any load goes over, and the call now prices the bend for
+    // the load (bend sweep, 2026-09-24).
+    let radius = min_radius_ft(55.0) as i64;
     let spoken = spoken_pacenotes(
         &mut app,
         &mut d,
-        vec![a_curve(pos + 0.3, 'L', 55, 307, 60.0)],
+        vec![a_curve(pos + 0.3, 'L', 55, radius, 60.0)],
         50.0,
     );
     assert!(
@@ -1771,7 +2012,7 @@ fn test_route_status_on_a_street_chain_answers_with_the_gate() {
     app.clear_speech();
     d.speak_route_status(&mut app.ctx);
     let said = app.main_lines().last().expect("a route status").clone();
-    assert!(said.starts_with("on city streets, "));
+    assert!(said.starts_with("On city streets, "));
     assert!(said.contains(" to the gate at "));
 }
 
@@ -1886,10 +2127,12 @@ fn drive_through_the_bend(
     }
 }
 
+/// Whether the bend's too-fast warning was spoken: the line that comes before
+/// the bend costs the load or the lane anything (`driving_rollover`).
 fn drifted(run: &BendRun) -> bool {
     run.lines
         .iter()
-        .any(|line| line.contains("drifting to the outside"))
+        .any(|line| line.contains(", too fast. Slow to"))
 }
 
 #[test]
@@ -1912,11 +2155,20 @@ fn test_cruise_into_a_hot_bend_arrives_at_the_advisory() {
     let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
         servo_max = servo_max.max(d.curve_servo.as_ref().map_or(0.0, |s| s.brake));
     });
+    // A light trim, not a stop. It read under 0.12 while the gearbox's torque
+    // interruption ran on the real clock, and only because the box hunted
+    // the truck down to 25 for a 35 bend; arriving on the number now, the
+    // servo trims the last of it at about 0.15 (2026-09-23).
     assert!(
-        servo_max < 0.15,
+        servo_max < 0.2,
         "cruise makes the bend on its own; the servo should barely touch the pedal: {servo_max:.2}"
     );
 
+    assert!(
+        run.speed_at_start_mph >= 35.0 - 5.0,
+        "shed far past the advisory, to {:.1} mph",
+        run.speed_at_start_mph
+    );
     assert!(
         run.speed_at_start_mph <= 35.0 + 2.0,
         "crossed the bend's start at {:.1} mph: {:#?}",
@@ -2159,8 +2411,12 @@ fn test_the_servo_never_fans_the_pedal_on_any_grade_at_any_advisory() {
     let mut d = a_drive(&mut app);
     for grade in [-0.02, -0.03, -0.04, -0.05, -0.061, -0.07, -0.08] {
         for target in [15.0, 25.0, 30.0, 40.0, 55.0] {
+            // 400 ft, or what a sign this fast is really built on: a 55 on
+            // 400 ft asks half a g, which curve assistance now slows for
+            // below the sign on its own (bend sweep, 2026-09-24).
+            let radius = min_radius_ft(target).max(400.0) as i64;
             for (over, push) in [(0.5, 0.0), (1.5, 0.0), (8.0, 0.0), (0.9, 0.04)] {
-                a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, 400, 0.5);
+                a_hot_bend_ahead(&mut app, &mut d, target + over, target as i64, radius, 0.5);
                 d.curve_servo = None;
                 let here = d.trip.position_mi;
                 d.arm_curve_servo(target, here - 0.1, here + 5.0, false);
@@ -2241,11 +2497,75 @@ fn test_the_last_few_miles_an_hour_are_shed_on_the_real_clock() {
     );
 }
 
+/// The worst the truck sat in its lane taking the 35 mph bend at 35 with
+/// curve assistance off and `lane_keeping`, nobody steering.
+fn worst_offset_at_the_advisory(lane_keeping: &str) -> (f64, Vec<String>) {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 35.0, 35, 307, 0.3);
+    app.ctx.settings.curve_speed_assist = false;
+    app.ctx.settings.lane_keeping = lane_keeping.to_string();
+    let mut worst: f64 = 0.0;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        d.trip.truck.velocity_mps = 35.0 * 0.44704;
+        if d.trip.position_mi >= bend.start_mi && d.trip.position_mi <= bend.end_mi {
+            worst = worst.max(d.lane.offset.abs());
+        }
+    });
+    (worst, run.lines)
+}
+
+#[test]
+fn test_the_cab_never_speaks_an_advisory_the_load_cannot_hold() {
+    // A 141 ft bend on a banked road, posted 30 because the bake rounded 27.6
+    // up: at 30 it asks a full trailer 0.37 g of its 0.35. The cab speaks the
+    // load's own number there, in the 5 mph steps a plaque comes in; an empty
+    // trailer is told the sign.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let bend = a_curve(d.trip.position_mi + 1.0, 'L', 30, 141, 60.0);
+    d.trip.truck.trailer_attached = true;
+    d.trip.truck.cargo_kg = ff_core::sim::vehicle::REFERENCE_CARGO_KG;
+    d.trip.truck.liquid = None;
+    assert_eq!(d.spoken_advisory_mph(&bend), 25);
+    d.trip.truck.cargo_kg = 0.0;
+    assert_eq!(d.spoken_advisory_mph(&bend), 30);
+    // A sign the load holds is spoken as it is.
+    let gentle = a_curve(d.trip.position_mi + 1.0, 'L', 45, 600, 40.0);
+    d.trip.truck.cargo_kg = ff_core::sim::vehicle::REFERENCE_CARGO_KG;
+    assert_eq!(d.spoken_advisory_mph(&gentle), 45);
+}
+
+#[test]
+fn test_partial_lane_keeping_holds_a_bend_at_its_advisory_without_curve_assistance() {
+    // Owner ruling, 2026-09-24: partial lane keeping steers through the
+    // road's curve the way curve assistance does; the driver keeps lane
+    // changes and speed. Its correction used to be capped with the driver's
+    // key at the steering limit, so this bend ran wide at its own advisory.
+    let (partial, lines) = worst_offset_at_the_advisory("partial");
+    assert!(
+        partial < 0.5,
+        "partial lane keeping left the truck {partial:.2} off centre at the advisory"
+    );
+    assert!(
+        !lines.iter().any(|l| l.contains(", too fast. Slow to")),
+        "{lines:#?}"
+    );
+    // Lane keeping off stays manual: nobody steering, the bend is not held.
+    let (off, _) = worst_offset_at_the_advisory("off");
+    assert!(
+        off > partial + 0.3,
+        "with lane keeping off the bend steered itself: {off:.2}"
+    );
+}
+
 #[test]
 fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     // (e) The setting means something: with curve speed assistance off, a
-    // driver holding the throttle into the same bend gets the old drift
-    // line, and nothing brakes for them.
+    // driver holding the throttle into the same bend is warned while there
+    // is still road to slow in, nothing brakes for them, and at 60 into a
+    // 35 the truck goes over.
     let mut app = TestApp::new();
     let clock = app.fake_pacer_clock();
     let mut d = a_drive(&mut app);
@@ -2253,19 +2573,31 @@ fn test_with_the_assist_off_a_hot_bend_still_drifts() {
     app.ctx.settings.curve_speed_assist = false;
     app.ctx.input.press(Key::Up, Mods::NONE);
 
-    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+    let mut warned_before_the_bend = false;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |app, d| {
         assert!(
             d.curve_servo.is_none(),
             "the servo armed with the assist off"
         );
+        if d.trip.position_mi < bend.start_mi
+            && app
+                .event_lines()
+                .iter()
+                .any(|l| l.contains(", too fast. Slow to"))
+        {
+            warned_before_the_bend = true;
+        }
     });
 
-    assert!(
-        run.speed_at_start_mph > 35.0 + 15.0,
-        "the throttle-held truck should still be hot: {:.1}",
-        run.speed_at_start_mph
-    );
+    assert!(warned_before_the_bend, "{:#?}", run.lines);
     assert!(drifted(&run), "{:#?}", run.lines);
+    assert!(
+        run.lines
+            .iter()
+            .any(|line| line.contains("rolled over in the bend")),
+        "{:#?}",
+        run.lines
+    );
     assert!(
         !run.lines
             .iter()
