@@ -28,6 +28,8 @@
 
 - **A set of doubles weighs both trailers and the converter dolly.** Twin 28-foot parcel pups and 48-foot turnpike doubles now count both trailers and the dolly in gross weight. Parcel pups stay under 80,000 pounds; turnpike doubles use the turnpike limit for the route: 127,400 pounds in Ohio, Indiana and Massachusetts, 143,000 in New York and 120,000 in Kansas. Dispatch sizes the load to fit, the load weight line on the job board names the limit, and the CAT Scale ticket reads the gross against it.
 
+- **Hooking a set of doubles takes longer.** A second hook-up and a walk-around of both trailers and the converter dolly add 25 minutes on duty at the shipper. You hear it at check-in and loading, and the pickup screen shows it. With doubles hooked, the walk-around at a stop covers both trailers and the dolly and takes 25 minutes instead of 15.
+
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
 - Phase A ALCAN inland: `prince_george_bc_ca`, `dawson_creek_bc_ca` (Mile 0), and `fort_st_john_bc_ca` pass-throughs with bidirectional Hwy 1/97 / John Hart / Alaska Highway legs (465 / 254 / 45 mi) from public Valhalla truck costing on `feat/career-2.0`.

@@ -284,3 +284,46 @@ fn test_detention_charge_speaks_the_hours_and_pays_the_driver() {
         "1.8 hours held past the free time at the shipper"
     );
 }
+
+#[test]
+fn test_a_set_of_doubles_adds_the_second_hook_up_and_walk_around() {
+    use crate::models::doubles::{DOUBLES_SECOND_HOOK_MIN, DOUBLES_WALK_AROUND_EXTRA_MIN};
+    let extra = DOUBLES_SECOND_HOOK_MIN + DOUBLES_WALK_AROUND_EXTRA_MIN;
+    // A parcel hub stages its pups: drop and hook, plus the doubles work.
+    let pups = pickup_plan(
+        &job("parcel_hub", "hub-1", "parcel_doubles", 400.0),
+        &CompanyDriver,
+    );
+    assert!(pups.is_drop_hook());
+    assert_eq!(pups.minutes, DROP_HOOK_MIN + extra);
+    let single = pickup_plan(&job("parcel_hub", "hub-1", "parcel", 400.0), &CompanyDriver);
+    assert_eq!(single.minutes, DROP_HOOK_MIN);
+    assert_eq!(pups.minutes - single.minutes, extra);
+    // Live loaded doubles still take the extra hook-up, and it is never
+    // billed as detention: the shipper's clock is the same as a single's.
+    for n in 0..40 {
+        let facility = format!("elev-{n}");
+        let doubles = pickup_plan(
+            &job(
+                "farm_elevator",
+                &facility,
+                "turnpike_doubles",
+                300.0 + n as f64,
+            ),
+            &CompanyDriver,
+        );
+        let plain = pickup_plan(
+            &job("farm_elevator", &facility, "general", 300.0 + n as f64),
+            &CompanyDriver,
+        );
+        assert_eq!(doubles.mode, MODE_LIVE);
+        assert_eq!(doubles.minutes, plain.minutes + extra);
+        assert_eq!(doubles.detention_minutes, plain.detention_minutes);
+    }
+    // An owner-operator's own set loads at the dock, still with the extra.
+    let owned = pickup_plan(
+        &job("parcel_hub", "hub-1", "parcel_doubles", 400.0),
+        &OwnerOperator::with(&["double_van"]),
+    );
+    assert_eq!(owned.minutes, LIVE_LOAD_MIN + extra);
+}
