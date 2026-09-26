@@ -301,7 +301,7 @@ impl Profile {
         // gate already vouched for.
         let money = f("money", defaults.money);
 
-        Profile {
+        let mut profile = Profile {
             name: s("name", &defaults.name),
             money,
             money_guard: MoneyGuard::seeded(money),
@@ -361,7 +361,15 @@ impl Profile {
             // A save that had to be migrated on load is rewritten on the next
             // save, so the conversion is not redone on every launch.
             needs_migration_resave: migrated,
+        };
+        // A save written before the flag owes the notice only if it leases
+        // double_van without turnpike_double right now; latch it otherwise so a
+        // later double_van lease never triggers it.
+        if !d.contains_key("turnpike_program_notice_seen") && !profile.turnpike_program_notice_due()
+        {
+            profile.turnpike_program_notice_seen = true;
         }
+        profile
     }
 }
 

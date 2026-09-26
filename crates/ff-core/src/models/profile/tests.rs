@@ -251,6 +251,48 @@ fn test_turnpike_program_notice_is_owed_only_to_double_van_without_turnpike_doub
 }
 
 #[test]
+fn test_turnpike_program_notice_latches_on_old_saves_that_do_not_owe_it() {
+    with_data_dir(|_| {
+        // An old save, written before the flag, from a driver leasing the
+        // given programs.
+        let write_old_save = |name: &str, programs: &[&str]| {
+            let mut p = Profile::named(name);
+            p.business_status = LEASED_OWNER_OPERATOR.to_string();
+            p.owned_trucks = vec!["rig".to_string()];
+            p.trailer_programs = programs.iter().map(|k| k.to_string()).collect();
+            let mut data = p.to_dict();
+            data.remove("turnpike_program_notice_seen");
+            data.remove(SIGNATURE_FIELD);
+            let path = p.path();
+            write_text(&path, &data);
+            path
+        };
+
+        // Not owed on load (no double_van yet): leasing double_van later,
+        // then saving and reloading, must not start owing the notice.
+        let path = write_old_save("Dry Van Lessee", &["dry_van"]);
+        let mut loaded = load(&path);
+        assert!(loaded.turnpike_program_notice_seen);
+        assert!(!loaded.turnpike_program_notice_due());
+        loaded.trailer_programs.push("double_van".to_string());
+        let path = loaded.save().unwrap();
+        let again = load(&path);
+        assert!(!again.turnpike_program_notice_due());
+
+        // Already leasing both on load: dropping turnpike_double later must
+        // not start owing it either.
+        let path = write_old_save("Both Lessee", &["double_van", "turnpike_double"]);
+        let mut loaded = load(&path);
+        assert!(!loaded.turnpike_program_notice_due());
+        loaded.trailer_programs.retain(|k| k != "turnpike_double");
+        assert!(!loaded.turnpike_program_notice_due());
+        let path = loaded.save().unwrap();
+        let again = load(&path);
+        assert!(!again.turnpike_program_notice_due());
+    });
+}
+
+#[test]
 fn test_old_turnpike_doubles_save_with_double_van_loads_as_turnpike_double() {
     // Before turnpike_doubles got its own program, the load ran on the STAA
     // `double_van` pups. The job payload never stored a trailer key (the box
