@@ -279,3 +279,65 @@ impl Menu for SaveMigrationNoticeState {
 }
 
 impl_state_for_menu!(SaveMigrationNoticeState);
+
+/// Turnpike doubles loads moved off the `double_van` program onto their own
+/// `turnpike_double` program. A save that leases double_van without the new
+/// program hears this once; trips already under way finish as they are.
+pub const TURNPIKE_PROGRAM_NOTICE: &str = "Turnpike doubles loads now need the turnpike doubles \
+     program. Your double van program still covers parcel doubles.";
+
+pub struct TurnpikeProgramNoticeState {
+    menu: MenuCore<Self>,
+}
+
+impl TurnpikeProgramNoticeState {
+    pub fn new() -> Self {
+        Self {
+            menu: MenuCore::new("Trailer programs changed")
+                .with_intro_help("Enter continues to your career."),
+        }
+    }
+
+    fn acknowledge(&mut self, ctx: &mut GameContext) {
+        if let Some(p) = ctx.profile.as_mut() {
+            p.turnpike_program_notice_seen = true;
+            if let Err(e) = p.save() {
+                log::error!("Could not save the profile: {e}");
+            }
+        }
+        continue_to_career(ctx);
+    }
+}
+
+impl Default for TurnpikeProgramNoticeState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Menu for TurnpikeProgramNoticeState {
+    fn menu(&self) -> &MenuCore<Self> {
+        &self.menu
+    }
+
+    fn menu_mut(&mut self) -> &mut MenuCore<Self> {
+        &mut self.menu
+    }
+
+    fn announce_entry(&mut self, ctx: &mut GameContext) {
+        let text = format!("{TURNPIKE_PROGRAM_NOTICE} {}", self.current_text(ctx));
+        ctx.say(&text);
+    }
+
+    fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        vec![MenuItem::new("OK", |s: &mut Self, ctx| s.acknowledge(ctx))
+            .help("Continue to your career.")]
+    }
+
+    fn go_back(&mut self, ctx: &mut GameContext) {
+        // Escape acknowledges too; the player must never be stuck here.
+        self.acknowledge(ctx);
+    }
+}
+
+impl_state_for_menu!(TurnpikeProgramNoticeState);

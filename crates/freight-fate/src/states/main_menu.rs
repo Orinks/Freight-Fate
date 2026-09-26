@@ -33,6 +33,7 @@ use crate::states::online_hub::OnlineHubState;
 use crate::states::online_offer::OnlineOfferState;
 use crate::states::save_notice::{
     DrivingRecordNoticeState, SaveMigrationNoticeState, SaveModifiedNoticeState,
+    TurnpikeProgramNoticeState,
 };
 use crate::states::text_entry::{TextEntry, TextEntryCore};
 use crate::updater;
@@ -190,6 +191,9 @@ pub fn pending_notice_state(ctx: &GameContext) -> Option<SharedState> {
     }
     if profile.driving_record.notice_pending {
         return Some(share(DrivingRecordNoticeState::new()));
+    }
+    if profile.turnpike_program_notice_due() {
+        return Some(share(TurnpikeProgramNoticeState::new()));
     }
     None
 }

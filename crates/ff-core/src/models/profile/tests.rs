@@ -206,6 +206,51 @@ fn test_old_owner_operator_save_without_trailer_programs_gets_basic_program() {
 }
 
 #[test]
+fn test_turnpike_program_notice_flag_defaults_false_on_old_saves_only() {
+    with_data_dir(|_| {
+        // A new career never ran turnpike doubles on the pups: nothing owed.
+        let fresh = Profile::named("Fresh Career");
+        assert!(fresh.turnpike_program_notice_seen);
+
+        let mut p = Profile::named("Old Pup Lessee");
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.owned_trucks = vec!["rig".to_string()];
+        p.trailer_programs = vec!["dry_van".to_string(), "double_van".to_string()];
+        let mut data = p.to_dict();
+        // Written before the flag existed.
+        data.remove("turnpike_program_notice_seen");
+        data.remove(SIGNATURE_FIELD);
+        let path = p.path();
+        write_text(&path, &data);
+
+        let mut loaded = load(&path);
+        assert!(!loaded.turnpike_program_notice_seen);
+        assert!(loaded.turnpike_program_notice_due());
+
+        loaded.turnpike_program_notice_seen = true;
+        let path = loaded.save().unwrap();
+        let again = load(&path);
+        assert!(again.turnpike_program_notice_seen);
+        assert!(!again.turnpike_program_notice_due());
+    });
+}
+
+#[test]
+fn test_turnpike_program_notice_is_owed_only_to_double_van_without_turnpike_double() {
+    let owed = |programs: &[&str]| {
+        let mut p = Profile::named("Programs");
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.owned_trucks = vec!["rig".to_string()];
+        p.trailer_programs = programs.iter().map(|k| k.to_string()).collect();
+        p.turnpike_program_notice_seen = false;
+        p.turnpike_program_notice_due()
+    };
+    assert!(owed(&["dry_van", "double_van"]));
+    assert!(!owed(&["dry_van", "reefer"]));
+    assert!(!owed(&["double_van", "turnpike_double"]));
+}
+
+#[test]
 fn test_old_turnpike_doubles_save_with_double_van_loads_as_turnpike_double() {
     // Before turnpike_doubles got its own program, the load ran on the STAA
     // `double_van` pups. The job payload never stored a trailer key (the box
