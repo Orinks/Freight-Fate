@@ -11,6 +11,7 @@ pub mod carrier_fleet;
 pub mod carriers;
 pub mod credentials;
 pub mod dispatch_policy;
+pub mod doubles;
 pub mod economy;
 pub mod enforcement;
 pub mod home_base;

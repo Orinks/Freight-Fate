@@ -17,6 +17,7 @@ use ff_core::data::world::World;
 use ff_core::data::world_models::Route;
 use ff_core::models::business_constants::is_owner_operator;
 use ff_core::models::dispatch_policy::dispatch_policy;
+use ff_core::models::doubles::{doubles_hook_extra_min, doubles_hook_text, is_doubles_cargo};
 use ff_core::models::jobs::{job_from_payload, job_payload, plan_hos, Job};
 use ff_core::models::trailer_yard::{
     pickup_plan, replacement_trailer, PickupPlan, TrailerUnit, TRAILER_SWAP_MIN,
@@ -32,7 +33,7 @@ use ff_core::sim::route_roadwork::{
 use ff_core::sim::season::{adjust_for_calendar, real_clock_game_hours, temperature_c};
 use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
-use ff_core::sim::vehicle::TruckState;
+use ff_core::sim::vehicle::{TrailerSet, TruckState};
 use ff_core::sim::weather::WeatherSystem;
 
 use crate::app::GameContext;
@@ -483,8 +484,14 @@ impl PickupFacilityState {
         }
         let Some(defect) = trailer.defect() else {
             ctx.audio.play("ui/notify");
+            let covered = if is_doubles_cargo(self.job.cargo.key) {
+                ", both trailers and the converter dolly"
+            } else {
+                ""
+            };
             ctx.say(&format!(
-                "Walking {}: lamps lit, brakes in adjustment, tires with tread. It checks out.{}",
+                "Walking {}{covered}: lamps lit, brakes in adjustment, tires with tread. It \
+                 checks out.{}",
                 trailer.spoken_name(),
                 self.tank_walk_around_clause()
             ));
@@ -614,10 +621,11 @@ impl PickupFacilityState {
         self.refresh(ctx, false);
         ctx.audio.play("ui/notify");
         let plan = self.pickup_plan(ctx);
+        let doubles = self.doubles_clause();
         if plan.is_drop_hook() {
             ctx.say(&format!(
                 "Checked in at {facility}. Your load is on {} in the drop yard. Stop, then \
-                 drop and hook.",
+                 drop and hook.{doubles}",
                 plan.trailer
                     .as_ref()
                     .map(|t| t.spoken_name())
@@ -625,8 +633,20 @@ impl PickupFacilityState {
             ));
         } else {
             ctx.say(&format!(
-                "Checked in at {facility}. Dock assigned. Stop, then load cargo."
+                "Checked in at {facility}. Dock assigned. Stop, then load cargo.{doubles}"
             ));
+        }
+    }
+
+    /// The hook-up and walk-around a set of doubles adds, with a leading
+    /// space, or empty for a single trailer. Spoken at check-in and loading
+    /// and shown on the pickup screen.
+    fn doubles_clause(&self) -> String {
+        let text = doubles_hook_text(self.job.cargo.key);
+        if text.is_empty() {
+            text
+        } else {
+            format!(" {text}")
         }
     }
 
@@ -659,13 +679,14 @@ impl PickupFacilityState {
                 "Hooking the loaded trailer",
                 format!(
                     "Dropping your empty at {facility} and hooking {}, loaded with {} tons \
-                     of {}.",
+                     of {}.{}",
                     plan.trailer
                         .as_ref()
                         .map(|t| t.spoken_name())
                         .unwrap_or_default(),
                     fmt_f(self.job.weight_tons, 0),
-                    self.job.spoken_cargo_label()
+                    self.job.spoken_cargo_label(),
+                    self.doubles_clause()
                 ),
                 "Dropping and hooking.",
             )
@@ -673,9 +694,10 @@ impl PickupFacilityState {
             (
                 "Loading cargo",
                 format!(
-                    "Loading {} tons of {} at {facility}.",
+                    "Loading {} tons of {} at {facility}.{}",
                     fmt_f(self.job.weight_tons, 0),
-                    self.job.spoken_cargo_label()
+                    self.job.spoken_cargo_label(),
+                    self.doubles_clause()
                 ),
                 "Loading cargo.",
             )
@@ -708,10 +730,12 @@ impl PickupFacilityState {
             let start = p.game_hours;
             p.game_hours += plan.minutes / 60.0;
             let end = p.game_hours;
-            let activity = if plan.is_drop_hook() {
-                "dropping and hooking"
-            } else {
-                "loading"
+            let doubles = is_doubles_cargo(self.job.cargo.key);
+            let activity = match (plan.is_drop_hook(), doubles) {
+                (true, true) => "dropping and hooking a set of doubles",
+                (true, false) => "dropping and hooking",
+                (false, true) => "loading and hooking a set of doubles",
+                (false, false) => "loading",
             };
             p.duty_log
                 .record("on_duty_not_driving", start, end, &facility, activity);
@@ -783,7 +807,17 @@ impl PickupFacilityState {
             (filtered, note)
         } else if cargo_requires_lcv_turnpike(self.job.cargo.key) {
             let before = routes.len();
-            let filtered = filter_lcv_turnpike_routes(&routes);
+            // The turnpike allowlist, and a recorded LCV cap in every state
+            // the lane touches: a state without one makes the lane illegal
+            // for this set at any weight, so it is dropped, never capped at
+            // 80,000 lb.
+            let filtered: Vec<_> = filter_lcv_turnpike_routes(&routes)
+                .into_iter()
+                .filter(|route| {
+                    TrailerSet::for_cargo_on_route(self.job.cargo.key, ctx.world, Some(route))
+                        .is_some()
+                })
+                .collect();
             if filtered.is_empty() {
                 ctx.audio.play("ui/error");
                 ctx.say(LCV_TURNPIKE_ROUTE_REFUSAL);
@@ -1175,6 +1209,15 @@ impl Menu for PickupFacilityState {
             ),
             format!("Destination: {}", self.job.spoken_destination()),
             format!("Status: {state}"),
+        ];
+        if is_doubles_cargo(self.job.cargo.key) {
+            lines.push(format!(
+                "Doubles: two hook-ups and a walk-around of both trailers and the dolly, {} \
+                 extra minutes on duty",
+                fmt_f(doubles_hook_extra_min(self.job.cargo.key), 0)
+            ));
+        }
+        lines.extend([
             format!(
                 "Speed: {}",
                 ctx.settings.hud_speed_text(self.truck.speed_mph())
@@ -1197,7 +1240,7 @@ impl Menu for PickupFacilityState {
                     "parking released"
                 }
             ),
-        ];
+        ]);
         if self.speed_control_armed {
             let target = match self.speed_control_target_mph {
                 Some(mph) => ctx.settings.speed_text(mph),

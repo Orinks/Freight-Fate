@@ -127,8 +127,9 @@ pub const TRAILER_CATALOG: &[TrailerType] = &[
     // 102 ft (two 48-ft boxes plus converter); overall combination is 117 ft
     // (day-cab tractor + boxes + dolly), inside the MA 120 ft unit cap and
     // the frozen Appendix C cargo-length ceilings (NY 102 / MA 104 / OH 102 /
-    // IN 106 / KS 109; MA also caps trailers at 48 ft). Tare and GVW still
-    // use the shared trailer mass until FIX 5.
+    // IN 106 / KS 109; MA also caps trailers at 48 ft). Tare and legal gross
+    // come from `models::doubles`: both boxes and the dolly, under the
+    // route's turnpike cap.
     TrailerType {
         key: "turnpike_double",
         label: "48-foot turnpike doubles",

@@ -40,7 +40,7 @@ pub fn describe_job(ctx: &GameContext, total: usize, job: &Job, index: Option<us
     let preview = format!(
         "{} {}",
         market_preview(&business),
-        load_weight_margin(p, job)
+        load_weight_margin(ctx.world, p, job)
     );
     let distance = ctx.settings.distance_text(job.distance_mi, false);
     let text = job.describe(&DescribeOptions {
@@ -134,7 +134,7 @@ impl JobDetailState {
             format!("Origin: {}.", job.origin_facility_text()),
             format!("Destination: {destination_text}."),
             format!("Distance: {}.", s.distance_text(job.distance_mi, false)),
-            load_weight_margin(p, job),
+            load_weight_margin(ctx.world, p, job),
             format!(
                 "{}: {} dollars.",
                 pay_label(&p.business_status),

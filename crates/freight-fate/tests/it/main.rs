@@ -185,6 +185,7 @@ mod transcript_spoken_truth;
 mod transcript_truck_status;
 mod transcript_tutorial_verbosity;
 mod transcript_wrong_way;
+mod twin_parcel_doubles;
 mod updater;
 mod windows_subsystem;
 

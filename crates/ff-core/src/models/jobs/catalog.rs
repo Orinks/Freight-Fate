@@ -318,9 +318,9 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
         // 48-foot turnpike doubles on the classic LCV turnpike corridors
         // (see `data::lcv_turnpikes`). Distinct from STAA 28-foot pups. Needs
         // the doubles endorsement and the LCV certificate. Never placarded /
-        // hazmat -- hazmat in doubles is not modeled. The game keeps the
-        // combination at legal GVW; per-corridor LCV caps are recorded for
-        // FIX 5 but not enforced yet.
+        // hazmat -- hazmat in doubles is not modeled. The board keeps the
+        // combination under the route's LCV cap (`models::doubles`), with
+        // both trailers and the dolly in the tare.
         CargoType::plain(
             "turnpike_doubles",
             "48-foot turnpike doubles freight",
