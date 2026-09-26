@@ -5,19 +5,22 @@
 use crate::states_city_support::*;
 use ff_core::data::world::get_world;
 use ff_core::models::doubles::{
-    doubles_hook_text, DOUBLES_NO_REVERSE_TEXT, DOUBLES_SECOND_HOOK_MIN,
-    DOUBLES_WALK_AROUND_EXTRA_MIN,
+    doubles_break_text, doubles_hook_text, DOUBLES_BREAK_SET_MIN, DOUBLES_NO_REVERSE_TEXT,
+    DOUBLES_SECOND_HOOK_MIN, DOUBLES_WALK_AROUND_EXTRA_MIN, REAR_TRAILER_WHIP_TEXT,
 };
 use ff_core::models::jobs::{cargo_type, Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
-use ff_core::models::trailer_yard::LIVE_LOAD_MIN;
+use ff_core::models::trailer_yard::{delivery_plan, LIVE_LOAD_MIN};
 use ff_core::sim::transmission::REVERSE;
 use ff_core::sim::vehicle::KG_PER_TON;
+use ff_core::sim::weather::WeatherKind;
+use freight_fate::app::share;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
 use freight_fate::states::city_pickup::{PickupFacilityState, PickupOptions};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, WALK_AROUND_MIN};
+use freight_fate::states::driving_menu_states::{DriveRef, FacilityArrivalState};
 use freight_fate::states::driving_rest_states::walk_around_minutes;
 
 fn drive(
@@ -43,7 +46,14 @@ fn drive(
         1000.0,
         12.0,
     );
-    let mut drive = DrivingState::new(&mut app.ctx, job, route, None, DRIVE_PHASE_DELIVERY, None);
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(7),
+        DRIVE_PHASE_DELIVERY,
+        None,
+    );
     drive.trip.set_npc_vehicles(Vec::new());
     drive
 }
@@ -150,4 +160,100 @@ fn a_turnpike_double_runs_under_its_turnpike_cap_and_pups_under_eighty_thousand(
     let mut heavy = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
     heavy.trip.truck.cargo_kg = 30.0 * KG_PER_TON;
     assert!(heavy.trip.truck.is_over_legal_gvw());
+}
+
+#[test]
+fn breaking_a_set_of_doubles_at_the_receiver_takes_time_and_says_so() {
+    let mut app = TestApp::new();
+    let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+    d.trip.truck.velocity_mps = 0.0;
+    let plan = delivery_plan(&d.job, app.ctx.profile.as_ref().unwrap());
+    let base = {
+        let mut single = d.job.clone();
+        single.cargo = &CARGO_CATALOG["general"];
+        delivery_plan(&single, app.ctx.profile.as_ref().unwrap()).minutes
+    };
+    assert_eq!(plan.minutes, base + DOUBLES_BREAK_SET_MIN);
+    let minutes_before = d.trip.game_minutes;
+    let duty_before = profile(&app).hos.duty_min;
+
+    let shared = share(d);
+    app.ctx.push_shared_with(shared.clone(), false);
+    app.push_state(FacilityArrivalState::with_drive(DriveRef::of(&shared)));
+    let text = doubles_break_text("parcel_doubles");
+    let said = app.main_lines().last().cloned().unwrap();
+    assert!(
+        said.contains(&text),
+        "arrival must speak the break time: {said}"
+    );
+    assert!(
+        app.visible_lines()
+            .iter()
+            .any(|l| l.starts_with("Doubles: drop the rear trailer")),
+        "the break time must be on screen too: {:?}",
+        app.visible_lines()
+    );
+
+    key(&mut app, Key::Return); // drop or dock
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains(&text),
+        "the work must speak the break time: {said}"
+    );
+    finish_timed_state(&mut app);
+    let minutes_after = shared
+        .borrow()
+        .as_any()
+        .downcast_ref::<DrivingState>()
+        .unwrap()
+        .trip
+        .game_minutes;
+    assert!((minutes_after - (minutes_before + plan.minutes)).abs() < 1e-6);
+    assert!((profile(&app).hos.duty_min - (duty_before + plan.minutes)).abs() < 1e-6);
+}
+
+#[test]
+fn a_crosswind_drifts_the_tractor_the_same_with_doubles_as_with_a_single() {
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "off".to_string();
+    let mut run = |cargo: &str| {
+        let mut d = drive(&mut app, cargo, "Buffalo", "Rochester", 10.0);
+        d.trip.weather.current = WeatherKind::Wind;
+        d.trip.truck.velocity_mps = 60.0 / 2.23694;
+        let mut offsets = Vec::new();
+        let mut gusted = false;
+        for _ in 0..200 {
+            d.update_lane(&mut app.ctx, 0.05);
+            offsets.push((d.lane.lane, d.lane.offset));
+            gusted |= d.lane.wind_lateral_g > 0.0;
+        }
+        (offsets, gusted)
+    };
+    let (single, gusted) = run("general");
+    let (pups, _) = run("parcel_doubles");
+    assert!(gusted, "the wind must be blowing for this to mean anything");
+    assert!(single.iter().any(|(_, offset)| *offset != 0.0));
+    assert_eq!(
+        single, pups,
+        "rear-trailer amplification must not reach the tractor"
+    );
+}
+
+#[test]
+fn full_lane_keeping_changes_lanes_gently_with_no_whip() {
+    // Under full lane keeping the steering keys only ask for a timed,
+    // signalled lane change; there is no abrupt steer to reach, and the
+    // change it makes never whips the rear trailer.
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "full".to_string();
+    let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+    d.trip.truck.velocity_mps = 60.0 / 2.23694;
+    let damage = d.trip.truck.cargo_damage_pct;
+    d.tap_lane_change(&mut app.ctx, 1);
+    for _ in 0..200 {
+        d.update_lane(&mut app.ctx, 0.05);
+        assert_eq!(d.lane.transient_lateral_g(), 0.0);
+    }
+    assert_eq!(d.trip.truck.cargo_damage_pct, damage);
+    assert!(!app.main_lines().iter().any(|l| l == REAR_TRAILER_WHIP_TEXT));
 }

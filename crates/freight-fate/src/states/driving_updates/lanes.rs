@@ -412,9 +412,10 @@ impl DrivingState {
             .unwrap_or(0.0);
         let road = RoadConditions {
             curvature: curve,
-            // The rear trailer of a set of doubles amplifies what the wind
-            // does to the tractor (FHWA 2000 CTSW Vol III, Ch VIII).
-            wind: wind * self.trip.truck.crosswind_mult(),
+            // The tractor drifts in a crosswind the same with doubles as
+            // with a single; the rear trailer's amplified sway is its own
+            // (`rear_trailer_whip`).
+            wind,
             grip,
             bank,
         };
@@ -916,13 +917,19 @@ impl DrivingState {
 }
 
 impl DrivingState {
-    /// A set of doubles: a quick steer swings the rear trailer harder than
-    /// the tractor. Past the whip threshold the freight shifts and the driver
-    /// hears why, once per swerve.
+    /// A set of doubles: a quick steer or a gust swings the rear trailer
+    /// harder than the tractor. Past the whip threshold the freight shifts
+    /// and the driver hears why, once per swerve.
+    ///
+    /// Full lane keeping runs no drift model, so both readings are zero
+    /// there: its lane changes are timed, signalled and gentle, and the
+    /// steering keys under it only ask for one (`tap_lane_change`). There
+    /// is no abrupt steer to report while it drives.
     fn rear_trailer_whip(&mut self, ctx: &mut GameContext, dt: f64) {
         self.rear_whip_cooldown_s = (self.rear_whip_cooldown_s - dt).max(0.0);
         let steer_g = self.lane.transient_lateral_g();
-        let whipped = self.trip.truck.update_rear_trailer(dt, steer_g);
+        let wind_g = self.lane.wind_lateral_g;
+        let whipped = self.trip.truck.update_rear_trailer(dt, steer_g, wind_g);
         if whipped && self.rear_whip_cooldown_s <= 0.0 {
             self.rear_whip_cooldown_s = REAR_WHIP_COOLDOWN_S;
             self.set_status(REAR_TRAILER_WHIP_TEXT);

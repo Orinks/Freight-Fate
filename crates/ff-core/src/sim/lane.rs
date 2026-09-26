@@ -250,6 +250,13 @@ pub struct LaneKeeping {
     /// heading (positive to the right). Zero when no drift model runs.
     pub lateral_g: f64,
     steady_lateral_g: f64,
+    /// How hard the crosswind gust is shoving sideways this update, g,
+    /// unsigned: the rate the gust's sideways speed is changing. The tractor
+    /// already drifts with the gust through `drift_rate`; this is the same
+    /// push read as an acceleration, for the rear trailer of a set of
+    /// doubles, which the lane model does not steer.
+    pub wind_lateral_g: f64,
+    wind_lateral_fps: Option<f64>,
 }
 
 impl Default for LaneKeeping {
@@ -286,6 +293,8 @@ impl LaneKeeping {
             event_cooldown: 0.0,
             lateral_g: 0.0,
             steady_lateral_g: 0.0,
+            wind_lateral_g: 0.0,
+            wind_lateral_fps: None,
         }
     }
 
@@ -299,6 +308,8 @@ impl LaneKeeping {
     fn clear_lateral(&mut self) {
         self.lateral_g = 0.0;
         self.steady_lateral_g = 0.0;
+        self.wind_lateral_g = 0.0;
+        self.wind_lateral_fps = None;
     }
 
     pub fn lane_name(&self) -> &'static str {
@@ -397,6 +408,15 @@ impl LaneKeeping {
             self.gust_target = self.rng.uniform(-1.0, 1.0);
         }
         self.gust += (self.gust_target - self.gust) * (dt / 1.5).min(1.0);
+        // The gust's sideways speed on the truck before any assist damps the
+        // drift it causes (the assist steers the tractor; it does not stop
+        // the air). Its rate of change is the shove, in g.
+        let wind_fps = wind * self.gust * WIND_RATE * HALF_LANE_FT;
+        self.wind_lateral_g = match self.wind_lateral_fps {
+            Some(before) if dt > 0.0 => ((wind_fps - before) / dt).abs() / G_FPS2,
+            _ => 0.0,
+        };
+        self.wind_lateral_fps = Some(wind_fps);
 
         // What the driver asked the front axle for, plus whatever partial
         // lane keeping is contributing, capped so a held key is a steering

@@ -17,6 +17,8 @@ use super::{
     TruckState, CARGO_CORNER_PCT_PER_G_S, KG_PER_LB, LEGAL_GVW_KG, REFERENCE_CARGO_KG,
     TRAILER_TARE_KG,
 };
+use crate::data::corners::TRUCK_ROLLOVER_G;
+use crate::data::lcv_turnpikes::{cargo_requires_lcv_turnpike, filter_lcv_turnpike_routes};
 use crate::data::world::World;
 use crate::data::world_models::Route;
 use crate::models::doubles::{
@@ -118,33 +120,64 @@ impl TruckState {
         })
     }
 
-    /// The rear trailer's lateral acceleration, g, for a steer that puts
-    /// `steer_lateral_g` on the tractor. A single trailer tracks the tractor.
-    pub fn rear_trailer_lateral_g(&self, steer_lateral_g: f64) -> f64 {
+    /// How much harder a gust shoves this set than a loaded one: the same
+    /// wind force on less mass is more acceleration (a = F / m). The lane
+    /// model's gust is taken as the push on a combination at its legal
+    /// gross (ASSUMED calibration), so a set at or over its legal gross
+    /// reads 1.0 and an empty set well above it. 1.0 for a single trailer,
+    /// whose own drift the lane model already carries.
+    pub fn light_set_wind_mult(&self) -> f64 {
+        if !self.doubles_hooked() {
+            return 1.0;
+        }
+        (self.legal_gvw_kg() / self.gross_mass_kg().max(1.0)).max(1.0)
+    }
+
+    /// The rear trailer's lateral acceleration, g: the tractor's quick-steer
+    /// acceleration plus the crosswind gust's shove, both amplified down the
+    /// set (rearward amplification), the gust also scaled up for a light set
+    /// ([`Self::light_set_wind_mult`]). A single trailer tracks the tractor,
+    /// so it reads the steer alone. The amplification never reaches the
+    /// tractor's own lane drift: it is a property of the rear trailer.
+    pub fn rear_trailer_lateral_g(&self, steer_lateral_g: f64, wind_lateral_g: f64) -> f64 {
         if !self.doubles_hooked() {
             return steer_lateral_g.abs();
         }
-        steer_lateral_g.abs() * self.trailer_set.rearward_amplification
+        (steer_lateral_g.abs() + wind_lateral_g.abs() * self.light_set_wind_mult())
+            * self.trailer_set.rearward_amplification
     }
 
-    /// How far past the roll model's warning share of this load's threshold
-    /// the rear trailer is swinging, in g; zero or less is fine. The same
-    /// ladder a bend uses (`vehicle/roll.rs`), applied to the swing a quick
-    /// steer sends down a set of doubles. Always zero for a single trailer
-    /// and below [`REAR_WHIP_MIN_MPH`].
-    pub fn rear_trailer_whip_excess_g(&self, steer_lateral_g: f64) -> f64 {
+    /// The swing at which the rear trailer of a set whips, g: the roll
+    /// model's warning share of the threshold, with the threshold floored at
+    /// the loaded trailer's. A light pup is no harder to whip over than a
+    /// loaded one -- empty pups blow over and whip MORE easily -- so a light
+    /// load must never raise this.
+    pub fn rear_trailer_whip_threshold_g(&self) -> f64 {
+        ROLL_WARN_SHARE * self.roll_threshold_g().min(TRUCK_ROLLOVER_G)
+    }
+
+    /// How far past [`Self::rear_trailer_whip_threshold_g`] the rear trailer
+    /// is swinging, in g; zero or less is fine. Always zero for a single
+    /// trailer and below [`REAR_WHIP_MIN_MPH`].
+    pub fn rear_trailer_whip_excess_g(&self, steer_lateral_g: f64, wind_lateral_g: f64) -> f64 {
         if !self.doubles_hooked() || self.speed_mph() < REAR_WHIP_MIN_MPH {
             return 0.0;
         }
-        self.rear_trailer_lateral_g(steer_lateral_g) - ROLL_WARN_SHARE * self.roll_threshold_g()
+        self.rear_trailer_lateral_g(steer_lateral_g, wind_lateral_g)
+            - self.rear_trailer_whip_threshold_g()
     }
 
     /// Freight in the rear trailer works against its straps when a quick
-    /// steer whips it past the warning share, at the rate a bend taken too
-    /// fast would cost (`update_cargo`), on the rear trailer's share of the
-    /// load. Returns whether it whipped this frame.
-    pub fn update_rear_trailer(&mut self, dt: f64, steer_lateral_g: f64) -> bool {
-        let excess = self.rear_trailer_whip_excess_g(steer_lateral_g);
+    /// steer or a gust whips it past the threshold, at the rate a bend taken
+    /// too fast would cost (`update_cargo`), on the rear trailer's share of
+    /// the load. Returns whether it whipped this frame.
+    pub fn update_rear_trailer(
+        &mut self,
+        dt: f64,
+        steer_lateral_g: f64,
+        wind_lateral_g: f64,
+    ) -> bool {
+        let excess = self.rear_trailer_whip_excess_g(steer_lateral_g, wind_lateral_g);
         if excess <= 0.0 {
             return false;
         }
@@ -160,22 +193,11 @@ impl TruckState {
         true
     }
 
-    /// How much harder a crosswind pushes this set than a single box.
-    /// ASSUMED: the rear trailer's amplification is used as the factor; no
-    /// published crosswind figure for doubles was found.
-    pub fn crosswind_mult(&self) -> f64 {
-        if self.doubles_hooked() {
-            self.trailer_set.rearward_amplification
-        } else {
-            1.0
-        }
-    }
-
     /// The CAT Scale ticket. A single trailer is broken out by axle group
-    /// ([`super::AxleLoads::ticket_text`]); a set of doubles stands on
-    /// single axles the three-group split does not model, so its ticket
-    /// gives the gross against this set's legal gross for the route and
-    /// says the axles are not broken out.
+    /// ([`super::AxleLoads::ticket_text`]). A set of doubles stands on
+    /// single axles the three-group split does not model, so the game reads
+    /// its gross against this set's legal gross for the route and nothing
+    /// else; a real ticket prints each platform, which is a ROADMAP debt.
     pub fn scale_ticket_text(&self) -> String {
         if !self.doubles_hooked() {
             return self.axle_loads().ticket_text();
@@ -331,6 +353,7 @@ mod tests {
     #[test]
     fn a_quick_steer_swings_the_rear_pup_harder() {
         let mut set = pups();
+        set.cargo_kg = REFERENCE_CARGO_KG;
         set.velocity_mps = 60.0 / 2.23694;
         let single = TruckState {
             velocity_mps: set.velocity_mps,
@@ -338,41 +361,80 @@ mod tests {
         };
         // The driver's steering cap at highway speed is 0.2 g on the tractor.
         let steer_g = 0.2;
-        assert!((set.rear_trailer_lateral_g(steer_g) - 0.34).abs() < 1e-9);
-        assert_eq!(single.rear_trailer_lateral_g(steer_g), steer_g);
-        // Full load: the pup passes the warning share a single never reaches.
-        assert!(set.rear_trailer_whip_excess_g(steer_g) > 0.0);
-        assert!(single.rear_trailer_whip_excess_g(steer_g) <= 0.0);
+        assert!((set.rear_trailer_lateral_g(steer_g, 0.0) - 0.34).abs() < 1e-9);
+        assert_eq!(single.rear_trailer_lateral_g(steer_g, 0.0), steer_g);
+        // Full load: the pup passes the threshold a single never reaches.
+        assert!(set.rear_trailer_whip_excess_g(steer_g, 0.0) > 0.0);
+        assert!(single.rear_trailer_whip_excess_g(steer_g, 0.0) <= 0.0);
         // A gentle lane change is fine even on pups.
-        assert!(set.rear_trailer_whip_excess_g(0.1) <= 0.0);
+        assert!(set.rear_trailer_whip_excess_g(0.1, 0.0) <= 0.0);
         // Turnpike doubles amplify less: the same steer stays under.
         let mut lcv = turnpike(127_400.0);
+        lcv.cargo_kg = REFERENCE_CARGO_KG;
         lcv.velocity_mps = set.velocity_mps;
-        assert!(lcv.rear_trailer_whip_excess_g(steer_g) <= 0.0);
+        assert!(lcv.rear_trailer_whip_excess_g(steer_g, 0.0) <= 0.0);
         // At street speed nothing is said.
         set.velocity_mps = 25.0 / 2.23694;
-        assert_eq!(set.rear_trailer_whip_excess_g(steer_g), 0.0);
+        assert_eq!(set.rear_trailer_whip_excess_g(steer_g, 0.0), 0.0);
+    }
+
+    #[test]
+    fn an_empty_set_whips_no_later_than_a_loaded_one() {
+        let speed = 60.0 / 2.23694;
+        let mut loaded = pups();
+        loaded.cargo_kg = REFERENCE_CARGO_KG;
+        loaded.velocity_mps = speed;
+        let mut empty = pups();
+        empty.cargo_kg = 0.0;
+        empty.velocity_mps = speed;
+        // A light load never raises the threshold.
+        assert!(empty.rear_trailer_whip_threshold_g() <= loaded.rear_trailer_whip_threshold_g());
+        // The smallest steer that whips each set, found by stepping up.
+        let first_whip = |t: &TruckState| {
+            (1..=400)
+                .map(|n| f64::from(n) * 0.001)
+                .find(|g| t.rear_trailer_whip_excess_g(*g, 0.0) > 0.0)
+                .expect("some steer whips a set of doubles")
+        };
+        assert!(first_whip(&empty) <= first_whip(&loaded));
+        // In a crosswind the light set is pushed harder, so it whips on a
+        // smaller steer than the loaded one.
+        let gust = 0.03;
+        assert!(empty.light_set_wind_mult() > loaded.light_set_wind_mult());
+        let first_whip_in_wind = |t: &TruckState| {
+            (1..=400)
+                .map(|n| f64::from(n) * 0.001)
+                .find(|g| t.rear_trailer_whip_excess_g(*g, gust) > 0.0)
+                .expect("some steer whips a set of doubles")
+        };
+        assert!(first_whip_in_wind(&empty) < first_whip_in_wind(&loaded));
     }
 
     #[test]
     fn a_whip_costs_the_rear_trailer_freight_and_a_single_nothing() {
         let mut set = pups();
+        set.cargo_kg = REFERENCE_CARGO_KG;
         set.velocity_mps = 60.0 / 2.23694;
-        assert!(set.update_rear_trailer(1.0, 0.2));
+        assert!(set.update_rear_trailer(1.0, 0.2, 0.0));
         assert!(set.cargo_damage_pct > 0.0);
         let mut single = TruckState {
             velocity_mps: set.velocity_mps,
             ..TruckState::default()
         };
-        assert!(!single.update_rear_trailer(1.0, 0.2));
+        assert!(!single.update_rear_trailer(1.0, 0.2, 0.0));
         assert_eq!(single.cargo_damage_pct, 0.0);
     }
 
     #[test]
-    fn a_crosswind_pushes_doubles_more() {
-        assert_eq!(TruckState::default().crosswind_mult(), 1.0);
-        assert_eq!(pups().crosswind_mult(), 1.7);
-        let lcv = turnpike(127_400.0).crosswind_mult();
-        assert!(lcv > 1.0 && lcv < 1.7);
+    fn a_crosswind_sways_the_rear_trailer_not_the_tractor() {
+        // The gust reaches the rear trailer amplified; a single trailer,
+        // tracking the tractor, reads none of it here -- its drift is the
+        // lane model's, unchanged for doubles.
+        let set = pups();
+        let single = TruckState::default();
+        let gust = 0.05;
+        assert!(set.rear_trailer_lateral_g(0.0, gust) >= gust * 1.7 - 1e-12);
+        assert_eq!(single.rear_trailer_lateral_g(0.0, gust), 0.0);
+        assert_eq!(single.light_set_wind_mult(), 1.0);
     }
 }
