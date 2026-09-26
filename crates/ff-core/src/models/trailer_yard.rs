@@ -82,7 +82,9 @@ pub const MODE_DROP_HOOK: &str = "drop_and_hook";
 pub const MODE_LIVE: &str = "live_load";
 
 /// One physical trailer, with a number on the side and a history behind it.
-/// Rides in the trip snapshot, so it serialises by field name.
+/// Never written into a save: the pickup and trip snapshots keep only the job,
+/// and the unit is worked out again from its cargo and origin facility
+/// (`yard_trailers`, `preloaded_trailer`) whenever it is needed.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TrailerUnit {
     pub number: String,

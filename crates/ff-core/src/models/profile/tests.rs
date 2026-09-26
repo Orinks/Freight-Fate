@@ -257,6 +257,12 @@ fn test_old_turnpike_doubles_save_with_double_van_loads_as_turnpike_double() {
     // is derived from the cargo each time), so an old active trip that still
     // carries a stale "double_van" field, from a driver leasing the
     // double_van program, resolves to `turnpike_double` on load.
+    //
+    // No released or branch version ever wrote a "trailer" key into a job
+    // payload; the stale field is planted here only to prove the load path
+    // ignores it. What this test guards is that the trailer keeps being
+    // worked out from the cargo, so a turnpike_doubles job can never come
+    // back on the STAA pups.
     use crate::models::jobs::job_from_payload;
     use crate::models::trailer_yard::{preloaded_trailer, DROP_YARD_FACILITY_TYPES};
     use crate::models::trailers::trailer_keys_for_cargo;
