@@ -23,7 +23,9 @@ use crate::models::start_options::{start_option, DEFAULT_START_KEY};
 use crate::pyfmt::round_py_n;
 use crate::pyrandom::PyRandom;
 use crate::sim::hos::HosClock;
-use crate::sim::vehicle::{combination_tare_kg, max_legal_cargo_tons, TruckSpecs};
+use crate::sim::vehicle::{
+    combination_tare_kg, TrailerSet, TruckSpecs, KG_PER_TON, TRAILER_TARE_KG,
+};
 
 /// `(destination, route miles, route leg count)`.
 pub type Candidate = (String, f64, usize);
@@ -779,11 +781,21 @@ impl<'w> JobBoard<'w> {
         carrier_key: &str,
         direct_freight: bool,
     ) -> Job {
-        // Clamp to 80,000 lb GVW for a stock tractor + trailer. Heavier
-        // catalog ranges exist, but a dispatched load that starts illegal
-        // is a lie; the live overweight check still red-lights a truck
-        // that ends up over (a heavier tractor, a test load).
-        let max_tons = max_legal_cargo_tons(combination_tare_kg(&TruckSpecs::default()));
+        let route = self
+            .world
+            .supported_route(origin, destination, None)
+            .ok()
+            .flatten();
+        // Clamp to the legal gross for a stock tractor and what this freight
+        // hooks: 80,000 lb for a single or STAA twin 28s, the route's
+        // turnpike cap for turnpike doubles, with both trailers and the
+        // converter dolly in the tare. Heavier catalog ranges exist, but a
+        // dispatched load that starts illegal is a lie; the live overweight
+        // check still red-lights a truck that ends up over (a heavier
+        // tractor, a test load).
+        let set = TrailerSet::for_cargo_on_route(cargo.key, self.world, route.as_ref());
+        let tare = combination_tare_kg(&TruckSpecs::default()) - TRAILER_TARE_KG + set.tare_kg;
+        let max_tons = ((set.legal_gvw_kg - tare) / KG_PER_TON).max(0.0);
         let hi = cargo.weight_tons.1.min(max_tons);
         let lo = cargo.weight_tons.0.min(hi);
         let weight = self.rng.uniform(lo, hi);
@@ -801,11 +813,6 @@ impl<'w> JobBoard<'w> {
         );
         // deadline: the honest HOS-compliant hours (driving, breaks, sleep),
         // shipper slack on top, plus a flat hour for fuel and the unexpected
-        let route = self
-            .world
-            .supported_route(origin, destination, None)
-            .ok()
-            .flatten();
         let slack = self.rng.uniform(
             DEADLINE_DISPATCH_SLACK_RANGE.0,
             DEADLINE_DISPATCH_SLACK_RANGE.1,

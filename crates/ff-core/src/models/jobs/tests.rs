@@ -1589,3 +1589,63 @@ fn ordinary_reefer_cargo_keeps_catalog_label() {
     job.destination_location = "Chicago Cross-Dock".into();
     assert_eq!(job.spoken_cargo_label(), "refrigerated goods");
 }
+
+#[test]
+fn doubles_loads_stay_under_their_route_cap_with_both_trailers_and_the_dolly() {
+    // FIX 5: the board prices a set of doubles with both trailers and the
+    // converter dolly in the tare, against the gross cap of the route the
+    // load runs. Turnpike doubles take the turnpike cap; STAA pups stay at
+    // 80,000 lb.
+    use crate::sim::vehicle::{
+        combination_tare_kg, TrailerSet, TruckSpecs, KG_PER_TON, TRAILER_TARE_KG,
+    };
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    let tractor_kg = combination_tare_kg(&TruckSpecs::default()) - TRAILER_TARE_KG;
+    let mut pups = 0;
+    let mut turnpike = 0;
+    for city in ["Toledo", "Buffalo", "Gary", "Chicago", "Columbus"] {
+        for seed in 0..12 {
+            let jobs = board(seed).offers(
+                city,
+                &every_credential,
+                OfferOptions {
+                    count: 12,
+                    level: 30,
+                    ..Default::default()
+                },
+            );
+            for job in jobs {
+                let set = TrailerSet::for_cargo_on_route(
+                    job.cargo.key,
+                    world(),
+                    supported(&job).as_ref(),
+                );
+                if !set.is_doubles() {
+                    continue;
+                }
+                let gross = tractor_kg + set.tare_kg + job.weight_tons * KG_PER_TON;
+                assert!(
+                    gross <= set.legal_gvw_kg + 1e-6,
+                    "{} from {city} grossed {gross} kg over its {} kg cap",
+                    job.cargo.key,
+                    set.legal_gvw_kg
+                );
+                match job.cargo.key {
+                    "parcel_doubles" => {
+                        pups += 1;
+                        assert_eq!(set.legal_gvw_lb().round(), 80_000.0);
+                    }
+                    "turnpike_doubles" => {
+                        turnpike += 1;
+                        assert!(set.legal_gvw_lb().round() >= 80_000.0);
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    assert!(
+        pups + turnpike > 0,
+        "no seeded board offered a set of doubles"
+    );
+}

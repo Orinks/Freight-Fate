@@ -1,19 +1,35 @@
 //! Gross-weight advice spoken before dispatch acceptance.
 
+use ff_core::data::world::World;
 use ff_core::models::jobs::Job;
 use ff_core::models::profile::Profile;
 use ff_core::pyfmt::fmt_grouped;
-use ff_core::sim::vehicle::{TruckState, KG_PER_LB, KG_PER_TON};
+use ff_core::sim::vehicle::{TrailerSet, TruckState, KG_PER_LB, KG_PER_TON};
 
-pub(super) fn load_weight_margin(p: &Profile, job: &Job) -> String {
+pub(super) fn load_weight_margin(world: &World, p: &Profile, job: &Job) -> String {
     let mut proposed = p.clone();
     proposed.take_slip_seat(job);
     let mut truck = TruckState::new(proposed.truck_specs());
     truck.fuel_gal = proposed.truck_fuel_gal();
+    // A set of doubles weighs both trailers and the dolly and carries the
+    // gross cap of the route it runs, so the advice prices that set.
+    let route = world
+        .supported_route(&job.origin, &job.destination, None)
+        .ok()
+        .flatten();
+    truck.trailer_set = TrailerSet::for_cargo_on_route(job.cargo.key, world, route.as_ref());
     let margin_kg = truck.gross_weight_margin_with_cargo_kg(job.weight_tons * KG_PER_TON);
     let side = if margin_kg >= 0.0 { "under" } else { "over" };
-    format!(
+    let mut text = format!(
         "Load weight: {} pounds {side} the gross-weight limit with current fuel.",
         fmt_grouped(margin_kg.abs() / KG_PER_LB, 0)
-    )
+    );
+    if truck.trailer_set.is_doubles() {
+        text.push_str(&format!(
+            " The limit for this set of doubles on this route is {} pounds, counting both \
+             trailers and the converter dolly.",
+            fmt_grouped(truck.trailer_set.legal_gvw_lb().round(), 0)
+        ));
+    }
+    text
 }
