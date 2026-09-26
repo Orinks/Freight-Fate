@@ -32,9 +32,9 @@ use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
     open_freight_market, parked_at, profile, profile_mut, record_city_duty,
-    terminal_objective_clause, BobtailDestState, BusinessStatusState, EndorsementCourseState,
-    GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI,
-    DRIVING_SCHOOL_ENABLED,
+    terminal_objective_clause, ApplyToCarrierState, BobtailDestState, BusinessStatusState,
+    EndorsementCourseState, GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S,
+    BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
 };
 use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
@@ -119,6 +119,12 @@ impl CityMenuState {
     /// `_job_board`: open the dispatch board.
     pub fn job_board(&mut self, ctx: &mut GameContext) {
         open_freight_market(ctx);
+    }
+
+    /// A company driver with no carrier looks for a seat.
+    fn apply_to_carrier(&mut self, ctx: &mut GameContext) {
+        let state = ApplyToCarrierState::new(ctx);
+        ctx.push_state(state);
     }
 
     fn bobtail(&mut self, ctx: &mut GameContext) {
@@ -482,32 +488,51 @@ impl CityMenuState {
     }
 
     /// A company driver the carrier will no longer keep on the insurance.
+    /// The fallback rule (plan section 5) picks who takes them on from their
+    /// home city; when nobody hires there they are home with no carrier.
     pub fn check_carrier_termination(&mut self, ctx: &mut GameContext) {
         if !enforcement::carrier_termination_due(profile(ctx)) {
             return;
         }
-        let former = {
+        let (former, taken_on, home) = {
             let p = profile_mut(ctx);
             let former = p.carrier_name.clone();
+            let firing_key = p.carrier_key.clone();
             p.driving_record.carrier_terminations += 1;
-            // The new carrier's terminal becomes home; the truck stays put.
-            p.change_carrier(
-                enforcement::LAST_CHANCE_CARRIER_KEY,
-                enforcement::LAST_CHANCE_CARRIER_NAME,
-            );
-            p.dispatch_board_cache = None;
-            former
+            let taken_on = p
+                .take_fallback_after_let_go(&firing_key)
+                .map(|c| c.name.clone());
+            let home = p.driver_home_city();
+            (former, taken_on, home)
         };
         ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
         ctx.save_profile();
+        // A driver left with no carrier trades the dispatch board for
+        // "Apply to a carrier", so the rows are rebuilt.
+        self.refresh(ctx, true);
         ctx.audio.play("ui/error");
-        ctx.say(&format!(
+        let home = ctx.world.spoken_city(&home, None);
+        let opening = format!(
             "{former} has ended your employment. Your safety record is past what their \
-             insurance will carry, so your seat and your assigned truck go back to the yard. \
-             {} will take you on: lower pay, shorter freight, and a fresh start. Your money, \
-             your levels, and everything you own stay as they are.",
-            enforcement::LAST_CHANCE_CARRIER_NAME
-        ));
+             insurance will carry, so your seat and your assigned truck go back to the yard."
+        );
+        let kept = "Your money, your levels, and everything you own stay as they are.";
+        let line = match taken_on {
+            Some(name) if name == enforcement::LAST_CHANCE_CARRIER_NAME => format!(
+                "{opening} {name} will take you on: lower pay, shorter freight, and a fresh \
+                 start. {kept}"
+            ),
+            Some(name) => format!(
+                "{opening} {name}, which hires near your home in {home}, will take you on \
+                 knowing your record. {kept}"
+            ),
+            None => format!(
+                "{opening} No carrier that hires near {home} can take you on right now, so \
+                 you are home with no carrier. {kept} Choose Apply to a carrier from the \
+                 terminal menu when you are ready."
+            ),
+        };
+        ctx.say(&line);
     }
 
     fn logbook(&mut self, ctx: &mut GameContext) {
@@ -705,6 +730,14 @@ impl Menu for CityMenuState {
             } else {
                 format!(" {record}")
             };
+            let record = if p.is_unassigned_company_driver() {
+                format!(
+                    "{record} You have no carrier right now. Choose Apply to a carrier to \
+                     take a seat."
+                )
+            } else {
+                record
+            };
             format!(
                 "Parked{} in {}, {city_state}. {} with \
                  level {}, {}.{cdl}{record} \
@@ -737,13 +770,24 @@ impl Menu for CityMenuState {
         } else {
             p.business_status.as_str()
         };
-        let mut items: Vec<MenuItem<Self>> =
+        let mut items: Vec<MenuItem<Self>> = if p.is_unassigned_company_driver() {
+            // No carrier, so no dispatch: the one way back to freight is a
+            // seat, and it sits where the dispatch board would.
+            vec![MenuItem::new("Apply to a carrier", |s: &mut Self, ctx| {
+                s.apply_to_carrier(ctx)
+            })
+            .help(
+                "Carriers that would take you on from your home. There is no dispatch \
+                 board until one does.",
+            )]
+        } else {
             vec![
                 MenuItem::new("Dispatch board", |s: &mut Self, ctx| s.job_board(ctx)).help(
                     "Loads from local freight facilities. New company hires get an assigned \
                      load, load choice opens with seniority.",
                 ),
-            ];
+            ]
+        };
         items.push(
             MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
                 "Tractors at the local dealer. Owner-operators buy and switch here, company \

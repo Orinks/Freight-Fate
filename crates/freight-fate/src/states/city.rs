@@ -64,7 +64,7 @@ pub use board::{
     describe_job, locked_reason, trailer_note, JobBoardState, JobDetailState, JOB_BOARD_INTRO_HELP,
 };
 pub use close_out::CloseOutCareerState;
-pub use extras::{BobtailDestState, PayDebtState};
+pub use extras::{ApplyToCarrierState, BobtailDestState, PayDebtState};
 pub use terminal::CityMenuState;
 pub use truck_status::TruckStatusState;
 
@@ -403,6 +403,15 @@ fn py_repr_sorted_items(key: &Value) -> String {
 /// current, else build a fresh one and cache it. Pushes the board and
 /// returns its jobs.
 pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
+    if profile(ctx).is_unassigned_company_driver() {
+        // No carrier, no dispatcher: say so instead of an empty board.
+        ctx.audio.play("ui/error");
+        ctx.say(
+            "You have no carrier, so there is no dispatch board. Choose Apply to a carrier \
+             at the terminal to take a seat.",
+        );
+        return Vec::new();
+    }
     let world = ctx.world;
     let (key, cache, hos) = {
         let p = profile_mut(ctx);

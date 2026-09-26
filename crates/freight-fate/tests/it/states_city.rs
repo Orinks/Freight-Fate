@@ -12,9 +12,10 @@
 use crate::states_city_support::*;
 use ff_core::models::business::{INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
 use ff_core::models::career::LEVEL_XP;
+use ff_core::models::carriers::fallback_carrier_for;
 use ff_core::models::dispatch_policy::{NEW_HIRE_DECLINE_BUDGET, SENIOR_LOAD_CHOICE_LEVEL};
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
-use ff_core::models::enforcement::{self, LAST_CHANCE_CARRIER_KEY};
+use ff_core::models::enforcement;
 use ff_core::models::jobs::{
     board_offer_count, cargo_type, job_payload, make_reposition_job, Job, JobBoard, OfferOptions,
     ASSIGNED_REPOSITION_PAY_FRACTION,
@@ -26,8 +27,9 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu, SimpleMenuState};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{
-    dispatch_cache_key, open_freight_market, relay_load_for_board, CityMenuState, JobBoardState,
-    JobDetailState, PayDebtState, RouteSelectState, TruckStatusState, JOB_BOARD_INTRO_HELP,
+    dispatch_cache_key, open_freight_market, relay_load_for_board, ApplyToCarrierState,
+    CityMenuState, JobBoardState, JobDetailState, PayDebtState, RouteSelectState, TruckStatusState,
+    JOB_BOARD_INTRO_HELP,
 };
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
@@ -1057,12 +1059,21 @@ fn test_a_setback_only_ever_fires_at_the_terminal() {
         p.career.xp = 152_000.0;
         p.set_money(-solvency::company_debt_ceiling(p) - 1.0);
     }
+    // The fallback rule: a carrier that hires at the driver's home (no
+    // saved home city here, so the home terminal city), never the one that
+    // ended the employment.
+    let home = profile(&app).driver_home_city();
+    let expected = fallback_carrier_for(app.ctx.world, &home, "northstar")
+        .expect("a seat")
+        .key
+        .clone();
     // Walking into the terminal is what fires it, and the notice takes the
     // screen ahead of everything else the terminal had to say.
     let city = CityMenuState::new(&app.ctx, false);
     app.push_state(city);
     assert!(is::<CareerSetbackNoticeState>(&app));
-    assert_eq!(profile(&app).carrier_key, "great_lakes_training");
+    assert_eq!(profile(&app).carrier_key, expected);
+    assert_ne!(profile(&app).carrier_key, "northstar");
 
     with_state_mut::<CareerSetbackNoticeState, _>(&mut app, |s, ctx| {
         freight_fate::states::base::Menu::go_back(s, ctx)
@@ -1220,8 +1231,18 @@ fn test_a_floor_reputation_company_driver_loses_the_carrier() {
     profile_mut(&mut app).career.reputation = 4.0;
     let mut state = CityMenuState::new(&app.ctx, false);
     app.clear_speech();
+    let home = profile(&app).driver_home_city();
+    let expected = fallback_carrier_for(app.ctx.world, &home, "northstar")
+        .expect("a lower-48 home always has a seat")
+        .key
+        .clone();
     state.check_carrier_termination(&mut app.ctx);
-    assert_eq!(profile(&app).carrier_key, LAST_CHANCE_CARRIER_KEY);
+    // The fallback rule (carrier plan section 5): a regional or local that
+    // hires at home, never the carrier that let the driver go.
+    assert_eq!(profile(&app).carrier_key, expected);
+    assert_ne!(profile(&app).carrier_key, "northstar");
+    assert!(enforcement::kept_on_sufferance(profile(&app)));
+    assert!(!enforcement::carrier_termination_due(profile(&app)));
     assert_eq!(profile(&app).driving_record.carrier_terminations, 1);
     // "Ended your employment", never "let you go": the ontology settled on
     // the plain factual verb over the softening one.
@@ -1231,6 +1252,66 @@ fn test_a_floor_reputation_company_driver_loses_the_carrier() {
         .any(|line| line.contains(&former) && line.contains("ended your employment")));
     // Nothing is taken away but the seat.
     assert!(profile(&app).money() > 0.0 || profile(&app).career.level() >= 1);
+}
+
+#[test]
+fn test_a_driver_no_carrier_near_home_will_take_applies_from_the_terminal() {
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.carrier_key = "chatanika_freight".to_string();
+        p.carrier_name = "Chatanika Freight Lines".to_string();
+        p.home_city = "fairbanks_ak_us".to_string();
+        p.home_terminal_city = "fairbanks_ak_us".to_string();
+        p.current_city = "fairbanks_ak_us".to_string();
+        p.parked_facility.clear();
+        p.career.reputation = 4.0;
+    }
+    app.clear_speech();
+    // Arriving at the terminal runs the carrier's review.
+    let terminal = CityMenuState::new(&app.ctx, false);
+    app.push_state(terminal);
+    assert!(profile(&app).is_unassigned_company_driver());
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("No carrier that hires near Fairbanks")
+            && line.contains("Apply to a carrier")));
+
+    // No dispatch board without a carrier; the seat search sits in its place.
+    let rows = labels::<CityMenuState>(&app);
+    assert_eq!(rows[0], "Apply to a carrier");
+    assert!(!rows.iter().any(|t| t == "Dispatch board"));
+    app.clear_speech();
+    assert!(open_freight_market(&mut app.ctx).is_empty());
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("You have no carrier")));
+
+    move_to::<CityMenuState>(&mut app, "Apply to a carrier");
+    key(&mut app, Key::Return);
+    let offered = labels::<ApplyToCarrierState>(&app);
+    let knik = "Knik Arm Cartage: local carrier, hires into its Anchorage terminal, \
+                moves your home to Anchorage";
+    assert!(offered.iter().any(|t| t == knik), "{offered:?}");
+    assert!(!offered.iter().any(|t| t.starts_with("Chatanika")));
+    move_to::<ApplyToCarrierState>(&mut app, "Knik Arm Cartage");
+    key(&mut app, Key::Return);
+    let p = profile(&app);
+    assert_eq!(p.carrier_key, "knik_arm_cartage");
+    assert_eq!(p.home_city, "anchorage_ak_us");
+    assert_eq!(p.current_city, "anchorage_ak_us");
+    assert!(enforcement::kept_on_sufferance(p));
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("Knik Arm Cartage has taken you on")));
+    assert!(labels::<CityMenuState>(&app)
+        .iter()
+        .any(|t| t == "Dispatch board"));
 }
 
 // -- tests/test_career_objectives.py (terminal and board) -----------------------------

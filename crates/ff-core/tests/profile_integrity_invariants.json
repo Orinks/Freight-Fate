@@ -1168,11 +1168,31 @@
     "Freight Fate Independent"
   ],
   "carrierLabels": {
+    "alapaha_regional": "Alapaha Regional",
+    "androscoggin_freight": "Androscoggin Freight",
+    "barataria_carriers": "Barataria Carriers",
+    "basin_harbor_drayage": "Basin Harbor Drayage",
+    "chatanika_freight": "Chatanika Freight Lines",
+    "chehalis_freight": "Chehalis Freight Lines",
+    "des_plaines_cartage": "Des Plaines River Cartage",
     "great_lakes_training": "Great Lakes Training Transport",
+    "kittatinny_crossroads": "Kittatinny Crossroads Freight",
+    "knik_arm_cartage": "Knik Arm Cartage",
+    "lone_mesa_freight": "Lone Mesa Freight",
+    "loonwater_regional": "Loonwater Regional",
+    "meherrin_transport": "Meherrin Transport",
+    "musselshell_freight": "Musselshell Freight Lines",
     "northstar": "Northstar Freight Lines",
+    "olentangy_valley": "Olentangy Valley Freight",
+    "pinyon_basin": "Pinyon Basin Transport",
     "prairie_link": "Prairie Link Regional",
     "roadstead_owner_operator": "Northstar Freight Lines",
-    "summit_value": "Summit Value Logistics"
+    "saint_francis_river": "Saint Francis River Lines",
+    "san_simon_freight": "San Simon Freight",
+    "summit_value": "Summit Value Logistics",
+    "sunpine_freight": "Sunpine Freight Lines",
+    "tehachapi_motor_lines": "Tehachapi Motor Lines",
+    "verdigris_transport": "Verdigris Transport"
   },
   "cityLabels": {
     "aberdeen_sd_us": "Aberdeen, South Dakota",

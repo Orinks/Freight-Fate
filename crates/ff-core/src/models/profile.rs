@@ -629,6 +629,89 @@ impl Profile {
         self.rehome_to_carrier();
     }
 
+    /// Where this driver lives: `home_city`, else the home terminal city,
+    /// else wherever the truck is.
+    pub fn driver_home_city(&self) -> String {
+        [
+            &self.home_city,
+            &self.home_terminal_city,
+            &self.current_city,
+        ]
+        .into_iter()
+        .find(|c| !c.trim().is_empty())
+        .cloned()
+        .unwrap_or_default()
+    }
+
+    /// A company driver with no carrier (see
+    /// [`crate::models::carriers::is_unassigned_company_driver`]).
+    pub fn is_unassigned_company_driver(&self) -> bool {
+        crate::models::carriers::is_unassigned_company_driver(
+            &self.carrier_key,
+            &self.carrier_name,
+            &self.business_status,
+        )
+    }
+
+    /// `firing_key` has let this driver go: hand them to the carrier the
+    /// fallback rule picks from their home city (plan section 5), homed at
+    /// that carrier's terminal that hires there and kept on sufferance, or,
+    /// when nobody hires there, leave them home with no carrier. Returns the
+    /// new carrier, `None` when unassigned.
+    pub fn take_fallback_after_let_go(
+        &mut self,
+        firing_key: &str,
+    ) -> Option<&'static crate::models::carriers::Carrier> {
+        let world = crate::data::world::get_world();
+        let home = world.resolve_city_key(&self.driver_home_city());
+        self.driving_record.let_go_by = firing_key.to_string();
+        self.parked_facility.clear();
+        self.dispatch_board_cache = None;
+        if self.home_city.trim().is_empty() {
+            self.home_city = home.clone();
+        }
+        match crate::models::carriers::fallback_carrier_for(world, &home, firing_key) {
+            Some(carrier) => {
+                self.carrier_key = carrier.key.clone();
+                self.carrier_name = carrier.name.clone();
+                self.home_terminal_city = carrier
+                    .hiring_terminal_city(world, &home)
+                    .unwrap_or_else(|| home.clone());
+                self.driving_record.sufferance_carrier_key = carrier.key.clone();
+                Some(carrier)
+            }
+            None => {
+                self.carrier_key.clear();
+                self.carrier_name.clear();
+                self.driving_record.sufferance_carrier_key.clear();
+                self.home_terminal_city = home.clone();
+                if self.active_trip.is_none() {
+                    self.current_city = home;
+                }
+                None
+            }
+        }
+    }
+
+    /// An unassigned driver takes a seat from
+    /// [`crate::models::carriers::openings_for_unassigned`]: the carrier,
+    /// its terminal as home terminal and where the truck is, the home city
+    /// (moved when the opening says so). A carrier that takes on a driver
+    /// whose record would otherwise end the seat keeps them on sufferance.
+    pub fn join_carrier_opening(&mut self, opening: &crate::models::carriers::CarrierOpening) {
+        self.carrier_key = opening.carrier.key.clone();
+        self.carrier_name = opening.carrier.name.clone();
+        self.home_city = opening.home_city.clone();
+        self.home_terminal_city = opening.terminal_city.clone();
+        self.current_city = opening.terminal_city.clone();
+        self.parked_facility.clear();
+        self.dispatch_board_cache = None;
+        self.driving_record.sufferance_carrier_key.clear();
+        if crate::models::enforcement::carrier_termination_due(self) {
+            self.driving_record.sufferance_carrier_key = opening.carrier.key.clone();
+        }
+    }
+
     /// The carrier's home terminal ("{Carrier} {City} terminal"), if any.
     pub fn carrier_home_terminal(
         &self,

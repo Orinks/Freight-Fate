@@ -459,12 +459,13 @@ fn test_start_options_for_a_city_are_only_carriers_that_hire_there() {
     assert!(keys("hutchinson_ks_us").contains(&"prairie_link"));
     assert!(!keys("boston_ma_us").contains(&"prairie_link"));
     assert!(!keys("seattle_wa_us").contains(&"prairie_link"));
-    for blocked in [
-        "healy_ak_us",
-        "anchorage_ak_us",
-        "whitehorse_yt_ca",
-        "surrey_bc_ca",
-    ] {
+    for blocked in ["whitehorse_yt_ca", "surrey_bc_ca"] {
         assert!(keys(blocked).is_empty(), "{blocked}");
     }
+    // Alaska homes see only the Alaska carriers, never a lower-48 one.
+    assert_eq!(
+        keys("anchorage_ak_us"),
+        ["chatanika_freight", "knik_arm_cartage"]
+    );
+    assert_eq!(keys("healy_ak_us"), ["chatanika_freight"]);
 }

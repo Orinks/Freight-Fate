@@ -758,11 +758,14 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
         return String::new();
     }
     if record_past_termination_floor(record, game_hours) {
-        if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
+        if kept_on_sufferance(profile) {
+            let keeper = match profile.carrier_name().trim() {
+                "" => LAST_CHANCE_CARRIER_NAME,
+                name => name,
+            };
             return format!(
-                "The carrier's insurer will not carry a record like that; {} keeps you on \
+                "The carrier's insurer will not carry a record like that; {keeper} keeps you on \
                  sufferance until the oldest ages out {}.",
-                LAST_CHANCE_CARRIER_NAME,
                 record_ages_out_text(profile)
             );
         }
@@ -928,13 +931,27 @@ pub fn board_reputation_note(reputation: f64) -> String {
     }
 }
 
+/// A carrier that keeps this driver whatever the record says: the
+/// last-chance fleet, or the carrier that took them on after a termination
+/// knowing the record (`DrivingRecord::sufferance_carrier_key`).
+pub fn kept_on_sufferance<P: StandingProfile + ?Sized>(profile: &P) -> bool {
+    let key = profile.carrier_key();
+    key == LAST_CHANCE_CARRIER_KEY
+        || profile.driving_record().is_some_and(|record| {
+            !record.sufferance_carrier_key.is_empty() && record.sufferance_carrier_key == key
+        })
+}
+
 /// A company driver the carrier will not keep on the insurance any longer.
 pub fn carrier_termination_due<P: StandingProfile + ?Sized>(profile: &P) -> bool {
     if is_owner_operator(profile.business_status()) {
         return false;
     }
-    if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
-        return false; // already at the fleet of last resort; nowhere further down
+    if kept_on_sufferance(profile) {
+        return false; // already taken on knowing the record; nowhere further down
+    }
+    if profile.carrier_key().trim().is_empty() {
+        return false; // no carrier to let the driver go
     }
     if profile.career_reputation() < REPUTATION_TERMINATION {
         return true;

@@ -86,6 +86,10 @@ impl SolvencyProfile for Profile {
         // A new carrier means that carrier's terminal; the truck stays put.
         self.change_carrier(key, name);
     }
+    fn take_fallback_carrier(&mut self, firing_key: &str) -> Option<String> {
+        self.take_fallback_after_let_go(firing_key)
+            .map(|carrier| carrier.name.clone())
+    }
     fn set_pay_advance(&mut self, amount: f64) {
         self.pay_advance = amount;
     }
