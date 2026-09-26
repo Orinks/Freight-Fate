@@ -2156,6 +2156,8 @@ LCV turnpike doubles on permitted toll roads.
       lowest recorded turnpike cap along the route for turnpike doubles
       (`data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`); a turnpike-doubles
       route through a state with no cap is refused, never held to 80,000 lb.
+      A trip already under way on one from an older save is grandfathered:
+      the lowest recorded cap among its capped states, or 80,000 lb.
       The job board clamp, live overweight check, board weight line and CAT
       Scale ticket use it.
 - [x] **Realism review of FIX 3–5 (landed).** Kept: 15 / 10 minute pickup
@@ -2168,6 +2170,12 @@ LCV turnpike doubles on permitted toll roads.
       set sways harder in a gust; the doubles scale ticket drops its axle
       sentence; turnpike doubles on a route through a state with no
       recorded cap are refused, never held to 80,000 lb.
+- [x] **Second realism rulings on FIX 3–5 (landed).** A legacy
+      turnpike-doubles trip on an uncapped lane finishes clean at the
+      lowest recorded cap among its capped states, or 80,000 lb; new jobs
+      stay refused. Gust sway uses a fixed reference mass per program
+      (80,000 lb pups, 127,400 lb turnpike doubles), never the route cap,
+      with the reference-over-actual ratio clamped to 1.0–2.0.
 - [ ] **Honesty debt: deadhead to a doubles pickup.** The run to a
       doubles shipper pulls one empty trailer. It should be bobtail or an
       empty set of doubles.
@@ -2177,7 +2185,10 @@ LCV turnpike doubles on permitted toll roads.
 - [ ] **Honesty debt: assumed doubles handling figures.** The 40 mph whip
       floor and the 3 s steady-state filter are assumed. The gust shove is
       the lane model's gust read as an acceleration, taken as the push on a
-      combination at its legal gross and scaled up for a lighter set.
+      combination at the program's fixed reference mass (80,000 lb pups,
+      127,400 lb turnpike doubles) and scaled up for a lighter set, at
+      most 2x (`models::doubles::LIGHT_SET_SWAY_MAX`). Neither the push
+      nor the clamp is calibrated against a measurement.
 
 ### Travel-center bulk fuel (non-blocking)
 
