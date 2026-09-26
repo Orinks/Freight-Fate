@@ -23,8 +23,8 @@ use crate::data::world::World;
 use crate::data::world_models::Route;
 use crate::models::doubles::{
     doubles_trailer_for_cargo, legacy_trip_legal_gvw_lb, legal_gvw_lb_for_route,
-    rearward_amplification, trailer_set_extra_tare_kg, trailer_units, DOUBLES_NO_REVERSE_TEXT,
-    REAR_TRAILER_FREIGHT_SHARE,
+    rearward_amplification, sway_reference_gross_lb, trailer_set_extra_tare_kg, trailer_units,
+    DOUBLES_NO_REVERSE_TEXT, LIGHT_SET_SWAY_MAX, REAR_TRAILER_FREIGHT_SHARE,
 };
 use crate::pyfmt::fmt_grouped;
 use crate::sim::transmission::ShiftResult;
@@ -47,6 +47,9 @@ pub struct TrailerSet {
     /// Rear trailer's lateral acceleration over the tractor's in a quick
     /// lane change. 1.0 for a single trailer.
     pub rearward_amplification: f64,
+    /// The fixed combination mass the crosswind gust is taken to push,
+    /// kilograms (`models::doubles::sway_reference_gross_lb`).
+    pub sway_reference_kg: f64,
 }
 
 impl Default for TrailerSet {
@@ -56,6 +59,7 @@ impl Default for TrailerSet {
             tare_kg: TRAILER_TARE_KG,
             legal_gvw_kg: LEGAL_GVW_KG,
             rearward_amplification: 1.0,
+            sway_reference_kg: LEGAL_GVW_KG,
         }
     }
 }
@@ -68,6 +72,7 @@ impl TrailerSet {
             tare_kg: TRAILER_TARE_KG + trailer_set_extra_tare_kg(trailer_key, TRAILER_TARE_KG),
             legal_gvw_kg: legal_gvw_lb * KG_PER_LB,
             rearward_amplification: rearward_amplification(trailer_key),
+            sway_reference_kg: sway_reference_gross_lb(trailer_key) * KG_PER_LB,
         }
     }
 
@@ -178,15 +183,20 @@ impl TruckState {
 
     /// How much harder a gust shoves this set than a loaded one: the same
     /// wind force on less mass is more acceleration (a = F / m). The lane
-    /// model's gust is taken as the push on a combination at its legal
-    /// gross (ASSUMED calibration), so a set at or over its legal gross
-    /// reads 1.0 and an empty set well above it. 1.0 for a single trailer,
-    /// whose own drift the lane model already carries.
+    /// model's gust is taken as the push on a combination at the program's
+    /// fixed reference mass (`TrailerSet::sway_reference_kg`; an ASSUMED
+    /// calibration), never the route's cap, so a set sways the same on
+    /// every corridor. The ratio is clamped to 1.0 ..=
+    /// [`LIGHT_SET_SWAY_MAX`]: a set at or over its reference reads 1.0 (a
+    /// heavier set is not made steadier than the reference), and an empty
+    /// set reads at most 2.0. 1.0 for a single trailer, whose own drift the
+    /// lane model already carries.
     pub fn light_set_wind_mult(&self) -> f64 {
         if !self.doubles_hooked() {
             return 1.0;
         }
-        (self.legal_gvw_kg() / self.gross_mass_kg().max(1.0)).max(1.0)
+        (self.trailer_set.sway_reference_kg / self.gross_mass_kg().max(1.0))
+            .clamp(1.0, LIGHT_SET_SWAY_MAX)
     }
 
     /// The rear trailer's lateral acceleration, g: the tractor's quick-steer
@@ -289,7 +299,7 @@ pub fn combination_tare_for_trailer_kg(specs: &super::TruckSpecs, trailer_key: &
 
 #[cfg(test)]
 mod tests {
-    use super::super::{TruckSpecs, REVERSE_ENGAGE_MAX_MPH};
+    use super::super::{TruckSpecs, KG_PER_TON, REVERSE_ENGAGE_MAX_MPH};
     use super::*;
     use crate::models::doubles::{
         PUP_TRAILER_TARE_LB, SINGLE_AXLE_DOLLY_TARE_LB, TURNPIKE_DOUBLE_EXTRA_OVER_SINGLE_LB,
@@ -491,5 +501,48 @@ mod tests {
         assert!(set.rear_trailer_lateral_g(0.0, gust) >= gust * 1.7 - 1e-12);
         assert_eq!(single.rear_trailer_lateral_g(0.0, gust), 0.0);
         assert_eq!(single.light_set_wind_mult(), 1.0);
+    }
+
+    #[test]
+    fn the_same_set_sways_the_same_under_any_turnpike_cap() {
+        // The gust's reference mass is fixed per program, not the route's
+        // cap: the same load sways identically on a NY (143,000 lb) lane and
+        // a KS (120,000 lb) lane.
+        let speed = 60.0 / 2.23694;
+        let mut ny = turnpike(143_000.0);
+        let mut ks = turnpike(120_000.0);
+        for set in [&mut ny, &mut ks] {
+            set.cargo_kg = 20.0 * KG_PER_TON;
+            set.velocity_mps = speed;
+        }
+        assert_eq!(ny.light_set_wind_mult(), ks.light_set_wind_mult());
+        assert_eq!(
+            ny.rear_trailer_lateral_g(0.1, 0.04),
+            ks.rear_trailer_lateral_g(0.1, 0.04)
+        );
+        assert_eq!(
+            ny.rear_trailer_whip_excess_g(0.1, 0.04),
+            ks.rear_trailer_whip_excess_g(0.1, 0.04)
+        );
+        assert_eq!(
+            ny.trailer_set.sway_reference_kg,
+            127_400.0 * KG_PER_LB,
+            "turnpike doubles sway against one fixed reference"
+        );
+        assert_eq!(pups().trailer_set.sway_reference_kg, 80_000.0 * KG_PER_LB);
+    }
+
+    #[test]
+    fn an_empty_set_sways_at_most_twice_a_loaded_one() {
+        for mut set in [pups(), turnpike(143_000.0), turnpike(120_000.0)] {
+            set.cargo_kg = 0.0;
+            let empty = set.light_set_wind_mult();
+            assert!(empty > 1.0, "an empty set takes the gust harder");
+            assert!(empty <= LIGHT_SET_SWAY_MAX + 1e-12, "{empty}");
+            assert!((LIGHT_SET_SWAY_MAX - 2.0).abs() < 1e-12);
+            // At or over the reference mass the factor is 1.0, never less.
+            set.cargo_kg = 60.0 * KG_PER_TON;
+            assert_eq!(set.light_set_wind_mult(), 1.0);
+        }
     }
 }

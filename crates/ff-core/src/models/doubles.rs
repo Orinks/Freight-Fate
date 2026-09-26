@@ -235,6 +235,29 @@ where
         .unwrap_or(STANDARD_GVW_LB)
 }
 
+/// The combination mass the lane model's crosswind gust is taken to push,
+/// pounds, per doubles program: a fixed reference, not the route's cap, so
+/// the same set sways the same wherever it runs. Parcel pups: the 80,000 lb
+/// federal gross they run at. Turnpike doubles: 127,400 lb, the OH/IN/MA
+/// turnpike cap, as one constant for every corridor. The push itself is not
+/// calibrated against any measurement (ROADMAP debt).
+pub fn sway_reference_gross_lb(trailer_key: &str) -> f64 {
+    match trailer_key {
+        "turnpike_double" => TURNPIKE_DOUBLE_SWAY_REFERENCE_LB,
+        _ => STANDARD_GVW_LB,
+    }
+}
+
+/// The turnpike-doubles sway reference, pounds (see
+/// [`sway_reference_gross_lb`]).
+pub const TURNPIKE_DOUBLE_SWAY_REFERENCE_LB: f64 = 127_400.0;
+
+/// The most a light set's gust sway is scaled up over the reference. An
+/// empty set's reference-over-actual mass ratio is about 2.4 for pups and
+/// 2.6 for turnpike doubles in this game; the ratio is clamped at 2.0 so the
+/// uncalibrated push is not magnified past a round factor. ASSUMED.
+pub const LIGHT_SET_SWAY_MAX: f64 = 2.0;
+
 /// The walk-around and hook-up clause for a set of doubles, spoken and shown
 /// at the shipper. Empty for single-trailer freight.
 pub fn doubles_hook_text(cargo_key: &str) -> String {

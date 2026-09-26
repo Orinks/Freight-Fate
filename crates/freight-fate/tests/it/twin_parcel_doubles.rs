@@ -283,3 +283,24 @@ fn a_legacy_turnpike_doubles_trip_on_an_uncapped_lane_finishes_clean() {
         assert!(ticket.contains("Legal"), "{ticket}");
     }
 }
+
+#[test]
+fn the_same_turnpike_set_sways_the_same_on_a_ny_lane_and_a_ks_lane() {
+    let mut app = TestApp::new();
+    let mut ny = drive(&mut app, "turnpike_doubles", "Buffalo", "Rochester", 20.0);
+    let mut ks = drive(&mut app, "turnpike_doubles", "Wichita", "Emporia", 20.0);
+    assert_eq!(ny.trip.truck.trailer_set.legal_gvw_lb().round(), 143_000.0);
+    assert_eq!(ks.trip.truck.trailer_set.legal_gvw_lb().round(), 120_000.0);
+    for d in [&mut ny, &mut ks] {
+        d.trip.truck.cargo_kg = 20.0 * KG_PER_TON;
+        d.trip.truck.velocity_mps = 60.0 / 2.23694;
+    }
+    assert_eq!(
+        ny.trip.truck.light_set_wind_mult(),
+        ks.trip.truck.light_set_wind_mult()
+    );
+    assert_eq!(
+        ny.trip.truck.rear_trailer_lateral_g(0.1, 0.04),
+        ks.trip.truck.rear_trailer_lateral_g(0.1, 0.04)
+    );
+}
