@@ -2112,8 +2112,9 @@ not started here.
       doubles are not offered. Rocky Mountain / other Western LCV routes
       outside the classic turnpike list are not modeled.
 - [ ] **Honesty debt: staging lots.** Break-bulk yards at turnpike exits
-      are approximated as same-city locals / end approaches / ≤ 1.0 mi
-      stubs, not curated LCV staging facilities.
+      are approximated as same-city locals or first/last end legs of
+      ≤ 1.0 mi (cue'd approaches share the stub cap, as on the STAA
+      National Network gate), not curated LCV staging facilities.
 - [ ] **Honesty debt: no LCV driver certification or carrier permit gate
       (49 CFR 380).** Holding the in-game LCV certificate opens the
       freight; federal driver entry-level LCV training and carrier
