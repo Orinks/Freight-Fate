@@ -2067,7 +2067,7 @@ instead of a spawn point.
 - [ ] **BLOCKER (2.0 tester release): orinks.net profile integrity export.**
       The validator's exact save-field list must be updated from
       `crates/ff-core/tests/profile_integrity_invariants.json` for the new
-      save fields `parked_facility`, `home_terminal_city`, and
+      save fields `parked_facility`, `home_terminal_city`, `home_city`, and
       `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
       be rejected as a schema mismatch.
 
@@ -2087,6 +2087,11 @@ there, with the truck starting at that carrier's terminal.
 - [x] **Slice 2: the home-base picker lists only offerable cities.** Only
       cities where `is_offerable_home_city` is true (some carrier hires
       there) appear in the start picker.
+- [ ] **Carrier home-time slice: the driver's home stays the picked home
+      city.** At home time the truck parks at the terminal (or at home if the
+      carrier allows it) and the driver goes to the home city. The terminal
+      city must never silently become the driver's home. The picked city is
+      saved as `home_city` from slice 2 on.
 
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds

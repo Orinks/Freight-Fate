@@ -133,6 +133,7 @@ pub const PROFILE_FIELDS: &[&str] = &[
     "current_city",
     "home_terminal_city",
     "parked_facility",
+    "home_city",
     "created_line",
     "migration_notice_pending",
     "integrity_modified",
@@ -369,6 +370,10 @@ pub struct Profile {
     /// Facility (name) in `current_city` the truck last delivered or dropped
     /// at; "" when none. Feeds the hub's "parked at" line off the home city.
     pub parked_facility: String,
+    /// The home city the driver picked at career start (resolved key), or ""
+    /// on careers from before it was recorded. The driver's home, which the
+    /// carrier terminal city never silently replaces.
+    pub home_city: String,
     // The release line this career was created on. New careers stamp the
     // current line; a save without the field is judged by its save version
     // instead (see is_pre_1_9_save), and pre-1.9 saves never get this far --
@@ -501,6 +506,7 @@ impl Default for Profile {
             current_city: DEFAULT_CITY.to_string(),
             home_terminal_city: DEFAULT_CITY.to_string(),
             parked_facility: String::new(),
+            home_city: String::new(),
             created_line: CREATED_LINE.to_string(),
             migration_notice_pending: false,
             integrity_modified: false,

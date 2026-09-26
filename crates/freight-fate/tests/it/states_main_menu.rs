@@ -774,7 +774,7 @@ fn test_milwaukee_pick_with_northstar_starts_at_the_chicago_terminal() {
         ),
         "{briefing}"
     );
-    assert!(!briefing.contains("Milwaukee"), "{briefing}");
+    assert!(!briefing.contains("Milwaukee service area"), "{briefing}");
     assert!(!briefing.to_lowercase().contains("home"), "{briefing}");
 }
 
@@ -855,4 +855,65 @@ fn test_prairie_link_row_near_wichita_starts_at_the_wichita_terminal() {
             && r.contains("Truck starts at Prairie Link Regional Wichita terminal.")),
         "{rows:?}"
     );
+}
+
+/// Pick `home` and `carrier_label` in the carrier list, and return the
+/// first-day briefing spoken at career creation.
+fn briefing_for_pick(app: &mut TestApp, name: &str, home: &str, carrier_label: &str) -> String {
+    let picker = CareerStartState::new(&app.ctx, name, home);
+    app.push_state(picker);
+    app.clear_speech();
+    select::<CareerStartState>(app, carrier_label);
+    app.main_lines()
+        .into_iter()
+        .find(|line| line.contains("First-day briefing"))
+        .expect("the briefing was spoken")
+}
+
+#[test]
+fn test_a_hire_away_from_the_terminal_hears_the_carrier_covered_travel() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Milwaukee Travel",
+        "milwaukee_wi_us",
+        "Northstar Freight Lines",
+    );
+    assert!(
+        briefing.contains("The carrier covered your travel from Milwaukee"),
+        "{briefing}"
+    );
+    assert!(
+        briefing.contains("and a hotel for orientation."),
+        "{briefing}"
+    );
+    let profile = app.ctx.profile.clone().expect("a career");
+    assert_eq!(profile.home_city, "milwaukee_wi_us", "home stays the pick");
+    assert_eq!(profile.home_terminal_city, "chicago_il_us");
+}
+
+#[test]
+fn test_a_hire_in_the_terminal_city_hears_no_travel_line() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Chicago Local",
+        "chicago_il_us",
+        "Northstar Freight Lines",
+    );
+    assert!(!briefing.contains("covered your travel"), "{briefing}");
+    assert_eq!(app.ctx.profile.as_ref().unwrap().home_city, "chicago_il_us");
+}
+
+#[test]
+fn test_an_owner_operator_hears_no_travel_line() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Lease Travel",
+        "milwaukee_wi_us",
+        "Owner-operator start",
+    );
+    assert!(briefing.contains("Lease orientation is at "), "{briefing}");
+    assert!(!briefing.contains("covered your travel"), "{briefing}");
 }

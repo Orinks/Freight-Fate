@@ -378,6 +378,8 @@ pub trait StartProfile {
     fn set_current_city(&mut self, city: &str);
     /// The facility the truck starts parked at (the carrier terminal).
     fn set_parked_facility(&mut self, facility: &str);
+    /// The picked home city (the driver's home, not the terminal city).
+    fn set_home_city(&mut self, city: &str);
     fn set_start_mode(&mut self, mode: &str);
     fn set_carrier_name(&mut self, name: &str);
     fn set_money(&mut self, money: f64);
@@ -497,6 +499,7 @@ pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
         .clone()
         .unwrap_or_else(|| world.resolve_city_key(&base));
     profile.set_home_terminal_city(&home);
+    profile.set_home_city(&world.resolve_city_key(&base));
     // New hires do orientation and truck assignment at the carrier terminal,
     // so the truck starts there, not in the picked home city.
     if let (Some(carrier), Some(home)) = (hiring, carrier_home.as_deref()) {

@@ -1267,9 +1267,11 @@ fn test_home_terminal_city_round_trips_unchanged() {
     with_data_dir(|_| {
         let mut p = p.clone();
         p.parked_facility = "Milwaukee Dry Warehouse".to_string();
+        p.home_city = "milwaukee_wi_us".to_string();
         let back = load(&p.save().unwrap());
         assert_eq!(back.home_terminal_city, p.home_terminal_city);
         assert_eq!(back.parked_facility, p.parked_facility);
+        assert_eq!(back.home_city, p.home_city);
         assert_eq!(back.current_city, "Milwaukee");
     });
 }

@@ -214,7 +214,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
                 .to_string(),
         ];
     }
-    vec![
+    let mut lines = vec![
         format!(
             "{prefix}First-day briefing: welcome aboard {}.",
             option.carrier_name
@@ -228,6 +228,15 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         } else {
             format!("Your assigned truck is parked {location}.")
         },
+    ];
+    // A new hire whose carrier terminal is in another city got there on the
+    // carrier: say so, instead of letting the terminal city pass as home.
+    if let Some(home) = travelled_from_home_city(ctx, p) {
+        lines.push(format!(
+            "The carrier covered your travel from {home} and a hotel for orientation."
+        ));
+    }
+    lines.extend([
         "The carrier covers fuel, repairs, insurance, and trailer support.".to_string(),
         format!("Dispatch style: {}.", option.dispatch_profile().summary()),
         "As a new hire, dispatch assigns your load and route, and refusing an assignment \
@@ -236,7 +245,21 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         "First objective: open the dispatch board, accept the assigned load, and deliver \
          it cleanly."
             .to_string(),
-    ]
+    ]);
+    lines
+}
+
+/// The spoken home city a company hire travelled from, when the career's
+/// picked home city is not its carrier terminal city.
+fn travelled_from_home_city(ctx: &GameContext, p: &Profile) -> Option<String> {
+    if p.home_city.trim().is_empty() {
+        return None;
+    }
+    let home = ctx.world.resolve_city_key(&p.home_city);
+    if home == ctx.world.resolve_city_key(&p.home_terminal_city) {
+        return None;
+    }
+    Some(ctx.world.spoken_city(&home, None))
 }
 
 /// "at {place} in the {city} service area" (or "in the {city} service area" when
