@@ -2071,6 +2071,16 @@ instead of a spawn point.
       `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
       be rejected as a schema mismatch.
 
+- [ ] **A felony in a commercial vehicle carries its full 49 CFR 383.51
+      weight.** Modelled today: running from a stop is a major offense
+      (383.51 Table 1), a one-year CDL disqualification, and a second
+      major offense is lifetime. Not modelled: the lifetime
+      disqualification for a felony involving a controlled substance (the
+      game has no such offense yet), and termination -- a company driver
+      keeps the job after a felony stop, where a carrier would let the
+      driver go. It should land as a carrier termination notice at the
+      terminal, like the record-review termination.
+
 ### Career carriers (slices 2–4)
 
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
