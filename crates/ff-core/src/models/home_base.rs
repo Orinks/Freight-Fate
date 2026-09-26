@@ -69,9 +69,18 @@ impl ParkedAt {
         let area = city_service_area(&world.spoken_city(&self.city_key, None));
         match self.kind {
             ParkedKind::City => format!("in {area}"),
-            ParkedKind::Impound => format!("at an impound lot in {area}"),
+            // An impound lot is in the city, never a "service area".
+            ParkedKind::Impound => format!("at an impound lot in {}", self.city_text(world)),
             _ => format!("at {} in {area}", self.name),
         }
+    }
+
+    /// The city an impound lot is in, the way the tow summary says it:
+    /// "Buffalo, New York", "The Dalles, Oregon".
+    fn city_text(&self, world: &World) -> String {
+        impound_lot_text(world, &self.city_key)
+            .trim_start_matches("an impound lot in ")
+            .to_string()
     }
 
     /// The name a logbook line or menu title uses.
@@ -321,7 +330,7 @@ mod tests {
         assert_eq!(p.at_clause(), " at an impound lot");
         assert_eq!(
             p.service_area_phrase(world),
-            "at an impound lot in the Chicago service area"
+            "at an impound lot in Chicago, Illinois"
         );
         assert!(world.cities["chicago_il_us"]
             .locations
@@ -343,7 +352,7 @@ mod tests {
         );
         assert_eq!(
             dalles.service_area_phrase(world),
-            "at an impound lot in The Dalles service area"
+            "at an impound lot in The Dalles, Oregon"
         );
         assert_eq!(
             impound_lot_text(world, "the_dalles_or_us"),

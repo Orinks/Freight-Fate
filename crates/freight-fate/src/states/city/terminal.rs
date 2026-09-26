@@ -705,12 +705,25 @@ impl Menu for CityMenuState {
             } else {
                 format!(" {record}")
             };
+            // An impound lot is in the city, not a "service area" (which
+            // reads as a turnpike travel plaza): "Parked at an impound lot
+            // in Buffalo, New York."
+            let where_parked = if parked.kind == ff_core::models::home_base::ParkedKind::Impound {
+                format!(
+                    " at {}",
+                    ff_core::models::home_base::impound_lot_text(world, &p.current_city)
+                )
+            } else {
+                format!(
+                    "{} in {}, {city_state}",
+                    parked.at_clause(),
+                    ff_core::models::home_base::city_service_area(&city_name)
+                )
+            };
             format!(
-                "Parked{} in {}, {city_state}. {} with \
+                "Parked{where_parked}. {} with \
                  level {}, {}.{cdl}{record} \
                  You have {} dollars.{first_day}",
-                parked.at_clause(),
-                ff_core::models::home_base::city_service_area(&city_name),
                 crate::states::city::py_capitalize(business),
                 rank.level,
                 rank.title,

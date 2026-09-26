@@ -268,9 +268,10 @@ fn test_a_felony_stop_tows_to_an_impound_lot_in_the_stop_city() {
     // The hub says the same place, and names no pin either.
     let (line, title) = hub_after_release(&mut app);
     assert!(
-        line.starts_with("Parked at an impound lot in the Buffalo service area, New York."),
+        line.starts_with("Parked at an impound lot in Buffalo, New York. "),
         "{line}"
     );
+    assert!(!line.contains("service area"), "{line}");
     assert_eq!(title, "Buffalo impound lot");
     assert_names_no_pin(&app, "buffalo_ny_us", &line);
 }
@@ -295,7 +296,7 @@ fn test_a_felony_stop_beside_a_travel_center_still_tows_to_the_impound_lot() {
     assert_names_no_pin(&app, "healy_ak_us", &summary);
     let (line, _) = hub_after_release(&mut app);
     assert!(
-        line.starts_with("Parked at an impound lot in the Healy"),
+        line.starts_with("Parked at an impound lot in Healy, Alaska. "),
         "{line}"
     );
     assert_names_no_pin(&app, "healy_ak_us", &line);
@@ -315,7 +316,7 @@ fn test_a_felony_stop_in_the_home_terminal_city_still_says_impound_lot() {
     assert_eq!(profile_of_app(&app).current_city, "buffalo_ny_us");
     let (line, title) = hub_after_release(&mut app);
     assert!(
-        line.starts_with("Parked at an impound lot in the Buffalo service area"),
+        line.starts_with("Parked at an impound lot in Buffalo, New York. "),
         "{line}"
     );
     assert_eq!(title, "Buffalo impound lot");
@@ -324,6 +325,25 @@ fn test_a_felony_stop_in_the_home_terminal_city_still_says_impound_lot() {
         assert!(!line.contains(&terminal), "{line}");
     }
     assert!(!line.to_lowercase().contains("terminal"), "{line}");
+}
+
+#[test]
+fn test_the_hub_names_an_impound_lot_by_city_not_service_area() {
+    let mut app = TestApp::new();
+    let _drive = a_drive(&mut app, "Gorge");
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.current_city = "the_dalles_or_us".to_string();
+        p.parked_facility = IMPOUND_LOT_FACILITY.to_string();
+    }
+    let (line, title) = hub_after_release(&mut app);
+    assert!(
+        line.starts_with("Parked at an impound lot in The Dalles, Oregon. "),
+        "{line}"
+    );
+    assert!(!line.contains("service area"), "{line}");
+    assert!(!line.contains("the The"), "{line}");
+    assert_eq!(title, "The Dalles impound lot");
 }
 
 #[test]
