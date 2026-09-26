@@ -314,6 +314,16 @@ mod tests {
     }
 
     #[test]
+    fn the_refused_reverse_reads_exactly() {
+        assert_eq!(
+            DOUBLES_NO_REVERSE_TEXT,
+            "Reverse refused. You don't back a set of doubles: the converter dolly is a \
+             second pivot and the rear trailer jackknifes within a few feet. Pull forward and \
+             go around instead."
+        );
+    }
+
+    #[test]
     fn legal_gross_follows_the_route_states() {
         // Twin 28s stay at the federal cap wherever they run.
         assert_eq!(
