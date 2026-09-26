@@ -6,7 +6,8 @@ use crate::states_city_support::*;
 use ff_core::data::world::get_world;
 use ff_core::models::doubles::{
     doubles_break_text, doubles_hook_text, DOUBLES_BREAK_SET_MIN, DOUBLES_NO_REVERSE_TEXT,
-    DOUBLES_SECOND_HOOK_MIN, DOUBLES_WALK_AROUND_EXTRA_MIN, REAR_TRAILER_WHIP_TEXT,
+    DOUBLES_SECOND_HOOK_MIN, DOUBLES_WALK_AROUND_EXTRA_MIN, REAR_TRAILER_WHIP_EMPTY_TEXT,
+    REAR_TRAILER_WHIP_TEXT,
 };
 use ff_core::models::jobs::{cargo_type, Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
@@ -16,7 +17,7 @@ use ff_core::sim::vehicle::KG_PER_TON;
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::share;
 use freight_fate::app::testing::TestApp;
-use freight_fate::states::base::Key;
+use freight_fate::states::base::{Key, Mods};
 use freight_fate::states::city_pickup::{PickupFacilityState, PickupOptions};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, WALK_AROUND_MIN};
@@ -255,7 +256,7 @@ fn full_lane_keeping_changes_lanes_gently_with_no_whip() {
         assert_eq!(d.lane.transient_lateral_g(), 0.0);
     }
     assert_eq!(d.trip.truck.cargo_damage_pct, damage);
-    assert!(!app.main_lines().iter().any(|l| l == REAR_TRAILER_WHIP_TEXT));
+    assert!(!app.event_lines().iter().any(|l| l.contains("whipped")));
 }
 
 #[test]
@@ -303,4 +304,109 @@ fn the_same_turnpike_set_sways_the_same_on_a_ny_lane_and_a_ks_lane() {
         ny.trip.truck.rear_trailer_lateral_g(0.1, 0.04),
         ks.trip.truck.rear_trailer_lateral_g(0.1, 0.04)
     );
+}
+
+/// Drive `d` at 60 mph through `steps` of (key held, seconds) on the real
+/// input path, then 4 s hands off, at 20 frames a second. Returns the cargo
+/// damage it cost and the whip lines spoken.
+fn steer_through(
+    app: &mut TestApp,
+    d: &mut DrivingState,
+    steps: &[(Option<Key>, f64)],
+) -> (f64, Vec<String>) {
+    let clock = app.fake_pacer_clock();
+    let dt = 0.05;
+    let before = d.trip.truck.cargo_damage_pct;
+    let mut all: Vec<(Option<Key>, f64)> = steps.to_vec();
+    all.push((None, 4.0));
+    for (key, seconds) in all {
+        if let Some(k) = key {
+            app.ctx.input.press(k, Mods::NONE);
+        }
+        let frames = (seconds / dt).round() as usize;
+        for _ in 0..frames {
+            d.trip.truck.velocity_mps = 60.0 / 2.23694;
+            d.update_lane(&mut app.ctx, dt);
+            clock.advance(dt);
+        }
+        if let Some(k) = key {
+            app.ctx.input.release(k, Mods::NONE);
+        }
+    }
+    let whips = app
+        .event_lines()
+        .into_iter()
+        .filter(|l| l.contains("whipped"))
+        .collect();
+    (d.trip.truck.cargo_damage_pct - before, whips)
+}
+
+#[test]
+fn a_keyboard_lane_change_on_loaded_pups_does_not_whip() {
+    // A steering key is a switch, but the rear trailer feels the steer
+    // build at the slew limit: a tap or a real tenth-second lane change at
+    // 60 mph on loaded pups neither whips nor shifts freight, with lane
+    // keeping off or partial.
+    let taps: [&[(Option<Key>, f64)]; 3] = [
+        &[(Some(Key::Left), 0.05)],
+        &[(Some(Key::Left), 0.1), (Some(Key::Right), 0.1)],
+        &[(Some(Key::Left), 0.2), (None, 0.3), (Some(Key::Right), 0.2)],
+    ];
+    for mode in ["off", "partial"] {
+        for steps in taps {
+            let mut app = TestApp::new();
+            app.ctx.settings.lane_keeping = mode.to_string();
+            let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+            let (damage, whips) = steer_through(&mut app, &mut d, steps);
+            assert_eq!(damage, 0.0, "{mode} {steps:?}");
+            assert!(whips.is_empty(), "{mode} {steps:?}: {whips:?}");
+            drop(app);
+        }
+    }
+}
+
+#[test]
+fn an_evasive_swerve_on_loaded_pups_still_whips_and_says_so() {
+    // Full lock one way, then the other: the swerve that really swings a
+    // rear pup. It whips, the freight shifts, and one line covers it.
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "off".to_string();
+    let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+    let (damage, whips) = steer_through(
+        &mut app,
+        &mut d,
+        &[(Some(Key::Left), 1.0), (Some(Key::Right), 1.0)],
+    );
+    assert!(damage > 0.0);
+    assert_eq!(whips, vec![REAR_TRAILER_WHIP_TEXT.to_string()]);
+    assert_eq!(
+        d.status_text, REAR_TRAILER_WHIP_TEXT,
+        "shown as well as spoken"
+    );
+    // The same swerve empty still whips, and the line claims no freight.
+    drop(app);
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "off".to_string();
+    let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+    d.trip.truck.cargo_kg = 0.0;
+    let (_, whips) = steer_through(
+        &mut app,
+        &mut d,
+        &[(Some(Key::Left), 1.0), (Some(Key::Right), 1.0)],
+    );
+    assert_eq!(whips, vec![REAR_TRAILER_WHIP_EMPTY_TEXT.to_string()]);
+}
+
+#[test]
+fn a_keyboard_lane_change_never_whips_turnpike_doubles() {
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "off".to_string();
+    let mut d = drive(&mut app, "turnpike_doubles", "Toledo", "Elkhart", 25.0);
+    let (damage, whips) = steer_through(
+        &mut app,
+        &mut d,
+        &[(Some(Key::Left), 0.1), (Some(Key::Right), 0.1)],
+    );
+    assert_eq!(damage, 0.0);
+    assert!(whips.is_empty(), "{whips:?}");
 }

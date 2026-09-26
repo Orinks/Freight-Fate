@@ -109,8 +109,22 @@ pub const DOUBLES_NO_REVERSE_TEXT: &str = "Reverse refused. You don't back a set
      a few feet. Pull forward and go around instead.";
 
 /// Spoken and shown when a quick steer swings the rear trailer hard.
-pub const REAR_TRAILER_WHIP_TEXT: &str = "The rear trailer whipped on that steer. On \
+pub const REAR_TRAILER_WHIP_TEXT: &str = "The rear trailer whipped on that steer and \
+     shifted its freight. On doubles the back trailer swings harder than the tractor, so ease \
+     into lane changes.";
+
+/// The whip line for an empty set, which has no freight to shift.
+pub const REAR_TRAILER_WHIP_EMPTY_TEXT: &str = "The rear trailer whipped on that steer. On \
      doubles the back trailer swings harder than the tractor, so ease into lane changes.";
+
+/// The whip line, spoken and shown, for a set with or without freight.
+pub fn rear_trailer_whip_text(loaded: bool) -> &'static str {
+    if loaded {
+        REAR_TRAILER_WHIP_TEXT
+    } else {
+        REAR_TRAILER_WHIP_EMPTY_TEXT
+    }
+}
 
 /// The trailer program a cargo class hooks, when it is exactly one.
 fn only_trailer_key(cargo_key: &str) -> Option<&'static str> {

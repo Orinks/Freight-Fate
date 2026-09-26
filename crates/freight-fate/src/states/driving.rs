@@ -479,8 +479,10 @@ pub struct DrivingState {
     // where the terminal releases; the driver's own brake cancels it, and a
     // cancel holds for the rest of this ramp.
     pub approach_pull_ahead: bool,
-    // Seconds before the rear-trailer whip warning may speak again on a set
-    // of doubles, so one swerve is one line, not one per frame.
+    // Seconds left in the current rear-trailer whip episode on a set of
+    // doubles: every whip frame restarts it, and a whip with none left is a
+    // new episode that is spoken and shown. One swerve is one line, and no
+    // freight shifts without a line for its episode.
     pub rear_whip_cooldown_s: f64,
     pub approach_pull_ahead_canceled: bool,
     // A street control on a facility chain, played through the ramp

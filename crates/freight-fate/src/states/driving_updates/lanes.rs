@@ -3,7 +3,7 @@
 //! and keep-right pressure.
 
 use ff_core::data::curves::{advisory_with_bank_mph, superelevation_at};
-use ff_core::models::doubles::REAR_TRAILER_WHIP_TEXT;
+use ff_core::models::doubles::rear_trailer_whip_text;
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -930,15 +930,23 @@ impl DrivingState {
         let steer_g = self.lane.transient_lateral_g();
         let wind_g = self.lane.wind_lateral_g;
         let whipped = self.trip.truck.update_rear_trailer(dt, steer_g, wind_g);
-        if whipped && self.rear_whip_cooldown_s <= 0.0 {
-            self.rear_whip_cooldown_s = REAR_WHIP_COOLDOWN_S;
-            self.set_status(REAR_TRAILER_WHIP_TEXT);
+        if !whipped {
+            return;
+        }
+        // Every whip frame belongs to an episode, and every episode is
+        // spoken and shown when it starts, so freight never shifts silently.
+        let new_episode = self.rear_whip_cooldown_s <= 0.0;
+        self.rear_whip_cooldown_s = REAR_WHIP_EPISODE_GAP_S;
+        if new_episode {
+            let text = rear_trailer_whip_text(self.trip.truck.cargo_kg > 0.0);
+            self.set_status(text);
             let mut opts = SayEvent::queued().priority(EventPriority::Route);
             opts.category = Some(SpeechCategory::Safety);
-            ctx.say_event_with(REAR_TRAILER_WHIP_TEXT, opts);
+            ctx.say_event_with(text, opts);
         }
     }
 }
 
-/// Seconds between rear-trailer whip warnings.
-const REAR_WHIP_COOLDOWN_S: f64 = 20.0;
+/// Seconds without a whip before the next whip is a new episode with its
+/// own line. One swerve's back-and-forth stays one line.
+const REAR_WHIP_EPISODE_GAP_S: f64 = 3.0;

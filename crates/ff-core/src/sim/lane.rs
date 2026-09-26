@@ -124,6 +124,16 @@ pub const G_FPS2: f64 = 32.174;
 /// takes a few seconds, and the SAE J2179 test FHWA cites runs one in 200 ft
 /// at 55 mph, about 2.5 seconds.
 pub const LATERAL_STEADY_TAU_S: f64 = 3.0;
+/// How fast the steer the rear trailer of a set of doubles feels can build,
+/// g per second. A steering key is a switch: it puts the tractor at the
+/// driver's lateral cap on the first frame, a step no real hand on a wheel
+/// makes, and a step read straight into rearward amplification whipped a
+/// loaded set of pups on every keyboard lane change. The rear trailer
+/// instead feels the tractor's lateral acceleration rate-limited to this
+/// slew, so a tap of a tenth or two of a second stays small while a held
+/// full-lock swerve, an S-swerve or a partial-assist snap-back still builds
+/// past the whip threshold. ASSUMED; not calibrated against a measurement.
+pub const REAR_WHIP_STEER_SLEW_G_PER_S: f64 = 0.3;
 
 /// Only the modes where the driver does the lane work have a drift model.
 /// "full" is absent on purpose: it pins the offset to lane centre.
@@ -249,6 +259,9 @@ pub struct LaneKeeping {
     /// The tractor's lateral acceleration last update, g, signed like the
     /// heading (positive to the right). Zero when no drift model runs.
     pub lateral_g: f64,
+    /// [`Self::lateral_g`] rate-limited to [`REAR_WHIP_STEER_SLEW_G_PER_S`]:
+    /// the steer the rear trailer of a set of doubles feels, g, signed.
+    pub rear_steer_g: f64,
     steady_lateral_g: f64,
     /// How hard the crosswind gust is shoving sideways this update, g,
     /// unsigned: the rate the gust's sideways speed is changing. The tractor
@@ -292,21 +305,23 @@ impl LaneKeeping {
             off_road_timer: 0.0,
             event_cooldown: 0.0,
             lateral_g: 0.0,
+            rear_steer_g: 0.0,
             steady_lateral_g: 0.0,
             wind_lateral_g: 0.0,
             wind_lateral_fps: None,
         }
     }
 
-    /// The part of the tractor's lateral acceleration that is a quick steer
-    /// rather than a bend held steady, g, unsigned. See
-    /// [`LATERAL_STEADY_TAU_S`].
+    /// The part of the steer the rear trailer feels ([`Self::rear_steer_g`])
+    /// that is a quick steer rather than a bend held steady, g, unsigned.
+    /// See [`LATERAL_STEADY_TAU_S`] and [`REAR_WHIP_STEER_SLEW_G_PER_S`].
     pub fn transient_lateral_g(&self) -> f64 {
-        (self.lateral_g - self.steady_lateral_g).abs()
+        (self.rear_steer_g - self.steady_lateral_g).abs()
     }
 
     fn clear_lateral(&mut self) {
         self.lateral_g = 0.0;
+        self.rear_steer_g = 0.0;
         self.steady_lateral_g = 0.0;
         self.wind_lateral_g = 0.0;
         self.wind_lateral_fps = None;
@@ -457,8 +472,10 @@ impl LaneKeeping {
         // the wheel into it. This is where load and grip live now.
         yaw_rate *= grip.clamp(0.0, 1.0);
         self.lateral_g = yaw_rate * fps / G_FPS2;
+        let slew = REAR_WHIP_STEER_SLEW_G_PER_S * dt;
+        self.rear_steer_g += (self.lateral_g - self.rear_steer_g).clamp(-slew, slew);
         self.steady_lateral_g +=
-            (self.lateral_g - self.steady_lateral_g) * (dt / LATERAL_STEADY_TAU_S).min(1.0);
+            (self.rear_steer_g - self.steady_lateral_g) * (dt / LATERAL_STEADY_TAU_S).min(1.0);
 
         // The road turns underneath. Holding the wheel still in a bend leaves
         // the truck pointing where it was, so the RELATIVE heading opens up
@@ -571,10 +588,19 @@ mod tests {
             "{}",
             lane.transient_lateral_g()
         );
-        // A sudden full-lock steer on a straight is a transient at once.
+        // The key puts the tractor at its cap on the first frame, but the
+        // rear trailer's steer builds at the slew: a tenth-second tap stays
+        // small, a held full-lock swerve is a large transient.
         let mut swerve = LaneKeeping::new(Some(7));
         swerve.steering = 1.0;
         swerve.update(0.05, speed, RoadConditions::default(), "off", false);
+        assert!(swerve.lateral_g > 0.15, "{}", swerve.lateral_g);
+        swerve.update(0.05, speed, RoadConditions::default(), "off", false);
+        let tap = swerve.transient_lateral_g();
+        assert!(tap <= REAR_WHIP_STEER_SLEW_G_PER_S * 0.1 + 1e-9, "{tap}");
+        for _ in 0..12 {
+            swerve.update(0.05, speed, RoadConditions::default(), "off", false);
+        }
         assert!(
             swerve.transient_lateral_g() > 0.15,
             "{}",
