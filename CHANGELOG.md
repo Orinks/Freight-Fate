@@ -157,6 +157,8 @@
 
 ### Fixed
 
+- **The siren, weigh station, and lane guide tone now stop when you leave the drive.** They used to keep playing until you closed the game.
+
 - **J turns the engine brake on while cruise is holding the throttle.** It no longer asks you to release an accelerator you are not pressing.
 
 - **Exits on several routes are announced at the right mile.** Charlotte to Knoxville and Dallas to St. Louis no longer name another highway's exits.

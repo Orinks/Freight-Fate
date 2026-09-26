@@ -30,6 +30,7 @@ use ff_core::sim::enforcement_posts::{
 };
 use ff_core::sim::traffic_manager::TrafficVehicle;
 use ff_core::sim::trip_models::RoadStop;
+use freight_fate::states::base::State;
 
 use freight_fate::app::testing::{AudioLog, TestApp};
 use freight_fate::states::driving::DrivingState;
@@ -1716,4 +1717,21 @@ fn test_overweight_cargo_is_a_real_check_and_red_lights_the_scale() {
     assert!(drive.cargo_is_overweight());
     let verdict = drive.roll_transponder_verdict(&scale, "weigh:heavy");
     assert_eq!(verdict, "red");
+}
+
+#[test]
+fn test_leaving_the_drive_mid_stop_releases_the_siren() {
+    // The siren's own dead-man's switch only ticks from inside update(), so
+    // it can never time itself out once the state stops running -- leaving
+    // to the menu (or a save load, which exits the same way) mid pull-over
+    // used to leave it playing until the game closed.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Presence");
+    drive.pull_over = Some(PULL_OVER_LIGHTS.to_string());
+    drive.hold_stop_siren(&mut app.ctx);
+    assert!(drive.siren.active);
+
+    State::exit(&mut drive, &mut app.ctx);
+
+    assert!(!drive.siren.active);
 }
