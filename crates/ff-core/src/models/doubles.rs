@@ -41,6 +41,12 @@ pub const DOUBLES_SECOND_HOOK_MIN: f64 = 15.0;
 /// tractor and one trailer.
 pub const DOUBLES_WALK_AROUND_EXTRA_MIN: f64 = 10.0;
 
+/// Breaking the set at the receiver: drop the rear pup, pull the converter
+/// dolly out from under the lead trailer and park it, then drop the lead.
+/// ASSUMED at about 15 minutes, the figure the realism review set; no public
+/// time study was found.
+pub const DOUBLES_BREAK_SET_MIN: f64 = 15.0;
+
 /// A single-axle converter dolly, pounds. READ: Silver Eagle Manufacturing,
 /// Value Added converter dolly model VAST-20 spec sheet ("Weight: 2,740
 /// pounds", GVWR 20,000 lb), Section VA, updated 2005-04-06,
@@ -145,6 +151,16 @@ pub fn doubles_hook_extra_min(cargo_key: &str) -> f64 {
     }
 }
 
+/// Extra on-duty minutes a set of doubles adds at the receiver: breaking the
+/// set. Zero for single-trailer freight.
+pub fn doubles_break_extra_min(cargo_key: &str) -> f64 {
+    if is_doubles_cargo(cargo_key) {
+        DOUBLES_BREAK_SET_MIN
+    } else {
+        0.0
+    }
+}
+
 /// Extra on-duty minutes a walk-around takes with a set of doubles hooked.
 pub fn walk_around_extra_min(trailer_units: u8) -> f64 {
     if trailer_units >= 2 {
@@ -217,6 +233,31 @@ pub fn doubles_hook_text(cargo_key: &str) -> String {
         DOUBLES_WALK_AROUND_EXTRA_MIN as i64,
         doubles_hook_extra_min(cargo_key) as i64
     )
+}
+
+/// The clause for breaking a set of doubles, spoken and shown at the
+/// receiver. Empty for single-trailer freight.
+pub fn doubles_break_text(cargo_key: &str) -> String {
+    if !is_doubles_cargo(cargo_key) {
+        return String::new();
+    }
+    format!(
+        "Breaking a set of doubles is dropping the rear trailer, unhooking and parking \
+         the converter dolly, then dropping the lead trailer: about {} extra minutes on duty.",
+        doubles_break_extra_min(cargo_key) as i64
+    )
+}
+
+/// The receiver's screen line for breaking a set of doubles, or None for a
+/// single trailer.
+pub fn doubles_break_line(cargo_key: &str) -> Option<String> {
+    is_doubles_cargo(cargo_key).then(|| {
+        format!(
+            "Doubles: drop the rear trailer, park the converter dolly, drop the lead, {} \
+             extra minutes on duty",
+            doubles_break_extra_min(cargo_key) as i64
+        )
+    })
 }
 
 #[cfg(test)]

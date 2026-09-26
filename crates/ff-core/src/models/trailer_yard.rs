@@ -36,7 +36,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::models::career::JobView;
-use crate::models::doubles::doubles_hook_extra_min;
+use crate::models::doubles::{doubles_break_extra_min, doubles_hook_extra_min};
 use crate::models::trailers::{owned_trailer_for_cargo, trailer_keys_for_cargo, trailer_type};
 use crate::pyfmt::{fmt_f, py_str_float, round_py_n};
 
@@ -407,10 +407,14 @@ where
     J: JobView + ?Sized,
     P: TrailerOwner + ?Sized,
 {
+    // A set of doubles is broken apart whichever way it comes off: the rear
+    // pup dropped, the dolly parked, the lead dropped or docked
+    // (`doubles::doubles_break_extra_min`).
+    let doubles_min = doubles_break_extra_min(job.cargo_key());
     if owns_the_trailer(profile, job) {
         return DeliveryPlan {
             mode: MODE_LIVE,
-            minutes: LIVE_UNLOAD_MIN,
+            minutes: LIVE_UNLOAD_MIN + doubles_min,
             keeps_trailer: true,
             reason: "it is your own trailer, so they unload you at the dock",
         };
@@ -423,14 +427,14 @@ where
     if facility_has_drop_yard(facility_type, facility_id) {
         return DeliveryPlan {
             mode: MODE_DROP_HOOK,
-            minutes: DROP_EMPTY_MIN,
+            minutes: DROP_EMPTY_MIN + doubles_min,
             keeps_trailer: false,
             reason: "the receiver takes the whole trailer and you leave with an empty",
         };
     }
     DeliveryPlan {
         mode: MODE_LIVE,
-        minutes: LIVE_UNLOAD_MIN,
+        minutes: LIVE_UNLOAD_MIN + doubles_min,
         keeps_trailer: true,
         reason: "the receiver is unloading you at the dock",
     }

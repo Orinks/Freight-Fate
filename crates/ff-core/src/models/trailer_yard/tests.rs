@@ -327,3 +327,26 @@ fn test_a_set_of_doubles_adds_the_second_hook_up_and_walk_around() {
     );
     assert_eq!(owned.minutes, LIVE_LOAD_MIN + extra);
 }
+
+#[test]
+fn test_breaking_a_set_of_doubles_adds_time_at_the_receiver() {
+    use crate::models::doubles::{doubles_break_text, DOUBLES_BREAK_SET_MIN};
+    for (facility, id) in [("parcel_hub", "hub-1"), ("farm_elevator", "elev-1")] {
+        let mut pups = job("cross_dock", "fac-1", "parcel_doubles", 400.0);
+        pups.destination_type = facility.to_string();
+        pups.destination_facility_id = id.to_string();
+        let mut single = job("cross_dock", "fac-1", "parcel", 400.0);
+        single.destination_type = facility.to_string();
+        single.destination_facility_id = id.to_string();
+        let doubles = delivery_plan(&pups, &CompanyDriver);
+        let plain = delivery_plan(&single, &CompanyDriver);
+        assert_eq!(doubles.mode, plain.mode);
+        assert_eq!(doubles.minutes, plain.minutes + DOUBLES_BREAK_SET_MIN);
+    }
+    let mut owned = job("cross_dock", "fac-1", "parcel_doubles", 400.0);
+    owned.destination_type = "parcel_hub".to_string();
+    let own = delivery_plan(&owned, &OwnerOperator::with(&["double_van"]));
+    assert_eq!(own.minutes, LIVE_UNLOAD_MIN + DOUBLES_BREAK_SET_MIN);
+    assert!(doubles_break_text("parcel_doubles").contains("converter dolly"));
+    assert!(doubles_break_text("general").is_empty());
+}
