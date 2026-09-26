@@ -347,7 +347,7 @@ fn test_the_felony_stop_cancels_the_load_and_releases_the_driver() {
         state.summary()
     );
     assert!(
-        state.summary().contains("You are released."),
+        state.summary().contains("You are released after booking."),
         "{}",
         state.summary()
     );

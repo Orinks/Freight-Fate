@@ -21,6 +21,8 @@
 //! | `monkeypatch.setattr(pygame.key, "get_pressed", {K_x: True})` | `ctx.input.press(Key::X, Mods::SHIFT)`, the real held key |
 //! | `monkeypatch.setattr(ctx, "save_profile", noop)` | left alone: the test app saves into its own temp data directory |
 
+use ff_core::models::business::{COMPANY_DRIVER, INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
+use ff_core::models::carriers::hiring_carrier;
 use ff_core::models::enforcement::{FATIGUE_EVENT_REPUTATION_HIT, SUSPENSION_LIFETIME};
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
@@ -49,27 +51,32 @@ fn approx(a: f64, b: f64) -> bool {
 
 /// `_driving(app, name="Jerry")`: Buffalo to Rochester, empty road.
 fn a_drive(app: &mut TestApp, name: &str) -> DrivingState {
+    a_drive_between(app, name, "Buffalo", "Rochester")
+}
+
+/// The same rigging on another lane.
+fn a_drive_between(app: &mut TestApp, name: &str, from: &str, to: &str) -> DrivingState {
     let world = app.ctx.world;
-    let mut profile = Profile::named_in(name, "Buffalo");
+    let mut profile = Profile::named_in(name, from);
     profile.tutorial_done = true;
     app.ctx.profile = Some(profile);
     let route = world
-        .supported_route("Buffalo", "Rochester", None)
+        .supported_route(from, to, None)
         .expect("the world routes")
-        .expect("Buffalo to Rochester is supported");
+        .expect("the lane is supported");
     let mut job = Job::new(
         CARGO_CATALOG
             .get("general")
             .expect("the general cargo type"),
         12.0,
-        "Buffalo",
+        from,
         "company yard",
-        "Rochester",
+        to,
         route.miles(),
         1000.0,
         12.0,
     );
-    job.destination_location = "Rochester freight market".to_string();
+    job.destination_location = format!("{to} freight market");
     let mut drive = DrivingState::new(
         &mut app.ctx,
         job,
@@ -197,7 +204,10 @@ fn test_a_felony_stop_away_from_home_never_names_the_home_terminal() {
     state.announce_entry(&mut app.ctx);
 
     let summary = state.summary().to_string();
-    assert!(summary.contains("You are released."), "{summary}");
+    assert!(
+        summary.contains("You are released after booking."),
+        "{summary}"
+    );
     let said = said(&app);
     for text in [&summary, &said] {
         assert!(!text.contains(&home), "{text}");
@@ -205,6 +215,134 @@ fn test_a_felony_stop_away_from_home_never_names_the_home_terminal() {
         assert!(!text.contains("released back"), "{text}");
         assert!(!text.contains("from the terminal"), "{text}");
     }
+}
+
+/// Run from the stop on this rigged drive and return the summary.
+fn felony_summary(app: &mut TestApp, drive: &mut DrivingState) -> String {
+    FelonyStopState::new(&mut app.ctx, drive)
+        .summary()
+        .to_string()
+}
+
+/// Where the truck ended up: (current_city key, parked_facility), after
+/// checking the facility is a real one in that city and returning its type.
+fn towed_facility(app: &TestApp) -> (String, String, String) {
+    let p = app.ctx.profile.as_ref().expect("a career");
+    let world = app.ctx.world;
+    let key = world.resolve_city_key(&p.current_city);
+    let loc = world.cities[&key]
+        .locations
+        .iter()
+        .find(|l| l.name == p.parked_facility)
+        .unwrap_or_else(|| panic!("{:?} is not a facility in {key}", p.parked_facility));
+    (key, loc.name.clone(), loc.facility_type.clone())
+}
+
+#[test]
+fn test_a_felony_stop_tows_the_truck_to_the_nearest_public_lot() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive_between(&mut app, "Parks", "healy_ak_us", "fairbanks_ak_us");
+    let summary = felony_summary(&mut app, &mut drive);
+
+    let (key, facility, kind) = towed_facility(&app);
+    assert!(
+        kind == "travel_center" || kind == "truck_parking",
+        "{kind}: {summary}"
+    );
+    assert_eq!(key, "healy_ak_us");
+    let city = app.ctx.world.spoken_city(&key, None);
+    assert!(
+        summary.contains(&format!(
+            "You are released after booking. The truck was towed to {facility} in {city}."
+        )),
+        "{summary}"
+    );
+    // The hub reads the same place.
+    let parked = app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .parked_at(app.ctx.world);
+    assert_eq!(parked.name, facility);
+}
+
+#[test]
+fn test_a_felony_stop_with_no_lot_in_range_tows_to_the_nearest_real_facility() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Niagara");
+    let summary = felony_summary(&mut app, &mut drive);
+
+    let (key, facility, _) = towed_facility(&app);
+    let city = app.ctx.world.spoken_city(&key, None);
+    assert!(
+        summary.ends_with(&format!("The truck was towed to {facility} in {city}."))
+            || summary.contains(&format!("The truck was towed to {facility} in {city}. ")),
+        "{summary}"
+    );
+}
+
+#[test]
+fn test_a_felony_stop_never_leaves_the_truck_on_a_shoulder() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Shoulder");
+    let summary = felony_summary(&mut app, &mut drive);
+    assert!(!summary.to_lowercase().contains("shoulder"), "{summary}");
+    assert!(!profile_of_app(&app).parked_facility.is_empty());
+}
+
+fn profile_of_app(app: &TestApp) -> &Profile {
+    app.ctx.profile.as_ref().expect("a career")
+}
+
+#[test]
+fn test_a_felony_stop_says_the_carrier_recovered_a_company_load() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Company");
+    app.ctx.profile.as_mut().expect("a career").business_status = COMPANY_DRIVER.to_string();
+    let carrier = carrier_name(&app);
+    let summary = felony_summary(&mut app, &mut drive);
+    assert!(
+        summary.contains(&format!("{carrier} recovered the load.")),
+        "{summary}"
+    );
+    assert!(!summary.contains("yours to sort out"), "{summary}");
+}
+
+#[test]
+fn test_a_felony_stop_says_the_carrier_recovered_a_leased_load() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Leased");
+    app.ctx.profile.as_mut().expect("a career").business_status = LEASED_OWNER_OPERATOR.to_string();
+    let carrier = carrier_name(&app);
+    let summary = felony_summary(&mut app, &mut drive);
+    assert!(
+        summary.contains(&format!("{carrier} recovered the load.")),
+        "{summary}"
+    );
+    assert!(!summary.contains("yours to sort out"), "{summary}");
+}
+
+#[test]
+fn test_a_felony_stop_leaves_an_own_authority_load_to_the_shipper() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Authority");
+    app.ctx.profile.as_mut().expect("a career").business_status = INDEPENDENT_AUTHORITY.to_string();
+    let summary = felony_summary(&mut app, &mut drive);
+    assert!(
+        summary.contains("The load is yours to sort out with the shipper."),
+        "{summary}"
+    );
+    assert!(!summary.contains("recovered the load"), "{summary}");
+    assert!(!summary.contains("Dispatch"), "{summary}");
+}
+
+fn carrier_name(app: &TestApp) -> String {
+    let p = profile_of_app(app);
+    hiring_carrier(&p.carrier_key, &p.carrier_name, &p.business_status)
+        .expect("a hiring carrier")
+        .name
+        .clone()
 }
 
 #[test]

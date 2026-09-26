@@ -80,6 +80,82 @@ pub fn city_service_area(city: &str) -> String {
     format!("{} service area", crate::speech_text::the_city(city))
 }
 
+/// How far a heavy wrecker is taken to tow a seized truck to a public
+/// truck lot, in air miles. A `travel_center` or `truck_parking` pin
+/// farther than this is not where a roadside tow ends up.
+pub const TOW_LOT_RADIUS_MI: f64 = 100.0;
+
+/// Where a tow leaves the truck: a real facility the hub can say the truck
+/// is parked at.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TowPlace {
+    /// World city key the facility is in; becomes `current_city`.
+    pub city_key: String,
+    /// Facility name; becomes `parked_facility`.
+    pub facility: String,
+    /// Its `facility_type`.
+    pub facility_type: String,
+    /// Air miles from the tow point.
+    pub miles: f64,
+}
+
+impl TowPlace {
+    /// Whether this is a public truck lot rather than the fallback.
+    pub fn is_public_lot(&self) -> bool {
+        is_public_lot_type(&self.facility_type)
+    }
+}
+
+fn is_public_lot_type(facility_type: &str) -> bool {
+    matches!(facility_type, "travel_center" | "truck_parking")
+}
+
+/// Where a tow from `(lat, lon)` leaves the truck: the nearest
+/// `travel_center` or `truck_parking` facility within
+/// [`TOW_LOT_RADIUS_MI`], or, when no public lot is that close, the nearest
+/// facility of any type. Only facilities in the country of the city nearest
+/// the tow point count, so a tow never crosses a border. `None` only when
+/// the world has no facility at all in that country.
+pub fn tow_destination(world: &World, lat: f64, lon: f64) -> Option<TowPlace> {
+    use crate::data::world::air_miles;
+    let country = world
+        .cities
+        .values()
+        .min_by(|a, b| {
+            air_miles(lat, lon, a.lat, a.lon).total_cmp(&air_miles(lat, lon, b.lat, b.lon))
+        })
+        .map(|c| c.country.clone())?;
+    let mut nearest_lot: Option<TowPlace> = None;
+    let mut nearest_any: Option<TowPlace> = None;
+    for (key, city) in &world.cities {
+        if city.country != country {
+            continue;
+        }
+        for loc in &city.locations {
+            if loc.name.trim().is_empty() {
+                continue;
+            }
+            let miles = air_miles(lat, lon, loc.lat, loc.lon);
+            let place = || TowPlace {
+                city_key: key.clone(),
+                facility: loc.name.clone(),
+                facility_type: loc.facility_type.clone(),
+                miles,
+            };
+            if is_public_lot_type(&loc.facility_type)
+                && miles <= TOW_LOT_RADIUS_MI
+                && nearest_lot.as_ref().is_none_or(|b| miles < b.miles)
+            {
+                nearest_lot = Some(place());
+            }
+            if nearest_any.as_ref().is_none_or(|b| miles < b.miles) {
+                nearest_any = Some(place());
+            }
+        }
+    }
+    nearest_lot.or(nearest_any)
+}
+
 /// The career fields [`parked_at`] reads.
 #[derive(Debug, Clone, Copy)]
 pub struct ParkedInputs<'a> {
@@ -202,6 +278,55 @@ mod tests {
 
     fn has_lot(city: &crate::data::world_models::City, kind: &str) -> bool {
         city.locations.iter().any(|l| l.facility_type == kind)
+    }
+
+    #[test]
+    fn test_a_tow_near_a_public_lot_ends_at_that_lot() {
+        let world = get_world();
+        let healy = &world.cities["healy_ak_us"];
+        let lot = healy
+            .locations
+            .iter()
+            .find(|l| l.facility_type == "travel_center")
+            .expect("Healy's travel center");
+        // A few miles up the Parks Highway from the lot.
+        let tow = tow_destination(world, lot.lat + 0.05, lot.lon).expect("a tow place");
+        assert!(tow.is_public_lot(), "{tow:?}");
+        assert_eq!(tow.facility, lot.name);
+        assert_eq!(tow.city_key, "healy_ak_us");
+        assert!(tow.miles <= TOW_LOT_RADIUS_MI);
+    }
+
+    #[test]
+    fn test_a_tow_never_crosses_the_border_to_a_closer_lot() {
+        let world = get_world();
+        // Just south of the Blaine crossing: the Surrey lot is in Canada.
+        let tow = tow_destination(world, 48.98, -122.74).expect("a tow place");
+        assert_eq!(world.cities[&tow.city_key].country, "US", "{tow:?}");
+        assert_eq!(tow.city_key, "blaine_wa_us");
+    }
+
+    #[test]
+    fn test_a_tow_with_no_lot_in_range_ends_at_the_nearest_real_facility() {
+        let world = get_world();
+        let buffalo = &world.cities["buffalo_ny_us"];
+        let tow = tow_destination(world, buffalo.lat, buffalo.lon).expect("a tow place");
+        assert!(!tow.is_public_lot(), "{tow:?}");
+        let city = &world.cities[&tow.city_key];
+        assert!(
+            city.locations.iter().any(|l| l.name == tow.facility),
+            "{tow:?}"
+        );
+        // Nothing nearer in the same country.
+        for (key, c) in &world.cities {
+            if c.country != "US" {
+                continue;
+            }
+            for l in &c.locations {
+                let d = crate::data::world::air_miles(buffalo.lat, buffalo.lon, l.lat, l.lon);
+                assert!(d >= tow.miles - 1e-9, "{key} {} is nearer", l.name);
+            }
+        }
     }
 
     #[test]

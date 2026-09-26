@@ -4,7 +4,11 @@
 //! [`RoadsideExit`] is Python's `_RoadsideExitMixin`: a trait with provided
 //! methods, no state of its own, shared by the first two screens.
 
+use ff_core::models::business::INDEPENDENT_AUTHORITY;
+use ff_core::models::carriers::hiring_carrier;
 use ff_core::models::enforcement;
+use ff_core::models::home_base::{tow_destination, ParkedKind};
+use ff_core::models::profile::Profile;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::hos;
@@ -627,6 +631,10 @@ impl FelonyStopState {
             p.game_hours += hours;
             p.market_day()
         };
+        // The truck does not stay on the shoulder: a wrecker tows it to the
+        // nearest public truck lot (or, with none in range, the nearest real
+        // facility), and the hub reads it parked there.
+        let towed_to = tow_truck_from_stop(ctx, d);
         {
             let p = profile_mut_of(ctx);
             p.market.advance_to(market_day);
@@ -635,28 +643,86 @@ impl FelonyStopState {
         }
         ctx.save_profile();
 
-        let load_text = if self.load_lost {
-            format!(
-                "Dispatch cancels the {} load. No pay for this run.",
-                d.job.spoken_cargo_label()
-            )
+        let load_text = felony_load_text(profile_of(ctx), self.load_lost, d);
+        let booking_min = FAILURE_TO_STOP_PROCESSING_MIN;
+        let booking = if booking_min > 0.0 {
+            format!(", and booking took {} hours", fmt_f(booking_min / 60.0, 0))
         } else {
-            "No loaded trailer to lose, but the assignment is canceled.".to_string()
+            String::new()
         };
+        let towed = towed_to
+            .map(|place| format!(" The truck was towed to {place}."))
+            .unwrap_or_default();
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
-             major reputation hit.{} Spike strips added {} percent truck damage, processing \
-             took {} hours. {load_text} You are released.",
+             major reputation hit.{} Spike strips added {} percent truck damage{booking}. \
+             {load_text} You are released after booking.{towed}",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_f(FAILURE_TO_STOP_DAMAGE_PCT, 0),
-            fmt_f(FAILURE_TO_STOP_PROCESSING_MIN / 60.0, 0)
         );
         if !self.standing_text.is_empty() {
             self.summary.push_str(&format!(" {}", self.standing_text));
         }
     }
+}
+
+/// What happens to the freight after a felony stop, by who owns the run.
+fn felony_load_text(p: &Profile, load_lost: bool, d: &DrivingState) -> String {
+    let own_authority = p.business_status == INDEPENDENT_AUTHORITY;
+    if d.job.bobtail {
+        return "No loaded trailer to lose, but the assignment is canceled.".to_string();
+    }
+    if own_authority {
+        let lead = if load_lost {
+            format!(
+                "The {} load does not deliver, so no pay for this run.",
+                d.job.spoken_cargo_label()
+            )
+        } else {
+            "No loaded trailer to lose, but the load is canceled.".to_string()
+        };
+        return format!("{lead} The load is yours to sort out with the shipper.");
+    }
+    if !load_lost {
+        return "No loaded trailer to lose, but the assignment is canceled.".to_string();
+    }
+    let carrier = hiring_carrier(&p.carrier_key, &p.carrier_name, &p.business_status)
+        .map(|c| c.name.clone())
+        .unwrap_or_else(|| "Your carrier".to_string());
+    format!(
+        "Dispatch cancels the {} load. No pay for this run. {carrier} recovered the load.",
+        d.job.spoken_cargo_label()
+    )
+}
+
+/// Tow the truck from the stop to [`tow_destination`] and park it there:
+/// `current_city` and `parked_facility` move together, so the hub, the
+/// board and the next dispatch all start from the lot. Returns how the
+/// place is spoken, from the same rule the hub uses, so the two agree.
+fn tow_truck_from_stop(ctx: &mut GameContext, d: &DrivingState) -> Option<String> {
+    let world = ctx.world;
+    let (mut lat, mut lon) = d.trip.latlon_at(None);
+    if lat == 0.0 && lon == 0.0 {
+        // No road coordinate (a local street leg): tow from the city.
+        let here = world.resolve_city_key(&profile_of(ctx).current_city);
+        let city = world.cities.get(&here)?;
+        (lat, lon) = (city.lat, city.lon);
+    }
+    let tow = tow_destination(world, lat, lon)?;
+    let p = profile_mut_of(ctx);
+    p.current_city = tow.city_key.clone();
+    p.parked_facility = tow.facility.clone();
+    let parked = p.parked_at(world);
+    Some(match parked.kind {
+        ParkedKind::City => world.spoken_city(&parked.city_key, None),
+        _ => format!(
+            "{} in {}",
+            parked.name,
+            world.spoken_city(&parked.city_key, None)
+        ),
+    })
 }
 
 impl Menu for FelonyStopState {
