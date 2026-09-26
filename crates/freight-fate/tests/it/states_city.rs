@@ -613,7 +613,7 @@ fn test_accepting_a_retired_pickup_says_so_instead_of_crashing() {
 
 #[test]
 fn test_job_board_help_names_drivable_pickup_before_route_planning() {
-    assert!(JOB_BOARD_INTRO_HELP.contains("deadhead from your terminal"));
+    assert!(JOB_BOARD_INTRO_HELP.contains("starts the deadhead to its origin facility"));
     assert!(!JOB_BOARD_INTRO_HELP.contains("route planning"));
 }
 
@@ -1770,4 +1770,120 @@ fn test_assignment_prefers_a_lane_not_recently_run() {
     }
     let saturated = JobBoardState::new(&app.ctx, jobs);
     assert_eq!(saturated.assigned_queue(), baseline_queue);
+}
+
+// -- the hub's "parked at" line ------------------------------------------------------
+
+fn hub_entry(app: &mut TestApp) -> String {
+    app.clear_speech();
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    let lines = app.main_lines();
+    lines
+        .iter()
+        .find(|l| l.starts_with("Parked"))
+        .cloned()
+        .unwrap_or_else(|| panic!("no parked line in {lines:?}"))
+}
+
+#[test]
+fn test_hub_parks_at_the_carrier_terminal_in_the_home_terminal_city() {
+    let mut app = TestApp::new();
+    career(&mut app, "Home Yard", "Chicago");
+    assert_eq!(profile(&app).home_terminal_city, "chicago_il_us");
+    let line = hub_entry(&mut app);
+    assert!(
+        line.starts_with(
+            "Parked at Northstar Freight Lines Chicago terminal in the Chicago service area"
+        ),
+        "{line}"
+    );
+    assert_eq!(
+        CityMenuState::title_for(&app.ctx),
+        "Northstar Freight Lines Chicago terminal"
+    );
+}
+
+#[test]
+fn test_hub_parks_at_the_delivered_facility_away_from_home() {
+    let mut app = TestApp::new();
+    career(&mut app, "Away", "Milwaukee");
+    let facility = app.ctx.world.cities["milwaukee_wi_us"]
+        .locations
+        .iter()
+        .find(|l| l.facility_type == "dry_warehouse" || l.facility_type == "cross_dock")
+        .expect("a Milwaukee receiver")
+        .name
+        .clone();
+    profile_mut(&mut app).parked_facility = facility.clone();
+    let line = hub_entry(&mut app);
+    assert!(
+        line.starts_with(&format!("Parked at {facility} in the Milwaukee")),
+        "{line}"
+    );
+    assert!(!line.contains("Chicago"), "{line}");
+}
+
+#[test]
+fn test_hub_parks_at_the_public_lot_when_there_is_no_delivered_facility() {
+    let mut app = TestApp::new();
+    career(&mut app, "Healy", "healy_ak_us");
+    let line = hub_entry(&mut app);
+    assert!(line.starts_with("Parked at Fisher Fuel"), "{line}");
+    assert!(!line.contains("Nenana"), "{line}");
+    assert!(!line.to_lowercase().contains("company yard"), "{line}");
+}
+
+#[test]
+fn test_hub_names_only_the_city_when_nothing_else_is_honest() {
+    let mut app = TestApp::new();
+    // Milwaukee has no public lot and the truck has not delivered there.
+    let milwaukee = &app.ctx.world.cities["milwaukee_wi_us"];
+    assert!(!milwaukee
+        .locations
+        .iter()
+        .any(|l| matches!(l.facility_type.as_str(), "travel_center" | "truck_parking")));
+    career(&mut app, "Curb", "Milwaukee");
+    let line = hub_entry(&mut app);
+    assert!(
+        line.starts_with("Parked in the Milwaukee service area"),
+        "{line}"
+    );
+    assert!(!line.contains("Terminal"), "{line}");
+    assert!(!line.contains("Company Yard"), "{line}");
+    assert!(!line.contains("Chicago"), "{line}");
+}
+
+#[test]
+fn test_hub_says_the_dalles_service_area_without_a_doubled_article() {
+    let mut app = TestApp::new();
+    career(&mut app, "Gorge", "the_dalles_or_us");
+    let line = hub_entry(&mut app);
+    assert!(
+        line.starts_with("Parked in The Dalles service area, Oregon."),
+        "{line}"
+    );
+    assert!(!line.contains("the The"), "{line}");
+    assert!(!line.contains("  "), "{line}");
+}
+
+#[test]
+fn test_hub_line_joins_the_objective_with_a_single_space() {
+    let mut app = TestApp::new();
+    career(&mut app, "Spacing", "Chicago");
+    let line = hub_entry(&mut app);
+    assert!(line.contains(" objective: "), "{line}");
+    assert!(line.contains("dollars. "), "{line}");
+    assert!(!line.contains("  "), "{line}");
+}
+
+#[test]
+fn test_hub_home_logic_reads_home_terminal_city_not_current_city() {
+    let mut app = TestApp::new();
+    career(&mut app, "Moved", "Chicago");
+    // Same truck location, different home terminal city: no carrier yard.
+    profile_mut(&mut app).home_terminal_city = "milwaukee_wi_us".to_string();
+    let line = hub_entry(&mut app);
+    assert!(!line.contains("Northstar Freight Lines"), "{line}");
+    assert!(!line.contains("Chicago Company Yard"), "{line}");
 }

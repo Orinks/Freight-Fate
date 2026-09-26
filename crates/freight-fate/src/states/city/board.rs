@@ -34,8 +34,8 @@ use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem};
 use crate::states::city::{
-    base_menu_handle_event, first_day_guidance_active, first_dispatch_done, home_terminal,
-    launch_driving, profile, profile_mut, sleeps_needed, DrivingLaunch, LaunchAnnouncement,
+    base_menu_handle_event, first_day_guidance_active, first_dispatch_done, launch_driving,
+    parked_at, profile, profile_mut, sleeps_needed, DrivingLaunch, LaunchAnnouncement,
     DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP, PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN,
 };
 use crate::states::city_pickup::warm_route_feeds;
@@ -50,13 +50,13 @@ pub use details::{describe_job, JobDetailState};
 /// The board's class-level `intro_help` (the browsable board; an assigned
 /// board swaps in its own on construction).
 pub const JOB_BOARD_INTRO_HELP: &str =
-    "Enter accepts a dispatch and starts the deadhead from your terminal to its origin \
-     facility. F1 reads the job details. Tab repeats the freight market watch. Escape returns \
+    "Enter accepts a dispatch and starts the deadhead to its origin facility. \
+     F1 reads the job details. Tab repeats the freight market watch. Escape returns \
      to the terminal.";
 
 const ASSIGNED_INTRO_HELP: &str =
-    "Dispatch assigned this load. Enter accepts it and starts the deadhead from your terminal \
-     to its origin facility. Declining draws another load, but refusals cost reputation from a \
+    "Dispatch assigned this load. Enter accepts it and starts the deadhead to its origin \
+     facility. Declining draws another load, but refusals cost reputation from a \
      budget that refills at your next promotion. F1 reads the job details. Escape returns to \
      the terminal.";
 
@@ -226,7 +226,7 @@ impl JobBoardState {
     /// the case `accept` answers with the shipping office in place of a
     /// deadhead. For the test rigs whose subject is the deadhead itself.
     pub fn assigned_load_is_staged_here(&self, ctx: &GameContext) -> bool {
-        job_origin_is_this_yard(ctx, self.assigned_job(), &home_terminal(ctx).name)
+        job_origin_is_this_yard(ctx, self.assigned_job(), &parked_at(ctx).name)
     }
 
     /// `_assigned_queue`: the order dispatch will offer the board in.
@@ -278,8 +278,8 @@ impl JobBoardState {
              Route inspection after accepting covers rest, fuel, toll, weather, and \
              restrictions."
         } else {
-            "Dispatch assigned this load. Accepting starts the deadhead from your terminal to \
-             its origin facility. Route inspection after pickup covers rest, fuel, toll, \
+            "Dispatch assigned this load. Accepting starts the deadhead to its \
+             origin facility. Route inspection after pickup covers rest, fuel, toll, \
              weather, and restrictions."
         };
         let mut items = vec![MenuItem::new(
@@ -613,7 +613,7 @@ impl JobBoardState {
         // (Chippewa Falls to Duluth, owner, 2026-09-12): it fit by minutes on
         // paper, the pickup and the yard roads ate them, and the drive ended
         // with a forced 10-hour sleep 5 hours past the deadline.
-        let deadhead_h = if job_origin_is_this_yard(ctx, job, &home_terminal(ctx).name) {
+        let deadhead_h = if job_origin_is_this_yard(ctx, job, &parked_at(ctx).name) {
             0.0
         } else {
             // A load relayed from a nearby city adds the corridor to that
@@ -757,7 +757,7 @@ impl JobBoardState {
             ctx.say("That load's facility is no longer on the network. Dispatch pulled the offer.");
             return;
         };
-        let terminal = home_terminal(ctx);
+        let terminal = parked_at(ctx);
         // The load is staged in the very yard the truck is parked in --
         // which is where a new hire's assigned loads are. Driving a
         // two-mile "deadhead from the terminal to the terminal" was the

@@ -241,7 +241,7 @@ impl DrivingState {
         } else {
             let objective = if self.phase == DRIVE_PHASE_PICKUP {
                 format!(
-                    "Pickup dispatch: deadhead from the terminal to {}. ",
+                    "Pickup dispatch: deadhead to {}. ",
                     self.pickup_facility_text(ctx)
                 )
             } else {
