@@ -312,6 +312,11 @@ impl ConfirmCareerActionState {
         };
         let mut fresh = Profile::named_in(&name, home);
         apply_start_option(&mut fresh, option_for_profile(old));
+        // An older career never recorded its home city; the terminal city it
+        // was seeded from must not become the driver's home.
+        if old.home_city.is_empty() {
+            fresh.home_city.clear();
+        }
         match fresh.save() {
             // A career loaded from a file named apart from it: the reset went
             // to the file its name points at, so the old career goes.
