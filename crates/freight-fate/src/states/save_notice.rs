@@ -14,6 +14,24 @@ fn continue_to_career(ctx: &mut GameContext) {
     ctx.replace_shared_with(next, true, true);
 }
 
+/// Screen text for a notice: the title, the notice body, then the items.
+/// The default menu screen shows only the title and items, which would leave
+/// a notice spoken but not on screen.
+fn notice_lines<M: Menu>(menu: &M, ctx: &GameContext, body: &str) -> Vec<String> {
+    let core = menu.menu();
+    let mut out = vec![
+        core.title.clone(),
+        String::new(),
+        body.to_string(),
+        String::new(),
+    ];
+    for (i, item) in core.items.iter().enumerate() {
+        let marker = if i == core.index { "> " } else { "  " };
+        out.push(format!("{marker}{}", item.text(menu, ctx)));
+    }
+    out
+}
+
 pub struct SaveModifiedNoticeState {
     menu: MenuCore<Self>,
 }
@@ -145,6 +163,26 @@ impl_state_for_menu!(LegacyCareerNoticeState);
 /// a reputation dispatch has already lost faith in counts too. The one thing
 /// owed is a plain explanation, once, before the player finds out by way of
 /// a short board they cannot account for.
+/// The driving record notice body, with the driver's current standing.
+pub fn driving_record_notice(ctx: &GameContext) -> String {
+    let (standing, trust) = match ctx.profile.as_ref() {
+        Some(p) => (
+            enforcement::standing_text(p),
+            enforcement::trust_text(p.standing()),
+        ),
+        None => (String::new(), String::new()),
+    };
+    format!(
+        "Freight Fate now keeps a driving record for your career: \
+         citations, serious violations, and whether your CDL is clear. \
+         Two serious violations in three years suspend it; running from a \
+         police stop is a major offense that disqualifies it for a year. \
+         Reputation also decides how much freight dispatch shows you and \
+         how much choice you get. Nothing was reset or taken. {standing} \
+         {trust}"
+    )
+}
+
 pub struct DrivingRecordNoticeState {
     menu: MenuCore<Self>,
 }
@@ -184,24 +222,12 @@ impl Menu for DrivingRecordNoticeState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let (standing, trust) = match ctx.profile.as_ref() {
-            Some(p) => (
-                enforcement::standing_text(p),
-                enforcement::trust_text(p.standing()),
-            ),
-            None => (String::new(), String::new()),
-        };
-        let text = format!(
-            "Freight Fate now keeps a driving record for your career: \
-             citations, serious violations, and whether your CDL is clear. \
-             Two serious violations in three years suspend it; running from a \
-             police stop is a major offense that disqualifies it for a year. \
-             Reputation also decides how much freight dispatch shows you and \
-             how much choice you get. Nothing was reset or taken. {standing} \
-             {trust} {}",
-            self.current_text(ctx)
-        );
+        let text = format!("{} {}", driving_record_notice(ctx), self.current_text(ctx));
         ctx.say(&text);
+    }
+
+    fn lines(&self, ctx: &GameContext) -> Vec<String> {
+        notice_lines(self, ctx, &driving_record_notice(ctx))
     }
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
@@ -216,6 +242,13 @@ impl Menu for DrivingRecordNoticeState {
 }
 
 impl_state_for_menu!(DrivingRecordNoticeState);
+
+/// The save conversion notice body.
+pub const SAVE_MIGRATION_NOTICE: &str = "Save file updated. This career was converted from an \
+     older version: every truck you own now keeps its own fuel, damage, tire \
+     wear, and road grime. The truck you were driving keeps its condition; \
+     your other trucks start fueled and fresh. The updated save no longer \
+     opens in older versions of the game.";
 
 pub struct SaveMigrationNoticeState {
     menu: MenuCore<Self>,
@@ -256,15 +289,12 @@ impl Menu for SaveMigrationNoticeState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let text = format!(
-            "Save file updated. This career was converted from an older \
-             version: every truck you own now keeps its own fuel, damage, tire \
-             wear, and road grime. The truck you were driving keeps its \
-             condition; your other trucks start fueled and fresh. The updated \
-             save no longer opens in older versions of the game. {}",
-            self.current_text(ctx)
-        );
+        let text = format!("{SAVE_MIGRATION_NOTICE} {}", self.current_text(ctx));
         ctx.say(&text);
+    }
+
+    fn lines(&self, ctx: &GameContext) -> Vec<String> {
+        notice_lines(self, ctx, SAVE_MIGRATION_NOTICE)
     }
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
@@ -327,6 +357,10 @@ impl Menu for TurnpikeProgramNoticeState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!("{TURNPIKE_PROGRAM_NOTICE} {}", self.current_text(ctx));
         ctx.say(&text);
+    }
+
+    fn lines(&self, ctx: &GameContext) -> Vec<String> {
+        notice_lines(self, ctx, TURNPIKE_PROGRAM_NOTICE)
     }
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {

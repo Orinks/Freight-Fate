@@ -186,6 +186,8 @@
 
 ### Fixed
 
+- **Save notices show their text on screen.** The driving record, save conversion, and turnpike program notices were spoken but showed only their title and OK.
+
 - Job board distance uses the tighter of the level cap and the carrier run-band max; the run-band minimum is not applied on the board yet (saved for later lane-area work).
 
 - Phase A ALCAN: BC↔YT `state_crossings` on Fort Nelson–Watson Lake Alaska Highway legs (corridor metadata completeness).
