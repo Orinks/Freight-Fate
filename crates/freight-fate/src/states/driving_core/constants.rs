@@ -106,21 +106,34 @@ pub const STOP_PULL_IN_WAIT_S: f64 = 1.0;
 pub const EXIT_WINDOW_MI: f64 = 5.0; // how far out X can arm the upcoming exit, at minimum
 pub const EXIT_WARNING_REAL_S: f64 = 25.0; // target real seconds from callout to the ramp
 pub const EXIT_WINDOW_MAX_MI: f64 = 20.0;
-pub const EXIT_LANE_PREP_MI: f64 = 2.0; // where GPS starts asking for the exit lane
-                                        // Keep the exact announced destination exit available for the same real-time
-                                        // budget even if coasting or automatic braking shrinks the dynamic window.
+// Keep the exact announced destination exit available for the same real-time
+// budget even if coasting or automatic braking shrinks the dynamic window.
 pub const DESTINATION_EXIT_RESPONSE_GRACE_S: f64 = EXIT_WARNING_REAL_S;
 // Spoken distance anchors for an armed exit; a signal-on announcement miles
 // out gets buried under canyon pacenotes without them.
 pub const EXIT_COUNTDOWN_MILESTONES_MI: [f64; 3] = [2.0, 1.0, 0.5];
+// Roadside chatter (billboards, landmarks) stays quiet inside this distance of
+// an exit being taken: the countdown's last two calls and the gore's take line
+// are the only things the driver needs to hear there. The countdown's own
+// one-mile mark, so it is not a new number.
+pub const EXIT_APPROACH_QUIET_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[1];
 // The pacenote cue tone leans hard toward the curve's side of the field.
 pub const PACENOTE_CUE_PAN: f64 = 0.85;
 pub const EXIT_COMMIT_WINDOW_MI: f64 = 0.4; // generous gore-window grace after the marker
-pub const EXIT_LANE_READY: f64 = 0.85; // accumulated right-lane commitment
-pub const EXIT_LANE_OFFSET_READY: f64 = 0.45; // right-side lane position also counts
+/// Where the exit lane opens: the length of its taper ahead of the gore, in
+/// miles. DERIVED: a parallel deceleration lane's taper runs 15:1 to 25:1
+/// (AASHTO Green Book 2018, 10.9.6.6.2), so 180 to 300 feet to reach a 12-foot
+/// lane; the long end, 300 feet. MUTCD 11th ed. 2E.25 stands the exit direction
+/// sign at the start of this taper, which is where the cab calls the lane.
+pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
+/// How far out the exit's turn signal starts clicking, in miles. Owner ruling
+/// (2026-09-24): a driver flicks it on a quarter to half a mile out, never
+/// miles of blinker; the long end, which is also the last advance guide sign
+/// (MUTCD 11th ed. 2E.23, 1/2 mi). X commits to the exit wherever it is
+/// pressed; this is only when the blinker runs.
+pub const EXIT_BLINKER_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[2];
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
-pub const EXIT_LANE_LOST_S: f64 = 1.0; // held out of the exit lane this long before it is called lost
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
 pub const AEB_LEAD_S: f64 = 0.5; // plus this flat lead, covering brake heat added during the stop
                                  // The assist brakes on the SERVICE brakes, and the escalation to the emergency
@@ -137,10 +150,14 @@ pub const AEB_ESCALATE_CONFIRM_S: f64 = 0.5;
 // window at all. A dodgeable hazard adds LANE_TAP_CHANGE_S on top, because
 // "or change lanes" names a maneuver that takes that long to finish.
 pub const HAZARD_MIN_REACTION_S: f64 = 3.0;
-pub const RAMP_CREEP_MI: f64 = 0.04; // within ~200 ft of the bar, "creep"; farther is a drive
-                                     // Any faster and you blow past the exit. Defined in the portable layer,
-                                     // because the arrival speed zones are built from the same number: the
-                                     // destination approach must never cap below the speed the ramp needs.
+// How far a truck stopped short of the bar has to close before stopping again
+// earns another "Stopped N feet short" line. Assumed, not measured: about a
+// car length, so a crawl bobbing across the stopped line is one stop, and a
+// real hop toward the bar is a new one.
+pub const RAMP_CREEP_REARM_MI: f64 = 25.0 / 5280.0;
+// Any faster and you blow past the exit. Defined in the portable layer,
+// because the arrival speed zones are built from the same number: the
+// destination approach must never cap below the speed the ramp needs.
 pub const RAMP_MAX_MPH: f64 = TRIP_RAMP_MAX_MPH;
 // How far under a ramp's own design speed automatic control aims. Was the
 // gap between a flat 40 and a flat 45; now it is the gap itself, applied to
@@ -151,11 +168,22 @@ pub const RAMP_CRUISE_TARGET_MPH: f64 = RAMP_MAX_MPH - RAMP_CRUISE_HEADROOM_MPH;
 // once it has slowed the truck to it. Deliberately small: the assist is keeping
 // a truck rolling to its own gore, not driving it.
 pub const EXIT_HOLD_MAX_THROTTLE: f64 = 0.45;
-pub const RAMP_LENGTH_MI: f64 = 0.5; // deceleration lane plus ramp to the stop
-                                     // Ramp terminals: where the off-ramp meets the surface road there is usually
-                                     // a light or a stop sign (diamond interchanges), occasionally free flow
-                                     // (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
-                                     // on the ramp links when available, else a seeded urban/rural heuristic.
+// READ: the most automatic control eases below road speed on the MAINLINE for
+// an armed exit. TxDOT Roadway Design Manual 9.4.4 accepts up to 10 mph of
+// slowing in the through lanes where the full deceleration length is
+// impractical; NCHRP Research Report 1081 (2024) measured diverge speeds of
+// 58 to 70 mph at 70 mph sites. The ramp's own number is reached past the
+// gore, in the deceleration lane.
+pub const EXIT_MAINLINE_EASE_MPH: f64 = 10.0;
+// How far over what the gore accepts adaptive cruise or the keeper may be
+// before exit speed assistance takes the pedals from it: the cruise loop's
+// own two-mph brake deadband, which it answers inside anyway.
+pub const EXIT_ASSIST_CONTROLLER_MARGIN_MPH: f64 = 2.0;
+// A ramp's length is not a constant any more: `Trip::ramp_length_mi`.
+// Ramp terminals: where the off-ramp meets the surface road there is usually
+// a light or a stop sign (diamond interchanges), occasionally free flow
+// (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
+// on the ramp links when available, else a seeded urban/rural heuristic.
 pub const RAMP_ACCESS_MI: f64 = 0.12; // terminal-to-driveway stretch at the ramp's end
                                       // Rolling stop-bar countdown milestones (spoken as each is crossed while
                                       // moving): the bar needs a position the way an exit does, or a driver
@@ -184,9 +212,32 @@ pub const RAMP_BAR_REACTION_S: f64 = 1.5;
 pub const CRITICAL_CALL_WINDOW_S: f64 = 8.0;
 pub const CRITICAL_RESPEAK_DELAY_S: f64 = 2.0;
 pub const RAMP_CONTROL_ANNOUNCE_MI: f64 = 0.38; // where the terminal callout fires on the ramp
-pub const RAMP_LIGHT_RED_S: f64 = 12.0; // red phase of the terminal light, real seconds
-pub const RAMP_LIGHT_GREEN_S: f64 = 15.0; // green phase: a real minor-leg minimum, crossable from a stop
-pub const RAMP_LIGHT_YELLOW_S: f64 = 4.0; // yellow phase; entering on yellow is legal, like the real law
+
+// Game tuning, not a claim about any field signal plan. FHWA's planning-level
+// examples commonly begin at 60-second cycles; these four seeded profiles run
+// 62, 68, 74, or 80 real seconds so every terminal does not feel metronomic.
+// https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter3.htm
+pub const RAMP_LIGHT_RED_S: f64 = 30.0; // shortest profile; includes clearance below
+pub const RAMP_LIGHT_RED_STEP_S: f64 = 4.0;
+pub const RAMP_LIGHT_GREEN_S: f64 = 26.0; // shortest profile; room for a loaded departure
+pub const RAMP_LIGHT_GREEN_STEP_S: f64 = 2.0;
+pub const RAMP_LIGHT_PROFILE_COUNT: i64 = 4;
+// The player's light remains red for this final part of its red interval while
+// the cross street is also held. The MUTCD makes red clearance an engineering
+// decision; this fixed game interval gives even this model's slowest vehicle
+// enough time to accelerate from its 45-foot cross bar and clear the 55-foot
+// conflict window rather than pretending to reproduce a real site.
+// https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/part4.pdf#page=120
+pub const RAMP_LIGHT_RED_CLEARANCE_S: f64 = 7.0;
+// MUTCD 4F.17 recommends 3 to 6 seconds and says a timing plan's yellow must
+// not vary cycle by cycle, so one figure serves every game profile. The ITE
+// kinematic interval, y = t + v / 2a, at a 35 mph ramp approach (51 ft/s)
+// with a loaded truck's 8 ft/s2 is 1 + 3.2 = 4.2 s -- but this driver learns
+// of the change by ear, and "Light yellow." takes about 1.5 s to say, so the
+// perception term is 2.5 s and the interval 5.7. Four seconds put the red on
+// the end of the spoken yellow (owner, exit 286A, 2026-09-23: "the light
+// transitions seem way too short"). Rounded to the MUTCD ceiling.
+pub const RAMP_LIGHT_YELLOW_S: f64 = 6.0;
 pub const RED_STOP_MPH: f64 = 3.0; // at or under this you have honored a red or a stop sign
                                    // The stop bar's continuous tone level (BAR_SOLID_VOLUME) is re-exported from
                                    // ff_core::sound_catalog by the prelude, so the road and the Learn game
@@ -451,14 +502,26 @@ pub const CRUISE_GRADE_BEATEN_S: f64 = 3.0;
 // answers first because its heat goes out the exhaust; the drums only join in
 // when the jake cannot hold, so a long grade does not fade them away.
 pub const CRUISE_JAKE_OVER_MPH: f64 = 0.75; // over the target by this much and the jake steps in
-pub const CRUISE_JAKE_STEP_MPH: f64 = 1.0; // further overspeed per additional jake stage
-pub const CRUISE_JAKE_RELEASE_MPH: f64 = 0.25; // back inside this and the retarder hands off
 pub const CRUISE_JAKE_STEP_S: f64 = 4.0; // quiet time between stage changes; the jake is loud
-                                         // Descent control announcing itself is a per-grade event, not a per-dip one:
-                                         // rolling country crosses the 2.5 percent trigger every dip, and at 1.5
-                                         // seconds of retarder spacing the bench heard a stage change every ten
-                                         // seconds and the holding cue four times in six minutes (2026-07-25).
-pub const DESCENT_CUE_COOLDOWN_S: f64 = 120.0;
+                                         // Under the target by this much and the retarder steps DOWN a stage -- and
+                                         // inside it cruise does not fuel against a retarder holding a grade, since
+                                         // any throttle cuts the jake. Assumed: wider than the snub's own band (it
+                                         // ends half a mile an hour under), so the snub finishing never reads as
+                                         // over-retarding, and inside the droop band that calls a climb beaten.
+pub const CRUISE_JAKE_UNDER_MPH: f64 = 2.0;
+// A step in the opposite direction to the last waits this long. Assumed:
+// three of the steps above, so a stage just raised has a hill's worth of
+// road to prove itself before it can come back off -- the owner heard
+// 3, 0, 2, 1, 2, 1 in thirty seconds down a 5.8 percent grade (2026-09-24).
+pub const CRUISE_JAKE_REVERSE_S: f64 = 12.0;
+// Descent control engages at this grade (a fraction, downhill) and lets go
+// where the road stops being a grade at all (`on_downgrade`).
+pub const DESCENT_CONTROL_GRADE: f64 = 0.025;
+// How close to the automatic's retarder ceiling (`JAKE_MAX_RPM`) the revs
+// may come on a downgrade before cruise snubs to hold the gear. Assumed: a
+// fraction of the ratio step between gears, so the snub lands well before
+// the box's protective upshift and releases a guard band lower.
+pub const DESCENT_RPM_GUARD: f64 = 50.0;
 // The drums are the last resort, and they only come out in snubs: apply,
 // recover the target, release. Dragging a light application down a long grade
 // is how a real truck fades its brakes and empties its air tanks -- and the
@@ -471,6 +534,12 @@ pub const CRUISE_SNUB_BRAKE: f64 = 0.3; // a real application, not a drag
                                         // Interactive descent control's ceiling while a grade lasts. A cap on the
                                         // working target only -- it must never be written into the set speed.
 pub const DESCENT_SAFE_MAX_MPH: f64 = 55.0;
+
+/// Closing on a lower target, cruise's service trim fades in from this far
+/// over and reaches its full over/30 a mile an hour later. A switched edge
+/// pumps the pedal, and air is charged per application.
+pub const CRUISE_CLOSE_FEATHER_FROM_MPH: f64 = 1.0;
+
 // When has a hill BEATEN the descent control, as opposed to merely being held?
 //
 // The descent twin of CRUISE_GRADE_BEATEN_*, and it did not exist until
@@ -521,6 +590,10 @@ pub const GRADE_WARN_STEEPEN_PCT: f64 = 1.0;
 pub const GRADE_WARN_LOOKAHEAD_MI: f64 = 0.75; // how far ahead the advisory reaches
 pub const GRADE_WARN_SCAN_MI: f64 = 15.0; // how far a grade's run is measured before giving up
 pub const GRADE_WARN_STEP_MI: f64 = 0.25; // sampling stride; matches the baked segment length
+                                          // A grade gentler than the steep line's release runs, for the G key's "for
+                                          // another", until the road stops going its way at all -- this close to
+                                          // level. The number the readout has always used (0.002 as a fraction).
+pub const GRADE_READOUT_LEVEL_PCT: f64 = 0.2;
 pub const GRADE_WARN_MIN_MPH: f64 = 25.0; // no advisories while crawling; nothing to plan for
                                           // A grade has to last to be worth planning for. The baked segments are around
                                           // half a mile each and the mountain corridors are full of short punchy dips: a
@@ -746,7 +819,9 @@ pub const POI_SERVICE_LABELS: [(&str, &str); 9] = [
     ("parking", "truck parking"),
     ("truck_parking", "truck parking"),
     ("restrooms", "restrooms"),
-    ("scale", "scale"),
+    // Only truck stops list it: the certified scale a driver pays to use,
+    // never the weigh station ("the scale" in short cues).
+    ("scale", "CAT Scale"),
     ("repair", "repair"),
     ("roadside_assistance", "roadside assistance"),
     ("towing", "towing"),

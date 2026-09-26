@@ -172,8 +172,34 @@ impl DrivingState {
     /// worst kind of surprise for a player who cannot see the trailer -- so
     /// each rung speaks once, when it is crossed.
     pub fn update_cargo_condition(&mut self, ctx: &mut GameContext, _dt: f64) {
-        let curve = self.trip.curve_at(self.trip.position_mi);
-        let bend = curve.filter(|curve| !curve.connector);
+        // The bend under the truck: a mapped one on the highway, or the exit
+        // ramp's own curve past its deceleration lane. The ramp is the same
+        // corner to the freight -- the exit speed is its advisory and its
+        // radius is that speed's AASHTO minimum -- so a ramp curve taken hot
+        // moves the load, and rolls the truck, exactly as a mainline bend
+        // would (`driving_rollover`).
+        let (advisory_mph, radius_ft, bank) = if self.ramp_mi.is_some() {
+            match (
+                self.ramp_curve_radius_ft(),
+                self.ramp_layout,
+                self.ramp_curve_geometry(),
+            ) {
+                (Some(radius), Some(layout), Some((_, bank))) => {
+                    (Some(layout.curve_mph), radius, bank)
+                }
+                _ => (None, 0.0, 0.0),
+            }
+        } else {
+            let curve = self.trip.curve_at(self.trip.position_mi);
+            match curve.filter(|curve| !curve.connector) {
+                Some(bend) => (
+                    Some(bend.advisory_mph as f64),
+                    bend.min_radius_ft as f64,
+                    self.bend_bank(&bend),
+                ),
+                None => (None, 0.0, 0.0),
+            }
+        };
         let speed_mph = self.trip.truck.speed_mph();
         let ambient = self
             .trip
@@ -182,18 +208,18 @@ impl DrivingState {
             .unwrap_or(ff_core::sim::vehicle::AMBIENT_C);
         let t = &mut self.trip.truck;
         t.ambient_temp_c = ambient;
-        t.corner_overspeed_mph = match &bend {
-            Some(bend) => (speed_mph - bend.advisory_mph as f64).max(0.0),
-            None => 0.0,
-        };
+        t.corner_overspeed_mph =
+            advisory_mph.map_or(0.0, |advisory| (speed_mph - advisory).max(0.0));
         // The advisory itself as well as the excess: a liquid load needs the
         // ratio, because what a bend pulls sideways goes with the square of
         // how far over the posting it is being taken.
-        t.corner_advisory_mph = bend.as_ref().map_or(0.0, |b| b.advisory_mph as f64);
+        t.corner_advisory_mph = advisory_mph.unwrap_or(0.0);
         // And the geometry, for dry freight: a pallet is moved by the sideways
         // pull, which comes from the radius rather than from the sign.
-        t.corner_radius_ft = bend.as_ref().map_or(0.0, |b| b.min_radius_ft as f64);
-        let condition = t.cargo_damage_pct;
+        t.corner_radius_ft = radius_ft;
+        t.corner_bank = bank;
+        self.update_rollover(ctx);
+        let condition = self.trip.truck.cargo_damage_pct;
         // The HIGHEST rung crossed, not the next one up. A collision can put a
         // load through all three at once, and walking them a frame apart would
         // fire three interrupting warnings inside a tenth of a second; the

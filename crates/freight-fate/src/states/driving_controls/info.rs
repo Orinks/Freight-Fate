@@ -4,12 +4,13 @@
 
 use ff_core::data::curves::RouteCurve;
 use ff_core::sim::trip::Trip;
+use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::{GameContext, Say};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-use super::{SAFE_SPEED_CURVE_MI, SAFE_SPEED_EXIT_MI, UPCOMING_MAX_CLAUSES};
+use super::{SAFE_SPEED_CURVE_MI, UPCOMING_MAX_CLAUSES};
 
 impl DrivingState {
     /// `_keeper_holding_text()`: what the speed keeper is holding RIGHT NOW,
@@ -120,7 +121,58 @@ impl DrivingState {
         let speed = ctx.settings.speed_text(self.trip.truck.speed_mph());
         let rpm = self.trip.truck.rpm;
         let air = self.air_status_text(false);
-        ctx.say(&format!("{speed}, {gear}, {rpm:.0} RPM{cruise}, {air}."));
+        // With the signal on, how far to the exit is the number the driver is
+        // waiting on, and until now only the countdown anchors said it (owner,
+        // driving, 2026-09-24: "I should be able to see how far away from the
+        // exit I am"). Asked for, never volunteered.
+        let armed = match self.armed_exit() {
+            Some(stop) => format!(
+                " Signal on for {}, {}.",
+                self.armed_exit_name(ctx, &stop),
+                ctx.settings
+                    .distance_text(stop.at_mi - self.trip.position_mi, true)
+            ),
+            None => String::new(),
+        };
+        ctx.say(&format!(
+            "{speed}, {gear}, {rpm:.0} RPM{cruise}, {air}.{armed}"
+        ));
+    }
+
+    /// The exit the signal is on for, while the truck is still short of its
+    /// gore. `None` once on the ramp, where the ramp readouts take over.
+    fn armed_exit(&self) -> Option<RoadStop> {
+        if !self.exit_signal_on || self.exit_signal_canceled || self.ramp_mi.is_some() {
+            return None;
+        }
+        self.exit_stop
+            .clone()
+            .filter(|stop| stop.at_mi > self.trip.position_mi)
+    }
+
+    /// The armed exit as Space and U name it, in the signal-on line's shapes:
+    /// "exit 263, Main Street" for the destination, "exit 42, Flying J" or
+    /// "the Flying J exit" for a stop. The signal-on line already gave the
+    /// stop's full name, so the plain one is enough here.
+    fn armed_exit_name(&mut self, ctx: &mut GameContext, stop: &RoadStop) -> String {
+        if stop.stop_type != "delivery_destination" {
+            return if stop.exit_label.is_empty() {
+                format!("the {} exit", stop.name)
+            } else {
+                format!("{}, {}", stop.exit_label, stop.name)
+            };
+        }
+        let phrase = self.exit_phrase_of(ctx, stop);
+        let labeled = if phrase.is_empty() {
+            stop.exit_label.clone()
+        } else {
+            phrase
+        };
+        if labeled.is_empty() {
+            format!("the destination exit for {}", stop.name)
+        } else {
+            labeled
+        }
     }
 
     /// `_speak_speed_limit()`: S -- the posted limit here, the zone if any,
@@ -146,9 +198,12 @@ impl DrivingState {
         }
         let position = self.trip.position_mi;
         let (limit, reason) = self.trip.speed_limit_at(position);
+        // A street is not a zone: its limit is its own (`spoken_zone`).
         let zone = match reason {
-            Some(reason) => format!(", in a {reason} zone"),
-            None => String::new(),
+            Some(reason) if !ff_core::sim::trip::is_street_zone_reason(&reason) => {
+                format!(", in a {reason} zone")
+            }
+            _ => String::new(),
         };
         let over = self.trip.truck.speed_mph() - limit;
         let comparison = if over >= 1.0 {
@@ -234,6 +289,15 @@ impl DrivingState {
         let (limit, _) = self.trip.speed_limit_at(position);
         let mut safe = limit.min(self.trip.weather.effects().safe_speed_mph);
         let mut context = "";
+        // A steep downgrade has a safe speed of its own for this truck at this
+        // weight -- the one descent control holds. Without it D answered the
+        // posted 65 on a seven percent grade while descent control held 45.
+        if let Some(descent) = self.safe_descent_here_mph() {
+            if descent < safe {
+                safe = descent;
+                context = " for the grade";
+            }
+        }
         // The bend under the wheels, or the next one close ahead: whichever
         // binds, its advisory is the number that keeps the truck on the road.
         // Connector arcs count when the truck is inside one.
@@ -243,15 +307,12 @@ impl DrivingState {
                 context = " for the bend";
             }
         }
-        let ahead = self
-            .exit_stop
-            .as_ref()
-            .map(|stop| stop.at_mi - self.trip.position_mi);
-        let exit_armed = self.exit_signal_on
-            && ahead.is_some_and(|ahead| ahead > 0.0 && ahead <= SAFE_SPEED_EXIT_MI);
-        if self.ramp_mi.is_some() || exit_armed {
+        // On the ramp the exit speed governs. An armed exit still ahead does
+        // not: the gore takes road speed, and the exit speed is braked for
+        // past it (realistic exit, 2026-09-24).
+        if self.ramp_mi.is_some() {
             safe = safe.min(self.armed_ramp_mph(None));
-            context = " for the ramp";
+            context = ", the exit speed";
         }
         let spoken = ctx.settings.speed_text(safe);
         ctx.say(&format!("Safe speed {spoken}{context}."));
@@ -357,26 +418,19 @@ impl DrivingState {
         } else {
             let direction = if grade > 0.0 { "uphill" } else { "downhill" };
             let mut lead = format!("Grade {:.1} percent {direction}", grade.abs() * 100.0);
-            // How far the slope keeps its character, sampled the way the
-            // chain-law scan does; flat or reversed counts as the end.
-            let sign = if grade > 0.0 { 1.0 } else { -1.0 };
-            let mut run_mi: Option<f64> = None;
-            let mut probe = 0.25;
-            while probe <= 15.0 {
-                let at = self.trip.position_mi + probe;
-                if at >= self.trip.total_miles() {
-                    break;
-                }
-                if self.trip.grade_at(at) * sign <= 0.002 {
-                    run_mi = Some(probe);
-                    break;
-                }
-                probe += 0.25;
-            }
-            if let Some(run_mi) = run_mi {
-                if run_mi >= 1.0 {
-                    lead.push_str(&format!(" for another {}", self.trip.distance_text(run_mi)));
-                }
+            // How far the slope keeps its character: the same run the grade
+            // ahead is measured by ("running 2 miles"), so one pitch has one
+            // length whichever sentence names it. A grade gentler than the
+            // steep line runs until the road stops going its way at all.
+            let sign = if grade > 0.0 { 1 } else { -1 };
+            let floor_pct = if grade.abs() * 100.0 >= GRADE_WARN_CLEAR_PCT {
+                GRADE_WARN_CLEAR_PCT
+            } else {
+                GRADE_READOUT_LEVEL_PCT
+            };
+            let run_mi = self.grade_run_over_mi(self.trip.position_mi, sign, floor_pct);
+            if (1.0..GRADE_WARN_SCAN_MI).contains(&run_mi) {
+                lead.push_str(&format!(" for another {}", self.trip.distance_text(run_mi)));
             }
             parts.push(format!("{lead}."));
         }
@@ -490,6 +544,12 @@ impl DrivingState {
         if !upcoming.is_empty() {
             return upcoming;
         }
+        // Under a mile of road left to scan -- the streets to a gate -- whole
+        // miles said "Nothing steep in the next 0 miles" (live drive into
+        // Abilene, 2026-09-24): the rest of the route is all there is.
+        if scanned < 1.0 {
+            return format!("{nothing} ahead.");
+        }
         format!(
             "{nothing} in the next {}.",
             self.trip.distance_text(scanned)
@@ -542,6 +602,22 @@ impl DrivingState {
         if let Some(light) = self.ramp_light_query_text(ctx) {
             parts.push(light.trim_end_matches('.').to_lowercase());
         }
+        // The exit the signal is on for leads: it is the one thing on this
+        // road the driver has already committed to (owner, 2026-09-24).
+        let armed = self.armed_exit();
+        if let Some(stop) = armed.as_ref() {
+            let name = self.armed_exit_name(ctx, stop);
+            parts.push(format!(
+                "signal on for {name}, in {}{}",
+                ctx.settings.distance_text(stop.at_mi - pos, true),
+                Self::ramp_ending_clause(&self.ramp_control_for(ctx, stop, None))
+            ));
+        }
+        let is_armed = |at_mi: f64| {
+            armed
+                .as_ref()
+                .is_some_and(|a| (a.at_mi - at_mi).abs() < 0.001)
+        };
         if let Some(zone) = self.trip.next_zone_within(within_mi) {
             let paired = if zone.reason == "construction merge" {
                 self.trip
@@ -571,12 +647,29 @@ impl DrivingState {
                     ctx.settings.speed_text(paired.limit_mph)
                 ));
             } else {
-                parts.push(format!(
-                    "{} in {}, speed limit {}",
-                    zone.reason,
-                    ctx.settings.distance_text(zone.start_mi - pos, true),
-                    ctx.settings.speed_text(zone.limit_mph)
-                ));
+                // The gate zone runs up to the gate, so its start is not where
+                // the gate is: "facility gate in 0.3 miles" here and "three
+                // quarters of a mile to the gate" from R (agent drive A,
+                // 2026-09-24). The gate's clause reads the gate.
+                let ahead = match self.gate_distance_mi(ctx) {
+                    Some(gate) if zone.reason == "facility gate" => gate,
+                    _ => zone.start_mi - pos,
+                };
+                // The next street's number, not a zone by name.
+                if ff_core::sim::trip::is_street_zone_reason(&zone.reason) {
+                    parts.push(format!(
+                        "speed limit {} in {}",
+                        ctx.settings.speed_text(zone.limit_mph),
+                        ctx.settings.distance_text(ahead, true)
+                    ));
+                } else {
+                    parts.push(format!(
+                        "{} in {}, speed limit {}",
+                        zone.reason,
+                        ctx.settings.distance_text(ahead, true),
+                        ctx.settings.speed_text(zone.limit_mph)
+                    ));
+                }
             }
         }
         // Every distance here is PRECISE. Whole miles bottom out at "0
@@ -587,16 +680,52 @@ impl DrivingState {
         // gate in 0 miles", and before that watched it sit on "2 miles" for
         // three minutes while he closed on it (2026-08-23). The bend clause
         // below always asked for precise; the rest did not.
-        if let Some(stop) = self.trip.upcoming_stop(within_mi).cloned() {
+        //
+        // Off the highway there is no next highway stop: on an exit ramp or
+        // the streets, "Coming up: Flying J in 0.1 miles, where the ramp ends
+        // at a traffic light" named a stop the truck had already left the
+        // road for, and a ramp end that was a stop sign (agent drive, exit
+        // 286A, 2026-09-23).
+        let on_the_highway = self.ramp_mi.is_none() && !self.on_local_streets();
+        // The destination exit is the most notable thing on the road, and it
+        // is not one of the trip's stops: "Nothing notable in the next 15
+        // miles." 1.2 miles before it (agent drives A and B, 2026-09-24).
+        let destination = self
+            .destination_exit_stop(ctx)
+            .filter(|exit| on_the_highway && exit.at_mi - pos <= within_mi);
+        if let Some(exit) = destination.as_ref().filter(|exit| !is_armed(exit.at_mi)) {
+            let phrase = self.exit_phrase_of(ctx, exit);
+            let labeled = if phrase.is_empty() {
+                exit.exit_label.clone()
+            } else {
+                phrase
+            };
+            let named = if labeled.is_empty() {
+                format!("the destination exit for {}", exit.name)
+            } else {
+                format!("the destination exit, {labeled},")
+            };
+            parts.push(format!(
+                "{named} in {}{}",
+                ctx.settings.distance_text(exit.at_mi - pos, true),
+                Self::ramp_ending_clause(&self.ramp_control_for(ctx, exit, None))
+            ));
+        }
+        if let Some(stop) = self
+            .trip
+            .upcoming_stop(within_mi)
+            .cloned()
+            .filter(|stop| on_the_highway && !is_armed(stop.at_mi))
+            // Past the destination exit is road this truck is not driving.
+            .filter(|stop| {
+                destination
+                    .as_ref()
+                    .is_none_or(|exit| stop.at_mi < exit.at_mi)
+            })
+        {
             // The ramp's ending is part of the plan: a stop sign first heard
             // mid-ramp is too late to brake for.
-            let ending = match self.ramp_control_for(ctx, &stop, None).as_str() {
-                "signal" => ", where the ramp ends at a traffic light",
-                "stop" => ", where the ramp ends at a stop sign",
-                "yield" => ", where the ramp ends at a yield",
-                "roundabout" => ", where the ramp ends at a roundabout",
-                _ => "",
-            };
+            let ending = Self::ramp_ending_clause(&self.ramp_control_for(ctx, &stop, None));
             parts.push(format!(
                 "{}{} in {}{ending}",
                 self.trip.planned_prefix(&stop),
@@ -644,6 +773,18 @@ impl DrivingState {
         // the readout back into a paragraph.
         parts.truncate(UPCOMING_MAX_CLAUSES);
         ctx.say(&format!("Coming up: {}.", parts.join(". ")));
+    }
+
+    /// ", where the ramp ends at a traffic light", or "" for a free-flowing
+    /// ramp.
+    fn ramp_ending_clause(control: &str) -> &'static str {
+        match control {
+            "signal" => ", where the ramp ends at a traffic light",
+            "stop" => ", where the ramp ends at a stop sign",
+            "yield" => ", where the ramp ends at a yield",
+            "roundabout" => ", where the ramp ends at a roundabout",
+            _ => "",
+        }
     }
 
     /// `_speak_fuel()`: F.

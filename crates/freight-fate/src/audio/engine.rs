@@ -11,8 +11,8 @@ use ff_core::pyrandom::PyRandom;
 use super::{
     asset_bytes, Audio, AudioBackend, AudioError, BassBackend, Buses, KeyProbe, NullBackend,
     SustainLoopSpec, VolumeUpdate, ALERT_HOLD_TIMEOUT_S, BASS_NO_SOUND_DEVICE, CH_AIR, CH_ALERT,
-    CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_RADIO_FX, CH_ROAD, CH_SURGE, CH_WEATHER,
-    CH_WEATHER_B, CUE_HOLD_TIMEOUT_S, HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY,
+    CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_LANE_GUIDE, CH_RADIO_FX, CH_ROAD, CH_SCALE, CH_SURGE,
+    CH_WEATHER, CH_WEATHER_B, CUE_HOLD_TIMEOUT_S, HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY,
     JAKE_RECORDED_KEY, SFX_EXTENSIONS,
 };
 
@@ -772,6 +772,13 @@ impl Audio for AudioEngine {
             // must not be heard through it, and update_liquid_cues restarts
             // it on its own once driving resumes if the wave is still live.
             CH_SURGE,
+            // The weigh-station bed and the lane-guide tone are both plain
+            // per-frame loops with no dead-man's switch of their own: leave
+            // the state and nothing is left to stop them (the siren's own
+            // switch never gets a tick to fire either, so it is released
+            // explicitly by its owner in `exit_drive` instead).
+            CH_SCALE,
+            CH_LANE_GUIDE,
         ] {
             self.stop_loop_with(ch, 400);
         }

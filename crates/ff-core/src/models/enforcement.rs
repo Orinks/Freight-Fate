@@ -42,8 +42,8 @@ mod record;
 mod tests;
 
 pub use record::{
-    seed_record_from_save, DrivingRecord, RecordEntry, RECORD_CITATION, RECORD_ENTRIES_KEPT,
-    RECORD_FATIGUE, RECORD_MAJOR, RECORD_SERIOUS,
+    seed_record_from_save, DrivingRecord, RecordEntry, RECORD_CITATION, RECORD_CRASH,
+    RECORD_ENTRIES_KEPT, RECORD_FATIGUE, RECORD_MAJOR, RECORD_SERIOUS,
 };
 
 use crate::models::business_constants::is_owner_operator;
@@ -295,12 +295,14 @@ pub const RECORD_SERIOUS_REPUTATION: f64 = 10.0;
 pub const RECORD_MAJOR_REPUTATION: f64 = 20.0;
 pub const RECORD_REPUTATION_CAP: f64 = 60.0;
 
-/// What the driving record costs off reputation right now.
+/// What the driving record costs off reputation right now. A crash counts as
+/// a serious event (owner ruling, 2026-09-24).
 pub fn record_reputation_penalty(record: &DrivingRecord, game_hours: f64) -> f64 {
+    let serious = record.serious_within(game_hours, REPUTATION_WINDOW_DAYS)
+        + record.crashes_within(game_hours, REPUTATION_WINDOW_DAYS);
     let penalty = RECORD_CITATION_REPUTATION
         * record.citations_within(game_hours, REPUTATION_WINDOW_DAYS) as f64
-        + RECORD_SERIOUS_REPUTATION
-            * record.serious_within(game_hours, REPUTATION_WINDOW_DAYS) as f64
+        + RECORD_SERIOUS_REPUTATION * serious as f64
         + RECORD_MAJOR_REPUTATION * record.major_count() as f64;
     penalty.min(RECORD_REPUTATION_CAP)
 }

@@ -30,14 +30,22 @@
 
 ## Reading this roadmap
 
-Start with the [1.9 release gate](#release-gate----what-stands-between-here-and-a-public-190),
-including its cutover checklist, remaining bugs, and owner decisions.
+Start with the [1.9 release gate](#release-gate-190), the fixed list of
+what stands between here and 1.9.0, and
+[Found along the way](#found-along-the-way-not-blocking-190), open work
+that does not block it. The [release gate record](#release-gate-record)
+keeps the cutover checklist, the closed blockers and the owner decisions.
 The [2.0 plan](#20-planned-featcareer-20----the-working-week-and-home) follows it.
 The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
 bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
+
+- [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
+      intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
+      call eats the first second and a half) and a 7 second all-red so cross
+      traffic clears before green.
 
 - [x] Quiet speech keeps concise lane openings, confirmations, and status transitions; Urgent only omits routine costs and status, and suppressed categories skip review.
 
@@ -73,8 +81,12 @@ bookmarks usable.
       (a module that jumps back to its start ends after one pass, so the
       playlist moves on). The Tab radio screen says Freight Fate's own
       stations are off the dial in Synthesized mode.
-      - [ ] Typed-in music seeds.
-      - [ ] More synth voices per style.
+      - [x] Typed-in music seeds: Enter on Music seed opens the text field
+            and takes a whole number; Left and Right still roll one.
+      - (Release gate) More synth voices per style: built, awaiting the owner's
+            listening pass. A strummed guitar, drawbar organ, bell and reed,
+            two or three per style (the higher rungs get three); the reed
+            takes the B sections' tune. Tick once Josh has heard them.
 
 - [x] Career balance integrity: a `MoneyGuard` shadow (balance bits XORed
       with a per-instance key) resyncs on every legitimate earn, spend, or
@@ -93,16 +105,155 @@ bookmarks usable.
       backup the site already holds unmarked is accepted without a manual
       review and listed once in the owner's digest.
 
-### Release gate -- what stands between here and a public 1.9.0
+### Release gate: 1.9.0
 
-The checklist below retains the recorded open release gates. Verification here
-covers the September 11 corrections; other items have not been revalidated. The
+What stands between here and a public 1.9.0, and nothing else. It holds the
+work that was open on the morning of 2026-09-24, plus later findings that
+cost the drive: the truck ignores an instruction, progress or cargo is lost,
+or a spoken line is untrue in a way that causes the mistake. Anything else
+found goes under [Found along the way](#found-along-the-way-not-blocking-190);
+the owner can promote any of it. Landing an item ticks it here. The details
+stay in the dated sections linked from each line, marked "(Release gate)".
+
+Costs the drive (found 2026-09-24):
+
+- [x] A half-full tank's swing from one bend into the next: the plan now
+      counts the swing the liquid carries; Lookout Pass's closest call went
+      from 0.98 unwarned to 0.74 with two warnings
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] An empty truck under partial lane keeping left the pavement in US-62's
+      tight esses: calls no longer hide the bends behind them or cut a
+      warning, and stale warnings are dropped
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Adaptive cruise sloshed a half-full tank on a climb: the slug now stops
+      against the tank head instead of rebounding
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Rural roads no longer take the in-town statutory limit: outside the
+      boundary a state's code keys on, an untagged road gets its rural
+      default (IA 175 by the Love's is 55) (PR #232).
+- [x] The exit lane is the deceleration lane: the approach asks for the
+      right lane only when the truck is out of it, and the cab calls the
+      exit lane once where it opens at the taper. The miles-long offset hold
+      that walked the owner onto the shoulder, across into the left lane and
+      back into a semi is gone
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Street lights and signs, and road stops' streets, are off for 1.9 and
+      the streets drive as before 2026-09-24. A street is never called a
+      zone, G never says "the next 0 miles", lines raised in one moment are
+      said once in order, and a corner taken under its speed sounds at the
+      corner ([September 24](#september-24-realistic-interstate-exit)).
+- [x] Exit labels named the driver's own Interstate: the interchange bake
+      merged a mainline entrance ramp's signage into the exit's record, so
+      southbound at Ardmore exit 31B was "for I-35 North toward Oklahoma
+      City". At run time a via on the leg's own route with a cardinal is
+      dropped with the mainline's destinations (route cities, and cities the
+      leg's other exits also sign); 3,151 of 18,165 interchange records
+      (17 percent) carried one, an opposite-direction label for one of the
+      two travel directions. Also: facility-street turn calls wait until the
+      truck is round the last corner so tone and words agree; a ramp-end
+      yield names the same car the crossing sounds are panned for; staged
+      drives no longer speak bend calls or award Bumper-to-Bumper Blues on
+      frame one; the crest hold is silent and the descent line names its
+      grade; "At the yield" while creeping; capitalised progress line;
+      weather period (PR #242).
+- [x] Descent control held 77 and 85 on a 7 percent grade and let a
+      loaded truck run: it now holds a safe descent speed derived for the
+      truck and load, the retarder no longer hunts, and the G key gives a
+      pitch one length (PR #243;
+      [September 24](#september-24-descent-control-into-denver)).
+- [x] 81 legs' exits sat at the wrong mile: the legs were rerouted after
+      their exits were found (Charlotte to Knoxville by a median 8 miles).
+      Their interchanges are re-derived on the polyline each leg drives,
+      from the June OSM extracts every other layer was read from, and the
+      layers under them rebuilt. The position screen flagged all 81 and
+      withheld 1,113 exits; it now flags none and withholds none. Exits
+      more than 0.75 mi from their own junction, or with none on the road:
+      2,016 of 2,776 labelled exits before, 19 of 3,073 after; at the leg
+      ends, where the game hands over to the destination exit, 85 of 162
+      before and 2 after
+      ([September 24](#september-24-realistic-interstate-exit)).
+
+Costs the drive (found 2026-09-25, gate drive on I-70):
+
+- [x] J refused the engine brake whenever cruise was pulling, with
+      "Release the accelerator" though no pedal was down, right after the
+      downgrade call asked for J. Only the driver's own accelerator refuses
+      it now.
+
+World data (the rest of the 1.9 world-data list moved to
+[2.0](#world-data-deferred-from-19) on 2026-09-25):
+
+- [x] The Flying J listed at exit 286A is off the Abilene to Wichita Falls
+      leg and on Lubbock to Abilene, which passes it on I-20 at exit 277
+      ([September 23](#september-23-agent-drive-into-abilene)).
+
+Driving and platform:
+
+- [x] The speed keeper holds the next turn's speed when it is too close to
+      build back up and brake again
+      ([September 23](#september-23-agent-drive-into-abilene); PR #232).
+- [ ] Drop the whole-archive Prism link once a `prismer` release vendors
+      ethindp/prism#135
+      ([September 21](#september-21-prism-from-the-prismer-crate)).
+
+The owner's:
+
+- [ ] Listening pass on the new synth voices per style
+      ([above](#19-in-flight-featcareer-19)).
+- [ ] Listening pass and a longer drive over wear thresholds and
+      interrupted warnings ([September 11](#september-11-trucking-corrections)).
+- [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
+      workaround (enumerate voices only on a voice change) is the fix; any
+      upstream report stays the owner's call
+      ([September 12](#september-12-long-sessions-and-speech)).
+- [x] The eight remaining jazz songs, in the pack and on Nashville After
+      Hours since 2026-09-25 ([September 13](#september-13-driver-directory)).
+- [ ] New station IDs for the 16 stations still without them; the
+      Roadhouse, Desert Rock and Neon Drive got theirs 2026-09-25
+      ([September 13](#september-13-driver-directory)).
+- [ ] The radio stream sweep (`--recheck-dead`) on release day.
+- [ ] Push the `v1.9.0` tag on the commit to ship, last, after every other
+      item here is closed.
+
+### Found along the way (not blocking 1.9.0)
+
+Open work found since the morning of 2026-09-24 that does not cost the
+drive. New findings land here by default; the owner can promote any of them
+into the release gate. Details stay in the linked dated sections, marked
+"(Found along the way)".
+
+Everything found before 2026-09-25 moved to
+[2.0](#found-along-the-way-in-19-moved-to-20) that day.
+
+- [x] Player builds carried the agent server: `freightfate --agent-server
+      --online` copied the driver's identity into a session with cloud
+      backups on, where `scenario` sets any level, money or credentials. It
+      is the `agent-server` Cargo feature now, and `tools/build_release.py`
+      builds without it (2026-09-25).
+- [x] A source build still has the agent server, so `--online` is gone: no
+      agent session reaches production. Site checks use `--staging`, its
+      own driver on dev.orinks.net, connected once by the owner, with no
+      identity copied from the real saves (2026-09-25).
+- [ ] The site cannot tell an invented career from an earned one. Anyone
+      who builds from source can set their own money or level before a
+      backup, agent or not, and every client-side mark can be edited out.
+      The check has to live in the cloud validator: earnings against the
+      miles, hours and deliveries that paid them; level and experience
+      against deliveries; credentials against their level gates and the
+      clock. Calibrate against real backups, then mark rather than refuse
+      (owner, 2026-09-25).
+
+### Release gate record
+
+What closed on the way to 1.9.0, and the owner decisions still pending. The
+open items are in the [release gate](#release-gate-190). The
 [detailed backlog](docs/roadmap-details.md) retains the supporting notes and
 [completed gate work](docs/roadmap-details.md#completed-19-release-gate-work).
 
 #### Release cutover checklist
 
-These steps remain open even where a related implementation bullet is checked:
+The two cutover steps still open, the radio stream sweep and the tag push,
+are in the [release gate](#release-gate-190).
 
 - [x] Revert-the-revert on dev for the driving-assists withdrawal
       (2026-09-20, `d00faad1`), and public career selection the same
@@ -137,9 +288,15 @@ These steps remain open even where a related implementation bullet is checked:
       rework left the Vercel build deploying a backend only on `dev`,
       so `main` would have shipped the new site against production's old
       Convex functions. Fixed in orinks-net `9925714` first.
-- [ ] The radio stream sweep (`--recheck-dead`) runs before the release;
-      the place-callouts ladder rides the release merge to dev.
-- [ ] **The 1.9 stable-release path.** OWNER RULING 2026-09-20: 1.8 gets
+- [x] The place-callouts ladder is on dev (`e340995e`): `place_callouts`
+      is off, sparse or all, sparse by default, and split from the
+      sitting-budget chatter.
+- [x] **The 1.9 stable-release path is written; pushing a `v*.*.*` tag
+      cuts the release** (`9bbe8f12`). The tag push drops `--prerelease`,
+      takes the version and tag from the tag, and writes the notes with
+      `tools/release_notes.py stable`; CI never creates, moves or deletes a
+      stable tag. `main`'s copy of `build-career-1.9.yml` matches `dev`'s.
+      OWNER RULING 2026-09-20: 1.8 gets
       no further releases of any kind, and the next stable is 1.9. So
       `build.yml` was deleted rather than retired in stages -- it built
       the Python game (no `rustup` step, no `fetch_bass.py`, and
@@ -148,26 +305,19 @@ These steps remain open even where a related implementation bullet is checked:
       nightly could not succeed against a Rust `dev`, and its tag trigger
       would have handed a `v1.9.0` to Nuitka. `build-career-1.9.yml` is
       the only workflow that builds the game now.
-      * What is left to build: that workflow only cuts PRERELEASES today
-        (`--prerelease`, `1.9-tester-*` tags, version from the date). A
-        stable release needs the version and tag to come from a `v*.*.*`
-        push, the prerelease flag dropped, and stable release notes.
-      * Deliberately not written yet. Nothing can exercise it short of
-        tagging a real release, and 1.9 is not close to stable. Write it
-        when it is, against a workflow that has been running nightly by
-        then rather than against guesses now.
       * [x] Also freed by the ruling, and DONE in the Python sunset
         (2026-09-21): `tools/build_release.py`'s Python/Nuitka mode,
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
-- [ ] The owner voice pass over seven achievement titles. The
-      physical-Mac VoiceOver listening pass was DROPPED as a release
-      gate (2026-09-20, owner): there is no physical Mac to test on.
-      Prism reaches VoiceOver the same way it reaches every other
-      reader, and the native runner boots the packaged app before it
-      ships, so the gate could never have been cleared here anyway.
-      Revive it only if a Mac tester appears.
+- [x] The owner voice pass over seven achievement titles (2026-09-22).
+      The category-description cut landed and the owner accepted all
+      seven titles as-is. The physical-Mac VoiceOver listening pass was
+      DROPPED as a release gate (2026-09-20, owner): there is no physical
+      Mac to test on. Prism reaches VoiceOver the same way it reaches
+      every other reader, and the native runner boots the packaged app
+      before it ships, so that sub-gate could never have been cleared
+      here anyway. Revive the Mac listen only if a Mac tester appears.
 - [x] The Unreleased block is ready to cut stable notes from
       (2026-09-20). The four tester-line bullets are gone: the staging
       orinks.net copy, the Update channel developer-snapshots row, and
@@ -225,10 +375,17 @@ These items are part of the release-gate sweep:
       confirmations) now ducks the bed the same way when game sounds step
       back for speech is on. The cue levels were never low; the unducked
       road bed was masking them.
-- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE;
-      last open world-data item for 1.9. The real-zone floor and the
-      merge-free opening miles landed 2026-08-16; what remains is departure
-      chains for the other 72 percent of facilities, a data project.
+- [x] Departing straight into a hazard at route mile zero -- DONE,
+      CLOSED 2026-09-22 at the current `origin/dev` tip (`e2d27d5b`),
+      closing the 1.9 release gate at current tip coverage. The real-zone
+      floor and the merge-free opening miles landed 2026-08-16. The Sep 16-17
+      ship-line history already on `dev` includes `2cbd19ed`, `a378909c`,
+      `fdcbe821`, `ba06486f`, later `4d2150cb` (2,416/5,037, about 48%),
+      and `5f26a6d8`, among the follow-ups. At this tip,
+      `data/facility_approaches.json` has 2,456 / 4,271 `turn_level`
+      approaches (57.5%); its `generated.merge` metadata is dated 2026-09-20,
+      and the all-49-state batch is present. This closes the gate at the
+      documented coverage; it does not claim turn geometry for every facility.
       Builder side landed 2026-09-16: the turn-level route pass now takes
       cold storage, food processors, grocery DCs, grain elevators and ports,
       and a state batch merges into the checked-in file instead of
@@ -300,7 +457,10 @@ These items are part of the release-gate sweep:
       at Baton Rouge and New Orleans, the Connecticut at Hartford, a
       motorway or water elsewhere), 2 would need a private road mid-route
       or a gate on a public street, 1 has under half a mile of public
-      street, and 3 have a private stretch past the cut (see below).
+      street, and 3 have a private stretch past the cut (see below). A
+      matcher/sibling facility-type widen is explicitly deferred past
+      2026-10-04. The ruled-out private-yard and no-path leftovers remain
+      honest refusals, not a data-PR target.
 - [x] Re-sweep facility endpoints with a matcher that reads an object's own
       tags, not substrings of the tag dump. DONE 2026-09-17, by the owner's
       ruling that the 1,396 chains to non-sites stay until a re-sweep
@@ -314,7 +474,7 @@ These items are part of the release-gate sweep:
       merge and can be re-run a state at a time. The approach builder
       rebuilds a chain whose endpoint was replaced and labels the ones it
       could not. Numbers are in the item above.
-- [ ] 995 sourced endpoints are still not freight sites, 560 of them under
+- (Release gate) 995 sourced endpoints are still not freight sites, 560 of them under
       a chain. Named sites ran out: OpenStreetMap names few warehouses in
       small towns. OWNER DECISION: 365 of the 995 have an UNNAMED
       building=warehouse, works or rail yard of their own family inside the
@@ -353,7 +513,7 @@ These items are part of the release-gate sweep:
       a clear gap before 1.49, so the cut is one mile; the owner allowed
       three sites past it by name (Gary Works steel mill 1.49, Tampa cold
       storage 1.94, Port Tampa Bay bulk docks 1.97).
-- [ ] Two endpoints reached only over five to eight miles of private road,
+- (Release gate) Two endpoints reached only over five to eight miles of private road,
       left unbuilt by owner ruling 2026-09-17 because that reads like a
       wrong endpoint: Huntsville cross-dock (endpoint "Kuskokwin Building",
       tagged only building=warehouse, whose coordinates put it inside
@@ -412,12 +572,6 @@ endpoints behind miles of private road.
       sweeping junction is now genuinely faster than a square one and a
       switchback slower. The local-geometry layer still reports 0 read; it
       serves the retired city-service rows and nothing the game drives.
-- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
-      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
-      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
-      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
-      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
-      in: 29 states carry live construction now, 15 of them new that day.
 
 #### Owner decisions
 
@@ -447,10 +601,12 @@ its status or release decision.
       links the archive whole on Linux and macOS, and the nightly now fails
       when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
       missing from `--list-speech-backends`.
-- [ ] Prism's backend anchors cover MSVC only; a GCC static link drops
+- (Release gate) Prism's backend anchors cover MSVC only; a GCC static link drops
       every backend unless linked whole. Reported with a standalone
-      reproduction as ethindp/prism#130; drop the whole-archive link in
-      `crates/freight-fate/build.rs` once a fix ships.
+      reproduction as ethindp/prism#130, fixed upstream 2026-09-22 by
+      ethindp/prism#135 (anchors for GCC and Clang). Waiting on a `prismer`
+      release that vendors it (0.1.3 does not); then drop the whole-archive
+      link in `crates/freight-fate/build.rs` and dry-run the nightly.
 
 ### September 21 the Python sunset
 
@@ -465,18 +621,18 @@ its status or release decision.
       `freightfate --playtest-road --find <feature>` and
       `freightfate --playtest-sandbox --launch`; `tools/playtest_watch.py`
       still follows their logs.
-- [ ] `av` and `scipy` are imported by `tools/encode_music_opus.py`,
-      `tools/patch_loop_transients.py` and the `sound-test/` scripts but
-      declared nowhere in `pyproject.toml`. Add them to a group (`tooling`
-      fits) so a fresh checkout can run those tools.
-- [ ] `sound-test/` carries old ruff lint and format debt, so the
-      pre-commit ruff hooks exclude it (CI lints only `tests` and `tools`).
-      Clean it up and drop the exclude.
-- [ ] Port the "bear is CB voice only" source sweep. The Python game had a
-      test that failed on the word outside a CB clause in any player-facing
-      string; the Rust
-      `test_bear_is_cb_voice_only_in_every_player_facing_string` is an
-      ignored placeholder, so the `docs/ontology.md` rule is unenforced.
+- [x] `av` and `scipy`, imported by `tools/encode_music_opus.py`,
+      `tools/patch_loop_transients.py` and the `sound-test/` scripts, are
+      declared in the `tooling` group and locked, so a fresh checkout runs
+      them with `uv run --group tooling ...`.
+- [x] `sound-test/` is ruff-clean (lint and format); the pre-commit ruff
+      hooks no longer exclude it and CI's lint step covers it too.
+- [x] The "bear is CB voice only" source sweep is ported (2026-09-24).
+      `test_bear_is_cb_voice_only_in_every_player_facing_string` reads every
+      string literal in both crates, multi-line and raw strings included, and
+      fails on "bear" or "bears" in any case outside a line that names the
+      CB; the song title "Black Bear Road" is the one exception. It lands
+      green: today's hits are all CB chatter.
 
 ### September 11 trucking corrections
 
@@ -501,10 +657,38 @@ its status or release decision.
       qualifying rest from the window; the short half counts until the pair
       is credited. Tester report 2026-09-11: 7 duty hours plus an 8-hour
       berth rest woke to a closed window.
+- [x] Rest-stop sleep choices preview the resulting driving allowance, legal
+      driving cutoff, fatigue, game-clock cost, and delivery deadline before
+      a second press commits the rest. Arrival at a planned sleep stop focuses
+      the full reset. A 30-minute break, either 7/3 split order, and full
+      10-hour reset have menu-level scenario coverage.
+- [x] At loaded departure, reconcile the delivery deadline once against the
+      chosen route and live HOS clock. A cached short offer cannot penalize a
+      mandatory 10-hour sleep; the adjusted time is spoken and saved. Existing
+      still-on-time active deliveries get a one-time repair on resume. A full
+      sleep also satisfies a due break in the deadline estimate.
+- [x] Optional HOS planning hints, off by default, use the legal-reach planner
+      as the next limit reaches three game-hours. An earlier compatible stop is
+      suggested when its estimated arrival leaves a useful 30-to-90-minute
+      buffer; the last legally reachable stop remains the fallback in the hint
+      and Alt+D. While rolling, T selects the recommended break or sleep stop,
+      with its matching rest row focused on arrival; repeating T cancels it.
+      If the fallback is tight, an earlier safe stop is still named
+      even when it is more than 90 minutes early. Hints speak once per break or
+      shift in Standard, including a no-reachable-stop case; Quiet and Urgent
+      only remain silent. Required warnings and requested readouts stay active.
 - [x] `--agent-server --operator-keys` keeps the window up and lets the
       owner's keyboard reach the game, to drive alongside the agent; the
       repo's `.mcp.json` passes it. Without the switch the keys are still
-      dropped at the door.
+      dropped at the door. Since 2026-09-24 the window also comes up when
+      the desktop app launches the server hidden (STARTUPINFO `SW_HIDE`
+      turned SDL's first show into a hide); the startup log records
+      whether a show had to be forced.
+- [x] `weather_collector`'s copy names all nine skies the award needs
+      (2026-09-24). It listed eight and left out ice, which it now calls
+      freezing rain, the word the weather readout speaks. The award is
+      unchanged; the catalog digest and the invariants export moved with the
+      copy, and orinks.net carries the new export.
 - [x] Achievement triggers audited (2026-09-20). 181 badges: 177 wired, 3
       deliberately retired into "first_day" and tested as such, and 2 --
       `thrifty_run` and `coffee_regular` -- that had never been awardable in
@@ -522,11 +706,16 @@ its status or release decision.
       A test now asserts every catalog badge is either awarded in shipping
       code or named as retired, and that a retired one is never awarded
       again. It reads source, so it proves REACHABILITY, not correctness.
-- [ ] 130 of the 177 wired badges have no test naming them individually, so
-      nothing proves they fire at the right MOMENT rather than merely being
-      reachable. The trigger sites are concentrated (one arrival pass, one
-      rest-stop pass), so this is a readable job, not an endless one.
-- [ ] Complete the owner's listening pass and longer gameplay verification
+- [x] Every wired badge has a moment test (2026-09-24). The 131 no test
+      named, plus 24 only named in a catalog check or as a truck key, each
+      take their real trigger step (a settled delivery, a trip event, a menu
+      row) and are checked absent on the step before or the near miss
+      (`crates/freight-fate/tests/it/badge_moments_*.rs`). Two fired at the
+      wrong moment and are fixed: "hooked_a_bad_one" was awarded at the hook,
+      announcing the defect before the walk-around its copy names, and
+      "dropped_the_bad_one" read the origin yard's trailer, so a driver who
+      refused it at pickup still earned it at the receiver.
+- (Release gate) Complete the owner's listening pass and longer gameplay verification
       of wear thresholds and interrupted warnings. Captured live readouts and
       successful native calls do not establish what the owner heard.
 
@@ -595,14 +784,30 @@ its status or release decision.
       `ZETA_LATERAL` equals the smooth-bore value whatever the baffles,
       matching FMCSA's Cargo Tank Incidents Study -- "in all cases, tank
       structure does not control side-to-side sloshing".
-- [ ] A part-filled tank is priced as a FULL one by the roll models, not as
-      worse than one. `roll_load_fraction` stops a half-empty tank reading as
-      a light load, which was the bug; the truth is that the half-empty tank
-      is the worst case of all, because the liquid climbs as it goes to the
-      outside of the turn. Needs a fill-level curve for the rollover
-      threshold: FMCSA's 2007 Cargo Tank Roll Stability Study is the place to
-      look, and its PDF refuses a plain fetch (403), so it wants a proper
-      read rather than a guessed de-rating.
+- [x] Adaptive cruise's own closing snub -- following a lead, easing to a
+      lower posted limit, or shedding for a ramp -- stacked on top of
+      whatever engine-brake stage a downgrade had already raised (2026-09-24).
+      The snub was sized as though it were the only thing slowing the truck;
+      on a steep, loaded descent with the retarder doing real work, the two
+      together crossed the freight's hard-brake line the same way an
+      emergency stop does, for an ordinary approach. The snub now nets out
+      the retarder's own deceleration first, so the two share one planned
+      stop instead of compounding.
+- [x] A part-filled tank rolls over first where the liquid is moving
+      (2026-09-24). FMCSA's 2007 Cargo Tank Roll Stability Study still
+      refuses every fetch (403), so the read is NTSB HAR-11/01 2.3.4, which
+      cites UMTRI-85-35: in a steady curve an 80 percent and a full tank
+      "would not differ significantly", and in a transient the liquid swings
+      "twice the level of the steady-state amplitude". So a tank is priced
+      full in a steady bend at any fill (read at 80, assumed below it), and
+      the lateral wave running past its steady place takes back the stability
+      its lower weight would have bought (derived, `vehicle/roll.rs`). The
+      wave is fed each bend over a 2.0 s transition (Green Book Table 3-21,
+      read), so entering a 250 ft bend a half-full tank goes over at 35.1 mph
+      (34.6 until the wave was judged against the bend's own pull, 2026-09-24)
+      and a full one at 36.2; held long enough to settle, both at the same
+      speed. Curve and exit speed assistance plan against the half-full
+      figure.
 - [x] The map stops inventing freight where it cannot see any (2026-09-20).
       Of 623 markets, 137 had no facility whose endpoint the freight-site
       screen accepts -- Nevada 11 of 15, Montana 9 of 15, Arizona 12 of 22 --
@@ -613,7 +818,7 @@ its status or release decision.
       a generated road: no snapped real street stands in for a site that is
       not there. Drive-throughs, parking aisles, fire lanes and permit-only
       ways left the routing graph in the same pass.
-- [ ] Wholesale and trade sites are refused as retail. `shop=wholesale` is
+- (Release gate) Wholesale and trade sites are refused as retail. `shop=wholesale` is
       how OSM tags a distributor -- Shamrock Foodservice Warehouse in
       Billings is a bare node carrying it and nothing else -- and the screen
       refuses any `shop` object outright. Accepting the tag alone would also
@@ -691,10 +896,18 @@ its status or release decision.
       charged but never booked on the licence file, and an out-of-service
       order only ever counted on the trip, never on the career field the
       scale screening scores. Both reach the record now.
-- [ ] The public safety record lists citations, serious violations, major
-      offenses, claims, terminations and repossessions; out-of-service
-      orders and fatigue events are scored but not shown, by the same rule
-      that keeps fatigue private. Decide whether orders belong on the page.
+- [x] Out-of-service orders go on the public safety record as a count
+      (owner ruling 2026-09-24: FMCSA publishes inspection out-of-service
+      results); fatigue events and the reason behind an order stay private.
+      The save already carries `out_of_service_events`, an allow-listed
+      profile field, so no invariants regen; the in-game driver profile
+      reads `outOfServiceOrders` when the site sends it.
+- [x] orinks.net side of the out-of-service count (orinks-net `fcdc9f3`,
+      live on staging and production 2026-09-24): the snapshot carries
+      `outOfServiceOrders` from the save's `out_of_service_events`, the
+      profile page lists "N out-of-service order(s)" after major offenses,
+      and the validator checks `out_of_service_times` and `fatigue_times`
+      against the career clock like `citation_times`.
 - [x] The driving record bites through the carrier and the insurer, and is
       spoken (owner ask, 2026-09-12). Endorsements stay untied to the record
       (hazmat is a TSA threat assessment, 49 CFR 1572, criminal and
@@ -748,10 +961,18 @@ its status or release decision.
       last row, confirmed) is how the game removes an ended career's save and its
       cloud backups. Real-life basis: 49 CFR 383.51 Table 1 lifetime
       disqualification, 49 CFR 384.225 55-year record retention.
-- [ ] Two record gaps from the same research: the scale-house safety
-      record scores lifetime counts where the real carrier score is a
-      time-weighted 24 months, and driving under an out-of-service order is
-      a disqualifying offense (383.51 Table 4) the game does not model.
+- [x] Two record gaps from the same research. The scale-house safety
+      record now counts citations, serious violations, out-of-service orders
+      and fatigue events inside the one-game-year window reputation and the
+      carrier review use (`SAFETY_RECORD_WINDOW_DAYS`), where the real
+      carrier score is time-weighted over 24 months; orders and fatigue
+      events carry career times from this build (older ones are never in
+      the window, like undated citations), and clean inspections stay a
+      lifetime credit. Driving under an out-of-service order (383.51 Table
+      4) is unreachable, not unmodelled: an order is written only once the
+      truck is stopped and is served in full before control returns, and
+      equipment orders are repaired on the spot. A test pins it, so the
+      offense gets modelled if a path ever opens.
 
 ### September 14 reputation reads the record
 
@@ -870,12 +1091,12 @@ its status or release decision.
       is playing, the same as a station on the dial. The song readout
       answered for every playlist that it sends no song information,
       which is only true of a file off the player's own disk.
-- [ ] 196 legs still have no sleep stop a loaded truck can use and no
+- (Release gate) 196 legs still have no sleep stop a loaded truck can use and no
       inventory record on the road. US-12 Willmar to Minneapolis is one:
       its only stop is a Kwik Trip typed bobtail-only. Needs another
       source, state DOT rest-area lists or truck parking read from the OSM
       extracts, before the rest key can plan a stop on them.
-- [ ] Inventory rest areas are one per carriageway (Heath Creek serves
+- (Release gate) Inventory rest areas are one per carriageway (Heath Creek serves
       I-35 north, New Market I-35 south) and the map stores each as serving
       both directions, so a pair is announced twice within a mile. The
       runtime only knows forward and reverse relative to a leg; deriving
@@ -972,7 +1193,7 @@ its status or release decision.
       the twin screen now drops 2 records where it dropped 90, and the retype
       acts on 52 where it acted on 1,317 (counted with a Python mirror of both
       rules that reproduces the 90 and the 1,317 on the map before).
-- [ ] Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
+- (Release gate) Chain stops' mile markers are loose: a median of 0.9 miles and a 90th
       percentile of 3.4 from where the store projects onto the leg's own
       line, and 5 to 40 miles for about 110 curated records on long legs.
       Exit numbers and ramp controls are found by mile marker, so re-project
@@ -1020,7 +1241,7 @@ its status or release decision.
       2,136 (56.6%), and the mile marker had named another exit for 527 of
       the 1,506 now decided by identity. 41 stops name an exit their leg
       puts elsewhere.
-- [ ] What still leaves a truck stop's ramp to the seeded control, in order
+- (Release gate) What still leaves a truck stop's ramp to the seeded control, in order
       of size: 1,353 stops are on the 532 legs with no interchange records
       (the interchange build only reads Interstate shields); 390 snapped to
       an exit their leg does not record, because the build drops an exit
@@ -1097,8 +1318,11 @@ its status or release decision.
       The music pack preserves its prior 380 entries and adds 25.
 - [x] Lights Over Superior borrowed into the day menu rotation, by owner
       request, and still in the classic rock station playlist.
-- [ ] Download and integrate the eight remaining jazz songs, then 19 station
+- (Release gate) Download and integrate the eight remaining jazz songs, then 19 station
       jingles, after the September 21 Suno allowance refresh.
+- [x] 2026-09-25 pack: the eight jazz songs, ten station IDs (Roadhouse
+      and Neon Drive four each, Desert Rock two) and hiring ads for
+      Northstar, Prairie Link and Summit Value. 405 -> 426 entries, re-pinned.
 
 - [x] Two owner-supplied instrumentals in the music pack: D-Major Medley
       in the menu rotation, From Bossa to Blues in the day drive pool (so
@@ -1121,8 +1345,9 @@ its status or release decision.
       a session with no screen reader running, where OneCore is the automatic
       main voice and the probe re-acquired it on every pass. 1.8 never
       enumerated outside the settings menu.
-- [ ] Owner verifies the OneCore leak with Prism's author before anything
-      goes upstream; no issue or PR from this side (owner rule 2026-09-12).
+- [x] Closed for 1.9.0 by owner ruling 2026-09-24: the game-side workaround
+      is the fix. Before anything goes upstream the owner verifies the
+      OneCore leak with Prism's author; no issue or PR from this side (owner rule 2026-09-12).
       Hand-off is the probe, which left the tree with the in-tree Prism
       crates on 2026-09-21: `git show f9c06a7f:crates/prism/examples/handle_leak_probe.rs`.
       Pinned 2026-09-12: the leak is in FREEING an
@@ -1149,12 +1374,31 @@ against.
       September 12 sweep missed. Oklahoma answers (60 zones) but publishes its
       access token inside the URL, which is still a key; New Mexico still
       answers 503, a week on, so it is dead rather than briefly down.
-- [ ] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
-      each axle group weighs before a scale house tells them. 2,127 of them
-      are mapped and branded, and the truck already knows its mass and axle
-      load. Needs the owner's call on what a weigh costs and what the readout
-      says.
-- [ ] Where the state scale houses are is still unsolved. 78 of 1,283 legs
+- [x] A driver can pull onto a CAT Scale at a truck stop, pay, and hear what
+      each axle group weighs before a scale house tells them. The stop menu's
+      Weigh on the CAT Scale row costs CAT's published 15.25 dollars, 5.25 for
+      a reweigh at the same scale within 24 hours (read from catscale.com's
+      FAQ, 2026-09-24; company drivers bill the carrier), takes ten minutes on
+      duty (assumed), and reads the ticket: steer, drive and trailer axles and
+      gross in pounds, then legal or which groups are over the 34,000 lb
+      tandem and 80,000 lb gross limits. The split comes from a lever model
+      on the mass model's own parts (`sim/vehicle/axles.rs`), derived per
+      truck so a full legal load scales 12,000 / 34,000 / 34,000; the one
+      assumed number is a bare tractor's 55 percent on its steer axle. Which
+      stops have one is read: `tools/cat_scales.py` snapshots the 2,127
+      CAT-branded OpenStreetMap weighbridges and gives the `scale` service to
+      1,667 truck-stop records within 0.25 mi of one (calibrated: 844 of 1,102
+      travel centers within 0.1 mi, 868 within 0.25, 880 within 0.5), on top
+      of the 176 read from brand pages. Stop details now say "CAT Scale".
+- (Found along the way) An axle cannot go over while the gross is legal: the game has no load
+      placement, fifth-wheel slide or tandem slide, so the axle model is fixed
+      per truck and a state scale still judges gross only. Real drivers weigh
+      mostly to catch a heavy drive tandem at a legal gross; that needs load
+      placement and an axle check at the scale house.
+- (Found along the way) 234 travel-center records with a coordinate have no mapped CAT Scale
+      within 0.25 mi, and records with no coordinate are never matched. CAT
+      Scale's own locator is the check on both.
+- (Release gate) Where the state scale houses are is still unsolved. 78 of 1,283 legs
       carry one, every one of them found off an exit sign rather than looked
       for, and no keyless national source beats that -- OpenStreetMap's
       weighbridge tag holds 72 enforcement scales against 2,127 commercial
@@ -1190,21 +1434,605 @@ against.
       cannot hold it were deliberately NOT written. They stay as the profile
       left them for the load screen to clamp, because baking a bridge deck in
       as a grade would put it beyond the one rule that catches it.
-- [ ] Note for anyone sampling USGS: the single-point EPQS service answers an
-      out-of-coverage point with HTTP 200 and the text `Call failed.`, so a
-      reader that trusts the status stores that string as an elevation.
-- [ ] California stays dark until a route-to-district lookup exists. Caltrans
-      publishes lane closures per district with no key, but district 7 alone
-      is 17.6 MB against an 8-second feed budget.
-- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
-      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
-      feed, and EIA fuel prices. Not in the registry at all: Alabama,
-      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
-      Tennessee, West Virginia, Wyoming, DC.
+- [x] USGS answers an out-of-coverage point with HTTP 200 and the text
+      `Call failed.`, so a reader that trusts the status stores that string
+      as an elevation. `tools/screen_grades_3dep.py` refuses any non-JSON
+      body (pinned by `tests/test_screen_grades_3dep.py`), and the gotcha is
+      written up in `docs/data-sources.md` for the next USGS reader.
+- [x] California reads Caltrans's Lane Closure System, fetching only the
+      districts a leg crosses. Counties come from the Census 1:20M outlines,
+      widened by their measured 3.24 mi error against the 1:500k file, and
+      map to districts through Caltrans's own county layer (Kern also gets
+      District 9, which files eastern Kern's closures). The CSV feed is the
+      size fix: District 7 is 2.2 MB and arrived in 4.5 to 5.0 seconds on
+      2026-09-24, where its 13.6 MB JSON took 11 to 16. Only mainline closures
+      in effect now are kept, and an incident closure open over a week is
+      dropped as stale: that day's feeds held a full closure of I-5 through
+      Los Angeles "under investigation" since June. No state's feed is
+      fetched twice at once any more.
+- The keyed feeds (Colorado and the other states that want a registered
+  key, and EIA fuel prices) moved to the 2.0 section, under "Deferred from
+  1.9: live feeds that need a key".
 - [x] The National Highway System and FHWA toll facility datasets were
       checked and left: the route graph already carries truck-restricted
       geometry, and `tools/toll_rates.py` already carries what a five-axle rig
       pays, which the toll inventory does not.
+
+### September 23 flight's driving notes
+
+flight drove with every assist off and sent four notes. All four have
+shipped; the second shipped the third way, below.
+
+- [x] **The drift lean reads the heading, not only the position.** Both
+      drift producers (the engine lean and the opt-in tone) lean on
+      `lane_guidance::settled_offset`: the offset plus the heading's lateral
+      stopping distance, from a two-choice reaction time plus the lean's own
+      slew, and the driver's yaw authority in `sim::lane`. In a closed-loop
+      test, a driver who follows the old position-only lean out of a 0.6
+      drift ends up 1.5 past centre, off the other edge. With the new lean
+      it is 0.05. The agent drive that checked it found one more gap: the
+      lean went quiet as soon as the settled point was centred, with heading
+      still on, and the truck carried on across. `drift_speaks` now keeps
+      it awake until the truck is also pointing down the road.
+- [x] **A hill's speed is spent on the clock that gave it.** Integrating
+      motion on the game clock (merged to `dev` 2026-09-23, reverted
+      2026-09-24) made the truck pull away at the pace's multiple in real
+      time and rattled the gearbox through its gears, so motion stays on
+      the real clock. A grade clock followed (2026-09-24: 3% or steeper ran
+      in real time) and came out on 2026-09-25 at the owner's call: it
+      dragged every mountain pass into real minutes and made flight's
+      switch for the driver, real time down the grade and paced on the
+      flat after it. Fuel is billed at the pace, so at one pace a climb, a
+      coast and a pulse-and-glide each cost what they should per mile; the
+      free energy was only speed gained on one clock and spent on another.
+      A Driving mode change made mid-drive now waits until the truck is
+      stopped (`PACE_CHANGE_MAX_MPH`). At a faster pace a hill passes in
+      fewer real seconds and moves the speed less, the trade a compressed
+      map makes.
+- [x] **Real time from the brake point, not from the corner call.** The
+      call stays time-based; `controlled_turn` now goes on at
+      `turn_brake_point_mi` (eight real seconds of reaction and settle plus
+      the shed to the advise speed at the keeper's 0.4 m/s²), and
+      `Trip::turn_clock` slides the pace down over the three real seconds
+      before it, the exit release run backwards. A 30 mph approach that
+      crawled four real minutes from a two-mile call now runs real time for
+      its last fifth of a mile.
+- [x] **A straighten-up key.** Slash, held, applies only the heading half
+      of partial lane keeping's steering law (`LaneKeeping::straighten`), so
+      the truck points down the road and keeps its place in the lane. A
+      bindings-table row, keyboard only: a pad steers on the stick.
+
+### September 23 agent drive into Abilene
+
+An agent drive of `feat/momentum-game-clock`, Aberdeen yard to the Abilene
+gate, turned up these on dev's own code.
+
+- [x] **The ramp stop sign.** The terminal servo presses after physics and
+      was missing from the frame's `assist_floor`, so the pedal decayed under
+      it: 0.43 m/s² against the 0.6 planned, 13 mph sixty feet out, then half
+      a pedal. The cap's "released" line is held while the terminal owns the
+      stop.
+- [x] **Music source.** `roadhouse_synth_state` read the Roadhouse off the
+      radio state `with_radio_backend` had swapped out, so Synthesized to
+      Original never restarted the rotation.
+- [x] **Limit changes ride ROUTE.** The advance "drops to 55" marks the
+      limit announced; dropped as stale, it silenced the boundary too.
+- [x] **One call per street turn.** The route lead is dropped for a turn
+      already called, and a call after the lead keeps only its advise speed.
+- [x] **A flushed line's hand-back plays first.** `should_flush` handed
+      back a route line not a word of which had been heard, and it was
+      requeued behind the line that flushed it, so the road played
+      backwards. The hand-back is now spoken ahead of that line
+      (`EventSpeechPacer::note_ahead` keeps the newcomer the protected one).
+- [x] **Ramp readouts.** The route readout on a destination ramp adds the
+      street chain to the gate; U drops highway stops off the highway; the
+      unrecorded ramp control is seeded by the exit, not by each stop.
+- [x] **Data: the Flying J listed at exit 286A** on the Wichita Falls to
+      Abilene leg is the I-20 exit 277 (FM 707) store, placed from 7.5
+      miles off this road by its own source note. Two legs pass the store:
+      Big Spring to Abilene (I-20) already lists it, as "Flying J Travel
+      Center Tye" at exit 277, so the record moved to Lubbock to Abilene
+      (US-84, on I-20 for its last miles), which listed nothing there. It
+      carries the store's coordinates read from OpenStreetMap, sits at mile
+      155.7 by projecting them onto that leg (derived), and the stop snap
+      reads exit 277 from its own source. That leg has no interchange
+      records, so the ramp control stays seeded.
+- (Release gate) **The speed keeper between close street turns.** It built back to
+      the zone limit between turns a quarter mile apart (9 to 21 mph), then
+      eased in the last 0.07 mile at about 0.3 g. It now holds the next
+      turn's advise speed when that turn is inside its own build-and-shed
+      distance (`keeper_build_and_shed_mi`; build rate 0.4 m/s2, under the
+      0.49 measured with 18 t aboard and 0.94 empty). Pinned: peak between
+      the corners at or under the second's number, under 0.2 g into it.
+
+### September 24 realistic interstate exit
+
+A tester said the drive off the highway, the speeds and the slowing for the
+ramp, was unrealistic. The owner approved a redesign built on NCHRP Research
+Report 1081 (2024) and the Green Book 2018 over the old ramp-speed-on-the-
+mainline behaviour.
+
+- [x] **Mainline.** Cruise and exit speed assistance ease at most 10 mph
+      under road speed before the gore (`EXIT_MAINLINE_EASE_MPH`, TxDOT RDM
+      9.4.4, read); the old floor was the ramp's own number, about 44 mph in
+      a 70 lane for the last half mile. The countdown and lane-prep lines ask
+      for the lane and the signal only; the gore line and its "Stay under" are
+      gone.
+- [x] **Deceleration lane.** Crossing the gore starts a lane of Green Book
+      Table 10-6 length (all four curve columns now, 40 mph fixed to 320 and
+      45 mph added at 385) with the book's own deceleration grade factors
+      (0.9, 1.2, 0.8, 1.35), keyed on the corridor limit and the ramp's
+      speed. Speed control pauses there, "Exit speed N." is said once, and
+      exit speed assistance (or route-transition assistance) brakes to it by
+      the curve.
+- [x] **Ramp curve and run to the bar.** The ramp's curvature applies only
+      in its curve (45 degrees, assumed, at the ramp speed's AASHTO minimum
+      radius), which now feeds the load and the tank the way a mapped bend
+      does. The ramp past the lane is level (assumed). Gore-to-bar length
+      comes from `Trip::ramp_length_mi`: lane, curve, a derived 590 ft climb
+      and an assumed 200 ft queue, about 1,200 to 2,000 ft where the flat
+      unsourced half mile was 2,640.
+- [x] **Per-exit ramp length from OSM.** Each exit carries its ramp length
+      per direction, measured along the ramp from where it leaves the
+      motorway to where it meets the surface road (or the merge on a
+      freeway-to-freeway ramp). It covers 16,882 of 18,165 exits (92.9%),
+      median 1,474 ft (5th percentile 735, 95th 3,456); 172 values under
+      300 ft and 47 over 1.5 miles were dropped. The OSM length starts at
+      the gore, so `Trip::ramp_length_mi` adds the deceleration lane in
+      front of it; exits without a length keep the derived default.
+- [x] (Release gate) **The exit lane is the deceleration lane** (owner's
+      drive, I-70 East to exit 263, partial lane keeping). The old "exit
+      lane" was an offset held inside the right lane for miles: already in
+      the right lane he was told to steer right, pushed at the shoulder,
+      went "set" and "lost", overcorrected across into the left lane and
+      steered back onto the right-lane semi his adaptive cruise had been
+      following. Now the arming line, the destination callout, the 2 / 1 /
+      1/2 mi anchors and the exit speed assistance line ask for the right
+      lane only while the truck is out of it. The exit lane opens
+      `EXIT_TAPER_MI` (300 ft, derived: Green Book 2018 10.9.6.6.2 parallel
+      taper 25:1 on 12 ft) before the gore; the cab says "Exit lane opening.
+      Steer right into it." once, the lane model treats the right side of
+      lane 0 as a lane line (no rumble), and crossing it takes the ramp at
+      once. It stays open, on the real clock, until the gore window closes;
+      no steer by then is "You were not in the exit lane." Full lane keeping
+      takes it at the gore as before. The exit lane is not a traffic lane:
+      entering it runs no mirror check. The lane-open readout flip in the
+      same log was the message history being replayed plus a real 3-to-2
+      lane drop, each change said once; now pinned stable where the count is.
+- [x] **The exit blinker runs from half a mile out** (owner ruling,
+      2026-09-24: a driver flicks it on a quarter to half a mile out, never
+      miles of blinker; agent drives blinked 7.3 and 5.8 miles to the gore).
+      X still commits the truck wherever it is pressed and stays the gate;
+      the clicks, for X and for lane keeping on full taking the exit, start
+      at `EXIT_BLINKER_MI` (0.5 mi, the last advance guide sign). Armed
+      farther out the line says "Signal set for ...", "Signal on for ..."
+      once it clicks; a new ontology row names the pair.
+- (Found along the way) **Sideswipe window.** `finish_lane_change` calls any
+      vehicle in the new lane from 0.15 mi behind to 0.35 mi ahead a
+      sideswipe, the same clearance the lane-open cue uses. A truck landing
+      a few hundred feet behind a car hears it hit. Owner's call whether
+      contact should need overlap.
+- (Found along the way) **Per-exit ramp grade.** The ramp past the deceleration lane is
+      assumed level because nothing records its climb or drop. Needs an
+      elevation bake (USGS 3DEP) of each exit's gore and terminal nodes.
+- [x] **Truck rollover, on ramp curves and mapped bends alike**
+      (feat/rollover-model, 2026-09-24). One model (`vehicle/roll.rs`): the
+      bend's pull in the truck's own frame, `v^2/gR` less the bank, against
+      the static rollover threshold of the load aboard (0.35 g full, 0.70 g
+      empty; a ramp curve credited the 6 percent roads are built to, its
+      radius having been derived at 8). The ladder is shares of that
+      threshold: from 0.857 (0.30 g, the most any advisory is established
+      at per FHWA-SA-11-22 3.7, over a full trailer's 0.35) the freight
+      shifts, replacing the flat 0.40 g that sat past
+      where a full trailer rolls; at 1.0 the truck goes over, the load is
+      scrap, and `recover_out_of_service` runs as for any truck that may not
+      be driven. The too-fast warning names the speed that costs nothing,
+      inside the curve or on the approach once the road left is the Green
+      Book's 2.5 s and 11.2 ft/s2 (read), and is heard before any cost; it
+      replaced the flat 15 over the sign. Curve and exit speed assistance
+      hold under that speed, and the exit assist matrix stays green.
+      Also fixed from the same agent drive: leaving the pavement was free
+      with the lane-departure warning off, and the ramp curve's engine lean
+      went silent with it (the curve is a turn now, like a mapped bend).
+- [x] **Partial lane keeping steers through the road's bends** (owner
+      ruling, 2026-09-24). The steering cap (`MAX_STEER_LATERAL_G`, 0.2 g)
+      bound lane keeping's own correction as well as the driver's key, so
+      with curve assistance off a bend ran wide at its own advisory under
+      partial lane keeping. Partial now supplies the road's wheel the way
+      curve assistance does (`Settings::road_steers_the_bend`); lane changes
+      and speed stay the driver's, and lane keeping off stays manual.
+- [x] **The assists hold every mapped bend without rolling the truck**
+      (test/rollover-assist-sweep, 2026-09-24; the owner's question). A
+      sweep (`states_driving_bend_rollover_sweep`) drives twelve bend-dense
+      three-mile stretches -- I-70 Floyd Hill and Glenwood Canyon, I-5
+      Siskiyou and Shasta Lake, I-40 Pigeon River, I-80 Donner, I-90
+      Lookout Pass, US-550 Red Mountain, US-62 Ozarks, US-60 Salt River
+      Canyon, CA-299, US-50 -- with bobtail, empty, half, full, and tanks at
+      50 and 95 percent, under curve assistance with the driver on the
+      throttle, the All preset with cruise, Balanced with cruise, and a
+      driver obeying only the number the cab speaks. None rolls and no bend
+      moves the load; the assists never hear "too fast", make at most one
+      full application per bend, and keep the air up; a driver 10 over every
+      sign rolls on seven of the twelve, warned first. It found five faults, all
+      fixed: the servo armed only off the spoken call, whose margin (3 mph,
+      8 on a gentle bend) sat past where a full trailer goes over, so the
+      Siskiyou's 6 percent rolled one at 60 with curve assistance on (it now
+      looks ahead on the load's own number); the call itself used that
+      margin, so a driver obeying every number spoken rolled on US-550 and
+      the Salt River Canyon (it now calls past where the bend costs this
+      load, or runs a manual lane wide); a half-full tank's wave was judged
+      against a pull still being built, or a gentle bend's tiny one, and
+      rolled at 50 and at 23 under its number (judged against the bend's own
+      pull, and the rollover pull where the bend asks less); adaptive cruise
+      held the throttle against the servo's brake -- half the pedal against
+      a sixth, the tanks at 48 psi down US-50 (it caps to the servo's number
+      and yields to its brake); and the too-fast warning looked only under
+      the truck, so the next of two bends was warned once the load was
+      already moving (it looks at both, and prices a downhill bend where the
+      truck will be after the reaction time).
+- [x] **A half-full tank's swing from one bend into the next**
+      (fix/roll-near-misses, 2026-09-24). The plan now counts the swing
+      the liquid still carries (`LiquidLoad::planning_overshoot`): its
+      energy about where the present pull holds it, as a share of the
+      steady shift at the rollover pull, on top of what a bend entered from
+      rest leaves. Energy, not position, so the number eases as the wave
+      settles instead of rising and falling with it; the position was what
+      made the first try brake more. On Lookout Pass the spoken-number
+      driver's closest call went from 0.98 of the rollover threshold,
+      unwarned, to 0.74 with two warnings, and no bend in the sweep moves a
+      load. The sweep now caps every setup but the daring one at 0.90 and
+      fails any bend past the warning share (0.857) with no "too fast" in
+      the ten seconds before; the highest is 0.85. Curve assistance's surge
+      allowance on the approach went on whole the moment the shed passed
+      the road's own drag, which chattered the pedal every other frame for
+      fifteen seconds approaching a Shasta bend; it fades in with the
+      braking now.
+- [x] **Partial lane keeping in tight esses with an empty truck**
+      (fix/roll-near-misses, 2026-09-24). Three faults behind US-62's late
+      warnings: a bend already called stopped the call search, so the
+      bends behind it in a run went uncalled until the truck was in them; a
+      warning cut off by the next bend's came back after it, naming a bend
+      already behind with a higher number, which is the one the driver
+      heard last; and a curve call cut off any warning still being spoken,
+      which then came back behind it. Calls skip bends already called, a
+      warning is handed back only while its bend is ahead or underfoot and
+      the truck still over the number, and a call waits behind a warning or
+      another call instead of cutting it. The sweep fails any setup but the
+      daring one that leaves the pavement; "too fast" warnings to the
+      spoken-number driver across the sweep fell from 302 to 231.
+- [x] **Adaptive cruise and a half-full tank on a climb**
+      (fix/roll-near-misses, 2026-09-24). The surge model, not cruise: a
+      slug that reached a tank head rebounded at nearly the speed it
+      arrived with and also handed that momentum to the truck, whose lurch
+      threw it back harder. Once a wave reached the heads it ran itself up
+      to 18 m/s end to end and cost the load with no pedal moving; cruise's
+      throttle was only the first kick. The slug now stops against the head
+      and the spring runs it back, as liquid piling against a head does.
+      Pinned in `vehicle::tests` (the old rebound runs a kicked slug to
+      29.7 m/s in a minute); the sweep's Donner cruise run keeps the load
+      whole.
+- [x] **A rollover goes on the driving record as a crash** (owner ruling,
+      2026-09-24). 49 CFR 390.15's accident register lists every accident,
+      and 390.5 counts a vehicle towed away; `DrivingRecord::crashes` and
+      `crash_times` (nested in `driving_record`, so the cloud validator
+      accepts it with no invariants regen) weigh on reputation and the
+      safety record as a serious event does, and age out on the same
+      window. The Citations and violations list names it "Crash".
+- [x] **orinks.net: the public crash count** (orinks-net `743fa38`, live on
+      staging and production 2026-09-24). The snapshot carries `crashes` from
+      `driving_record.crashes`, the profile page lists "N crash(es)" after the
+      out-of-service orders, and the validator checks `crash_times` against
+      the career clock like `out_of_service_times`.
+- (Found along the way) **Signs priced by the MUTCD, not at 0.30 g.** The curve bake prices
+      every advisory at 0.30 g plus bank, so a full trailer at the number the
+      cab speaks is 3 mph from going over at 45 and 4 at 65. MUTCD 11th ed.
+      2C.59's ball-bank criteria read as 0.26 / 0.21 / 0.18 g
+      (FHWA-SA-11-22) and leave it 14 and 20. Repricing that way (stacked
+      branch `feat/mutcd-advisories`) calls an interstate slowdown every 25
+      miles against the owner's floor of 100 (2026-08-23): the bake's
+      minimum radii read low on flat interstates (I-94 Billings to Miles
+      City, 1,323 ft, posted 65 in an 80). It needs the radius re-measured,
+      or calibrated against OSM `maxspeed:advisory` or HPMS curve class,
+      before it can ship.
+- [x] **Every assist follows the exit rules.** One matrix
+      (`tests/it/states_driving_exit_assist_matrix.rs`: nine assist setups
+      by seven ramp kinds, from two miles out to the stop or the gate) found
+      and fixed: facility stopping assistance ignoring the ramp curve; the
+      run to the entrance on the compressed clock; a clear yield leaving the
+      terminal servo's last press held (stopped 270 ft short) and a gap at a
+      held yield never released; exit speed assistance pausing cruise for
+      0.3 mph over; the street pull-ahead aiming at the mainline's limit; the
+      steering lean bending the whole ramp; "oncoming lane" on a one-way
+      ramp; the yield unnamed in the take line.
+- [x] **A yield's gap is judged at the crossroad** (fix/yield-at-the-line,
+      2026-09-24). It was judged about 100 ft past the line, so a gap clear
+      at the line could read as "forced". The crossroad now starts 17 ft past
+      the yield line (the middle of MUTCD 11th ed. 3B.19's 4 to 30 ft,
+      assumed), is two 12 ft lanes (assumed), and a WB-67 (73.5 ft, Green
+      Book Table 2-1a, read) must get across it on Long's truck acceleration;
+      a gap that holds for that whole crossing is clean, one that closes
+      during it is forced (`CrossTraffic::conflict_between`). The same timing
+      decides when a yield or roundabout is clear to roll or to pull out
+      from a stop. Stop signs still use the four-second look.
+- [x] **"Live weather unavailable. Simulated weather in use." repeats every
+      few minutes** (agent drive, 2026-09-24; fix/air-and-weather-repeat).
+      A retry after a failed fetch read as "loading" while it ran, so the
+      source flipped back to fallback after every failed retry and was
+      announced again once a minute. A retry now stays unavailable, and a new
+      route cell loading while simulated weather is in use is not a source
+      change (trip and weather tablet). Said once; "Live weather ready" once
+      on recovery.
+- [x] **Air ready went false at 62 mph on the mainline** (agent drive D,
+      2026-09-24; fix/air-and-weather-repeat). Pedal fanning again: cruise's
+      service trim for a lower target switched on at 2 mph over at a
+      fifteenth of the pedal, so an exit glide sliding down ahead of the
+      truck held it on that edge and the pedal rose about fifteen times a
+      second (8 full applications on the reproduced I-20 run, tanks to
+      100 psi; now under 1, 120 psi). It now fades in over the mile an hour
+      below the edge. Three siblings with the same switched edge, each
+      measured pumping on its own bench, fade in too: interactive descent
+      control's brake at 8 over its ceiling, exit speed assistance's 0.35 at
+      the gore's acceptance, and the curve assist's drums at 10 over with
+      the retarder on.
+- [x] **The exit drives' speech and sounds** (fix/exit-drive-speech,
+      2026-09-24, from six agent drives through signal, stop, yield,
+      roundabout and truck-stop exits). The stop-bar ticks and held tone stay
+      quiet on a green. The pacer no longer flushes a ROUTE or CRITICAL line
+      the player is part way through when nothing else is queued behind it:
+      the next line waits, so the take line is not said twice or cut by
+      "Light red." A line about a hold at the bar is dropped once the gap or
+      the green comes rather than replayed before the release. A mainline
+      limit change at the gore is not spoken over the take line. A stop inside
+      the held tone counts as a stop at the sign, and "Stopped N short" always
+      names N and is said once per stop. Route-transition assistance says one
+      line for one approach. U names the destination exit and reads the gate,
+      not its zone; C estimates the approach from the road left to the gate.
+      The pre-gate warning is silent when facility stopping assistance or the
+      keeper already holds the gate's 15; the keeper says "easing" only when
+      it is actually slowing; billboards wait out the last mile of an exit;
+      the descent advice does not tell a driver with the jake on to press J;
+      the jake growl holds through a gap instead of restarting. Adaptive
+      cruise holding five over a lowered limit is the documented design
+      (`ACC_LIMIT_OFFSET_MPH`, and the driving help: "never holds more than
+      five over the posted limit"), left as is.
+
+Streets from the ramp to the facility (owner order 2026-09-24). The data is
+baked (`tools/street_chain.py`, `facility_approaches.json` coverage
+`streets`), and the drive reads all of it (below).
+
+- [x] **Ramp terminal per exit.** Each exit carries the OSM node its ramp
+      ends at, per direction (`Trip::ramp_terminal_node_at`): 18,764 of the
+      20,531 directional ramp lengths; a merge has none.
+- [x] **Ramp walks end at public roads.** A service stub or driveway
+      touching a ramp mid-link no longer stands in for its crossroad
+      (Baltimore node 9879536272). Of the chains that failed on it, 65 of 404
+      "disconnected" and 74 of 248 "terminal not on the street graph"
+      recovered; 313 of the 340 still disconnected are facilities no route
+      reaches today at all.
+- [x] **One ramp rule with and without --force.** Every exit a run reaches
+      is judged from the evidence alone; the bake is a fixed point.
+- [x] **A chain from each ramp terminal.** For each leg into a city, the
+      labelled exit nearest the city end (the game's own destination-exit
+      rule) starts a chain at its terminal, kept whole
+      (`World::facility_exit_route`): 3,054 chains, 1,386 of 2,049 routed
+      facilities have one; 746 terminal-facility pairs failed (340
+      disconnected, 215 beyond the 18-mile limit, 127 terminal not on the
+      street graph -- a terminal across a state line from the facility's
+      extract, or on a motorroad -- 54 over budget, 8 yard road too long, 2
+      no road at the endpoint).
+- [x] **Posted limit per street, with its kind** (`Trip::street_limit_at`):
+      read from OSM on 49% of exit-chain miles, the state's statutory
+      district default on 40%, assumed on 11% (states with no district
+      default, and past the driveway).
+- [x] **Signals and stop signs along the chain**
+      (`Trip::street_controls_between`), read from OSM only: 25% of passed
+      intersections and 29% of turns have one on the exit chains; the rest
+      are unknown, not free. Signals dominate (35,335 against 1,473 stops,
+      880 all-way stops, 203 yields); 531 stops drawn on an intersection
+      node with no direction were left out as ambiguous.
+- [x] **Driveway** (`World::facility_driveway`): where the chain leaves the
+      public street for a service or private way, on 1,968 exit chains.
+- [x] **Older city-centre chains matched to the map.** 277 of the 671 chains
+      no re-route reproduces got their street detail by reading their own
+      streets back off OSM (`tools/chain_match.py`); 270 name a street the
+      graph no longer offers, 83 match the names but not the miles, 41 lead
+      to a replaced endpoint.
+- [x] **Road stops off an exit** (`Trip::stop_approach_route`): 1,005
+      chains from the serving exit's ramp terminal to 888 stops' lots (756
+      travel centers, 111 fuel stations, 17 service plazas, 4 truck stops),
+      893 with a driveway. Rest areas and weigh stations get none: no exit
+      is linked to them; 7 routes that never touch a public street are
+      recorded on_mainline.
+- [x] **Per-street limits in driving** (`Trip::street_zones`): one zone
+      per street at its baked limit, joined where neighbours agree; the
+      keeper, enforcement, corner advise speeds and the assists read the same
+      number. A change is said as "Speed limit raised to 40"; only a drop of
+      10 or more is warned, at the highway pacenote's lead. Chains with no
+      street detail keep the old single zone and gate zone.
+- [x] **The arrival picks its chain by the exit taken**
+      (`DrivingState::destination_terminal_node`): the exit chain from that
+      ramp terminal when one is baked, the city-centre chain otherwise.
+- [x] **The yard from the driveway** (`Leg::local_yard`, `YARD_LIMIT_MPH`
+      15, industry practice, assumed for any one yard): no 15 on a public
+      street; the driveway is a judged turn at corner speed; the gate
+      warning waits for the yard, and a gate standing on the street is
+      warned at the braking distance or six seconds, whichever is longer.
+- [x] **Street lights and signs** (`driving_events/street_controls.rs`):
+      each READ signal, stop, all-way stop and yield plays through the ramp
+      terminal's own state (`terminal_gap_mi`): light cycle, cross traffic,
+      bar countdown, route-transition assistance, and the keeper pulling
+      ahead when facility stopping assistance is on. A green is driven at
+      street speed and not spoken past; an all-way stop has no crossroad
+      traffic; the ramp terminal's own node is not played twice. Deadlines
+      and pickup ETAs plan each street at its limit (`route_planning_limit`).
+      The exit matrix gained a street chain with a red light and a stop sign.
+- [x] **Street signal timing and progression** (`street_light_plan`): a
+      90 s cycle (read range 60-150, assumed), 53 s through green (derived:
+      the coordinated phase takes what the side street leaves), 25 s side
+      street green (read range 20-40, assumed) where the chain turns at the
+      light. Signals along one street share the cycle and are offset for its
+      posted limit with a 21 s band (derived from the TTI handbook's worked
+      two-way example, 0.23 of the cycle); the light runs on the trip clock.
+      Mapped nodes within 0.03 mile are one intersection. Synthetic 10-signal
+      arterial, 5 seeds: 0-2 reds at the limit (mean 0.8), 3-5 at half of it
+      (mean 4.2). Real Dallas to Abilene Company Yard streets (exit 292B, 14
+      mapped signals), every assist on, 20 seeds: 2.55 red stops before, 2.20
+      after; most of what is left is the first light of each street and the
+      side-street turn. Sourced from FHWA-HOP-08-024 and TTI 0-6402-P1.
+- (Found along the way) **Check the street signal numbers against the Signal Timing Manual
+      2nd ed. (NCHRP 812).** Its text could not be fetched (the PDF is past
+      the fetch limit, the NAP reader serves page images); the cycle, splits
+      and band come from the two documents it builds on.
+- (Found along the way) **Street controls outbound.** A departure chain drops the READ
+      controls, which face the inbound truck. Bake the controls facing the
+      other way and play them on the way out.
+- [x] **Road stops driven through their approach chain**
+      (`begin_stop_chain`, `finish_stop_chain`): at the ramp's end a stop
+      with `Trip::stop_approach_route` for this direction swaps to its
+      streets like a facility chain -- per-street limits ("access road"
+      zones), the same street controls, the driveway turn, the lot at the
+      yard's 15 (no chain posts a sourced lot limit) -- and at the lot the
+      highway trip comes back at the exit and the stop opens as before. A
+      save on those streets saves at the exit. Stops with no chain keep the
+      ramp-end entrance. The exit matrix's free-flow truck-stop cell drives
+      a frontage road and a lot.
+- (Found along the way) **Gate and dock are one point (NOT built; owner has not decided).**
+      A real arrival stops at the check-in, drives the yard at 5 to 15 and
+      backs into a door. Recorded only; not to be built unasked.
+- [x] **81 legs' exit mileage re-derived on their polyline** (they were
+      rerouted after their exits were discovered; Charlotte to Knoxville by
+      a median 8 miles). `build_interchanges.py --force --only` on the 81,
+      read from the June 2026 Geofabrik extracts (the rollback copy, swapped
+      in for the bake and back out), then ramp controls, the stop snap, stop
+      approaches (`--only`) and the facility chains of the 72 cities whose
+      destination exit changed. Four builder faults were fixed first: the
+      PBF prefilter boxed route_points (on 7 legs part of the polyline lay
+      outside them, 77 percent of Dallas to St Louis), junctions snapped to
+      the nearest vertex of an archive that keeps one every few miles on a
+      straight (at 200 m that found 5,545 of the 13,841 junctions on these
+      polylines), one exit number seen in two states was averaged into a
+      mile between them, and a leg
+      relabelled for its new road (Denver to Albuquerque, I-25 to US-285)
+      was skipped and kept the old road's exits. Re-derived at_mi is
+      labelled derived. Results on the 81: 3,082 exits to 3,379; labelled
+      exits with no junction of their number on the road, 455 to 0; exits
+      given a ramp length 1,940 to 3,313 and a surface terminal 1,826 to
+      3,113 (all exits: length 16,253 of 18,165 to 17,626 of 18,462); the
+      exit link changed on 154 road stops, and 69 to 114 have a street chain;
+      facility exit chains 3,054 to 3,135, turn-level facilities unchanged
+      at 2,456. The 19 exits still over 0.75 mi from a junction are split
+      interchanges whose two directions sit 1.5 to 1.9 mi apart, averaged
+      into one record like every other exit on the map.
+- (Found along the way) **Lane segments on the 81 legs were not re-baked.** The lane
+      bake reads live Overpass, not the June extract this bake used. Its
+      only tie to exits is keeping a lane-count stretch under 0.3 mi within
+      0.4 mi of an exit: 50 such stretches there now sit at no exit. Re-bake
+      them with the next lane sweep.
+- (Release gate) **In-town and rural statutory limits kept apart.** An untagged street
+      takes the in-town district default only inside the boundary its
+      state's code keys on (Census 2020 Urban Areas for a density district,
+      incorporated places for corporate limits); outside it, the state's
+      rural default for a numbered highway or a local road
+      (`tools/statutory_rural.py`, 49 cited rows; the median 55 where a code
+      sets none, labelled assumed). Each fill records its `limit_basis`. IA
+      175 by the Love's off I-35 is now 55, not 20. 2,115 street segments
+      (1,185 mi) changed.
+- (Found along the way) **Minority speed tags on a street.** 995 filled streets (1,286 mi)
+      carry an OSM maxspeed on some of their own ways but under half their
+      miles, so the fill wins for the whole street. Splitting a street into
+      read and filled stretches needs a per-stretch limit in the record.
+      (The Wichita Falls "Waurika Freeway" 30 is not this: the chain drives
+      the untagged frontage road; the 55 and 70 tags belong to the TX 79
+      main lanes, which share the name. 24 filled streets share a name only
+      with a freeway.)
+- (Found along the way) **3,630 road stops have no decided exit**, among them every travel
+      center the stop snap could not link; they get no street chain.
+- (Found along the way) **394 older chains still carry no street detail** (above).
+- [x] **How far to the signalled exit, on demand.** Owner, driving: "When
+      the signal is on for the exit, I should be able to see how far away
+      from the exit I am." With the signal on for the destination exit or a
+      stop's exit, Space ends with that exit and its distance and U leads with
+      it; neither is spoken unasked, and both drop it on the ramp.
+- [x] (Release gate) **Street lights off for 1.9, and the live drive's
+      street faults** (owner decision after the live drives into Abilene and
+      Ardmore, `fix/street-lights-live`). Street lights and signs sit behind
+      `STREET_CONTROLS_IN_PLAY`, road stops' streets behind
+      `STOP_STREETS_IN_PLAY`, both false; no code or data is removed, and the
+      street-control and truck-stop-street tests switch them on as the 2.0
+      suite. Road stops' streets are off because most exits have a ramp end
+      baked one way only (3,456 of 18,165 have both), so the Love's at Baird,
+      I-20 exit 307, had streets eastbound and none westbound; the builder
+      fix is on `feat/street-lights-2-0` and needs a re-bake
+      ([2.0](#street-traffic-controls)). Also: a street zone is never spoken
+      as a zone (`spoken_zone`); G says "Nothing steep ahead" with under a
+      mile to scan; route lines raised in the same instant queue whole
+      instead of each purging the one before and handing it back to be said
+      again; and a corner taken under its speed settles at once. Its grace
+      only defers a miss now: the Ardmore yard's off-the-ramp line held its
+      first corner for 71 s (its words at the slowest modelled voice) while
+      the truck drove the next two, 0.05 mile apart, and all three tones
+      sounded together 0.2 mile on.
+
+### September 24 descent control into Denver
+
+Two live drives of I-70 east from the Eisenhower tunnel, a 76,000 lb truck on
+Balanced. Descent control said it was holding 85 (the set speed) and then 77
+on the 7 percent; the agent's run held 45 by its own words and ran to 55, the
+automatic upshifting on the downgrade; the retarder walked 3, 0, 2, 1, 2, 1
+inside half a minute; the G key called the 7 percent pitch "running 2 miles"
+and then "for another 10 miles". A bench of the owner's run reproduced it: 68
+to 72 mph down the 5.8 and the 7.0 on a tenth of the drums, the retarder never
+raised, drums past 300 C, the box cycling ninth and tenth at the retarder's
+rev ceiling.
+
+- [x] (Release gate) **A safe descent speed, derived.** `TruckState::safe_descent_mph`
+      runs the Grade Severity Rating System's rule (FHWA-RD-79-116, read) on
+      the truck's own heat model: the highest multiple of 5 mph (MUTCD
+      2B.13, read) at which the drums, holding what gravity leaves after
+      drag, rolling and full engine brake in the gear an automatic holds,
+      settle under GSRS's 500 F limit (read) or the shoes' own fade line.
+      Derived numbers for the default truck, set at the top of the steepest
+      grade inside the advisory's look-ahead:
+      40,000 lb none up to 10 percent; 60,000 lb 45 at 8, 30 at 10;
+      76,000 lb 65 at 5.8 and 6, 45 at 7, 30 at 8, 20 at 10;
+      80,000 lb 65 at 6, 30 at 7 and 8. Descent control at every level but
+      Off caps cruise there, raises full engine brake at once on such a
+      hill, snubs past the number, snubs to keep the retarder's gear short
+      of the protective upshift while a stage is on, keeps the snub through
+      a shift, and never fuels against the retarder. The box holds its gear
+      while descent control holds a grade, the way it does under a brake
+      application (no pre-select without a stage on), and a retarder
+      pre-select lands 100 rpm (assumed) under its ceiling. Past the held
+      gear's top, the revs 100 rpm under that ceiling, the retarder answers
+      as it would past the number. The bend sweep caught the first version
+      pumping: it pre-selected a bobtail down into sixth with no stage on,
+      and guarded a gear with no retarder in it on a snub every two seconds
+      (Siskiyou, Red Mountain, Salt River; up to 1.1 applications a bend,
+      now under 0.7). Over the number on the downgrade above a steep pitch, the
+      retarder goes to full before the drums join in; the bench had the
+      drums alone take the truck from 63 to 45 on the 2.4 percent above the
+      7.0. The same run now holds 60 to 65 down the 5.8 and 43 to 46 down
+      the 7.0, drums under 220 C, air at 100 psi or more, no upshift. D
+      names the number "for the grade".
+- [x] (Release gate) **The retarder no longer hunts.** Cruise steps a stage at a
+      time, drops one only when well under its number and never with a
+      steep pitch in sight, and waits 12 s (assumed) before stepping back
+      the other way; the J key's manager gets the same reversal time and
+      works to what descent control holds, not the set speed.
+- [x] (Release gate) **One length per grade.** The G key's "for another" reads the
+      same run as the grade look-ahead's "running".
+- [x] (Release gate) **"Descent control holding N" once per number,** with no
+      clock, and only for a number of descent control's own: the hill's,
+      Interactive's 55, or a brake's capture. A grade that needs none is held
+      at cruise's speed without a line; the same run said "holding 70" on a
+      65 road, the limit plus five.
+- [x] **Colorado's dead traffic feed is no longer fetched** (benched until
+      the 2.0 keyed-feeds item).
+- [ ] (2.0) **Two brake-heat lines.** The retarder comes up where the drums
+      alone would settle past fade (400 C), while the safe descent speed
+      works to GSRS's 260 C. On the 4.5 percent below the 7.0 the drums
+      alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
+      line, or show why two are right.
 
 ## 2.0 planned (`feat/career-2.0`) -- the working week and home
 
@@ -1407,9 +2235,9 @@ onto exit signalling.
       signals a street corner. The map is not the blocker -- baked tier-1
       maneuvers already carry direction and distance, which is what feeds
       the `events/turn_left` and `turn_right` earcons. What is missing is
-      the turn as a continuous act: `LaneKeeping` has a lateral offset and
-      a lane index and no heading, the same gap that killed the quick-time
-      turn in July. Needs a held tick that self-cancels at the corner and a
+      the turn as a continuous act. `LaneKeeping` has carried a heading
+      since 2026-09-18, which closes the gap that killed the quick-time
+      turn in July. Still needs a held tick that self-cancels at the corner and a
       rule about signalling before one, alongside whatever turn geometry
       the surface-intersection work (1.9, `docs/surface-roads-plan.md`
       phase 4) leaves behind. The self-cancel half of that now exists:
@@ -1422,6 +2250,112 @@ onto exit signalling.
       different reason -- the edge ladder took its job -- so it is a
       deletion, not a wiring job.
 
+
+### Street traffic controls
+
+The street signals and signs baked for 1.9, and road stops' streets, are
+switched off for the 1.9 release (`fix/street-lights-live`,
+`STREET_CONTROLS_IN_PLAY` and `STOP_STREETS_IN_PLAY`); the timing work is
+parked on `feat/street-lights-2-0`. Detail in
+[September 24](#september-24-realistic-interstate-exit).
+
+- [ ] **Turn street traffic controls back on.** Lights and signs on the
+      approach chains play again once the items below hold up on a drive.
+- [ ] **Turn road stops' streets back on.** Most exits have a ramp end
+      baked for one direction only (3,456 of 18,165 have both), because the
+      other direction's ramp leaves at its own junction node. The search
+      around same-numbered junctions (`RAMP_SIBLING_JUNCTION_M`, with its
+      pytest, on `feat/street-lights-2-0`) adds 34 of 47 on the Abilene to
+      Fort Worth leg. Re-bake the ramp terminals, then the stop approaches
+      and facility exit chains, from one OSM set; I-20 exit 307 westbound
+      (the Love's at Baird) is the check.
+- [ ] **Arterial progression.** Signals along one street share a cycle
+      and are offset for its posted limit, so a truck at the limit meets
+      greens.
+- [ ] **Coast to green.** The speed keeper eases off ahead of a red that
+      turns green before the bar, instead of stopping and starting.
+- [ ] **Pedestrian signals.** Walk phases at the mapped crossings, with
+      the extra clearance they add to the cycle.
+- [ ] **The light speech.** Approach, change and bar lines on the event
+      channel: brief, no line that repeats what the driver knows.
+- [ ] **Check the timing against the Signal Timing Manual 2nd ed. (NCHRP
+      812).** Its text could not be fetched; the cycle, splits and band
+      come from FHWA-HOP-08-024 and TTI 0-6402-P1 (PR #232).
+
+### World data deferred from 1.9
+
+Moved out of the 1.9 release gate on 2026-09-25: none of these makes the
+truck do the wrong thing on a drive.
+
+- [ ] **The interchange bake is direction-blind.** `tools/build_interchanges.py`
+      merges every ramp near a junction into one record, so an exit's real
+      via (US-70 West at Ardmore 31B) is lost when a mainline entrance
+      ramp's via is taken first. Re-derive per carriageway, keeping only
+      exit ramps leaving in the direction of travel; the run-time filter
+      landed for 1.9 can then go.
+- [ ] **995 sourced facility endpoints are unnamed.** Plan: take OSM
+      buildings over 500 m2 and name them from Overture Places keyed by
+      GERS id ([record](#release-gate-record)).
+- [ ] **196 legs have no sleep stop a loaded truck can use**
+      ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] **Where the state scale houses are**
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] **Chain truck stops' mile markers are loose**
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] **Truck stops whose ramp control is still seeded**
+      ([September 17](#september-17-truck-stops-listed-twice)).
+- [ ] **Rest areas are stored for both directions**, so a pair is
+      announced twice within a mile
+      ([September 18](#september-18-a-nights-parking-on-every-road)).
+- [ ] **Wholesale and trade sites are refused as retail**
+      ([September 11](#september-11-trucking-corrections)).
+- [ ] **Two facility endpoints reached only over miles of private road**
+      want an endpoint fix ([record](#release-gate-record)).
+
+### Found along the way in 1.9, moved to 2.0
+
+Open work found during the 1.9 gate that does not cost the drive, moved
+here 2026-09-25. Details stay in the linked dated sections.
+
+- [ ] Per-exit ramp grade: past the deceleration lane a ramp is assumed
+      level ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] A lane change is called a sideswipe when a vehicle in the new lane is
+      anywhere within a third of a mile ahead, not only alongside; owner's
+      call whether contact should need overlap
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Price curve signs by the MUTCD's ball-bank criteria, once the bake's
+      minimum radii are re-measured
+      ([September 24](#september-24-realistic-interstate-exit)).
+- [ ] Catch an axle over while the gross is legal: needs load placement and
+      an axle check at the scale house
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] 234 travel centers have no mapped CAT Scale within 0.25 mi; check
+      them against CAT's locator
+      ([September 19](#september-19-keyless-public-data-sources-surveyed)).
+- [ ] Street controls on the way out: a departure chain drops the signals
+      and signs, which face the inbound truck (PR #232).
+- [ ] Gate and dock are one point, where a real arrival checks in, drives
+      the yard and backs into a door. The owner has not decided; not to be
+      built unasked (PR #232).
+- [ ] 3,630 road stops have no decided exit, so no street chain (PR #232).
+- [ ] 394 older facility chains still carry no street detail (PR #232).
+- [ ] 995 streets with an OSM speed tag on under half their miles take the
+      statutory fill for the whole street; splitting them needs a
+      per-stretch limit (PR #232).
+- [ ] Owner call: a rural statutory limit inside city limits. North Arnold
+      Boulevard (FM 3438), the last 0.27 mile before the Abilene Company
+      Yard's street, reads 70 (Tex. Transp. Code 545.352(b)(2), rural
+      basis): it is inside Abilene's corporate limits but outside the Census
+      2020 urban area that stands in for Texas's urban district, and OSM
+      tags no limit. Counting corporate limits as town would undo the IA 175
+      ruling (PR #232); the official source is TxDOT's posted speed zones.
+- [ ] Owner call: one limit for an older chain. The 394 chains with no
+      street detail post one limit for the whole chain: the state's in-town
+      figure, else the highest street's. Oklahoma sets no in-town figure, so
+      the Ardmore Company Yard's 3.06 miles post 55 from the ramp, service
+      road included; OSM reads 35, then 40, 45 and 55 along West Broadway
+      Street west of M Street. Options: each street's own number, or match
+      the chain to the map.
 
 ### Lanes and maneuvering
 
@@ -1457,6 +2391,23 @@ onto exit signalling.
       tools are report-only.
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#world-and-narration).
+
+### Deferred from 1.9: live feeds that need a key
+
+Moved here 2026-09-24. Both need a registered API key, and a key shipped in
+a public build leaks.
+
+- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
+      retired; COtrip's WZDx feed wants a registered key, as do Ohio,
+      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
+      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
+      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
+      in: 29 states carry live construction now, 15 of them new that day.
+- [ ] Deferred for needing a key: Colorado, Illinois, Massachusetts, Michigan,
+      Ohio, Oregon, Pennsylvania, Virginia, statewide Texas, California's WZDx
+      feed, and EIA fuel prices. Not in the registry at all: Alabama,
+      Arkansas, Montana, Nebraska, Rhode Island, South Carolina, South Dakota,
+      Tennessee, West Virginia, Wyoming, DC.
 
 ## Shipped in 1.6.0
 

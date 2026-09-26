@@ -114,7 +114,15 @@ fn tools_list() -> Value {
         ),
         tool(
             "wait_for",
-            "Let the game run until something arrives: a spoken line or sound whose text contains `text` (case-insensitive), or a menu on screen when `menu` is true, or `seconds` of real time (max 300), whichever comes first. Anything heard since the last listen counts, so a line already spoken answers at once. Replies with everything heard, and says if the clock ran out. Use it to drive to the next event instead of waiting blind.",
+            "Let the game run until something arrives: a spoken line or sound whose \
+             text contains `text` (case-insensitive), or a menu on screen when `menu` \
+             is true, or `seconds` of real time (max 300), whichever comes first. \
+             It also stops early whenever the cab cuts in on the driving channel \
+             (an interrupting instruction or warning), so it can be answered: act \
+             on it, then wait again. Anything heard since the last listen counts, \
+             so a line already spoken answers at once. Replies with everything \
+             heard, and says if the cab or the clock ended it first. Use it to \
+             drive to the next event instead of waiting blind.",
             json!({
                 "text": {"type": "string", "description": "text to listen for"},
                 "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},
@@ -174,7 +182,22 @@ fn tools_list() -> Value {
         ),
         tool(
             "scenario",
-            "Put the sandbox career in any situation and reopen the terminal on it. Every field is optional: city (any world city, the career moves there with no miles driven), level (1 to 30), deliveries, money, reputation, business (company, leased or independent), endorsements (a list of credential keys bought outright, replacing what was held), hour (local clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and brake_wear_pct (0 to 100, what a roadside inspection reads), citations and out_of_service_events (counts on the record; with damage they set the safety band that decides who is pulled into the inspection lane), rested (true takes a full sleep), clear_load (true drops a load in progress first), market_seed and board_seed (the dispatch board rolls from them), settings (an object of setting name to value, for this session), and name (the career created when none is loaded; default Playtest). Nothing is refused for being unreasonable: this is the audited sandbox. Listen afterwards for the terminal.",
+            "Put the sandbox career in any situation and reopen the terminal on it. \
+             Every field is optional: city (any world city, the career moves there \
+             with no miles driven), level (1 to 30), deliveries, money, reputation, \
+             business (company, leased or independent), endorsements (a list of \
+             credential keys bought outright, replacing what was held), hour (local \
+             clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and \
+             brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
+             out_of_service_events (counts on the record, dated now; with damage they set the \
+             safety band that decides who is pulled into the inspection lane), \
+             rested (true takes a full sleep), hos_driving_min, hos_duty_min and \
+             hos_since_break_min (sandbox HOS counters in game minutes), clear_load (true drops a load in \
+             progress first), market_seed and board_seed (the dispatch board rolls \
+             from them), settings (an object of setting name to value, for this \
+             session), and name (the career created when none is loaded; default \
+             Playtest). Nothing is refused for being unreasonable: this is the \
+             audited sandbox. Listen afterwards for the terminal.",
             json!({
                 "name": {"type": "string"},
                 "city": {"type": "string"},
@@ -192,6 +215,9 @@ fn tools_list() -> Value {
                 "citations": {"type": "integer"},
                 "out_of_service_events": {"type": "integer"},
                 "rested": {"type": "boolean"},
+                "hos_driving_min": {"type": "number"},
+                "hos_duty_min": {"type": "number"},
+                "hos_since_break_min": {"type": "number"},
                 "clear_load": {"type": "boolean"},
                 "market_seed": {"type": "integer"},
                 "board_seed": {"type": "integer"},
@@ -206,6 +232,19 @@ fn tools_list() -> Value {
                 "live": {"type": "boolean", "description": "true to let the operator's keyboard in, false to shut it out again"},
             }),
             &["live"],
+        ),
+        tool(
+            "lockstep",
+            "Freeze the world between tool calls (on true), so the road waits while you \
+             think: time passes only inside wait, pedal and wait_for, and for the few \
+             frames a press or cruise call scripts. Use it to answer a cue in time \
+             where a round trip would otherwise cost road -- steering with lane keeping \
+             off, braking for a hazard. Off (false) runs the road on the wall clock \
+             again, which is the default and what an owner driving alongside needs.",
+            json!({
+                "on": {"type": "boolean", "description": "true to freeze the world between calls, false for the live road"},
+            }),
+            &["on"],
         ),
         tool(
             "quit_game",
@@ -305,6 +344,11 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
             }
         };
         respond_raw(out, &json!({"jsonrpc": "2.0", "id": id, "result": reply}));
+        if method == "tools/call" && params.get("name").and_then(Value::as_str) == Some("quit_game")
+        {
+            // A quit ends the process; nothing after it is read.
+            return;
+        }
     }
 }
 
@@ -476,6 +520,10 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
         "operator_keys" => match args.get("live").and_then(Value::as_bool) {
             Some(live) => Ok(Command::OperatorKeys { live }),
             None => Err("operator_keys needs live: true or false".to_string()),
+        },
+        "lockstep" => match args.get("on").and_then(Value::as_bool) {
+            Some(on) => Ok(Command::Lockstep { on }),
+            None => Err("lockstep needs on: true or false".to_string()),
         },
         "quit_game" => Ok(Command::Quit),
         other => Err(format!("unknown tool {other}")),

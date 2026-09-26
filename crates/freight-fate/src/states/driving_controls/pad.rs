@@ -161,7 +161,8 @@ impl DrivingState {
             | Action::Brake
             | Action::EmergencyBrake
             | Action::SteerLeft
-            | Action::SteerRight => {}
+            | Action::SteerRight
+            | Action::Straighten => {}
         }
     }
 

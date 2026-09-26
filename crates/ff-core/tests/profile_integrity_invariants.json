@@ -728,7 +728,7 @@
     },
     "weather_collector": {
       "category": "weather_seasons",
-      "description": "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did."
+      "description": "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, freezing rain, fog, and wind. None of it lasted; you did."
     },
     "westbound_delivery": {
       "category": "places",
@@ -1848,6 +1848,7 @@
     "Company Career Veteran",
     "Freight Fate Company Driver"
   ],
+  "companyRankForkLevel": 18,
   "endorsements": {
     "doubles_triples": {
       "label": "doubles",

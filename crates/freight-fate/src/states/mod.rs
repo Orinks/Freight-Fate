@@ -25,6 +25,7 @@ pub mod driving_pause_states;
 pub mod driving_pickup;
 pub mod driving_radio_app;
 pub mod driving_rest_states;
+pub mod driving_rollover;
 pub mod driving_school;
 pub mod driving_siren;
 pub mod driving_speed_control;

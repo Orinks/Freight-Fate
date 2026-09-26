@@ -45,8 +45,14 @@ def marker_ir(hf_keep: float = 1.0) -> np.ndarray:
     n = int(0.09 * SR)
     t = np.arange(n) / SR
     ir = np.zeros(n)
-    modes = ((48.0, 0.020, 1.00), (86.0, 0.014, 0.85), (140.0, 0.010, 0.60),
-             (230.0, 0.007, 0.40), (390.0, 0.005, 0.24), (720.0, 0.003, 0.12))
+    modes = (
+        (48.0, 0.020, 1.00),
+        (86.0, 0.014, 0.85),
+        (140.0, 0.010, 0.60),
+        (230.0, 0.007, 0.40),
+        (390.0, 0.005, 0.24),
+        (720.0, 0.003, 0.12),
+    )
     for freq, dec, gain in modes:
         tilt = 1.0 if freq < 100 else hf_keep ** (1.0 + freq / 400.0)
         ir += gain * tilt * np.exp(-t / dec) * np.sin(2 * np.pi * freq * t)
@@ -84,8 +90,10 @@ def cross_markers(
         print(f"    {label}:")
         base = rows[0][1]
         for dist, t_hit, db in rows:
-            print(f"      axle {dist:5.2f}m -> {(t_hit - base) * 1000:6.1f} ms after "
-                  f"the first hit, {db:+5.1f} dB")
+            print(
+                f"      axle {dist:5.2f}m -> {(t_hit - base) * 1000:6.1f} ms after "
+                f"the first hit, {db:+5.1f} dB"
+            )
     return out
 
 
@@ -102,20 +110,26 @@ def seamless_jake_loop(rpm: float, cycles: int = 8, stage: int = 3) -> np.ndarra
 
 def main() -> None:
     print("lane-line markers -- a single marker, front axle then rear")
-    write_wav("marker_car_65mph.wav",
-              cross_markers(65 * 0.44704, CAR_AXLES, label="car 65 mph"))
-    write_wav("marker_truck_65mph.wav",
-              cross_markers(65 * 0.44704, TRUCK_AXLES, seconds=3.0, label="truck 65 mph"))
+    write_wav("marker_car_65mph.wav", cross_markers(65 * 0.44704, CAR_AXLES, label="car 65 mph"))
+    write_wav(
+        "marker_truck_65mph.wav",
+        cross_markers(65 * 0.44704, TRUCK_AXLES, seconds=3.0, label="truck 65 mph"),
+    )
 
     print("\nlane-line markers -- clipping two markers on a shallow crossing")
-    write_wav("marker_car_two_65mph.wav",
-              cross_markers(65 * 0.44704, CAR_AXLES, n_markers=2, seconds=3.0))
-    write_wav("marker_truck_two_65mph.wav",
-              cross_markers(65 * 0.44704, TRUCK_AXLES, n_markers=2, seconds=3.5))
+    write_wav(
+        "marker_car_two_65mph.wav", cross_markers(65 * 0.44704, CAR_AXLES, n_markers=2, seconds=3.0)
+    )
+    write_wav(
+        "marker_truck_two_65mph.wav",
+        cross_markers(65 * 0.44704, TRUCK_AXLES, n_markers=2, seconds=3.5),
+    )
 
     print("\nlane-line markers -- slower, for comparison")
-    write_wav("marker_truck_35mph.wav",
-              cross_markers(35 * 0.44704, TRUCK_AXLES, seconds=3.5, label="truck 35 mph"))
+    write_wav(
+        "marker_truck_35mph.wav",
+        cross_markers(35 * 0.44704, TRUCK_AXLES, seconds=3.5, label="truck 35 mph"),
+    )
 
     print("\nseamless jake loops (integer four-stroke cycles)")
     timings = []
@@ -125,10 +139,11 @@ def main() -> None:
         dt = (time.perf_counter() - t0) * 1000
         timings.append(dt)
         write_wav(f"jakeloop_{rpm}rpm.wav", loop)
-        print(f"      {rpm} rpm: {len(loop) / SR * 1000:.0f} ms of audio "
-              f"generated in {dt:.0f} ms")
-    print(f"\n    six buckets generated in {sum(timings):.0f} ms total "
-          f"-- cheap enough to build at startup rather than ship as assets")
+        print(f"      {rpm} rpm: {len(loop) / SR * 1000:.0f} ms of audio generated in {dt:.0f} ms")
+    print(
+        f"\n    six buckets generated in {sum(timings):.0f} ms total "
+        f"-- cheap enough to build at startup rather than ship as assets"
+    )
 
     print(f"\nwrote to {pulse_synth.OUT}")
 

@@ -95,23 +95,22 @@ pub const GENERIC_BILLBOARDS: &[&str] = &[
     "Next exit: biggest pancake in the state! Probably. We haven't checked.",
     "Free coffee! With purchase of coffee. Extra refills fifty cents each.",
     "Next exit: homemade jerky and a gift shop that sells the same jerky.",
-    "If you can read this, you are not in the sleeper. Eyes up.",
     "We have ice. We have bait. We have opinions about your bumper sticker.",
     "Diesel, showers, and a fried pie that will change your itinerary.",
-    "All-you-can-eat catfish. The catfish retained counsel.",
+    "All-you-can-eat catfish. Bring a bigger belt.",
     "World's largest frying pan. Breakfast is served. Bring a forklift.",
     "Homemade pie, next exit. Made this morning. The coffee is older.",
-    "Fresh peaches, next exit. Or possibly just a painted peach. Worth the look.",
+    "Fresh peaches, next exit. Pick your own or grab a bag.",
     "Antiques and ammunition. One building. Two hobbies.",
     "If you lived here, you'd be home by now. Nobody lives here.",
-    "Truck wash, next exit. Your dispatcher can see this color from space.",
+    "Truck wash, next exit. Your trailer used to be white.",
     "The coffee is fine. The pie is better. The gossip is unbeatable.",
-    "Yard gnomes, concrete animals, and a very confident fountain. Next exit.",
-    "We have a gift shop. You have a dashboard. Let's talk.",
+    "Concrete deer and yard gnomes, next exit. We help you load them.",
+    "Gift shop, next exit. Dashboard hula girls, half off.",
     "Local honey. Local jam. Local opinions, free with every purchase.",
     "The steak is bigger than the plate. The plate is bigger than your budget.",
     "Next exit: homemade ice cream. The cows are local. The freezer is older than you.",
-    "Gun show this weekend, craft fair the next. Same tent, better judgment sold separately.",
+    "Gun show this weekend, craft fair the next. Same tent.",
     "Buffet: if it isn't on a steam table, it isn't dinner.",
 ];
 
@@ -184,7 +183,7 @@ pub const REGIONAL_RADIO_BILLBOARDS: &[&str] = &[
     "AM trucking radio. Static included at no extra charge.",
     "The station that plays only driving songs. You are the whole audience.",
     "Tune us in. Tune the other guy out. All request, no sleep.",
-    "Night dispatch radio. We cannot fix your load. We can play fiddle.",
+    "Overnight trucker radio. Road reports and old country till sunrise.",
     "Ten thousand watts of somebody's uncle with a stack of records.",
     "If your radio still has a knob, we still have a tower.",
     "Weather, crop reports, and a hymn at sunrise. You know the station.",
@@ -202,7 +201,7 @@ pub const TRAVEL_PLAZA_BILLBOARDS: &[&str] = &[
     "Travel center: showers, diesel, and a gift shop selling hats you already own.",
     "Motel vacancy. Free ice. Free Wi-Fi. Free regret about the mattress.",
     "Chain hotel, next exit. Continental breakfast starts when the waffle iron wakes up.",
-    "QSR drive-thru, next exit. The bag is small. The line is not.",
+    "Burger drive-thru, next exit. The bag is small. The line is not.",
     "Exit food: burgers, fries, and a soda the size of a fuel can.",
     "Truck parking and a sit-down special. The special is that they still have parking.",
 ];
@@ -217,7 +216,7 @@ pub const WAWA_BILLBOARD: &str =
 pub const RACETRAC_BILLBOARD: &str =
     "RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use.";
 pub const CRACKER_BARREL_BILLBOARD: &str =
-    "Cracker Barrel next exit. Rocking chairs out front. Your break clock out back.";
+    "Cracker Barrel, next exit. Rocking chairs out front, biscuits inside.";
 
 /// Southern/midwest fireworks-stand country. Consumer fireworks barns are an
 /// interstate staple here; New England and the far West are not that genre.
@@ -246,15 +245,15 @@ pub const CRACKER_BARREL_STATES: &[&str] = &[
 // Never a permanent "this is franchise country" claim. No place names.
 pub const POP_CULTURE_BILLBOARDS: &[&str] = &[
     "Now showing: a movie about a truck. You are living the sequel.",
-    "Coming soon to a theater near an exit. Bring cash for popcorn, not the load.",
+    "Coming soon to the drive-in: a movie about a truck. You've seen the real thing.",
     "Weekend double feature at the drive-in. Windows up if it rains. Windows down if it smells.",
-    "Now playing: something with explosions. Your dispatcher already filed the complaint.",
+    "Now playing: something with explosions. Popcorn is extra.",
     "Coming Friday: the one with the car chase. Please do not practice on this interstate.",
     "Matinee special. Matinee is when you should be sleeping. We know.",
-    "Streaming soon, somehow also on a billboard. The future is confusing. Eyes on the road.",
+    "Streaming now, and somehow also on a billboard. Eyes on the road.",
     "Now showing: a comedy about a road trip. You already know how it ends.",
-    "Coming soon: a documentary about highways. You are the research assistant.",
-    "Drive-in, next weekend only. Classic cars welcome. Classic trailers, negotiate.",
+    "Coming soon: a documentary about highways. You could have narrated it.",
+    "Drive-in movies, weekends only. Two features for one ticket.",
 ];
 
 // The truck-wreck attorney genre -- a real interstate staple, and gently meta in
@@ -266,7 +265,7 @@ pub const ATTORNEY_BILLBOARDS: &[&str] = &[
     "Eighteen wheels of justice. Big Jim sues trucks. Awkward, we know.",
     "Big Jim's big for a reason, he understands your medical problems cause he's got as many problems as he does pounds. Give him a call if life broke you and he'll sue ... whoever",
     "Big Jim saw that lane change. He is not mad. He is drafting.",
-    "Rollover? Call Big Jim. He has a vest for every settlement.",
+    "Rollover? Call Big Jim. He answers on the first ring.",
     "Big Jim Tolliver: because your insurance company has a lawyer too.",
     "Whiplash? Big Jim has a cousin who had that. Call him anyway.",
     "Big Jim does not sleep. Big Jim's paralegal does not sleep. The bill does not sleep.",
@@ -311,11 +310,11 @@ pub const ROADSIDE_ODDITIES: &[&str] = &[
     "Gravity hill ahead. Your truck already knew.",
     "Mystery house. Crooked floors. Straight prices. Nine ninety-five.",
     "Live rattlesnakes. Dead air conditioning. Next exit.",
-    "The cave is real. The gift crystals are optimistic. Next exit.",
+    "Cave tours, next exit. The crystals in the gift shop are glass.",
     "Two-headed calf, stuffed. One-headed cashier, not. Next exit.",
     "See the thing in a jar. We will not say which jar. Nine dollars.",
     "Miniature village, next exit. Your rig will not fit down Main Street.",
-    "Tornado museum. Indoor winds. Outdoor regret if you skip it.",
+    "Tornado museum, next exit. Step inside the storm cellar.",
 ];
 
 // Trucker-services genre -- signs pitched straight at the driver, not the
@@ -331,12 +330,12 @@ pub const TRUCKER_SERVICES_BILLBOARDS: &[&str] = &[
     "Need diesel? Of course you do. $4.89/gallon. Please cry inside.",
     "Rest easy at the Budget Palace! Luxury not included.",
     "Showers with actual hot water. We are as surprised as you are.",
-    "Idle here. The lot is full of promises and one open spot behind the dumpster.",
-    "DEF, diesel, and a sandwich that has seen things. Next exit.",
-    "Parking for trucks. Cars will still take the spots. We have cones and a dream.",
+    "Truck parking, next exit. One spot left, behind the dumpster.",
+    "Diesel and a hot dog that's been on the roller grill since Tuesday. Next exit.",
+    "We put out cones for truck parking. Cars park in them anyway. Next exit.",
     "Tire shop that does not flinch at your recaps. Next exit.",
-    "We wash bugs off. We cannot wash the dispatch off. Next exit.",
-    "CB shop, next exit. Your skip is skippier than you think.",
+    "Bugs on the windshield? Free squeegee with every fill-up. Next exit.",
+    "CB shop, next exit. New antennas, and a guy who will talk your ear off.",
     "Reefer repair. If it is warm, we can tell from here.",
     "The lot has spaces. They are occupied by people who said they would only be a minute.",
     "Fuel desk open all night. The smile closes at ten.",

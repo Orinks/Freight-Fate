@@ -78,12 +78,12 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "descent_speed_control",
         "Descent speed control",
-        "Engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also picks safe targets and intervenes harder.",
+        "With adaptive cruise on, holds a steep downgrade at the speed your truck can take it at with its load, on the engine brake and short brake applications. Balanced and Interactive capture a lower target when you brake. Interactive also caps every descent at 55 miles per hour and intervenes harder.",
     ),
     (
         "exit_speed_assist",
         "Exit speed assistance",
-        "Slows for a signalled exit; you still take it.",
+        "For a signalled exit: slows a truck too fast for the gore, keeps the approach within 10 miles per hour of road speed, and brakes in the exit lane to the exit speed. You still take the exit.",
     ),
     (
         "destination_approach_assist",
@@ -301,6 +301,7 @@ impl SettingsCategoryState {
             "difficulty" => vec![
                 adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
                 adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
             ],
             "world" => vec![
                 adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
@@ -367,12 +368,30 @@ impl SettingsCategoryState {
                 row(
                     dyn_label(|s| format!("Driving mode: {}", pace_label(s))),
                     adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
-                    "Pacing and pressure. Relaxed gives wider hazard windows, gentler damage and fatigue, calmer speech, and the most time to respond. Standard keeps balanced pressure and moves the clock twice as fast. Real time keeps Standard's pressure and runs the driving clock at the speed of a real clock, lined up with your computer's date and time; delivery time remaining and hours of service do not move. Changeable mid-drive from the pause menu.",
+                    "Pacing and pressure. Relaxed gives wider hazard windows, \
+                     gentler damage and fatigue, calmer speech, and the most \
+                     time to respond. Standard keeps balanced pressure and moves \
+                     the clock twice as fast. Real time keeps Standard's \
+                     pressure and runs the driving clock at the speed of a real \
+                     clock, lined up with your computer's date and time; delivery \
+                     time remaining and hours of service do not move. Changeable \
+                     mid-drive from the pause menu; the new pacing starts when \
+                     the truck next stops.",
                 ),
                 row(
                     dyn_label(|s| format!("Hours of service: {}", hos_label(s))),
                     adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
                     "Realistic: full hours rules and normal road hazards. Relaxed: the same 11-hour drive, 14-hour window, and 30-minute break, with lighter fines, fewer inspections, and rare road hazards.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "HOS planning hints: {}",
+                            if s.hos_planning_hints { "On" } else { "Off" }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
+                    "Optional early advice for a break or sleep stop with time to spare. If an earlier stop fits, the hint also names the last legally reachable fallback. While rolling, use the Rest control to select the recommended stop; use it again to cancel. Standard driving speech speaks one suggestion before the next hours warning. The HOS drive-time readout gives full hours and route details. Quiet and Urgent only keep the automatic hint silent. Your required hours warnings and readout controls still work when this is off.",
                 ),
                 // The overspeed warning no longer has a row. It armed at the
                 // same 5-over pace predictive cruise itself holds, so it
@@ -605,7 +624,19 @@ impl SettingsCategoryState {
         items.push(row(
             dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
             adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
-            "How much of the lane-holding work the truck does. Full holds the lane, turns Left and Right into tap lane changes, and takes your exits, including the destination exit, without a signal. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs its signal and its exit lane. On partial or off the road sound leans toward where the wheel should go, and the road edge answers: a stutter clipping the rumble strip, a buzz fully on it, gravel off the pavement. Realistic sets this off, Balanced partial, All assists full.",
+            "How much of the lane-holding work the truck does. Full \
+             holds the lane, turns Left and Right into tap lane \
+             changes, and takes your exits, including the destination \
+             exit, without a signal. Partial steers the truck through \
+             the road's bends and drifts gently, with generous steering \
+             help; lane changes and speed are yours. Off drifts like a \
+             real wheel, bends included, and \
+             every exit needs its signal and its exit lane. On partial \
+             or off the road sound leans toward where the wheel should \
+             go, and the road edge answers: a stutter clipping the \
+             rumble strip, a buzz fully on it, gravel off the pavement. \
+             Realistic sets this off, Balanced partial, All assists \
+             full.",
         ));
         items.push(row(
             dyn_label(|s| format!("Following gap: {}", acc_gap_label(s))),
@@ -701,10 +732,16 @@ impl SettingsCategoryState {
                 adjust(|s, ctx, d| s.toggle_music_source(ctx, d)),
                 "Synthesized plays menu music and the Roadhouse station made by the game itself, with no AI-made songs or voices, and takes Freight Fate's other stations off the dial. Original plays the full soundtrack.",
             ),
-            row(
+            // Enter types a seed; Left and Right roll one (the adjust table).
+            MenuItem::new(
                 dyn_label(|s| format!("Music seed: {}", s.music_seed)),
-                adjust(|s, ctx, d| s.roll_music_seed(ctx, d)),
-                "Enter rolls a new seed. Every synthesized piece changes with it.",
+                |_s: &mut SettingsCategoryState, ctx| {
+                    ctx.push_state(SettingsCategoryState::music_seed_entry())
+                },
+            )
+            .help(
+                "Enter types a seed, a whole number. Left or Right rolls a new one. \
+                 Every synthesized piece changes with it.",
             ),
             row(
                 dyn_label(|s| format!("In-cab radio volume: {} percent", pct(s.radio_volume))),

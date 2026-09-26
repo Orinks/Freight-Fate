@@ -59,6 +59,9 @@
 
 use std::f64::consts::PI;
 
+use crate::data::corners::TRUCK_ROLLOVER_G;
+use crate::data::curves::ADVISORY_ACCEPTABLE_MAX_G;
+
 pub const G: f64 = 9.81;
 
 // A road tanker is about forty feet of shell on a two-metre bore. Both feed
@@ -117,6 +120,16 @@ pub const TRAVEL_FRACTION: f64 = 0.14;
 // pulls with the square of the ratio.
 pub const CURVE_DESIGN_LAT_G: f64 = 0.12;
 
+/// The pull, on the scale above, at which a tank priced full goes over in a
+/// bend whose sign is priced the way the game prices signs. DERIVED: the
+/// wave is driven at `CURVE_DESIGN_LAT_G` where the bend asks the sign's
+/// 0.30 g (`ADVISORY_ACCEPTABLE_MAX_G`), and the truck goes over at 0.35 g
+/// (`TRUCK_ROLLOVER_G`), so the same ratio on this scale. It is the pull the
+/// "twice the steady amplitude" reading is about; see
+/// [`LiquidLoad::lateral_overshoot`].
+pub const ROLLOVER_SURGE_PULL_G: f64 =
+    CURVE_DESIGN_LAT_G * TRUCK_ROLLOVER_G / ADVISORY_ACCEPTABLE_MAX_G;
+
 // Below this the wave is no longer worth a driver's attention: the load has
 // settled. Expressed as a share of the travel limit so it means the same thing
 // on every tank.
@@ -136,6 +149,14 @@ pub const HEAD_IMPACT_S: f64 = 0.8;
 // far shorter, but a paused-and-resumed frame or a slow machine must not be
 // allowed to make a stiff spring explode.
 pub const MAX_SUBSTEP_S: f64 = 0.02;
+
+/// How long a bend's sideways pull takes to build, in seconds. READ: AASHTO
+/// Green Book 2018 Table 3-21 sizes the desirable spiral transition into a
+/// curve as 2.0 s of travel, the natural path a vehicle steers. The game's
+/// bends begin at a milepost with no transition of their own, so the lateral
+/// wave is fed the pull the way the road would have built it; fed as a step,
+/// every bend entry would throw the liquid as hard as a swerve does.
+pub const SPIRAL_TRANSITION_S: f64 = 2.0;
 
 /// How much of the liquid joins the first sloshing mode, 0 to 1.
 ///
@@ -232,10 +253,19 @@ impl SloshAxis {
         }
         if head_on {
             // The slug ran out of tank: it stops against the steel and spends
-            // its momentum on the truck over the contact window.
+            // its momentum on the truck over the contact window. It stops --
+            // liquid piles against a head, it does not bounce off it, and the
+            // spring runs it back from there. It used to rebound at nearly its
+            // full speed AND hand that speed to the truck, momentum made twice
+            // over; the truck's lurch then threw the slug back harder still, so
+            // every strike fed the next. Once a half-full tank's wave reached
+            // the heads it ran itself up to 18 m/s end to end, shoving the
+            // truck back and forth near half a g several times a second and
+            // costing the load with no pedal moving (bend sweep, 2026-09-24:
+            // 2.5 percent under adaptive cruise up Donner's 3.8 percent).
             self.impact_v = incoming_v;
             self.impact_left_s = HEAD_IMPACT_S;
-            self.v = -self.v * (1.0 - self.zeta);
+            self.v = 0.0;
         }
         self.struck = true;
         self.strike_strength = (incoming_v.abs() / self.peak_v().max(1e-6)).min(1.0);
@@ -290,6 +320,9 @@ pub struct LiquidLoad {
     pub tank_length_m: f64,
     pub longitudinal: SloshAxis,
     pub lateral: SloshAxis,
+    /// The sideways pull the lateral wave is being driven by right now, in
+    /// m/s2: the bend's pull, built up over [`SPIRAL_TRANSITION_S`].
+    pub lateral_drive_mps2: f64,
 }
 
 impl Default for LiquidLoad {
@@ -327,6 +360,7 @@ impl LiquidLoad {
             tank_length_m,
             longitudinal,
             lateral,
+            lateral_drive_mps2: 0.0,
         }
     }
 
@@ -365,9 +399,100 @@ impl LiquidLoad {
     }
 
     /// Advance both waves under the tank's own acceleration this frame.
+    ///
+    /// The sideways pull reaches the lateral wave along a transition: a bend
+    /// that asks for its whole pull at once is built up to it over
+    /// [`SPIRAL_TRANSITION_S`], and let go of the same way.
     pub fn update(&mut self, dt: f64, accel_mps2: f64, lateral_accel_mps2: f64) {
+        let step = lateral_accel_mps2.abs().max(self.lateral_drive_mps2.abs())
+            / SPIRAL_TRANSITION_S
+            * dt.max(0.0);
+        self.lateral_drive_mps2 +=
+            (lateral_accel_mps2 - self.lateral_drive_mps2).clamp(-step, step);
         self.longitudinal.step(dt, accel_mps2);
-        self.lateral.step(dt, lateral_accel_mps2);
+        self.lateral.step(dt, self.lateral_drive_mps2);
+    }
+
+    /// How far the sideways wave has run PAST where the bend asking
+    /// `pull_mps2` (on the [`lateral_accel_mps2`] scale) would hold it, as a
+    /// share of the steady shift: 0 when it sits where the bend puts it (or
+    /// has swung back toward the inside), 1 at twice the steady shift or more.
+    ///
+    /// Twice is the ceiling because that is what the reading gives: in a
+    /// transient manoeuvre the liquid moves "with an amplitude ... that is
+    /// twice the level of the steady-state amplitude" (NTSB HAR-11/01 2.3.4,
+    /// citing Winkler et al., SAE RR-004). An undamped wave kicked by a step
+    /// reaches exactly that, so the oscillator and the report agree.
+    ///
+    /// Two things this is careful about, both found by the bend sweep
+    /// (2026-09-24), where a half-full tank went over at 50 in a gentle bend
+    /// on the Siskiyou and at 23 on US-62 with every assist holding it under
+    /// its number:
+    ///
+    /// - The pull is the one the bend under the truck asks NOW, passed in,
+    ///   not the drive still being built toward it or the last frame's bend:
+    ///   either read a bend's first foot as the whole overshoot.
+    /// - The reading is about pulls where the tank goes over. Far below
+    ///   that, a leftover swing from the last bend is a small shift of the
+    ///   liquid in absolute terms, but as a share of a gentle bend's tiny
+    ///   steady shift it read as the whole overshoot and halved the
+    ///   threshold. So the share is taken of the steady shift at
+    ///   [`ROLLOVER_SURGE_PULL_G`] wherever the bend asks less; at and past
+    ///   it, of the bend's own, exactly as the reading is written.
+    pub fn lateral_overshoot(&self, pull_mps2: f64) -> f64 {
+        let axis = &self.lateral;
+        if axis.omega <= 0.0 {
+            return 0.0;
+        }
+        // The spring's rest point under the bend's pull: x'' = -a - w^2 x.
+        let w2 = axis.omega * axis.omega;
+        let steady = -pull_mps2 / w2;
+        if steady.abs() < 1e-9 {
+            return 0.0;
+        }
+        let reference = steady.abs().max(ROLLOVER_SURGE_PULL_G * G / w2);
+        let outward = axis.x * steady.signum();
+        ((outward - steady.abs()) / reference).clamp(0.0, 1.0)
+    }
+
+    /// The overshoot a bend entered along its transition leaves behind: what
+    /// an undamped wave of this tank's frequency keeps after a pull ramped in
+    /// over [`SPIRAL_TRANSITION_S`], `|sin(wT/2) / (wT/2)|`. DERIVED, the
+    /// ramp response of the same oscillator; a property of the tank, so the
+    /// assists can price a bend before the truck is in it.
+    pub fn entry_overshoot(&self) -> f64 {
+        let half = self.lateral.omega * SPIRAL_TRANSITION_S / 2.0;
+        if half <= 0.0 {
+            return 0.0;
+        }
+        (half.sin() / half).abs().min(1.0)
+    }
+
+    /// The overshoot to plan the next bend against: what a bend entered from
+    /// rest leaves ([`Self::entry_overshoot`]), plus the swing the liquid is
+    /// still carrying from the last one, on the scale
+    /// [`Self::lateral_overshoot`] uses where a bend asks less than the
+    /// rollover pull.
+    ///
+    /// The swing is the free wave's amplitude about where the pull driving it
+    /// now would hold it, `sqrt(dx^2 + (v/w)^2)`: its energy, not where it
+    /// happens to be this frame, so the price does not breathe with the wave
+    /// the way the position does. It is what the next bend can find
+    /// running outward at its entry whatever the phase; the wave is nearly
+    /// undamped (`ZETA_LATERAL`), so in a run of bends it survives from one
+    /// to the next. Priced from rest, a half-full tank held under its number
+    /// on I-90's Lookout Pass came within 0.98 of rolling with no warning
+    /// (bend sweep, 2026-09-24).
+    pub fn planning_overshoot(&self) -> f64 {
+        let axis = &self.lateral;
+        if axis.omega <= 0.0 {
+            return 0.0;
+        }
+        let w2 = axis.omega * axis.omega;
+        let dx = axis.x + self.lateral_drive_mps2 / w2;
+        let swing = (dx * dx + (axis.v / axis.omega).powi(2)).sqrt();
+        let reference = ROLLOVER_SURGE_PULL_G * G / w2;
+        (self.entry_overshoot() + swing / reference).min(1.0)
     }
 
     /// What the liquid is doing to the truck right now, newtons.

@@ -65,7 +65,7 @@ fn test_driving_help_explains_selected_automatic_direction_style() {
         "{said}"
     );
     assert!(
-        said.contains("T plans the next nearby sleep-capable stop while rolling"),
+        said.contains("T plans the recommended break or sleep stop when HOS planning hints are on"),
         "{said}"
     );
     assert!(
@@ -93,11 +93,11 @@ fn test_driving_help_explains_selected_automatic_direction_style() {
         "{said}"
     );
     assert!(
-        said.contains("plans a nearby sleep stop while rolling"),
+        said.contains("plans a recommended break or sleep stop when HOS planning hints are on"),
         "{said}"
     );
     assert!(
-        said.contains("away from route points while fully stopped"),
+        said.contains("Away from route points while fully stopped"),
         "{said}"
     );
     assert!(said.contains("opens emergency shoulder sleep"), "{said}");
@@ -176,6 +176,7 @@ fn test_how_to_play_documents_new_gameplay_systems() {
         "standard keeps balanced timing and consequences",
         "real time keeps standard's pressure and runs the driving clock",
         "changed mid-drive from the pause menu",
+        "the new pacing starts when the truck next stops",
         "real violations keep their normal consequences",
         "adaptive cruise",
         "three second clear-weather gap",

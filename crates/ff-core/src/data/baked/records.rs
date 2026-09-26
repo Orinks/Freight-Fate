@@ -18,10 +18,11 @@ use serde::{Deserialize, Serialize};
 use crate::data::curves::CurveRecord;
 use crate::data::world_local_data::CityServiceEntry;
 use crate::data::world_models::{
-    City, CorridorDetail, ElevationSample, FacilityApproach, FacilityEndpoint, GradeSegment,
-    HpmsTerrain, Interchange, Landmark, LaneSegment, LocalApproach, LocalGeometry,
+    City, CorridorDetail, Driveway, ElevationSample, ExitChain, FacilityApproach, FacilityEndpoint,
+    GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment, LocalApproach, LocalGeometry,
     LocalGeometrySegment, Location, RouteCheckpoint, RoutePoint, RouteRestriction,
-    SpeedLimitSample, StateCrossing, StateMileage, Stop, TollEvent, TrafficVolumeSample,
+    SpeedLimitSample, StateCrossing, StateMileage, Stop, StreetControl, StreetLimit, TollEvent,
+    TrafficVolumeSample,
 };
 
 /// A mirror struct with the same field names and types as its model, and the
@@ -92,6 +93,9 @@ mirror!(BakedInterchange => Interchange {
     via: String, highway: String, source: String, ramp_control: String,
     ramp_far_end: String, ramp_advisory_mph_forward: Option<f64>,
     ramp_advisory_mph_backward: Option<f64>, ramp_advisory_source: String,
+    ramp_length_ft_forward: Option<f64>, ramp_length_ft_backward: Option<f64>,
+    ramp_length_source: String, ramp_terminal_node_forward: Option<i64>,
+    ramp_terminal_node_backward: Option<i64>, ramp_terminal_source: String,
 });
 
 mirror!(BakedSpeedLimitSample => SpeedLimitSample {
@@ -184,12 +188,66 @@ impl From<BakedCorridor> for CorridorDetail {
 
 // --------------------------------------------------------------------- eager
 
-mirror!(BakedStop => Stop {
-    name: String, at_mi: f64, stop_type: String, source: String,
-    actions: Vec<String>, services: Vec<String>, parking: String,
-    directions: Vec<String>, curation: String, parking_spaces: i64,
-    vehicle_access: String, exit_ref: String, interchange_mi: Option<f64>,
-});
+/// Holds `BakedExitChain`s, so it is spelled out.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BakedStop {
+    pub name: String,
+    pub at_mi: f64,
+    pub stop_type: String,
+    pub source: String,
+    pub actions: Vec<String>,
+    pub services: Vec<String>,
+    pub parking: String,
+    pub directions: Vec<String>,
+    pub curation: String,
+    pub parking_spaces: i64,
+    pub vehicle_access: String,
+    pub exit_ref: String,
+    pub interchange_mi: Option<f64>,
+    pub approach_chains: Vec<BakedExitChain>,
+}
+
+impl From<&Stop> for BakedStop {
+    fn from(value: &Stop) -> Self {
+        BakedStop {
+            name: value.name.clone(),
+            at_mi: value.at_mi,
+            stop_type: value.stop_type.clone(),
+            source: value.source.clone(),
+            actions: value.actions.clone(),
+            services: value.services.clone(),
+            parking: value.parking.clone(),
+            directions: value.directions.clone(),
+            curation: value.curation.clone(),
+            parking_spaces: value.parking_spaces,
+            vehicle_access: value.vehicle_access.clone(),
+            exit_ref: value.exit_ref.clone(),
+            interchange_mi: value.interchange_mi,
+            approach_chains: to_mirror(&value.approach_chains),
+        }
+    }
+}
+
+impl From<BakedStop> for Stop {
+    fn from(value: BakedStop) -> Self {
+        Stop {
+            name: value.name,
+            at_mi: value.at_mi,
+            stop_type: value.stop_type,
+            source: value.source,
+            actions: value.actions,
+            services: value.services,
+            parking: value.parking,
+            directions: value.directions,
+            curation: value.curation,
+            parking_spaces: value.parking_spaces,
+            vehicle_access: value.vehicle_access,
+            exit_ref: value.exit_ref,
+            interchange_mi: value.interchange_mi,
+            approach_chains: from_mirror(value.approach_chains),
+        }
+    }
+}
 
 mirror!(BakedLocation => Location {
     name: String, facility_type: String, cargo: Vec<String>, id: String,
@@ -294,9 +352,84 @@ mirror!(BakedFacilityEndpoint => FacilityEndpoint {
     dock_hint: bool, mapping: String,
 });
 
-mirror!(BakedLocalGeometrySegment => LocalGeometrySegment {
-    road: String, miles: f64, cue: String, speed_mph: f64, turn_deg: f64,
+mirror!(BakedStreetLimit => StreetLimit { mph: f64, source: String, basis: String });
+
+mirror!(BakedStreetControl => StreetControl { at_mi: f64, kind: String });
+
+mirror!(BakedDriveway => Driveway {
+    at_mi: f64, lat: f64, lon: f64, kind: String, source: String,
 });
+
+/// Holds a `BakedStreetLimit` and `BakedStreetControl`s, so it is spelled out.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BakedLocalGeometrySegment {
+    pub road: String,
+    pub miles: f64,
+    pub cue: String,
+    pub speed_mph: f64,
+    pub turn_deg: f64,
+    pub limit: Option<BakedStreetLimit>,
+    pub controls: Vec<BakedStreetControl>,
+}
+
+impl From<&LocalGeometrySegment> for BakedLocalGeometrySegment {
+    fn from(value: &LocalGeometrySegment) -> Self {
+        BakedLocalGeometrySegment {
+            road: value.road.clone(),
+            miles: value.miles,
+            cue: value.cue.clone(),
+            speed_mph: value.speed_mph,
+            turn_deg: value.turn_deg,
+            limit: value.limit.as_ref().map(BakedStreetLimit::from),
+            controls: to_mirror(&value.controls),
+        }
+    }
+}
+
+impl From<BakedLocalGeometrySegment> for LocalGeometrySegment {
+    fn from(value: BakedLocalGeometrySegment) -> Self {
+        LocalGeometrySegment {
+            road: value.road,
+            miles: value.miles,
+            cue: value.cue,
+            speed_mph: value.speed_mph,
+            turn_deg: value.turn_deg,
+            limit: value.limit.map(StreetLimit::from),
+            controls: from_mirror(value.controls),
+        }
+    }
+}
+
+/// Holds segments and a driveway, so it is spelled out.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BakedExitChain {
+    pub terminal_node: i64,
+    pub total_miles: f64,
+    pub segments: Vec<BakedLocalGeometrySegment>,
+    pub driveway: Option<BakedDriveway>,
+}
+
+impl From<&ExitChain> for BakedExitChain {
+    fn from(value: &ExitChain) -> Self {
+        BakedExitChain {
+            terminal_node: value.terminal_node,
+            total_miles: value.total_miles,
+            segments: to_mirror(&value.segments),
+            driveway: value.driveway.as_ref().map(BakedDriveway::from),
+        }
+    }
+}
+
+impl From<BakedExitChain> for ExitChain {
+    fn from(value: BakedExitChain) -> Self {
+        ExitChain {
+            terminal_node: value.terminal_node,
+            total_miles: value.total_miles,
+            segments: from_mirror(value.segments),
+            driveway: value.driveway.map(Driveway::from),
+        }
+    }
+}
 
 mirror!(BakedLocalApproach => LocalApproach {
     target_id: String, target_type: String, city: String, name: String,
@@ -383,6 +516,8 @@ pub struct BakedFacilityApproach {
     pub dock_hint: bool,
     pub final_hint: String,
     pub source_note: String,
+    pub driveway: Option<BakedDriveway>,
+    pub exit_chains: Vec<BakedExitChain>,
 }
 
 impl From<&FacilityApproach> for BakedFacilityApproach {
@@ -411,6 +546,8 @@ impl From<&FacilityApproach> for BakedFacilityApproach {
             dock_hint: value.dock_hint,
             final_hint: value.final_hint.clone(),
             source_note: value.source_note.clone(),
+            driveway: value.driveway.as_ref().map(BakedDriveway::from),
+            exit_chains: to_mirror(&value.exit_chains),
         }
     }
 }
@@ -441,6 +578,8 @@ impl From<BakedFacilityApproach> for FacilityApproach {
             dock_hint: value.dock_hint,
             final_hint: value.final_hint,
             source_note: value.source_note,
+            driveway: value.driveway.map(Driveway::from),
+            exit_chains: from_mirror(value.exit_chains),
         }
     }
 }

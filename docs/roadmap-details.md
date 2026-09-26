@@ -1158,7 +1158,7 @@ repository root; Markdown links are relative to this document.
       stretch. On a ramp with no terminal control (`ramp_control == "none"`:
       every scale ramp, a freeway-to-freeway ramp, or the dice) the
       `facility_final_approach` bypass latches at the TOP of the ramp, so the
-      truck crawled the entire `RAMP_LENGTH_MI` at 12 with the lane posted
+      truck crawled the entire ramp (then a flat half mile) at 12 with the lane posted
       at 15 or more. Second edge: `loop_back_to_destination_terminal` reset
       the pull-ahead but not `destination_arrival_active`, so the retry after
       a blown gate was held at the walk from the turnaround on and the
@@ -3768,10 +3768,10 @@ repository root; Markdown links are relative to this document.
       spoken approach target is `min(cruise, exit cap)`. The ramp number is
       a ceiling, not a demand.
 
-      Still open from this: `deceleration_lane_mi` is modelled but unused.
-      The ramp is a flat `RAMP_LENGTH_MI` of 0.5 that stands in for the
-      deceleration lane plus the ramp proper; sizing the shed from the real
-      lane length (and its downhill multiplier) is the next slice.
+      Closed 2026-09-24 by the realistic exit: the flat half-mile ramp is
+      gone. `Trip::ramp_length_mi` lays each ramp out as a Green Book
+      deceleration lane (with the book's own grade factors), the ramp curve,
+      and the run to the bar, and the shed happens in that lane.
 
 - [x] **The reverse trap: the throttle latch ate the shift out of reverse
       (FIXED 2026-08-21).** Owner hit it at the I-40 scale mid-playtest --
@@ -7250,15 +7250,25 @@ city service drives below.)
       keep-right-except-to-pass CB nags, and right-lane exit gating.
 - [x] **Signalized ramp terminals grounded in OSM.** Baked
       `traffic_signals`/`stop` nodes on 6,295 of 13,504 exit ramp links
-      (heuristic elsewhere): a red/green cycle at the stop bar, grace
+      (heuristic elsewhere): a green-yellow-red cycle at the stop bar, grace
       distance, cross-traffic clips for running it -- now with dedicated
       red and green light earcons alongside the spoken callouts.
       Reworked 2026-07-14 after a log-proven playtest crash: lights now
-      run a real green-yellow-red cycle (15 s green crossable from a
-      stop, 4 s yellow, entering on yellow legal like the law), and
+      run a real green-yellow-red cycle, and
       every phase change on the approach is spoken -- the old one-flip
       announce cap could say green, silently flip red, and punish the
       driver for obeying the last thing they heard.
+      Re-tuned 2026-09-12 from the universal 31-second cycle to a stable
+      60-, 66-, 72-, or 78-second plan selected for each intersection:
+      26-32 seconds green, 4 seconds yellow, and 30-42 seconds red. The
+      final 7 seconds of red hold cross traffic so every modeled vehicle
+      clears the conflict area before green. The profiles use the
+      [FHWA Traffic Signal Timing Manual](https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter6.htm)'s
+      60-second simple-intersection example and under-120-second planning
+      guidance, while keeping yellow within the
+      [MUTCD 11th edition Section 4F.17](https://mutcd.fhwa.dot.gov/pdfs/11th_Edition/part4.pdf#page=120)
+      3-to-6-second range. They are gameplay pacing profiles, not
+      field-engineered timing plans for the represented sites.
 - [x] **Congestion grounded in FHWA HPMS volume.** Real AADT baked per leg
       drives clock-gated jams on a commuter curve: metro stretches jam at
       rush hour and flow free at midnight; entering a live jam injects slow

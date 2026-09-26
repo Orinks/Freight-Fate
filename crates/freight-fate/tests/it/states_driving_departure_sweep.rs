@@ -273,13 +273,24 @@ impl CornerWatch {
         // Only the APPROACH counts, and only while the corner is still to be
         // judged: the clock is free to compress again the moment a corner is
         // behind the truck, and a tenth of a mile of tail is exactly that.
+        // Inside the corner's brake point, that is: reaction seconds plus the
+        // shed to its advise speed, where the owner's design puts real time
+        // (ROADMAP, flight's notes). Before it the clock may still be paced.
         let approaching = (0..self.corners.len()).any(|i| {
             let ahead = self.corners[i].at_mi - position;
             if !(0.0 < ahead && ahead <= CORNER_BAND_MI) {
                 return false;
             }
             let key = self.keys[i].clone();
-            harness.read_drive(|d| !d.turn_resolved.contains(&key))
+            harness.read_drive(|d| {
+                let brake_mi = d
+                    .trip
+                    .navigation_cues
+                    .iter()
+                    .find(|cue| cue.key == key)
+                    .map_or(0.0, |cue| d.turn_brake_point_mi(cue));
+                !d.turn_resolved.contains(&key) && ahead <= brake_mi
+            })
         });
         if approaching {
             self.scale_near_corner = self.scale_near_corner.max(scale);
@@ -559,7 +570,7 @@ pub fn arrive_corners(destination: &Destination, bench: Bench) -> (Vec<Corner>, 
     let at = exit.at_mi;
     harness.with_drive(move |d, ctx| {
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
         d.trip.position_mi = at;
         d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
@@ -787,9 +798,14 @@ fn test_a_departure_corner_is_never_approached_at_compressed_pace() {
     // real time changes the outcome of 2 corners in 125, and the arrival
     // chain, which IS pinned, scores the same on every corner measure.
     //
+    // Since 2026-09-23 the pin starts at the corner's brake point rather than
+    // at its call (a 30 mph approach crawled four real minutes from a
+    // two-mile call), so the band this measures is the brake point, not a
+    // flat tenth of a mile.
+    //
     // So this asserts the mechanism rather than a flag: however the pinning
-    // is done, the last tenth of a mile before a corner the truck has still
-    // to take may not be covered at compressed pace. Take the latch away, or
+    // is done, the run-up inside a corner's brake point may not be covered
+    // at compressed pace. Take the latch away, or
     // stop sizing the window in real seconds, and the compressed ground here
     // goes from feet to hundreds of feet and this fails.
     let mut failures: Vec<String> = Vec::new();

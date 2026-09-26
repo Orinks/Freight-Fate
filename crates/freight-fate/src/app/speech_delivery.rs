@@ -413,6 +413,13 @@ impl GameContext {
     /// is never interrupting and an identical interrupting line is never
     /// handed back behind itself.
     fn requeue_cut_event(&mut self, cut: Cut) {
+        self.deliver_cut_event(cut, false);
+    }
+
+    /// Deliver a handed-back line: queued behind whatever cut it, or, for a
+    /// flush, interrupting in front of the line that flushed (see the flush
+    /// in `say_event_with`).
+    fn deliver_cut_event(&mut self, cut: Cut, interrupt: bool) {
         let (text, priority) = cut;
         // Name the line. A bare "cut line requeued" says a hand-back
         // happened and not what came back, which is the one thing an audit
@@ -427,10 +434,14 @@ impl GameContext {
             self.handed_back.pop_front();
         }
         self.handed_back.push_back(text.clone());
-        self.event_pacer.note_queued(&text, priority, None, None);
+        if interrupt {
+            self.event_pacer.note_ahead(&text);
+        } else {
+            self.event_pacer.note_queued(&text, priority, None, None);
+        }
         self.event_pacer.resume_delivery(&text);
         if self.settings.sapi_events {
-            self.speech.say_event(&text, false);
+            self.speech.say_event(&text, interrupt);
         } else {
             self.speech.say(&text, false);
         }
@@ -686,6 +697,15 @@ impl GameContext {
                 transcript!("[pacer] stale event backlog flushed");
                 cut = self.event_pacer.take_flush_cut();
                 interrupt = true;
+                // What a flush hands back came BEFORE this line and is still
+                // true, so it is spoken first and this line queues behind
+                // it. Requeued behind instead, the road played backwards:
+                // "assistance is taking you onto the streets" after
+                // "assistance released" (agent drive, 2026-09-23).
+                if let Some(first) = cut.take() {
+                    self.deliver_cut_event(first, true);
+                    interrupt = false;
+                }
             }
             self.speech.say_event(&text, interrupt);
         } else {
@@ -873,6 +893,11 @@ impl GameContext {
     /// the mix already trusts rather than inventing a second one.
     pub fn event_voice_busy(&mut self) -> bool {
         self.event_pacer.busy()
+    }
+
+    /// Whether the event voice is mid-way through a warning to act on now.
+    pub fn event_voice_critical(&mut self) -> bool {
+        self.event_pacer.speaking_critical()
     }
 
     pub fn event_delivery_status(

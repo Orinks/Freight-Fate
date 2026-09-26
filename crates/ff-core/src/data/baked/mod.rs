@@ -96,7 +96,20 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 ///
 /// 3: a local segment carries the measured turn angle at the junction onto it
 /// (`local_turn_deg`), which `data::corners` prices the corner from.
-pub const FORMAT_VERSION: u32 = 3;
+///
+/// 4: an interchange carries its OSM-derived ramp length per direction
+/// (`ramp_length_ft_forward/backward`, `ramp_length_source`).
+///
+/// 5: an interchange carries the OSM node its ramp ends at per direction
+/// (`ramp_terminal_node_*`); a facility street carries its posted limit and
+/// kind and its controls, and a facility approach its driveway and one
+/// street chain per ramp terminal (`exit_chains`).
+///
+/// 6: a road stop carries the street chains from its exit's ramp terminals
+/// (`approach_chains`).
+///
+/// 7: a street limit carries the statute it follows (`basis`: town or rural).
+pub const FORMAT_VERSION: u32 = 7;
 
 const HEADER_LEN: usize = 32;
 

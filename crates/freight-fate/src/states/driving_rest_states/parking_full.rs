@@ -4,6 +4,7 @@
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::vehicle::TruckState;
 
 use crate::app::{GameContext, Say};
 use crate::impl_state_for_menu;
@@ -11,7 +12,7 @@ use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
     advance_rest_clock, clock_text, hos_mut_of, poi_ambient_key, profile_mut_of, profile_of,
-    shut_down_engine, MOTEL_COST,
+    shut_down_engine, FacilityEngine, MOTEL_COST,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
@@ -79,13 +80,16 @@ impl ParkingFullState {
     fn rows(&mut self, ctx: &mut GameContext, d: &mut DrivingState) -> Vec<MenuItem<Self>> {
         let mut items: Vec<MenuItem<Self>> = Vec::new();
         if self.stop.actions.iter().any(|a| a == "fuel") {
-            // First: a driver turned away at 2 AM needs the tank before they
-            // need the choice of where to sleep, and running dry between
-            // overnight stops is the failure this ordering exists to prevent.
+            // Kill switch while parked: the road's engine key is out of reach
+            // under this menu, and the fuel island refuses a running tractor.
+            items.push(self.facility_engine_item_for(d.trip.truck.engine_on));
+            // Pumps still lead the hospitality choices: a driver turned away
+            // at 2 AM needs the tank before the choice of where to sleep.
             let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
-                    "Fills the tank at the regional diesel price plus a 35 dollar service fee.",
+                    "Fills the tank at the regional diesel price plus a 35 dollar service fee. \
+                     The engine must be off.",
                 ),
             );
         }
@@ -191,6 +195,43 @@ impl ParkingFullState {
             Some(self.stop.at_mi),
         );
         ctx.push_state(state);
+    }
+
+    /// [`FacilityEngine::facility_engine_item`] with engine state already in hand
+    /// (rows build inside a DriveRef borrow).
+    fn facility_engine_item_for(&self, engine_on: bool) -> MenuItem<Self> {
+        if engine_on {
+            MenuItem::new(
+                crate::states::driving_core::FACILITY_ENGINE_SHUT_DOWN_ITEM,
+                |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
+            )
+            .help("Engine off while parked, no fuel burned. Required before the fuel island.")
+        } else {
+            MenuItem::new(
+                crate::states::driving_core::FACILITY_ENGINE_START_ITEM,
+                |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
+            )
+            .help("Starts the engine. The parking brake needs 100 psi of air.")
+        }
+    }
+}
+
+impl FacilityEngine for ParkingFullState {
+    fn facility_engine_on(&self, _ctx: &GameContext) -> bool {
+        self.driving
+            .read(|d| d.trip.truck.engine_on)
+            .unwrap_or(false)
+    }
+
+    fn with_facility_truck<R>(
+        &mut self,
+        ctx: &mut GameContext,
+        f: impl FnOnce(&mut GameContext, &mut TruckState) -> R,
+    ) -> R {
+        self.driving
+            .clone()
+            .call(self, ctx, |_s, ctx, d| f(ctx, &mut d.trip.truck))
+            .expect("the parking-full menu keeps the drive under it")
     }
 }
 

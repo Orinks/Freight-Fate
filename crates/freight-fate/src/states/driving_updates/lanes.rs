@@ -2,7 +2,7 @@
 //! changes, crossings, a road that narrows under the truck, coned-off lanes,
 //! and keep-right pressure.
 
-use ff_core::data::curves::{advisory_with_bank_mph, min_radius_ft, superelevation_at};
+use ff_core::data::curves::{advisory_with_bank_mph, superelevation_at};
 use ff_core::pyfmt::fmt_grouped;
 use ff_core::sim::lane::RoadConditions;
 use ff_core::sim::trip_models::Zone;
@@ -34,6 +34,7 @@ impl DrivingState {
             steer = ctx.controller.steering();
         }
         self.lane.steering = steer;
+        self.lane.straighten = ctx.bindings.pressed(&ctx.input, Action::Straighten);
         // The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane_before_narrow = Some(self.lane.lane);
         let count = if self.ramp_mi.is_some() {
@@ -47,55 +48,32 @@ impl DrivingState {
         // the truck is.
         self.leave_a_lane_the_road_closed(ctx);
         // Use the real baked curve data when the truck is inside a curve.
-        // The curve force pushes the lane offset outward proportionally to
-        // how much the truck's speed exceeds the advisory speed, scaled by
-        // load, grip, and the curve's tightness.
+        // The lane model carries a HEADING, so running wide is not a push
+        // applied to the position -- it is what happens by itself when the
+        // road turns and the truck does not. What it wants from here is the
+        // road's real geometry: one over the radius, signed positive when the
+        // road bends right.
         let active = self.trip.curve_at(self.trip.position_mi);
         let route_transition_owns_ramp =
             ctx.settings.route_transition_assist && self.ramp_mi.is_some();
-        let mut curve;
-        match active.as_ref().filter(|c| !c.connector) {
+        let mut curve = match active.as_ref().filter(|c| !c.connector) {
             Some(bend) => {
-                let excess = 0.0f64.max(self.trip.truck.speed_mph() - bend.advisory_mph as f64);
-                let tightness = 0.2f64.max(1.0 - bend.min_radius_ft as f64 / 5000.0);
-                // Curve push severity: around 1.0 at advisory in a tight bend,
-                // ramping with excess speed. A heavier load pushes harder (more
-                // inertia to pull wide); worn or icy grip means less resistance.
-                let load =
-                    1.5f64.min(self.trip.truck.gross_mass_kg() / self.trip.truck.specs.mass_kg);
-
-                // The lane model carries a HEADING now, so running wide is
-                // not a push applied to the position -- it is what happens by
-                // itself when the road turns and the truck does not. What it
-                // wants from here is the road's real geometry: one over the
-                // radius, signed positive when the road bends right.
-                //
-                // `tightness`, `load` and `excess` stay computed because the
-                // slip warning below reads them, and because a tighter bend at
-                // a higher speed rotates the road faster under the truck all
-                // on its own -- which the curvature already says.
-                let _ = (tightness, load);
                 let direction = if bend.direction == 'L' { -1.0 } else { 1.0 };
-                curve = direction / (bend.min_radius_ft as f64).max(1.0);
-                // Spoken slip warning: entering a curve well above advisory
-                // pushes the truck toward the shoulder and the driver should
-                // know why.
-                if excess > 15.0 && !self.curve_slip_active {
-                    self.curve_slip_active = true;
-                    let phrase = self.pacenote_phrase(bend);
-                    ctx.say_event_with(
-                        format!("{phrase}, too fast, drifting to the outside."),
-                        SayEvent::new().category(SpeechCategory::Safety),
-                    );
-                }
+                direction / (bend.min_radius_ft as f64).max(1.0)
             }
-            None => curve = 0.0,
-        }
-        if self.ramp_mi.is_some() && !self.surface_chain {
-            // A ramp peels off the mainline and keeps bending. Its radius is
-            // DERIVED from the speed it is posted at, through the same AASHTO
-            // point-mass control the curve bake uses, rather than a flat push
-            // invented for the old model.
+            None => 0.0,
+        };
+        // The too-fast warning, mapped bend and ramp curve alike: from the
+        // roll model and the lane's own grip, before either costs anything
+        // (`driving_rollover`).
+        self.update_curve_warning(ctx);
+        let ramp_curve = self.ramp_curve_radius_ft();
+        if let Some(ramp_radius) = ramp_curve {
+            // The ramp's controlling curve, past its deceleration lane. Its
+            // radius is DERIVED from the speed it is posted at, through the
+            // same AASHTO point-mass control the curve bake uses, rather than
+            // a flat push invented for the old model; see
+            // `ramp_curve_radius_ft`.
             //
             // NOT on the facility street chain, which keeps `ramp_mi` set long
             // after the ramp is behind the truck: a ramp's curvature held over
@@ -103,11 +81,7 @@ impl DrivingState {
             // steering it walked the truck into the median and wrote it off
             // (every chain destination in the approach sweep, first run of the
             // heading model).
-            let ramp_radius = min_radius_ft(self.armed_ramp_mph(None));
-            curve += 1.0 / ramp_radius.max(1.0);
-        }
-        if active.is_none() && self.curve_slip_active {
-            self.curve_slip_active = false;
+            curve += 1.0 / ramp_radius;
         }
         self.update_curve_run(ctx, active.as_ref());
         // Curve speed assist: use the real advisory speed when one is active
@@ -261,11 +235,19 @@ impl DrivingState {
         let jake_slowing = self.trip.truck.engine_brake()
             && self.trip.truck.throttle < 0.05
             && self.trip.truck.grip >= 0.55;
-        let needs_service = !jake_slowing || excess_now.is_some_and(|excess| excess > 10.0);
+        // With the retarder slowing the truck the drums join from 10 over,
+        // faded in across the mile an hour under it: switched at 10, the
+        // pedal pumped on and off while the truck sat on the line, and every
+        // application costs air.
+        let service_share = if jake_slowing {
+            excess_now.map_or(0.0, |excess| (excess - 9.0).clamp(0.0, 1.0))
+        } else {
+            1.0
+        };
         // The spoken cues get a cooldown on top: even a legitimate slow
         // cycle (cruise pulling back up to the engage line) must not chant.
         self.curve_assist_cue_s = (self.curve_assist_cue_s - dt).max(0.0);
-        if curve_assisting && needs_service {
+        if curve_assisting && service_share > 0.0 {
             // Sized from how far OVER the bend's advisory the truck is, not
             // from `curve`: that used to be a severity around 1.0 and is a
             // curvature around 0.002 since the lane model grew a heading, so
@@ -277,7 +259,7 @@ impl DrivingState {
                 .trip
                 .truck
                 .brake
-                .max(0.35f64.min(0.1 + over_mph * 0.02));
+                .max(service_share * 0.35f64.min(0.1 + over_mph * 0.02));
         }
         // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp with no baked bend is
         // priced off its own radius above, so an exit taken over that number
@@ -352,8 +334,13 @@ impl DrivingState {
         } else {
             ramp_cap_mph
         };
+        // Not in the deceleration lane: the truck arrives there at road speed
+        // by design, and the lane's own servo brakes it to the exit speed by
+        // the curve (`update_deceleration_lane`). Lifting there as well only
+        // announced a second assist for the same slowing.
         let transition_assisting = ctx.settings.route_transition_assist
             && self.ramp_mi.is_some()
+            && !self.in_deceleration_lane()
             && self.trip.truck.speed_mph() > ramp_hold_mph;
         if transition_assisting {
             // A ramp cap is sustained speed control, not the bar's stop.
@@ -368,18 +355,20 @@ impl DrivingState {
                 self.pause_speed_control(ctx, true);
                 // ROUTE, not the ambient default: names an automation taking
                 // the pedals (automation-handoff sweep, 2026-08-20, the
-                // deferred 2026-08-15 audit).
-                ctx.say_event_with(
-                    "Route-transition assistance slowing.",
-                    SayEvent::queued()
-                        .priority(EventPriority::Route)
-                        .category(SpeechCategory::Confirmation),
-                );
+                // deferred 2026-08-15 audit). Named for the terminal where
+                // there is one; see `say_ramp_lift`.
+                self.say_ramp_lift(ctx);
             }
-        } else if self.transition_assist_active {
+        } else if self.transition_assist_active && !self.ramp_terminal_owns_the_stop() {
             // ROUTE, not the ambient default: names the automation handing the
             // pedals back (automation-handoff sweep, 2026-08-20, the deferred
             // 2026-08-15 audit).
+            //
+            // Not while the terminal still has a stop to make. The cap lets go
+            // five under its number, but the terminal's servo is still braking
+            // for the bar, so "released" at 15 mph with the stop sign ahead was
+            // untrue (agent drive into Abilene, 2026-09-23). The terminal's own
+            // "Stopped at the sign" is the release there.
             ctx.say_event_with(
                 "Route-transition assistance released.",
                 SayEvent::queued()
@@ -398,7 +387,13 @@ impl DrivingState {
         // wind, and the two are separate settings because they are separate
         // jobs: feed-forward off the road's shape, feedback off the driver's
         // error.
-        let takes_the_bend = ctx.settings.curve_speed_assist;
+        //
+        // Partial lane keeping supplies the bend's wheel too (owner ruling,
+        // 2026-09-24): its correction was capped with the driver's key at the
+        // steering limit, so a bend at its own advisory ran wide under
+        // partial lane keeping whenever curve assistance was off. Lane changes
+        // and speed stay the driver's; lane keeping off stays manual.
+        let takes_the_bend = ctx.settings.road_steers_the_bend();
         // The bank the bend is built with, which is load the tires do not
         // carry -- the same `superelevation_at` the advisory was priced with,
         // so the ceiling and the number the cab speaks agree about the road.
@@ -422,13 +417,18 @@ impl DrivingState {
         };
         let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
         if off_road_event {
-            if !ctx.settings.lane_departure_warning {
-                return;
-            }
-            let pan = self.lane_pan();
-            ctx.audio.play_with("vehicle/rumble_strip", 1.0, pan);
+            // The shoulder costs the truck whether or not anything warns about
+            // it: the warning setting governs the sound and the line, never
+            // the physics. It used to return first, so with the warning off
+            // leaving the road was free, and the rest of this frame's lane
+            // work (a lane change in progress, a merge) was skipped with it
+            // (agent drive, 2026-09-24).
             self.trip.truck.add_damage(1.0, true);
-            self.announce_off_pavement(ctx);
+            if ctx.settings.lane_departure_warning {
+                let pan = self.lane_pan();
+                ctx.audio.play_with("vehicle/rumble_strip", 1.0, pan);
+                self.announce_off_pavement(ctx);
+            }
         } else if self.road_position_band.is_some() && !self.off_pavement() {
             // Back on the pavement: the standing condition ended, so its one
             // transition line speaks and the band resets (research doc R12).

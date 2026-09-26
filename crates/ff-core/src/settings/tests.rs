@@ -80,18 +80,18 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_eighty_persisted_fields_in_python_order() {
+fn the_struct_carries_the_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12), the two shortcut tables (2026-09-14),
     // radio_shuffle_playlists and steering_guide_inverted (2026-09-18), and
     // synth_music and music_seed (2026-09-21) were added on the Rust side;
     // lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 82);
+    assert_eq!(Settings::FIELD_NAMES.len(), 83);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[78], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[79], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 82);
+    assert_eq!(pairs.len(), 83);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -107,51 +107,63 @@ fn the_defaults_match_the_python_dataclass() {
     let s = Settings::default();
     let expected: Value = serde_json::from_str(
         r#"{
- "online_services": true, "imperial_units": true, "engine_voice": "real",
- "jake_voice": "real", "acc_following_gap": "normal", "automatic_transmission": true,
- "automatic_direction_changes": "simple", "time_scale": 10.0,
- "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
- "real_parking": false, "real_fuel_prices": true,
- "live_weather_controls_calendar": true,
- "hos_mode": "realistic", "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
- "lane_cue_loudness": "standard", "lane_guide_tone": false,
- "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
- "lane_departure_warning": true, "stop_and_go_assist": true,
- "descent_speed_control": "balanced",
- "exit_speed_assist": true, "destination_approach_assist": true,
- "selected_stop_assist": false, "curve_speed_assist": true,
- "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
- "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
- "sfx_volume": 0.8, "music_volume": 0.5, "synth_music": false, "music_seed": 48213,
- "radio_volume": 0.25, "radio_enabled": true,
- "radio_station_id": "route_playlist", "radio_streamer_safe": false,
- "radio_shuffle_playlists": false,
- "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
- "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
- "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
- "chatter_billboards": true, "place_callouts": "sparse",
- "announce_menu_position": true, "backup_announcements": "every",
- "sapi_events": true, "event_backend": "SAPI", "braille_only": false,
- "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
- "update_channel": "", "skipped_update": "", "discord_presence": true,
- "online_presence": false, "duty_notifications": false,
- "profile_sharing_consent_version": 0,
- "profile_sharing_pending_off": false, "cloud_saves": false,
- "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
- "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
- "settings_version": 3, "settings_layout_notice_from": -1,
- "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false
- }"#,
+        "online_services": true, "imperial_units": true, "engine_voice": "real",
+        "jake_voice": "real", "acc_following_gap": "normal", "automatic_transmission": true,
+        "automatic_direction_changes": "simple", "time_scale": 10.0,
+        "pace_retired_notice_left": 0, "real_weather": false, "real_traffic": false,
+        "real_parking": false, "real_fuel_prices": true,
+        "live_weather_controls_calendar": true,
+        "hos_mode": "realistic", "hos_planning_hints": false,
+        "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
+        "lane_cue_loudness": "standard", "lane_guide_tone": false,
+        "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
+        "lane_departure_warning": true, "stop_and_go_assist": true,
+        "descent_speed_control": "balanced",
+        "exit_speed_assist": true, "destination_approach_assist": true,
+        "selected_stop_assist": false, "curve_speed_assist": true,
+        "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
+        "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
+        "sfx_volume": 0.8, "music_volume": 0.5, "synth_music": false, "music_seed": 48213,
+        "radio_volume": 0.25, "radio_enabled": true,
+        "radio_station_id": "route_playlist", "radio_streamer_safe": false,
+        "radio_shuffle_playlists": false,
+        "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
+        "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
+        "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
+        "chatter_billboards": true, "place_callouts": "sparse",
+        "announce_menu_position": true, "backup_announcements": "every",
+        "sapi_events": true, "event_backend": "SAPI", "braille_only": false,
+        "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
+        "update_channel": "", "skipped_update": "", "discord_presence": true,
+        "online_presence": false, "duty_notifications": false,
+        "profile_sharing_consent_version": 0,
+        "profile_sharing_pending_off": false, "cloud_saves": false,
+        "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
+        "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
+        "settings_version": 3, "settings_layout_notice_from": -1,
+        "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false
+    }"#,
     )
     .unwrap();
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 82);
+    assert_eq!(expected.len(), 83);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
     assert!(!s.lane_keeping_unreadable);
+}
+
+#[test]
+fn hos_planning_hints_default_off_and_round_trip_as_a_boolean() {
+    assert!(!Settings::default().hos_planning_hints);
+    let mut enabled = Settings::default();
+    enabled.hos_planning_hints = true;
+    let stored: Value = serde_json::from_str(&enabled.to_file_text()).unwrap();
+    assert_eq!(stored["hos_planning_hints"], true);
+    assert!(from_json(stored).hos_planning_hints);
+    assert!(!from_json(json!({"hos_planning_hints": "true"})).hos_planning_hints);
 }
 
 #[test]

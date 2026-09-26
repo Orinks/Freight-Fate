@@ -456,6 +456,32 @@ impl Trip {
         self.ramp_advisory_at(route_mile).mph()
     }
 
+    /// OSM-derived length in miles of the exit ramp nearest a route mile
+    /// (within 2 miles, like `ramp_advisory_at`), for this trip's direction
+    /// of travel; None when that exit has no baked length that way.
+    pub fn ramp_length_mi_at(&self, route_mile: f64) -> Option<f64> {
+        let (ix, forward) = self.interchange_with_direction_at(route_mile, 2.0)?;
+        let feet = if forward {
+            ix.ramp_length_ft_forward
+        } else {
+            ix.ramp_length_ft_backward
+        };
+        feet.map(|ft| ft / 5280.0)
+    }
+
+    /// The OSM node the exit ramp nearest a route mile ends at, for this
+    /// trip's direction of travel -- the key of the facility street chain
+    /// that starts there (`World::facility_exit_route`). None for a ramp
+    /// ending in a merge, or with no baked terminal that way.
+    pub fn ramp_terminal_node_at(&self, route_mile: f64) -> Option<i64> {
+        let (ix, forward) = self.interchange_with_direction_at(route_mile, 2.0)?;
+        if forward {
+            ix.ramp_terminal_node_forward
+        } else {
+            ix.ramp_terminal_node_backward
+        }
+    }
+
     /// The baked interchange nearest a route mile, or None.
     pub fn interchange_at(&self, route_mile: f64, tol_mi: f64) -> Option<&Interchange> {
         self.interchange_with_direction_at(route_mile, tol_mi)

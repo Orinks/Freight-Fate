@@ -283,7 +283,7 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     # route with curl rather than checking that its file deployed.
     assert build_release.music_download_config() == (
         "https://www.orinks.net/downloads/music.pak",
-        "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0",
+        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d",
     )
 
 
@@ -488,6 +488,8 @@ def test_cargo_command_honours_the_target_dir(tmp_path):
         "--release",
         "-p",
         "freight-fate",
+        # A player build carries no agent server.
+        "--no-default-features",
     ]
     target = tmp_path / "t53"
     assert build_release.cargo_build_command(target)[-2:] == ["--target-dir", str(target)]
@@ -519,12 +521,41 @@ def test_windows_release_wrapper_is_the_complete_beginner_command():
     readme_heading = "## Build a standalone copy"
     assert readme_heading in (root / "README.md").read_text(encoding="utf-8")
     assert readme_heading.removeprefix("## ") in script
-    assert "Get-Command rustc" in script
-    assert "Get-Command uv" in script
+    assert "Get-Command $tool" in script
+    for tool in ("rustup", "rustc", "cargo", "uv", "cmake"):
+        assert f'"{tool}"' in script
+    assert "atlbase.h" in script
+    assert "Microsoft.VisualStudio.Component.VC.ATL" in script
+    assert "rustup show" in script
     assert "uv sync --group dev" in script
     assert "--group build" not in script
     assert "uv run python tools/build_release.py --rust --smoke" in script
     assert "Start-Process" not in script
+
+
+def test_unix_release_wrapper_mirrors_the_windows_one():
+    root = Path(__file__).resolve().parents[1]
+    path = root / "build-release.sh"
+    script = path.read_text(encoding="utf-8")
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    assert "./build-release.sh" in readme
+    tracked_mode = subprocess.run(
+        ["git", "ls-files", "-s", "build-release.sh"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.split()[0]
+    assert tracked_mode == "100755"
+    assert script.startswith("#!/usr/bin/env bash\n")
+    assert "Build a standalone copy" in script
+    for tool in ("rustup", "rustc", "cargo", "uv", "cmake"):
+        assert f"need {tool}" in script
+    assert "rustup show" in script
+    assert "uv sync --group dev" in script
+    assert "--group build" not in script
+    assert 'tools/build_release.py --rust --smoke "$@"' in script
+    assert "gcc-13" in script
 
 
 def test_main_accepts_the_rust_flags(capsys):

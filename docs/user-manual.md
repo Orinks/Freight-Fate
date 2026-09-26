@@ -73,8 +73,10 @@ before starting a new drive.
 - **The hours clock answers one question at a time.** Alt+A, Alt+S, and Alt+D
   each ask a single question; C keeps the clock, the deadline, and whichever
   limit comes first.
-- **Traffic lights have a yellow, and every change is spoken.** Ramp-end
-  lights cycle green, yellow, red. Entering on green or yellow is legal.
+- **Traffic lights keep a steady cycle, and every change is spoken.** Each
+  ramp-end light keeps its timing while you approach. Reds and greens last
+  long enough to stop and pull a loaded truck away; entering on green or
+  yellow is legal, and cross traffic clears before green.
 - **The dash warns you about your own speed.** A few miles per hour over the
   posted limit chimes softly and names the limit, faster the further over you
   go. It is a courtesy alert with no setting; it starts more than 7 miles per
@@ -665,7 +667,7 @@ wherever the pad has one.
 | Alt+T | Switch between automatic and manual transmission on the road. This changes your whole control scheme, so it is worth knowing you pressed it. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
-| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. With the turn signal on for an exit, it ends with that exit and how far away it is. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding, pulling, or losing it -- including whether the engine brake has the descent or is about to lose it. G also names the next grade ahead worth planning for, how far off and how long it runs -- including one that steepens without flattening out first, and the gentler pull automatic speed control is building speed for when nothing steep is coming. |
@@ -687,7 +689,7 @@ wherever the pad has one.
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
-| U | Report the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
+| U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
@@ -876,9 +878,14 @@ needs one.
 
 If you cook the brakes anyway, you will hear it: hot brakes squeal, and
 a spoken warning names the trend. Press D for the one safe-speed number
-that already accounts for the conditions. Descent speed control, in the
-driving assistance settings, can manage engine braking for you at the
-level you choose.
+that already accounts for the conditions; on a steep downgrade that is
+the speed your truck can hold the hill at with its current load, and D
+says "for the grade". Descent speed control, in the driving assistance
+settings, drives a descent the same way for you with adaptive cruise on:
+it slows to that speed before the steep part, sets the engine brake,
+holds the gear, and snubs the service brakes. When the hill needs a
+slower speed than cruise is already holding, descent control says that
+speed once, and again only when the hill changes it.
 
 ## Taking curves
 
@@ -1080,8 +1087,9 @@ unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
 
 Inspections are real. A clean record is waved through an open scale nearly
-every time; a record carrying citations or out-of-service history is
-pulled into the lane, and the lane is a Level 1 inspection: driver,
+every time; a record carrying citations or out-of-service orders from the
+last game year is pulled into the lane, and older ones no longer count
+against you there. The lane is a Level 1 inspection: driver,
 paperwork, a walk-around and a look under the truck, about 45 minutes on
 duty. Worn tires, brakes near their limit, body damage and whatever the
 last driver left on a hooked trailer get written up, with a fine and a
@@ -1166,8 +1174,10 @@ you while slowing down is still free.
 
 Ramp ends are real intersections. Most ramps end at a traffic light or a stop
 sign, called out on the way down. Lights cycle green, yellow, red, and speak
-every change. Enter on green or yellow; red means brake to a full stop at the
-bar and hold the brakes until it says green. Rolling a red draws horns;
+every change. Each light keeps a stable, slower cycle instead of changing its
+timing while you wait, and cross traffic clears before green. Enter on green
+or yellow; red means brake to a full stop at the bar and hold the brakes until
+it says green. Rolling a red draws horns;
 blowing one at speed means cross traffic finds your trailer. The stop bar has
 a parking-sensor tick that speeds up as you close on it, so you stop at the
 bar instead of a quarter mile short and creeping blind.
@@ -1175,8 +1185,10 @@ bar instead of a quarter mile short and creeping blind.
 Once the stop is honored and the way is clear, who pulls ahead depends on
 Facility stopping assistance. With it off, the cab says "Clear; pull ahead to
 the entrance" (or "Green light. Pull ahead to the entrance") and the last
-stretch is yours. With it on, the cab says "Facility stopping assistance is
-taking you to the entrance" and the truck moves off on its own: where the ramp
+stretch is yours; where city streets follow the ramp, it says "onto the
+streets" instead. With it on, the cab says "Facility stopping assistance is
+taking you to the entrance", or "onto the streets", and the truck moves off
+on its own: where the ramp
 ends at the gate, the assist drives it there and stops; where the facility sits
 at the end of city streets, the assist rolls the truck to the streets and the
 speed keeper takes them, holding the posted number and easing for each corner,
@@ -1187,18 +1199,46 @@ bar, the same rule as every other assist. If the speed keeper is off, a
 facility with city streets keeps the manual release, because nothing could
 drive the streets for you.
 
+City streets start where your ramp ends: the first street named off the ramp
+is the one the ramp meets. Each street keeps its own speed limit, taken from
+the map where the map has one and from the state's default for city streets
+where it does not. When the street changes, the cab says the new number, "Speed
+limit raised to 40". A drop of 10 or more is called ahead of the sign. In
+this version the streets themselves have no traffic lights or stop signs;
+the ramp's end keeps its own.
+
+The facility's driveway is a turn like any other, called with its advise
+speed. Past it you are in the yard, "Into the yard. Yard limit 15", and the
+gate where you stop to check in is at the end of the yard. Facilities post
+their own yard limits; 15 is the game's number for all of them. Where the map
+shows no driveway, the gate stands on the street itself, and the street keeps
+its limit right up to it.
+
+A truck stop, travel center or fuel station has its entrance at the end of
+its ramp: stop there and the stop's menu opens.
+
 Stops are reported as you approach them. An armed exit counts itself down --
 two miles, one mile, half a mile -- so the exit stays anchored while you set
-up for it. As an announced exit approaches, use X to signal or cancel your intent,
-slow to 45 miles per hour or less, and set up the exit lane unless lane keeping
-is on full. The signal-on announcement also names how the ramp ends -- a traffic
+up for it. As an announced exit approaches, use X to signal or cancel your intent.
+X commits you to the exit wherever you press it, and the game says "Signal
+set"; the blinker itself starts clicking half a mile out, the way a driver
+flicks it on near the exit.
+Unless lane keeping is on full, move to the right lane and stay centered there;
+the game asks for that move only while you are out of the right lane. Just
+before the gore the exit lane opens beside the right lane, and the game says
+"Exit lane opening. Steer right into it." Steer right across the line and you
+are in the exit lane, the start of the ramp. On full, lane keeping takes it for
+you. Keep road speed until then: the gore accepts anything up to the speed the
+posted limit allows. The exit lane, which road engineers call the deceleration
+lane, is where you slow down, and the game says the exit speed as you enter it.
+Brake to it before the ramp curve at the end of that lane; a loaded truck
+taking that curve too fast shifts its load and can run wide. The signal-on announcement also names how the ramp ends -- a traffic
 light or a stop sign -- so the braking plan can start on the mainline, and the
 U upcoming readout carries the same warning. Once you are on a ramp that ends
 in a light or a sign, the game clock runs in real time until you are through
 the intersection, so the warning buys real reaction seconds instead of
-compressed ones. If your speed, lane setup, and route intent are valid at the marker,
-the truck takes the ramp automatically. If you reach the gore too fast, without
-signaling, or without the exit lane set, you stay on the
+compressed ones. If you reach the gore too fast or without signaling, or the
+gore goes by without you steering into the exit lane, you stay on the
 highway and the game tells you what went wrong. The timing is generous so the
 sequence is about preparation, not twitch input. The game can also tell you when
 traffic boxes you out of the lane, so you know to recover at the next safe exit
@@ -1208,13 +1248,14 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to slow down and set up for the ramp. With lane keeping on partial
-or off, use X to signal and move right for the exit lane. On full, lane keeping
+and tells you to set up for it. With lane keeping on partial
+or off, use X to signal, keep to the right lane, and steer into the exit lane
+where it opens. On full, lane keeping
 takes the destination exit for you, and the first call of each approach says so. If automatic speed control is
-active, it eases the truck to 40 miles per hour or your lower cruise target,
-below the 45 mile-per-hour ramp limit, so you can reach ramp speed without an
-abrupt handoff. Press X to take the exit; automatic speed control releases as
-you enter the ramp, then you brake to the stop. If you miss the destination
+active, it holds road speed and eases at most 10 miles per hour below it just
+before the gore. Press X to take the exit; automatic speed control pauses as
+you enter the exit lane, then you brake to the exit speed for the ramp
+curve and on to the stop. If you miss the destination
 exit, continue to the next safe turnaround. Dispatch loops you back onto the
 approach so you can hear the exit call again and press X to take it. On full,
 the turnaround and the fresh exit call both say lane keeping is taking it, so
@@ -1227,6 +1268,7 @@ context.
 Stop actions depend on that stop's data. A stop may offer:
 
 - Fuel.
+- A CAT Scale weigh.
 - Meals, drinks, and showers.
 - A 30-minute break.
 - 10-hour sleep or sleeper-berth splits.
@@ -1245,6 +1287,15 @@ work, so the carrier covers it for company drivers; food and showers
 are always your own money. Different stop brands are good at what they
 are really known for.
 
+A truck stop with a CAT Scale lists it among its services, and its menu
+has a Weigh on the CAT Scale row. The weigh takes ten minutes on duty and
+reads the ticket: steer axle, drive axles, trailer axles and gross, in
+pounds, then either that you are legal on every axle or which ones are over
+and by how much. The federal limit is 34,000 pounds on each tandem and
+80,000 gross. A weigh costs what CAT Scale charges, 15 dollars and 25
+cents, and a reweigh at the same scale within 24 hours costs 5 dollars and
+25 cents. Company drivers bill the carrier.
+
 Not every stop offers every action. A public rest area usually does not offer
 fuel or repair. A weigh station is for inspection, not food or sleep: slow
 below fifteen, signal for the scale exit with X, stop at the scale, then
@@ -1259,7 +1310,7 @@ When a sleep-capable stop is close enough ahead, press T to plan that exact
 stop. The game names it, its exit, and the next action. Press X separately to
 signal for the exit; T never chooses to leave the highway by itself. The
 default-off Planned rest-stop stopping assistance setting can then brake to a
-complete stop at the entrance after you have set the exit lane and cleared any
+complete stop at the entrance after you have taken the exit lane and cleared any
 ramp light or stop sign. It never selects, signals, takes, or cancels an exit.
 
 ## Enforcement, your record, and your CDL
@@ -1489,7 +1540,7 @@ Use these keys when you need status without leaving the road:
 
 | Key | Information |
 | --- | --- |
-| Space | Speed, gear, RPM, air pressure, and brake state. |
+| Space | Speed, gear, RPM, air pressure, and brake state, and with the signal on, how far to the exit. |
 | F | Fuel level and estimated range. |
 | C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
 | Alt+A | Time at the wheel so far this shift, and time on duty. |
@@ -1563,7 +1614,8 @@ AppImage does not move those saves.
 At the destination, slow down for the facility gate, stop, and choose **Dock
 and deliver**. On highway deliveries, take the announced destination exit
 first; in cities with street data, the arrival flows off the ramp onto the
-destination's real local streets with spoken turn-by-turn cues, and loaded
+destination's real local streets with spoken turn-by-turn cues, their own
+speed limits, and the yard behind the facility's driveway (see the ramp section above), and loaded
 departures drive the streets back out to the on-ramp the same way. You can
 also review paperwork before settling.
 
@@ -1607,7 +1659,7 @@ quarters always reaching you. See When You Owe Money.
 
 ### Driving assistance and speed keeper
 
-Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
 #### Individual assists
 
@@ -1617,11 +1669,17 @@ approach assistance, Planned rest-stop stopping assistance, Curve speed
 assistance, and Route-transition assistance.
 
 Descent speed control has four levels: Off, Realistic, Balanced, and Interactive.
-Interactive is a descent-control level, not a preset.
+Interactive is a descent-control level, not a preset. At every level but Off,
+adaptive cruise holds a steep downgrade at the speed your truck can take it at
+with its load, never faster than your set speed or the posted limit allows.
 
 #### Exit and stopping assistance
 
-Exit speed assistance slows for an already-selected exit. Facility stopping
+Exit speed assistance brakes in the exit lane of an already-selected
+exit, so the truck reaches the exit speed by the ramp curve. On the highway it
+only slows a truck the gore would refuse. Route-transition, curve, or
+facility stopping assistance does the same braking when exit speed assistance
+is off. Facility stopping
 assistance (the destination approach assistance row) slows and stops at the
 selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
 cleared stop or green light at the end of the destination ramp, it also pulls
@@ -1656,7 +1714,7 @@ Predictive cruise sits outside the presets. It lets cruise read the road about a
 
 #### Lane keeping
 
-Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs your turn signal set and the exit lane held.
+Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel, bends included, and every exit needs your turn signal set and a steer into the exit lane where it opens.
 
 On partial or off, with lane-departure warning on, the engine leans back toward lane center when you drift, and you steer the way it leans; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. The road noise underneath leans to where you sit in your lane whichever way you are drifting, so it tells you position, not direction. On full the engine still leans for the bends and corners ahead, and the road noise stays centered because the truck is.
 
@@ -1664,7 +1722,7 @@ Lane keeping is a preset field: Realistic sets it to off, Balanced to partial, a
 
 #### Speed keeper
 
-Speed keeper sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone.
+Speed keeper sits outside the presets and is never changed by choosing a preset. Where adaptive cruise is unavailable, such as the city streets to a facility, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone. When the next corner is too close to build back up to the street's number and brake again in time, the keeper holds the corner's own speed until it.
 
 On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. The same handoff covers an open road where a hazard or a stop has left you below 20 miles per hour with the session still armed: the speed keeper builds speed behind whatever slowed you, and adaptive cruise takes over at 20. With the speed keeper off, the cab says once that automatic speed control resumes at 20, and the pedals are yours until then.
 
@@ -1699,7 +1757,7 @@ listed under. Driving assistance is covered in full above.
 
 | Setting | Purpose |
 | --- | --- |
-| Driving mode | Choose Relaxed, Standard, or Real time pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. Real time keeps Standard's pressure, lines the date and time up with your computer's clock, and runs the driving clock at the speed of a real clock, so a mile takes as long as it really would; with the weather source set to real world it is the most true to life the game gets. Aligning the clock does not move delivery time remaining, career progress, or hours of service. At low speed the compressed pacings ease toward real time, and deliberate parked waiting runs at double the selected pace; in Real time the clock is real at every speed, parked included. Breaks and sleep at stops pass the clock the same way in every mode. Any of the three can be changed mid-drive from the pause menu. |
+| Driving mode | Choose Relaxed, Standard, or Real time pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. Real time keeps Standard's pressure, lines the date and time up with your computer's clock, and runs the driving clock at the speed of a real clock, so a mile takes as long as it really would; with the weather source set to real world it is the most true to life the game gets. Aligning the clock does not move delivery time remaining, career progress, or hours of service. At low speed the compressed pacings ease toward real time, and deliberate parked waiting runs at double the selected pace; in Real time the clock is real at every speed, parked included. Breaks and sleep at stops pass the clock the same way in every mode. Any of the three can be changed mid-drive from the pause menu; the new pacing starts when the truck next stops. |
 | Hours of service | Choose realistic or relaxed legal limits. Both use the same 11-hour driving limit, 14-hour duty window, and break after 8 hours. Relaxed reduces fines, inspections, and random hazards. |
 
 The dash overspeed alert has no setting. It speaks once and then chimes,
@@ -1742,7 +1800,7 @@ quiets it, and settling back under the limit disarms it.
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
 | Music volume | Menu and facility background music volume. |
 | Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |
-| Music seed | Only shown with Music source set to Synthesized. Rolls a new seed and reads it aloud, so you can share a favorite with someone else. Every synthesized piece changes, and the current music restarts at once. |
+| Music seed | Picks every synthesized piece. Enter opens a field where you type a whole number, such as a seed someone shared with you; Escape leaves the seed as it was. Left or Right rolls a new seed and reads it aloud, so you can share a favorite. Every synthesized piece changes, and the current music restarts at once. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. With Music source set to Synthesized, this locks the radio to the synthesized Roadhouse alone; every other station control does nothing, though the radio key, volume, and now playing still work. |
 | Shuffle personal playlists | Off by default: each of your playlists plays top to bottom and resumes where it left off. On plays it in a random order, every track once before any repeats, with a new order each time through. |

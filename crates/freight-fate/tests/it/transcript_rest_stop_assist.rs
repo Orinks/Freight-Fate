@@ -218,10 +218,8 @@ fn test_canceling_a_planned_stop_resets_its_armed_exit_approach() {
         d.truck_mut().brake = 0.2;
         d.cruise_exit_mph = Some(31.0);
         d.exit_signal_canceled = true;
-        d.exit_lane_alignment = 0.75;
-        d.exit_lane_prompt_said = true;
-        d.exit_lane_ready_said = true;
-        d.exit_commit_said = true;
+        d.exit_lane_entered = true;
+        d.exit_taper_said = true;
         d.exit_cancel_armed = true;
         d.exit_right_hold_s = 0.8;
         d.exit_right_taps = 3;
@@ -244,10 +242,8 @@ fn test_canceling_a_planned_stop_resets_its_armed_exit_approach() {
     assert!(!harness.read_drive(|d| d.exit_signal_on));
     assert!(!harness.read_drive(|d| d.exit_signal_canceled));
     assert!(harness.read_drive(|d| d.cruise_exit_mph.is_none()));
-    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.0));
-    assert!(!harness.read_drive(|d| d.exit_lane_prompt_said));
-    assert!(!harness.read_drive(|d| d.exit_lane_ready_said));
-    assert!(!harness.read_drive(|d| d.exit_commit_said));
+    assert!(!harness.read_drive(|d| d.exit_lane_entered));
+    assert!(!harness.read_drive(|d| d.exit_taper_said));
     assert!(!harness.read_drive(|d| d.exit_cancel_armed));
     assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.0));
     assert_eq!(harness.read_drive(|d| d.exit_right_taps), 0);
@@ -286,10 +282,8 @@ fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
         d.selected_stop_assist_brake = 0.3;
         d.truck_mut().brake = 0.2;
         d.cruise_exit_mph = Some(31.0);
-        d.exit_lane_alignment = 0.75;
-        d.exit_lane_prompt_said = true;
-        d.exit_lane_ready_said = true;
-        d.exit_commit_said = true;
+        d.exit_lane_entered = true;
+        d.exit_taper_said = true;
         d.exit_cancel_armed = true;
         d.exit_right_hold_s = 0.8;
         d.exit_right_taps = 3;
@@ -315,10 +309,8 @@ fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
     assert!(harness.read_drive(|d| d.exit_signal_on));
     assert!(harness.read_drive(|d| d.exit_signal_canceled));
     assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(31.0));
-    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.75));
-    assert!(harness.read_drive(|d| d.exit_lane_prompt_said));
-    assert!(harness.read_drive(|d| d.exit_lane_ready_said));
-    assert!(harness.read_drive(|d| d.exit_commit_said));
+    assert!(harness.read_drive(|d| d.exit_lane_entered));
+    assert!(harness.read_drive(|d| d.exit_taper_said));
     assert!(harness.read_drive(|d| d.exit_cancel_armed));
     assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.8));
     assert_eq!(harness.read_drive(|d| d.exit_right_taps), 3);
@@ -476,11 +468,11 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     );
     assert_eq!(
         harness.focused_label().unwrap_or_default(),
-        "Sleep 2 hours in sleeper berth"
+        "Sleep 10 hours"
     );
     assert!(spoken(&harness)
         .iter()
-        .any(|line| line.contains("Sleep 2 hours in sleeper berth")));
+        .any(|line| line.contains("Sleep 10 hours")));
     let labels = harness.menu_labels();
     for hours in [2, 3, 7, 8] {
         assert!(
@@ -503,13 +495,15 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     let armed_i = index_of("stopping assistance armed");
     let braking_i = index_of("Facility stopping assistance taking the pedals");
     let stopped_i = index_of("Stopped at public rest area");
-    let menu_i = index_of("Sleep 2 hours in sleeper berth");
+    let menu_i = index_of("Sleep 10 hours");
     assert!(
         selected_i < armed_i && armed_i < braking_i && braking_i < stopped_i && stopped_i < menu_i,
         "{selected_i} {armed_i} {braking_i} {stopped_i} {menu_i}"
     );
 
-    harness.key(freight_fate::playtest::harness::key_event(Key::Down, None));
+    for _ in 0..3 {
+        harness.key(freight_fate::playtest::harness::key_event(Key::Up, None));
+    }
     assert_eq!(
         harness.focused_label().unwrap_or_default(),
         "Sleep 3 hours in sleeper berth"

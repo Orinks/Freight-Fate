@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from scipy.signal import stft, istft
+from scipy.signal import istft, stft
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cand_common as C  # noqa: E402
@@ -28,9 +28,9 @@ RNG = np.random.default_rng(7)
 
 IDLE_RPM = 650.0
 NPERSEG = 4096
-NOVERLAP = 3072          # 75% overlap -- COLA-safe with a Hann window
-LIFTER_Q = 90            # cepstral quefrency cutoff: smooth over the harmonics,
-                         # keep the broad body/cab formants (features > ~500 Hz)
+NOVERLAP = 3072  # 75% overlap -- COLA-safe with a Hann window
+LIFTER_Q = 90  # cepstral quefrency cutoff: smooth over the harmonics,
+# keep the broad body/cab formants (features > ~500 Hz)
 
 
 # --- spectral-envelope machinery --------------------------------------------
@@ -47,7 +47,7 @@ def _cep_env(mag: np.ndarray, q: int = LIFTER_Q) -> np.ndarray:
     cep = np.fft.irfft(logm, n=2 * (len(mag) - 1))
     lift = np.zeros_like(cep)
     lift[:q] = 1.0
-    lift[-q + 1:] = 1.0          # keep the mirror half symmetric
+    lift[-q + 1 :] = 1.0  # keep the mirror half symmetric
     lift[0] = 1.0
     env = np.exp(np.fft.rfft(cep * lift).real)
     return env
@@ -55,8 +55,7 @@ def _cep_env(mag: np.ndarray, q: int = LIFTER_Q) -> np.ndarray:
 
 def _target_envelope(loop: np.ndarray) -> np.ndarray:
     """The FIXED formant template: cepstral envelope of the idle's mean spectrum."""
-    f, t, Z = stft(loop, fs=C.SR, window="hann", nperseg=NPERSEG,
-                   noverlap=NOVERLAP, boundary=None)
+    f, t, Z = stft(loop, fs=C.SR, window="hann", nperseg=NPERSEG, noverlap=NOVERLAP, boundary=None)
     mean_mag = np.abs(Z).mean(axis=1)
     return _cep_env(mean_mag)
 
@@ -67,17 +66,17 @@ def _reimpose_formants(x: np.ndarray, e_target: np.ndarray) -> np.ndarray:
     x has already had its firing rate moved (by resampling), which dragged the
     formants along; this pins them back to e_target so the body stays put.
     """
-    f, t, Z = stft(x, fs=C.SR, window="hann", nperseg=NPERSEG,
-                   noverlap=NOVERLAP, boundary="zeros", padded=True)
+    f, t, Z = stft(
+        x, fs=C.SR, window="hann", nperseg=NPERSEG, noverlap=NOVERLAP, boundary="zeros", padded=True
+    )
     Zc = np.empty_like(Z)
     for k in range(Z.shape[1]):
         mag = np.abs(Z[:, k])
         env = _cep_env(mag)
         gain = e_target / np.maximum(env, env.max() * 1e-4)
         Zc[:, k] = Z[:, k] * gain
-    _, y = istft(Zc, fs=C.SR, window="hann", nperseg=NPERSEG,
-                 noverlap=NOVERLAP, boundary=True)
-    return y[:len(x)]
+    _, y = istft(Zc, fs=C.SR, window="hann", nperseg=NPERSEG, noverlap=NOVERLAP, boundary=True)
+    return y[: len(x)]
 
 
 def _resample_varying(src: np.ndarray, ratio: np.ndarray) -> np.ndarray:
@@ -87,7 +86,7 @@ def _resample_varying(src: np.ndarray, ratio: np.ndarray) -> np.ndarray:
     every harmonic) rises by that factor, a smooth continuous glide.
     """
     pos = np.cumsum(ratio)
-    pos = pos - pos[0]                       # start at the loop's head
+    pos = pos - pos[0]  # start at the loop's head
     idx = np.arange(len(src))
     return np.interp(pos % (len(src) - 1), idx, src)
 
@@ -99,15 +98,16 @@ def build_idle_loop() -> np.ndarray:
     """Real interior idle, cut to a steady window near 650 rpm, made seamless."""
     src = C.load_wav(C.LICENSED["int_idle_low"])
     win = C.find_steady_window(src, IDLE_RPM, dur_s=2.6)
-    if win is None:                          # fall back to the take's calm head
-        win = src[int(2 * C.SR):int(4.6 * C.SR)]
+    if win is None:  # fall back to the take's calm head
+        win = src[int(2 * C.SR) : int(4.6 * C.SR)]
     # trim tiny DC/level drift, then crossfade-loop it
     win = win - win.mean()
     return C.make_seamless_loop(win, xfade_s=0.14)
 
 
-def build_rev(loop: np.ndarray, e_target: np.ndarray,
-              start_rpm: float, end_rpm: float, dur_s: float) -> np.ndarray:
+def build_rev(
+    loop: np.ndarray, e_target: np.ndarray, start_rpm: float, end_rpm: float, dur_s: float
+) -> np.ndarray:
     n = int(dur_s * C.SR)
     # smootherstep rpm ramp so the pull eases in and settles, not a linear line
     u = np.linspace(0.0, 1.0, n)
@@ -120,16 +120,14 @@ def build_rev(loop: np.ndarray, e_target: np.ndarray,
     return y[:n]
 
 
-def build_cruise(loop: np.ndarray, e_target: np.ndarray,
-                 rpm: float, dur_s: float) -> np.ndarray:
+def build_cruise(loop: np.ndarray, e_target: np.ndarray, rpm: float, dur_s: float) -> np.ndarray:
     ratio = rpm / IDLE_RPM
     src = C.tile(loop, dur_s * ratio + 2.0)
     r = np.full(int((dur_s + 0.4) * C.SR), ratio)
     shifted = _resample_varying(src, r)
     y = _reimpose_formants(shifted, e_target)
     # re-loop the steady result so cruise tiles cleanly too
-    y = C.make_seamless_loop(y[int(0.2 * C.SR):int((dur_s + 0.2) * C.SR)],
-                             xfade_s=0.12)
+    y = C.make_seamless_loop(y[int(0.2 * C.SR) : int((dur_s + 0.2) * C.SR)], xfade_s=0.12)
     return C.tile(y, dur_s)
 
 
@@ -153,8 +151,7 @@ def main() -> None:
     print("wrote:")
     for p in paths:
         print("  ", p)
-    print("rms  idle=%.3f rev=%.3f cruise=%.3f"
-          % (rms(idle_out), rms(rev), rms(cruise)))
+    print(f"rms  idle={rms(idle_out):.3f} rev={rms(rev):.3f} cruise={rms(cruise):.3f}")
     print("score:", C.score(loop, rev))
 
 

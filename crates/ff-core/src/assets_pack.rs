@@ -1006,10 +1006,11 @@ mod tests {
         // Truth joined the country pool; 378 since 2026-09-11 (the gospel,
         // tejano, synthwave and Night Line song batch); 380 since 2026-09-13
         // (D-Major Medley and From Bossa to Blues); 405 since 2026-09-19
-        // (25 selected radio songs). Only the size and header are checked
-        // here: hashing the whole pack is the Python suite's job, once.
+        // (25 selected radio songs); 426 since 2026-09-25 (eight jazz songs,
+        // ten station IDs, three hiring ads). Only the size and header are
+        // checked here: hashing the whole pack is the Python suite's job, once.
         let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 367_493_532);
+        assert_eq!(len, 392_392_427);
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()

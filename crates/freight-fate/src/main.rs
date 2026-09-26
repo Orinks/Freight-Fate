@@ -185,23 +185,37 @@ fn run(args: &[String]) -> i32 {
         return playtest_road(args);
     }
     if has(args, "--agent-server") {
-        let launch =
-            flag_value(args, "--find").map(|feature| freight_fate::agent_server::LaunchAt {
-                feature,
-                origin: flag_value(args, "--from"),
-                destination: flag_value(args, "--to"),
-                seed: flag_value(args, "--seed")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(7),
-            });
-        return freight_fate::agent_server::run(
-            has(args, "--reset"),
-            launch,
-            has(args, "--operator-keys"),
-            has(args, "--online"),
-        );
+        return agent_server(args);
     }
     app::main_with(CliOptions::parse(args.iter().cloned()))
+}
+
+#[cfg(feature = "agent-server")]
+fn agent_server(args: &[String]) -> i32 {
+    let launch = flag_value(args, "--find").map(|feature| freight_fate::agent_server::LaunchAt {
+        feature,
+        origin: flag_value(args, "--from"),
+        destination: flag_value(args, "--to"),
+        seed: flag_value(args, "--seed")
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(7),
+    });
+    freight_fate::agent_server::run(
+        has(args, "--reset"),
+        launch,
+        has(args, "--operator-keys"),
+        has(args, "--staging"),
+    )
+}
+
+/// Player builds leave the agent server out (the `agent-server` feature).
+#[cfg(not(feature = "agent-server"))]
+fn agent_server(_args: &[String]) -> i32 {
+    eprintln!(
+        "This build has no agent server. Build one with \
+         `cargo build --release -p freight-fate --bin freightfate`."
+    );
+    2
 }
 
 /// Every switch the binary answers to, for the unrecognised-switch check.
@@ -210,7 +224,7 @@ fn run(args: &[String]) -> i32 {
 const KNOWN_SWITCHES: &[&str] = &[
     "--agent-server",
     "--operator-keys",
-    "--online",
+    "--staging",
     "--ai",
     "--assists",
     "--at",
@@ -306,9 +320,9 @@ Drive tools:
                                     to boot straight into a staged drive;
                                     --operator-keys keeps the window up and
                                     lets the operator's keyboard in, to play
-                                    alongside the agent; --online uses its
-                                    own directory with the real driver
-                                    identity and cloud backup on)
+                                    alongside the agent; --staging uses its
+                                    own directory and its own driver on the
+                                    staging site, cloud backup on)
   --log PATH                        session log for the watcher
 ";
 

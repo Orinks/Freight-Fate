@@ -14,8 +14,9 @@ Packages the Rust game and archives it for release:
 
 Run from the repository root: ``uv run python tools/build_release.py``
 
-The pipeline is ``cargo build --release -p freight-fate``
-(``--cargo-target-dir`` picks the Cargo target directory), then ``ff-bake``
+The pipeline is ``cargo build --release -p freight-fate --no-default-features``
+(no agent server in a player build; ``--cargo-target-dir`` picks the Cargo
+target directory), then ``ff-bake``
 to turn the JSON data tree into ``world.ffdata``, then a ``FreightFate/``
 folder with the executable renamed to ``FreightFate``. On macOS it creates
 ``FreightFate.app`` with the executable under ``Contents/MacOS``, native
@@ -79,7 +80,7 @@ ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # environment at deploy time, so setting it takes a redeploy to have any
 # effect. The sha256 below is what actually gates the download either way.
 DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
-DEFAULT_MUSIC_SHA256 = "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
+DEFAULT_MUSIC_SHA256 = "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
@@ -508,7 +509,9 @@ def cargo_exe_name(platform_name: str = sys.platform) -> str:
 
 
 def cargo_build_command(target_dir: Path | None = None) -> list[str]:
-    cmd = ["cargo", "build", "--release", "-p", RUST_PACKAGE]
+    # No default features: the agent server (``--agent-server``) is dev
+    # tooling, and a player has no use for an agent at the wheel.
+    cmd = ["cargo", "build", "--release", "-p", RUST_PACKAGE, "--no-default-features"]
     if target_dir is not None:
         cmd.extend(["--target-dir", str(target_dir)])
     return cmd

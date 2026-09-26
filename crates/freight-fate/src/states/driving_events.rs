@@ -20,6 +20,8 @@
 //! * [`ramp_terminal`] -- what meets you at the end of a ramp: the light,
 //!   the sign, the cross-traffic bubble, the stop bar and its tone;
 //!   [`ramp_crossing`] works the pedals for it and judges the crossing.
+//!   [`street_controls`] plays a facility chain's lights and signs through
+//!   the same two.
 //! * [`update_exit`] -- the per-frame advance of an armed exit or an active
 //!   ramp, and the destination terminal loop-back.
 //! * [`cruise`] -- arming and adjusting cruise and the speed keeper;
@@ -37,12 +39,15 @@ pub mod arrival;
 pub mod chains;
 pub mod cruise;
 pub mod cruise_loop;
+pub mod decel_lane;
+pub mod descent_control;
 pub mod destination_exit;
 pub mod exits;
 pub mod pending;
 pub mod ramp_crossing;
 pub mod ramp_terminal;
 pub mod stops;
+pub mod street_controls;
 pub mod trip_events;
 pub mod update_exit;
 

@@ -40,7 +40,8 @@ pub use paths::{
 // Real time (1x) joined the row on 2026-08-22: the driving clock runs at the
 // speed of the wall clock, which with live weather is as true to life as the
 // game gets. It is last in the cycle so the two compressed pacings keep their
-// places, and like the others it can be changed mid-drive from the pause menu.
+// places, and like the others it can be changed mid-drive from the pause menu,
+// taking effect when the truck next stops (PACE_CHANGE_MAX_MPH).
 pub const TIME_SCALES: [f64; 3] = [10.0, 20.0, 1.0];
 pub const RETIRED_TIME_SCALE: f64 = 40.0;
 pub const TIME_SCALE_FALLBACK: f64 = 20.0;
@@ -257,7 +258,7 @@ pub fn driving_assist_preset(name: &str) -> Option<&'static [AssistValue; 9]> {
         .map(|(_, values)| values)
 }
 
-/// The 78 persisted fields, in the Python dataclass's declaration order
+/// The persisted fields, in the Python dataclass's declaration order
 /// (which is the order `save` writes them in). Each row is
 /// `name: type = default => coercion`, the coercion naming how a raw JSON
 /// value lands on the typed field (see `migrate::coerce`).
@@ -383,6 +384,9 @@ settings_fields! {
     /// hours of service: realistic/relaxed (debug_off is an internal dev
     /// bypass)
     hos_mode: String = "realistic" => str_checked,
+    /// Optional early advice from the legal-reach planner. The mandatory
+    /// hours warnings and requested readouts do not depend on this switch.
+    hos_planning_hints: bool = false => bool_strict,
     /// How much of the lane-holding work the truck does. "full" keeps the
     /// truck centred, takes your exits for you, and turns Left and Right
     /// into tap lane changes. "partial" drifts gently and gives you generous
@@ -685,6 +689,16 @@ impl Settings {
     /// Whether the lane work -- and the exit -- belongs to the driver.
     pub fn lane_is_manual(&self) -> bool {
         !self.lane_is_automated()
+    }
+
+    /// Whether something supplies the wheel a bend asks for, so the truck
+    /// follows the road's curve without the driver steering it: curve
+    /// assistance, or partial lane keeping, which steers through the road's
+    /// curve the same way while lane changes and speed stay the driver's
+    /// (owner ruling, 2026-09-24). Lane keeping off leaves the bend to the
+    /// driver's own wheel; full holds the lane outright.
+    pub fn road_steers_the_bend(&self) -> bool {
+        self.curve_speed_assist || self.lane_keeping == "partial"
     }
 
     /// The spoken value with the clause that says what it costs you.

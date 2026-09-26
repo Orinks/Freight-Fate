@@ -82,8 +82,8 @@ impl DrivingState {
         // parked while the truck is on the ramp: the harness showed it reading
         // 3.200 mi with the truck crawling yards from the market, so the cap
         // came out at 215 mph and the assist waved the truck through. The
-        // arrival lives on the ramp instead -- ramp_mi counts down from
-        // RAMP_LENGTH_MI to the stop, and the dock opens when it reaches zero
+        // arrival lives on the ramp instead -- ramp_mi counts down from the
+        // ramp's own length to the stop, and the dock opens when it reaches zero
         // at docking speed; anything faster is a blown stop and the driver is
         // told they drove past (owner, three runs, 2026-08-19/20).
         //
@@ -126,7 +126,15 @@ impl DrivingState {
             // fought, and a foot on the brake wins outright.
             self.destination_arrival_active = false;
             if let Some(ramp_mi) = self.ramp_mi.filter(|mi| *mi > 0.0) {
-                let (limit_mph, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                // The street's limit past the bar, never the mainline's: the
+                // milepost holds at the gore while the truck is on the ramp,
+                // so the limit "here" was the interstate's, and the assist
+                // wound a truck leaving a stop bar toward 70 on the way into
+                // town (every-assist audit, 2026-09-24). With no street zone
+                // to read, the facility access limit stands in.
+                let limit_mph = self
+                    .street_limit_past_bar_mph()
+                    .unwrap_or(ff_core::sim::trip_models::FACILITY_ACCESS_LIMIT_MPH);
                 let target_mph = limit_mph.max(FACILITY_LANE_ROLL_MPH);
                 self.hold_approach_speed_with(
                     ramp_mi * 1609.344,
@@ -434,11 +442,17 @@ impl DrivingState {
 
     /// Whether this delivery's ramp hands off to a street chain rather than
     /// ending at the gate (see `destination_street_chain_ahead`).
+    ///
+    /// A road stop with its own streets from the exit to its lot continues
+    /// the same way (`begin_stop_chain`).
     pub(crate) fn ramp_continues_to_destination_streets(&mut self, ctx: &GameContext) -> bool {
-        self.ramp_stop
-            .as_ref()
-            .is_some_and(|stop| stop.stop_type == "delivery_destination")
-            && self.destination_street_chain_ahead(ctx)
+        match self.ramp_stop.clone() {
+            Some(stop) if stop.stop_type == "delivery_destination" => {
+                self.destination_street_chain_ahead(ctx)
+            }
+            Some(stop) => self.stop_chain_route(&stop).is_some(),
+            None => false,
+        }
     }
 
     /// Whether facility stopping assistance can take the truck on from the
@@ -450,6 +464,13 @@ impl DrivingState {
     /// release stays the driver's. A driver who braked the pull-ahead off has
     /// said no for this ramp.
     pub(crate) fn approach_pull_ahead_available(&mut self, ctx: &GameContext) -> bool {
+        if self.on_street_control() {
+            // A light or sign on the streets: the speed keeper is what drives
+            // on from it, so the same promise needs the keeper.
+            return ctx.settings.destination_approach_assist
+                && ctx.settings.speed_keeper
+                && !self.approach_pull_ahead_canceled;
+        }
         if !ctx.settings.destination_approach_assist
             || self.ramp_stop.is_none()
             || self.approach_pull_ahead_canceled
@@ -468,8 +489,13 @@ impl DrivingState {
         self.destination_assist_brake = 0.0;
         // ROUTE, not the ambient default: an automation just released the
         // pedals (the automation-handoff rule, 2026-08-20).
+        let whither = if self.ramp_continues_to_destination_streets(ctx) {
+            "onto the streets"
+        } else {
+            "to the entrance"
+        };
         ctx.say_event_with(
-            "Facility stopping assistance released; pull ahead to the entrance.",
+            format!("Facility stopping assistance released; pull ahead {whither}."),
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),

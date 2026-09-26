@@ -214,9 +214,22 @@ pub struct LaneKeeping {
     /// points right of the road. Zero means tracking it.
     pub yaw_rad: f64,
     pub steering: f64,
+    /// The straighten-up key is held: steer out the heading error only,
+    /// the heading half of partial lane keeping's law. It points the truck
+    /// down the road and leaves where it sits in the lane to the driver.
+    pub straighten: bool,
     pub lane: i64, // everyone starts in the right lane
     pub lane_count: i64,
     pub crossed: i64, // last update's lane change: +1 left, -1 right
+    /// An exit lane is open to the right of the right lane: from the start of
+    /// its taper to the gore, the right side of lane 0 is a lane line, not the
+    /// road edge. The driving state opens it for an exit the truck is set to
+    /// take; nothing else ever does.
+    pub exit_lane_open: bool,
+    /// Set for the one update in which the truck crossed into that exit lane.
+    /// Not a `crossed` change: the exit lane is not a traffic lane, so nothing
+    /// that answers a lane change (the mirror check above all) applies to it.
+    pub entered_exit_lane: bool,
     wander: f64,
     wander_target: f64,
     wander_timer: f64,
@@ -245,9 +258,12 @@ impl LaneKeeping {
             offset: 0.0,
             yaw_rad: 0.0,
             steering: 0.0,
+            straighten: false,
             lane: 0,
             lane_count: DEFAULT_LANE_COUNT,
             crossed: 0,
+            exit_lane_open: false,
+            entered_exit_lane: false,
             wander: 0.0,
             wander_target: 0.0,
             wander_timer: 0.0,
@@ -290,7 +306,7 @@ impl LaneKeeping {
     /// neighboring lane. Drifting toward another lane never rumbles; the
     /// rumble strip lives on the shoulder and the median.
     fn edge_excursion_inner(&self) -> f64 {
-        if self.offset > 0.0 && self.lane == 0 {
+        if self.offset > 0.0 && self.lane == 0 && !self.exit_lane_open {
             return self.offset;
         }
         if self.offset < 0.0 && self.lane >= self.lane_count - 1 {
@@ -325,6 +341,7 @@ impl LaneKeeping {
             bank,
         } = road;
         self.crossed = 0;
+        self.entered_exit_lane = false;
         let Some((drift_mult, steer_mult)) = assist_tuning(assist) else {
             self.offset = 0.0;
             self.yaw_rad = 0.0;
@@ -358,6 +375,8 @@ impl LaneKeeping {
         // input rather than a rollover (see MAX_STEER_LATERAL_G).
         let helper = if assist_steers(assist) {
             -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
+        } else if self.straighten {
+            -self.yaw_rad * ASSIST_YAW_GAIN
         } else {
             0.0
         };
@@ -422,6 +441,12 @@ impl LaneKeeping {
             self.lane -= 1;
             self.offset -= LANE_WIDTH;
             self.crossed = -1;
+        } else if self.offset >= CROSS_AT && self.exit_lane_open {
+            // Across the line into the exit lane. Its own right side is the
+            // ramp's edge, so the lane it opened is the truck's lane now.
+            self.offset -= LANE_WIDTH;
+            self.exit_lane_open = false;
+            self.entered_exit_lane = true;
         }
         self.offset = self.offset.clamp(-MAX_OFFSET, MAX_OFFSET);
 
@@ -502,6 +527,36 @@ mod tests {
             }
         }
         events
+    }
+
+    #[test]
+    fn an_open_exit_lane_is_a_lane_to_the_right_not_the_shoulder() {
+        // Held right from the right lane: with the exit lane open the truck
+        // crosses into it and never touches a rumble strip; with it closed the
+        // same steer is the shoulder.
+        for open in [true, false] {
+            let mut lane = LaneKeeping::new(Some(11));
+            lane.exit_lane_open = open;
+            lane.steering = 1.0;
+            let mut entered = false;
+            let mut rumble: f64 = 0.0;
+            for _ in 0..80 {
+                lane.update(0.05, 29.0, RoadConditions::default(), "partial", false);
+                entered |= lane.entered_exit_lane;
+                if !entered {
+                    rumble = rumble.max(lane.rumble_level());
+                }
+            }
+            assert_eq!(entered, open);
+            assert_eq!(lane.lane, 0);
+            assert_eq!(lane.crossed, 0);
+            if open {
+                assert_eq!(rumble, 0.0);
+                assert!(!lane.exit_lane_open, "entering the lane closes it");
+            } else {
+                assert!(rumble > 0.0);
+            }
+        }
     }
 
     // -- heading -------------------------------------------------------------

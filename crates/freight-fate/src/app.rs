@@ -134,6 +134,10 @@ pub struct App {
     /// (2026-09-01); the agent's own keys come in through
     /// `queue_player_input`, which this never touches.
     operator_keys_ignored: bool,
+    /// Set by an input policy for one frame: the frame runs with no time
+    /// passing. The agent server's lockstep uses it so the road waits while
+    /// the agent decides.
+    world_held: bool,
 }
 
 /// Read-only driving facts available to a normal-input policy.
@@ -196,6 +200,17 @@ impl PlayerInputFrame<'_> {
 
     pub fn event_speech_busy(&mut self) -> bool {
         self.app.ctx.event_voice_busy()
+    }
+
+    /// Run this frame with no time passing: events still pump and queued
+    /// input still lands, but nothing in the world moves.
+    pub fn hold_world(&mut self) {
+        self.app.world_held = true;
+    }
+
+    /// Whether this frame will run with no time passing.
+    pub fn world_is_held(&self) -> bool {
+        self.app.world_held
     }
 
     /// Hand the keyboard to the operator (`live`) or take it back: the
@@ -498,6 +513,7 @@ impl App {
             initial_state: None,
             queued_player_input: Vec::new(),
             operator_keys_ignored: false,
+            world_held: false,
         }
     }
 
@@ -930,6 +946,11 @@ impl App {
                 self.ctx.running = false;
                 break;
             }
+            let dt = if std::mem::take(&mut self.world_held) {
+                0.0
+            } else {
+                dt
+            };
             self.frame(dt);
             frames += 1;
             if frames == 1 {
@@ -1151,6 +1172,7 @@ mod operator_keys_tests {
                 key: Key::Space,
                 mods: Mods::NONE,
                 text: Some(' '),
+                repeat: false,
             },
             InputEvent::KeyUp {
                 key: Key::Space,

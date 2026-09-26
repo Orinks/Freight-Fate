@@ -2,6 +2,7 @@
 //! re-speak, and the retarder transcript trace.
 
 use ff_core::sim::season::real_clock_game_hours;
+use ff_core::sim::trip_models::PACE_CHANGE_MAX_MPH;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent, TRANSCRIPT_TARGET};
@@ -41,7 +42,9 @@ impl DrivingState {
         self.critical_respeak_at = None;
         let ahead = curve.start_mi - self.trip.position_mi;
         let speed = self.trip.truck.speed_mph();
-        if ahead <= 0.0 || speed <= curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH {
+        let floor = (curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH)
+            .min(self.trip.bend_costs_above_mph(&curve));
+        if ahead <= 0.0 || speed <= floor {
             return;
         }
         // The pacenote speaks; the chime that preceded it does not (owner,
@@ -109,6 +112,8 @@ impl DrivingState {
         ctx.update_music_rotation(dt);
         self.refresh_live_facts();
         self.trace_engine_brake();
+        // The curve call prices a bend by who holds the lane in it.
+        self.trip.lane_steers = Self::lane_steers(ctx);
         // A fresh loaded run out of a chain-capable origin starts on the
         // facility's streets. Decided on the first tick, never on a resume:
         // from_snapshot marks the check done and re-enters a chain itself.
@@ -118,26 +123,30 @@ impl DrivingState {
                 self.begin_departure_chain(ctx, true);
             }
         }
-        // Pacing can be changed from the pause menu mid-trip. Entering Real
-        // time also moves the independent spoken clock to now, while the
+        // Pacing can be changed from the pause menu mid-trip, and takes
+        // effect once the truck is stopped (`PACE_CHANGE_MAX_MPH`). Entering
+        // Real time also moves the independent spoken clock to now, while the
         // career, deadline, and HOS clocks keep their elapsed totals.
-        if ctx.settings.time_scale == 1.0 && self.trip.time_scale != 1.0 {
-            let elapsed_h = self.trip.game_minutes / 60.0;
-            let real_hours = real_clock_game_hours(None);
-            profile_mut_of(ctx).sync_calendar_to(real_hours - elapsed_h);
-            ctx.save_profile();
-            let local_hour = real_hours.rem_euclid(24.0);
-            let reference_now = local_hour - self.trip.current_timezone().offset_h;
-            let start_hour = (reference_now - elapsed_h).rem_euclid(24.0);
-            self.trip.start_hour = start_hour;
-            self.trip.traffic_manager.start_hour = start_hour;
-            if self.trip.weather.game_hours.is_some() {
-                self.trip.weather.game_hours =
-                    Some(profile_of(ctx).calendar_game_hours() + elapsed_h);
+        if ctx.settings.time_scale != self.trip.time_scale
+            && self.trip.truck.speed_mph().abs() < PACE_CHANGE_MAX_MPH
+        {
+            if ctx.settings.time_scale == 1.0 {
+                let elapsed_h = self.trip.game_minutes / 60.0;
+                let real_hours = real_clock_game_hours(None);
+                profile_mut_of(ctx).sync_calendar_to(real_hours - elapsed_h);
+                ctx.save_profile();
+                let local_hour = real_hours.rem_euclid(24.0);
+                let reference_now = local_hour - self.trip.current_timezone().offset_h;
+                let start_hour = (reference_now - elapsed_h).rem_euclid(24.0);
+                self.trip.start_hour = start_hour;
+                self.trip.traffic_manager.start_hour = start_hour;
+                if self.trip.weather.game_hours.is_some() {
+                    self.trip.weather.game_hours =
+                        Some(profile_of(ctx).calendar_game_hours() + elapsed_h);
+                }
             }
+            self.trip.time_scale = ctx.settings.time_scale;
         }
-        // Keep the trip's clock compression in step with the setting.
-        self.trip.time_scale = ctx.settings.time_scale;
         let tuning = tuning_for_time_scale(self.trip.time_scale);
         self.trip.hazard_scale =
             hos::hazard_scale(&ctx.settings.hos_mode) * tuning.hazard_frequency;
@@ -280,10 +289,31 @@ impl DrivingState {
         // sweep, 2026-09-20). A pedal an assist is holding is not a pedal
         // the driver let go of, so the decay stops there. Their own brake
         // key still cancels the assist, which is what drops the floor.
+        //
+        // The ramp terminal's servo was left out, and it is the one that
+        // presses AFTER physics runs: the truck felt 0.09 of a 0.20 stop,
+        // slowed at 0.43 m/s2 against the 0.6 planned, reached a stop bar at
+        // 15 mph and had to slam the rest (agent drive into Abilene,
+        // 2026-09-23). Only while it still has a terminal to stop at: a press
+        // left over once the ramp is behind the truck held it on its brakes.
+        let ramp_terminal_brake = if self.terminal_live() && !self.ramp_terminal_done {
+            self.ramp_assist_brake
+        } else {
+            0.0
+        };
+        // The exit assists' deceleration-lane servo, by the same rule. It
+        // stands itself down (to zero) the frame the lane is behind the truck.
+        let decel_lane_brake = if self.in_deceleration_lane() {
+            self.decel_lane_brake
+        } else {
+            0.0
+        };
         let assist_floor = self
             .keeper_snub
             .max(self.aeb_brake)
             .max(self.destination_assist_brake)
+            .max(ramp_terminal_brake)
+            .max(decel_lane_brake)
             .max(self.curve_servo.as_ref().map_or(0.0, |servo| servo.brake))
             .clamp(0.0, 1.0);
         {
@@ -532,6 +562,7 @@ impl DrivingState {
         if self.selected_stop_key.is_some()
             && self.trip.planned_stop_key != self.selected_stop_key
             && self.ramp_stop.is_none()
+            && self.stop_chain.is_none()
         {
             // The trip model canceled a passed plan. Do not leave explicit
             // intent or its stopping assist armed for a later optional exit.
@@ -543,7 +574,17 @@ impl DrivingState {
         self.check_gate_approach_warning(ctx, dt);
         self.update_turn_commitment(ctx, dt);
         let moved_mi = self.trip.last_moved_mi;
+        // Advance and announce an already-active signal before adjudicating
+        // this frame's stop-bar crossing. Otherwise a yellow-to-red boundary
+        // uses the previous phase even though the real-time clock has moved.
+        let ramp_was_active = self.ramp_mi.is_some();
+        self.update_ramp_light(ctx, dt);
         self.update_exit_with_input(ctx, moved_mi, dt, hand_accelerating);
+        if !ramp_was_active && self.ramp_mi.is_some() {
+            // An exit can create its terminal above. Announce its seeded
+            // starting phase now without charging this frame's time twice.
+            self.update_ramp_light(ctx, 0.0);
+        }
         self.update_departure_ramp(ctx, moved_mi);
         // Immediately after the exit watch, which is what turns a signaled
         // scale exit into a ramp. Only now can a scale crossing be told apart
@@ -563,7 +604,6 @@ impl DrivingState {
         self.update_audio(ctx, dt);
         self.update_announcements(ctx, dt);
         self.update_ambient_events(ctx, dt);
-        self.update_ramp_light(ctx, dt);
         self.update_critical_respeak(ctx, dt);
         self.update_hazard(ctx, dt);
         self.update_grade_advisory(ctx);
@@ -598,6 +638,9 @@ impl DrivingState {
             if self.departure_chain {
                 // End of the origin's streets: merge onto the highway trip.
                 self.finish_departure_chain(ctx);
+            } else if self.stop_chain.is_some() {
+                // At a road stop's lot, off its own streets.
+                self.handle_stop_chain_end(ctx);
             } else if self.phase == DRIVE_PHASE_PICKUP {
                 self.handle_pickup_gate(ctx);
             } else if self.ramp_mi.is_some() {
@@ -625,5 +668,11 @@ impl DrivingState {
         live::set_hazard_active(self.hazard_deadline.is_some());
         live::set_arrival_menu_open(self.arrival_menu_open);
         live::set_gate_stop_prompted(self.arrival_full_stop_said);
+        live::set_on_ramp(self.ramp_mi.is_some());
+        live::set_ramp_holding(
+            self.ramp_mi.is_some()
+                && !self.ramp_terminal_done
+                && (self.ramp_waiting_at_sign || self.ramp_waiting_at_light),
+        );
     }
 }

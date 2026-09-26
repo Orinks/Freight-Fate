@@ -30,7 +30,7 @@
 //! an injected [`Clock`], and runs its fetches on `std::thread` when
 //! `threaded` (the Python daemon-thread shape) or inline when not.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::thread::JoinHandle;
@@ -45,7 +45,7 @@ use super::real_traffic_parsers::pyval::to_i64;
 pub use super::real_traffic_parsers::TrafficEvent;
 use super::real_traffic_parsers::{
     parse_cars_events, parse_construction_events, parse_events, parse_iteris_construction_events,
-    parse_iteris_events, parse_wzdx_construction_events, parse_wzdx_events,
+    parse_iteris_events, parse_lcs_csv, parse_wzdx_construction_events, parse_wzdx_events,
 };
 
 // ---- The network seam ----------------------------------------------------
@@ -227,6 +227,7 @@ pub const DEFAULT_USER_AGENT: &str =
 // surface matches the Python file.
 mod state_apis;
 pub use state_apis::{state_api, StateApi, STATE_APIS};
+pub mod caltrans;
 
 // Cache settings
 pub const FETCH_TIMEOUT_S: f64 = 8.0;
@@ -333,6 +334,29 @@ impl TrafficData {
 struct ProviderState {
     cache: HashMap<String, TrafficData>,
     failed_until: HashMap<String, f64>,
+    /// Cache keys with a fetch running.
+    in_flight: HashSet<String>,
+}
+
+/// The cache entry a fetch fills: the state (or feed) key, with
+/// `:construction` for the construction fetch.
+fn cache_key(state: &str, construction: bool) -> String {
+    if construction {
+        format!("{state}:construction")
+    } else {
+        state.to_string()
+    }
+}
+
+/// Whether a feed key has anything to fetch. `no_api` states never do;
+/// California's lane closures come per district, so only a district key
+/// (`california/d7`) fetches, and only construction.
+fn fetches(api: &StateApi, key: &str, construction: bool) -> bool {
+    match api.parser {
+        "no_api" => false,
+        "caltrans_lcs" => construction && caltrans::district_of_feed_key(key).is_some(),
+        _ => true,
+    }
 }
 
 /// The half of the provider a background fetch needs: transport, clock and
@@ -531,6 +555,15 @@ impl Fetcher {
         let parser = api_config.construction_parser.unwrap_or(api_config.parser);
         let events = if parser == "cars" {
             self.fetch_cars_events(state, api_config.construction_endpoint.unwrap_or(""), true)?
+        } else if parser == "caltrans_lcs" {
+            let district = caltrans::district_of_feed_key(state)
+                .ok_or_else(|| TransportError::new(format!("{state} names no district")))?;
+            let body = self.transport.get(
+                &caltrans::lcs_csv_url(api_config.base_url.unwrap_or(""), district),
+                &[("User-Agent", self.user_agent.as_str())],
+                FETCH_TIMEOUT_S,
+            )?;
+            parse_lcs_csv(&body, self.now())
         } else {
             let url = format!(
                 "{}{}",
@@ -665,8 +698,8 @@ impl RealTrafficProvider {
                     return cached.clone();
                 }
             }
-            // no_api: never fetch, but honour any (test-seeded) cache entry
-            if api.parser == "no_api" {
+            // no fetch: honour any (test-seeded) cache entry
+            if !fetches(api, &state_key, false) {
                 return cached.unwrap_or_else(|| self.empty_data(&state_key));
             }
             cached
@@ -705,8 +738,8 @@ impl RealTrafficProvider {
                     return cached.clone();
                 }
             }
-            // no_api: never fetch, but honour any (test-seeded) cache entry
-            if api.parser == "no_api" {
+            // no fetch: honour any (test-seeded) cache entry
+            if !fetches(api, &state_key, true) {
                 return cached.unwrap_or_else(|| self.empty_data(&state_key));
             }
             cached
@@ -715,8 +748,16 @@ impl RealTrafficProvider {
         cached.unwrap_or_else(|| self.empty_data(&state_key))
     }
 
-    /// Spawn a background fetch (or run it inline when not threaded).
+    /// Spawn a background fetch (or run it inline when not threaded). A feed
+    /// already being fetched is not fetched again alongside itself: a
+    /// dispatch board asks about every leg of every route option, and a
+    /// second copy of District 7's 2.2 MB would only slow the first past
+    /// the feed budget.
     fn spawn_fetch(&self, state: String, construction: bool) {
+        let flight_key = cache_key(&state, construction);
+        if !lock_unpoisoned(&self.state).in_flight.insert(flight_key) {
+            return;
+        }
         let fetcher = self.fetcher.clone();
         let shared = Arc::clone(&self.state);
         let job = move || run_fetch(&fetcher, &shared, &state, construction);
@@ -739,14 +780,22 @@ impl RealTrafficProvider {
         road_name: Option<&str>,
         radius_mi: f64,
     ) -> Vec<TrafficEvent> {
-        let construction_data = self.fetch_construction(state);
-        if construction_data.events.is_empty() || route_points.is_empty() {
+        // California publishes per district: ask only for the districts
+        // this stretch of road passes through.
+        let events: Vec<TrafficEvent> = if state.to_lowercase().trim() == caltrans::CALTRANS_STATE {
+            caltrans::districts_near_route(route_points, radius_mi)
+                .into_iter()
+                .flat_map(|d| self.fetch_construction(&caltrans::feed_key(d)).events)
+                .collect()
+        } else {
+            self.fetch_construction(state).events
+        };
+        if events.is_empty() || route_points.is_empty() {
             return Vec::new();
         }
         // Only consider construction-type events
         let mut nearby = Vec::new();
-        for event in construction_data
-            .events
+        for event in events
             .into_iter()
             .filter(|e| e.event_type == "construction")
         {
@@ -805,18 +854,23 @@ impl RealTrafficProvider {
 /// replaces the old one and the cooldown clears; on failure the state goes
 /// into `RETRY_AFTER_S` cooldown.
 fn run_fetch(fetcher: &Fetcher, shared: &Mutex<ProviderState>, state: &str, construction: bool) {
-    let (result, cache_key, what) = if construction {
+    /// Clears the fetch's in-flight mark however the fetch ends, a panicking
+    /// parser included, so a failed worker never leaves its feed unfetchable.
+    struct InFlight<'a>(&'a Mutex<ProviderState>, String);
+    impl Drop for InFlight<'_> {
+        fn drop(&mut self) {
+            lock_unpoisoned(self.0).in_flight.remove(&self.1);
+        }
+    }
+    let cache_key = cache_key(state, construction);
+    let _in_flight = InFlight(shared, cache_key.clone());
+    let (result, what) = if construction {
         (
             fetcher.fetch_construction_from_api(state),
-            format!("{state}:construction"),
             "construction data",
         )
     } else {
-        (
-            fetcher.fetch_from_api(state),
-            state.to_string(),
-            "traffic data",
-        )
+        (fetcher.fetch_from_api(state), "traffic data")
     };
     match result {
         Ok(data) => {

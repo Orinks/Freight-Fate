@@ -80,7 +80,9 @@ def norm(x: np.ndarray) -> np.ndarray:
     return x / (np.abs(x).max() or 1.0)
 
 
-def cycle_corr(x: np.ndarray, sr: int = SR, lo: float = 15.0, hi: float = 130.0) -> tuple[float, float]:
+def cycle_corr(
+    x: np.ndarray, sr: int = SR, lo: float = 15.0, hi: float = 130.0
+) -> tuple[float, float]:
     """Best-case cycle-to-cycle correlation, sweeping f0.
 
     Sweeping matters: pick the wrong period and successive windows misalign,
@@ -93,9 +95,11 @@ def cycle_corr(x: np.ndarray, sr: int = SR, lo: float = 15.0, hi: float = 130.0)
         n = min((len(x) // p) - 1, 40)
         if n < 8:
             continue
-        cs = [np.corrcoef(x[i * p:(i + 1) * p], x[(i + 1) * p:(i + 2) * p])[0, 1]
-              for i in range(n)
-              if x[i * p:(i + 1) * p].std() > 0 and x[(i + 1) * p:(i + 2) * p].std() > 0]
+        cs = [
+            np.corrcoef(x[i * p : (i + 1) * p], x[(i + 1) * p : (i + 2) * p])[0, 1]
+            for i in range(n)
+            if x[i * p : (i + 1) * p].std() > 0 and x[(i + 1) * p : (i + 2) * p].std() > 0
+        ]
         if cs and np.mean(cs) > best[0]:
             best = (float(np.mean(cs)), sr / p)
     return best
@@ -106,12 +110,14 @@ def main() -> None:
 
     print("CYCLE-TO-CYCLE REPETITION (best-case f0, so this is an upper bound)")
     print("  ~0.67 = a real recording. ~1.00 = every cycle is a copy: electronic.")
-    for label, rel in (("idle.ogg (Duff, REAL)", "engine/idle.ogg"),
-                       ("mid.ogg  (shipped)", "engine/mid.ogg")):
+    for label, rel in (
+        ("idle.ogg (Duff, REAL)", "engine/idle.ogg"),
+        ("mid.ogg  (shipped)", "engine/mid.ogg"),
+    ):
         r, f = cycle_corr(read_mono(rel, 3.0))
         print(f"    {label:24s} r={r:+.3f} at {f:5.1f} Hz")
     short, _ = engine(1500, cycles=8, load=0.6)
-    r, f = cycle_corr(np.tile(short, int(secs * SR / len(short)) + 1)[:int(3 * SR)])
+    r, f = cycle_corr(np.tile(short, int(secs * SR / len(short)) + 1)[: int(3 * SR)])
     print(f"    {'engine_v1 (synth)':24s} r={r:+.3f} at {f:5.1f} Hz")
 
     print("\n1. LOOP LENGTH -- same synth, different repeat period")
@@ -124,7 +130,7 @@ def main() -> None:
 
     print("\n2. NORM'S IDEA, LITERALLY: synth + idle.ogg underneath")
     print("   Two engines at once. Listen for the beating -- this is the failure.")
-    body = np.tile(short, int(secs * SR / len(short)) + 1)[:int(secs * SR)]
+    body = np.tile(short, int(secs * SR / len(short)) + 1)[: int(secs * SR)]
     idle = read_mono("engine/idle.ogg", secs)
     for tag, level in (("quiet", 0.25), ("even", 0.6)):
         write_wav(f"mix_synth_plus_idle_{tag}.wav", norm(norm(body) + level * norm(idle)))
@@ -138,7 +144,7 @@ def main() -> None:
 
     print("\n4. LONG LOOP + BED -- both fixes together, the actual proposal")
     long_sig, _ = engine(1500, cycles=128, load=0.6)
-    long_body = np.tile(long_sig, int(secs * SR / len(long_sig)) + 1)[:int(secs * SR)]
+    long_body = np.tile(long_sig, int(secs * SR / len(long_sig)) + 1)[: int(secs * SR)]
     write_wav("mix_best_long_plus_road.wav", norm(norm(long_body) + 0.55 * norm(road)))
 
     print("\n5. CONTROL: the shipped mid.ogg mixed the same way, for reference")
