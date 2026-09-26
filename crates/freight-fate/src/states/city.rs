@@ -35,7 +35,7 @@ use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
 use ff_core::models::enforcement;
-use ff_core::models::home_base::ParkedAt;
+use ff_core::models::home_base::{ParkedAt, ParkedKind};
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
     board_offer_count, dispatch_deadline_hours, job_from_payload, job_payload,
@@ -181,12 +181,27 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
     let p = profile(ctx);
     let option = option_for_profile(p);
     let location = first_day_parked_location(ctx);
+    // At the carrier terminal (where every new career starts), say what
+    // happens there: orientation and truck assignment. Anywhere else, just
+    // where the truck is.
+    let parked = parked_at(ctx);
+    let at_terminal = parked.kind == ParkedKind::CarrierTerminal;
+    let city = ctx.world.spoken_city(&p.current_city, None);
     if option.is_owner_operator() {
-        return vec![
+        let first = if at_terminal {
+            format!(
+                "{prefix}First-day briefing: leased to {}. Lease orientation is at {} in the \
+                 {city} service area, where your truck is parked.",
+                option.carrier_name, parked.name
+            )
+        } else {
             format!(
                 "{prefix}First-day briefing: leased to {}, parked {location}.",
                 option.carrier_name
-            ),
+            )
+        };
+        return vec![
+            first,
             format!(
                 "You own a new truck with a full tank and {} dollars of working capital.",
                 fmt_grouped(p.money(), 0)
@@ -204,7 +219,15 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
             "{prefix}First-day briefing: welcome aboard {}.",
             option.carrier_name
         ),
-        format!("Your assigned truck is parked {location}."),
+        if at_terminal {
+            format!(
+                "Orientation and truck assignment are at {} in the {city} service area, \
+                 where your assigned truck is parked.",
+                parked.name
+            )
+        } else {
+            format!("Your assigned truck is parked {location}.")
+        },
         "The carrier covers fuel, repairs, insurance, and trailer support.".to_string(),
         format!("Dispatch style: {}.", option.dispatch_profile().summary()),
         "As a new hire, dispatch assigns your load and route, and refusing an assignment \

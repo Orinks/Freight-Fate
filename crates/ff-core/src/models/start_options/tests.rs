@@ -421,3 +421,50 @@ fn test_option_for_profile_recovers_an_old_save_from_its_carrier_name() {
     p.carrier_name = "Great Lakes Training Transport".to_string();
     assert_eq!(option_for_profile(&p).key, "great_lakes_training");
 }
+
+#[test]
+fn test_a_start_puts_the_truck_at_the_hiring_carriers_terminal() {
+    let mut p = FakeProfile::named("Milwaukee Hire");
+    p.current_city = "milwaukee_wi_us".to_string();
+    apply_start_option(&mut p, start_option(None)); // Northstar
+    assert_eq!(p.home_terminal_city, "chicago_il_us");
+    assert_eq!(p.current_city, "chicago_il_us");
+    assert_eq!(
+        p.parked_facility,
+        "Northstar Freight Lines Chicago terminal"
+    );
+}
+
+#[test]
+fn test_a_regional_start_out_of_range_never_takes_a_far_away_home() {
+    // The picker never offers this; if it happens anyway the truck stays in
+    // the picked city rather than jumping to the fallback carrier's yard.
+    let mut p = FakeProfile::named("Seattle Plains");
+    p.current_city = "seattle_wa_us".to_string();
+    apply_start_option(&mut p, start_option(Some("prairie_link")));
+    assert_eq!(p.home_terminal_city, "seattle_wa_us");
+    assert_eq!(p.current_city, "seattle_wa_us");
+    assert!(p.parked_facility.is_empty());
+}
+
+#[test]
+fn test_start_options_for_a_city_are_only_carriers_that_hire_there() {
+    let world = crate::data::world::get_world();
+    let keys = |city: &str| -> Vec<&str> {
+        start_options_for_home_city(world, city)
+            .iter()
+            .map(|o| o.key)
+            .collect()
+    };
+    assert!(keys("hutchinson_ks_us").contains(&"prairie_link"));
+    assert!(!keys("boston_ma_us").contains(&"prairie_link"));
+    assert!(!keys("seattle_wa_us").contains(&"prairie_link"));
+    for blocked in [
+        "healy_ak_us",
+        "anchorage_ak_us",
+        "whitehorse_yt_ca",
+        "surrey_bc_ca",
+    ] {
+        assert!(keys(blocked).is_empty(), "{blocked}");
+    }
+}

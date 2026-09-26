@@ -303,7 +303,8 @@ impl ConfirmCareerActionState {
             return;
         };
         let name = self.name.clone();
-        let mut fresh = Profile::named_in(&name, &old.current_city);
+        // A reset starts over at the carrier terminal nearest the old home.
+        let mut fresh = Profile::named_in(&name, &old.home_terminal_city);
         apply_start_option(&mut fresh, option_for_profile(old));
         match fresh.save() {
             // A career loaded from a file named apart from it: the reset went

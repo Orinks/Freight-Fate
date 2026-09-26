@@ -2076,14 +2076,15 @@ instead of a spawn point.
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
 ("{Carrier} {City} terminal"), the hub's "parked at" rule, and the
 offerability and hiring-radius rule (`is_offerable_home_city`; regionals
-home drivers only within their radius). That rule is defined and tested but
-not yet used by the new-career picker; the start picker adopts it in slice 2.
+home drivers only within their radius). Slice 2 made the new-career picker
+enforce it: region, then offerable home city, then the carriers hiring
+there, with the truck starting at that carrier's terminal.
 
-- [ ] **Slice 2: start flow places the truck at the hiring carrier's
+- [x] **Slice 2: start flow places the truck at the hiring carrier's
       terminal.** Orientation and truck assignment happen at the carrier
       terminal in `home_terminal_city`, so a new hire's first "parked at" is
       that terminal rather than the picked city.
-- [ ] **Slice 2: the home-base picker lists only offerable cities.** Only
+- [x] **Slice 2: the home-base picker lists only offerable cities.** Only
       cities where `is_offerable_home_city` is true (some carrier hires
       there) appear in the start picker.
 

@@ -236,6 +236,12 @@ impl StartProfile for Profile {
     fn home_base_city(&self) -> String {
         self.current_city.clone()
     }
+    fn set_current_city(&mut self, city: &str) {
+        self.current_city = city.to_string();
+    }
+    fn set_parked_facility(&mut self, facility: &str) {
+        self.parked_facility = facility.to_string();
+    }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();
     }

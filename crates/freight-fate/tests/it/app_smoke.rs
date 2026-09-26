@@ -29,10 +29,11 @@ fn new_career_to_city(app: &mut TestApp) {
     select::<MainMenuState>(app, "New career");
     assert!(is::<NameEntryState>(app));
     key(app, Key::Return); // default name
+    assert!(is::<HomeTerminalState>(app));
+    key(app, Key::Return); // default region
+    key(app, Key::Return); // default home city
     assert!(is::<CareerStartState>(app));
     key(app, Key::Return); // default start
-    key(app, Key::Return); // default region
-    key(app, Key::Return); // default home terminal
     assert!(is::<CityMenuState>(app));
 }
 
@@ -183,12 +184,12 @@ fn test_full_game_flow_headless() {
         app.dispatch_to_state(&InputEvent::typed(ch));
     }
     key(&mut app, Key::Return);
-    assert!(is::<CareerStartState>(&app));
-    key(&mut app, Key::Return); // default start: Northstar
     assert!(is::<HomeTerminalState>(&app));
     key(&mut app, Key::Return); // default region: Great Lakes
     assert!(is::<HomeCityState>(&app));
     key(&mut app, Key::Return); // default city: Chicago
+    assert!(is::<CareerStartState>(&app));
+    key(&mut app, Key::Return); // default start: Northstar
     assert!(is::<CityMenuState>(&app));
     assert_eq!(profile(&app).name, "Smoke");
     assert_eq!(profile(&app).current_city, "chicago_il_us");

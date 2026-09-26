@@ -15,7 +15,6 @@ use chrono::{DateTime, Datelike, Local, Timelike};
 use ff_core::models::business::status_label;
 use ff_core::models::jobs::facility_text;
 use ff_core::models::profile::{data_dir, LegacyCareerError, LoadError, Profile};
-use ff_core::models::start_options::option_for_profile;
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::playtest_levers::apply_continue_levers;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
@@ -208,36 +207,13 @@ pub fn should_offer_online(ctx: &GameContext) -> bool {
     IdentityStore::platform(&data_dir()).load().is_none()
 }
 
-/// The first-day welcome spoken at career creation.
-// TODO(lead): belongs in `states::city` (`first_day_orientation_message`);
-// reproduced here, word for word, until that module lands.
+/// The first-day welcome spoken at career creation (the `states::city`
+/// briefing, joined).
 pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String {
-    let Some(p) = ctx.profile.as_ref() else {
+    if ctx.profile.is_none() {
         return String::new();
-    };
-    let option = option_for_profile(p);
-    // Where the truck really is, spoken city (same as the states::city copy).
-    let location = crate::states::city::first_day_parked_location(ctx);
-    if option.is_owner_operator() {
-        return format!(
-            "{prefix}First-day briefing: leased to {}, parked {location}. You own a new \
-             truck with a full tank and {} dollars of working capital. Fuel, repairs, truck \
-             wear, trailer programs, and business reserves come out of your cash. First \
-             objective: open the dispatch board and choose an unlocked load with a deadline \
-             you can protect.",
-            option.carrier_name,
-            fmt_grouped(p.money(), 0)
-        );
     }
-    format!(
-        "{prefix}First-day briefing: welcome aboard {}. Your assigned truck is parked \
-         {location}. The carrier covers fuel, repairs, insurance, and trailer support. \
-         Dispatch style: {}. As a new hire, dispatch assigns your load and route, and \
-         refusing an assignment goes on your service record. First objective: open the \
-         dispatch board, accept the assigned load, and deliver it cleanly.",
-        option.carrier_name,
-        option.dispatch_profile().summary()
-    )
+    crate::states::city::first_day_orientation_message(ctx, prefix)
 }
 
 /// The city menu, or the one-time orinks.net offer ahead of it.
@@ -992,7 +968,7 @@ impl TextEntry for NameEntryState {
             trimmed => trimmed.to_string(),
         };
         ctx.audio.play("ui/menu_select");
-        ctx.push_state(CareerStartState::new(&name));
+        ctx.push_state(HomeTerminalState::new(ctx, &name));
     }
 }
 
