@@ -2069,7 +2069,11 @@ instead of a spawn point.
       `crates/ff-core/tests/profile_integrity_invariants.json` for the new
       save fields `parked_facility`, `home_terminal_city`, `home_city`, and
       `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
-      be rejected as a schema mismatch.
+      be rejected as a schema mismatch. Carrier slice 3 also grows
+      `carrierLabels` by 20 carriers (the regionals, Chatanika Freight Lines,
+      and the three locals), and a company driver no carrier near home would
+      take saves an empty `carrier_key` and `carrier_name`; the site must
+      accept both.
 
 ### Career carriers (slices 2–4)
 
@@ -2096,12 +2100,27 @@ there, with the truck starting at that carrier's terminal.
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds
       into the distance cap today. Slice 4 (board lane area) enforces it.
-- [ ] **The 16 regionals plus an Alaska regional.** Only Prairie Link
-      exists today. Alaska home bases stay blocked until an AK regional with
-      an Alaska terminal is in `data/carriers.json`; BC and YT stay blocked.
-- [ ] **Home-base coverage test.** Pin which map cities are offerable home
-      bases (some carrier hires there) so a carrier or map change that drops
-      coverage fails loudly instead of silently shrinking the start list.
+- [x] **The 16 regionals plus an Alaska regional.** Slice 3: sixteen new
+      regionals join Prairie Link, Chatanika Freight Lines hires across
+      Alaska out of Anchorage and Fairbanks, and three locals (Des Plaines
+      River Cartage, Basin Harbor Drayage, Knik Arm Cartage) hire within 50
+      mi. Alaska home bases open; BC and YT stay blocked. A driver let go
+      goes to a carrier that hires at home, never the one that let them go,
+      or is home with no carrier and applies from the terminal.
+- [x] **Home-base coverage test.** `tests/it/carrier_slice3.rs` pins all
+      625 lower-48 map cities as hired into by a regional, every Alaska city
+      as served by Alaska carriers only, and BC and YT as closed.
+- [ ] **Loonwater Regional's terminals span 636 air mi (Bismarck to Green
+      Bay).** KEEP: Bismarck stays. Terminal span is not run length; its
+      loads obey the regional 150-600 mi band like every regional's. Slice 3
+      plan, §11.
+- [ ] **Fairbanks has no world `company_yard` or `terminal` pin.** Its old
+      stand-in yard became a travel center in the ALCAN public-lot cleanup,
+      and Carlile's Fairbanks terminal is a cross-dock shipper. Chatanika
+      Freight Lines' Fairbanks terminal is carrier-owned, so nothing reads
+      the pin today, and the carrier needs it: Fairbanks and Tok are past 250
+      air mi from Anchorage. Add a sourced Fairbanks yard pin if a feature
+      ever needs one; the slice 3 test names it as the one known gap.
 - [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
       national run band.** The dispatch bias asks for short rookie loads the
       band minimum would forbid once enforced. Revisit in slice 4.
@@ -2109,8 +2128,8 @@ there, with the truck starting at that carrier's terminal.
       The next AK map adds for an Anchorage local are the Kenai Peninsula
       (Soldotna/Kenai, about 147 road mi) and Seward (about 125 road mi),
       measured by road, not air. Skip Whittier until the Anton Anderson
-      Memorial Tunnel schedule and its hazmat limits are modeled. Slice 3
-      plan, §4.
+      Memorial Tunnel schedule and its hazmat limits are modeled. KEEP
+      thin for now. Slice 3 plan, §4.
 - [ ] **Port drayage into the LA/Long Beach terminals needs a TWIC card.**
       When drayage loads are real, a load into the marine terminals
       requires the driver to hold TWIC (Basin Harbor Drayage's port work
