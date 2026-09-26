@@ -24,6 +24,7 @@
 use ff_core::models::business::{COMPANY_DRIVER, INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
 use ff_core::models::carriers::hiring_carrier;
 use ff_core::models::enforcement::{FATIGUE_EVENT_REPUTATION_HIT, SUSPENSION_LIFETIME};
+use ff_core::models::home_base::IMPOUND_LOT_FACILITY;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::sim::weather::WeatherKind;
@@ -31,6 +32,7 @@ use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::GameContext;
 use freight_fate::states::base::{Menu, MenuItem};
+use freight_fate::states::city::CityMenuState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
     DRIVE_PHASE_DELIVERY, MICROSLEEP_FORCE_STOP_MISSES, PURSUIT_RUN_S, SPEEDING_LEEWAY_MPH,
@@ -224,60 +226,140 @@ fn felony_summary(app: &mut TestApp, drive: &mut DrivingState) -> String {
         .to_string()
 }
 
-/// Where the truck ended up: (current_city key, parked_facility), after
-/// checking the facility is a real one in that city and returning its type.
-fn towed_facility(app: &TestApp) -> (String, String, String) {
-    let p = app.ctx.profile.as_ref().expect("a career");
-    let world = app.ctx.world;
-    let key = world.resolve_city_key(&p.current_city);
-    let loc = world.cities[&key]
-        .locations
-        .iter()
-        .find(|l| l.name == p.parked_facility)
-        .unwrap_or_else(|| panic!("{:?} is not a facility in {key}", p.parked_facility));
-    (key, loc.name.clone(), loc.facility_type.clone())
+/// The hub's entry line and title after the felony stop's go_back.
+fn hub_after_release(app: &mut TestApp) -> (String, String) {
+    app.clear_speech();
+    let hub = CityMenuState::new(&app.ctx, false);
+    app.push_state(hub);
+    let line = app
+        .main_lines()
+        .into_iter()
+        .find(|l| l.starts_with("Parked"))
+        .expect("a parked line");
+    (line, CityMenuState::title_for(&app.ctx))
+}
+
+/// No facility pin of any type in `city_key` is named in `text`.
+fn assert_names_no_pin(app: &TestApp, city_key: &str, text: &str) {
+    for loc in &app.ctx.world.cities[city_key].locations {
+        assert!(!text.contains(&loc.name), "{} named in {text}", loc.name);
+    }
 }
 
 #[test]
-fn test_a_felony_stop_tows_the_truck_to_the_nearest_public_lot() {
-    let mut app = TestApp::new();
-    let mut drive = a_drive_between(&mut app, "Parks", "healy_ak_us", "fairbanks_ak_us");
-    let summary = felony_summary(&mut app, &mut drive);
-
-    let (key, facility, kind) = towed_facility(&app);
-    assert!(
-        kind == "travel_center" || kind == "truck_parking",
-        "{kind}: {summary}"
-    );
-    assert_eq!(key, "healy_ak_us");
-    let city = app.ctx.world.spoken_city(&key, None);
-    assert!(
-        summary.contains(&format!(
-            "You are released after booking. The truck was towed to {facility} in {city}."
-        )),
-        "{summary}"
-    );
-    // The hub reads the same place.
-    let parked = app
-        .ctx
-        .profile
-        .as_ref()
-        .expect("a career")
-        .parked_at(app.ctx.world);
-    assert_eq!(parked.name, facility);
-}
-
-#[test]
-fn test_a_felony_stop_with_no_lot_in_range_tows_to_the_nearest_real_facility() {
+fn test_a_felony_stop_tows_to_an_impound_lot_in_the_stop_city() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Niagara");
     let summary = felony_summary(&mut app, &mut drive);
 
-    let (key, facility, _) = towed_facility(&app);
-    let city = app.ctx.world.spoken_city(&key, None);
+    let p = profile_of_app(&app);
+    assert_eq!(p.current_city, "buffalo_ny_us");
+    assert_eq!(p.parked_facility, IMPOUND_LOT_FACILITY);
     assert!(
-        summary.ends_with(&format!("The truck was towed to {facility} in {city}."))
-            || summary.contains(&format!("The truck was towed to {facility} in {city}. ")),
+        summary.contains(
+            "You are released after booking. The truck was towed to an impound lot in \
+             Buffalo, New York."
+        ),
+        "{summary}"
+    );
+    assert!(!summary.contains("secured lot"), "{summary}");
+    assert_names_no_pin(&app, "buffalo_ny_us", &summary);
+
+    // The hub says the same place, and names no pin either.
+    let (line, title) = hub_after_release(&mut app);
+    assert!(
+        line.starts_with("Parked at an impound lot in the Buffalo service area, New York."),
+        "{line}"
+    );
+    assert_eq!(title, "Buffalo impound lot");
+    assert_names_no_pin(&app, "buffalo_ny_us", &line);
+}
+
+#[test]
+fn test_a_felony_stop_beside_a_travel_center_still_tows_to_the_impound_lot() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive_between(&mut app, "Parks", "healy_ak_us", "fairbanks_ak_us");
+    assert!(app.ctx.world.cities["healy_ak_us"]
+        .locations
+        .iter()
+        .any(|l| l.facility_type == "travel_center"));
+    let summary = felony_summary(&mut app, &mut drive);
+
+    let p = profile_of_app(&app);
+    assert_eq!(p.current_city, "healy_ak_us");
+    assert_eq!(p.parked_facility, IMPOUND_LOT_FACILITY);
+    assert!(
+        summary.contains("The truck was towed to an impound lot in Healy, Alaska."),
+        "{summary}"
+    );
+    assert_names_no_pin(&app, "healy_ak_us", &summary);
+    let (line, _) = hub_after_release(&mut app);
+    assert!(
+        line.starts_with("Parked at an impound lot in the Healy"),
+        "{line}"
+    );
+    assert_names_no_pin(&app, "healy_ak_us", &line);
+}
+
+#[test]
+fn test_a_felony_stop_in_the_home_terminal_city_still_says_impound_lot() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Hometown");
+    let terminal = {
+        let world = app.ctx.world;
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.home_terminal_city = "buffalo_ny_us".to_string();
+        p.carrier_home_terminal(world).map(|t| t.spoken_name())
+    };
+    let summary = felony_summary(&mut app, &mut drive);
+    assert_eq!(profile_of_app(&app).current_city, "buffalo_ny_us");
+    let (line, title) = hub_after_release(&mut app);
+    assert!(
+        line.starts_with("Parked at an impound lot in the Buffalo service area"),
+        "{line}"
+    );
+    assert_eq!(title, "Buffalo impound lot");
+    if let Some(terminal) = terminal {
+        assert!(!summary.contains(&terminal), "{summary}");
+        assert!(!line.contains(&terminal), "{line}");
+    }
+    assert!(!line.to_lowercase().contains("terminal"), "{line}");
+}
+
+#[test]
+fn test_the_impound_lot_round_trips_through_the_save() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Saved");
+    felony_summary(&mut app, &mut drive);
+    let before = profile_of_app(&app).clone();
+    let loaded = Profile::from_dict(&before.to_dict());
+    assert_eq!(loaded.current_city, before.current_city);
+    assert_eq!(loaded.parked_facility, IMPOUND_LOT_FACILITY);
+    assert_eq!(
+        loaded.parked_at(app.ctx.world),
+        before.parked_at(app.ctx.world)
+    );
+}
+
+#[test]
+fn test_a_felony_stop_near_blaine_stays_on_the_road_side_of_the_border() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive_between(&mut app, "Border", "blaine_wa_us", "surrey_bc_ca");
+    // Short of the crossing, on the Washington side.
+    drive.trip.position_mi = 0.2;
+    felony_summary(&mut app, &mut drive);
+    assert_eq!(profile_of_app(&app).current_city, "blaine_wa_us");
+    drop(drive);
+    drop(app);
+
+    let mut app = TestApp::new();
+    let mut drive = a_drive_between(&mut app, "Border", "blaine_wa_us", "surrey_bc_ca");
+    // Past the crossing, in British Columbia.
+    drive.trip.position_mi = drive.trip.total_miles() - 0.2;
+    let summary = felony_summary(&mut app, &mut drive);
+    assert_eq!(
+        profile_of_app(&app).current_city,
+        "surrey_bc_ca",
         "{summary}"
     );
 }

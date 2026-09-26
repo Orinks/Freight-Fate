@@ -97,8 +97,8 @@ pub(crate) fn profile_mut(ctx: &mut GameContext) -> &mut Profile {
         .expect("the terminal screens run with a loaded career")
 }
 
-/// Where the truck is parked right now: the carrier terminal in the home
-/// terminal city, else the facility it last delivered or dropped at, else
+/// Where the truck is parked right now: an impound lot after a police tow,
+/// else the carrier terminal in the home terminal city, else the facility it last delivered or dropped at, else
 /// the city's travel center or truck parking, else just the city. Never a
 /// yard in another city and never a bare "Terminal" (see
 /// `ff_core::models::home_base`).

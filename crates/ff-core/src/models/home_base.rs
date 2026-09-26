@@ -2,6 +2,8 @@
 //!
 //! The hub's "parked at" line comes from where the truck really is:
 //!
+//! 0. a generic impound lot in the current city after a police tow
+//!    (`parked_facility` is [`IMPOUND_LOT_FACILITY`]), before anything else;
 //! 1. the hiring carrier's own terminal ("{Carrier} {City} terminal") when
 //!    the truck is in the career's `home_terminal_city`;
 //! 2. otherwise the facility the truck last delivered or dropped at, when it
@@ -26,6 +28,8 @@ pub enum ParkedKind {
     PublicLot,
     /// The city itself: nothing honest to name.
     City,
+    /// A generic impound lot after a police tow ([`IMPOUND_LOT_FACILITY`]).
+    Impound,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,6 +47,7 @@ impl ParkedAt {
     pub fn at_clause(&self) -> String {
         match self.kind {
             ParkedKind::City => String::new(),
+            ParkedKind::Impound => " at an impound lot".to_string(),
             _ => format!(" at {}", self.name),
         }
     }
@@ -52,6 +57,7 @@ impl ParkedAt {
         let city = world.spoken_city(&self.city_key, None);
         match self.kind {
             ParkedKind::City => format!("in {city}"),
+            ParkedKind::Impound => format!("at an impound lot in {city}"),
             _ => format!("at {} in {city}", self.name),
         }
     }
@@ -63,6 +69,7 @@ impl ParkedAt {
         let area = city_service_area(&world.spoken_city(&self.city_key, None));
         match self.kind {
             ParkedKind::City => format!("in {area}"),
+            ParkedKind::Impound => format!("at an impound lot in {area}"),
             _ => format!("at {} in {area}", self.name),
         }
     }
@@ -80,80 +87,45 @@ pub fn city_service_area(city: &str) -> String {
     format!("{} service area", crate::speech_text::the_city(city))
 }
 
-/// How far a heavy wrecker is taken to tow a seized truck to a public
-/// truck lot, in air miles. A `travel_center` or `truck_parking` pin
-/// farther than this is not where a roadside tow ends up.
-pub const TOW_LOT_RADIUS_MI: f64 = 100.0;
+/// `parked_facility` value for a truck towed to an impound lot after a
+/// police arrest. Not a world pin: the map has no real tow or impound yards,
+/// so the lot is generic and always in the stop city. Old saves never carry
+/// it, and it round-trips as the plain string it is.
+pub const IMPOUND_LOT_FACILITY: &str = "impound_lot";
 
-/// Where a tow leaves the truck: a real facility the hub can say the truck
-/// is parked at.
-#[derive(Debug, Clone, PartialEq)]
-pub struct TowPlace {
-    /// World city key the facility is in; becomes `current_city`.
-    pub city_key: String,
-    /// Facility name; becomes `parked_facility`.
-    pub facility: String,
-    /// Its `facility_type`.
-    pub facility_type: String,
-    /// Air miles from the tow point.
-    pub miles: f64,
-}
-
-impl TowPlace {
-    /// Whether this is a public truck lot rather than the fallback.
-    pub fn is_public_lot(&self) -> bool {
-        is_public_lot_type(&self.facility_type)
+/// How a tow summary names the lot: "an impound lot in Buffalo, New York",
+/// the city and state the way the hub says them.
+pub fn impound_lot_text(world: &World, city_key: &str) -> String {
+    let key = world.resolve_city_key(city_key);
+    match world.cities.get(&key) {
+        Some(city) if !city.state.is_empty() => {
+            format!("an impound lot in {}, {}", city.name, city.state)
+        }
+        Some(city) => format!("an impound lot in {}", city.name),
+        None => format!("an impound lot in {}", world.spoken_city(city_key, None)),
     }
 }
 
-fn is_public_lot_type(facility_type: &str) -> bool {
-    matches!(facility_type, "travel_center" | "truck_parking")
-}
-
-/// Where a tow from `(lat, lon)` leaves the truck: the nearest
-/// `travel_center` or `truck_parking` facility within
-/// [`TOW_LOT_RADIUS_MI`], or, when no public lot is that close, the nearest
-/// facility of any type. Only facilities in the country of the city nearest
-/// the tow point count, so a tow never crosses a border. `None` only when
-/// the world has no facility at all in that country.
-pub fn tow_destination(world: &World, lat: f64, lon: f64) -> Option<TowPlace> {
+/// The city a roadside stop at `(lat, lon)` happened in: the nearest world
+/// city, among the cities of `state_hint` (a state or province code or
+/// name, from the road the truck was on) when any match, so a stop never
+/// lands across a state line or a border. `None` only for an empty world.
+pub fn stop_city(world: &World, lat: f64, lon: f64, state_hint: &str) -> Option<String> {
     use crate::data::world::air_miles;
-    let country = world
+    let hint = state_hint.trim();
+    let in_state = |c: &crate::data::world_models::City| {
+        !hint.is_empty()
+            && (c.state_code.eq_ignore_ascii_case(hint) || c.state.eq_ignore_ascii_case(hint))
+    };
+    let any_in_state = world.cities.values().any(in_state);
+    world
         .cities
-        .values()
-        .min_by(|a, b| {
+        .iter()
+        .filter(|(_, c)| !any_in_state || in_state(c))
+        .min_by(|(_, a), (_, b)| {
             air_miles(lat, lon, a.lat, a.lon).total_cmp(&air_miles(lat, lon, b.lat, b.lon))
         })
-        .map(|c| c.country.clone())?;
-    let mut nearest_lot: Option<TowPlace> = None;
-    let mut nearest_any: Option<TowPlace> = None;
-    for (key, city) in &world.cities {
-        if city.country != country {
-            continue;
-        }
-        for loc in &city.locations {
-            if loc.name.trim().is_empty() {
-                continue;
-            }
-            let miles = air_miles(lat, lon, loc.lat, loc.lon);
-            let place = || TowPlace {
-                city_key: key.clone(),
-                facility: loc.name.clone(),
-                facility_type: loc.facility_type.clone(),
-                miles,
-            };
-            if is_public_lot_type(&loc.facility_type)
-                && miles <= TOW_LOT_RADIUS_MI
-                && nearest_lot.as_ref().is_none_or(|b| miles < b.miles)
-            {
-                nearest_lot = Some(place());
-            }
-            if nearest_any.as_ref().is_none_or(|b| miles < b.miles) {
-                nearest_any = Some(place());
-            }
-        }
-    }
-    nearest_lot.or(nearest_any)
+        .map(|(key, _)| key.clone())
 }
 
 /// The career fields [`parked_at`] reads.
@@ -170,6 +142,24 @@ pub struct ParkedInputs<'a> {
 /// Where the truck is parked (see the module docs for the order).
 pub fn parked_at(world: &World, inputs: ParkedInputs<'_>) -> ParkedAt {
     let here = world.resolve_city_key(inputs.current_city);
+    // A towed truck is in the impound lot, whatever else this city has --
+    // the carrier terminal included.
+    if inputs.parked_facility.trim() == IMPOUND_LOT_FACILITY {
+        return ParkedAt {
+            kind: ParkedKind::Impound,
+            // The bare city, as the hub's own line says it ("Buffalo");
+            // the hub adds the state after the service area.
+            name: format!(
+                "{} impound lot",
+                world
+                    .cities
+                    .get(&here)
+                    .map(|c| c.name.clone())
+                    .unwrap_or_else(|| world.spoken_city(&here, None))
+            ),
+            city_key: here,
+        };
+    }
     let carrier = hiring_carrier(
         inputs.carrier_key,
         inputs.carrier_name,
@@ -281,52 +271,84 @@ mod tests {
     }
 
     #[test]
-    fn test_a_tow_near_a_public_lot_ends_at_that_lot() {
+    fn test_the_stop_city_is_the_nearest_city_even_beside_a_travel_center() {
         let world = get_world();
         let healy = &world.cities["healy_ak_us"];
-        let lot = healy
+        assert!(has_lot(healy, "travel_center"));
+        let key = stop_city(world, healy.lat + 0.02, healy.lon, "AK").expect("a city");
+        assert_eq!(key, "healy_ak_us");
+    }
+
+    #[test]
+    fn test_the_stop_city_stays_on_its_side_of_the_blaine_border() {
+        let world = get_world();
+        let blaine = &world.cities["blaine_wa_us"];
+        let surrey = &world.cities["surrey_bc_ca"];
+        // Just north of the midpoint, nearer Surrey: the road still says
+        // Washington until the crossing, so the stop is in Blaine.
+        let lat = (blaine.lat + surrey.lat) / 2.0 + 0.02;
+        let lon = (blaine.lon + surrey.lon) / 2.0;
+        assert_eq!(
+            stop_city(world, lat, lon, &blaine.state_code).as_deref(),
+            Some("blaine_wa_us")
+        );
+        assert_eq!(
+            stop_city(world, lat, lon, &surrey.state_code).as_deref(),
+            Some("surrey_bc_ca")
+        );
+        // With no state from the road, plain nearest.
+        assert_eq!(
+            stop_city(world, blaine.lat, blaine.lon, "").as_deref(),
+            Some("blaine_wa_us")
+        );
+    }
+
+    #[test]
+    fn test_an_impound_lot_wins_over_the_carrier_terminal_and_every_pin() {
+        let world = get_world();
+        let p = parked_at(
+            world,
+            inputs(
+                "northstar",
+                COMPANY_DRIVER,
+                "chicago_il_us",
+                "chicago_il_us",
+                IMPOUND_LOT_FACILITY,
+            ),
+        );
+        assert_eq!(p.kind, ParkedKind::Impound);
+        assert_eq!(p.name, "Chicago impound lot");
+        assert_eq!(p.at_clause(), " at an impound lot");
+        assert_eq!(
+            p.service_area_phrase(world),
+            "at an impound lot in the Chicago service area"
+        );
+        assert!(world.cities["chicago_il_us"]
             .locations
             .iter()
-            .find(|l| l.facility_type == "travel_center")
-            .expect("Healy's travel center");
-        // A few miles up the Parks Highway from the lot.
-        let tow = tow_destination(world, lot.lat + 0.05, lot.lon).expect("a tow place");
-        assert!(tow.is_public_lot(), "{tow:?}");
-        assert_eq!(tow.facility, lot.name);
-        assert_eq!(tow.city_key, "healy_ak_us");
-        assert!(tow.miles <= TOW_LOT_RADIUS_MI);
-    }
-
-    #[test]
-    fn test_a_tow_never_crosses_the_border_to_a_closer_lot() {
-        let world = get_world();
-        // Just south of the Blaine crossing: the Surrey lot is in Canada.
-        let tow = tow_destination(world, 48.98, -122.74).expect("a tow place");
-        assert_eq!(world.cities[&tow.city_key].country, "US", "{tow:?}");
-        assert_eq!(tow.city_key, "blaine_wa_us");
-    }
-
-    #[test]
-    fn test_a_tow_with_no_lot_in_range_ends_at_the_nearest_real_facility() {
-        let world = get_world();
-        let buffalo = &world.cities["buffalo_ny_us"];
-        let tow = tow_destination(world, buffalo.lat, buffalo.lon).expect("a tow place");
-        assert!(!tow.is_public_lot(), "{tow:?}");
-        let city = &world.cities[&tow.city_key];
-        assert!(
-            city.locations.iter().any(|l| l.name == tow.facility),
-            "{tow:?}"
+            .all(|l| l.name != IMPOUND_LOT_FACILITY && l.id != IMPOUND_LOT_FACILITY));
+        assert_eq!(
+            impound_lot_text(world, "chicago_il_us"),
+            "an impound lot in Chicago, Illinois"
         );
-        // Nothing nearer in the same country.
-        for (key, c) in &world.cities {
-            if c.country != "US" {
-                continue;
-            }
-            for l in &c.locations {
-                let d = crate::data::world::air_miles(buffalo.lat, buffalo.lon, l.lat, l.lon);
-                assert!(d >= tow.miles - 1e-9, "{key} {} is nearer", l.name);
-            }
-        }
+        let dalles = parked_at(
+            world,
+            inputs(
+                "northstar",
+                COMPANY_DRIVER,
+                "chicago_il_us",
+                "the_dalles_or_us",
+                IMPOUND_LOT_FACILITY,
+            ),
+        );
+        assert_eq!(
+            dalles.service_area_phrase(world),
+            "at an impound lot in The Dalles service area"
+        );
+        assert_eq!(
+            impound_lot_text(world, "the_dalles_or_us"),
+            "an impound lot in The Dalles, Oregon"
+        );
     }
 
     #[test]

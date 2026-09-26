@@ -154,6 +154,26 @@ fn test_old_save_without_business_status_loads_as_company_driver() {
 }
 
 #[test]
+fn test_an_impound_lot_round_trips_through_a_save_file() {
+    with_data_dir(|_| {
+        let mut p = Profile::named_in("Towed", "Buffalo");
+        p.current_city = "buffalo_ny_us".to_string();
+        p.parked_facility = crate::models::home_base::IMPOUND_LOT_FACILITY.to_string();
+        let path = p.save().unwrap();
+        let loaded = load(&path);
+        assert_eq!(
+            loaded.parked_facility,
+            crate::models::home_base::IMPOUND_LOT_FACILITY
+        );
+        let world = crate::data::world::get_world();
+        assert_eq!(
+            loaded.parked_at(world).kind,
+            crate::models::home_base::ParkedKind::Impound
+        );
+    });
+}
+
+#[test]
 fn test_independent_authority_status_round_trips() {
     with_data_dir(|_| {
         let mut p = Profile::named("Authority Save");

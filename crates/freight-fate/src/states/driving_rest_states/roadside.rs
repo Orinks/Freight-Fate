@@ -7,7 +7,7 @@
 use ff_core::models::business::INDEPENDENT_AUTHORITY;
 use ff_core::models::carriers::hiring_carrier;
 use ff_core::models::enforcement;
-use ff_core::models::home_base::{tow_destination, ParkedKind};
+use ff_core::models::home_base::{impound_lot_text, stop_city, IMPOUND_LOT_FACILITY};
 use ff_core::models::profile::Profile;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::pyrandom::PyRandom;
@@ -631,9 +631,9 @@ impl FelonyStopState {
             p.game_hours += hours;
             p.market_day()
         };
-        // The truck does not stay on the shoulder: a wrecker tows it to the
-        // nearest public truck lot (or, with none in range, the nearest real
-        // facility), and the hub reads it parked there.
+        // The truck does not stay on the shoulder: a police rotation wrecker
+        // tows it to an impound lot in the stop city, and the hub reads it
+        // parked there.
         let towed_to = tow_truck_from_stop(ctx, d);
         {
             let p = profile_mut_of(ctx);
@@ -650,14 +650,11 @@ impl FelonyStopState {
         } else {
             String::new()
         };
-        let towed = towed_to
-            .map(|place| format!(" The truck was towed to {place}."))
-            .unwrap_or_default();
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
              major reputation hit.{} Spike strips added {} percent truck damage{booking}. \
-             {load_text} You are released after booking.{towed}",
+             {load_text} You are released after booking. The truck was towed to {towed_to}.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_f(FAILURE_TO_STOP_DAMAGE_PCT, 0),
@@ -697,32 +694,38 @@ fn felony_load_text(p: &Profile, load_lost: bool, d: &DrivingState) -> String {
     )
 }
 
-/// Tow the truck from the stop to [`tow_destination`] and park it there:
-/// `current_city` and `parked_facility` move together, so the hub, the
-/// board and the next dispatch all start from the lot. Returns how the
-/// place is spoken, from the same rule the hub uses, so the two agree.
-fn tow_truck_from_stop(ctx: &mut GameContext, d: &DrivingState) -> Option<String> {
+/// Tow the truck from the stop to a generic impound lot in the stop city:
+/// the world city nearest the stop, on the road's side of any state line or
+/// border, or the leg city when the road has no coordinate. `current_city`
+/// and `parked_facility` move together, so the hub, the board and the next
+/// dispatch all start from the lot. Returns how the summary names it. The
+/// map has no real tow yards, so no facility pin is ever used.
+fn tow_truck_from_stop(ctx: &mut GameContext, d: &DrivingState) -> String {
     let world = ctx.world;
-    let (mut lat, mut lon) = d.trip.latlon_at(None);
-    if lat == 0.0 && lon == 0.0 {
-        // No road coordinate (a local street leg): tow from the city.
-        let here = world.resolve_city_key(&profile_of(ctx).current_city);
-        let city = world.cities.get(&here)?;
-        (lat, lon) = (city.lat, city.lon);
-    }
-    let tow = tow_destination(world, lat, lon)?;
+    let (lat, lon) = d.trip.latlon_at(None);
+    let from_road = if lat == 0.0 && lon == 0.0 {
+        None
+    } else {
+        stop_city(world, lat, lon, &d.trip.state_at(None))
+    };
+    let city = from_road
+        .or_else(|| leg_city(ctx, d))
+        .unwrap_or_else(|| world.resolve_city_key(&profile_of(ctx).current_city));
     let p = profile_mut_of(ctx);
-    p.current_city = tow.city_key.clone();
-    p.parked_facility = tow.facility.clone();
-    let parked = p.parked_at(world);
-    Some(match parked.kind {
-        ParkedKind::City => world.spoken_city(&parked.city_key, None),
-        _ => format!(
-            "{} in {}",
-            parked.name,
-            world.spoken_city(&parked.city_key, None)
-        ),
-    })
+    p.current_city = city.clone();
+    p.parked_facility = IMPOUND_LOT_FACILITY.to_string();
+    impound_lot_text(world, &city)
+}
+
+/// The nearer end of the leg the truck is on, when it is a world city.
+fn leg_city(ctx: &GameContext, d: &DrivingState) -> Option<String> {
+    let trip = &d.trip;
+    let (leg_i, leg_start) = trip.leg_at_mile(trip.position_mi);
+    let leg_miles = trip.route.legs.get(leg_i)?.miles;
+    let past_half = trip.position_mi - leg_start > leg_miles / 2.0;
+    let index = if past_half { leg_i + 1 } else { leg_i };
+    let key = ctx.world.resolve_city_key(trip.route.cities.get(index)?);
+    ctx.world.cities.contains_key(&key).then_some(key)
 }
 
 impl Menu for FelonyStopState {
