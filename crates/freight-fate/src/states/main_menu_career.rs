@@ -4,6 +4,7 @@
 use std::collections::BTreeMap;
 
 use ff_core::data::regions::region_label;
+use ff_core::models::carriers::{hiring_carrier, home_terminal_city_for};
 use ff_core::models::profile::{find_save_path, is_pre_1_9_save_file, Profile, DEFAULT_CITY};
 use ff_core::models::start_options::{all_start_options, apply_start_option, start_option};
 
@@ -302,20 +303,32 @@ impl Menu for HomeCityState {
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         let mut items = Vec::new();
+        let option = start_option(Some(&self.start_key));
+        let hiring = hiring_carrier(
+            option.key,
+            option.carrier_name,
+            if option.is_owner_operator() {
+                "leased_owner_operator"
+            } else {
+                "company_driver"
+            },
+        );
         for key in &self.cities {
             let Some(city) = ctx.world.cities.get(key) else {
                 continue;
             };
-            let terminal_name = ctx
-                .world
-                .home_terminal(key)
-                .map(|t| t.spoken_name())
-                .unwrap_or_default();
             let place = city.spoken_qualified();
+            // The hiring carrier's own terminal nearest this home base.
+            let help = hiring
+                .and_then(|c| {
+                    let home = home_terminal_city_for(Some(c), ctx.world, key);
+                    c.home_terminal(ctx.world, &home)
+                })
+                .map(|t| format!("Start in {place}. Home terminal: {}.", t.spoken_name()))
+                .unwrap_or_else(|| format!("Start in {place}."));
             let k = key.clone();
             items.push(
-                MenuItem::new(place.clone(), move |s: &mut Self, ctx| s.pick(ctx, &k))
-                    .help(format!("Start at {terminal_name} in {place}.")),
+                MenuItem::new(place.clone(), move |s: &mut Self, ctx| s.pick(ctx, &k)).help(help),
             );
         }
         items

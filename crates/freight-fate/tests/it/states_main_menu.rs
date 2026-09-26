@@ -474,10 +474,19 @@ fn continue_latest_career_welcomes_the_driver_back() {
     app.clear_speech();
     key(&mut app, Key::Return);
     assert_eq!(app.ctx.profile.as_ref().unwrap().name, "Road Star");
-    assert!(app
-        .main_lines()
-        .iter()
-        .any(|line| line.starts_with("Welcome back, Road Star. You are parked at")));
+    // A Northstar driver in Denver is away from the Chicago home terminal
+    // and Denver has no public lot: the welcome names the city, never a yard.
+    let lines = app.main_lines();
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.starts_with("Welcome back, Road Star. You are parked in Denver")),
+        "{lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|line| line.contains("Company Yard")),
+        "{lines:?}"
+    );
     assert!(is::<CityMenuState>(&app));
 }
 

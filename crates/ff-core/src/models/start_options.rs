@@ -347,6 +347,8 @@ pub fn pay_plan_for_key(key: Option<&str>) -> CompanyPayPlan {
 pub trait StartProfile {
     fn set_carrier_key(&mut self, key: &str);
     fn set_home_terminal_city(&mut self, city: &str);
+    /// The home base city the driver picked (a new career's current city).
+    fn home_base_city(&self) -> String;
     fn set_start_mode(&mut self, mode: &str);
     fn set_carrier_name(&mut self, name: &str);
     fn set_money(&mut self, money: f64);
@@ -418,10 +420,25 @@ pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
     profile.set_carrier_key(option.key);
     profile.set_start_mode(option.mode);
     profile.set_carrier_name(option.carrier_name);
-    // Persist the nearest real yard city for this start's default city.
-    let home = crate::data::world::get_world()
-        .resolve_home_terminal_city(option.default_city)
-        .unwrap_or_else(|| option.default_city.to_string());
+    // Home terminal: the hiring carrier's terminal city nearest the picked
+    // home base (a carrier-owned yard, never a world freight pin).
+    let world = crate::data::world::get_world();
+    let base = profile.home_base_city();
+    let base = if base.trim().is_empty() {
+        option.default_city.to_string()
+    } else {
+        base
+    };
+    let hiring = carriers::hiring_carrier(
+        option.key,
+        option.carrier_name,
+        if option.is_owner_operator() {
+            "leased_owner_operator"
+        } else {
+            "company_driver"
+        },
+    );
+    let home = carriers::home_terminal_city_for(hiring, world, &base);
     profile.set_home_terminal_city(&home);
     profile.set_money(option.starting_money);
     profile.set_business_status(if option.is_owner_operator() {

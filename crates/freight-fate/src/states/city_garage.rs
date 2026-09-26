@@ -34,7 +34,7 @@ pub const CHAIN_SET_COST: f64 = 750.0;
 pub const TERMINAL_CHAINS_MIN: f64 = 10.0;
 
 fn record_terminal_duty(ctx: &mut GameContext, start_hour: f64, end_hour: f64, note: &str) {
-    let terminal = crate::states::city::home_terminal(ctx);
+    let terminal = crate::states::city::parked_at(ctx);
     profile_mut(ctx).duty_log.record(
         "on_duty_not_driving",
         start_hour,

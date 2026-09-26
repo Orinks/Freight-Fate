@@ -13,6 +13,7 @@ pub mod credentials;
 pub mod dispatch_policy;
 pub mod economy;
 pub mod enforcement;
+pub mod home_base;
 pub mod jobs;
 pub mod loyalty;
 pub mod market;

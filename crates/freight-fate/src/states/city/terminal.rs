@@ -31,7 +31,7 @@ use crate::states::career_stats::{fully_rested, CareerStatsState};
 use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
-    home_terminal, open_freight_market, profile, profile_mut, record_city_duty,
+    open_freight_market, parked_at, profile, profile_mut, record_city_duty,
     terminal_objective_clause, BobtailDestState, BusinessStatusState, EndorsementCourseState,
     GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI,
     DRIVING_SCHOOL_ENABLED,
@@ -84,7 +84,7 @@ impl CityMenuState {
         if ctx.profile.is_none() {
             return "Terminal".to_string();
         }
-        home_terminal(ctx).name
+        parked_at(ctx).name
     }
 
     pub fn title(&self) -> &str {
@@ -486,6 +486,8 @@ impl CityMenuState {
             p.driving_record.carrier_terminations += 1;
             p.carrier_key = enforcement::LAST_CHANCE_CARRIER_KEY.to_string();
             p.carrier_name = enforcement::LAST_CHANCE_CARRIER_NAME.to_string();
+            // The new carrier's terminal becomes home; the truck stays put.
+            p.rehome_to_carrier();
             p.dispatch_board_cache = None;
             former
         };
@@ -668,7 +670,7 @@ impl Menu for CityMenuState {
                 .city(&p.current_city)
                 .map(|c| (c.name.clone(), c.state.clone()))
                 .unwrap_or_else(|_| (p.current_city.clone(), String::new()));
-            let terminal = home_terminal(ctx);
+            let parked = parked_at(ctx);
             let business = status_label(&p.business_status);
             let rank = display_rank_for(p);
             let first_day = terminal_objective_clause(p);
@@ -694,8 +696,8 @@ impl Menu for CityMenuState {
                 format!(" {record}")
             };
             format!(
-                "Parked at {} in the {city_name} service area, {city_state}. {} with level {}, {}.{cdl}{record} You have {} dollars. {first_day}",
-                terminal.spoken_name(),
+                "Parked{} in the {city_name} service area, {city_state}. {} with level {}, {}.{cdl}{record} You have {} dollars. {first_day}",
+                parked.at_clause(),
                 crate::states::city::py_capitalize(business),
                 rank.level,
                 rank.title,

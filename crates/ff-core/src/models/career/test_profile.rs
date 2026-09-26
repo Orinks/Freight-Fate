@@ -319,6 +319,9 @@ impl StartProfile for FakeProfile {
     fn set_home_terminal_city(&mut self, city: &str) {
         self.home_terminal_city = city.to_string();
     }
+    fn home_base_city(&self) -> String {
+        self.home_terminal_city.clone()
+    }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();
     }

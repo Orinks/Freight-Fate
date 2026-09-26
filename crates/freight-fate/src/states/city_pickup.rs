@@ -920,14 +920,23 @@ impl PickupFacilityState {
     }
 
     fn cancel(&mut self, ctx: &mut GameContext) {
+        let at_shipper = ctx.world.resolve_city_key(&self.job.origin)
+            == ctx.world.resolve_city_key(&profile(ctx).current_city);
         {
             let p = profile_mut(ctx);
             p.active_trip = None;
             p.dispatch_board_cache = None;
+            // The truck is at the shipper it was picking up from.
+            if at_shipper && !self.job.bobtail {
+                p.parked_facility = self.job.origin_location.clone();
+            }
         }
         ctx.save_profile();
-        let terminal = crate::states::city::home_terminal(ctx);
-        ctx.say(&format!("Pickup canceled. Returned to {}.", terminal.name));
+        let parked = crate::states::city::parked_at(ctx);
+        ctx.say(&format!(
+            "Pickup canceled. Parked {}.",
+            parked.phrase(ctx.world)
+        ));
         let city = CityMenuState::new(ctx, false);
         ctx.reset_to(city);
     }

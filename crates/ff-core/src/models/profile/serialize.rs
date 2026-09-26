@@ -65,6 +65,10 @@ impl Profile {
             Value::from(self.home_terminal_city.as_str()),
         );
         d.insert(
+            "parked_facility".into(),
+            Value::from(self.parked_facility.as_str()),
+        );
+        d.insert(
             "created_line".into(),
             Value::from(self.created_line.as_str()),
         );
@@ -303,14 +307,18 @@ impl Profile {
             money_guard: MoneyGuard::seeded(money),
             current_city: s("current_city", &defaults.current_city),
             home_terminal_city: {
-                let raw = s("home_terminal_city", "");
-                if raw.is_empty() {
-                    // Old save: derive from current city via nearest real yard.
-                    migrate_home_terminal_city(&s("current_city", &defaults.current_city))
-                } else {
-                    migrate_home_terminal_city(&raw)
-                }
+                let carrier = crate::models::carriers::hiring_carrier(
+                    &s("carrier_key", &defaults.carrier_key),
+                    &s("carrier_name", &defaults.carrier_name),
+                    &s("business_status", &defaults.business_status),
+                );
+                migrate_home_terminal_city(
+                    carrier,
+                    &s("home_terminal_city", ""),
+                    &s("current_city", &defaults.current_city),
+                )
             },
+            parked_facility: s("parked_facility", ""),
             created_line: s("created_line", &defaults.created_line),
             migration_notice_pending: b("migration_notice_pending", false),
             integrity_modified: b("integrity_modified", false),
@@ -359,14 +367,30 @@ impl Profile {
     }
 }
 
-/// Resolve a saved home city to a city that owns a real yard/terminal.
-/// Synthetic "{City} Company Yard" homes never existed as a save field; this
-/// catches cities that only have fuel/parking pins by walking to the nearest
-/// offerable yard city (or leaving the key unchanged when already offerable).
-pub(super) fn migrate_home_terminal_city(city: &str) -> String {
+/// Home terminal city for a (possibly old) save: the hiring carrier's
+/// terminal city nearest the saved home (or `current_city` when the save has
+/// none). A saved home that is already one of the carrier's terminal cities
+/// is kept. No world-pin search: world `terminal`/`company_yard` pins are
+/// freight endpoints, never homes. With no hiring carrier (own authority)
+/// the saved home, or else the current city, is kept as a city key.
+pub(crate) fn migrate_home_terminal_city(
+    carrier: Option<&crate::models::carriers::Carrier>,
+    saved_home: &str,
+    current_city: &str,
+) -> String {
     use crate::data::world::get_world;
     let world = get_world();
-    world
-        .resolve_home_terminal_city(city)
-        .unwrap_or_else(|| world.resolve_city_key(city))
+    let base = if saved_home.trim().is_empty() {
+        current_city
+    } else {
+        saved_home
+    };
+    let key = world.resolve_city_key(base);
+    let Some(carrier) = carrier else {
+        return key;
+    };
+    if carrier.terminal_city_keys.contains(&key) {
+        return key;
+    }
+    carrier.nearest_terminal_city(world, &key).unwrap_or(key)
 }

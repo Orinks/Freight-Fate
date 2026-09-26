@@ -8,7 +8,6 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use ff_core::data::world_models::HomeTerminal;
 use ff_core::models::business::{display_rank_for, uses_company_career_ranks_for, SettlementTerms};
 use ff_core::models::career::{standing_xp_rate, xp_rate_settlement_clause};
 use ff_core::models::career_ladder::relabel_level_up_announcements;
@@ -19,6 +18,7 @@ use ff_core::models::carrier_fleet::{
 };
 use ff_core::models::credentials::MANUAL_SPEC_DIFFERENTIAL;
 use ff_core::models::enforcement;
+use ff_core::models::home_base::{self, ParkedAt, ParkedInputs};
 use ff_core::models::jobs::{lane_key, Job};
 use ff_core::models::solvency::{self, deductions_from_settlement};
 use ff_core::models::trucks::truck_model;
@@ -65,7 +65,17 @@ pub struct ArrivalState {
     public_achievement_names: Vec<String>,
     announcements: Vec<String>,
     pub summary_lines: Vec<String>,
-    pub terminal: HomeTerminal,
+    pub terminal: ParkedAt,
+}
+
+/// The facility a finished drive leaves the truck at: the receiver for a
+/// delivery, none for an empty reposition.
+fn arrival_parked_facility(job: &Job) -> String {
+    if job.bobtail {
+        String::new()
+    } else {
+        job.destination_location.clone()
+    }
 }
 
 impl ArrivalState {
@@ -77,12 +87,24 @@ impl ArrivalState {
     /// Build settlement with an appointment time captured at receiver
     /// check-in. `driving` may already include later unloading time.
     pub fn new_at(ctx: &mut GameContext, driving: &mut DrivingState, arrival_hours: f64) -> Self {
-        let terminal = ctx
-            .world
-            .home_terminal(&driving.job.destination)
-            .unwrap_or_else(|_| {
-                HomeTerminal::new("Terminal", &driving.job.destination, "", "yard")
-            });
+        // Where the truck ends up: the carrier terminal in the home terminal
+        // city, else the receiver it just delivered to (a reposition has no
+        // facility), else the city's public lot -- never a yard elsewhere.
+        let terminal = {
+            let p = profile_of(ctx);
+            let facility = arrival_parked_facility(&driving.job);
+            home_base::parked_at(
+                ctx.world,
+                ParkedInputs {
+                    carrier_key: &p.carrier_key,
+                    carrier_name: &p.carrier_name,
+                    business_status: &p.business_status,
+                    home_terminal_city: &p.home_terminal_city,
+                    current_city: &driving.job.destination,
+                    parked_facility: &facility,
+                },
+            )
+        };
         let mut state = ArrivalState {
             menu: MenuCore::new("Delivery complete").with_intro_help(ARRIVAL_INTRO_HELP),
             summary_parts: Vec::new(),
@@ -129,6 +151,7 @@ impl ArrivalState {
         {
             let p = profile_mut_of(ctx);
             p.current_city = job.destination.clone();
+            p.parked_facility = arrival_parked_facility(&job);
             let driver_charges = p.fines_owed;
             if driver_charges != 0.0 {
                 p.spend(driver_charges);
@@ -530,6 +553,7 @@ impl ArrivalState {
             p.fines_owed = round_py_n(p.fines_owed + (carried_balance - collected).max(0.0), 2);
             p.earn(net_pay);
             p.current_city = job.destination.clone();
+            p.parked_facility = arrival_parked_facility(&job);
         }
         let lane = lane_key(ctx.world, &job);
         profile_mut_of(ctx).remember_lane(&lane);

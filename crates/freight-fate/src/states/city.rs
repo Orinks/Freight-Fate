@@ -28,13 +28,14 @@ use once_cell::sync::Lazy;
 use serde_json::{Map, Value};
 
 use ff_core::data::world::World;
-use ff_core::data::world_models::{HomeTerminal, Route};
+use ff_core::data::world_models::Route;
 use ff_core::models::business::{is_owner_operator, COMPANY_DRIVER, INDEPENDENT_AUTHORITY};
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
 use ff_core::models::enforcement;
+use ff_core::models::home_base::{ParkedAt, ParkedKind};
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
     board_offer_count, job_from_payload, job_payload, normalize_job_cities, Job, JobBoard,
@@ -94,14 +95,13 @@ pub(crate) fn profile_mut(ctx: &mut GameContext) -> &mut Profile {
         .expect("the terminal screens run with a loaded career")
 }
 
-/// The terminal the truck is parked at. An unknown current city is a data
-/// bug the Python surfaced as `KeyError`; here it falls back to a plain
-/// "Terminal" rather than taking the hub screen down.
-pub(crate) fn home_terminal(ctx: &GameContext) -> HomeTerminal {
-    let city = &profile(ctx).current_city;
-    ctx.world
-        .home_terminal(city)
-        .unwrap_or_else(|_| HomeTerminal::new("Terminal", city, "", "yard"))
+/// Where the truck is parked right now: the carrier terminal in the home
+/// terminal city, else the facility it last delivered or dropped at, else
+/// the city's travel center or truck parking, else just the city. Never a
+/// yard in another city and never a bare "Terminal" (see
+/// `ff_core::models::home_base`).
+pub(crate) fn parked_at(ctx: &GameContext) -> ParkedAt {
+    profile(ctx).parked_at(ctx.world)
 }
 
 /// Python `str.capitalize()`: first character upper, the rest lower.
@@ -119,10 +119,10 @@ pub(crate) fn record_city_duty(
     if ctx.profile.is_none() {
         return;
     }
-    let terminal = home_terminal(ctx);
+    let place = parked_at(ctx).name;
     profile_mut(ctx)
         .duty_log
-        .record(status, start_hour, end_hour, &terminal.name, note);
+        .record(status, start_hour, end_hour, &place, note);
 }
 
 /// 10-hour sleeps required to cover `drive_h`, given the driving hours left
@@ -177,20 +177,12 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
 /// screen; `first_day_orientation_message` is these joined.
 pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<String> {
     let p = profile(ctx);
-    let terminal = home_terminal(ctx);
     let option = option_for_profile(p);
-    // Spoken city, never the map key: the raw key read "parked at Chicago
-    // Company Yard in the chicago_il_us service area" (found by the first
-    // agent-driven playtest, 2026-08-30).
-    let location = format!(
-        "{} in the {} service area",
-        terminal.spoken_name(),
-        ctx.world.spoken_city(&p.current_city, None)
-    );
+    let location = first_day_parked_location(ctx);
     if option.is_owner_operator() {
         return vec![
             format!(
-                "{prefix}First-day briefing: leased to {}, parked at {location}.",
+                "{prefix}First-day briefing: leased to {}, parked {location}.",
                 option.carrier_name
             ),
             format!(
@@ -208,7 +200,7 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
             "{prefix}First-day briefing: welcome aboard {}.",
             option.carrier_name
         ),
-        format!("Your assigned truck is parked at {location}."),
+        format!("Your assigned truck is parked {location}."),
         "The carrier covers fuel, repairs, insurance, and trailer support.".to_string(),
         format!("Dispatch style: {}.", option.dispatch_profile().summary()),
         "As a new hire, dispatch assigns your load and route, and refusing an assignment \
@@ -217,6 +209,21 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
         "First objective: open the dispatch board, accept the assigned load, and deliver it cleanly."
             .to_string(),
     ]
+}
+
+/// "at {place} in the {city} service area" (or "in the {city} service area" when
+/// only the city is known) for the first-day briefing. Spoken city, never
+/// the map key: the raw key read "parked at Chicago Company Yard in the
+/// chicago_il_us service area" (found by the first agent-driven playtest,
+/// 2026-08-30).
+pub(crate) fn first_day_parked_location(ctx: &GameContext) -> String {
+    let p = profile(ctx);
+    let parked = parked_at(ctx);
+    let city = ctx.world.spoken_city(&p.current_city, None);
+    match parked.kind {
+        ParkedKind::City => format!("in the {city} service area"),
+        _ => format!("at {} in the {city} service area", parked.name),
+    }
 }
 
 /// What the terminal says about the first-day / career objective on entry

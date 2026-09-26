@@ -85,6 +85,8 @@ impl SolvencyProfile for Profile {
     fn set_carrier(&mut self, key: &str, name: &str) {
         self.carrier_key = key.to_string();
         self.carrier_name = name.to_string();
+        // A new carrier means that carrier's terminal; the truck stays put.
+        self.rehome_to_carrier();
     }
     fn set_pay_advance(&mut self, amount: f64) {
         self.pay_advance = amount;
@@ -221,6 +223,9 @@ impl StartProfile for Profile {
     }
     fn set_home_terminal_city(&mut self, city: &str) {
         self.home_terminal_city = city.to_string();
+    }
+    fn home_base_city(&self) -> String {
+        self.current_city.clone()
     }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();

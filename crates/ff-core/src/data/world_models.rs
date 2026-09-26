@@ -133,8 +133,9 @@ impl Location {
     }
 }
 
-/// The player's dispatch yard for a service area (`city` carries the SPOKEN
-/// city name -- the terminal object exists to be announced).
+/// The player's carrier home terminal (`city` carries the SPOKEN city name --
+/// the terminal object exists to be announced). Built from `data/carriers.json`
+/// terminal cities, never from world freight pins.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HomeTerminal {
     pub name: String,
@@ -154,14 +155,19 @@ impl HomeTerminal {
     }
 
     pub fn label(&self) -> &'static str {
-        if self.kind == "terminal" {
-            "company terminal"
-        } else {
-            "company yard"
+        match self.kind.as_str() {
+            "carrier_terminal" => "terminal",
+            "terminal" => "company terminal",
+            _ => "company yard",
         }
     }
 
+    /// A carrier terminal's name already says "terminal"
+    /// ("Northstar Freight Lines Chicago terminal"), so it is spoken as is.
     pub fn spoken_name(&self) -> String {
+        if self.kind == "carrier_terminal" {
+            return self.name.clone();
+        }
         format!("{}: {}", self.label(), self.name)
     }
 

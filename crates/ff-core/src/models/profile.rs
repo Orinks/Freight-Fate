@@ -132,6 +132,7 @@ pub const PROFILE_FIELDS: &[&str] = &[
     "money",
     "current_city",
     "home_terminal_city",
+    "parked_facility",
     "created_line",
     "migration_notice_pending",
     "integrity_modified",
@@ -359,9 +360,14 @@ pub struct Profile {
     /// honest career as modified. Read it with [`Profile::money`].
     money: f64,
     pub current_city: String,
-    /// Persisted home base city key (Career 2.0). Old saves migrate from
-    /// `current_city` via nearest real company_yard/terminal. Never a fuel lot.
+    /// Career 2.0 home terminal city key: the hiring carrier's terminal city
+    /// nearest the driver's home base (`data/carriers.json`). Home logic reads
+    /// this, never `current_city`. Old saves migrate to the hiring carrier's
+    /// nearest terminal city; the truck itself stays in `current_city`.
     pub home_terminal_city: String,
+    /// Facility (name) in `current_city` the truck last delivered or dropped
+    /// at; "" when none. Feeds the hub's "parked at" line off the home city.
+    pub parked_facility: String,
     // The release line this career was created on. New careers stamp the
     // current line; a save without the field is judged by its save version
     // instead (see is_pre_1_9_save), and pre-1.9 saves never get this far --
@@ -488,6 +494,7 @@ impl Default for Profile {
             money: STARTING_MONEY,
             current_city: DEFAULT_CITY.to_string(),
             home_terminal_city: DEFAULT_CITY.to_string(),
+            parked_facility: String::new(),
             created_line: CREATED_LINE.to_string(),
             migration_notice_pending: false,
             integrity_modified: false,
@@ -567,14 +574,68 @@ impl Profile {
 
     /// `Profile(name=name, current_city=city)`.
     pub fn named_in(name: &str, current_city: &str) -> Self {
-        Profile {
+        let mut profile = Profile {
             name: name.to_string(),
             current_city: current_city.to_string(),
-            // The same key a reload resolves to, so saving never reads as a
-            // change the player made.
-            home_terminal_city: serialize::migrate_home_terminal_city(current_city),
             ..Self::default()
-        }
+        };
+        // The same key a reload resolves to, so saving never reads as a
+        // change the player made.
+        profile.rehome_to_carrier();
+        profile
+    }
+
+    /// The carrier this career works for (`None` under its own authority).
+    pub fn hiring_carrier(&self) -> Option<&'static crate::models::carriers::Carrier> {
+        crate::models::carriers::hiring_carrier(
+            &self.carrier_key,
+            &self.carrier_name,
+            &self.business_status,
+        )
+    }
+
+    /// Re-derive `home_terminal_city` for the current hiring carrier: kept
+    /// when it is already one of that carrier's terminal cities, otherwise
+    /// the carrier's nearest terminal city to it (or to `current_city` when
+    /// empty). Never moves the truck.
+    pub fn rehome_to_carrier(&mut self) {
+        self.home_terminal_city = serialize::migrate_home_terminal_city(
+            self.hiring_carrier(),
+            &self.home_terminal_city,
+            &self.current_city,
+        );
+    }
+
+    /// The carrier's home terminal ("{Carrier} {City} terminal"), if any.
+    pub fn carrier_home_terminal(
+        &self,
+        world: &crate::data::world::World,
+    ) -> Option<crate::data::world_models::HomeTerminal> {
+        crate::models::home_base::carrier_home_terminal(
+            world,
+            &self.carrier_key,
+            &self.carrier_name,
+            &self.business_status,
+            &self.home_terminal_city,
+        )
+    }
+
+    /// Where the truck is parked right now (see `models::home_base`).
+    pub fn parked_at(
+        &self,
+        world: &crate::data::world::World,
+    ) -> crate::models::home_base::ParkedAt {
+        crate::models::home_base::parked_at(
+            world,
+            crate::models::home_base::ParkedInputs {
+                carrier_key: &self.carrier_key,
+                carrier_name: &self.carrier_name,
+                business_status: &self.business_status,
+                home_terminal_city: &self.home_terminal_city,
+                current_city: &self.current_city,
+                parked_facility: &self.parked_facility,
+            },
+        )
     }
 
     // -- money -----------------------------------------------------------------

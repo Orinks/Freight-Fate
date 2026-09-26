@@ -2001,6 +2001,7 @@
     "owned_trailers",
     "owned_trucks",
     "owner_operator_declined",
+    "parked_facility",
     "pay_advance",
     "pay_advance_used_for_load",
     "radio_favorites",
