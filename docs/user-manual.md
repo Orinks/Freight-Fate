@@ -1072,9 +1072,11 @@ serious violation on your record, but not a felony. Hold highway speed or
 accelerate for another twelve seconds after that final warning, with no brake,
 and you are running from the police. Nobody gets there by accident: a touch of
 the brake starts the count over. A pursuit ends in a felony stop that adds
-truck damage, a major fine, a reputation hit, several hours of processing
-time, and cancels the active loaded run. You are released back to the terminal
-so you can repair, rest, and choose what to do next. Speeding is charged only
+truck damage, a major fine, a reputation hit, three hours of booking, and
+cancels the active loaded run. You are released after booking, and the truck
+is towed to the nearest travel center or truck parking lot within 100 miles,
+or the nearest facility when no lot is that close, where you can repair,
+rest, and choose what to do next. Speeding is charged only
 when a trooper catches it.
 What each of those costs, and what it puts on your record, is under
 Enforcement, Your Record, And Your CDL.
