@@ -2064,11 +2064,25 @@ instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
+- [ ] **BLOCKER (2.0 tester release): orinks.net profile integrity export.**
+      The validator's exact save-field list must be updated from
+      `crates/ff-core/tests/profile_integrity_invariants.json` for the new
+      save fields `parked_facility`, `home_terminal_city`, and
+      `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
+      be rejected as a schema mismatch.
 
 ### Career carriers (slices 2–4)
 
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
 ("{Carrier} {City} terminal"), and the hub's "parked at" rule.
+
+- [ ] **Slice 2: start flow places the truck at the hiring carrier's
+      terminal.** Orientation and truck assignment happen at the carrier
+      terminal in `home_terminal_city`, so a new hire's first "parked at" is
+      that terminal rather than the picked city.
+- [ ] **Slice 2: the home-base picker lists only offerable cities.** Only
+      cities where `is_offerable_home_city` is true (some carrier hires
+      there) appear in the start picker.
 
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds
@@ -2085,6 +2099,12 @@ Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
 - [ ] **`retail_store` facility type.** Costco and Fred Meyer are pinned as
       distribution centers today; a retail store type lets them receive as
       stores instead.
+- [ ] **Low priority: retire or retype the ~628 synthesized "{City} Company
+      Yard" freight pins.** A yard is not a shipper or receiver; these
+      template pins still act as freight endpoints on the board.
+- [ ] **Low priority: name the fallback garage as a truck repair shop.** The
+      fallback garage borrows `yard_pin_name` for its label; it should be
+      named as a truck repair shop in that city instead.
 
 
 ### Twin parcel / STAA doubles (Track A)
