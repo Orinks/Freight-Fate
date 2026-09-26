@@ -2138,30 +2138,46 @@ LCV turnpike doubles on permitted toll roads.
       check-in and loading and shown on the pickup screen. The walk-around at
       a stop takes 25 minutes with doubles hooked. Both minute figures are
       ASSUMED (`models::doubles`); no public time study was found.
+      Breaking the set at delivery adds 15 minutes on duty, spoken and
+      shown at the receiver.
 - [x] **FIX 4: Pup handling (landed).** The rear trailer's lateral
       acceleration is the tractor's quick-steer acceleration times the
       rearward amplification (STAA pups 1.7, READ from FHWA 2000 CTSW Vol III
       Ch VIII; turnpike doubles about 1.36, DERIVED from Figure VIII-11).
-      Above 40 mph a whip past the roll-warning share shifts the rear
-      trailer's freight and speaks a warning. Crosswind is scaled by the
-      same amplification. Reverse is refused with doubles hooked.
+      Above 40 mph a whip past the roll-warning share of the loaded
+      threshold shifts the rear trailer's freight and speaks a warning. Gusts
+      sway the rear trailer (amplified, harder on a light set); the tractor's
+      own drift is unchanged. Reverse is refused with doubles hooked.
 - [x] **FIX 5: Twin tare and GVW (landed).** Gross weight counts both
       trailers and the converter dolly: pups 2 × 6,185 lb + a 2,740 lb dolly
       (DERIVED from FHWA 2014 CTSW Table 4 and the Silver Eagle VAST-20 spec
       sheet); turnpike doubles the stock trailer plus 16,200 lb (DERIVED from
       FHWA 2000 CTSW Table V-3). Legal gross is 80,000 lb for pups and the
       lowest recorded turnpike cap along the route for turnpike doubles
-      (`data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`), falling back to
-      80,000 lb when a state has no cap. The job board clamp, live
-      overweight check, board weight line and CAT Scale ticket use it.
-- [ ] **Honesty debt: doubles timing and handling figures are partly
-      assumed.** Hook-up and walk-around minutes, the 40 mph whip floor, the
-      3 s steady-state filter and crosswind = rearward amplification are
-      open realism questions. Unhooking a set at delivery is not timed, and
-      pickup deadheads pull one empty trailer.
-- [ ] **Honesty debt: no axle split on a doubles scale ticket.** The
-      three-group axle model does not cover a set's extra axles, so the
-      ticket gives gross only and says so.
+      (`data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`); a turnpike-doubles
+      route through a state with no cap is refused, never held to 80,000 lb.
+      The job board clamp, live overweight check, board weight line and CAT
+      Scale ticket use it.
+- [x] **Realism review of FIX 3–5 (landed).** Kept: 15 / 10 minute pickup
+      times, the 6,185 lb pup tare (light against real 28s at about 6,500
+      to 7,500 lb, but inside tolerance), the unsplit 16,200 lb turnpike
+      set, the 1.36 amplification reading and the minimum-cap rule. Fixed:
+      breaking the set at delivery takes 15 minutes on duty; amplification
+      applies to the rear trailer's sway and whip only, never the tractor's
+      drift; the whip threshold is floored at the loaded pup's and a light
+      set sways harder in a gust; the doubles scale ticket drops its axle
+      sentence; turnpike doubles on a route through a state with no
+      recorded cap are refused, never held to 80,000 lb.
+- [ ] **Honesty debt: deadhead to a doubles pickup.** The run to a
+      doubles shipper pulls one empty trailer. It should be bobtail or an
+      empty set of doubles.
+- [ ] **Honesty debt: gross only on a doubles scale ticket.** Real tickets
+      print each platform; the three-group axle model does not cover a
+      set's extra axles, so the game reads gross and the legal limit only.
+- [ ] **Honesty debt: assumed doubles handling figures.** The 40 mph whip
+      floor and the 3 s steady-state filter are assumed. The gust shove is
+      the lane model's gust read as an acceleration, taken as the push on a
+      combination at its legal gross and scaled up for a lighter set.
 
 ### Travel-center bulk fuel (non-blocking)
 
