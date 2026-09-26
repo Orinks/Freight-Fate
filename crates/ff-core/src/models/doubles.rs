@@ -104,9 +104,9 @@ pub const TURNPIKE_DOUBLE_REARWARD_AMPLIFICATION: f64 = 1.3589;
 pub const REAR_TRAILER_FREIGHT_SHARE: f64 = 0.5;
 
 /// Spoken and shown when reverse is refused with doubles hooked.
-pub const DOUBLES_NO_REVERSE_TEXT: &str = "Reverse refused. A set of doubles cannot be \
-     backed up: the converter dolly folds and the rear trailer jackknifes. Pull forward \
-     and go around instead.";
+pub const DOUBLES_NO_REVERSE_TEXT: &str = "Reverse refused. You don't back a set of \
+     doubles: the converter dolly is a second pivot and the rear trailer jackknifes within \
+     a few feet. Pull forward and go around instead.";
 
 /// Spoken and shown when a quick steer swings the rear trailer hard.
 pub const REAR_TRAILER_WHIP_TEXT: &str = "The rear trailer whipped on that steer. On \
