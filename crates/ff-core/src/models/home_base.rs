@@ -77,11 +77,7 @@ impl ParkedAt {
 /// already starts with one: "The Dalles service area", never "the The
 /// Dalles service area".
 pub fn city_service_area(city: &str) -> String {
-    if city.starts_with("The ") {
-        format!("{city} service area")
-    } else {
-        format!("the {city} service area")
-    }
+    format!("{} service area", crate::speech_text::the_city(city))
 }
 
 /// The career fields [`parked_at`] reads.

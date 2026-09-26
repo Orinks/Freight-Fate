@@ -1589,3 +1589,21 @@ fn ordinary_reefer_cargo_keeps_catalog_label() {
     job.destination_location = "Chicago Cross-Dock".into();
     assert_eq!(job.spoken_cargo_label(), "refrigerated goods");
 }
+
+#[test]
+fn test_metro_market_text_does_not_double_the_dalles_article() {
+    for text in [
+        facility_text("metro_market", "", "The Dalles", ""),
+        facility_offer_text("metro_market", "", "The Dalles", ""),
+    ] {
+        assert_eq!(text, "The Dalles metro freight market");
+    }
+    assert_eq!(
+        facility_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+    assert_eq!(
+        facility_offer_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+}
