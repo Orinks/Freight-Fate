@@ -167,11 +167,8 @@ fn leg_is_staging_access(leg: &Leg) -> bool {
     if leg.a == leg.b {
         return true;
     }
-    // A first/last cue'd approach shares the plain stub's cap, the same
+    // A plain stub and a first/last cue'd approach share one cap, the same
     // 1.0 mi the STAA National Network gate applies to cue'd end legs.
-    if !leg.local_cue.is_empty() {
-        return leg.miles <= LCV_STAGING_ACCESS_MAX_MI;
-    }
     leg.miles <= LCV_STAGING_ACCESS_MAX_MI
 }
 
@@ -274,6 +271,36 @@ mod tests {
         let short = cued(0.4);
         assert!(leg_is_staging_access(&short));
         assert!(route_allows_lcv_turnpike(&route_with(short)));
+
+        // The same cap holds on the last leg, off the turnpike to the dock.
+        let cued_off = |miles: f64| {
+            let mut leg = Leg::new(
+                "elkhart_in_us",
+                "south_bend_in_us",
+                miles,
+                "Dock Spur",
+                "flat",
+                Vec::new(),
+            );
+            leg.local_cue = "left onto Dock Spur".to_string();
+            leg
+        };
+        let route_ending = |last: Leg| {
+            Route::from_legs(
+                vec![
+                    "toledo_oh_us".into(),
+                    "elkhart_in_us".into(),
+                    "south_bend_in_us".into(),
+                ],
+                vec![ohio_west_turnpike_leg(), last],
+            )
+        };
+        let long_last = cued_off(LCV_STAGING_ACCESS_MAX_MI + 0.5);
+        assert!(!leg_is_staging_access(&long_last));
+        assert!(!route_allows_lcv_turnpike(&route_ending(long_last)));
+        let last_at_cap = cued_off(LCV_STAGING_ACCESS_MAX_MI);
+        assert!(leg_is_staging_access(&last_at_cap));
+        assert!(route_allows_lcv_turnpike(&route_ending(last_at_cap)));
     }
 
     #[test]
