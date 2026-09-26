@@ -1,16 +1,18 @@
 # Carrier slice 3 plan — regional, local, and Alaska carriers
 
-Status: **plan only — no carrier data yet.** `data/carriers.json` is not
-touched until the data PR. Third pass: the realism re-cut approved the
-structure for the data PR and sent the names back; the renamed list and its
-screen are in §10, and every decision is in §11.
+Status: **approved; names final.** The data lands in the carriers.json
+data PR (`wip/carrier-s3-data`). The realism re-cut approved the structure;
+the names are final after one swap (Catawba Ridge Transport became
+Meherrin Transport, §10). The screen is in §10 and every decision is in
+§11.
 
 Parent: ROADMAP "Career carriers (slices 2–4)" — the row "The 16 regionals
 plus an Alaska regional". Slices 1 and 2 (carrier-owned terminals, the
 truthful parked-at line, the carrier-first start picker) are merged into
 `feat/career-2.0`.
 
-Branch: `wip/carrier-s3-regionals` off `feat/career-2.0` at `6e852f24`.
+Branch: planned on `wip/carrier-s3-regionals` off `feat/career-2.0` at
+`6e852f24`; that plan and the data land together on `wip/carrier-s3-data`.
 
 ---
 
@@ -32,18 +34,18 @@ Every terminal key listed here exists as a map city key today.
 
 ---
 
-## 1. Proposed carriers at a glance
+## 1. Carriers at a glance
 
 Prairie Link Regional (`prairie_link`, KC / Omaha / Wichita) stays as it is.
 The count is settled: **sixteen new lower-48 regionals plus Prairie Link,
 17 lower-48 regionals in all**, one Alaska regional, and three locals
-(Chicago, LA, Anchorage). Names below are the post-screen names (§10).
+(Chicago, LA, Anchorage). Names below are final (§10).
 
 | # | Name | Key | Tier | Terminal city keys | Cities in footprint | Only regional for |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Androscoggin Freight | `androscoggin_freight` | regional | `boston_ma_us`, `hartford_ct_us`, `portland_me_us`, `albany_ny_us` | 40 | 5 |
 | 2 | Kittatinny Crossroads Freight | `kittatinny_crossroads` | regional | `harrisburg_pa_us`, `baltimore_md_us`, `pittsburgh_pa_us`, `newark_nj_us` | 85 | 0 |
-| 3 | Catawba Ridge Transport | `catawba_ridge` | regional | `charlotte_nc_us`, `greensboro_nc_us`, `richmond_va_us` | 82 | 7 |
+| 3 | Meherrin Transport | `meherrin_transport` | regional | `charlotte_nc_us`, `greensboro_nc_us`, `richmond_va_us` | 82 | 7 |
 | 4 | Alapaha Regional | `alapaha_regional` | regional | `atlanta_ga_us`, `birmingham_al_us`, `savannah_ga_us` | 82 | 0 |
 | 5 | Sunpine Freight Lines | `sunpine_freight` | regional | `jacksonville_fl_us`, `orlando_fl_us`, `miami_fl_us` | 38 | 14 |
 | 6 | Barataria Carriers | `barataria_carriers` | regional | `new_orleans_la_us`, `baton_rouge_la_us`, `mobile_al_us`, `jackson_ms_us` | 55 | 5 |
@@ -95,9 +97,10 @@ to. §10 has the screen for every name.
 - **Hiring footprint:** 85 map cities; states VA 13, OH 12, PA 11, NY 9, WV 6, NJ 5, MA 4, CT 4, MD 4, KY 4, MI 3, NH 3, RI 2, DE 2, DC 1, NC 1, VT 1.
 - **Only regional for:** none (every city here is also reached by another regional).
 
-### 3. Catawba Ridge Transport (`catawba_ridge`)
+### 3. Meherrin Transport (`meherrin_transport`)
 
-- **Name:** Catawba River, from the Blue Ridge through the Charlotte region into SC.
+- **Name:** Meherrin River, on the Virginia and North Carolina line between
+  Richmond and Greensboro, inside this carrier's footprint.
 - **Tier:** regional; hires within 250 air mi of any terminal, same country; runs 150-600 mi.
 - **Terminals:** `charlotte_nc_us`, `greensboro_nc_us`, `richmond_va_us` (widest terminal pair 248 air mi).
 - **Lane area:** Carolinas and Virginia: Charlotte, Greensboro, and Richmond terminals; lanes along I-85/I-40/I-95 from Richmond to upstate SC.
@@ -206,7 +209,10 @@ to. §10 has the screen for every name.
 
 ### 15. Tehachapi Motor Lines (`tehachapi_motor_lines`)
 
-- **Name:** Tehachapi Mountains and Tehachapi Pass (CA-58), the grade between the LA basin side and the San Joaquin Valley.
+- **Name:** Tehachapi Mountains and Tehachapi Pass (CA-58), at the south
+  end of the San Joaquin Valley inside the lane area. The main Los Angeles
+  to Fresno lane runs I-5 over Tejon Pass, not CA-58; the name is for the
+  range in the lane area, not a claim about the LA-Fresno route.
 - **Tier:** regional; hires within 250 air mi of any terminal, same country; runs 150-600 mi.
 - **Terminals:** `los_angeles_ca_us`, `fresno_ca_us`, `sacramento_ca_us` (widest terminal pair 361 air mi).
 - **Lane area:** California and Reno: Los Angeles, Fresno, and Sacramento terminals; lanes along I-5/CA-99/I-80 from the LA basin through the Central Valley to Reno.
@@ -309,7 +315,7 @@ Chicago and LA are KEEP (resolved). The Anchorage local is new in this pass
 
 ## 5. Termination and solvency fallback (rule change)
 
-**Today:** `check_carrier_termination` (`states/city/terminal.rs`) and the
+**Before this slice:** `check_carrier_termination` (`states/city/terminal.rs`) and the
 two solvency paths (`solvency.rs`, `set_carrier` with
 `LAST_CHANCE_CARRIER_KEY`) always move the driver to Great Lakes Training
 (`enforcement::LAST_CHANCE_CARRIER_KEY`). `change_carrier` then makes a
@@ -335,6 +341,12 @@ Milwaukee.**
 
 The same pick serves the solvency path (an owner-operator who loses the
 business), minus the "not the firing carrier" filter.
+
+**Sufferance.** The carrier that takes on a let-go driver does so knowing
+the record, so the same record does not end that seat again: the driver is
+kept on sufferance at that carrier (`DrivingRecord.sufferance_carrier_key`,
+as Great Lakes Training always has) and their debt stops at the ceiling
+like a Great Lakes Training driver's.
 
 **Alaska outcomes:**
 
@@ -421,8 +433,9 @@ terminal on Prairie Link. The coverage test (§7) would catch the drop.
 
 1. `data/carriers.json`: the 20 new entries (16 regionals, Chatanika Freight Lines,
    3 locals). Pay and dispatch numbers per tier, reusing Prairie Link's
-   regional shape and a local shape (higher `stop_pay`, strong
-   `short_haul_bias`), tuned in review.
+   regional shape and a local shape (higher `stop_pay`, a little more
+   deadline slack; no `short_haul_bias`, whose spoken summary says
+   "training loads"), tuned in review.
 2. Tier `local` in `models/carriers.rs` (a non-national with
    `hiring_radius_mi = 50`; the regional code path already handles it).
 3. One company start option per new carrier in
@@ -483,7 +496,7 @@ Sources, all run 2026-09-26:
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Androscoggin Freight | `androscoggin_freight` | none; ANDROSCOGGIN 2 (a granite shop, a summer camp) | 9 marks, 2 live, none in IC 039/035/012 | only carriers located in Androscoggin County | Clean |
 | 2 | Kittatinny Crossroads Freight | `kittatinny_crossroads` | none; KITTATINNY 1 (a canoe outfitter) | 2 marks, 1 live: a Harrisburg fire company slogan (IC 035/045) | canoe and campground only | Clean (KEEP) |
-| 3 | Catawba Ridge Transport | `catawba_ridge` | none; **CATAWBA 36, including CATAWBA TRUCKING LLC, CATAWBA HAULING LLC, CATAWBA WARRIOR TRUCKING LLC** | "catawba ridge" 1 mark, dead; "catawba" 20 live, none in IC 039 | no "Catawba Ridge" carrier | **Flagged on the bare word** (KEEP by review; see note) |
+| 3 | Meherrin Transport | `meherrin_transport` | none; MEHERRIN 3 (an ag-chemical firm, a forest products firm; no freight names) | "meherrin" 2 marks, both dead | only carriers located in Meherrin VA | Clean (swapped in; see note) |
 | 4 | Alapaha Regional | `alapaha_regional` | none; ALAPAHA none | 2 marks, 1 live, none in IC 039/035/012 | only carriers located in Alapaha GA | Clean |
 | 5 | Sunpine Freight Lines | `sunpine_freight` | none; SUNPINE none | 5 marks, 3 live; TAHOE SUNPINE (IC 035/016, a lodging business), none in IC 039 | a lumber maker, a biofuel firm | Clean (KEEP) |
 | 6 | Barataria Carriers | `barataria_carriers` | none; BARATARIA 1 (an electrician) | 0 marks | only carriers on Barataria Blvd, Marrero LA | Clean |
@@ -502,19 +515,24 @@ Sources, all run 2026-09-26:
 | L2 | Basin Harbor Drayage | `basin_harbor_drayage` | none; — | 1 mark, dead | a Vermont resort; a hauler on Basin Harbor Rd, not authorized | Clean (KEEP) |
 | L3 | Knik Arm Cartage | `knik_arm_cartage` | none; KNIK 24, including KNIK TOWING & WRECKING and KNIK ROAD SERVICE (Mat-Su) | "knik arm" 0; "knik" 1 mark, dead | geography and port context only | Clean on the phrase (weak hit: Knik Towing, same metro) (KEEP) |
 
-**Catawba Ridge note.** "Catawba Ridge" itself screens clean everywhere,
-but the bare word "Catawba" is used by three freight-named registrants in
-the carrier's own lane area. The re-cut kept the name, so it stays; if the
-review wants zero flags, the best-screening fallback found is **Meherrin
-Transport** (Meherrin River, VA/NC line): SAFER MEHERRIN 3 (an ag-chemical
-firm, a forest products firm), USPTO 2 marks, both dead, web shows only
-carriers located in Meherrin VA. Rivanna, Uwharrie, Haw River, Tar River,
-Deep River, Yadkin, Roanoke, and Pee Dee all collide (below).
+**Meherrin swap (final).** The re-cut first kept Catawba Ridge Transport.
+"Catawba Ridge" screened clean, but the bare word "Catawba" is used by three
+freight-named registrants in the carrier's own lane area (CATAWBA TRUCKING
+LLC, CATAWBA HAULING LLC, CATAWBA WARRIOR TRUCKING LLC). Review swapped it
+for Meherrin Transport, the best-screening fallback: the Meherrin River runs
+on the VA/NC line between Richmond and Greensboro, inside the carrier's
+footprint. Rivanna, Uwharrie, Haw River, Tar River, Deep River, Yadkin,
+Roanoke, and Pee Dee all collide (below). With the swap, the names are final.
+
+**Tehachapi note.** Los Angeles to Fresno runs I-5 over Tejon Pass, not
+CA-58. CA-58 over Tehachapi Pass is inside the lane area, so the name
+stays; no wording claims CA-58 is the LA-Fresno route.
 
 ### Candidates rejected this pass
 
 | Candidate | Collision found |
 | --- | --- |
+| Catawba Ridge (swapped out) | bare word: CATAWBA TRUCKING LLC, CATAWBA HAULING LLC, CATAWBA WARRIOR TRUCKING LLC (SAFER) |
 | Piscataqua | PISCATAQUA BROKERAGE INC (SAFER) |
 | Casco Bay, Merrimack, Penobscot | CASCO BAY TRANSPORTATION LLC; MERRIMACK TRUCKING & EQUIPMENT LLC; PENOBSCOT HIGHLAND ENTERPRISES |
 | Quinebaug | clean in SAFER; second choice behind Androscoggin |
@@ -587,14 +605,26 @@ of the retirements: MARSH HEN is a live mark of Marsh Hen Mill LLC.
     highway, region, or a founder), no plants, animals, seaweed, or grasses,
     and no "Line Freight" pattern. Eight names are KEEP as they were; twelve
     are replaced and screened (§10).
+12. **Names final:** Catawba Ridge Transport becomes Meherrin Transport
+    (`meherrin_transport`); every other name is KEEP. Tehachapi Motor Lines
+    stays: CA-58 is in its lane area even though LA-Fresno runs I-5 over
+    Tejon Pass (§10).
 
 ---
 
 ## 12. Open questions
 
-1. **Catawba Ridge Transport:** kept by the re-cut, but the bare word
-   collides with CATAWBA TRUCKING LLC and two other freight-named
-   registrants in its lane area (§10). Keep, or swap to Meherrin Transport?
-2. **Unassigned driver state (§5):** how the hub reads a driver with no
-   carrier (menu wording, what the dispatch board says) needs a design
-   before the fallback rule lands.
+None open.
+
+1. **Catawba Ridge Transport:** resolved. Swapped to Meherrin Transport
+   (§10, §11 item 12).
+2. **Unassigned driver state (§5):** resolved with the simplest honest
+   version in the data PR. A company driver with no carrier saves an empty
+   `carrier_key` and `carrier_name`. The hub says "You have no carrier right
+   now" on arrival, and "Apply to a carrier" takes the dispatch board's
+   place. It lists carriers that hire in the home city, never the one that
+   let the driver go; when none do, carriers with a terminal in the same
+   state, each saying it moves the driver's home there. Picking one puts the
+   driver at that terminal on sufferance if the record would otherwise end
+   the seat. Opening the dispatch board with no carrier says why there is
+   none.
