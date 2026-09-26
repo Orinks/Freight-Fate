@@ -23,7 +23,6 @@ use super::legacy_aliases::LEGACY_CITY_SLUGS;
 use super::stop_twins::screen_twin_stops;
 use super::world_constants::{
     ALTERNATE_ROUTE_EXTRA_RATIO, ALTERNATE_ROUTE_MAX_EXTRA_MILES, ALTERNATE_ROUTE_MIN_EXTRA_MILES,
-    HOME_TERMINAL_SEARCH_RADIUS_MI,
 };
 use super::world_corridor::raw_metadata_complete;
 use super::world_loader::{load_world_data, WorldData};
@@ -32,8 +31,8 @@ use super::world_local_data::{
     load_local_approaches, load_local_geometries, CityServiceData,
 };
 use super::world_models::{
-    City, CorridorDetail, DataError, DetailSource, FacilityApproach, FacilityEndpoint,
-    HomeTerminal, Leg, LocalApproach, LocalGeometry, Location, Route,
+    City, CorridorDetail, DataError, DetailSource, FacilityApproach, FacilityEndpoint, Leg,
+    LocalApproach, LocalGeometry, Location, Route,
 };
 use super::world_parsing::{
     expand_market_locations, is_legacy_market_name, market_tags_for_city, merge_overlay,
@@ -700,78 +699,13 @@ impl World {
         Err(DataError::key(format!("{city} has no freight facilities")))
     }
 
-    /// Return the player's dispatch yard for a service area.
-    ///
-    /// Prefers an explicit `terminal`, then an explicit `company_yard` in the
-    /// named city. Travel centers and truck parking are never home terminals.
-    /// When the city has neither, the nearest city within
-    /// [`HOME_TERMINAL_SEARCH_RADIUS_MI`] air miles that has a real yard or
-    /// terminal is used (spoken city/state follow that yard's city). No
-    /// synthetic "`{city} Company Yard`" names — if nothing is in range,
-    /// returns `Err` and [`Self::is_offerable_home_city`] is false. Carrier
-    /// hiring by home terminal builds on this rule.
-    pub fn home_terminal(&self, city: &str) -> Result<HomeTerminal, DataError> {
+    /// Name of this city's own `terminal` (preferred) or `company_yard`
+    /// freight pin, for cosmetic naming only (the fallback garage). World
+    /// pins are freight endpoints and are never a player's home terminal:
+    /// that is the hiring carrier's own yard (see `models::carriers`).
+    pub fn yard_pin_name(&self, city: &str) -> Option<&str> {
         let key = self.resolve_city_key(city);
-        if !self.cities.contains_key(&key) {
-            return Err(DataError::key(format!("Unknown city: {city}")));
-        }
-        let Some((yard_city_key, location)) = self.home_terminal_location(&key) else {
-            return Err(DataError::key(format!(
-                "{city} has no company yard or terminal within {HOME_TERMINAL_SEARCH_RADIUS_MI} air miles"
-            )));
-        };
-        let yard_city = &self.cities[&yard_city_key];
-        Ok(HomeTerminal::new(
-            &location.name,
-            &yard_city.name,
-            &yard_city.state,
-            &location.facility_type,
-        ))
-    }
-
-    /// True when [`Self::home_terminal`] can resolve a real yard/terminal
-    /// at or near this city (within [`HOME_TERMINAL_SEARCH_RADIUS_MI`]).
-    /// Slice 2's start flow uses this to decide which cities appear as home
-    /// bases.
-    pub fn is_offerable_home_city(&self, city: &str) -> bool {
-        let key = self.resolve_city_key(city);
-        self.cities.contains_key(&key) && self.home_terminal_location(&key).is_some()
-    }
-
-    /// City key that owns the yard [`Self::home_terminal`] would announce
-    /// for `city` (the city itself, or the nearest in-range yard city).
-    pub fn resolve_home_terminal_city(&self, city: &str) -> Option<String> {
-        let key = self.resolve_city_key(city);
-        self.home_terminal_location(&key)
-            .map(|(yard_city, _)| yard_city)
-    }
-
-    fn home_terminal_location(&self, city_key: &str) -> Option<(String, &Location)> {
-        if let Some(location) = self.yard_or_terminal_in(city_key) {
-            return Some((city_key.to_string(), location));
-        }
-        let origin = self.cities.get(city_key)?;
-        let mut best: Option<(f64, String, &Location)> = None;
-        for (other_key, other) in &self.cities {
-            if other_key == city_key {
-                continue;
-            }
-            let Some(location) = self.yard_or_terminal_in(other_key) else {
-                continue;
-            };
-            let miles = air_miles(origin.lat, origin.lon, other.lat, other.lon);
-            if miles > HOME_TERMINAL_SEARCH_RADIUS_MI {
-                continue;
-            }
-            if best.as_ref().is_none_or(|(best_mi, _, _)| miles < *best_mi) {
-                best = Some((miles, other_key.clone(), location));
-            }
-        }
-        best.map(|(_, key, loc)| (key, loc))
-    }
-
-    fn yard_or_terminal_in(&self, city_key: &str) -> Option<&Location> {
-        let city = self.cities.get(city_key)?;
+        let city = self.cities.get(&key)?;
         city.locations
             .iter()
             .find(|l| l.facility_type == "terminal")
@@ -780,6 +714,7 @@ impl World {
                     .iter()
                     .find(|l| l.facility_type == "company_yard")
             })
+            .map(|l| l.name.as_str())
     }
 
     // ------------------------------------------------------------ routing
@@ -1017,8 +952,8 @@ pub fn world_is_loaded() -> bool {
     WORLD.get().is_some()
 }
 
-/// Great-circle distance in statute miles (home-terminal nearest-yard search).
-fn air_miles(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
+/// Great-circle distance in statute miles (carrier terminal and hiring radius).
+pub fn air_miles(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     const EARTH_MI: f64 = 3958.7613;
     let (lat1, lon1, lat2, lon2) = (
         lat1.to_radians(),

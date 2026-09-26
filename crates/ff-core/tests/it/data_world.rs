@@ -213,50 +213,15 @@ fn test_every_city_has_locations_with_known_cargo() {
 }
 
 #[test]
-fn test_home_terminal_prefers_explicit_terminal_and_falls_back_to_yard() {
+fn test_world_yard_pins_are_freight_endpoints_not_homes() {
+    // World terminal/company_yard pins only name freight endpoints (and the
+    // fallback garage); homes are the hiring carrier's own terminals.
     let world = world();
-    let explicit = world.home_terminal("Nashville").unwrap();
-    let fallback = world.home_terminal("Chicago").unwrap();
-
-    assert_eq!(explicit.name, "Music City Freight");
-    assert_eq!(explicit.label(), "company terminal");
-    assert_eq!(
-        explicit.spoken_name(),
-        "company terminal: Music City Freight"
-    );
-    assert_eq!(explicit.service_area(), "Nashville, Tennessee");
-    assert_eq!(fallback.name, "Chicago Company Yard");
-    assert_eq!(fallback.label(), "company yard");
-    assert_eq!(fallback.spoken_name(), "company yard: Chicago Company Yard");
-}
-
-#[test]
-fn test_home_terminal_never_picks_travel_center_or_truck_parking() {
-    use ff_core::data::world_constants::HOME_TERMINAL_SEARCH_RADIUS_MI;
-    let world = world();
-    // Healy's only curated pin is Fisher Fuel (travel_center). Home terminal
-    // resolves to the nearest real yard (Nenana stand-in), never the fuel
-    // stop and never a synthetic "Healy Company Yard".
-    assert!(
-        world.is_offerable_home_city("healy_ak_us"),
-        "Nenana yard is within {HOME_TERMINAL_SEARCH_RADIUS_MI} air mi of Healy"
-    );
-    let yard_city = world
-        .resolve_home_terminal_city("healy_ak_us")
-        .expect("nearest yard city");
-    assert_eq!(yard_city, "nenana_ak_us");
-    let healy = world.home_terminal("healy_ak_us").expect("healy");
-    assert_eq!(healy.kind, "company_yard");
-    assert!(
-        healy.name.contains("Nenana"),
-        "expected Nenana yard, got {}",
-        healy.name
-    );
-    assert!(!healy.name.to_lowercase().contains("fisher"));
-    assert!(!healy.name.contains("Healy Company Yard"));
-    assert_ne!(healy.kind, "travel_center");
-    assert_ne!(healy.kind, "truck_parking");
-
+    assert_eq!(world.yard_pin_name("Nashville"), Some("Music City Freight"));
+    assert_eq!(world.yard_pin_name("Chicago"), Some("Chicago Company Yard"));
+    // Healy's only curated pin is Fisher Fuel (travel_center): no yard pin,
+    // no default freight facility, and no borrowed Nenana stand-in.
+    assert_eq!(world.yard_pin_name("healy_ak_us"), None);
     let err = world
         .default_facility("healy_ak_us")
         .expect_err("Healy has no company_yard/terminal on its own pin");
@@ -264,11 +229,26 @@ fn test_home_terminal_never_picks_travel_center_or_truck_parking() {
         err.to_string().contains("no freight facilities"),
         "unexpected default_facility error: {err}"
     );
+    assert!(world
+        .yard_pin_name("anchorage_ak_us")
+        .is_some_and(|name| name.contains("Port of Alaska")));
+}
 
-    // Anchorage keeps Port of Alaska as terminal home.
-    let anc = world.home_terminal("anchorage_ak_us").expect("anchorage");
-    assert_eq!(anc.kind, "terminal");
-    assert!(anc.name.contains("Port of Alaska"));
+#[test]
+fn test_home_base_offerability_follows_carrier_hiring() {
+    use ff_core::models::carriers::{carrier, home_terminal_city_for, is_offerable_home_city};
+    let world = world();
+    // Healy: nationals hire in the lower 48 only and no Alaska regional
+    // exists yet, so it is not offered.
+    assert!(!is_offerable_home_city(world, "healy_ak_us"));
+    // Chicago: offered, into Northstar's own Chicago terminal.
+    assert!(is_offerable_home_city(world, "chicago_il_us"));
+    let northstar = carrier("northstar").expect("northstar");
+    let home = home_terminal_city_for(Some(northstar), world, "Chicago");
+    assert_eq!(home, "chicago_il_us");
+    let terminal = northstar.home_terminal(world, &home).expect("terminal");
+    assert_eq!(terminal.name, "Northstar Freight Lines Chicago terminal");
+    assert_eq!(terminal.service_area(), "Chicago, Illinois");
 }
 
 #[test]

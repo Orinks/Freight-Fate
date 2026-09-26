@@ -500,12 +500,6 @@ pub const FACILITY_APPROACH_MILES: &[(&str, f64)] = &[
 // pin in the wrong place rather than a road anybody drives.
 pub const FACILITY_APPROACH_TRUSTED_MAX_MI: f64 = 2.5;
 
-/// Max air miles to search for a real `company_yard` / `terminal` when a
-/// city has none of its own. Matches the regional carrier hiring radius so
-/// a home base is always inside a regional's reach of some yard. Cities
-/// beyond this with only fuel/parking pins are not offerable home bases.
-pub const HOME_TERMINAL_SEARCH_RADIUS_MI: f64 = 250.0;
-
 pub const FACILITY_APPROACH_ROADS: &[(&str, &str)] = &[
     ("air_cargo", "airport cargo access road"),
     ("automotive_plant", "assembly plant access road"),

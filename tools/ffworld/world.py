@@ -366,72 +366,20 @@ class World(WorldServiceMixin):
                     return location
         raise KeyError(f"{city} has no freight facilities")
 
-    def home_terminal(self, city: str) -> HomeTerminal:
-        """Return the player's dispatch yard for a service area.
+    def yard_pin_name(self, city: str) -> str | None:
+        """Name of the city's own ``terminal`` (preferred) or ``company_yard``
+        freight pin, for cosmetic naming only (the fallback garage).
 
-        Prefers an explicit ``terminal``, then an explicit ``company_yard`` in
-        the named city. Travel centers and truck parking are never home
-        terminals. When the city has neither, the nearest city within
-        ``HOME_TERMINAL_SEARCH_RADIUS_MI`` air miles that has a real yard or
-        terminal is used. No synthetic ``"{city} Company Yard"`` names — if
-        nothing is in range, raises ``KeyError`` and
-        :meth:`is_offerable_home_city` is false.
+        World pins are freight endpoints and are never a player's home
+        terminal: that is the hiring carrier's own yard (``data/carriers.json``).
         """
-        key = self.resolve_city_key(city)
-        if key not in self.cities:
-            raise KeyError(f"Unknown city: {city}")
-        resolved = self._home_terminal_location(key)
-        if resolved is None:
-            raise KeyError(
-                f"{city} has no company yard or terminal within "
-                f"{HOME_TERMINAL_SEARCH_RADIUS_MI} air miles"
-            )
-        yard_key, location = resolved
-        yard_city = self.cities[yard_key]
-        return HomeTerminal(location.name, yard_city.name, yard_city.state, location.type)
-
-    def is_offerable_home_city(self, city: str) -> bool:
-        """True when a real yard/terminal is at or near this city."""
-        key = self.resolve_city_key(city)
-        return key in self.cities and self._home_terminal_location(key) is not None
-
-    def resolve_home_terminal_city(self, city: str) -> str | None:
-        """City key that owns the yard ``home_terminal`` would announce."""
-        key = self.resolve_city_key(city)
-        resolved = self._home_terminal_location(key)
-        return None if resolved is None else resolved[0]
-
-    def _home_terminal_location(self, city_key: str):
-        local = self._yard_or_terminal_in(city_key)
-        if local is not None:
-            return city_key, local
-        origin = self.cities[city_key]
-        best = None  # (miles, key, location)
-        for other_key, other in self.cities.items():
-            if other_key == city_key:
-                continue
-            location = self._yard_or_terminal_in(other_key)
-            if location is None:
-                continue
-            miles = _air_miles(origin.lat, origin.lon, other.lat, other.lon)
-            if miles > HOME_TERMINAL_SEARCH_RADIUS_MI:
-                continue
-            if best is None or miles < best[0]:
-                best = (miles, other_key, location)
-        if best is None:
+        city_obj = self.cities.get(self.resolve_city_key(city))
+        if city_obj is None:
             return None
-        return best[1], best[2]
-
-    def _yard_or_terminal_in(self, city_key: str):
-        city = self.cities.get(city_key)
-        if city is None:
-            return None
-        for location in city.locations:
-            if location.type == "terminal":
-                return location
-        for location in city.locations:
-            if location.type == "company_yard":
-                return location
+        for facility_type in ("terminal", "company_yard"):
+            for location in city_obj.locations:
+                if location.type == facility_type:
+                    return location.name
         return None
 
     def shortest_route(
@@ -676,15 +624,3 @@ def get_world() -> World:
     if _world is None:
         _world = World.load()
     return _world
-
-
-def _air_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle distance in statute miles."""
-    from math import asin, cos, radians, sin, sqrt
-
-    earth_mi = 3958.7613
-    lat1, lon1, lat2, lon2 = map(radians, (lat1, lon1, lat2, lon2))
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    return earth_mi * 2 * asin(sqrt(a))

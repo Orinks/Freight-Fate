@@ -355,14 +355,17 @@ fn test_full_game_flow_headless() {
     // continue back to the destination terminal hub
     select::<ArrivalState>(&mut app, "Continue to");
     assert!(is::<CityMenuState>(&app));
-    let terminal = app
-        .ctx
-        .world
-        .home_terminal(&destination)
-        .expect("the destination has a terminal");
+    // Parked where the load was delivered (unless that is the home
+    // terminal city, where the carrier's own terminal wins).
+    let parked = profile(&app).parked_at(app.ctx.world);
+    assert!(!parked.name.is_empty() && parked.name != "Terminal");
+    assert_eq!(
+        parked.city_key,
+        app.ctx.world.resolve_city_key(&destination)
+    );
     assert_eq!(
         with_state::<CityMenuState, _>(&app, |s, _| s.menu().title.clone()),
-        terminal.name
+        parked.name
     );
 
     // render a frame of every reachable lines() output

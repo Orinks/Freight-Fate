@@ -10,8 +10,8 @@ use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
 use crate::data::data_resources::read_data_text;
-use crate::data::world::get_world;
-use crate::data::world_models::DataError;
+use crate::data::world::{air_miles, get_world, World};
+use crate::data::world_models::{City, DataError, HomeTerminal};
 use crate::models::start_options::{CompanyPayPlan, DispatchProfile, NORTHSTAR_PAY};
 
 pub const CARRIER_TIERS: &[&str] = &["local", "regional", "national"];
@@ -57,6 +57,109 @@ impl Carrier {
     pub fn run_band_allows(&self, miles: f64) -> bool {
         miles + f64::EPSILON >= self.run_band.min_mi && miles <= self.run_band.max_mi + f64::EPSILON
     }
+
+    pub fn is_national(&self) -> bool {
+        self.tier == "national"
+    }
+
+    /// The carrier's own dispatch yard in `city_key`: "{Carrier} {City}
+    /// terminal". Only cities in `terminal_city_keys` have one.
+    pub fn terminal_name(&self, world: &World, city_key: &str) -> Option<String> {
+        let key = world.resolve_city_key(city_key);
+        if !self.terminal_city_keys.contains(&key) {
+            return None;
+        }
+        let city = world.cities.get(&key)?;
+        Some(format!("{} {} terminal", self.name, city.name))
+    }
+
+    /// Announceable home terminal for `city_key`, when it is one of this
+    /// carrier's terminal cities.
+    pub fn home_terminal(&self, world: &World, city_key: &str) -> Option<HomeTerminal> {
+        let key = world.resolve_city_key(city_key);
+        let name = self.terminal_name(world, &key)?;
+        let city = world.cities.get(&key)?;
+        Some(HomeTerminal::new(
+            &name,
+            &city.name,
+            &city.state,
+            CARRIER_TERMINAL_KIND,
+        ))
+    }
+
+    /// Terminal city nearest to `city_key` (air miles), regardless of the
+    /// hiring area. Existing careers already work here, so save migration
+    /// and carrier changes use this.
+    pub fn nearest_terminal_city(&self, world: &World, city_key: &str) -> Option<String> {
+        let key = world.resolve_city_key(city_key);
+        let origin = world.cities.get(&key)?;
+        self.terminals_by_distance(world, origin)
+            .into_iter()
+            .next()
+            .map(|(_, k)| k)
+    }
+
+    /// Terminal city this carrier would hire a driver living in `city_key`
+    /// into: nearest terminal for nationals (lower 48 only), nearest terminal
+    /// within `hiring_radius_mi` for regional and local carriers (same
+    /// country as that terminal). `None` means the carrier does not hire
+    /// there.
+    pub fn hiring_terminal_city(&self, world: &World, city_key: &str) -> Option<String> {
+        let key = world.resolve_city_key(city_key);
+        let origin = world.cities.get(&key)?;
+        if self.is_national() {
+            if !in_lower_48(origin) {
+                return None;
+            }
+            return self
+                .terminals_by_distance(world, origin)
+                .into_iter()
+                .next()
+                .map(|(_, k)| k);
+        }
+        let radius = self.hiring_radius_mi?;
+        self.terminals_by_distance(world, origin)
+            .into_iter()
+            .find(|(miles, terminal_key)| {
+                *miles <= radius + f64::EPSILON
+                    && world
+                        .cities
+                        .get(terminal_key)
+                        .is_some_and(|t| same_country(t, origin))
+            })
+            .map(|(_, k)| k)
+    }
+
+    pub fn hires_in(&self, world: &World, city_key: &str) -> bool {
+        self.hiring_terminal_city(world, city_key).is_some()
+    }
+
+    fn terminals_by_distance(&self, world: &World, origin: &City) -> Vec<(f64, String)> {
+        let mut out: Vec<(f64, String)> = self
+            .terminal_city_keys
+            .iter()
+            .filter_map(|k| {
+                let t = world.cities.get(k)?;
+                Some((air_miles(origin.lat, origin.lon, t.lat, t.lon), k.clone()))
+            })
+            .collect();
+        out.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+        out
+    }
+}
+
+/// `HomeTerminal::kind` for a carrier-owned terminal (spoken by name only).
+pub const CARRIER_TERMINAL_KIND: &str = "carrier_terminal";
+
+/// National carriers hire in the lower 48 only: Alaska waits for an Alaska
+/// regional, Hawaii has no road network, and BC/YT are not US hiring areas.
+fn in_lower_48(city: &City) -> bool {
+    city.country.eq_ignore_ascii_case("us")
+        && !matches!(city.state_code.to_ascii_uppercase().as_str(), "AK" | "HI")
+}
+
+fn same_country(a: &City, b: &City) -> bool {
+    a.country.eq_ignore_ascii_case(&b.country)
 }
 
 #[derive(Deserialize)]
@@ -221,30 +324,70 @@ pub fn solvency_fallback_carrier() -> &'static Carrier {
         .expect("carriers.json names exactly one solvency fallback")
 }
 
-/// Validate terminal cities exist and host a real company_yard or terminal.
+/// Validate that every `terminal_city_keys` entry is a world city key.
+///
+/// Carrier terminals belong to the carrier ("{Carrier} {City} terminal");
+/// world `terminal`/`company_yard` pins are freight endpoints and are not
+/// required (or used) here.
 pub fn validate_carrier_terminals() -> Result<(), DataError> {
-    let world = get_world();
-    for carrier in carrier_catalog().values() {
+    validate_terminals_against(carrier_catalog().values(), get_world())
+}
+
+fn validate_terminals_against<'a>(
+    carriers: impl IntoIterator<Item = &'a Carrier>,
+    world: &World,
+) -> Result<(), DataError> {
+    for carrier in carriers {
         for city_key in &carrier.terminal_city_keys {
-            let city = world.city(city_key).map_err(|_| {
-                DataError::value(format!(
-                    "carriers.json: carrier {} terminal city {city_key} is unknown",
-                    carrier.key
-                ))
-            })?;
-            let ok = city
-                .locations
-                .iter()
-                .any(|loc| matches!(loc.facility_type.as_str(), "company_yard" | "terminal"));
-            if !ok {
+            if !world.cities.contains_key(city_key) {
                 return Err(DataError::value(format!(
-                    "carriers.json: carrier {} terminal {city_key} has no company_yard/terminal",
+                    "carriers.json: carrier {} terminal city {city_key} is not a world city key",
                     carrier.key
                 )));
             }
         }
     }
     Ok(())
+}
+
+/// The carrier a profile works for: its catalog key, or (for a leased
+/// owner-operator whose start key is not a carrier) the carrier it is leased
+/// to by name. Independent authority has no hiring carrier.
+pub fn hiring_carrier(
+    carrier_key: &str,
+    carrier_name: &str,
+    business_status: &str,
+) -> Option<&'static Carrier> {
+    if business_status == crate::models::business::INDEPENDENT_AUTHORITY {
+        return None;
+    }
+    carrier(carrier_key).or_else(|| {
+        let name = carrier_name.trim();
+        if name.is_empty() {
+            return None;
+        }
+        carrier_catalog().values().find(|c| c.name == name)
+    })
+}
+
+/// A home base is offerable only when some carrier hires there.
+pub fn is_offerable_home_city(world: &World, city_key: &str) -> bool {
+    carrier_catalog()
+        .values()
+        .any(|c| c.hires_in(world, city_key))
+}
+
+/// Home terminal city for a career: the hiring carrier's nearest terminal
+/// city to `city_key`. Keeps `city_key` when there is no hiring carrier.
+pub fn home_terminal_city_for(carrier: Option<&Carrier>, world: &World, city_key: &str) -> String {
+    let key = world.resolve_city_key(city_key);
+    match carrier {
+        Some(c) => c
+            .hiring_terminal_city(world, &key)
+            .or_else(|| c.nearest_terminal_city(world, &key))
+            .unwrap_or(key),
+        None => key,
+    }
 }
 
 /// Pay plan for a carrier key; unknown keys fall back to Northstar wages.
@@ -292,8 +435,94 @@ mod tests {
     }
 
     #[test]
-    fn test_carrier_terminals_are_real_yards() {
+    fn test_carrier_terminal_city_keys_are_world_cities() {
         validate_carrier_terminals().expect("terminals validate");
+        let mut bad = carrier("prairie_link").unwrap().clone();
+        bad.terminal_city_keys.push("atlantis_xx_us".into());
+        let err = validate_terminals_against([&bad], get_world()).expect_err("unknown city");
+        assert!(err.to_string().contains("atlantis_xx_us"), "{err}");
+    }
+
+    #[test]
+    fn test_carrier_terminal_is_named_for_carrier_and_city() {
+        let world = get_world();
+        let northstar = carrier("northstar").unwrap();
+        let t = northstar
+            .home_terminal(world, "chicago_il_us")
+            .expect("chicago");
+        assert_eq!(t.name, "Northstar Freight Lines Chicago terminal");
+        assert_eq!(t.kind, CARRIER_TERMINAL_KIND);
+        assert_eq!(t.spoken_name(), "Northstar Freight Lines Chicago terminal");
+        // Not a terminal city for this carrier: no yard is invented.
+        assert!(northstar.home_terminal(world, "milwaukee_wi_us").is_none());
+        let prairie = carrier("prairie_link").unwrap();
+        assert_eq!(
+            prairie.terminal_name(world, "omaha_ne_us").as_deref(),
+            Some("Prairie Link Regional Omaha terminal")
+        );
+    }
+
+    #[test]
+    fn test_home_base_offerability_follows_carrier_hiring() {
+        let world = get_world();
+        // Chicago: Northstar hires nationally and has its terminal there.
+        assert!(is_offerable_home_city(world, "chicago_il_us"));
+        let northstar = carrier("northstar").unwrap();
+        assert_eq!(
+            northstar
+                .hiring_terminal_city(world, "chicago_il_us")
+                .as_deref(),
+            Some("chicago_il_us")
+        );
+        // Healy, AK: no national hires in Alaska and no AK regional exists.
+        assert!(!is_offerable_home_city(world, "healy_ak_us"));
+        assert!(!is_offerable_home_city(world, "anchorage_ak_us"));
+        assert!(!is_offerable_home_city(world, "fairbanks_ak_us"));
+        // BC and YT stay blocked.
+        assert!(!is_offerable_home_city(world, "whitehorse_yt_ca"));
+        assert!(!is_offerable_home_city(world, "surrey_bc_ca"));
+        // Prairie Link hires within 250 mi of its terminals only.
+        let prairie = carrier("prairie_link").unwrap();
+        assert_eq!(
+            prairie
+                .hiring_terminal_city(world, "topeka_ks_us")
+                .as_deref(),
+            Some("kansas_city_mo_us")
+        );
+        assert!(prairie
+            .hiring_terminal_city(world, "seattle_wa_us")
+            .is_none());
+        // A national hires anywhere in the lower 48, into its nearest terminal.
+        assert_eq!(
+            northstar
+                .hiring_terminal_city(world, "seattle_wa_us")
+                .as_deref(),
+            Some("chicago_il_us")
+        );
+    }
+
+    #[test]
+    fn test_hiring_carrier_maps_leases_and_skips_independents() {
+        use crate::models::business::{COMPANY_DRIVER, INDEPENDENT_AUTHORITY};
+        assert_eq!(
+            hiring_carrier("prairie_link", "", COMPANY_DRIVER).map(|c| c.key.as_str()),
+            Some("prairie_link")
+        );
+        assert_eq!(
+            hiring_carrier(
+                crate::models::start_options::OWNER_OPERATOR_START_KEY,
+                "Northstar Freight Lines",
+                "leased_owner_operator",
+            )
+            .map(|c| c.key.as_str()),
+            Some("northstar")
+        );
+        assert!(hiring_carrier(
+            "northstar",
+            "Northstar Freight Lines",
+            INDEPENDENT_AUTHORITY
+        )
+        .is_none());
     }
 
     #[test]

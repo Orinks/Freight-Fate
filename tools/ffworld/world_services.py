@@ -135,10 +135,10 @@ class WorldServiceMixin:
 
     def _fallback_city_service(self, city_key: str, key: str) -> CityService:
         city_obj = self.cities[city_key]
-        terminal = self.home_terminal(city_key)
+        yard = self.yard_pin_name(city_key)
         names = {
             "freight_market": f"{city_obj.name} Freight Market Office",
-            "garage": f"{terminal.name} Garage",
+            "garage": f"{yard or city_obj.name} Garage",
             "truck_dealer": f"{city_obj.name} Truck Dealer",
         }
         return CityService(
