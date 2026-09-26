@@ -398,6 +398,19 @@ fn an_evasive_swerve_on_loaded_pups_still_whips_and_says_so() {
 }
 
 #[test]
+fn a_held_steer_under_partial_lane_keeping_still_whips_on_the_snap_back() {
+    // Holding a key for a second under partial lane keeping throws the
+    // truck well off its line; the assist's correction rides the driver's
+    // steer, so its snap back still whips loaded pups, and says so.
+    let mut app = TestApp::new();
+    app.ctx.settings.lane_keeping = "partial".to_string();
+    let mut d = drive(&mut app, "parcel_doubles", "Buffalo", "Rochester", 10.0);
+    let (damage, whips) = steer_through(&mut app, &mut d, &[(Some(Key::Left), 1.0)]);
+    assert!(damage > 0.0);
+    assert_eq!(whips, vec![REAR_TRAILER_WHIP_TEXT.to_string()]);
+}
+
+#[test]
 fn a_keyboard_lane_change_never_whips_turnpike_doubles() {
     let mut app = TestApp::new();
     app.ctx.settings.lane_keeping = "off".to_string();
@@ -409,4 +422,100 @@ fn a_keyboard_lane_change_never_whips_turnpike_doubles() {
     );
     assert_eq!(damage, 0.0);
     assert!(whips.is_empty(), "{whips:?}");
+}
+
+/// Drive every mapped bend of `origin`→`destination` on loaded pups with no
+/// key pressed, at 20 frames a second. Bends closer than half a mile run as
+/// one stretch, from a tenth of a mile before the first to a tenth past the
+/// last. The speed is the advisory of the bend the truck is in, or else the
+/// lowest advisory of a bend in the next 0.3 mi (the driver has slowed for
+/// it), or else 55 mph. Returns the bends driven, the cargo damage and the
+/// whip lines spoken.
+fn drive_every_bend(
+    app: &mut TestApp,
+    origin: &str,
+    destination: &str,
+) -> (usize, f64, Vec<String>) {
+    let clock = app.fake_pacer_clock();
+    let mut d = drive(app, "parcel_doubles", origin, destination, 10.0);
+    let mut bends: Vec<_> = d
+        .trip
+        .curves
+        .iter()
+        .filter(|c| !c.connector)
+        .copied()
+        .collect();
+    bends.sort_by(|a, b| {
+        a.start_mi
+            .min(a.end_mi)
+            .total_cmp(&b.start_mi.min(b.end_mi))
+    });
+    let span = |c: &ff_core::data::curves::RouteCurve| {
+        (c.start_mi.min(c.end_mi), c.start_mi.max(c.end_mi))
+    };
+    let mut stretches: Vec<(f64, f64)> = Vec::new();
+    for bend in &bends {
+        let (lo, hi) = span(bend);
+        match stretches.last_mut() {
+            Some(last) if lo - last.1 < 0.5 => last.1 = last.1.max(hi),
+            _ => stretches.push((lo, hi)),
+        }
+    }
+    let speed_mph_at = |mi: f64| -> f64 {
+        let here = bends.iter().find(|c| {
+            let (lo, hi) = span(c);
+            lo <= mi && mi <= hi
+        });
+        if let Some(bend) = here {
+            return bend.advisory_mph as f64;
+        }
+        bends
+            .iter()
+            .filter(|c| {
+                let (lo, _) = span(c);
+                lo > mi && lo - mi <= 0.3
+            })
+            .map(|c| c.advisory_mph as f64)
+            .fold(55.0, f64::min)
+    };
+    let dt = 0.05;
+    for (lo, hi) in stretches {
+        d.trip.position_mi = lo - 0.1;
+        d.lane = ff_core::sim::lane::LaneKeeping::new(Some(7));
+        while d.trip.position_mi < hi + 0.1 {
+            let mps = speed_mph_at(d.trip.position_mi) / 2.23694;
+            d.trip.truck.velocity_mps = mps;
+            d.update_lane(&mut app.ctx, dt);
+            d.trip.position_mi += mps * dt / 1609.344;
+            clock.advance(dt);
+        }
+    }
+    let whips = app
+        .event_lines()
+        .into_iter()
+        .filter(|l| l.contains("whipped"))
+        .collect();
+    (bends.len(), d.trip.truck.cargo_damage_pct, whips)
+}
+
+#[test]
+fn loaded_pups_take_every_bend_at_advisory_without_a_whip() {
+    // A bend's own steer is the road's, not a quick steer by the driver:
+    // at advisory speed with no key pressed, loaded pups never whip, with
+    // lane keeping off or partial and curve assist on (the default).
+    for (origin, destination) in [
+        ("Chattanooga", "Knoxville"),
+        ("Denver", "Salt Lake City"),
+        ("Portland", "Seattle"),
+    ] {
+        for mode in ["off", "partial"] {
+            let mut app = TestApp::new();
+            app.ctx.settings.lane_keeping = mode.to_string();
+            let (bends, damage, whips) = drive_every_bend(&mut app, origin, destination);
+            assert!(bends > 5, "{origin} to {destination} has mapped bends");
+            assert!(whips.is_empty(), "{origin} {mode}: {} whips", whips.len());
+            assert_eq!(damage, 0.0, "{origin} {mode}");
+            drop(app);
+        }
+    }
 }
