@@ -8,6 +8,7 @@
 //! here, so these tests assert the screen the Python flow landed on.
 
 use crate::states_main_menu_support::*;
+use ff_core::models::home_base::ParkedKind;
 use ff_core::models::profile::{Profile, DEFAULT_CITY};
 use ff_core::models::start_options::DEFAULT_START_KEY;
 use freight_fate::app::testing::{set_headless_env, TestApp};
@@ -92,17 +93,19 @@ fn the_main_menu_welcomes_and_walks_a_new_career_to_the_home_city() {
         typed(&mut app, ch);
     }
     key(&mut app, Key::Return);
-    assert!(is::<CareerStartState>(&app));
-    key(&mut app, Key::Return); // default start: Northstar
     assert!(is::<HomeTerminalState>(&app));
     assert!(current_label::<HomeTerminalState>(&app).starts_with("Great Lakes"));
     key(&mut app, Key::Return); // default region: Great Lakes
     assert!(is::<HomeCityState>(&app));
     assert!(current_label::<HomeCityState>(&app).starts_with("Chicago"));
+    key(&mut app, Key::Return); // default city: Chicago
+    assert!(is::<CareerStartState>(&app));
+    assert!(current_label::<CareerStartState>(&app).starts_with("Northstar"));
     app.clear_speech();
+    // Default start: Northstar. The career exists, the welcome was spoken,
+    // and the whole new-career chain is gone from the stack: main menu, then
+    // the city placeholder.
     key(&mut app, Key::Return);
-    // The career exists, the welcome was spoken, and the whole new-career
-    // chain is gone from the stack: main menu, then the city placeholder.
     let profile = app.ctx.profile.clone().expect("a career was created");
     assert_eq!(profile.name, "Smoke");
     assert_eq!(profile.current_city, DEFAULT_CITY);
@@ -242,14 +245,7 @@ fn test_new_career_will_not_overwrite_a_same_named_legacy_save() {
     let mut app = TestApp::new();
     let path = write_1_8_save("Old Timer");
     let before = std::fs::read(&path).unwrap();
-    let region = app.ctx.world.cities[DEFAULT_CITY].region.clone();
-    let picker = HomeCityState::new(
-        &app.ctx,
-        "Old Timer",
-        DEFAULT_START_KEY,
-        &region,
-        &[DEFAULT_CITY.to_string()],
-    );
+    let picker = CareerStartState::new(&app.ctx, "Old Timer", DEFAULT_CITY);
     app.push_state(picker);
     app.clear_speech();
 
@@ -262,7 +258,7 @@ fn test_new_career_will_not_overwrite_a_same_named_legacy_save() {
     assert!(app.ctx.profile.is_none());
     assert_eq!(std::fs::read(&path).unwrap(), before);
     // The picker is still up; the career chain was not torn down.
-    assert!(is::<HomeCityState>(&app));
+    assert!(is::<CareerStartState>(&app));
 }
 
 // -- tests/test_career_start_options.py (app parts) -----------------------------------
@@ -270,7 +266,8 @@ fn test_new_career_will_not_overwrite_a_same_named_legacy_save() {
 #[test]
 fn test_new_career_start_menu_lists_company_and_owner_operator() {
     let mut app = TestApp::new();
-    app.push_state(CareerStartState::new("Choice Driver"));
+    let picker = CareerStartState::new(&app.ctx, "Choice Driver", DEFAULT_CITY);
+    app.push_state(picker);
     let rows = labels::<CareerStartState>(&app);
     assert!(rows
         .iter()
@@ -289,13 +286,10 @@ fn test_new_career_start_menu_lists_company_and_owner_operator() {
 #[test]
 fn test_new_company_career_choice_creates_company_profile() {
     let mut app = TestApp::new();
-    app.push_state(CareerStartState::new("Prairie Driver"));
-    select::<CareerStartState>(&mut app, "Prairie Link Regional");
-    key(&mut app, Key::Return);
-    assert!(is::<HomeCityState>(&app));
-    assert!(current_label::<HomeCityState>(&app).contains("Kansas City"));
+    let picker = CareerStartState::new(&app.ctx, "Prairie Driver", "wichita_ks_us");
+    app.push_state(picker);
     app.clear_speech();
-    key(&mut app, Key::Return);
+    select::<CareerStartState>(&mut app, "Prairie Link Regional");
 
     // The city hub is another task's screen; the placeholder stands where
     // `CityMenuState` will.
@@ -724,4 +718,233 @@ fn test_closing_the_window_at_the_terminal_saves_before_quitting() {
         path.exists(),
         "closing the window at the terminal must save before it quits"
     );
+}
+
+// -- carrier slice 2: home city first, then the carriers hiring there ---------------
+
+#[test]
+fn test_home_picker_offers_only_cities_where_a_carrier_hires() {
+    let app = TestApp::new();
+    let picker = HomeTerminalState::new(&app.ctx, "Picker");
+    let offered = picker.offered_cities();
+    for blocked in ["healy_ak_us", "anchorage_ak_us", "whitehorse_yt_ca"] {
+        assert!(!offered.iter().any(|c| c == blocked), "{blocked} offered");
+    }
+    for open in ["chicago_il_us", "milwaukee_wi_us"] {
+        assert!(offered.iter().any(|c| c == open), "{open} missing");
+    }
+    // A city picker handed a blocked city still leaves it out.
+    let region = app.ctx.world.cities["healy_ak_us"].region.clone();
+    let cities = HomeCityState::new(
+        &app.ctx,
+        "Picker",
+        &region,
+        &["healy_ak_us".to_string(), "anchorage_ak_us".to_string()],
+    );
+    assert!(cities.cities().is_empty());
+}
+
+#[test]
+fn test_milwaukee_pick_with_northstar_starts_at_the_chicago_terminal() {
+    let mut app = TestApp::new();
+    let picker = CareerStartState::new(&app.ctx, "Milwaukee Hire", "milwaukee_wi_us");
+    app.push_state(picker);
+    app.clear_speech();
+    select::<CareerStartState>(&mut app, "Northstar Freight Lines");
+
+    let profile = app.ctx.profile.clone().expect("a career was created");
+    assert_eq!(profile.carrier_name, "Northstar Freight Lines");
+    assert_eq!(profile.home_terminal_city, "chicago_il_us");
+    assert_eq!(profile.current_city, "chicago_il_us");
+    assert_eq!(
+        profile.parked_facility,
+        "Northstar Freight Lines Chicago terminal"
+    );
+    let parked = profile.parked_at(app.ctx.world);
+    assert_eq!(parked.kind, ParkedKind::CarrierTerminal);
+    assert_eq!(parked.name, "Northstar Freight Lines Chicago terminal");
+
+    let spoken = app.main_lines();
+    let briefing = spoken
+        .iter()
+        .find(|line| line.contains("First-day briefing"))
+        .expect("the briefing was spoken");
+    assert!(
+        briefing.contains(
+            "Orientation and truck assignment are at Northstar Freight Lines Chicago terminal"
+        ),
+        "{briefing}"
+    );
+    assert!(!briefing.contains("Milwaukee service area"), "{briefing}");
+    assert!(!briefing.to_lowercase().contains("home"), "{briefing}");
+}
+
+#[test]
+fn test_carrier_list_shows_only_carriers_that_hire_in_the_home_city() {
+    let app = TestApp::new();
+    let wichita = CareerStartState::new(&app.ctx, "Plains", "wichita_ks_us").option_keys();
+    let boston = CareerStartState::new(&app.ctx, "Harbor", "boston_ma_us").option_keys();
+    assert!(wichita.contains(&"prairie_link"), "{wichita:?}");
+    let hutchinson = CareerStartState::new(&app.ctx, "Plains", "hutchinson_ks_us").option_keys();
+    assert!(hutchinson.contains(&"prairie_link"), "{hutchinson:?}");
+    assert!(!boston.contains(&"prairie_link"), "{boston:?}");
+    // Nationals hire in every lower-48 city.
+    for keys in [&wichita, &boston] {
+        assert!(keys.contains(&DEFAULT_START_KEY), "{keys:?}");
+        assert!(keys.contains(&"great_lakes_training"), "{keys:?}");
+    }
+}
+
+#[test]
+fn test_carrier_rows_say_where_the_truck_starts() {
+    let mut app = TestApp::new();
+    let picker = CareerStartState::new(&app.ctx, "Reader", "milwaukee_wi_us");
+    app.push_state(picker);
+    let rows = labels::<CareerStartState>(&app);
+    assert!(!rows.is_empty());
+    for row in &rows {
+        assert!(row.contains(". Truck starts at "), "{row}");
+        assert!(row.ends_with(" terminal."), "{row}");
+    }
+    assert!(rows
+        .iter()
+        .any(|r| r.contains("Truck starts at Northstar Freight Lines Chicago terminal.")));
+    assert!(rows
+        .iter()
+        .any(|r| r.contains("Truck starts at Great Lakes Training Transport Milwaukee terminal.")));
+}
+
+#[test]
+fn test_owner_operator_briefing_names_the_lease_terminal() {
+    let mut app = TestApp::new();
+    let picker = CareerStartState::new(&app.ctx, "Lease Start", "milwaukee_wi_us");
+    app.push_state(picker);
+    app.clear_speech();
+    select::<CareerStartState>(&mut app, "Owner-operator start");
+    let profile = app.ctx.profile.clone().expect("a career was created");
+    assert_eq!(profile.current_city, profile.home_terminal_city);
+    let spoken = app.main_lines();
+    let briefing = spoken
+        .iter()
+        .find(|line| line.contains("First-day briefing"))
+        .expect("the briefing was spoken");
+    assert!(briefing.contains("Lease orientation is at "), "{briefing}");
+    assert!(briefing.contains(" terminal in the "), "{briefing}");
+}
+
+#[test]
+fn test_every_offered_home_city_has_a_carrier_that_hires_there() {
+    let app = TestApp::new();
+    let offered = HomeTerminalState::new(&app.ctx, "Coverage").offered_cities();
+    assert!(!offered.is_empty());
+    for city in &offered {
+        let picker = CareerStartState::new(&app.ctx, "Coverage", city);
+        assert!(!picker.option_keys().is_empty(), "{city} has no carrier");
+        let st = app.ctx.world.cities[city].state_code.to_ascii_uppercase();
+        assert!(!matches!(st.as_str(), "AK" | "BC" | "YT" | "HI"), "{city}");
+    }
+}
+
+#[test]
+fn test_prairie_link_row_near_wichita_starts_at_the_wichita_terminal() {
+    let mut app = TestApp::new();
+    let picker = CareerStartState::new(&app.ctx, "Plains Row", "hutchinson_ks_us");
+    app.push_state(picker);
+    let rows = labels::<CareerStartState>(&app);
+    assert!(
+        rows.iter().any(|r| r.starts_with("Prairie Link Regional")
+            && r.contains("Truck starts at Prairie Link Regional Wichita terminal.")),
+        "{rows:?}"
+    );
+}
+
+/// Pick `home` and `carrier_label` in the carrier list, and return the
+/// first-day briefing spoken at career creation.
+fn briefing_for_pick(app: &mut TestApp, name: &str, home: &str, carrier_label: &str) -> String {
+    let picker = CareerStartState::new(&app.ctx, name, home);
+    app.push_state(picker);
+    app.clear_speech();
+    select::<CareerStartState>(app, carrier_label);
+    app.main_lines()
+        .into_iter()
+        .find(|line| line.contains("First-day briefing"))
+        .expect("the briefing was spoken")
+}
+
+#[test]
+fn test_a_hire_away_from_the_terminal_hears_the_carrier_covered_travel() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Milwaukee Travel",
+        "milwaukee_wi_us",
+        "Northstar Freight Lines",
+    );
+    assert!(
+        briefing.contains("The carrier covered your travel from Milwaukee"),
+        "{briefing}"
+    );
+    assert!(
+        briefing.contains("and a hotel for orientation."),
+        "{briefing}"
+    );
+    let profile = app.ctx.profile.clone().expect("a career");
+    assert_eq!(profile.home_city, "milwaukee_wi_us", "home stays the pick");
+    assert_eq!(profile.home_terminal_city, "chicago_il_us");
+}
+
+#[test]
+fn test_a_hire_in_the_terminal_city_hears_no_travel_line() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Chicago Local",
+        "chicago_il_us",
+        "Northstar Freight Lines",
+    );
+    assert!(!briefing.contains("covered your travel"), "{briefing}");
+    assert_eq!(app.ctx.profile.as_ref().unwrap().home_city, "chicago_il_us");
+}
+
+#[test]
+fn test_an_owner_operator_hears_no_travel_line() {
+    let mut app = TestApp::new();
+    let briefing = briefing_for_pick(
+        &mut app,
+        "Lease Travel",
+        "milwaukee_wi_us",
+        "Owner-operator start",
+    );
+    assert!(briefing.contains("Lease orientation is at "), "{briefing}");
+    assert!(!briefing.contains("covered your travel"), "{briefing}");
+}
+
+#[test]
+fn test_carrier_counts_name_distinct_carriers_not_start_rows() {
+    // Milwaukee: Northstar, Great Lakes Training, Summit Value (the
+    // owner-operator start leases to Northstar, so it is not a fourth).
+    // Wichita adds Prairie Link.
+    let mut app = TestApp::new();
+    for (city, carriers, rows) in [("milwaukee_wi_us", 3, 4), ("wichita_ks_us", 4, 5)] {
+        let picker = CareerStartState::new(&app.ctx, "Counter", city);
+        assert_eq!(picker.carrier_count(&app.ctx), carriers, "{city}");
+        assert_eq!(picker.option_keys().len(), rows, "{city}");
+    }
+    let picker = CareerStartState::new(&app.ctx, "Counter", "milwaukee_wi_us");
+    app.clear_speech();
+    app.push_state(picker);
+    assert!(
+        app.main_lines()
+            .iter()
+            .any(|l| l.starts_with("Career start. 3 carriers hire in Milwaukee")),
+        "{:?}",
+        app.main_lines()
+    );
+    let region = app.ctx.world.cities["wichita_ks_us"].region.clone();
+    let cities = HomeCityState::new(&app.ctx, "Counter", &region, &["wichita_ks_us".to_string()]);
+    app.push_state(cities);
+    let help = with_state::<HomeCityState, _>(&app, |s, ctx| {
+        freight_fate::states::base::Menu::current_help(s, ctx)
+    });
+    assert!(help.contains("4 carriers hire here."), "{help}");
 }

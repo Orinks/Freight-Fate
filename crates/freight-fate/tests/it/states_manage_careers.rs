@@ -162,3 +162,40 @@ fn resetting_a_career_from_a_renamed_file_leaves_one_career() {
     select::<MainMenuState>(&mut app, "Manage careers");
     assert_eq!(labels::<ManageCareersState>(&app).len(), 2); // Tiger, Back
 }
+
+#[test]
+fn resetting_an_older_career_keeps_its_home_city_blank() {
+    // A career from before the home city was recorded: a Northstar driver
+    // whose home terminal is Chicago. The reset starts over there, and
+    // Chicago must not quietly become the driver's home.
+    let mut app = TestApp::new();
+    let mut old = Profile::named_in("Legacy Home", "milwaukee_wi_us");
+    assert_eq!(old.home_terminal_city, "chicago_il_us");
+    old.home_city.clear();
+    old.save().unwrap();
+    app.push_state(MainMenuState::new());
+    select::<MainMenuState>(&mut app, "Manage careers");
+    key(&mut app, Key::Return);
+    select::<CareerActionsState>(&mut app, "Reset this career");
+    select::<ConfirmCareerActionState>(&mut app, "Yes, reset Legacy Home");
+    let reset = Profile::load(&save_path_for("Legacy Home")).unwrap();
+    assert_eq!(reset.home_city, "", "no home city was ever picked");
+    assert_eq!(reset.home_terminal_city, "chicago_il_us");
+    assert_eq!(reset.current_city, "chicago_il_us");
+}
+
+#[test]
+fn resetting_a_career_starts_over_from_its_home_city() {
+    let mut app = TestApp::new();
+    let mut old = Profile::named_in("Picked Home", "chicago_il_us");
+    old.home_city = "milwaukee_wi_us".to_string();
+    old.save().unwrap();
+    app.push_state(MainMenuState::new());
+    select::<MainMenuState>(&mut app, "Manage careers");
+    key(&mut app, Key::Return);
+    select::<CareerActionsState>(&mut app, "Reset this career");
+    select::<ConfirmCareerActionState>(&mut app, "Yes, reset Picked Home");
+    let reset = Profile::load(&save_path_for("Picked Home")).unwrap();
+    assert_eq!(reset.home_city, "milwaukee_wi_us");
+    assert_eq!(reset.home_terminal_city, "chicago_il_us");
+}

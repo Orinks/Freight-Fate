@@ -374,6 +374,12 @@ pub trait StartProfile {
     fn set_home_terminal_city(&mut self, city: &str);
     /// The home base city the driver picked (a new career's current city).
     fn home_base_city(&self) -> String;
+    /// Where the truck starts: the hiring carrier's terminal city.
+    fn set_current_city(&mut self, city: &str);
+    /// The facility the truck starts parked at (the carrier terminal).
+    fn set_parked_facility(&mut self, facility: &str);
+    /// The picked home city (the driver's home, not the terminal city).
+    fn set_home_city(&mut self, city: &str);
     fn set_start_mode(&mut self, mode: &str);
     fn set_carrier_name(&mut self, name: &str);
     fn set_money(&mut self, money: f64);
@@ -440,6 +446,49 @@ fn provision_start_trucks<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
     }
 }
 
+/// The carrier a start option hires with (a leased owner-operator start maps
+/// to the carrier it leases to).
+pub fn hiring_carrier_for_option(option: &CareerStartOption) -> Option<&'static carriers::Carrier> {
+    carriers::hiring_carrier(
+        option.key,
+        option.carrier_name,
+        if option.is_owner_operator() {
+            "leased_owner_operator"
+        } else {
+            "company_driver"
+        },
+    )
+}
+
+/// Start options whose carrier hires in `city_key`, in menu order: nationals
+/// across the lower 48, regionals only within their hiring radius.
+pub fn start_options_for_home_city(
+    world: &crate::data::world::World,
+    city_key: &str,
+) -> Vec<&'static CareerStartOption> {
+    all_start_options()
+        .into_iter()
+        .filter(|option| {
+            hiring_carrier_for_option(option).is_some_and(|c| c.hires_in(world, city_key))
+        })
+        .collect()
+}
+
+/// How many distinct carriers hire in `city_key`. The owner-operator start
+/// leases to a carrier already listed, so it is not another carrier.
+pub fn hiring_carrier_count_for_home_city(
+    world: &crate::data::world::World,
+    city_key: &str,
+) -> usize {
+    let mut keys: Vec<&str> = start_options_for_home_city(world, city_key)
+        .into_iter()
+        .filter_map(|option| hiring_carrier_for_option(option).map(|c| c.key.as_str()))
+        .collect();
+    keys.sort_unstable();
+    keys.dedup();
+    keys.len()
+}
+
 /// Apply a start option to a freshly created or reset profile.
 pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &CareerStartOption) {
     profile.set_carrier_key(option.key);
@@ -454,20 +503,24 @@ pub fn apply_start_option<P: StartProfile + ?Sized>(profile: &mut P, option: &Ca
     } else {
         base
     };
-    let hiring = carriers::hiring_carrier(
-        option.key,
-        option.carrier_name,
-        if option.is_owner_operator() {
-            "leased_owner_operator"
-        } else {
-            "company_driver"
-        },
-    );
-    // A regional out of range falls back to the national fallback carrier's
-    // terminal city (the slice 2 start picker offers only carriers that hire
-    // in the picked city).
-    let home = carriers::home_terminal_city_or_fallback(hiring, world, &base);
+    let hiring = hiring_carrier_for_option(option);
+    // The start picker offers only carriers that hire in the picked city, so
+    // this is the carrier's own terminal in range. A start never falls back
+    // to another carrier's far-away terminal: with no home from this carrier
+    // (independent, or a regional out of range) the picked city stays and the
+    // truck is not moved.
+    let carrier_home = carriers::home_terminal_city_for(hiring, world, &base);
+    let home = carrier_home
+        .clone()
+        .unwrap_or_else(|| world.resolve_city_key(&base));
     profile.set_home_terminal_city(&home);
+    profile.set_home_city(&world.resolve_city_key(&base));
+    // New hires do orientation and truck assignment at the carrier terminal,
+    // so the truck starts there, not in the picked home city.
+    if let (Some(carrier), Some(home)) = (hiring, carrier_home.as_deref()) {
+        profile.set_current_city(home);
+        profile.set_parked_facility(&carrier.terminal_name(world, home).unwrap_or_default());
+    }
     profile.set_money(option.starting_money);
     profile.set_business_status(if option.is_owner_operator() {
         "leased_owner_operator"

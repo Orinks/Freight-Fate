@@ -68,6 +68,7 @@ impl Profile {
             "parked_facility".into(),
             Value::from(self.parked_facility.as_str()),
         );
+        d.insert("home_city".into(), Value::from(self.home_city.as_str()));
         d.insert(
             "created_line".into(),
             Value::from(self.created_line.as_str()),
@@ -329,6 +330,7 @@ impl Profile {
             current_city: s("current_city", &defaults.current_city),
             home_terminal_city: home_terminal_city.clone(),
             parked_facility: s("parked_facility", ""),
+            home_city: s("home_city", ""),
             created_line: s("created_line", &defaults.created_line),
             migration_notice_pending: b("migration_notice_pending", false),
             integrity_modified: b("integrity_modified", false),

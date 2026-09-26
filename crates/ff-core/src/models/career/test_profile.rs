@@ -39,6 +39,9 @@ pub(crate) struct FakeProfile {
     /// Where the truck is; the picked home base on a fresh career, as on
     /// the real `Profile`.
     pub current_city: String,
+    /// The facility the truck is parked at (the carrier terminal on a start).
+    pub parked_facility: String,
+    pub home_city: String,
     pub carrier_name: String,
     pub money: f64,
     pub fines_owed: f64,
@@ -70,6 +73,8 @@ impl Default for FakeProfile {
             carrier_key: DEFAULT_START_KEY.to_string(),
             home_terminal_city: "Chicago".to_string(),
             current_city: "Chicago".to_string(),
+            parked_facility: String::new(),
+            home_city: String::new(),
             carrier_name: STARTER_CARRIER_NAME.to_string(),
             money: 5000.0,
             fines_owed: 0.0,
@@ -325,6 +330,15 @@ impl StartProfile for FakeProfile {
     }
     fn home_base_city(&self) -> String {
         self.current_city.clone()
+    }
+    fn set_current_city(&mut self, city: &str) {
+        self.current_city = city.to_string();
+    }
+    fn set_parked_facility(&mut self, facility: &str) {
+        self.parked_facility = facility.to_string();
+    }
+    fn set_home_city(&mut self, city: &str) {
+        self.home_city = city.to_string();
     }
     fn set_start_mode(&mut self, mode: &str) {
         self.start_mode = mode.to_string();

@@ -303,8 +303,20 @@ impl ConfirmCareerActionState {
             return;
         };
         let name = self.name.clone();
-        let mut fresh = Profile::named_in(&name, &old.current_city);
+        // A reset starts over from the driver's home city (or, on a career
+        // from before it was recorded, the old home terminal city).
+        let home = if old.home_city.is_empty() {
+            &old.home_terminal_city
+        } else {
+            &old.home_city
+        };
+        let mut fresh = Profile::named_in(&name, home);
         apply_start_option(&mut fresh, option_for_profile(old));
+        // An older career never recorded its home city; the terminal city it
+        // was seeded from must not become the driver's home.
+        if old.home_city.is_empty() {
+            fresh.home_city.clear();
+        }
         match fresh.save() {
             // A career loaded from a file named apart from it: the reset went
             // to the file its name points at, so the old career goes.
