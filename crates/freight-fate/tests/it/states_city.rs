@@ -1855,6 +1855,29 @@ fn test_hub_names_only_the_city_when_nothing_else_is_honest() {
 }
 
 #[test]
+fn test_hub_says_the_dalles_service_area_without_a_doubled_article() {
+    let mut app = TestApp::new();
+    career(&mut app, "Gorge", "the_dalles_or_us");
+    let line = hub_entry(&mut app);
+    assert!(
+        line.starts_with("Parked in The Dalles service area, Oregon."),
+        "{line}"
+    );
+    assert!(!line.contains("the The"), "{line}");
+    assert!(!line.contains("  "), "{line}");
+}
+
+#[test]
+fn test_hub_line_joins_the_objective_with_a_single_space() {
+    let mut app = TestApp::new();
+    career(&mut app, "Spacing", "Chicago");
+    let line = hub_entry(&mut app);
+    assert!(line.contains(" objective: "), "{line}");
+    assert!(line.contains("dollars. "), "{line}");
+    assert!(!line.contains("  "), "{line}");
+}
+
+#[test]
 fn test_hub_home_logic_reads_home_terminal_city_not_current_city() {
     let mut app = TestApp::new();
     career(&mut app, "Moved", "Chicago");

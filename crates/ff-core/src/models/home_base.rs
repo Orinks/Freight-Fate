@@ -60,16 +60,27 @@ impl ParkedAt {
     /// area" when only the city is known, so a sentence reads "Parked {}."
     /// without inventing a place.
     pub fn service_area_phrase(&self, world: &World) -> String {
-        let city = world.spoken_city(&self.city_key, None);
+        let area = city_service_area(&world.spoken_city(&self.city_key, None));
         match self.kind {
-            ParkedKind::City => format!("in the {city} service area"),
-            _ => format!("at {} in the {city} service area", self.name),
+            ParkedKind::City => format!("in {area}"),
+            _ => format!("at {} in {area}", self.name),
         }
     }
 
     /// The name a logbook line or menu title uses.
     pub fn place(&self) -> &str {
         &self.name
+    }
+}
+
+/// "the {city} service area", dropping the article when the spoken city
+/// already starts with one: "The Dalles service area", never "the The
+/// Dalles service area".
+pub fn city_service_area(city: &str) -> String {
+    if city.starts_with("The ") {
+        format!("{city} service area")
+    } else {
+        format!("the {city} service area")
     }
 }
 
@@ -195,6 +206,30 @@ mod tests {
 
     fn has_lot(city: &crate::data::world_models::City, kind: &str) -> bool {
         city.locations.iter().any(|l| l.facility_type == kind)
+    }
+
+    #[test]
+    fn test_city_service_area_drops_the_article_for_the_dalles() {
+        assert_eq!(city_service_area("The Dalles"), "The Dalles service area");
+        assert_eq!(city_service_area("Chicago"), "the Chicago service area");
+        // Only a leading "The " word counts, not a city that merely starts
+        // with the letters.
+        assert_eq!(city_service_area("Theodore"), "the Theodore service area");
+        let world = get_world();
+        let p = parked_at(
+            world,
+            inputs(
+                "northstar",
+                COMPANY_DRIVER,
+                "chicago_il_us",
+                "the_dalles_or_us",
+                "",
+            ),
+        );
+        assert_eq!(p.city_key, "the_dalles_or_us");
+        let phrase = p.service_area_phrase(world);
+        assert!(phrase.ends_with("in The Dalles service area"), "{phrase}");
+        assert!(!phrase.contains("the The"), "{phrase}");
     }
 
     #[test]

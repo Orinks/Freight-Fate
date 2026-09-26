@@ -706,12 +706,11 @@ impl Menu for CityMenuState {
                 format!(" {record}")
             };
             format!(
-                "Parked{} in the {city_name} \
-                 service area, {city_state}. {} with \
+                "Parked{} in {}, {city_state}. {} with \
                  level {}, {}.{cdl}{record} \
-                 You have {} dollars. \
-                 {first_day}",
+                 You have {} dollars.{first_day}",
                 parked.at_clause(),
+                ff_core::models::home_base::city_service_area(&city_name),
                 crate::states::city::py_capitalize(business),
                 rank.level,
                 rank.title,
