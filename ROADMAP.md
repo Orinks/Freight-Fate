@@ -2068,8 +2068,7 @@ instead of a spawn point.
 ### Twin parcel / STAA doubles (Track A)
 
 STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
-LCV turnpike doubles on permitted toll roads. FIX 3–5 are intentionally
-not started here.
+LCV turnpike doubles on permitted toll roads.
 
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
@@ -2133,13 +2132,36 @@ not started here.
       `new_york`–`albany` I-87 leg is omitted rather than treated as a
       legal turnpike-doubles lane. A Yonkers (or Exit 6A) node would be
       needed before that corridor can be offered honestly.
-- [ ] **FIX 3: Dual hook time** (not started).
-- [ ] **FIX 4: Pup handling** (not started).
-- [ ] **FIX 5: Twin tare and GVW** (not started). `turnpike_double` still
-      shares the stock trailer tare / legal-GVW clamp. Per-corridor LCV
-      GVW caps are recorded in `data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`
-      (OH/IN/MA 127,400 lb; NY 143,000 lb; KS 120,000 lb) but not enforced
-      yet.
+- [x] **FIX 3: Dual hook time (landed).** A set of doubles adds a second
+      hook-up (15 min) and a walk-around of both trailers and the converter
+      dolly (10 min) at the shipper: 25 extra on-duty minutes, spoken at
+      check-in and loading and shown on the pickup screen. The walk-around at
+      a stop takes 25 minutes with doubles hooked. Both minute figures are
+      ASSUMED (`models::doubles`); no public time study was found.
+- [x] **FIX 4: Pup handling (landed).** The rear trailer's lateral
+      acceleration is the tractor's quick-steer acceleration times the
+      rearward amplification (STAA pups 1.7, READ from FHWA 2000 CTSW Vol III
+      Ch VIII; turnpike doubles about 1.36, DERIVED from Figure VIII-11).
+      Above 40 mph a whip past the roll-warning share shifts the rear
+      trailer's freight and speaks a warning. Crosswind is scaled by the
+      same amplification. Reverse is refused with doubles hooked.
+- [x] **FIX 5: Twin tare and GVW (landed).** Gross weight counts both
+      trailers and the converter dolly: pups 2 × 6,185 lb + a 2,740 lb dolly
+      (DERIVED from FHWA 2014 CTSW Table 4 and the Silver Eagle VAST-20 spec
+      sheet); turnpike doubles the stock trailer plus 16,200 lb (DERIVED from
+      FHWA 2000 CTSW Table V-3). Legal gross is 80,000 lb for pups and the
+      lowest recorded turnpike cap along the route for turnpike doubles
+      (`data::lcv_turnpikes::LCV_TURNPIKE_GVW_CAP_LB`), falling back to
+      80,000 lb when a state has no cap. The job board clamp, live
+      overweight check, board weight line and CAT Scale ticket use it.
+- [ ] **Honesty debt: doubles timing and handling figures are partly
+      assumed.** Hook-up and walk-around minutes, the 40 mph whip floor, the
+      3 s steady-state filter and crosswind = rearward amplification are
+      open realism questions. Unhooking a set at delivery is not timed, and
+      pickup deadheads pull one empty trailer.
+- [ ] **Honesty debt: no axle split on a doubles scale ticket.** The
+      three-group axle model does not cover a set's extra axles, so the
+      ticket gives gross only and says so.
 
 ### Travel-center bulk fuel (non-blocking)
 
