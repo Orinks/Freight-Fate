@@ -179,6 +179,12 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
 /// screen; `first_day_orientation_message` is these joined.
 pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<String> {
     let p = profile(ctx);
+    if p.is_unassigned_company_driver() {
+        return vec![format!(
+            "{prefix}You have no carrier right now. {}",
+            ff_core::models::career_objectives::NO_CARRIER_OBJECTIVE
+        )];
+    }
     let option = option_for_profile(p);
     let location = first_day_parked_location(ctx);
     // At the carrier terminal (where every new career starts), say what
@@ -274,6 +280,12 @@ pub(crate) fn first_day_parked_location(ctx: &GameContext) -> String {
 /// What the terminal says about the first-day / career objective on entry
 /// (the `first_day` clause of `CityMenuState.announce_entry`).
 pub(crate) fn terminal_objective_clause(p: &Profile) -> String {
+    if p.is_unassigned_company_driver() {
+        return format!(
+            " Career objective: {}",
+            ff_core::models::career_objectives::NO_CARRIER_OBJECTIVE
+        );
+    }
     if first_day_guidance_active(p) {
         let guidance = if is_company_training_profile(p) {
             Some(training_guidance(p))

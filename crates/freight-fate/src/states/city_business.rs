@@ -98,8 +98,13 @@ impl BusinessStatusState {
         }
         save_business_change(ctx);
         let carrier = ff_core::models::career::carrier_name_of(profile(ctx));
+        let with = if carrier.is_empty() {
+            String::new()
+        } else {
+            format!(" with {carrier}")
+        };
         ctx.say(&format!(
-            "Staying a company driver with {carrier}. The career plan stops pointing you at \
+            "Staying a company driver{with}. The career plan stops pointing you at \
              the buy-in. It stays open here under Business status if you change your mind."
         ));
         self.refresh(ctx, true);

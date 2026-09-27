@@ -1274,11 +1274,9 @@ fn test_a_driver_no_carrier_near_home_will_take_applies_from_the_terminal() {
     let terminal = CityMenuState::new(&app.ctx, false);
     app.push_state(terminal);
     assert!(profile(&app).is_unassigned_company_driver());
-    assert!(app
-        .main_lines()
-        .iter()
-        .any(|line| line.contains("No carrier that hires near Fairbanks")
-            && line.contains("Apply to a carrier")));
+    assert!(app.main_lines().iter().any(|line| line
+        .contains("No carrier that hires near your home in Fairbanks")
+        && line.contains("Apply to a carrier")));
 
     // No dispatch board without a carrier; the seat search sits in its place.
     let rows = labels::<CityMenuState>(&app);
@@ -1967,4 +1965,224 @@ fn test_hub_home_logic_reads_home_terminal_city_not_current_city() {
     let line = hub_entry(&mut app);
     assert!(!line.contains("Northstar Freight Lines"), "{line}");
     assert!(!line.contains("Chicago Company Yard"), "{line}");
+}
+
+// -- carrier slice 3: a driver with no carrier ---------------------------------------
+
+/// Every carrier's spoken name, to scan text that must name none of them.
+fn every_carrier_name() -> Vec<String> {
+    ff_core::models::carriers::carrier_catalog()
+        .values()
+        .map(|c| c.name.clone())
+        .collect()
+}
+
+fn assert_names_no_carrier(text: &str) {
+    for name in every_carrier_name() {
+        assert!(
+            !text.contains(&name),
+            "{name} named with no carrier: {text}"
+        );
+    }
+}
+
+/// A Fairbanks driver Chatanika lets go: nobody else hires there.
+fn fairbanks_driver_without_a_carrier(app: &mut TestApp, deliveries: i64) {
+    career(app, "Jerry", "Chicago");
+    {
+        let p = profile_mut(app);
+        if deliveries > 0 {
+            p.achievements.push("first_day".to_string());
+        }
+        p.career.deliveries = deliveries;
+        p.carrier_key = "chatanika_freight".to_string();
+        p.carrier_name = "Chatanika Freight Lines".to_string();
+        p.home_city = "fairbanks_ak_us".to_string();
+        p.home_terminal_city = "fairbanks_ak_us".to_string();
+        p.current_city = "fairbanks_ak_us".to_string();
+        p.parked_facility.clear();
+        p.career.reputation = 4.0;
+    }
+    let terminal = CityMenuState::new(&app.ctx, false);
+    app.push_state(terminal);
+    assert!(profile(app).is_unassigned_company_driver());
+}
+
+#[test]
+fn test_no_carrier_names_no_carrier_anywhere_on_the_hub() {
+    use ff_core::models::business::{
+        business_path_label, business_status_summary, next_business_unlock,
+    };
+    use ff_core::models::career_objectives::career_objective;
+    use ff_core::models::career_training::training_guidance;
+    use freight_fate::states::city::first_day_orientation_lines;
+    use freight_fate::states::main_menu::career_summary;
+
+    for deliveries in [0, 12] {
+        let mut app = TestApp::new();
+        fairbanks_driver_without_a_carrier(&mut app, deliveries);
+        // Back at the terminal again, after the firing line: everything the
+        // hub says, and every row, names no carrier.
+        app.clear_speech();
+        let again = CityMenuState::new(&app.ctx, false);
+        app.push_state(again);
+        let spoken = app.main_lines().join(" ");
+        assert_names_no_carrier(&spoken);
+        assert!(
+            spoken.contains("Career objective: Apply to a carrier to get back on freight."),
+            "{spoken}"
+        );
+        for row in labels_and_help::<CityMenuState>(&app) {
+            assert_names_no_carrier(&format!("{} {}", row.0, row.1));
+        }
+        let p = profile(&app);
+        let objective = career_objective(p);
+        assert_eq!(
+            objective.terminal_text,
+            "Apply to a carrier to get back on freight."
+        );
+        for text in objective
+            .spoken_lines()
+            .into_iter()
+            .chain(first_day_orientation_lines(&app.ctx, ""))
+            .chain([
+                objective.spoken_summary(),
+                training_guidance(p).terminal_text,
+                training_guidance(p).dispatch_text,
+                business_status_summary(p),
+                business_path_label(p),
+                next_business_unlock(p),
+                enforcement::dispatch_trust_line(p),
+                enforcement::record_consequence_text(p),
+                career_summary(&app.ctx, std::path::Path::new("x.json"), p, false),
+            ])
+        {
+            assert_names_no_carrier(&text);
+        }
+    }
+}
+
+#[test]
+fn test_no_carrier_hub_has_no_truck_rows_and_says_the_truck_is_gone() {
+    let mut app = TestApp::new();
+    fairbanks_driver_without_a_carrier(&mut app, 12);
+    app.clear_speech();
+    let again = CityMenuState::new(&app.ctx, false);
+    app.push_state(again);
+    let spoken = app.main_lines().join(" ");
+    assert!(
+        spoken.contains(
+            "You are in Fairbanks, Alaska. Company driver with no carrier and no truck \
+             until a carrier assigns you one."
+        ),
+        "{spoken}"
+    );
+    assert!(!spoken.contains("Parked"), "{spoken}");
+    let rows = labels::<CityMenuState>(&app);
+    for truck_row in ["Truck status", "Walk around the truck"] {
+        assert!(!rows.iter().any(|t| t == truck_row), "{rows:?}");
+    }
+    assert!(!rows.iter().any(|t| t.starts_with("Garage")), "{rows:?}");
+    assert!(!rows
+        .iter()
+        .any(|t| t.to_lowercase().contains("pay advance")));
+    assert_eq!(CityMenuState::title_for(&app.ctx), "Fairbanks");
+}
+
+#[test]
+fn test_no_carrier_hears_no_standing_line_and_sufferance_is_not_deciding() {
+    // No carrier: no dispatch trust line at all.
+    let mut app = TestApp::new();
+    fairbanks_driver_without_a_carrier(&mut app, 12);
+    let spoken = app.main_lines().join(" ");
+    assert!(!spoken.contains("Dispatch trust"), "{spoken}");
+    assert!(!spoken.contains("deciding whether to keep you"), "{spoken}");
+    drop(app);
+
+    // Let go with a seat: the new carrier keeps them on sufferance, which in
+    // the game means it never ends the seat over the record or the debt.
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.career.deliveries = 12;
+        p.home_city = "chicago_il_us".to_string();
+        p.career.reputation = 4.0;
+    }
+    app.clear_speech();
+    let terminal = CityMenuState::new(&app.ctx, false);
+    app.push_state(terminal);
+    assert_eq!(profile(&app).carrier_key, "des_plaines_cartage");
+    let spoken = app.main_lines().join(" ");
+    assert!(!spoken.contains("deciding whether to keep you"), "{spoken}");
+    assert!(
+        spoken.contains(
+            "Dispatch trust: last chance. One assigned load at a time and no refusals. \
+             Des Plaines River Cartage will not end your seat over your record or what \
+             you owe."
+        ),
+        "{spoken}"
+    );
+    assert!(!enforcement::carrier_termination_due(profile(&app)));
+    assert!(!enforcement::dispatch_trust_line(profile(&app)).contains("deciding"));
+}
+
+#[test]
+fn test_an_old_save_without_a_home_city_keeps_it_blank_when_let_go() {
+    // Parked in Milwaukee, homed at Northstar's Chicago terminal, no saved
+    // home city (#255 leaves it blank).
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Milwaukee");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.career.deliveries = 12;
+        p.home_city.clear();
+        p.home_terminal_city = "chicago_il_us".to_string();
+        p.current_city = "milwaukee_wi_us".to_string();
+        p.career.reputation = 4.0;
+    }
+    let mut state = CityMenuState::new(&app.ctx, false);
+    app.clear_speech();
+    state.check_carrier_termination(&mut app.ctx);
+    let p = profile(&app);
+    assert!(p.home_city.is_empty(), "home_city written: {}", p.home_city);
+    assert_eq!(p.carrier_key, "des_plaines_cartage");
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains("hires near your terminal in Chicago"),
+        "{said}"
+    );
+    assert!(!said.contains("your home"), "{said}");
+    drop(app);
+
+    // With no carrier to take them, the old terminal city is not written
+    // into the home or the current city either.
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.career.deliveries = 12;
+        p.carrier_key = "chatanika_freight".to_string();
+        p.carrier_name = "Chatanika Freight Lines".to_string();
+        p.home_city.clear();
+        p.home_terminal_city = "fairbanks_ak_us".to_string();
+        p.current_city = "healy_ak_us".to_string();
+        p.career.reputation = 4.0;
+    }
+    let mut state = CityMenuState::new(&app.ctx, false);
+    app.clear_speech();
+    state.check_carrier_termination(&mut app.ctx);
+    let p = profile(&app);
+    assert!(p.is_unassigned_company_driver());
+    assert!(p.home_city.is_empty(), "home_city written: {}", p.home_city);
+    assert_eq!(p.current_city, "healy_ak_us");
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains("No carrier that hires near your terminal in Fairbanks"),
+        "{said}"
+    );
+    assert!(!said.contains("your home"), "{said}");
 }

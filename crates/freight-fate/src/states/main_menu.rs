@@ -491,11 +491,15 @@ pub fn career_summary(
 ) -> String {
     let mut parts = vec![
         format!("{}: level {}", profile.name, profile.career.level()),
-        format!(
-            "{} {}",
-            profile.carrier_name,
-            status_label(&profile.business_status)
-        ),
+        if profile.is_unassigned_company_driver() {
+            format!("{} with no carrier", status_label(&profile.business_status))
+        } else {
+            format!(
+                "{} {}",
+                profile.carrier_name,
+                status_label(&profile.business_status)
+            )
+        },
         format!("{} dollars", fmt_grouped(profile.money(), 0)),
         career_location(ctx, profile),
         format!("{} deliveries", profile.career.deliveries),

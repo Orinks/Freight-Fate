@@ -155,6 +155,9 @@ impl SolvencyProfile for FakeProfile {
         self.carrier_key = key.to_string();
         self.carrier_name = name.to_string();
     }
+    fn let_go_near_phrase(&self) -> String {
+        "your home in Buffalo".to_string()
+    }
     fn take_fallback_carrier(&mut self, firing_key: &str) -> Option<String> {
         if let Some(record) = self.driving_record.as_mut() {
             record.let_go_by = firing_key.to_string();

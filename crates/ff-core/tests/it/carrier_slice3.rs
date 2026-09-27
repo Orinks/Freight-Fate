@@ -338,7 +338,7 @@ mod profile_fallback {
     use ff_core::models::carriers::openings_for_unassigned;
     use ff_core::models::enforcement::{carrier_termination_due, kept_on_sufferance};
     use ff_core::models::profile::Profile;
-    use ff_core::models::solvency::{apply_company_termination, hard_capped, NO_SEAT_LINE};
+    use ff_core::models::solvency::{apply_company_termination, hard_capped, no_seat_line};
 
     use crate::data_support::world;
 
@@ -433,7 +433,46 @@ mod profile_fallback {
         ak.set_money(-9_000.0);
         let lines = apply_company_termination(&mut ak);
         assert!(ak.is_unassigned_company_driver());
-        assert!(lines.iter().any(|l| l == NO_SEAT_LINE));
+        assert!(lines
+            .iter()
+            .any(|l| *l == no_seat_line("your home in Fairbanks")));
         assert!(!lines.iter().any(|l| l.contains("dispatch board whenever")));
+    }
+
+    #[test]
+    fn test_an_old_save_without_a_home_city_keeps_it_blank() {
+        use ff_core::models::business::{business_status_summary, carrier_name};
+        use ff_core::models::career_objectives::{career_objective, NO_CARRIER_OBJECTIVE};
+
+        // Parked in Milwaukee off Northstar's Chicago terminal, home blank.
+        let mut p = driver("", "northstar", "Northstar Freight Lines");
+        p.home_terminal_city = "chicago_il_us".to_string();
+        p.current_city = "milwaukee_wi_us".to_string();
+        p.set_money(-9_000.0);
+        let lines = apply_company_termination(&mut p);
+        assert!(p.home_city.is_empty(), "home_city written: {}", p.home_city);
+        assert_eq!(p.carrier_key, "des_plaines_cartage");
+        let said = lines.join(" ");
+        assert!(said.contains("near your terminal in Chicago"), "{said}");
+        assert!(!said.contains("your home"), "{said}");
+
+        // No seat and no saved home: nothing written into home or current.
+        let mut ak = driver("", "chatanika_freight", "Chatanika Freight Lines");
+        ak.home_terminal_city = "fairbanks_ak_us".to_string();
+        ak.current_city = "healy_ak_us".to_string();
+        ak.set_money(-9_000.0);
+        let lines = apply_company_termination(&mut ak);
+        assert!(ak.is_unassigned_company_driver());
+        assert!(ak.home_city.is_empty());
+        assert_eq!(ak.current_city, "healy_ak_us");
+        assert!(lines
+            .iter()
+            .any(|l| *l == no_seat_line("your terminal in Fairbanks")));
+        assert!(!lines.join(" ").contains("your home"));
+
+        // And nothing names a carrier now that there is none.
+        assert_eq!(carrier_name(&ak), "");
+        assert!(!business_status_summary(&ak).contains("Northstar"));
+        assert_eq!(career_objective(&ak).terminal_text, NO_CARRIER_OBJECTIVE);
     }
 }

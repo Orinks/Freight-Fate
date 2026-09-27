@@ -653,30 +653,51 @@ impl Profile {
         )
     }
 
+    /// What "near ..." names in a let-go line, read before the let-go moves
+    /// anything: "your home in Fairbanks" only when a home city is saved;
+    /// on saves without one (#255 keeps it blank), the city the fallback
+    /// picks from is derived, so it is "your terminal in Chicago" or just
+    /// the city, never "your home".
+    pub fn let_go_near_phrase(&self) -> String {
+        let world = crate::data::world::get_world();
+        if !self.home_city.trim().is_empty() {
+            return format!("your home in {}", world.spoken_city(&self.home_city, None));
+        }
+        if !self.home_terminal_city.trim().is_empty() {
+            return format!(
+                "your terminal in {}",
+                world.spoken_city(&self.home_terminal_city, None)
+            );
+        }
+        world.spoken_city(&self.current_city, None)
+    }
+
     /// `firing_key` has let this driver go: hand them to the carrier the
-    /// fallback rule picks from their home city (plan section 5), homed at
-    /// that carrier's terminal that hires there and kept on sufferance, or,
-    /// when nobody hires there, leave them home with no carrier. Returns the
-    /// new carrier, `None` when unassigned.
+    /// fallback rule picks from [`Profile::driver_home_city`] (plan section
+    /// 5), homed at that carrier's terminal that hires there and kept on
+    /// sufferance, or, when nobody hires there, leave them with no carrier.
+    /// Returns the new carrier, `None` when unassigned.
+    ///
+    /// The derived city only picks the carrier: `home_city` is never
+    /// written here, so a save without one keeps it blank. With no carrier,
+    /// a driver with a saved home goes home; one without stays where they
+    /// are, and the old terminal city is not written anywhere.
     pub fn take_fallback_after_let_go(
         &mut self,
         firing_key: &str,
     ) -> Option<&'static crate::models::carriers::Carrier> {
         let world = crate::data::world::get_world();
-        let home = world.resolve_city_key(&self.driver_home_city());
+        let pick_from = world.resolve_city_key(&self.driver_home_city());
         self.driving_record.let_go_by = firing_key.to_string();
         self.parked_facility.clear();
         self.dispatch_board_cache = None;
-        if self.home_city.trim().is_empty() {
-            self.home_city = home.clone();
-        }
-        match crate::models::carriers::fallback_carrier_for(world, &home, firing_key) {
+        match crate::models::carriers::fallback_carrier_for(world, &pick_from, firing_key) {
             Some(carrier) => {
                 self.carrier_key = carrier.key.clone();
                 self.carrier_name = carrier.name.clone();
                 self.home_terminal_city = carrier
-                    .hiring_terminal_city(world, &home)
-                    .unwrap_or_else(|| home.clone());
+                    .hiring_terminal_city(world, &pick_from)
+                    .unwrap_or_else(|| pick_from.clone());
                 self.driving_record.sufferance_carrier_key = carrier.key.clone();
                 Some(carrier)
             }
@@ -684,9 +705,13 @@ impl Profile {
                 self.carrier_key.clear();
                 self.carrier_name.clear();
                 self.driving_record.sufferance_carrier_key.clear();
-                self.home_terminal_city = home.clone();
-                if self.active_trip.is_none() {
-                    self.current_city = home;
+                let saved_home = self.home_city.trim().to_string();
+                if !saved_home.is_empty() {
+                    let home = world.resolve_city_key(&saved_home);
+                    self.home_terminal_city = home.clone();
+                    if self.active_trip.is_none() {
+                        self.current_city = home;
+                    }
                 }
                 None
             }
@@ -701,7 +726,11 @@ impl Profile {
     pub fn join_carrier_opening(&mut self, opening: &crate::models::carriers::CarrierOpening) {
         self.carrier_key = opening.carrier.key.clone();
         self.carrier_name = opening.carrier.name.clone();
-        self.home_city = opening.home_city.clone();
+        // Moving is the driver's own choice, so it sets the home; otherwise
+        // a blank home city stays blank.
+        if opening.moves_home || !self.home_city.trim().is_empty() {
+            self.home_city = opening.home_city.clone();
+        }
         self.home_terminal_city = opening.terminal_city.clone();
         self.current_city = opening.terminal_city.clone();
         self.parked_facility.clear();

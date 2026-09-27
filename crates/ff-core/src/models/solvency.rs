@@ -134,6 +134,9 @@ pub trait SolvencyProfile: StandingProfile {
     /// carrier's name, `None` when no carrier hires there and the driver is
     /// home with no carrier.
     fn take_fallback_carrier(&mut self, firing_key: &str) -> Option<String>;
+    /// `Profile::let_go_near_phrase`: what "near ..." names in a let-go
+    /// line. Read before `take_fallback_carrier`.
+    fn let_go_near_phrase(&self) -> String;
     fn set_pay_advance(&mut self, amount: f64);
     fn set_pay_advance_used_for_load(&mut self, used: bool);
     /// `profile.dispatch_board_cache = None`.
@@ -490,14 +493,18 @@ pub const KEPT_LINE: &str = "You keep your career level, your experience, your e
 pub const BACK_TO_WORK_LINE: &str =
     "There is freight waiting. Open the dispatch board whenever you are ready.";
 
-/// Spoken when no carrier near home can take a driver on.
-pub const NO_SEAT_LINE: &str =
-    "No carrier that hires near your home can take you on right now, so \
-                                you are home with no carrier. At the terminal, choose Apply to a \
-                                carrier to take a seat when you are ready.";
+/// Spoken when no carrier near `near` (see
+/// `SolvencyProfile::let_go_near_phrase`) can take a driver on.
+pub fn no_seat_line(near: &str) -> String {
+    format!(
+        "No carrier that hires near {near} can take you on right now, so you have \
+         no carrier. At the terminal, choose Apply to a carrier to take a seat when \
+         you are ready."
+    )
+}
 
 /// Where a driver let go by `former` goes next, and the closing line.
-fn new_seat_lines(former: &str, taken_on: Option<&str>) -> Vec<String> {
+fn new_seat_lines(former: &str, taken_on: Option<&str>, near: &str) -> Vec<String> {
     match taken_on {
         Some(name) if name == LAST_CHANCE_CARRIER_NAME => vec![
             format!(
@@ -511,14 +518,14 @@ fn new_seat_lines(former: &str, taken_on: Option<&str>) -> Vec<String> {
         Some(name) => vec![
             format!(
                 "What changes is the seat. Your assigned tractor goes back to the \
-                 {former} yard, and {name}, which hires out of a terminal near \
-                 your home, has taken you on."
+                 {former} yard, and {name}, which hires near {near}, has \
+                 taken you on."
             ),
             BACK_TO_WORK_LINE.to_string(),
         ],
         None => vec![
             format!("Your assigned tractor goes back to the {former} yard."),
-            NO_SEAT_LINE.to_string(),
+            no_seat_line(near),
         ],
     }
 }
@@ -537,6 +544,7 @@ pub fn apply_company_termination<P: SolvencyProfile + ?Sized>(profile: &mut P) -
     let settled = settle_account(profile);
     profile.driving_record_mut().carrier_terminations += 1;
     let firing_key = profile.carrier_key().to_string();
+    let near = profile.let_go_near_phrase();
     let taken_on = profile.take_fallback_carrier(&firing_key);
     profile.set_pay_advance(0.0);
     profile.set_pay_advance_used_for_load(false);
@@ -551,7 +559,7 @@ pub fn apply_company_termination<P: SolvencyProfile + ?Sized>(profile: &mut P) -
             .to_string(),
         KEPT_LINE.to_string(),
     ];
-    lines.extend(new_seat_lines(&former, taken_on.as_deref()));
+    lines.extend(new_seat_lines(&former, taken_on.as_deref(), &near));
     let record = profile.driving_record_mut();
     record.setback_notice_kind = "termination".to_string();
     record.setback_notice_lines = lines.clone();
@@ -580,7 +588,9 @@ pub fn apply_repossession<P: SolvencyProfile + ?Sized>(profile: &mut P) -> Vec<S
     // catches that case.
     // The fallback rule picks one from the driver's home city (plan section
     // 5). Nobody fired this driver, so no carrier is ruled out.
+    let mut near = String::new();
     if profile.career_reputation() < REPUTATION_TERMINATION {
+        near = profile.let_go_near_phrase();
         profile.take_fallback_carrier("");
     }
     let hiring = profile.carrier_name().to_string();
@@ -603,7 +613,7 @@ pub fn apply_repossession<P: SolvencyProfile + ?Sized>(profile: &mut P) -> Vec<S
              to you, and the buy-in gates are the same ones you cleared to get here."
                 .to_string(),
         );
-        lines.push(NO_SEAT_LINE.to_string());
+        lines.push(no_seat_line(&near));
     } else {
         lines.push(format!(
             "You are a company driver again, on the payroll at {hiring} and in a \
