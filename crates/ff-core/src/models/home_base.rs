@@ -2,6 +2,8 @@
 //!
 //! The hub's "parked at" line comes from where the truck really is:
 //!
+//! 0. a generic impound lot in the current city after a police tow
+//!    (`parked_facility` is [`IMPOUND_LOT_FACILITY`]), before anything else;
 //! 1. the hiring carrier's own terminal ("{Carrier} {City} terminal") when
 //!    the truck is in the career's `home_terminal_city`;
 //! 2. otherwise the facility the truck last delivered or dropped at, when it
@@ -26,6 +28,8 @@ pub enum ParkedKind {
     PublicLot,
     /// The city itself: nothing honest to name.
     City,
+    /// A generic impound lot after a police tow ([`IMPOUND_LOT_FACILITY`]).
+    Impound,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,6 +47,7 @@ impl ParkedAt {
     pub fn at_clause(&self) -> String {
         match self.kind {
             ParkedKind::City => String::new(),
+            ParkedKind::Impound => " at an impound lot".to_string(),
             _ => format!(" at {}", self.name),
         }
     }
@@ -52,6 +57,7 @@ impl ParkedAt {
         let city = world.spoken_city(&self.city_key, None);
         match self.kind {
             ParkedKind::City => format!("in {city}"),
+            ParkedKind::Impound => format!("at an impound lot in {city}"),
             _ => format!("at {} in {city}", self.name),
         }
     }
@@ -63,8 +69,18 @@ impl ParkedAt {
         let area = city_service_area(&world.spoken_city(&self.city_key, None));
         match self.kind {
             ParkedKind::City => format!("in {area}"),
+            // An impound lot is in the city, never a "service area".
+            ParkedKind::Impound => format!("at an impound lot in {}", self.city_text(world)),
             _ => format!("at {} in {area}", self.name),
         }
+    }
+
+    /// The city an impound lot is in, the way the tow summary says it:
+    /// "Buffalo, New York", "The Dalles, Oregon".
+    fn city_text(&self, world: &World) -> String {
+        impound_lot_text(world, &self.city_key)
+            .trim_start_matches("an impound lot in ")
+            .to_string()
     }
 
     /// The name a logbook line or menu title uses.
@@ -77,11 +93,48 @@ impl ParkedAt {
 /// already starts with one: "The Dalles service area", never "the The
 /// Dalles service area".
 pub fn city_service_area(city: &str) -> String {
-    if city.starts_with("The ") {
-        format!("{city} service area")
-    } else {
-        format!("the {city} service area")
+    format!("{} service area", crate::speech_text::the_city(city))
+}
+
+/// `parked_facility` value for a truck towed to an impound lot after a
+/// police arrest. Not a world pin: the map has no real tow or impound yards,
+/// so the lot is generic and always in the stop city. Old saves never carry
+/// it, and it round-trips as the plain string it is.
+pub const IMPOUND_LOT_FACILITY: &str = "impound_lot";
+
+/// How a tow summary names the lot: "an impound lot in Buffalo, New York",
+/// the city and state the way the hub says them.
+pub fn impound_lot_text(world: &World, city_key: &str) -> String {
+    let key = world.resolve_city_key(city_key);
+    match world.cities.get(&key) {
+        Some(city) if !city.state.is_empty() => {
+            format!("an impound lot in {}, {}", city.name, city.state)
+        }
+        Some(city) => format!("an impound lot in {}", city.name),
+        None => format!("an impound lot in {}", world.spoken_city(city_key, None)),
     }
+}
+
+/// The city a roadside stop at `(lat, lon)` happened in: the nearest world
+/// city, among the cities of `state_hint` (a state or province code or
+/// name, from the road the truck was on) when any match, so a stop never
+/// lands across a state line or a border. `None` only for an empty world.
+pub fn stop_city(world: &World, lat: f64, lon: f64, state_hint: &str) -> Option<String> {
+    use crate::data::world::air_miles;
+    let hint = state_hint.trim();
+    let in_state = |c: &crate::data::world_models::City| {
+        !hint.is_empty()
+            && (c.state_code.eq_ignore_ascii_case(hint) || c.state.eq_ignore_ascii_case(hint))
+    };
+    let any_in_state = world.cities.values().any(in_state);
+    world
+        .cities
+        .iter()
+        .filter(|(_, c)| !any_in_state || in_state(c))
+        .min_by(|(_, a), (_, b)| {
+            air_miles(lat, lon, a.lat, a.lon).total_cmp(&air_miles(lat, lon, b.lat, b.lon))
+        })
+        .map(|(key, _)| key.clone())
 }
 
 /// The career fields [`parked_at`] reads.
@@ -98,6 +151,24 @@ pub struct ParkedInputs<'a> {
 /// Where the truck is parked (see the module docs for the order).
 pub fn parked_at(world: &World, inputs: ParkedInputs<'_>) -> ParkedAt {
     let here = world.resolve_city_key(inputs.current_city);
+    // A towed truck is in the impound lot, whatever else this city has --
+    // the carrier terminal included.
+    if inputs.parked_facility.trim() == IMPOUND_LOT_FACILITY {
+        return ParkedAt {
+            kind: ParkedKind::Impound,
+            // The bare city, as the hub's own line says it ("Buffalo");
+            // the hub adds the state after the service area.
+            name: format!(
+                "{} impound lot",
+                world
+                    .cities
+                    .get(&here)
+                    .map(|c| c.name.clone())
+                    .unwrap_or_else(|| world.spoken_city(&here, None))
+            ),
+            city_key: here,
+        };
+    }
     let carrier = hiring_carrier(
         inputs.carrier_key,
         inputs.carrier_name,
@@ -206,6 +277,87 @@ mod tests {
 
     fn has_lot(city: &crate::data::world_models::City, kind: &str) -> bool {
         city.locations.iter().any(|l| l.facility_type == kind)
+    }
+
+    #[test]
+    fn test_the_stop_city_is_the_nearest_city_even_beside_a_travel_center() {
+        let world = get_world();
+        let healy = &world.cities["healy_ak_us"];
+        assert!(has_lot(healy, "travel_center"));
+        let key = stop_city(world, healy.lat + 0.02, healy.lon, "AK").expect("a city");
+        assert_eq!(key, "healy_ak_us");
+    }
+
+    #[test]
+    fn test_the_stop_city_stays_on_its_side_of_the_blaine_border() {
+        let world = get_world();
+        let blaine = &world.cities["blaine_wa_us"];
+        let surrey = &world.cities["surrey_bc_ca"];
+        // Just north of the midpoint, nearer Surrey: the road still says
+        // Washington until the crossing, so the stop is in Blaine.
+        let lat = (blaine.lat + surrey.lat) / 2.0 + 0.02;
+        let lon = (blaine.lon + surrey.lon) / 2.0;
+        assert_eq!(
+            stop_city(world, lat, lon, &blaine.state_code).as_deref(),
+            Some("blaine_wa_us")
+        );
+        assert_eq!(
+            stop_city(world, lat, lon, &surrey.state_code).as_deref(),
+            Some("surrey_bc_ca")
+        );
+        // With no state from the road, plain nearest.
+        assert_eq!(
+            stop_city(world, blaine.lat, blaine.lon, "").as_deref(),
+            Some("blaine_wa_us")
+        );
+    }
+
+    #[test]
+    fn test_an_impound_lot_wins_over_the_carrier_terminal_and_every_pin() {
+        let world = get_world();
+        let p = parked_at(
+            world,
+            inputs(
+                "northstar",
+                COMPANY_DRIVER,
+                "chicago_il_us",
+                "chicago_il_us",
+                IMPOUND_LOT_FACILITY,
+            ),
+        );
+        assert_eq!(p.kind, ParkedKind::Impound);
+        assert_eq!(p.name, "Chicago impound lot");
+        assert_eq!(p.at_clause(), " at an impound lot");
+        assert_eq!(
+            p.service_area_phrase(world),
+            "at an impound lot in Chicago, Illinois"
+        );
+        assert!(world.cities["chicago_il_us"]
+            .locations
+            .iter()
+            .all(|l| l.name != IMPOUND_LOT_FACILITY && l.id != IMPOUND_LOT_FACILITY));
+        assert_eq!(
+            impound_lot_text(world, "chicago_il_us"),
+            "an impound lot in Chicago, Illinois"
+        );
+        let dalles = parked_at(
+            world,
+            inputs(
+                "northstar",
+                COMPANY_DRIVER,
+                "chicago_il_us",
+                "the_dalles_or_us",
+                IMPOUND_LOT_FACILITY,
+            ),
+        );
+        assert_eq!(
+            dalles.service_area_phrase(world),
+            "at an impound lot in The Dalles, Oregon"
+        );
+        assert_eq!(
+            impound_lot_text(world, "the_dalles_or_us"),
+            "an impound lot in The Dalles, Oregon"
+        );
     }
 
     #[test]

@@ -57,6 +57,17 @@ pub fn type_prefix_is_redundant(label: &str, name: &str) -> bool {
     label_words.iter().all(|word| name_words.contains(word))
 }
 
+/// A spoken city with a leading "the" for phrases like "the {city} service
+/// area", unless the name already starts with its own article: "the
+/// Chicago", but "The Dalles", never "the The Dalles".
+pub fn the_city(city: &str) -> String {
+    if city.starts_with("The ") {
+        city.to_string()
+    } else {
+        format!("the {city}")
+    }
+}
+
 /// A facility's name with its type prefix, unless the prefix is redundant.
 pub fn typed_name(label: &str, name: &str, sep: &str) -> String {
     if type_prefix_is_redundant(label, name) {
@@ -685,6 +696,13 @@ mod tests {
     //! `tests/test_roadside_chatter.py`, `tests/test_instruction_retirement.py`
     //! and `tests/test_driving_speech_ladder.py`.
     use super::*;
+
+    #[test]
+    fn test_the_city_keeps_a_name_that_carries_its_own_article() {
+        assert_eq!(the_city("The Dalles"), "The Dalles");
+        assert_eq!(the_city("Chicago"), "the Chicago");
+        assert_eq!(the_city("Theodore"), "the Theodore");
+    }
 
     // -- the hazard call (R8) --------------------------------------------------
 

@@ -4,7 +4,11 @@
 //! [`RoadsideExit`] is Python's `_RoadsideExitMixin`: a trait with provided
 //! methods, no state of its own, shared by the first two screens.
 
+use ff_core::models::business::INDEPENDENT_AUTHORITY;
+use ff_core::models::carriers::hiring_carrier;
 use ff_core::models::enforcement;
+use ff_core::models::home_base::{impound_lot_text, stop_city, IMPOUND_LOT_FACILITY};
+use ff_core::models::profile::Profile;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::hos;
@@ -557,7 +561,7 @@ impl_state_for_menu!(EnforcementStopState);
 
 // -- FelonyStopState ----------------------------------------------------------------------
 
-const FELONY_INTRO_HELP: &str = "Enter or Escape continues from the terminal.";
+const FELONY_INTRO_HELP: &str = "Enter or Escape continues.";
 
 /// Failure-to-stop outcome after the player ignores an active siren.
 pub struct FelonyStopState {
@@ -627,6 +631,10 @@ impl FelonyStopState {
             p.game_hours += hours;
             p.market_day()
         };
+        // The truck does not stay on the shoulder: a police rotation wrecker
+        // tows it to an impound lot in the stop city, and the hub reads it
+        // parked there.
+        let towed_to = tow_truck_from_stop(ctx, d);
         {
             let p = profile_mut_of(ctx);
             p.market.advance_to(market_day);
@@ -635,32 +643,89 @@ impl FelonyStopState {
         }
         ctx.save_profile();
 
-        let load_text = if self.load_lost {
-            format!(
-                "Dispatch cancels the {} load. No pay for this run.",
-                d.job.spoken_cargo_label()
-            )
+        let load_text = felony_load_text(profile_of(ctx), self.load_lost, d);
+        let booking_min = FAILURE_TO_STOP_PROCESSING_MIN;
+        let booking = if booking_min > 0.0 {
+            format!(", and booking took {} hours", fmt_f(booking_min / 60.0, 0))
         } else {
-            "No loaded trailer to lose, but the assignment is canceled.".to_string()
+            String::new()
         };
-        let terminal = profile_of(ctx)
-            .carrier_home_terminal(ctx.world)
-            .map(|t| t.spoken_name())
-            .unwrap_or_else(|| "the terminal".to_string());
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
-             major reputation hit.{} Spike strips added {} percent truck damage, processing \
-             took {} hours. {load_text} You are released back to {terminal}.",
+             major reputation hit.{} Spike strips added {} percent truck damage{booking}. \
+             {load_text} You are released after booking. The truck was towed to {towed_to}.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_f(FAILURE_TO_STOP_DAMAGE_PCT, 0),
-            fmt_f(FAILURE_TO_STOP_PROCESSING_MIN / 60.0, 0)
         );
         if !self.standing_text.is_empty() {
             self.summary.push_str(&format!(" {}", self.standing_text));
         }
     }
+}
+
+/// What happens to the freight after a felony stop, by who owns the run.
+fn felony_load_text(p: &Profile, load_lost: bool, d: &DrivingState) -> String {
+    let own_authority = p.business_status == INDEPENDENT_AUTHORITY;
+    if d.job.bobtail {
+        return "No loaded trailer to lose, but the assignment is canceled.".to_string();
+    }
+    if own_authority {
+        let lead = if load_lost {
+            format!(
+                "The {} load does not deliver, so no pay for this run.",
+                d.job.spoken_cargo_label()
+            )
+        } else {
+            "No loaded trailer to lose, but the load is canceled.".to_string()
+        };
+        return format!("{lead} The load is yours to sort out with the shipper.");
+    }
+    if !load_lost {
+        return "No loaded trailer to lose, but the assignment is canceled.".to_string();
+    }
+    let carrier = hiring_carrier(&p.carrier_key, &p.carrier_name, &p.business_status)
+        .map(|c| c.name.clone())
+        .unwrap_or_else(|| "Your carrier".to_string());
+    format!(
+        "Dispatch cancels the {} load. No pay for this run. {carrier} recovered the load.",
+        d.job.spoken_cargo_label()
+    )
+}
+
+/// Tow the truck from the stop to a generic impound lot in the stop city:
+/// the world city nearest the stop, on the road's side of any state line or
+/// border, or the leg city when the road has no coordinate. `current_city`
+/// and `parked_facility` move together, so the hub, the board and the next
+/// dispatch all start from the lot. Returns how the summary names it. The
+/// map has no real tow yards, so no facility pin is ever used.
+fn tow_truck_from_stop(ctx: &mut GameContext, d: &DrivingState) -> String {
+    let world = ctx.world;
+    let (lat, lon) = d.trip.latlon_at(None);
+    let from_road = if lat == 0.0 && lon == 0.0 {
+        None
+    } else {
+        stop_city(world, lat, lon, &d.trip.state_at(None))
+    };
+    let city = from_road
+        .or_else(|| leg_city(ctx, d))
+        .unwrap_or_else(|| world.resolve_city_key(&profile_of(ctx).current_city));
+    let p = profile_mut_of(ctx);
+    p.current_city = city.clone();
+    p.parked_facility = IMPOUND_LOT_FACILITY.to_string();
+    impound_lot_text(world, &city)
+}
+
+/// The nearer end of the leg the truck is on, when it is a world city.
+fn leg_city(ctx: &GameContext, d: &DrivingState) -> Option<String> {
+    let trip = &d.trip;
+    let (leg_i, leg_start) = trip.leg_at_mile(trip.position_mi);
+    let leg_miles = trip.route.legs.get(leg_i)?.miles;
+    let past_half = trip.position_mi - leg_start > leg_miles / 2.0;
+    let index = if past_half { leg_i + 1 } else { leg_i };
+    let key = ctx.world.resolve_city_key(trip.route.cities.get(index)?);
+    ctx.world.cities.contains_key(&key).then_some(key)
 }
 
 impl Menu for FelonyStopState {
@@ -675,7 +740,7 @@ impl Menu for FelonyStopState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
             MenuItem::new("Return to terminal", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Continue from the city terminal."),
+                .help("Continue from where the truck is parked."),
         ]
     }
 

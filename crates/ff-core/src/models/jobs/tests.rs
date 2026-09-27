@@ -1591,6 +1591,24 @@ fn ordinary_reefer_cargo_keeps_catalog_label() {
 }
 
 #[test]
+fn test_metro_market_text_does_not_double_the_dalles_article() {
+    for text in [
+        facility_text("metro_market", "", "The Dalles", ""),
+        facility_offer_text("metro_market", "", "The Dalles", ""),
+    ] {
+        assert_eq!(text, "The Dalles metro freight market");
+    }
+    assert_eq!(
+        facility_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+    assert_eq!(
+        facility_offer_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+}
+
+#[test]
 fn doubles_loads_stay_under_their_route_cap_with_both_trailers_and_the_dolly() {
     // FIX 5: the board prices a set of doubles with both trailers and the
     // converter dolly in the tare, against the gross cap of the route the

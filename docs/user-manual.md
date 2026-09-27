@@ -236,7 +236,7 @@ The normal career loop is:
 1. Start or continue a career.
 2. Open your terminal's dispatch board. New company hires accept the load
    dispatch assigns; senior drivers and owner-operators pick their own.
-3. Drive from the terminal to the pickup facility.
+3. Deadhead from wherever your truck is parked to the pickup facility.
 4. Check in and load the cargo. Owner-operators then choose a destination
    route; company drivers run the route dispatch assigns.
 5. Drive the loaded trip.
@@ -581,8 +581,8 @@ project measured in real months of driving.
 
 ## Pickup, loading, and route planning
 
-After accepting a dispatch, you drive a local pickup leg from the terminal to
-the shipper. At the pickup gate:
+After accepting a dispatch, you deadhead on a local pickup leg from wherever
+your truck is parked to the shipper. At the pickup gate:
 
 1. Stop the truck.
 2. Open the pickup facility menu.
@@ -1072,10 +1072,12 @@ serious violation on your record, but not a felony. Hold highway speed or
 accelerate for another twelve seconds after that final warning, with no brake,
 and you are running from the police. Nobody gets there by accident: a touch of
 the brake starts the count over. A pursuit ends in a felony stop that adds
-truck damage, a major fine, a reputation hit, several hours of processing
-time, and cancels the active loaded run. You are released back to the terminal
-so you can repair, rest, and choose what to do next. Speeding is charged only
-when a trooper catches it.
+truck damage, a major fine, a reputation hit, three hours of booking, and
+cancels the active loaded run. You are released after booking, and the truck
+is towed to an impound lot in the city where you were stopped. The terminal
+reads it parked at that impound lot, even in your home terminal city, until
+the truck next drives out, and from there you can repair, rest, and choose
+what to do next. Speeding is charged only when a trooper catches it.
 What each of those costs, and what it puts on your record, is under
 Enforcement, Your Record, And Your CDL.
 Open weigh stations also matter: the game warns you before the scale, and if

@@ -796,7 +796,9 @@ impl Menu for CityMenuState {
                 format!(" {record}")
             };
             // With no carrier there is no truck to be parked: say where the
-            // driver is and that the seat and truck are gone.
+            // driver is and that the seat and truck are gone. That wins over
+            // an impound lot too -- a company driver fired after a felony tow
+            // has no truck in the lot to be parked with.
             let location = if p.is_unassigned_company_driver() {
                 format!(
                     "{} {} with no carrier and no truck until a carrier assigns you one.",
@@ -804,10 +806,24 @@ impl Menu for CityMenuState {
                     crate::states::city::py_capitalize(business),
                 )
             } else {
+                // An impound lot is in the city, not a "service area" (which
+                // reads as a turnpike travel plaza): "Parked at an impound lot
+                // in Buffalo, New York."
+                let where_parked = if parked.kind == ff_core::models::home_base::ParkedKind::Impound
+                {
+                    format!(
+                        " at {}",
+                        ff_core::models::home_base::impound_lot_text(world, &p.current_city)
+                    )
+                } else {
+                    format!(
+                        "{} in {}, {city_state}",
+                        parked.at_clause(),
+                        ff_core::models::home_base::city_service_area(&city_name)
+                    )
+                };
                 format!(
-                    "Parked{} in {}, {city_state}. {} with",
-                    parked.at_clause(),
-                    ff_core::models::home_base::city_service_area(&city_name),
+                    "Parked{where_parked}. {} with",
                     crate::states::city::py_capitalize(business),
                 )
             };

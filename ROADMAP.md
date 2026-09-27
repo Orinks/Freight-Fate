@@ -2075,6 +2075,25 @@ instead of a spawn point.
       take saves an empty `carrier_key` and `carrier_name`; the site must
       accept both.
 
+- [ ] **A felony in a commercial vehicle carries its full 49 CFR 383.51
+      weight.** Modelled today: running from a stop is a major offense
+      (383.51 Table 1), a one-year CDL disqualification, and a second
+      major offense is lifetime. Not modelled: the lifetime
+      disqualification for a felony involving a controlled substance (the
+      game has no such offense yet), and termination -- a company driver
+      keeps the job after a felony stop, where a carrier would let the
+      driver go. It should land as a carrier termination notice at the
+      terminal, like the record-review termination.
+
+- [ ] **Pin real tow and impound yards per city.** A police tow after a
+      felony stop goes to a generic impound lot in the stop city, because
+      the map has no tow or storage yards. Real rotation-wrecker impound
+      yards, sourced per city, would let the tow name the actual yard.
+- [ ] **Tow and storage fees after a police tow.** Nothing charges for the
+      tow or the impound storage today. Model both: the carrier pays for
+      company drivers and leased owner-operators, and the driver pays under
+      own authority.
+
 ### Career carriers (slices 2–4)
 
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals

@@ -97,8 +97,8 @@ pub(crate) fn profile_mut(ctx: &mut GameContext) -> &mut Profile {
         .expect("the terminal screens run with a loaded career")
 }
 
-/// Where the truck is parked right now: the carrier terminal in the home
-/// terminal city, else the facility it last delivered or dropped at, else
+/// Where the truck is parked right now: an impound lot after a police tow,
+/// else the carrier terminal in the home terminal city, else the facility it last delivered or dropped at, else
 /// the city's travel center or truck parking, else just the city. Never a
 /// yard in another city and never a bare "Terminal" (see
 /// `ff_core::models::home_base`).
@@ -877,6 +877,12 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             resume.speed_control_armed,
             resume.speed_control_target_mph,
         );
+    }
+    // The truck is driving out, so it has left any impound lot a police tow
+    // put it in: a deadhead, reposition, bobtail or loaded leg that is
+    // later abandoned must not come back "parked at an impound lot".
+    if profile(ctx).parked_facility == ff_core::models::home_base::IMPOUND_LOT_FACILITY {
+        profile_mut(ctx).parked_facility.clear();
     }
     let snapshot = driving.snapshot(ctx);
     profile_mut(ctx).active_trip = Some(snapshot);
