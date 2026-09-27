@@ -1174,19 +1174,36 @@ pub fn suspension_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     )
 }
 
-/// Why an empty drive (a bobtail to another board) is refused while the CDL
-/// is pulled. Driving empty is still driving a commercial vehicle.
+/// The CDL status as a noun: "disqualification" for a major offense,
+/// "suspension" for the serious-violation ladder.
+pub fn status_noun(record: &DrivingRecord) -> &'static str {
+    if status_verb(record) == "disqualified" {
+        "disqualification"
+    } else {
+        "suspension"
+    }
+}
+
+/// The terminal row that sits out a pulled CDL, named for what it is.
+pub fn wait_out_label(record: &DrivingRecord) -> String {
+    format!("Wait out the CDL {}", status_noun(record))
+}
+
+/// Why a bobtail (a drive with no trailer to another board) is refused while
+/// the CDL is pulled. A bobtail is still driving a commercial vehicle.
 pub fn suspension_drive_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);
     if record.lifetime_disqualified {
-        return "You cannot drive with a lifetime CDL disqualification, not even empty."
+        return "You cannot drive with a lifetime CDL disqualification, not even bobtail."
             .to_string();
     }
+    let noun = status_noun(record);
     format!(
-        "You cannot drive, not even empty, while your CDL is {}. It clears {}. Wait out the CDL \
-         suspension is on the terminal menu.",
+        "You cannot drive, not even bobtail, while your CDL is {}. The {noun} ends {}. {} is on \
+         the terminal menu.",
         status_verb(record),
-        clears_text(profile)
+        clears_text(profile),
+        wait_out_label(record)
     )
 }
 
@@ -1202,15 +1219,11 @@ pub fn suspended_objective_text<P: StandingProfile + ?Sized>(profile: &P) -> Opt
     if !record.suspended(game_hours) {
         return None;
     }
-    let noun = if status_verb(record) == "disqualified" {
-        "disqualification"
-    } else {
-        "suspension"
-    };
     Some(format!(
-        "wait out the CDL {noun}, {} remaining. Wait out the CDL suspension on this menu sits \
-         it out in one go.",
-        days_text(record.days_left(game_hours))
+        "wait out the CDL {}, {} remaining. Choose {} on this menu to skip ahead.",
+        status_noun(record),
+        days_text(record.days_left(game_hours)),
+        wait_out_label(record)
     ))
 }
 

@@ -34,7 +34,7 @@ use crate::states::driving_updates::pending::EnforcementStopParams;
 /// just enforced, and there would be no way off the shoulder at all. In that
 /// case the run ends here the way the felony stop already ends -- the load
 /// goes back to dispatch and the driver is released to the terminal, where
-/// "Wait out the CDL suspension" is waiting for them.
+/// "Wait out the CDL suspension" (or disqualification) is waiting for them.
 pub trait RoadsideExit: Menu {
     fn drive(&self) -> &DriveRef;
 

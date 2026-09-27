@@ -1260,10 +1260,32 @@ fn test_waiting_out_the_suspension_gives_the_licence_back() {
     state.wait_out_suspension(&mut app.ctx);
     let hours = profile(&app).game_hours;
     assert!(!profile(&app).driving_record.suspended(hours));
+    assert!(app.main_lines().iter().any(|line| line.contains(
+        "of your suspension. Your CDL is clear and the dispatch \
+             board is open again"
+    )));
+}
+
+#[test]
+fn test_the_wait_out_row_is_named_for_a_disqualification() {
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Buffalo");
+    let hours = profile(&app).game_hours;
+    profile_mut(&mut app)
+        .driving_record
+        .record_major_offense(hours);
+    let mut state = CityMenuState::new(&app.ctx, false);
+    let rows = built_labels(&mut app, &mut state);
+    assert!(rows
+        .iter()
+        .any(|t| t == "Wait out the CDL disqualification"));
+    assert!(!rows.iter().any(|t| t == "Wait out the CDL suspension"));
+    app.clear_speech();
+    state.wait_out_suspension(&mut app.ctx);
     assert!(app
         .main_lines()
         .iter()
-        .any(|line| line.contains("Your CDL is clear and the dispatch board is open again")));
+        .any(|line| line.contains("of your disqualification. Your CDL is clear")));
 }
 
 #[test]
@@ -2024,8 +2046,8 @@ fn test_a_disqualified_new_hire_is_told_to_wait_it_out_not_to_take_a_load() {
     let line = hub_entry(&mut app);
     assert!(
         line.contains(
-            "First-day objective: wait out the CDL disqualification, 365 days remaining. Wait \
-             out the CDL suspension on this menu sits it out in one go."
+            "First-day objective: wait out the CDL disqualification, 365 days remaining. \
+             Choose Wait out the CDL disqualification on this menu to skip ahead."
         ),
         "{line}"
     );
@@ -2052,7 +2074,8 @@ fn test_a_suspended_driver_is_told_to_wait_out_the_suspension() {
     let line = hub_entry(&mut app);
     assert!(
         line.contains(&format!(
-            "objective: wait out the CDL suspension, {days} remaining."
+            "First-day objective: wait out the CDL suspension, {days} remaining. Choose Wait \
+             out the CDL suspension on this menu to skip ahead."
         )),
         "{line}"
     );
@@ -2090,11 +2113,14 @@ fn test_a_disqualified_owner_operator_cannot_bobtail() {
     select::<CityMenuState>(&mut app, "Bobtail to a nearby city");
     assert!(is::<CityMenuState>(&app), "the bobtail menu opened");
     let expected = enforcement::suspension_drive_refusal_line(profile(&app));
-    assert!(
-        expected.starts_with(
-            "You cannot drive, not even empty, while your CDL is disqualified. It clears "
-        ),
-        "{expected}"
+    let ends = enforcement::clears_text(profile(&app));
+    assert_eq!(
+        expected,
+        format!(
+            "You cannot drive, not even bobtail, while your CDL is disqualified. The \
+             disqualification ends {ends}. Wait out the CDL disqualification is on the \
+             terminal menu."
+        )
     );
     assert!(
         app.main_lines().iter().any(|l| l == &expected),
@@ -2375,4 +2401,63 @@ fn test_no_carrier_career_stats_and_dealer_say_no_truck() {
     assert_eq!(rows[0].0, "Truck ownership locked: no carrier");
     assert_eq!(rows[0].1, TRUCK_SHOP_NO_CARRIER);
     assert!(!rows.iter().any(|r| r.0.contains("carrier-assigned")));
+}
+
+#[test]
+fn test_a_suspended_or_lifetime_driver_hears_the_matching_bobtail_refusal() {
+    let mut app = TestApp::new();
+    career(&mut app, "Ladder", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        let now = p.game_hours;
+        for _ in 0..3 {
+            p.driving_record.record_serious_violation(now);
+        }
+    }
+    let ends = enforcement::clears_text(profile(&app));
+    let line = enforcement::suspension_drive_refusal_line(profile(&app));
+    assert_eq!(
+        line,
+        format!(
+            "You cannot drive, not even bobtail, while your CDL is suspended. The suspension \
+             ends {ends}. Wait out the CDL suspension is on the terminal menu."
+        )
+    );
+    {
+        let p = profile_mut(&mut app);
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+        p.driving_record.record_major_offense(now);
+        assert!(p.driving_record.lifetime_disqualified);
+    }
+    let line = enforcement::suspension_drive_refusal_line(profile(&app));
+    assert_eq!(
+        line,
+        "You cannot drive with a lifetime CDL disqualification, not even bobtail."
+    );
+    assert!(
+        !line.contains("empty") && !line.contains("clears"),
+        "{line}"
+    );
+}
+
+#[test]
+fn test_a_suspended_driver_after_day_one_has_a_career_objective() {
+    let mut app = TestApp::new();
+    career(&mut app, "Later", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.career.deliveries = 12;
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+    }
+    let line = hub_entry(&mut app);
+    assert!(
+        line.contains(
+            "Career objective: wait out the CDL disqualification, 365 days remaining. Choose \
+             Wait out the CDL disqualification on this menu to skip ahead."
+        ),
+        "{line}"
+    );
 }

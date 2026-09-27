@@ -381,12 +381,13 @@ impl CityMenuState {
     /// accessibility problem dressed up as realism, so the terminal lets the
     /// driver wait it out and says exactly what that costs in game time.
     pub fn wait_out_suspension(&mut self, ctx: &mut GameContext) {
-        let (hours, days) = {
+        let (hours, days, noun) = {
             let p = profile(ctx);
             let record = &p.driving_record;
             (
                 record.hours_left(p.game_hours),
                 enforcement::days_text(record.days_left(p.game_hours)),
+                enforcement::status_noun(record),
             )
         };
         if hours <= 0.0 {
@@ -399,7 +400,7 @@ impl CityMenuState {
             p.game_hours += hours;
             (start, p.game_hours)
         };
-        record_city_duty(ctx, "off_duty", start, end, "CDL suspension");
+        record_city_duty(ctx, "off_duty", start, end, &format!("CDL {noun}"));
         {
             let p = profile_mut(ctx);
             let now = p.game_hours;
@@ -414,7 +415,7 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch \
+            "You sat out the {days} of your {noun}. Your CDL is clear and the dispatch \
              board is open again. It is {}, {}, and you are rested.",
             clock_text(hour),
             time_of_day(hour)
@@ -979,13 +980,14 @@ impl Menu for CityMenuState {
         if record.suspended(p.game_hours) && !record.lifetime_disqualified {
             items.insert(
                 1,
-                MenuItem::new("Wait out the CDL suspension", |s: &mut Self, ctx| {
+                MenuItem::new(enforcement::wait_out_label(record), |s: &mut Self, ctx| {
                     s.wait_out_suspension(ctx)
                 })
-                .help(
-                    "Sits out the suspension in one go. The clock jumps to the day it clears, \
-                     money, truck, and record untouched.",
-                ),
+                .help(format!(
+                    "Sits out the {} in one go. The clock jumps to the day it ends, money, \
+                     truck, and record untouched.",
+                    enforcement::status_noun(record)
+                )),
             );
         }
         if record.lifetime_disqualified {
