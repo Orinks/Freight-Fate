@@ -215,8 +215,11 @@ fn test_failed_post_is_retried_on_the_heartbeat_schedule() {
     service.update(Some(driving()));
     assert_eq!(transport.request_count(), 1);
 
-    // Not hammered while the site is down...
+    // Not hammered while the site is down, not even on the change throttle:
+    // the snapshot that failed is not a new change...
     clock.advance(1.0);
+    service.pump();
+    clock.advance(MIN_CHANGE_INTERVAL_S);
     service.pump();
     assert_eq!(transport.request_count(), 1);
 
@@ -225,6 +228,54 @@ fn test_failed_post_is_retried_on_the_heartbeat_schedule() {
     clock.advance(HEARTBEAT_INTERVAL_S);
     service.pump();
     assert_eq!(transport.request_count(), 2);
+}
+
+#[test]
+fn test_a_refused_post_waits_for_the_heartbeat_but_a_new_change_does_not() {
+    // A rejected driver (deleted, or a token rotated elsewhere) was retried
+    // every change window forever: four requests a minute from one game.
+    let transport = FakeTransport::failing(NetError::http(404));
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    for _ in 0..4 {
+        clock.advance(MIN_CHANGE_INTERVAL_S);
+        service.pump();
+    }
+    assert_eq!(transport.request_count(), 1);
+
+    // Something new to say still goes out on the change throttle.
+    service.update(Some(resting()));
+    assert_eq!(transport.request_count(), 2);
+}
+
+#[test]
+fn test_a_failed_sign_off_is_retried_on_the_heartbeat() {
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+
+    transport.set_error(Some(NetError::http(503)));
+    service.update(None);
+    clock.advance(OFF_DUTY_GRACE_S + 1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), 2);
+
+    // The worker used to wake every twentieth of a second and post again.
+    clock.advance(1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), 2);
+
+    transport.set_error(None);
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), "");
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(transport.request_count(), 3); // off the board, and quiet
 }
 
 // -- going off duty -------------------------------------------------------------
