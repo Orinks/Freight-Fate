@@ -4,6 +4,7 @@
 
 ### Changed
 
+- With no carrier, choosing Stay a company driver on the Business status screen now says "Staying on the company-driver path." instead of "Staying a company driver.", since there is no seat to stay in.
 - **A debt firing or repossession is said before the terminal, not after.** Walking into the terminal with the balance past the ceiling used to read the old hub line and the Dispatch board row first, for the seat or truck that was about to go. The notice now speaks first, and leaving it reads the rebuilt hub.
 - **A suspended or disqualified CDL is no longer sent to the dispatch board.** The terminal's objective now says to wait out the suspension or disqualification, with the days remaining, instead of telling you to accept a load the board refuses; a lifetime disqualification gets no driving objective. An owner-operator's Bobtail to a nearby city is refused with the date the CDL clears, the same as the board.
 - Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals).
