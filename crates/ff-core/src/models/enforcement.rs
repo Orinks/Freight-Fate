@@ -1096,6 +1096,46 @@ pub fn suspension_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     )
 }
 
+/// Why an empty drive (a bobtail to another board) is refused while the CDL
+/// is pulled. Driving empty is still driving a commercial vehicle.
+pub fn suspension_drive_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
+    let record = record_of(profile);
+    if record.lifetime_disqualified {
+        return "You cannot drive with a lifetime CDL disqualification, not even empty."
+            .to_string();
+    }
+    format!(
+        "You cannot drive, not even empty, while your CDL is {}. It clears {}. Wait out the CDL \
+         suspension is on the terminal menu.",
+        status_verb(record),
+        clears_text(profile)
+    )
+}
+
+/// The terminal's objective while the CDL is pulled: wait it out, with the
+/// real time left. Empty for a lifetime disqualification, which the greeting
+/// already says in full; `None` when the CDL is clear.
+pub fn suspended_objective_text<P: StandingProfile + ?Sized>(profile: &P) -> Option<String> {
+    let record = record_of(profile);
+    if record.lifetime_disqualified {
+        return Some(String::new());
+    }
+    let game_hours = profile.game_hours();
+    if !record.suspended(game_hours) {
+        return None;
+    }
+    let noun = if status_verb(record) == "disqualified" {
+        "disqualification"
+    } else {
+        "suspension"
+    };
+    Some(format!(
+        "wait out the CDL {noun}, {} remaining. Wait out the CDL suspension on this menu sits \
+         it out in one go.",
+        days_text(record.days_left(game_hours))
+    ))
+}
+
 /// The CDL line on the career screens: short, factual, always available.
 pub fn career_menu_status<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);

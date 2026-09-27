@@ -4,6 +4,7 @@
 
 ### Changed
 
+- **A suspended or disqualified CDL is no longer sent to the dispatch board.** The terminal's objective now says to wait out the suspension or disqualification, with the days remaining, instead of telling you to accept a load the board refuses; a lifetime disqualification gets no driving objective. An owner-operator's Bobtail to a nearby city is refused with the date the CDL clears, the same as the board.
 - Career carriers load from `data/carriers.json` with tiers: Northstar, Great Lakes Training, and Summit Value are national; Prairie Link is the Plains regional (Kansas City, Omaha, Wichita terminals).
 - **Your home terminal is your carrier's own yard.** It is named for the carrier and the city, like Northstar Freight Lines Chicago terminal, and it is the carrier terminal nearest your home base. A city's freight yards are pickup and delivery points only, never a home.
 - The home-base rule is defined: national carriers hire anywhere in the lower 48, and a regional carrier hires only within its hiring radius, so it never homes a driver at a terminal out of range. A home base is offerable only where some carrier hires, which leaves out Alaska, British Columbia, and Yukon for now. The new-career picker enforces this rule: it lists only home cities where some carrier hires, then only the carriers that hire in the city you pick.

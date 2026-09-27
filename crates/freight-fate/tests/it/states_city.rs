@@ -26,8 +26,9 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu, SimpleMenuState};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{
-    dispatch_cache_key, open_freight_market, relay_load_for_board, CityMenuState, JobBoardState,
-    JobDetailState, PayDebtState, RouteSelectState, TruckStatusState, JOB_BOARD_INTRO_HELP,
+    dispatch_cache_key, open_freight_market, relay_load_for_board, BobtailDestState, CityMenuState,
+    JobBoardState, JobDetailState, PayDebtState, RouteSelectState, TruckStatusState,
+    JOB_BOARD_INTRO_HELP,
 };
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
@@ -1886,4 +1887,102 @@ fn test_hub_home_logic_reads_home_terminal_city_not_current_city() {
     let line = hub_entry(&mut app);
     assert!(!line.contains("Northstar Freight Lines"), "{line}");
     assert!(!line.contains("Chicago Company Yard"), "{line}");
+}
+
+// -- a pulled CDL at the terminal ----------------------------------------------------
+
+#[test]
+fn test_a_disqualified_new_hire_is_told_to_wait_it_out_not_to_take_a_load() {
+    let mut app = TestApp::new();
+    career(&mut app, "Pulled", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+    }
+    let line = hub_entry(&mut app);
+    assert!(
+        line.contains(
+            "First-day objective: wait out the CDL disqualification, 365 days remaining. Wait \
+             out the CDL suspension on this menu sits it out in one go."
+        ),
+        "{line}"
+    );
+    assert!(!line.contains("open the dispatch board"), "{line}");
+    assert!(!line.contains("  "), "{line}");
+}
+
+#[test]
+fn test_a_suspended_driver_is_told_to_wait_out_the_suspension() {
+    let mut app = TestApp::new();
+    career(&mut app, "Ladder", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        let now = p.game_hours;
+        for _ in 0..3 {
+            p.driving_record.record_serious_violation(now);
+        }
+        assert!(p.driving_record.suspended(now));
+    }
+    let days = {
+        let p = profile(&app);
+        enforcement::days_text(p.driving_record.days_left(p.game_hours))
+    };
+    let line = hub_entry(&mut app);
+    assert!(
+        line.contains(&format!(
+            "objective: wait out the CDL suspension, {days} remaining."
+        )),
+        "{line}"
+    );
+    assert!(!line.contains("open the dispatch board"), "{line}");
+}
+
+#[test]
+fn test_a_lifetime_disqualification_has_no_driving_objective() {
+    let mut app = TestApp::new();
+    career(&mut app, "Done", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+        p.driving_record.record_major_offense(now);
+        assert!(p.driving_record.lifetime_disqualified);
+    }
+    let line = hub_entry(&mut app);
+    assert!(!line.contains("objective"), "{line}");
+    assert!(!line.contains("open the dispatch board"), "{line}");
+}
+
+#[test]
+fn test_a_disqualified_owner_operator_cannot_bobtail() {
+    let mut app = TestApp::new();
+    career(&mut app, "Empty", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+    }
+    hub_entry(&mut app);
+    app.clear_speech();
+    select::<CityMenuState>(&mut app, "Bobtail to a nearby city");
+    assert!(is::<CityMenuState>(&app), "the bobtail menu opened");
+    let expected = enforcement::suspension_drive_refusal_line(profile(&app));
+    assert!(
+        expected.starts_with(
+            "You cannot drive, not even empty, while your CDL is disqualified. It clears "
+        ),
+        "{expected}"
+    );
+    assert!(
+        app.main_lines().iter().any(|l| l == &expected),
+        "{:?}",
+        app.main_lines()
+    );
+
+    // A bobtail menu already open refuses too.
+    app.push_state(BobtailDestState::new(vec!["Milwaukee".to_string()]));
+    key(&mut app, Key::Return);
+    assert!(!is::<DrivingState>(&app));
 }
