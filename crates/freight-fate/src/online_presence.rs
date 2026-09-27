@@ -525,6 +525,10 @@ struct PresenceState2 {
     on_board: bool,
     none_since: Option<f64>,
     desired_changed_t: Option<f64>,
+    // The last post failed and nothing has changed since. Its retry waits for
+    // the heartbeat: a refused driver or an unreachable site used to be asked
+    // again on every change window (or, for a sign-off, every worker wake).
+    failed: bool,
 }
 
 struct Inner {
@@ -632,6 +636,7 @@ impl OnlinePresence {
             // Any genuine change restarts the idle clock; the dedupe above
             // means a parked truck re-reporting the same snapshot does not.
             st.desired_changed_t = Some((self.inner.clock)());
+            st.failed = false;
         }
         if self.inner.threaded {
             self.inner.wake.set();
@@ -711,7 +716,12 @@ impl Inner {
             if !st.on_board {
                 return WORKER_TICK_S;
             }
-            return (self.off_duty_grace - (now - none_since)).max(0.05);
+            let until_grace = self.off_duty_grace - (now - none_since);
+            let until_retry = match (st.failed, st.last_send_t) {
+                (true, Some(t)) => self.heartbeat - (now - t),
+                _ => 0.0,
+            };
+            return until_grace.max(until_retry).max(0.05);
         }
         // Idle and already signed off: nothing to send until a change. (Idle
         // but still on the board falls through, so the sign-off -- or a failed
@@ -733,7 +743,7 @@ impl Inner {
             return WORKER_TICK_S;
         };
         let until_heartbeat = self.heartbeat - (now - last_send_t);
-        if pending {
+        if pending && !st.failed {
             let until_change = self.min_change - (now - last_send_t);
             return until_heartbeat.min(until_change).max(0.05);
         }
@@ -745,7 +755,7 @@ impl Inner {
             return;
         }
         let now = (self.clock)();
-        let (desired, last_sent, on_board, none_since, last_send_t, idle) = {
+        let (desired, last_sent, on_board, none_since, last_send_t, idle, failed) = {
             let st = self.state.lock().unwrap();
             (
                 st.desired.clone(),
@@ -754,6 +764,7 @@ impl Inner {
                 st.none_since,
                 st.last_send_t,
                 idle_for(&st, now),
+                st.failed,
             )
         };
         let since_send = last_send_t.map(|t| now - t);
@@ -774,12 +785,17 @@ impl Inner {
             if now - none_since < self.off_duty_grace {
                 return;
             }
-            if self.post("", "") {
-                let mut st = self.state.lock().unwrap();
+            if failed && since_send.is_some_and(|s| s < self.heartbeat) {
+                return;
+            }
+            let ok = self.post("", "");
+            let mut st = self.state.lock().unwrap();
+            if ok {
                 st.on_board = false;
                 st.last_sent = None;
-                st.last_send_t = Some(now);
             }
+            st.failed = !ok;
+            st.last_send_t = Some(now);
             return;
         };
 
@@ -800,9 +816,9 @@ impl Inner {
             }
             return;
         }
-        let due = if changed && since_send.is_none_or(|s| s >= self.min_change) {
+        let due = if changed && !failed && since_send.is_none_or(|s| s >= self.min_change) {
             true // send the change now
-        } else if desired.activity == PAUSED_ACTIVITY {
+        } else if desired.activity == PAUSED_ACTIVITY && !failed {
             // A paused game has said its one word; the server holds a paused
             // row for the idle window without beats, and the idle sign-off
             // above is the next thing it hears.
@@ -821,6 +837,7 @@ impl Inner {
             st.on_board = true;
             st.last_sent = Some(desired);
         }
+        st.failed = !ok;
         // Count failures as attempts too, so an unreachable site is retried on
         // the heartbeat schedule instead of every worker wake-up.
         st.last_send_t = Some(now);
