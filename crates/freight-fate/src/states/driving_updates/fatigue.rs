@@ -269,6 +269,9 @@ impl DrivingState {
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         }
+        // A second run-off on top of a serious violation just suspended the
+        // CDL: the drive ends here instead of carrying on.
+        self.end_drive_if_licence_pulled(ctx);
     }
 
     /// Book a run-off-road fatigue event and say what it cost.
