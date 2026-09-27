@@ -153,10 +153,6 @@ impl DrivingState {
                 // The last delivered/dropped facility is back in the old city.
                 p.parked_facility.clear();
             }
-            // The truck has left the impound lot it was towed to.
-            if p.parked_facility == ff_core::models::home_base::IMPOUND_LOT_FACILITY {
-                p.parked_facility.clear();
-            }
             // Store the whole record, not just fuel and damage: this line also
             // accrues brake and engine wear, which the flat names do not carry.
             p.store_truck_condition(&self.trip.truck);

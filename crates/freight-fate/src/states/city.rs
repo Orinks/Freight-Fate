@@ -835,6 +835,12 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             resume.speed_control_target_mph,
         );
     }
+    // The truck is driving out, so it has left any impound lot a police tow
+    // put it in: a deadhead, reposition, bobtail or loaded leg that is
+    // later abandoned must not come back "parked at an impound lot".
+    if profile(ctx).parked_facility == ff_core::models::home_base::IMPOUND_LOT_FACILITY {
+        profile_mut(ctx).parked_facility.clear();
+    }
     let snapshot = driving.snapshot(ctx);
     profile_mut(ctx).active_trip = Some(snapshot);
     ctx.save_profile();

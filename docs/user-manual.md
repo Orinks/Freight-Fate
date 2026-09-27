@@ -1075,9 +1075,9 @@ the brake starts the count over. A pursuit ends in a felony stop that adds
 truck damage, a major fine, a reputation hit, three hours of booking, and
 cancels the active loaded run. You are released after booking, and the truck
 is towed to an impound lot in the city where you were stopped. The terminal
-reads it parked at that impound lot, even in your home terminal city, and
-from there you can repair, rest, and choose what to do next. Speeding is charged only
-when a trooper catches it.
+reads it parked at that impound lot, even in your home terminal city, until
+the truck next drives out, and from there you can repair, rest, and choose
+what to do next. Speeding is charged only when a trooper catches it.
 What each of those costs, and what it puts on your record, is under
 Enforcement, Your Record, And Your CDL.
 Open weigh stations also matter: the game warns you before the scale, and if
