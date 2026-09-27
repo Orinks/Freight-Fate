@@ -699,6 +699,13 @@ pub fn apply_return_to_company_driving<P: SolvencyProfile + ?Sized>(
     ]
 }
 
+/// Whether the terminal owes a money setback this visit: one already
+/// pending, or a company termination or repossession now due. The terminal
+/// shows that notice before anything else it has to say.
+pub fn career_setback_owed<P: StandingProfile + ?Sized>(profile: &P) -> bool {
+    setback_pending(profile) || company_termination_due(profile) || repossession_due(profile)
+}
+
 pub fn setback_pending<P: StandingProfile + ?Sized>(profile: &P) -> bool {
     profile
         .driving_record()

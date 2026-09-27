@@ -634,6 +634,35 @@ pub fn option_for_carrier(carrier_key: &str, carrier_name: &str) -> &'static Car
     option
 }
 
+/// The start a reset gives a driver with no carrier, and the city it is
+/// based on. There is no carrier to carry over, so this is the start picker's
+/// rule: company starts whose carrier hires in the city, nearest hiring
+/// terminal first. `cities` are tried in order (the saved home city, else the
+/// current city, then the old terminal city); a city no carrier hires in is
+/// skipped, so a start never goes to a carrier that cannot hire there and an
+/// Alaska driver never lands at a lower-48 terminal. `None` when no listed
+/// city has a hiring carrier.
+pub fn reset_start_for_no_carrier(
+    world: &crate::data::world::World,
+    cities: &[&str],
+) -> Option<(&'static CareerStartOption, String)> {
+    cities
+        .iter()
+        .filter(|city| !city.trim().is_empty())
+        .find_map(|city| {
+            let key = world.resolve_city_key(city);
+            start_options_for_home_city(world, &key)
+                .into_iter()
+                .filter(|option| option.is_company_driver())
+                .filter_map(|option| {
+                    let mi = hiring_carrier_for_option(option)?.hiring_distance_mi(world, &key)?;
+                    Some((mi, option))
+                })
+                .min_by(|a, b| a.0.total_cmp(&b.0))
+                .map(|(_, option)| (option, key))
+        })
+}
+
 /// The start option behind a profile: its `carrier_key`, or -- for a save
 /// from before carrier keys -- the option whose carrier name matches.
 pub fn option_for_profile<P: crate::models::enforcement::StandingProfile + ?Sized>(

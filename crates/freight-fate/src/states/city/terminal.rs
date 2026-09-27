@@ -512,8 +512,19 @@ impl CityMenuState {
     /// home city (derived on saves without one); when nobody hires there
     /// they have no carrier.
     pub fn check_carrier_termination(&mut self, ctx: &mut GameContext) {
+        if let Some(line) = self.take_carrier_termination(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
+        }
+    }
+
+    /// Apply a due carrier termination and return what to say about it, or
+    /// `None` when none is due. The rows and title are rebuilt for the new
+    /// state (a driver left with no carrier has no truck rows), so the hub
+    /// line spoken after it describes the terminal as it now is.
+    fn take_carrier_termination(&mut self, ctx: &mut GameContext) -> Option<String> {
         if !enforcement::carrier_termination_due(profile(ctx)) {
-            return;
+            return None;
         }
         let (former, taken_on, near) = {
             let p = profile_mut(ctx);
@@ -530,8 +541,8 @@ impl CityMenuState {
         ctx.save_profile();
         // A driver left with no carrier trades the dispatch board for
         // "Apply to a carrier", so the rows are rebuilt.
+        self.menu.title = Self::title_for(ctx);
         self.refresh(ctx, true);
-        ctx.audio.play("ui/error");
         let opening = format!(
             "{former} has ended your employment. Your safety record is past what their \
              insurance will carry, so your seat and your assigned truck go back to the yard."
@@ -552,7 +563,7 @@ impl CityMenuState {
                  menu when you are ready."
             ),
         };
-        ctx.say(&line);
+        Some(line)
     }
 
     fn logbook(&mut self, ctx: &mut GameContext) {
@@ -718,6 +729,24 @@ impl Menu for CityMenuState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let interrupt = !self.queue_entry_announcement;
         self.queue_entry_announcement = false;
+        // A carrier letting the driver go is applied and said first, so the
+        // hub line and the current row that follow describe the terminal as
+        // it now is, not the seat that just ended. A money setback owed at
+        // the same visit still goes first and takes the screen (below), so
+        // the record review waits for the next visit then, as before.
+        let fired = if solvency::career_setback_owed(profile(ctx)) {
+            None
+        } else {
+            self.take_carrier_termination(ctx)
+        };
+        let interrupt = match fired {
+            Some(firing) => {
+                ctx.audio.play("ui/error");
+                ctx.say_with(firing, Say::new().interrupt(interrupt));
+                false
+            }
+            None => interrupt,
+        };
         let line = {
             let p = profile(ctx);
             let world = ctx.world;
@@ -784,7 +813,6 @@ impl Menu for CityMenuState {
         if self.check_career_setback(ctx) {
             return;
         }
-        self.check_carrier_termination(ctx);
         self.check_standing(ctx);
         self.check_credentials(ctx);
     }

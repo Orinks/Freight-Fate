@@ -2186,3 +2186,52 @@ fn test_an_old_save_without_a_home_city_keeps_it_blank_when_let_go() {
     );
     assert!(!said.contains("your home"), "{said}");
 }
+
+#[test]
+fn test_a_firing_is_said_before_the_hub_and_the_hub_is_the_new_one() {
+    let mut app = TestApp::new();
+    career(&mut app, "Jerry", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.achievements.push("first_day".to_string());
+        p.career.deliveries = 12;
+        p.carrier_key = "chatanika_freight".to_string();
+        p.carrier_name = "Chatanika Freight Lines".to_string();
+        p.home_city = "fairbanks_ak_us".to_string();
+        p.home_terminal_city = "fairbanks_ak_us".to_string();
+        p.current_city = "fairbanks_ak_us".to_string();
+        p.career.reputation = 4.0;
+    }
+    app.clear_speech();
+    let terminal = CityMenuState::new(&app.ctx, false);
+    app.push_state(terminal);
+    let lines = app.main_lines();
+    assert!(
+        lines[0].contains("Chatanika Freight Lines has ended your employment"),
+        "{lines:?}"
+    );
+    let rest = lines[1..].join(" ");
+    assert!(rest.contains("You are in Fairbanks, Alaska."), "{lines:?}");
+    assert!(
+        !rest.contains("Parked") && !rest.contains("Dispatch board"),
+        "{lines:?}"
+    );
+    assert!(rest.contains("Apply to a carrier"), "{lines:?}");
+}
+
+#[test]
+fn test_no_carrier_career_stats_and_dealer_say_no_truck() {
+    use ff_core::models::carrier_fleet::{equipment_status_lines, NO_CARRIER_TRUCK_LINE};
+    use freight_fate::states::city_business::{TruckShopState, TRUCK_SHOP_NO_CARRIER};
+    let mut app = TestApp::new();
+    fairbanks_driver_without_a_carrier(&mut app, 12);
+    assert_eq!(
+        equipment_status_lines(profile(&app)),
+        [NO_CARRIER_TRUCK_LINE]
+    );
+    app.push_state(TruckShopState::new(true));
+    let rows = labels_and_help::<TruckShopState>(&app);
+    assert_eq!(rows[0].0, "Truck ownership locked: no carrier");
+    assert_eq!(rows[0].1, TRUCK_SHOP_NO_CARRIER);
+    assert!(!rows.iter().any(|r| r.0.contains("carrier-assigned")));
+}

@@ -805,7 +805,12 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     }
     if kept_on_sufferance(profile) {
         // Never let go over the record (`carrier_termination_due`), so no
-        // countdown to a let-go is spoken here.
+        // countdown to a let-go is spoken here, and a clean record (nothing
+        // left to age out) needs no line at all.
+        let ages_out = record_ages_out_text(profile);
+        if ages_out.trim().is_empty() {
+            return String::new();
+        }
         let keeper = match profile.carrier_name().trim() {
             "" => "Your carrier",
             name => name,
@@ -813,14 +818,12 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
         if record_past_termination_floor(record, game_hours) {
             return format!(
                 "The carrier's insurer will not carry a record like that; {keeper} keeps you on \
-                 sufferance until the oldest ages out {}.",
-                record_ages_out_text(profile)
+                 sufferance until the oldest ages out {ages_out}."
             );
         }
         return format!(
             "{keeper} keeps you on sufferance whatever the record says; the oldest entry \
-             ages out {}.",
-            record_ages_out_text(profile)
+             ages out {ages_out}."
         );
     }
     if record_past_termination_floor(record, game_hours) {

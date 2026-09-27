@@ -459,6 +459,10 @@ pub fn career_location(ctx: &GameContext, profile: &Profile) -> String {
         }
         return format!("on the road to {facility}");
     }
+    if profile.is_unassigned_company_driver() {
+        // No truck to be parked: the driver is just in the city.
+        return format!("in {}", ctx.world.spoken_city(&profile.current_city, None));
+    }
     profile.parked_at(ctx.world).phrase(ctx.world)
 }
 

@@ -475,4 +475,45 @@ mod profile_fallback {
         assert!(!business_status_summary(&ak).contains("Northstar"));
         assert_eq!(career_objective(&ak).terminal_text, NO_CARRIER_OBJECTIVE);
     }
+
+    #[test]
+    fn test_a_clean_record_on_sufferance_says_nothing_at_the_hub() {
+        use ff_core::models::enforcement::record_consequence_text;
+        for (key, name, home) in [
+            ("knik_arm_cartage", "Knik Arm Cartage", "anchorage_ak_us"),
+            (
+                "des_plaines_cartage",
+                "Des Plaines River Cartage",
+                "chicago_il_us",
+            ),
+        ] {
+            let mut p = driver(home, key, name);
+            p.driving_record.sufferance_carrier_key = key.to_string();
+            assert!(kept_on_sufferance(&p), "{name}");
+            assert_eq!(record_consequence_text(&p), "", "{name}");
+        }
+    }
+
+    #[test]
+    fn test_a_reset_with_no_carrier_takes_a_carrier_that_hires_there() {
+        use ff_core::models::start_options::{
+            hiring_carrier_for_option, reset_start_for_no_carrier,
+        };
+        let w = world();
+        let (option, city) =
+            reset_start_for_no_carrier(w, &["fairbanks_ak_us"]).expect("an Alaska start");
+        assert_eq!(city, "fairbanks_ak_us");
+        let carrier = hiring_carrier_for_option(option).expect("a hiring carrier");
+        assert!(carrier.hires_in(w, "fairbanks_ak_us"));
+        assert!(option.is_company_driver());
+
+        let (option, _) = reset_start_for_no_carrier(w, &["chicago_il_us"]).expect("a start");
+        assert!(hiring_carrier_for_option(option)
+            .expect("a hiring carrier")
+            .hires_in(w, "chicago_il_us"));
+
+        // A blank home skips to the next city.
+        let (_, city) = reset_start_for_no_carrier(w, &["", "anchorage_ak_us"]).expect("a start");
+        assert_eq!(city, "anchorage_ak_us");
+    }
 }
