@@ -923,6 +923,37 @@ fn endorsement_courses_price_each_unearned_endorsement() {
 }
 
 #[test]
+fn test_staying_with_no_carrier_stays_on_the_path_not_in_a_seat() {
+    // With no carrier there is no company-driver seat to stay in.
+    let mut app = TestApp::new();
+    career(&mut app, "Stay Path", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
+        p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
+        p.career.reputation = OWNER_OPERATOR_REPUTATION;
+        p.set_money(OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0);
+    }
+    // The row is offered only with a carrier; the carrier goes while the
+    // screen is open, so the choice is made with none.
+    app.push_state(BusinessStatusState::new());
+    {
+        let p = profile_mut(&mut app);
+        p.carrier_key.clear();
+        p.carrier_name.clear();
+        assert!(p.is_unassigned_company_driver());
+    }
+    app.clear_speech();
+    select::<BusinessStatusState>(&mut app, "Stay a company driver");
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains("Staying on the company-driver path."),
+        "{said}"
+    );
+    assert!(!said.contains("Staying a company driver"), "{said}");
+}
+
+#[test]
 fn test_business_status_lets_a_qualified_driver_stay_a_company_driver() {
     // Owner, 2026-09-03: a player who does not want the lease needs a way
     // to say so, and a way back if they change their mind.

@@ -32,9 +32,9 @@ use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
     open_freight_market, parked_at, profile, profile_mut, record_city_duty,
-    terminal_objective_clause, BobtailDestState, BusinessStatusState, EndorsementCourseState,
-    GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI,
-    DRIVING_SCHOOL_ENABLED,
+    terminal_objective_clause, ApplyToCarrierState, BobtailDestState, BusinessStatusState,
+    EndorsementCourseState, GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S,
+    BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
 };
 use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
@@ -60,6 +60,16 @@ pub struct CityMenuState {
     backup_watch: Option<(String, i64, f64)>,
 }
 
+/// Where a driver with no carrier is: the city, with no truck parked
+/// anywhere.
+pub fn no_truck_location_line(city_name: &str, city_state: &str) -> String {
+    if city_state.is_empty() {
+        format!("You are in {city_name}.")
+    } else {
+        format!("You are in {city_name}, {city_state}.")
+    }
+}
+
 fn local_zone(ctx: &GameContext) -> TimeZone {
     ctx.world
         .city(&profile(ctx).current_city)
@@ -81,8 +91,12 @@ impl CityMenuState {
     /// The Python `title` property: the terminal's name, or "Terminal"
     /// with no career loaded.
     pub fn title_for(ctx: &GameContext) -> String {
-        if ctx.profile.is_none() {
+        let Some(p) = ctx.profile.as_ref() else {
             return "Terminal".to_string();
+        };
+        if p.is_unassigned_company_driver() {
+            // No truck to be parked anywhere: the title is just the city.
+            return ctx.world.spoken_city(&p.current_city, None);
         }
         parked_at(ctx).name
     }
@@ -121,7 +135,20 @@ impl CityMenuState {
         open_freight_market(ctx);
     }
 
+    /// A company driver with no carrier looks for a seat.
+    fn apply_to_carrier(&mut self, ctx: &mut GameContext) {
+        let state = ApplyToCarrierState::new(ctx);
+        ctx.push_state(state);
+    }
+
     fn bobtail(&mut self, ctx: &mut GameContext) {
+        // Driving empty is still driving: the same pulled CDL that stops the
+        // board stops a bobtail.
+        if let Some(line) = crate::states::city::cdl_drive_refusal(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
+            return;
+        }
         let mut cands = board_candidates(ctx.world, &profile(ctx).current_city);
         cands.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         let mut nearby: Vec<String> = cands
@@ -194,6 +221,9 @@ impl CityMenuState {
     /// `_pay_advance_available`.
     pub fn pay_advance_available(ctx: &GameContext) -> bool {
         let p = profile(ctx);
+        if p.is_unassigned_company_driver() {
+            return false; // an advance comes from a dispatcher, and there is none
+        }
         // An advance is only ever offered below ten dollars of cash, so a
         // driver already having a balance collected would be offered one after
         // every single run, forever, borrowing against money that is already
@@ -351,12 +381,13 @@ impl CityMenuState {
     /// accessibility problem dressed up as realism, so the terminal lets the
     /// driver wait it out and says exactly what that costs in game time.
     pub fn wait_out_suspension(&mut self, ctx: &mut GameContext) {
-        let (hours, days) = {
+        let (hours, days, noun) = {
             let p = profile(ctx);
             let record = &p.driving_record;
             (
                 record.hours_left(p.game_hours),
                 enforcement::days_text(record.days_left(p.game_hours)),
+                enforcement::status_noun(record),
             )
         };
         if hours <= 0.0 {
@@ -369,7 +400,7 @@ impl CityMenuState {
             p.game_hours += hours;
             (start, p.game_hours)
         };
-        record_city_duty(ctx, "off_duty", start, end, "CDL suspension");
+        record_city_duty(ctx, "off_duty", start, end, &format!("CDL {noun}"));
         {
             let p = profile_mut(ctx);
             let now = p.game_hours;
@@ -384,7 +415,7 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch \
+            "You sat out the {days} of your {noun}. Your CDL is clear and the dispatch \
              board is open again. It is {}, {}, and you are rested.",
             clock_text(hour),
             time_of_day(hour)
@@ -428,6 +459,9 @@ impl CityMenuState {
     /// whether the career has slowed. All of it is available on demand from
     /// Career stats; none of it is ever repeated on a timer.
     fn check_standing(&mut self, ctx: &mut GameContext) {
+        if profile(ctx).is_unassigned_company_driver() {
+            return; // no carrier, so no dispatcher and no trust band to speak
+        }
         let line = {
             let p = profile_mut(ctx);
             let band = enforcement::standing_band(p);
@@ -482,32 +516,62 @@ impl CityMenuState {
     }
 
     /// A company driver the carrier will no longer keep on the insurance.
+    /// The fallback rule (plan section 5) picks who takes them on from their
+    /// home city (derived on saves without one); when nobody hires there
+    /// they have no carrier.
     pub fn check_carrier_termination(&mut self, ctx: &mut GameContext) {
-        if !enforcement::carrier_termination_due(profile(ctx)) {
-            return;
+        if let Some(line) = self.take_carrier_termination(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
         }
-        let former = {
+    }
+
+    /// Apply a due carrier termination and return what to say about it, or
+    /// `None` when none is due. The rows and title are rebuilt for the new
+    /// state (a driver left with no carrier has no truck rows), so the hub
+    /// line spoken after it describes the terminal as it now is.
+    fn take_carrier_termination(&mut self, ctx: &mut GameContext) -> Option<String> {
+        if !enforcement::carrier_termination_due(profile(ctx)) {
+            return None;
+        }
+        let (former, taken_on, near) = {
             let p = profile_mut(ctx);
             let former = p.carrier_name.clone();
+            let firing_key = p.carrier_key.clone();
+            let near = p.let_go_near_phrase();
             p.driving_record.carrier_terminations += 1;
-            // The new carrier's terminal becomes home; the truck stays put.
-            p.change_carrier(
-                enforcement::LAST_CHANCE_CARRIER_KEY,
-                enforcement::LAST_CHANCE_CARRIER_NAME,
-            );
-            p.dispatch_board_cache = None;
-            former
+            let taken_on = p
+                .take_fallback_after_let_go(&firing_key)
+                .map(|c| c.name.clone());
+            (former, taken_on, near)
         };
         ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
         ctx.save_profile();
-        ctx.audio.play("ui/error");
-        ctx.say(&format!(
+        // A driver left with no carrier trades the dispatch board for
+        // "Apply to a carrier", so the rows are rebuilt.
+        self.menu.title = Self::title_for(ctx);
+        self.refresh(ctx, true);
+        let opening = format!(
             "{former} has ended your employment. Your safety record is past what their \
-             insurance will carry, so your seat and your assigned truck go back to the yard. \
-             {} will take you on: lower pay, shorter freight, and a fresh start. Your money, \
-             your levels, and everything you own stay as they are.",
-            enforcement::LAST_CHANCE_CARRIER_NAME
-        ));
+             insurance will carry, so your seat and your assigned truck go back to the yard."
+        );
+        let kept = "Your money, your levels, and everything you own stay as they are.";
+        let line = match taken_on {
+            Some(name) if name == enforcement::LAST_CHANCE_CARRIER_NAME => format!(
+                "{opening} {name} will take you on: lower pay, shorter freight, and a fresh \
+                 start. {kept}"
+            ),
+            Some(name) => format!(
+                "{opening} {name}, which hires near {near}, will take you on knowing your \
+                 record. {kept}"
+            ),
+            None => format!(
+                "{opening} No carrier that hires near {near} can take you on right now, so \
+                 you have no carrier. {kept} Choose Apply to a carrier from the terminal \
+                 menu when you are ready."
+            ),
+        };
+        Some(line)
     }
 
     fn logbook(&mut self, ctx: &mut GameContext) {
@@ -673,6 +737,32 @@ impl Menu for CityMenuState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let interrupt = !self.queue_entry_announcement;
         self.queue_entry_announcement = false;
+        // A career-changing setback goes first and takes the screen: nothing
+        // else the terminal has to say survives being read over the top of
+        // it, and the hub line and the current row would describe the seat
+        // or the truck that just went. The notice speaks alone; leaving it
+        // re-enters this menu, which then speaks the rebuilt hub.
+        if self.check_career_setback(ctx) {
+            return;
+        }
+        // A carrier letting the driver go is applied and said first, so the
+        // hub line and the current row that follow describe the terminal as
+        // it now is, not the seat that just ended. A money setback owed at
+        // the same visit has already taken the screen (above), so the
+        // record review waits for the next visit then, as before.
+        let fired = if solvency::career_setback_owed(profile(ctx)) {
+            None
+        } else {
+            self.take_carrier_termination(ctx)
+        };
+        let interrupt = match fired {
+            Some(firing) => {
+                ctx.audio.play("ui/error");
+                ctx.say_with(firing, Say::new().interrupt(interrupt));
+                false
+            }
+            None => interrupt,
+        };
         let line = {
             let p = profile(ctx);
             let world = ctx.world;
@@ -705,40 +795,51 @@ impl Menu for CityMenuState {
             } else {
                 format!(" {record}")
             };
-            // An impound lot is in the city, not a "service area" (which
-            // reads as a turnpike travel plaza): "Parked at an impound lot
-            // in Buffalo, New York."
-            let where_parked = if parked.kind == ff_core::models::home_base::ParkedKind::Impound {
+            // With no carrier there is no truck to be parked: say where the
+            // driver is and that the seat and truck are gone. That wins over
+            // an impound lot too -- a company driver fired after a felony tow
+            // has no truck in the lot to be parked with.
+            let location = if p.is_unassigned_company_driver() {
                 format!(
-                    " at {}",
-                    ff_core::models::home_base::impound_lot_text(world, &p.current_city)
+                    "{} {} with no carrier and no truck until a carrier assigns you one.",
+                    no_truck_location_line(&city_name, &city_state),
+                    crate::states::city::py_capitalize(business),
                 )
             } else {
+                // An impound lot is in the city, not a "service area" (which
+                // reads as a turnpike travel plaza): "Parked at an impound lot
+                // in Buffalo, New York."
+                let where_parked = if parked.kind == ff_core::models::home_base::ParkedKind::Impound
+                {
+                    format!(
+                        " at {}",
+                        ff_core::models::home_base::impound_lot_text(world, &p.current_city)
+                    )
+                } else {
+                    format!(
+                        "{} in {}, {city_state}",
+                        parked.at_clause(),
+                        ff_core::models::home_base::city_service_area(&city_name)
+                    )
+                };
                 format!(
-                    "{} in {}, {city_state}",
-                    parked.at_clause(),
-                    ff_core::models::home_base::city_service_area(&city_name)
+                    "Parked{where_parked}. {} with",
+                    crate::states::city::py_capitalize(business),
                 )
             };
+            let rank_clause = if p.is_unassigned_company_driver() {
+                format!(" Level {}, {}.", rank.level, rank.title)
+            } else {
+                format!(" level {}, {}.", rank.level, rank.title)
+            };
             format!(
-                "Parked{where_parked}. {} with \
-                 level {}, {}.{cdl}{record} \
-                 You have {} dollars.{first_day}",
-                crate::states::city::py_capitalize(business),
-                rank.level,
-                rank.title,
+                "{location}{rank_clause}{cdl}{record} You have {} dollars.{first_day}",
                 fmt_grouped(p.money(), 0)
             )
         };
         ctx.say_with(line, Say::new().interrupt(interrupt));
         let current = self.current_text(ctx);
         ctx.say_with(current, Say::queued().review(false));
-        // A career-changing setback goes first and takes the screen: nothing
-        // else the terminal has to say survives being read over the top of it.
-        if self.check_career_setback(ctx) {
-            return;
-        }
-        self.check_carrier_termination(ctx);
         self.check_standing(ctx);
         self.check_credentials(ctx);
     }
@@ -750,13 +851,27 @@ impl Menu for CityMenuState {
         } else {
             p.business_status.as_str()
         };
-        let mut items: Vec<MenuItem<Self>> =
+        // No carrier means no assigned truck: it went back to the yard (or,
+        // after a repossession, to the lender), so the truck rows go too.
+        let no_carrier = p.is_unassigned_company_driver();
+        let mut items: Vec<MenuItem<Self>> = if no_carrier {
+            // No carrier, so no dispatch: the one way back to freight is a
+            // seat, and it sits where the dispatch board would.
+            vec![MenuItem::new("Apply to a carrier", |s: &mut Self, ctx| {
+                s.apply_to_carrier(ctx)
+            })
+            .help(
+                "Carriers that would take you on from your home. There is no dispatch \
+                 board until one does.",
+            )]
+        } else {
             vec![
                 MenuItem::new("Dispatch board", |s: &mut Self, ctx| s.job_board(ctx)).help(
                     "Loads from local freight facilities. New company hires get an assigned \
                      load, load choice opens with seniority.",
                 ),
-            ];
+            ]
+        };
         items.push(
             MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
                 "Tractors at the local dealer. Owner-operators buy and switch here, company \
@@ -779,16 +894,18 @@ impl Menu for CityMenuState {
                 ),
             );
         }
-        items.push(
-            MenuItem::new(
-                Label::dynamic(|_s: &Self, ctx| Self::garage_label(ctx)),
-                |s: &mut Self, ctx| s.garage(ctx),
-            )
-            .help(
-                "Fuel and repairs. Company drivers bill the carrier account, owner-operators \
-                 pay their own.",
-            ),
-        );
+        if !no_carrier {
+            items.push(
+                MenuItem::new(
+                    Label::dynamic(|_s: &Self, ctx| Self::garage_label(ctx)),
+                    |s: &mut Self, ctx| s.garage(ctx),
+                )
+                .help(
+                    "Fuel and repairs. Company drivers bill the carrier account, \
+                     owner-operators pay their own.",
+                ),
+            );
+        }
         items.push(
             MenuItem::new("Business status", |s: &mut Self, ctx| {
                 s.business_status(ctx)
@@ -819,19 +936,22 @@ impl Menu for CityMenuState {
                 ),
             );
         }
-        items.push(
-            MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx))
-                .help("Assignment, eligibility, fuel, condition, wear, grime, and snow chains."),
-        );
-        items.push(
-            MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {
-                s.walk_around(ctx)
-            })
-            .help(
-                "A pre-trip walk-around: what a roadside inspector would find on the tractor. \
-                 Fifteen minutes on duty.",
-            ),
-        );
+        if !no_carrier {
+            items.push(
+                MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx)).help(
+                    "Assignment, eligibility, fuel, condition, wear, grime, and snow chains.",
+                ),
+            );
+            items.push(
+                MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {
+                    s.walk_around(ctx)
+                })
+                .help(
+                    "A pre-trip walk-around: what a roadside inspector would find on the \
+                     tractor. Fifteen minutes on duty.",
+                ),
+            );
+        }
         items.push(
             MenuItem::new("Time and weather", |s: &mut Self, ctx| s.time_weather(ctx))
                 .help("Clock, career day, and the conditions outside."),
@@ -876,13 +996,14 @@ impl Menu for CityMenuState {
         if record.suspended(p.game_hours) && !record.lifetime_disqualified {
             items.insert(
                 1,
-                MenuItem::new("Wait out the CDL suspension", |s: &mut Self, ctx| {
+                MenuItem::new(enforcement::wait_out_label(record), |s: &mut Self, ctx| {
                     s.wait_out_suspension(ctx)
                 })
-                .help(
-                    "Sits out the suspension in one go. The clock jumps to the day it clears, \
-                     money, truck, and record untouched.",
-                ),
+                .help(format!(
+                    "Sits out the {} in one go. The clock jumps to the day it ends, money, \
+                     truck, and record untouched.",
+                    enforcement::status_noun(record)
+                )),
             );
         }
         if record.lifetime_disqualified {

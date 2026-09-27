@@ -98,8 +98,15 @@ impl BusinessStatusState {
         }
         save_business_change(ctx);
         let carrier = ff_core::models::career::carrier_name_of(profile(ctx));
+        // With no carrier there is no seat to stay in: what stays is the
+        // path, not the job.
+        let staying = if carrier.is_empty() {
+            "Staying on the company-driver path".to_string()
+        } else {
+            format!("Staying a company driver with {carrier}")
+        };
         ctx.say(&format!(
-            "Staying a company driver with {carrier}. The career plan stops pointing you at \
+            "{staying}. The career plan stops pointing you at \
              the buy-in. It stays open here under Business status if you change your mind."
         ));
         self.refresh(ctx, true);
@@ -663,6 +670,11 @@ impl_state_for_menu!(UpgradeShopState);
 
 // -- Trucks ----------------------------------------------------------------------------------
 
+/// The truck dealer with no carrier: the buy-in leases the tractor to a
+/// carrier, so it waits for one.
+pub const TRUCK_SHOP_NO_CARRIER: &str = "Truck ownership starts with the leased-on \
+     owner-operator buy-in, and that needs a carrier to lease to. Apply to a carrier first.";
+
 pub struct TruckShopState {
     menu: MenuCore<Self>,
     /// The dealer-name prefix is only true when the player actually
@@ -686,6 +698,10 @@ impl TruckShopState {
 
     fn locked(&mut self, ctx: &mut GameContext) {
         ctx.audio.play("ui/error");
+        if profile(ctx).is_unassigned_company_driver() {
+            ctx.say(TRUCK_SHOP_NO_CARRIER);
+            return;
+        }
         ctx.say("Truck ownership unlocks after the leased-on owner-operator buy-in.");
     }
 
@@ -805,6 +821,17 @@ impl Menu for TruckShopState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        if profile(ctx).is_unassigned_company_driver() {
+            // No carrier, so no assigned tractor, and the buy-in has no
+            // carrier to lease to (`owner_operator_eligibility`).
+            return vec![
+                MenuItem::new("Truck ownership locked: no carrier", |s: &mut Self, ctx| {
+                    s.locked(ctx)
+                })
+                .help(TRUCK_SHOP_NO_CARRIER),
+                MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)),
+            ];
+        }
         if !is_owner_operator(&profile(ctx).business_status) {
             return vec![
                 MenuItem::new(

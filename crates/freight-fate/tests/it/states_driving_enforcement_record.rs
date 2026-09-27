@@ -347,6 +347,39 @@ fn test_the_hub_names_an_impound_lot_by_city_not_service_area() {
 }
 
 #[test]
+fn test_no_carrier_wins_over_an_impound_lot_on_the_hub() {
+    // A company driver let go after the felony tow has no truck in the lot:
+    // the hub and the title say no carrier and no truck, not impound lot.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Let Go");
+    felony_summary(&mut app, &mut drive);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        assert_eq!(p.parked_facility, IMPOUND_LOT_FACILITY);
+        p.carrier_key.clear();
+        p.carrier_name.clear();
+        assert!(p.is_unassigned_company_driver());
+    }
+    app.clear_speech();
+    let hub = CityMenuState::new(&app.ctx, false);
+    app.push_state(hub);
+    let line = app
+        .main_lines()
+        .into_iter()
+        .find(|l| l.contains("no carrier and no truck"))
+        .unwrap_or_else(|| panic!("no hub line: {:?}", app.main_lines()));
+    let title = CityMenuState::title_for(&app.ctx);
+    assert!(
+        line.contains("with no carrier and no truck until a carrier assigns you one."),
+        "{line}"
+    );
+    assert!(!line.to_lowercase().contains("impound"), "{line}");
+    assert!(!line.starts_with("Parked"), "{line}");
+    assert!(!title.to_lowercase().contains("impound"), "{title}");
+    assert_eq!(title, "Buffalo, New York");
+}
+
+#[test]
 fn test_the_impound_lot_round_trips_through_the_save() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Saved");

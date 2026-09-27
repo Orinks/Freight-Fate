@@ -2069,7 +2069,11 @@ instead of a spawn point.
       `crates/ff-core/tests/profile_integrity_invariants.json` for the new
       save fields `parked_facility`, `home_terminal_city`, `home_city`, and
       `turnpike_program_notice_seen`, or cloud backups from 2.0 builds may
-      be rejected as a schema mismatch.
+      be rejected as a schema mismatch. Carrier slice 3 also grows
+      `carrierLabels` by 20 carriers (the regionals, Chatanika Freight Lines,
+      and the three locals), and a company driver no carrier near home would
+      take saves an empty `carrier_key` and `carrier_name`; the site must
+      accept both.
 
 - [ ] **A felony in a commercial vehicle carries its full 49 CFR 383.51
       weight.** Modelled today: running from a stop is a major offense
@@ -2115,15 +2119,47 @@ there, with the truck starting at that carrier's terminal.
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds
       into the distance cap today. Slice 4 (board lane area) enforces it.
-- [ ] **The 16 regionals plus an Alaska regional.** Only Prairie Link
-      exists today. Alaska home bases stay blocked until an AK regional with
-      an Alaska terminal is in `data/carriers.json`; BC and YT stay blocked.
-- [ ] **Home-base coverage test.** Pin which map cities are offerable home
-      bases (some carrier hires there) so a carrier or map change that drops
-      coverage fails loudly instead of silently shrinking the start list.
+- [ ] **Slice 4: hourly or per-move pay for local carriers.** Local pickup
+      and delivery and port drayage are not paid by the mile; Des Plaines
+      River Cartage, Basin Harbor Drayage, and Knik Arm Cartage use the
+      per-mile company pay plan today.
+- [ ] **Slice 4: a short-haul board bias for locals under its own
+      setting.** Locals carry no `short_haul_bias` today because that
+      setting's spoken summary says "training loads"; give locals their own
+      short-haul setting and summary instead of reusing it.
+- [x] **The 16 regionals plus an Alaska regional.** Slice 3: sixteen new
+      regionals join Prairie Link, Chatanika Freight Lines hires across
+      Alaska out of Anchorage and Fairbanks, and three locals (Des Plaines
+      River Cartage, Basin Harbor Drayage, Knik Arm Cartage) hire within 50
+      mi. Alaska home bases open; BC and YT stay blocked. A driver let go
+      goes to a carrier that hires at home, never the one that let them go,
+      or is home with no carrier and applies from the terminal.
+- [x] **Home-base coverage test.** `tests/it/carrier_slice3.rs` pins all
+      625 lower-48 map cities as hired into by a regional, every Alaska city
+      as served by Alaska carriers only, and BC and YT as closed.
+- [ ] **Loonwater Regional's terminals span 636 air mi (Bismarck to Green
+      Bay).** KEEP: Bismarck stays. Terminal span is not run length; its
+      loads obey the regional 150-600 mi band like every regional's. Slice 3
+      plan, §11.
+- [x] **Fairbanks terminal: no world pin needed; carrier-owned terminal.**
+      Home terminals are carrier-owned yards synthesized from
+      `terminal_city_keys` ("Chatanika Freight Lines Fairbanks terminal"),
+      never a world pin, so Fairbanks having no world `company_yard` or
+      `terminal` pin is not a gap. The slice 3 test checks that terminal
+      cities are real map cities with carrier-owned terminals.
 - [ ] **Great Lakes Training `short_haul_bias` 0.8 conflicts with its 400 mi
       national run band.** The dispatch bias asks for short rookie loads the
       band minimum would forbid once enforced. Revisit in slice 4.
+- [ ] **Knik Arm Cartage runs thin: two cities in its 25-150 mi band.**
+      The next AK map adds for an Anchorage local are the Kenai Peninsula
+      (Soldotna/Kenai, about 147 road mi) and Seward (about 125 road mi),
+      measured by road, not air. Skip Whittier until the Anton Anderson
+      Memorial Tunnel schedule and its hazmat limits are modeled. KEEP
+      thin for now. Slice 3 plan, §4.
+- [ ] **Port drayage into the LA/Long Beach terminals needs a TWIC card.**
+      When drayage loads are real, a load into the marine terminals
+      requires the driver to hold TWIC (Basin Harbor Drayage's port work
+      waits on it). Slice 3 plan, §9.
 - [ ] **`retail_store` facility type.** Costco and Fred Meyer are pinned as
       distribution centers today; a retail store type lets them receive as
       stores instead.
@@ -2500,6 +2536,17 @@ here 2026-09-25. Details stay in the linked dated sections.
 ### Maneuvers, enforcement, and the working day
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#maneuvers-enforcement-and-the-working-day).
+
+- [ ] CDL reinstatement is not automatic. When a suspension or
+      disqualification ends, the state DMV wants a reinstatement fee and
+      paperwork before the CDL is valid again; the game hands the licence
+      back the moment the time is served. Not modeled.
+- [ ] Most lifetime disqualifications can be reinstated once, after 10
+      years, with a state-approved rehabilitation program (49 CFR
+      383.51(a)(6)); a lifetime disqualification for using a CMV in a
+      controlled-substance felony is permanent. The game treats every
+      lifetime disqualification as permanent and models neither the
+      10-year reinstatement nor the felony distinction.
 
 ### Career, dispatch, and business
 

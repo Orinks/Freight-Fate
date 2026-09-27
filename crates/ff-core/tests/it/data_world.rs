@@ -238,9 +238,11 @@ fn test_world_yard_pins_are_freight_endpoints_not_homes() {
 fn test_home_base_offerability_follows_carrier_hiring() {
     use ff_core::models::carriers::{carrier, home_terminal_city_for, is_offerable_home_city};
     let world = world();
-    // Healy: nationals hire in the lower 48 only and no Alaska regional
-    // exists yet, so it is not offered.
-    assert!(!is_offerable_home_city(world, "healy_ak_us"));
+    // Healy: nationals hire in the lower 48 only; the Alaska regional hires
+    // there out of Fairbanks, so it is offered. Canada stays closed.
+    assert!(is_offerable_home_city(world, "healy_ak_us"));
+    assert!(!is_offerable_home_city(world, "whitehorse_yt_ca"));
+    assert!(!is_offerable_home_city(world, "surrey_bc_ca"));
     // Chicago: offered, into Northstar's own Chicago terminal.
     assert!(is_offerable_home_city(world, "chicago_il_us"));
     let northstar = carrier("northstar").expect("northstar");
@@ -270,7 +272,8 @@ fn test_regional_home_terminal_stays_inside_the_hiring_radius() {
         home_terminal_city_for(Some(prairie), world, "wichita_ks_us").as_deref(),
         Some("wichita_ks_us")
     );
-    // No Alaska, BC, or Yukon city is ever a home terminal.
+    // No BC or Yukon city is ever a home terminal, and an Alaska terminal
+    // only ever homes an Alaska career, from an Alaska carrier.
     for c in carrier_catalog().values() {
         for city in [
             "healy_ak_us",
@@ -280,11 +283,11 @@ fn test_regional_home_terminal_stays_inside_the_hiring_radius() {
         ] {
             if let Some(home) = home_terminal_city_for(Some(c), world, city) {
                 let st = world.cities[&home].state_code.to_ascii_uppercase();
-                assert!(
-                    !matches!(st.as_str(), "AK" | "BC" | "YT"),
-                    "{} -> {home}",
-                    c.key
-                );
+                assert!(!matches!(st.as_str(), "BC" | "YT"), "{} -> {home}", c.key);
+                if st == "AK" {
+                    assert!(city.ends_with("_ak_us"), "{} -> {home}", c.key);
+                    assert!(!c.is_national(), "{} -> {home}", c.key);
+                }
             }
         }
     }
