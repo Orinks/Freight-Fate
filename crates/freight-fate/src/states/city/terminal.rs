@@ -142,6 +142,13 @@ impl CityMenuState {
     }
 
     fn bobtail(&mut self, ctx: &mut GameContext) {
+        // Driving empty is still driving: the same pulled CDL that stops the
+        // board stops a bobtail.
+        if let Some(line) = crate::states::city::cdl_drive_refusal(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
+            return;
+        }
         let mut cands = board_candidates(ctx.world, &profile(ctx).current_city);
         cands.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         let mut nearby: Vec<String> = cands
@@ -374,12 +381,13 @@ impl CityMenuState {
     /// accessibility problem dressed up as realism, so the terminal lets the
     /// driver wait it out and says exactly what that costs in game time.
     pub fn wait_out_suspension(&mut self, ctx: &mut GameContext) {
-        let (hours, days) = {
+        let (hours, days, noun) = {
             let p = profile(ctx);
             let record = &p.driving_record;
             (
                 record.hours_left(p.game_hours),
                 enforcement::days_text(record.days_left(p.game_hours)),
+                enforcement::status_noun(record),
             )
         };
         if hours <= 0.0 {
@@ -392,7 +400,7 @@ impl CityMenuState {
             p.game_hours += hours;
             (start, p.game_hours)
         };
-        record_city_duty(ctx, "off_duty", start, end, "CDL suspension");
+        record_city_duty(ctx, "off_duty", start, end, &format!("CDL {noun}"));
         {
             let p = profile_mut(ctx);
             let now = p.game_hours;
@@ -407,7 +415,7 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch \
+            "You sat out the {days} of your {noun}. Your CDL is clear and the dispatch \
              board is open again. It is {}, {}, and you are rested.",
             clock_text(hour),
             time_of_day(hour)
@@ -729,11 +737,19 @@ impl Menu for CityMenuState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let interrupt = !self.queue_entry_announcement;
         self.queue_entry_announcement = false;
+        // A career-changing setback goes first and takes the screen: nothing
+        // else the terminal has to say survives being read over the top of
+        // it, and the hub line and the current row would describe the seat
+        // or the truck that just went. The notice speaks alone; leaving it
+        // re-enters this menu, which then speaks the rebuilt hub.
+        if self.check_career_setback(ctx) {
+            return;
+        }
         // A carrier letting the driver go is applied and said first, so the
         // hub line and the current row that follow describe the terminal as
         // it now is, not the seat that just ended. A money setback owed at
-        // the same visit still goes first and takes the screen (below), so
-        // the record review waits for the next visit then, as before.
+        // the same visit has already taken the screen (above), so the
+        // record review waits for the next visit then, as before.
         let fired = if solvency::career_setback_owed(profile(ctx)) {
             None
         } else {
@@ -808,11 +824,6 @@ impl Menu for CityMenuState {
         ctx.say_with(line, Say::new().interrupt(interrupt));
         let current = self.current_text(ctx);
         ctx.say_with(current, Say::queued().review(false));
-        // A career-changing setback goes first and takes the screen: nothing
-        // else the terminal has to say survives being read over the top of it.
-        if self.check_career_setback(ctx) {
-            return;
-        }
         self.check_standing(ctx);
         self.check_credentials(ctx);
     }
@@ -969,13 +980,14 @@ impl Menu for CityMenuState {
         if record.suspended(p.game_hours) && !record.lifetime_disqualified {
             items.insert(
                 1,
-                MenuItem::new("Wait out the CDL suspension", |s: &mut Self, ctx| {
+                MenuItem::new(enforcement::wait_out_label(record), |s: &mut Self, ctx| {
                     s.wait_out_suspension(ctx)
                 })
-                .help(
-                    "Sits out the suspension in one go. The clock jumps to the day it clears, \
-                     money, truck, and record untouched.",
-                ),
+                .help(format!(
+                    "Sits out the {} in one go. The clock jumps to the day it ends, money, \
+                     truck, and record untouched.",
+                    enforcement::status_noun(record)
+                )),
             );
         }
         if record.lifetime_disqualified {

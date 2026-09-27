@@ -33,6 +33,11 @@ impl BobtailDestState {
     }
 
     fn start(&mut self, ctx: &mut GameContext, dest: &str) {
+        if let Some(line) = crate::states::city::cdl_drive_refusal(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
+            return;
+        }
         let world = ctx.world;
         let (job, route) = {
             let p = profile(ctx);

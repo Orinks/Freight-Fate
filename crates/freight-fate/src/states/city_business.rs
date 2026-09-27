@@ -98,13 +98,15 @@ impl BusinessStatusState {
         }
         save_business_change(ctx);
         let carrier = ff_core::models::career::carrier_name_of(profile(ctx));
-        let with = if carrier.is_empty() {
-            String::new()
+        // With no carrier there is no seat to stay in: what stays is the
+        // path, not the job.
+        let staying = if carrier.is_empty() {
+            "Staying on the company-driver path".to_string()
         } else {
-            format!(" with {carrier}")
+            format!("Staying a company driver with {carrier}")
         };
         ctx.say(&format!(
-            "Staying a company driver{with}. The career plan stops pointing you at \
+            "{staying}. The career plan stops pointing you at \
              the buy-in. It stays open here under Business status if you change your mind."
         ));
         self.refresh(ctx, true);

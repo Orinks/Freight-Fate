@@ -2518,6 +2518,17 @@ here 2026-09-25. Details stay in the linked dated sections.
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#maneuvers-enforcement-and-the-working-day).
 
+- [ ] CDL reinstatement is not automatic. When a suspension or
+      disqualification ends, the state DMV wants a reinstatement fee and
+      paperwork before the CDL is valid again; the game hands the licence
+      back the moment the time is served. Not modeled.
+- [ ] Most lifetime disqualifications can be reinstated once, after 10
+      years, with a state-approved rehabilitation program (49 CFR
+      383.51(a)(6)); a lifetime disqualification for using a CMV in a
+      controlled-substance felony is permanent. The game treats every
+      lifetime disqualification as permanent and models neither the
+      10-year reinstatement nor the felony distinction.
+
 ### Career, dispatch, and business
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#career-dispatch-and-business).

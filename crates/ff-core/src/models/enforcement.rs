@@ -1174,6 +1174,59 @@ pub fn suspension_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     )
 }
 
+/// The CDL status as a noun: "disqualification" for a major offense,
+/// "suspension" for the serious-violation ladder.
+pub fn status_noun(record: &DrivingRecord) -> &'static str {
+    if status_verb(record) == "disqualified" {
+        "disqualification"
+    } else {
+        "suspension"
+    }
+}
+
+/// The terminal row that sits out a pulled CDL, named for what it is.
+pub fn wait_out_label(record: &DrivingRecord) -> String {
+    format!("Wait out the CDL {}", status_noun(record))
+}
+
+/// Why a bobtail (a drive with no trailer to another board) is refused while
+/// the CDL is pulled. A bobtail is still driving a commercial vehicle.
+pub fn suspension_drive_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
+    let record = record_of(profile);
+    if record.lifetime_disqualified {
+        return "You cannot drive with a lifetime CDL disqualification, not even bobtail."
+            .to_string();
+    }
+    let noun = status_noun(record);
+    format!(
+        "You cannot drive, not even bobtail, while your CDL is {}. The {noun} ends {}. {} is on \
+         the terminal menu.",
+        status_verb(record),
+        clears_text(profile),
+        wait_out_label(record)
+    )
+}
+
+/// The terminal's objective while the CDL is pulled: wait it out, with the
+/// real time left. Empty for a lifetime disqualification, which the greeting
+/// already says in full; `None` when the CDL is clear.
+pub fn suspended_objective_text<P: StandingProfile + ?Sized>(profile: &P) -> Option<String> {
+    let record = record_of(profile);
+    if record.lifetime_disqualified {
+        return Some(String::new());
+    }
+    let game_hours = profile.game_hours();
+    if !record.suspended(game_hours) {
+        return None;
+    }
+    Some(format!(
+        "wait out the CDL {}, {} remaining. Choose {} on this menu to skip ahead.",
+        status_noun(record),
+        days_text(record.days_left(game_hours)),
+        wait_out_label(record)
+    ))
+}
+
 /// The CDL line on the career screens: short, factual, always available.
 pub fn career_menu_status<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);
