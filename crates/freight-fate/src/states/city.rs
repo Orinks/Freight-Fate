@@ -64,7 +64,7 @@ pub use board::{
     describe_job, locked_reason, trailer_note, JobBoardState, JobDetailState, JOB_BOARD_INTRO_HELP,
 };
 pub use close_out::CloseOutCareerState;
-pub use extras::{BobtailDestState, PayDebtState};
+pub use extras::{ApplyToCarrierState, BobtailDestState, PayDebtState};
 pub use terminal::CityMenuState;
 pub use truck_status::TruckStatusState;
 
@@ -179,6 +179,12 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
 /// screen; `first_day_orientation_message` is these joined.
 pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<String> {
     let p = profile(ctx);
+    if p.is_unassigned_company_driver() {
+        return vec![format!(
+            "{prefix}You have no carrier right now. {}",
+            ff_core::models::career_objectives::NO_CARRIER_OBJECTIVE
+        )];
+    }
     let option = option_for_profile(p);
     let location = first_day_parked_location(ctx);
     // At the carrier terminal (where every new career starts), say what
@@ -295,6 +301,12 @@ pub(crate) fn terminal_objective_clause(p: &Profile) -> String {
             "Career objective"
         };
         return format!(" {label}: {wait}");
+    }
+    if p.is_unassigned_company_driver() {
+        return format!(
+            " Career objective: {}",
+            ff_core::models::career_objectives::NO_CARRIER_OBJECTIVE
+        );
     }
     if first_day_guidance_active(p) {
         let guidance = if is_company_training_profile(p) {
@@ -425,6 +437,15 @@ fn py_repr_sorted_items(key: &Value) -> String {
 /// current, else build a fresh one and cache it. Pushes the board and
 /// returns its jobs.
 pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
+    if profile(ctx).is_unassigned_company_driver() {
+        // No carrier, no dispatcher: say so instead of an empty board.
+        ctx.audio.play("ui/error");
+        ctx.say(
+            "You have no carrier, so there is no dispatch board. Choose Apply to a carrier \
+             at the terminal to take a seat.",
+        );
+        return Vec::new();
+    }
     let world = ctx.world;
     let (key, cache, hos) = {
         let p = profile_mut(ctx);

@@ -71,8 +71,20 @@ impl CareerObjective {
     }
 }
 
+/// The objective for a company driver with no carrier: there is one thing
+/// to do, and it names no carrier.
+pub const NO_CARRIER_OBJECTIVE: &str = "Apply to a carrier to get back on freight.";
+
 /// Return the current practical career objective without changing saves.
 pub fn career_objective<P: CareerProfile + ?Sized>(profile: &P) -> CareerObjective {
+    if crate::models::business::has_no_carrier(profile) {
+        return CareerObjective::new(
+            "Get back on freight",
+            NO_CARRIER_OBJECTIVE,
+            "There is no dispatch board until a carrier takes you on.",
+            "carrier seat",
+        );
+    }
     let status = profile.business_status();
     if status == INDEPENDENT_AUTHORITY {
         return independent_authority_objective(profile);

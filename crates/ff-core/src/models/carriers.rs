@@ -37,6 +37,9 @@ pub struct Carrier {
     pub dispatch: DispatchProfile,
     pub cargo_weight_bonus: Vec<(String, f64)>,
     pub solvency_fallback: bool,
+    /// Spoken lane area for the start picker ("the Pacific Northwest").
+    /// Empty for carriers with a hand-written start option.
+    pub lane_area: String,
 }
 
 impl Carrier {
@@ -60,6 +63,20 @@ impl Carrier {
 
     pub fn is_national(&self) -> bool {
         self.tier == "national"
+    }
+
+    pub fn is_local(&self) -> bool {
+        self.tier == "local"
+    }
+
+    /// Air miles from `city_key` to the terminal this carrier would hire a
+    /// driver living there into; `None` when it does not hire there.
+    pub fn hiring_distance_mi(&self, world: &World, city_key: &str) -> Option<f64> {
+        let key = world.resolve_city_key(city_key);
+        let origin = world.cities.get(&key)?;
+        let terminal = self.hiring_terminal_city(world, &key)?;
+        let t = world.cities.get(&terminal)?;
+        Some(air_miles(origin.lat, origin.lon, t.lat, t.lon))
     }
 
     /// The carrier's own dispatch yard in `city_key`: "{Carrier} {City}
@@ -229,6 +246,8 @@ struct RawCarrier {
     cargo_weight_bonus: IndexMap<String, f64>,
     #[serde(default)]
     solvency_fallback: bool,
+    #[serde(default)]
+    lane_area: String,
 }
 
 fn inert_policy() -> String {
@@ -310,6 +329,7 @@ fn parse_catalog(text: &str) -> Result<IndexMap<String, Carrier>, DataError> {
             },
             cargo_weight_bonus: raw.cargo_weight_bonus.into_iter().collect(),
             solvency_fallback: raw.solvency_fallback,
+            lane_area: raw.lane_area,
         };
         catalog.insert(key, carrier);
     }
@@ -431,6 +451,131 @@ pub fn home_terminal_city_or_fallback(
         .unwrap_or(key)
 }
 
+/// A company driver with no carrier: let go where no other carrier hires
+/// (see [`fallback_carrier_for`]), waiting at home to apply somewhere.
+pub fn is_unassigned_company_driver(
+    carrier_key: &str,
+    carrier_name: &str,
+    business_status: &str,
+) -> bool {
+    (business_status.is_empty() || business_status == crate::models::business::COMPANY_DRIVER)
+        && carrier_key.trim().is_empty()
+        && carrier_name.trim().is_empty()
+}
+
+/// The carrier that takes on a driver `firing_key` has just let go, picked
+/// from the driver's home city (plan section 5):
+///
+/// 1. never the carrier that did the firing;
+/// 2. a regional or local that hires in the home city, nearest hiring
+///    terminal first (ties by carrier key);
+/// 3. else the national last-chance carrier (Great Lakes Training), which
+///    hires across the lower 48; other nationals do not take a driver
+///    another carrier just let go;
+/// 4. else `None`: no carrier hires there, and the driver stays home
+///    without a seat. An Alaska driver is never sent to a lower-48 carrier,
+///    because no lower-48 carrier hires in Alaska.
+pub fn fallback_carrier_for(
+    world: &World,
+    home_city: &str,
+    firing_key: &str,
+) -> Option<&'static Carrier> {
+    let home = world.resolve_city_key(home_city);
+    let mut local: Vec<(f64, &'static Carrier)> = carrier_catalog()
+        .values()
+        .filter(|c| !c.is_national() && c.key != firing_key)
+        .filter_map(|c| c.hiring_distance_mi(world, &home).map(|mi| (mi, c)))
+        .collect();
+    local.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.key.cmp(&b.1.key)));
+    if let Some((_, c)) = local.first() {
+        return Some(c);
+    }
+    let last_chance = solvency_fallback_carrier();
+    (last_chance.key != firing_key && last_chance.hires_in(world, &home)).then_some(last_chance)
+}
+
+/// A carrier an unassigned driver can apply to, and where it would hire them.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CarrierOpening {
+    pub carrier: &'static Carrier,
+    /// The terminal city the carrier would hire into.
+    pub terminal_city: String,
+    /// The driver's home city after the hire: the current home when the
+    /// carrier hires there, else the terminal city (the driver moves).
+    pub home_city: String,
+    pub moves_home: bool,
+}
+
+/// Carriers an unassigned driver living in `home_city` can apply to, never
+/// `excluded_key` (the carrier that let them go): first those that hire in
+/// the home city, nearest terminal first; when there are none, those with a
+/// terminal in the same state or province, which means moving there.
+pub fn openings_for_unassigned(
+    world: &World,
+    home_city: &str,
+    excluded_key: &str,
+) -> Vec<CarrierOpening> {
+    let home = world.resolve_city_key(home_city);
+    let Some(origin) = world.cities.get(&home) else {
+        return Vec::new();
+    };
+    let mut near: Vec<(f64, CarrierOpening)> = carrier_catalog()
+        .values()
+        .filter(|c| c.key != excluded_key)
+        .filter_map(|c| {
+            let terminal = c.hiring_terminal_city(world, &home)?;
+            let mi = c.hiring_distance_mi(world, &home)?;
+            Some((
+                mi,
+                CarrierOpening {
+                    carrier: c,
+                    terminal_city: terminal,
+                    home_city: home.clone(),
+                    moves_home: false,
+                },
+            ))
+        })
+        .collect();
+    if near.is_empty() {
+        for c in carrier_catalog().values().filter(|c| c.key != excluded_key) {
+            let mut best: Option<(f64, String)> = None;
+            for t in &c.terminal_city_keys {
+                let Some(tc) = world.cities.get(t) else {
+                    continue;
+                };
+                if !same_country(tc, origin)
+                    || !tc.state_code.eq_ignore_ascii_case(&origin.state_code)
+                {
+                    continue;
+                }
+                let mi = air_miles(origin.lat, origin.lon, tc.lat, tc.lon);
+                if best
+                    .as_ref()
+                    .is_none_or(|(b, k)| mi < *b || (mi == *b && t < k))
+                {
+                    best = Some((mi, t.clone()));
+                }
+            }
+            if let Some((mi, t)) = best {
+                near.push((
+                    mi,
+                    CarrierOpening {
+                        carrier: c,
+                        terminal_city: t.clone(),
+                        home_city: t,
+                        moves_home: true,
+                    },
+                ));
+            }
+        }
+    }
+    near.sort_by(|a, b| {
+        a.0.total_cmp(&b.0)
+            .then_with(|| a.1.carrier.key.cmp(&b.1.carrier.key))
+    });
+    near.into_iter().map(|(_, o)| o).collect()
+}
+
 /// Pay plan for a carrier key; unknown keys fall back to Northstar wages.
 pub fn pay_plan_for_carrier(key: &str) -> CompanyPayPlan {
     carrier(key).map(|c| c.company_pay).unwrap_or(NORTHSTAR_PAY)
@@ -444,7 +589,7 @@ mod tests {
     #[test]
     fn test_carriers_json_loads_and_retiers() {
         let catalog = carrier_catalog();
-        assert_eq!(catalog.len(), 4);
+        assert_eq!(catalog.len(), 24);
         let northstar = carrier("northstar").expect("northstar");
         assert_eq!(northstar.tier, "national");
         assert_eq!(northstar.run_band.min_mi, 400.0);
@@ -562,10 +707,14 @@ mod tests {
                 .as_deref(),
             Some("chicago_il_us")
         );
-        // Healy, AK: no national hires in Alaska and no AK regional exists.
-        assert!(!is_offerable_home_city(world, "healy_ak_us"));
-        assert!(!is_offerable_home_city(world, "anchorage_ak_us"));
-        assert!(!is_offerable_home_city(world, "fairbanks_ak_us"));
+        // Alaska: no national hires there, but the Alaska regional and the
+        // Anchorage local do.
+        assert!(is_offerable_home_city(world, "healy_ak_us"));
+        assert!(is_offerable_home_city(world, "anchorage_ak_us"));
+        assert!(is_offerable_home_city(world, "fairbanks_ak_us"));
+        assert!(northstar
+            .hiring_terminal_city(world, "anchorage_ak_us")
+            .is_none());
         // BC and YT stay blocked.
         assert!(!is_offerable_home_city(world, "whitehorse_yt_ca"));
         assert!(!is_offerable_home_city(world, "surrey_bc_ca"));

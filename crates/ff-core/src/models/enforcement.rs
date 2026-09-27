@@ -538,6 +538,52 @@ pub fn trust_band_text(band: &str) -> &'static str {
      and the carrier is deciding whether to keep you."
 }
 
+/// Spoken in place of any trust line for a company driver with no carrier:
+/// there is no dispatcher to trust them or not.
+pub const NO_CARRIER_TRUST_TEXT: &str =
+    "Dispatch trust: none. You have no carrier, so there is no dispatch until one takes you on.";
+
+fn has_no_carrier<P: StandingProfile + ?Sized>(profile: &P) -> bool {
+    crate::models::carriers::is_unassigned_company_driver(
+        profile.carrier_key(),
+        profile.carrier_name(),
+        profile.business_status(),
+    )
+}
+
+/// [`trust_band_text`] for this driver. A driver kept on sufferance (the
+/// last-chance fleet, or the carrier that took them on after a let-go) is
+/// never let go over the record or the debt (`carrier_termination_due`,
+/// `solvency::hard_capped`), so their last-chance line says that instead of
+/// "deciding whether to keep you".
+pub fn trust_band_text_for<P: StandingProfile + ?Sized>(profile: &P, band: &str) -> String {
+    if band == TRUST_LAST_CHANCE && kept_on_sufferance(profile) {
+        let carrier = match profile.carrier_name().trim() {
+            "" => "Your carrier",
+            name => name,
+        };
+        return format!(
+            "Dispatch trust: last chance. One assigned load at a time and no refusals. \
+             {carrier} will not end your seat over your record or what you owe."
+        );
+    }
+    trust_band_text(band).to_string()
+}
+
+/// [`trust_text`] for this driver: the sufferance wording where it applies,
+/// and [`NO_CARRIER_TRUST_TEXT`] with no carrier.
+pub fn trust_text_for<P: StandingProfile + ?Sized>(profile: &P, reputation: f64) -> String {
+    if has_no_carrier(profile) {
+        return NO_CARRIER_TRUST_TEXT.to_string();
+    }
+    let band = trust_band(reputation);
+    let text = trust_band_text_for(profile, band);
+    if band == TRUST_FULL {
+        return text;
+    }
+    format!("{text} Clean on-time runs rebuild it.")
+}
+
 /// Where the driver stands with dispatch on service alone, in one line.
 pub fn trust_text(reputation: f64) -> String {
     let band = trust_band(reputation);
@@ -754,18 +800,33 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
             record_ages_out_text(profile)
         );
     }
-    if !under_carrier_review(profile) {
+    if has_no_carrier(profile) || !under_carrier_review(profile) {
         return String::new();
     }
-    if record_past_termination_floor(record, game_hours) {
-        if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
+    if kept_on_sufferance(profile) {
+        // Never let go over the record (`carrier_termination_due`), so no
+        // countdown to a let-go is spoken here, and a clean record (nothing
+        // left to age out) needs no line at all.
+        let ages_out = record_ages_out_text(profile);
+        if ages_out.trim().is_empty() {
+            return String::new();
+        }
+        let keeper = match profile.carrier_name().trim() {
+            "" => "Your carrier",
+            name => name,
+        };
+        if record_past_termination_floor(record, game_hours) {
             return format!(
-                "The carrier's insurer will not carry a record like that; {} keeps you on \
-                 sufferance until the oldest ages out {}.",
-                LAST_CHANCE_CARRIER_NAME,
-                record_ages_out_text(profile)
+                "The carrier's insurer will not carry a record like that; {keeper} keeps you on \
+                 sufferance until the oldest ages out {ages_out}."
             );
         }
+        return format!(
+            "{keeper} keeps you on sufferance whatever the record says; the oldest entry \
+             ages out {ages_out}."
+        );
+    }
+    if record_past_termination_floor(record, game_hours) {
         return "The carrier's insurer will not carry that record. The carrier ends your \
                 employment at the next terminal."
             .to_string();
@@ -902,8 +963,11 @@ use crate::models::career::xp_rate_clause;
 /// a timer, and never for a driver in full trust beyond the one plain line
 /// they already heard.
 pub fn dispatch_trust_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
+    if has_no_carrier(profile) {
+        return NO_CARRIER_TRUST_TEXT.to_string();
+    }
     let band = standing_band(profile);
-    let mut parts = vec![trust_band_text(band).to_string()];
+    let mut parts = vec![trust_band_text_for(profile, band)];
     let way_back = standing_way_back(profile);
     if !way_back.is_empty() {
         parts.push(way_back);
@@ -928,13 +992,27 @@ pub fn board_reputation_note(reputation: f64) -> String {
     }
 }
 
+/// A carrier that keeps this driver whatever the record says: the
+/// last-chance fleet, or the carrier that took them on after a termination
+/// knowing the record (`DrivingRecord::sufferance_carrier_key`).
+pub fn kept_on_sufferance<P: StandingProfile + ?Sized>(profile: &P) -> bool {
+    let key = profile.carrier_key();
+    key == LAST_CHANCE_CARRIER_KEY
+        || profile.driving_record().is_some_and(|record| {
+            !record.sufferance_carrier_key.is_empty() && record.sufferance_carrier_key == key
+        })
+}
+
 /// A company driver the carrier will not keep on the insurance any longer.
 pub fn carrier_termination_due<P: StandingProfile + ?Sized>(profile: &P) -> bool {
     if is_owner_operator(profile.business_status()) {
         return false;
     }
-    if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
-        return false; // already at the fleet of last resort; nowhere further down
+    if kept_on_sufferance(profile) {
+        return false; // already taken on knowing the record; nowhere further down
+    }
+    if profile.carrier_key().trim().is_empty() {
+        return false; // no carrier to let the driver go
     }
     if profile.career_reputation() < REPUTATION_TERMINATION {
         return true;

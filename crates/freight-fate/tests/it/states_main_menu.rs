@@ -727,19 +727,25 @@ fn test_home_picker_offers_only_cities_where_a_carrier_hires() {
     let app = TestApp::new();
     let picker = HomeTerminalState::new(&app.ctx, "Picker");
     let offered = picker.offered_cities();
-    for blocked in ["healy_ak_us", "anchorage_ak_us", "whitehorse_yt_ca"] {
+    for blocked in ["whitehorse_yt_ca", "surrey_bc_ca"] {
         assert!(!offered.iter().any(|c| c == blocked), "{blocked} offered");
     }
-    for open in ["chicago_il_us", "milwaukee_wi_us"] {
+    // Alaska opens with the Alaska regional and the Anchorage local.
+    for open in [
+        "chicago_il_us",
+        "milwaukee_wi_us",
+        "healy_ak_us",
+        "anchorage_ak_us",
+    ] {
         assert!(offered.iter().any(|c| c == open), "{open} missing");
     }
     // A city picker handed a blocked city still leaves it out.
-    let region = app.ctx.world.cities["healy_ak_us"].region.clone();
+    let region = app.ctx.world.cities["whitehorse_yt_ca"].region.clone();
     let cities = HomeCityState::new(
         &app.ctx,
         "Picker",
         &region,
-        &["healy_ak_us".to_string(), "anchorage_ak_us".to_string()],
+        &["whitehorse_yt_ca".to_string(), "surrey_bc_ca".to_string()],
     );
     assert!(cities.cities().is_empty());
 }
@@ -841,7 +847,7 @@ fn test_every_offered_home_city_has_a_carrier_that_hires_there() {
         let picker = CareerStartState::new(&app.ctx, "Coverage", city);
         assert!(!picker.option_keys().is_empty(), "{city} has no carrier");
         let st = app.ctx.world.cities[city].state_code.to_ascii_uppercase();
-        assert!(!matches!(st.as_str(), "AK" | "BC" | "YT" | "HI"), "{city}");
+        assert!(!matches!(st.as_str(), "BC" | "YT" | "HI"), "{city}");
     }
 }
 
@@ -921,11 +927,13 @@ fn test_an_owner_operator_hears_no_travel_line() {
 
 #[test]
 fn test_carrier_counts_name_distinct_carriers_not_start_rows() {
-    // Milwaukee: Northstar, Great Lakes Training, Summit Value (the
-    // owner-operator start leases to Northstar, so it is not a fourth).
-    // Wichita adds Prairie Link.
+    // Milwaukee: Northstar, Great Lakes Training, Summit Value, Loonwater
+    // Regional (Green Bay) and Olentangy Valley Freight (Indianapolis
+    // reaches it); the owner-operator start leases to Northstar, so it is
+    // not a sixth. Wichita: the three nationals, Prairie Link and Verdigris
+    // Transport.
     let mut app = TestApp::new();
-    for (city, carriers, rows) in [("milwaukee_wi_us", 3, 4), ("wichita_ks_us", 4, 5)] {
+    for (city, carriers, rows) in [("milwaukee_wi_us", 5, 6), ("wichita_ks_us", 5, 6)] {
         let picker = CareerStartState::new(&app.ctx, "Counter", city);
         assert_eq!(picker.carrier_count(&app.ctx), carriers, "{city}");
         assert_eq!(picker.option_keys().len(), rows, "{city}");
@@ -936,7 +944,7 @@ fn test_carrier_counts_name_distinct_carriers_not_start_rows() {
     assert!(
         app.main_lines()
             .iter()
-            .any(|l| l.starts_with("Career start. 3 carriers hire in Milwaukee")),
+            .any(|l| l.starts_with("Career start. 5 carriers hire in Milwaukee")),
         "{:?}",
         app.main_lines()
     );
@@ -946,5 +954,5 @@ fn test_carrier_counts_name_distinct_carriers_not_start_rows() {
     let help = with_state::<HomeCityState, _>(&app, |s, ctx| {
         freight_fate::states::base::Menu::current_help(s, ctx)
     });
-    assert!(help.contains("4 carriers hire here."), "{help}");
+    assert!(help.contains("5 carriers hire here."), "{help}");
 }
