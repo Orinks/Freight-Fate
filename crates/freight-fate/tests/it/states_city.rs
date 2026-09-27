@@ -1073,6 +1073,49 @@ fn test_a_setback_only_ever_fires_at_the_terminal() {
 }
 
 #[test]
+fn test_a_debt_firing_is_said_before_the_rebuilt_hub_not_after_the_old_one() {
+    // QA heard "Parked in the Milwaukee service area... You have -1,000,000
+    // dollars. Career objective: ..." and "Dispatch board. 1 of 16." before
+    // the notice: the hub for the seat that was about to go.
+    let mut app = TestApp::new();
+    career(&mut app, "Dale", "Buffalo");
+    let old_carrier = profile(&app).carrier_name.clone();
+    {
+        let p = profile_mut(&mut app);
+        p.career.xp = 152_000.0;
+        p.set_money(-solvency::company_debt_ceiling(p) - 1.0);
+    }
+    app.clear_speech();
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    assert!(is::<CareerSetbackNoticeState>(&app));
+    let before = app.main_lines();
+    assert!(
+        before[0].starts_with("Your carrier has ended your employment."),
+        "{before:?}"
+    );
+    assert!(
+        !before
+            .iter()
+            .any(|l| l.starts_with("Parked") || l.starts_with("Dispatch board")),
+        "the old hub was spoken with the notice: {before:?}"
+    );
+
+    app.clear_speech();
+    with_state_mut::<CareerSetbackNoticeState, _>(&mut app, |s, ctx| {
+        freight_fate::states::base::Menu::go_back(s, ctx)
+    });
+    assert!(is::<CityMenuState>(&app));
+    let after = app.main_lines();
+    let hub = after
+        .iter()
+        .find(|l| l.starts_with("Parked"))
+        .unwrap_or_else(|| panic!("no rebuilt hub after the notice: {after:?}"));
+    assert_ne!(profile(&app).carrier_name, old_carrier);
+    assert!(!hub.contains(&old_carrier), "{hub}");
+}
+
+#[test]
 fn test_the_terminal_only_offers_payoff_when_something_is_owed() {
     let mut app = TestApp::new();
     payer(&mut app, 5_000.0, 1_000.0);

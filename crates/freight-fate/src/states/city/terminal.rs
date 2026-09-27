@@ -680,6 +680,14 @@ impl Menu for CityMenuState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let interrupt = !self.queue_entry_announcement;
         self.queue_entry_announcement = false;
+        // A career-changing setback goes first and takes the screen: nothing
+        // else the terminal has to say survives being read over the top of
+        // it, and the hub line and the current row would describe the seat
+        // or the truck that just went. The notice speaks alone; leaving it
+        // re-enters this menu, which then speaks the rebuilt hub.
+        if self.check_career_setback(ctx) {
+            return;
+        }
         let line = {
             let p = profile(ctx);
             let world = ctx.world;
@@ -727,11 +735,6 @@ impl Menu for CityMenuState {
         ctx.say_with(line, Say::new().interrupt(interrupt));
         let current = self.current_text(ctx);
         ctx.say_with(current, Say::queued().review(false));
-        // A career-changing setback goes first and takes the screen: nothing
-        // else the terminal has to say survives being read over the top of it.
-        if self.check_career_setback(ctx) {
-            return;
-        }
         self.check_carrier_termination(ctx);
         self.check_standing(ctx);
         self.check_credentials(ctx);
