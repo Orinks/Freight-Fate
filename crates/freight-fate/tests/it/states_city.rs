@@ -862,9 +862,9 @@ fn test_a_relayed_load_replaces_a_board_slot_and_leads_the_assignment() {
             .any(|j| !j.bobtail && ctx.world.resolve_city_key(&j.origin) != here)
     });
     assert!(relayed, "Tonopah's board carries a relayed load");
-    let expected = enforcement::board_offers_for_reputation(
+    let expected = enforcement::board_offers_for_band(
         board_offer_count(p.career.level()) as i64,
-        p.career.reputation,
+        enforcement::standing_band(&p),
     ) as usize;
     assert_eq!(
         with_state::<JobBoardState, _>(&app, |b, _| b.jobs.len()),

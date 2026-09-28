@@ -18,7 +18,7 @@
 
 use crate::models::business_constants::is_owner_operator;
 use crate::models::career::CareerProfile;
-use crate::models::enforcement::{trust_decline_penalty, trust_revokes_load_choice};
+use crate::models::enforcement::{band_decline_penalty, band_revokes_load_choice, standing_band};
 
 #[cfg(test)]
 mod tests;
@@ -54,16 +54,19 @@ pub fn dispatch_policy<P: CareerProfile + ?Sized>(profile: &P) -> DispatchPolicy
     }
     let career = profile.career();
     let level = career.level();
-    let reputation = profile.career_reputation();
+    // The band the dispatch trust line speaks: service, licence, record and
+    // debt. On service alone, a record or debt that holds the line at
+    // guarded promised fewer refusals that never came (owner, 2026-09-28).
+    let band = standing_band(profile);
     let mut budget = NEW_HIRE_DECLINE_BUDGET
         + if level >= REGIONAL_REGULAR_LEVEL {
             1
         } else {
             0
         };
-    budget = (budget - trust_decline_penalty(reputation)).max(0);
+    budget = (budget - band_decline_penalty(band)).max(0);
     DispatchPolicy {
-        assigns_load: level < SENIOR_LOAD_CHOICE_LEVEL || trust_revokes_load_choice(reputation),
+        assigns_load: level < SENIOR_LOAD_CHOICE_LEVEL || band_revokes_load_choice(band),
         assigns_route: true,
         decline_budget: budget,
     }

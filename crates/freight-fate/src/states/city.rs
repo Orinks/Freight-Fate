@@ -298,10 +298,7 @@ pub fn dispatch_cache_key(p: &Profile) -> Value {
     );
     // A board cached before dispatch lost faith in you must not outlive
     // the trust that built it.
-    key.insert(
-        "trust".into(),
-        Value::from(enforcement::trust_band(p.standing())),
-    );
+    key.insert("trust".into(), Value::from(enforcement::standing_band(p)));
     key.insert(
         "force_dest".into(),
         Value::from(forced_dispatch_destination()),
@@ -415,11 +412,12 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
                     &endorsements,
                     OfferOptions {
                         // How much freight dispatch will show you is a matter of
-                        // trust, and trust slides with reputation the whole way
-                        // down.
-                        count: enforcement::board_offers_for_reputation(
+                        // trust: the band the dispatch trust line speaks, so a
+                        // record or debt holding it down holds the board down
+                        // too (owner, 2026-09-28).
+                        count: enforcement::board_offers_for_band(
                             board_offer_count(p.career.level()) as i64,
-                            p.standing(),
+                            enforcement::standing_band(p),
                         )
                         .max(0) as usize,
                         level: p.career.level(),

@@ -477,7 +477,13 @@ pub fn trust_band(reputation: f64) -> &'static str {
 
 /// How many loads dispatch will still put in front of this driver.
 pub fn board_offers_for_reputation(base: i64, reputation: f64) -> i64 {
-    let band = trust_band(reputation);
+    board_offers_for_band(base, trust_band(reputation))
+}
+
+/// The board for a trust band. Callers pass [`standing_band`], the band the
+/// dispatch trust line speaks, so a record or debt that holds the line at
+/// guarded holds the board there too (owner, 2026-09-28).
+pub fn board_offers_for_band(base: i64, band: &str) -> i64 {
     if band == TRUST_FULL {
         return base;
     }
@@ -496,13 +502,21 @@ pub fn board_offers_for_reputation(base: i64, reputation: f64) -> i64 {
 /// dispatch's trust takes that privilege back -- the game's own language for
 /// "we do not let you choose any more".
 pub fn trust_revokes_load_choice(reputation: f64) -> bool {
-    let band = trust_band(reputation);
+    band_revokes_load_choice(trust_band(reputation))
+}
+
+/// [`trust_revokes_load_choice`] for a band (see [`board_offers_for_band`]).
+pub fn band_revokes_load_choice(band: &str) -> bool {
     band == TRUST_POOR || band == TRUST_LAST_CHANCE
 }
 
 /// Refusals dispatch takes off the budget as trust falls.
 pub fn trust_decline_penalty(reputation: f64) -> i64 {
-    let band = trust_band(reputation);
+    band_decline_penalty(trust_band(reputation))
+}
+
+/// [`trust_decline_penalty`] for a band (see [`board_offers_for_band`]).
+pub fn band_decline_penalty(band: &str) -> i64 {
     if band == TRUST_GUARDED {
         return 1;
     }

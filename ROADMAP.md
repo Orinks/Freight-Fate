@@ -281,11 +281,10 @@ Everything found before 2026-09-25 moved to
       seeded from a leg-local mile, work zones raising low limits, descent
       control lost after an off-and-on, straighten inert on partial. Manual
       stalls under braking and leaving an open scale settled by owner ruling.
-- [ ] Dispatch trust's spoken band and its effects read different inputs:
-      the line uses the worst of service, licence, record and debt, while the
-      board size reads shown reputation and refusals and load choice read the
-      raw ledger. A record or debt band promises cuts that never happen.
-      Owner call on which inputs the carrier acts on (2026-09-28).
+- [x] Dispatch trust's spoken band and its effects read different inputs:
+      the line used the worst of service, licence, record and debt, while
+      the board, refusals and load choice read reputation alone. All three
+      follow the spoken band now (owner ruling, 2026-09-28).
 - [ ] Three prompts still name default keys a player can move: "Hold Right"
       and "Tap Right" on the exit approach, and the one-time "Hours of
       service moved to Alt A, Alt S, and Alt D" notice (2026-09-28).

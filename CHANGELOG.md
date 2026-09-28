@@ -61,6 +61,8 @@
 
 - **Choosing Back to the road at an open weigh station checks you in first.**
 
+- **Dispatch trust now shapes the board, refusals and load choice whatever lowers it.** A driving record or debt that holds trust down now costs freight too.
+
 - **Company drivers no longer see the truck dealer, upgrades, trucks, trailer programs or tire choice.** The owner-operator buy-in is still under Business status.
 
 - **The loyalty desk offers only the shower, at stops that sell one.** Parking, food and laundry rewards did nothing, so they are gone for now.
