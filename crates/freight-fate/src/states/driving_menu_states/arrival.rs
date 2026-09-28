@@ -104,6 +104,11 @@ impl ArrivalState {
     /// `enter()`, run while the drive is still in hand -- see `drive_ref`.
     /// Nothing here reads the drive; the settlement already captured it.
     pub fn enter_over_drive(&mut self, ctx: &mut GameContext) {
+        // The settlement just moved the driver to a new city: start its
+        // dispatch board's route work now, while the summary is read, so
+        // the board opens without the wait (2026-09-28).
+        let city = profile_of(ctx).current_city.clone();
+        crate::states::city::warm_dispatch_board(ctx.world, &city);
         Menu::enter(self, ctx);
     }
 

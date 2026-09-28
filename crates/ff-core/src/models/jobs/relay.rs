@@ -18,7 +18,7 @@ use crate::models::start_options::pay_plan_for_key;
 use crate::music::crc32;
 use crate::pyfmt::round_py_n;
 
-use super::board::{Candidate, JobBoard, OfferOptions};
+use super::board::{reachable_cities, Candidate, JobBoard, OfferOptions};
 use super::deadline::{required_hours, route_drive_hours};
 use super::{Job, ASSIGNED_REPOSITION_PAY_FRACTION, MIN_JOB_DISTANCE_MI};
 
@@ -94,6 +94,39 @@ pub fn freight_density(world: &World, city_key: &str) -> usize {
     world.city(city_key).map(|c| c.locations.len()).unwrap_or(0)
 }
 
+/// The towns a relay draws from: the thickest freight in range first, the
+/// nearer of equals first.
+fn relay_towns<'a>(world: &World, here: &str, nearby: &'a [Candidate]) -> Vec<&'a Candidate> {
+    let density = |key: &str| freight_density(world, key);
+    let mut towns: Vec<&Candidate> = nearby
+        .iter()
+        .filter(|(city, miles, _)| {
+            city != here
+                && *miles >= MIN_JOB_DISTANCE_MI
+                && *miles <= RELAY_RANGE_MI
+                && density(city) > 0
+        })
+        .collect();
+    towns.sort_by(|a, b| density(&b.0).cmp(&density(&a.0)).then(a.1.total_cmp(&b.1)));
+    towns.truncate(RELAY_CANDIDATE_CITIES);
+    towns
+}
+
+/// Work out ahead what opening a company board in `city` will ask the world
+/// for -- a route to every city, then the same from each relay town -- so the
+/// board opens on warm caches. Meant for a background thread: it only fills
+/// the shared route and candidate caches. The first board in a new city
+/// used to compute all of it on Enter (2026-09-28).
+pub fn warm_dispatch_routes(world: &World, city: &str) {
+    let here = world.resolve_city_key(city);
+    let mut nearby = reachable_cities(world, &here);
+    nearby.sort_by(|a, b| a.1.total_cmp(&b.1));
+    for (town, _, _) in relay_towns(world, &here, &nearby) {
+        let _ = world.supported_route(&here, town, None);
+        let _ = reachable_cities(world, town);
+    }
+}
+
 /// The best load a relay would bring, or None when the boards nearby hold
 /// nothing the driver can take. `nearby` is every reachable city with its
 /// route miles, as the board computes them.
@@ -103,22 +136,9 @@ pub fn best_relay(
     nearby: &[Candidate],
 ) -> Option<RelayLoad> {
     let here = world.resolve_city_key(request.here);
-    let density = |key: &str| freight_density(world, key);
-    let mut towns: Vec<&Candidate> = nearby
-        .iter()
-        .filter(|(city, miles, _)| {
-            *city != here
-                && *miles >= MIN_JOB_DISTANCE_MI
-                && *miles <= RELAY_RANGE_MI
-                && density(city) > 0
-        })
-        .collect();
-    // The thickest freight first, the nearer of equals first.
-    towns.sort_by(|a, b| density(&b.0).cmp(&density(&a.0)).then(a.1.total_cmp(&b.1)));
-    towns.truncate(RELAY_CANDIDATE_CITIES);
     let plan = pay_plan_for_key(request.carrier_key);
     let mut best: Option<RelayLoad> = None;
-    for (city, _, _) in towns {
+    for (city, _, _) in relay_towns(world, &here, nearby) {
         let Some(deadhead) = world.supported_route(&here, city, None).ok().flatten() else {
             continue;
         };

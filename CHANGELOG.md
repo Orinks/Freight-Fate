@@ -171,6 +171,8 @@
 
 ### Fixed
 
+- **The dispatch board opens without a pause in a new city.** It used to take about a second the first time.
+
 - **Adaptive cruise keeps its set speed through a pickup again.** Setting the parking brake or stopping assistance at the gate no longer switches it off.
 
 - **A shower that came free with your fuel stays free if you leave the truck stop menu and open it again.**

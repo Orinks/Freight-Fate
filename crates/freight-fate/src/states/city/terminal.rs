@@ -32,9 +32,9 @@ use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
     home_terminal, open_freight_market, profile, profile_mut, record_city_duty,
-    terminal_objective_clause, BobtailDestState, BusinessStatusState, EndorsementCourseState,
-    GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI,
-    DRIVING_SCHOOL_ENABLED,
+    terminal_objective_clause, warm_dispatch_board, BobtailDestState, BusinessStatusState,
+    EndorsementCourseState, GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S,
+    BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
 };
 use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
@@ -620,6 +620,7 @@ impl Menu for CityMenuState {
         // "loading" (the provider shares observations per station).
         let city = profile(ctx).current_city.clone();
         ctx.warm_real_weather(&city);
+        warm_dispatch_board(ctx.world, &city);
         base_menu_enter(self, ctx);
     }
 

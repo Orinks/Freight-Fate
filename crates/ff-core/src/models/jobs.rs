@@ -23,7 +23,7 @@ pub mod relay;
 #[cfg(test)]
 mod tests;
 
-pub use board::{JobBoard, OfferOptions};
+pub use board::{reachable_cities, JobBoard, OfferOptions};
 pub use deadline::{
     curve_ceilings, dispatch_deadline_hours, fair_active_deadline, minimum_pay_for_level, plan_hos,
     remaining_route_hos_plan, required_hours, route_drive_hours, route_drive_hours_over,

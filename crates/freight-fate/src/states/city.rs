@@ -21,10 +21,6 @@
 //! function used to push, and is kept only for a screen no port has claimed
 //! yet; nothing in this module reaches for it now.
 
-use std::collections::HashMap;
-use std::sync::Mutex;
-
-use once_cell::sync::Lazy;
 use serde_json::{Map, Value};
 
 use ff_core::data::world::World;
@@ -472,38 +468,26 @@ pub(crate) fn sort_by_distance(jobs: &mut [Job]) {
 }
 
 /// `(city key, miles, leg count)` for every city reachable from `city` on a
-/// supported route, the way `JobBoard._candidates` computed it.
-// TODO(lead): belongs in ff_core::models::jobs::JobBoard -- `candidates` is
-// private there; make it pub and delete this copy.
+/// supported route: the board's own shared cache, so the relay and the
+/// bobtail list never compute it twice.
 pub(crate) fn board_candidates(world: &World, city: &str) -> Vec<(String, f64, usize)> {
-    type CandidateCache = HashMap<usize, HashMap<String, Vec<(String, f64, usize)>>>;
-    static CACHE: Lazy<Mutex<CandidateCache>> = Lazy::new(|| Mutex::new(HashMap::new()));
-    let city = world.resolve_city_key(city);
-    let world_id = world as *const World as usize;
-    if let Some(cached) = CACHE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .get(&world_id)
-        .and_then(|per| per.get(&city))
-    {
-        return cached.clone();
+    ff_core::models::jobs::reachable_cities(world, city)
+}
+
+/// Build the route lists a board in `city` needs on a background thread,
+/// while the driver is still at the terminal: the first board in a new city
+/// computed a route to every city on the map, then again from each relay
+/// town, all on Enter (2026-09-28). The thread only fills shared caches, so
+/// there is nothing to join; a board opened before it finishes computes what
+/// it still needs itself.
+pub(crate) fn warm_dispatch_board(world: &'static World, city: &str) {
+    let city = city.to_string();
+    let spawned = std::thread::Builder::new()
+        .name("dispatch-warm".to_string())
+        .spawn(move || ff_core::models::jobs::relay::warm_dispatch_routes(world, &city));
+    if let Err(err) = spawned {
+        log::warn!("Could not start the dispatch warm-up thread: {err}");
     }
-    let mut computed: Vec<(String, f64, usize)> = Vec::new();
-    for dest in world.city_names() {
-        if dest == city {
-            continue;
-        }
-        if let Ok(Some(route)) = world.supported_route(&city, &dest, None) {
-            computed.push((dest, route.miles(), route.legs.len()));
-        }
-    }
-    CACHE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .entry(world_id)
-        .or_default()
-        .insert(city, computed.clone());
-    computed
 }
 
 /// The load dispatch relays onto a company driver's board when the board
