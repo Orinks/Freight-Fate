@@ -126,6 +126,9 @@ pub struct DrivingState {
     pub rig_buffs: RigBuffs,
     /// See [`StopVisit`]; read and written through `stop_visit`.
     pub stop_visit: StopVisit,
+    /// The truck moved in automatic at some point on this run, so the gate
+    /// pays no manual-spec differential however the run ends.
+    pub drove_automatic: bool,
     pub weather_source_real: bool,
     /// The route mile the cab next asks the Weather Service for warnings at.
     pub alerts_next_poll_mi: f64,

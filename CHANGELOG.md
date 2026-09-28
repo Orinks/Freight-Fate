@@ -171,6 +171,12 @@
 
 ### Fixed
 
+- **The manual transmission bonus is paid only for a run driven in manual.** Switching to manual near the end no longer earns it.
+
+- **A running engine burns fuel while you wait at a stop.** Breaks, meals and shop work idle the engine as the dock always did.
+
+- **Exit and hours of service prompts name your own keys.** A moved steering or hours key is named as you set it.
+
 - **The dispatch board opens without a pause in a new city.** It used to take about a second the first time.
 
 - **Adaptive cruise keeps its set speed through a pickup again.** Setting the parking brake or stopping assistance at the gate no longer switches it off.

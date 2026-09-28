@@ -274,6 +274,7 @@ impl DrivingState {
             start_engine_wear,
             rig_buffs: RigBuffs::new(),
             stop_visit: Default::default(),
+            drove_automatic: false,
             weather_source_real: ctx.settings.real_weather,
             alerts_next_poll_mi: 0.0,
             alerts_pending: None,

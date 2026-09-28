@@ -297,7 +297,7 @@ fn test_right_taps_with_drift_on_earn_the_hold_hint_once() {
         harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
     }
     assert_eq!(
-        said_count(&harness, "Hold Right to steer"),
+        said_count(&harness, "Hold the Right arrow to steer"),
         1,
         "{:?}",
         spoken(&harness)
@@ -308,7 +308,7 @@ fn test_right_taps_with_drift_on_earn_the_hold_hint_once() {
     harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
     release_keys(&mut harness);
     harness.with_drive(|d, ctx| d.update_exit_preparation(ctx, DT));
-    assert_eq!(said_count(&harness, "Hold Right to steer"), 1);
+    assert_eq!(said_count(&harness, "Hold the Right arrow to steer"), 1);
 }
 
 #[test]
@@ -1039,8 +1039,8 @@ fn test_exit_speed_assist_slows_with_full_lane_keeping() {
     // Never name a key this driver does not have: with lane keeping on full a
     // tap changes lanes, and holding Right does nothing.
     let last = slowing.last().expect("a slowing line");
-    assert!(last.contains("Tap Right"), "{last}");
-    assert!(!last.contains("Hold Right"), "{last}");
+    assert!(last.contains("Tap the Right arrow"), "{last}");
+    assert!(!last.contains("Hold the Right arrow"), "{last}");
 }
 
 #[test]

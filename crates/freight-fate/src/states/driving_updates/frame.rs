@@ -455,6 +455,9 @@ impl DrivingState {
                 SayEvent::new().category(SpeechCategory::Confirmation),
             );
         }
+        if self.trip.truck.transmission.automatic && self.trip.truck.speed_mph().abs() > 1.0 {
+            self.drove_automatic = true;
+        }
 
         // The clutch is fixed on Shift, read as the key itself: the held-key
         // tracker sees the key before any modifier flag, and the harness holds

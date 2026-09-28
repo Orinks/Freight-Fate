@@ -1274,3 +1274,25 @@ fn test_a_full_lot_refuses_fuel_while_the_engine_is_running() {
     assert_eq!(with_drive(&drive, |d| d.trip.truck.fuel_gal), before);
     assert_eq!(last(&app), "Shut the engine off before you fuel.");
 }
+
+#[test]
+fn test_a_break_burns_idle_fuel_only_with_the_engine_running() {
+    for engine_on in [true, false] {
+        let mut app = TestApp::new();
+        let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+        let at = with_drive(&drive, |d| {
+            d.trip.truck.engine_on = engine_on;
+            d.trip.truck.fuel_gal = 100.0;
+            d.trip.position_mi
+        });
+        let mut state = rest_stop_at(&mut app, &drive, travel_center("Love's Travel Stop", at));
+        activate(&mut state, &mut app.ctx, "Take a 30-minute break");
+        let fuel = with_drive(&drive, |d| d.trip.truck.fuel_gal);
+        if engine_on {
+            // About 0.8 gallons an hour at idle.
+            assert!(fuel < 99.8 && fuel > 99.0, "{fuel}");
+        } else {
+            assert_eq!(fuel, 100.0);
+        }
+    }
+}

@@ -475,7 +475,8 @@ impl ArrivalState {
         // not a second settlement, so they never fold into career earnings.
         //
         // The manual-spec differential: trained out of the automatic-only
-        // restriction, and actually rowing the gears on this run. Added
+        // restriction, and actually rowing the gears on this run -- the
+        // whole run, not just the gate (`drove_automatic`). Added
         // before settled_pay is taken, so the cash and the career's booked
         // earnings agree -- unbooked cash reads as an edited save to cloud
         // upload screening.
@@ -484,6 +485,7 @@ impl ArrivalState {
             .endorsements()
             .contains("manual_transmission")
             && !d.trip.truck.transmission.automatic
+            && !d.drove_automatic
         {
             let manual_bonus = round_py_n(net_pay * MANUAL_SPEC_DIFFERENTIAL, 2).max(0.0);
             if manual_bonus >= 1.0 {

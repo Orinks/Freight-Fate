@@ -235,6 +235,7 @@ impl DrivingState {
         );
         out.insert("rig_buffs".to_string(), json!(self.rig_buffs));
         out.insert("stop_visit".to_string(), json!(self.stop_visit));
+        out.insert("drove_automatic".to_string(), json!(self.drove_automatic));
         out.insert(
             "speed_control_armed".to_string(),
             json!(self.speed_control_armed),
@@ -447,6 +448,7 @@ impl DrivingState {
             .cloned()
             .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default();
+        state.drove_automatic = b(data, "drove_automatic", false);
         // "speeding_strikes" was a required snapshot field until the silent
         // at-delivery speeding charge was removed. Snapshots written before
         // that still carry it; the key is simply no longer consulted.

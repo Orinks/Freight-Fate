@@ -13,6 +13,7 @@ use ff_core::models::jobs::route_drive_hours;
 use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::GameContext;
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -226,7 +227,12 @@ impl DrivingState {
             return String::new();
         }
         profile_mut_of(ctx).hos_key_notice_left = left - 1;
-        " Hours of service moved to Alt A, Alt S, and Alt D.".to_string()
+        format!(
+            " Hours of service moved to {}, {}, and {}.",
+            ctx.control_name(Action::HosWheel),
+            ctx.control_name(Action::HosBreak),
+            ctx.control_name(Action::HosDrive)
+        )
     }
 
     /// `_speak_hos_wheel_time()`: Alt A -- how much of this shift is already

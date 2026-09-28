@@ -265,12 +265,13 @@ Everything found before 2026-09-25 moved to
 - [ ] The loyalty parking, food and laundry rewards were hidden because
       nothing in the game charges for what they discount. Wire each to a
       real price, or drop them from the loyalty model (2026-09-28).
-- [ ] Rest-stop waits (break, food, walk-around, shop work) burn no idle
-      fuel with the engine running, while the pickup and the dock do. Burn
-      it in `advance_rest_clock` and drop the dock's own charge (2026-09-28).
-- [ ] The manual-transmission pay bonus reads the mode only at the gate, so
-      a run driven on automatic is paid it after one switch. Keep a per-trip
-      "drove automatic" flag (2026-09-28).
+- [x] Rest-stop waits (break, food, walk-around, shop work) burn no idle
+      fuel with the engine running, while the pickup and the dock do. Burned
+      in `advance_rest_clock` now, and the dock's own charge is gone
+      (2026-09-28).
+- [x] The manual-transmission pay bonus reads the mode only at the gate, so
+      a run driven on automatic is paid it after one switch. A per-run
+      `drove_automatic` flag, kept in the save, withholds it now (2026-09-28).
 - [x] Sweep of shipped 1.9 features (2026-09-28): ticket reputation written
       from the shown standing, record-hold dates naming the oldest entry
       instead of the day the hold lifts, relayed deadlines padded with the
@@ -285,9 +286,10 @@ Everything found before 2026-09-25 moved to
       the line used the worst of service, licence, record and debt, while
       the board, refusals and load choice read reputation alone. All three
       follow the spoken band now (owner ruling, 2026-09-28).
-- [ ] Three prompts still name default keys a player can move: "Hold Right"
+- [x] Three prompts still name default keys a player can move: "Hold Right"
       and "Tap Right" on the exit approach, and the one-time "Hours of
-      service moved to Alt A, Alt S, and Alt D" notice (2026-09-28).
+      service moved to Alt A, Alt S, and Alt D" notice. All three read the
+      bindings now (2026-09-28).
 
 ### Release gate record
 

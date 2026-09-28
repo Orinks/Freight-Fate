@@ -614,11 +614,7 @@ impl DrivingState {
         // The right lane, and only while the truck is not in it. The exit lane
         // itself is asked for where it opens, at the taper.
         if !self.in_right_lane_for_exit() {
-            owed.push_str(if ctx.settings.lane_is_automated() {
-                " Tap Right to the right lane."
-            } else {
-                " Move to the right lane."
-            });
+            owed.push_str(&right_lane_request(ctx));
             if self
                 .active_exit_pressure(stop)
                 .is_some_and(|p| p.intensity >= 0.35)
@@ -714,10 +710,11 @@ impl DrivingState {
         }
         if self.exit_right_taps >= 2 && self.lane.exit_lane_open && !self.exit_tap_hint_said {
             self.exit_tap_hint_said = true;
-            self.say_plain(
-                ctx,
-                "Taps only nudge the wheel. Hold Right to steer into the exit lane.",
+            let text = format!(
+                "Taps only nudge the wheel. Hold {} to steer into the exit lane.",
+                ctx.control_name(Action::SteerRight)
             );
+            self.say_plain(ctx, text);
         }
         // No "Exit lane set" or "lost": crossing into the lane is the truck
         // taking the exit, and "You take" says so. No line at the gore. It used to say "Stay under" the ramp's number,
@@ -803,11 +800,9 @@ impl DrivingState {
         // drift off a tap changes lanes, and holding Right does nothing.
         // And only a lane the truck is not already in.
         let lane_text = if self.in_right_lane_for_exit() {
-            ""
-        } else if ctx.settings.lane_is_automated() {
-            " Tap Right to the right lane."
+            String::new()
         } else {
-            " Move to the right lane."
+            right_lane_request(ctx)
         };
         // Never "confirm": there is no confirm action, and an X pressed to
         // obey it cancels the signal instead.
@@ -937,5 +932,18 @@ impl DrivingState {
             return true;
         }
         stop.stop_type == "delivery_destination" && ctx.settings.lane_is_automated()
+    }
+}
+
+/// Ask for the right lane in this driver's own key. With lane keeping on, a
+/// tap of steer right changes lanes; without it the driver steers there.
+fn right_lane_request(ctx: &GameContext) -> String {
+    if ctx.settings.lane_is_automated() {
+        format!(
+            " Tap {} to the right lane.",
+            ctx.control_name(Action::SteerRight)
+        )
+    } else {
+        " Move to the right lane.".to_string()
     }
 }

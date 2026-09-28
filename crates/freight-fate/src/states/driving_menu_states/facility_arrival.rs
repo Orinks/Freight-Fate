@@ -189,11 +189,11 @@ impl FacilityArrivalState {
         let defect = self.hooked_defect(ctx);
         let complete = move |ctx: &mut GameContext| {
             drive.with(ctx, |d, ctx| {
+                // The rest clock burns the dock wait's idle fuel. The
+                // settlement already reports the tank, so this one is felt
+                // rather than announced.
                 advance_rest_clock(d, ctx, minutes, None, "");
                 hos_mut_of(ctx).on_duty(minutes);
-                // A dock wait is engine time too. The settlement already
-                // reports the tank, so this one is felt rather than announced.
-                d.trip.truck.burn_idle_fuel_over_game_time(minutes * 60.0);
                 d.set_status(if drop_hook {
                     "Trailer dropped. Hooked to an empty, paperwork signed."
                 } else {

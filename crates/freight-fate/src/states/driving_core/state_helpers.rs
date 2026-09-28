@@ -19,6 +19,8 @@ use super::{hos_mut_of, profile_mut_of, profile_of, set_engine_running, DOCKING_
 
 /// Resting advances game time, so deadlines keep counting.
 ///
+/// A running engine idles through the wait and burns fuel for it, as it
+/// does at the pickup and the dock; every sleep shuts it down first.
 /// `duty_status` (a `hos::DUTY_STATUSES` name) records the rest on the
 /// logbook; `note` defaults to "".
 pub fn advance_rest_clock(
@@ -29,6 +31,10 @@ pub fn advance_rest_clock(
     note: &str,
 ) {
     let start_hour = driving.absolute_game_hour(ctx, None);
+    driving
+        .trip
+        .truck
+        .burn_idle_fuel_over_game_time(minutes * 60.0);
     driving.trip.truck.advance_parked_time(minutes);
     driving.trip.game_minutes += minutes;
     driving.trip.weather.update(minutes);
