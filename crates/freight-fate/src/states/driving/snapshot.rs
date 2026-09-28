@@ -234,6 +234,7 @@ impl DrivingState {
             json!(self.maintenance_levels),
         );
         out.insert("rig_buffs".to_string(), json!(self.rig_buffs));
+        out.insert("stop_visit".to_string(), json!(self.stop_visit));
         out.insert(
             "speed_control_armed".to_string(),
             json!(self.speed_control_armed),
@@ -439,6 +440,12 @@ impl DrivingState {
             .get("rig_buffs")
             .cloned()
             .and_then(|value| serde_json::from_value::<RigBuffs>(value).ok())
+            .unwrap_or_default();
+        // Parked at a stop through a save: the fuel still pays for the shower.
+        state.stop_visit = data
+            .get("stop_visit")
+            .cloned()
+            .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default();
         // "speeding_strikes" was a required snapshot field until the silent
         // at-delivery speeding charge was removed. Snapshots written before

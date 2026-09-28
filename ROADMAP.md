@@ -241,6 +241,54 @@ Everything found before 2026-09-25 moved to
       against deliveries; credentials against their level gates and the
       clock. Calibrate against real backups, then mark rather than refuse
       (owner, 2026-09-25).
+- [x] Adaptive cruise lost its set speed at every pickup since the stopping
+      assist started holding at pickup gates (2026-09-20): the hold, and the
+      parking brake the gate asks for, ended the session instead of pausing
+      it for the departure (tester report, fixed 2026-09-28).
+- [x] What a driver did at a stop lived on the stop's menu, so leaving it and
+      pressing T again forgot the fuel that made the shower free, the weigh
+      station check-in, and the CAT Scale reweigh price. It lives on the
+      drive now (tester report, fixed 2026-09-28).
+- [x] The load report named fuel idled during check-in as if the engine ran
+      through the load; it says the idling came before the shutdown now
+      (tester report, fixed 2026-09-28).
+- [x] A shipper or receiver screen replaces the drive, which silenced the
+      engine loop: a running engine idled in silence and "Shut down the
+      engine" made no sound. Both screens bring the idle back (2026-09-28).
+- [x] Loyalty shower credits and points were spent and bought nothing; they
+      make the shower free at a stop that sells one now. Stop-visit memory
+      is saved with the drive (2026-09-28).
+- [x] Manual downshifts with the clutch held match revs like the automatic
+      (tester request, 2026-09-28).
+- [x] Company drivers no longer see the truck dealer, upgrades, trucks,
+      trailer programs or tire choice (owner, 2026-09-28).
+- [ ] The loyalty parking, food and laundry rewards were hidden because
+      nothing in the game charges for what they discount. Wire each to a
+      real price, or drop them from the loyalty model (2026-09-28).
+- [ ] Rest-stop waits (break, food, walk-around, shop work) burn no idle
+      fuel with the engine running, while the pickup and the dock do. Burn
+      it in `advance_rest_clock` and drop the dock's own charge (2026-09-28).
+- [ ] The manual-transmission pay bonus reads the mode only at the gate, so
+      a run driven on automatic is paid it after one switch. Keep a per-trip
+      "drove automatic" flag (2026-09-28).
+- [x] Sweep of shipped 1.9 features (2026-09-28): ticket reputation written
+      from the shown standing, record-hold dates naming the oldest entry
+      instead of the day the hold lifts, relayed deadlines padded with the
+      deadhead, failed log checks counted as passed inspections, courses
+      off the hours clock, the paused-cruise dial pointing at the off key,
+      Synthesized fades unannounced, a Roadhouse piece lost to its stand-in,
+      pause sub-screens signing the driver off the board, ramp-end controls
+      seeded from a leg-local mile, work zones raising low limits, descent
+      control lost after an off-and-on, straighten inert on partial. Manual
+      stalls under braking and leaving an open scale settled by owner ruling.
+- [ ] Dispatch trust's spoken band and its effects read different inputs:
+      the line uses the worst of service, licence, record and debt, while the
+      board size reads shown reputation and refusals and load choice read the
+      raw ledger. A record or debt band promises cuts that never happen.
+      Owner call on which inputs the carrier acts on (2026-09-28).
+- [ ] Three prompts still name default keys a player can move: "Hold Right"
+      and "Tap Right" on the exit approach, and the one-time "Hours of
+      service moved to Alt A, Alt S, and Alt D" notice (2026-09-28).
 
 ### Release gate record
 

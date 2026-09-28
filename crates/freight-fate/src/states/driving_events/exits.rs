@@ -836,6 +836,12 @@ impl DrivingState {
         if t.brake > 0.01 || t.emergency_brake || t.transmission.in_reverse() {
             return;
         }
+        // Clutch in or out of gear on a manual: throttle only revs the
+        // engine, and it held the revs up through the driver's downshift.
+        let tr = &t.transmission;
+        if !tr.automatic && (tr.clutch > 0.5 || tr.shifting() || tr.in_neutral()) {
+            return;
+        }
         let short_by = target - t.speed_mph();
         if short_by <= 0.0 {
             return; // coasting between the target and the gore's limit is fine

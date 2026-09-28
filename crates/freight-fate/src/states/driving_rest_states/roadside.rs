@@ -224,7 +224,10 @@ impl TrafficStopState {
         {
             let p = profile_mut_of(ctx);
             p.spend(fine);
-            p.career.reputation = (rep - hit).max(0.0);
+            // The hit comes off the delivery ledger. `rep` is the shown
+            // standing, ledger minus the record; writing it back subtracted
+            // the record from the ledger for good (2026-09-28).
+            p.career.reputation = (p.career.reputation - hit).max(0.0);
         }
         ctx.audio.play("ui/error");
         let serious = enforcement::is_serious_speed(self.over) || self.warned;

@@ -2,7 +2,7 @@
 //! `freight_fate/states/driving_pause_states.py`).
 
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
-use ff_core::sim::hos::HosClock;
+use ff_core::sim::hos::{duration_text, HosClock};
 
 use crate::app::{GameContext, Say};
 use crate::controller::{ControllerAction, ControllerButton};
@@ -550,7 +550,7 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
                 d.job.spoken_destination()
             ),
             d.pickup_progress_summary(ctx),
-            format!("{} hours used.", fmt_f(hours_used, 1)),
+            format!("{} used.", duration_text(hours_used)),
             format!("{}.", d.air_status_text(false)),
         ];
     }
@@ -563,9 +563,9 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
         ),
         d.trip.progress_summary(ctx.settings.imperial_units),
         format!(
-            "{} hours used of {}.",
-            fmt_f(hours_used, 1),
-            fmt_f(d.job.deadline_game_h, 0)
+            "{} used of {}.",
+            duration_text(hours_used),
+            duration_text(d.job.deadline_game_h)
         ),
         format!("{}.", d.air_status_text(false)),
     ]

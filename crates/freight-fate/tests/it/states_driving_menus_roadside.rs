@@ -83,6 +83,36 @@ fn test_a_serious_stop_writes_the_ticket_once_and_charges_it_on_the_spot() {
     assert_eq!(with_drive(&drive, |d| d.ticket_fines_paid), expected);
 }
 
+/// The ticket's reputation hit comes off the delivery ledger. It used to
+/// write back the shown standing (ledger minus record), so a driver with a
+/// record lost the record's points from the ledger for good (2026-09-28).
+#[test]
+fn test_a_ticket_takes_its_hit_from_the_ledger_not_the_shown_standing() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.career.reputation = 60.0;
+        p.driving_record.citations = 3;
+        p.driving_record.citation_times = vec![p.game_hours; 3];
+        assert!(p.standing() < 60.0, "the record must show in the standing");
+    }
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        TrafficStopState::new(ctx, d, false, 24.0, 65.0, false, false, false)
+    });
+    let ledger = app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .career
+        .reputation;
+    assert!(
+        (ledger - (60.0 - hos::HOS_REPUTATION_HIT)).abs() < 1e-9,
+        "ledger {ledger}"
+    );
+}
+
 #[test]
 fn test_a_work_zone_ticket_says_so_and_costs_double() {
     let mut app = TestApp::new();

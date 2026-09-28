@@ -706,14 +706,25 @@ pub fn record_window_phrase(record: &DrivingRecord, game_hours: f64) -> String {
     format!("{} in the last year", parts.join(" and "))
 }
 
-/// The spoken calendar day the oldest counted violation leaves the window.
-pub fn record_ages_out_text<P: StandingProfile + ?Sized>(profile: &P) -> String {
+/// The spoken calendar day the record stops meeting `holds(citations,
+/// serious)` as its violations age out, with nothing new added.
+pub fn record_clears_text<P: StandingProfile + ?Sized>(
+    profile: &P,
+    holds: impl Fn(i64, i64) -> bool,
+) -> String {
     let record = record_of(profile);
-    let Some(at) = record.window_ages_out_at(profile.game_hours()) else {
+    let Some(at) = record.window_clears_at(profile.game_hours(), holds) else {
         return String::new();
     };
     let at = at + profile.calendar_offset_days() * HOURS_PER_DAY;
     format!("{}, {}", weekday_name(at), date_text(at))
+}
+
+/// The day the carrier's record review lets go: back under its floor.
+pub fn record_review_clears_text<P: StandingProfile + ?Sized>(profile: &P) -> String {
+    record_clears_text(profile, |citations, serious| {
+        citations > CARRIER_REVIEW_CITATIONS || serious >= CARRIER_REVIEW_SERIOUS
+    })
 }
 
 /// The insurer's multiplier on an owner-operator's insurance reserve.
@@ -749,9 +760,9 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
         }
         let percent = round_py_int((surcharge - 1.0) * 100.0);
         return format!(
-            "Your insurance reserve is up {percent} percent for it, on every settlement, \
-             until the oldest ages out {}.",
-            record_ages_out_text(profile)
+            "Your insurance reserve is up {percent} percent for it, on every settlement. It \
+             comes down as the record ages out, and is gone {}.",
+            record_clears_text(profile, |citations, serious| citations + serious > 0)
         );
     }
     if !under_carrier_review(profile) {
@@ -761,9 +772,12 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
         if profile.carrier_key() == LAST_CHANCE_CARRIER_KEY {
             return format!(
                 "The carrier's insurer will not carry a record like that; {} keeps you on \
-                 sufferance until the oldest ages out {}.",
+                 sufferance until {}.",
                 LAST_CHANCE_CARRIER_NAME,
-                record_ages_out_text(profile)
+                record_clears_text(profile, |citations, serious| {
+                    citations >= CARRIER_TERMINATION_CITATIONS
+                        || serious >= CARRIER_TERMINATION_SERIOUS
+                })
             );
         }
         return "The carrier's insurer will not carry that record. The carrier ends your \
@@ -784,9 +798,8 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
             )
         };
         return format!(
-            "The carrier's record review holds your equipment back until the oldest ages \
-             out {}. {next}",
-            record_ages_out_text(profile)
+            "The carrier's record review holds your equipment back until {}. {next}",
+            record_review_clears_text(profile)
         );
     }
     String::new()
@@ -871,9 +884,9 @@ pub fn standing_way_back<P: StandingProfile + ?Sized>(profile: &P) -> String {
         let record = record_of(profile);
         return format!(
             "Your driving record is what is holding it: {}. The carrier's review keeps it \
-             there until the oldest ages out {}; keep the record clean until then.",
+             there until {}; keep the record clean until then.",
             record_window_phrase(record, profile.game_hours()),
-            record_ages_out_text(profile)
+            record_review_clears_text(profile)
         );
     }
     if cause == CAUSE_DEBT {

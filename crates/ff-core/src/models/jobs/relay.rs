@@ -195,10 +195,12 @@ pub fn relay_load(
     if !thin {
         return None;
     }
-    // The deadhead is part of the assignment: paid at the empty-mile rate,
-    // and given its hours in the deadline.
+    // The deadhead is part of the assignment: paid at the empty-mile rate.
+    // Not added to the deadline: the delivery clock starts at the shipper,
+    // so its hours there were a free extension on the loaded run
+    // (2026-09-28). The board's hours fit and the departure check already
+    // count the deadhead.
     relay.job.pay = round_py_n(relay.job.pay + relay.deadhead_pay, 2);
-    relay.job.deadline_game_h = round_py_n(relay.job.deadline_game_h + relay.deadhead_h, 1);
     Some(relay)
 }
 
@@ -285,10 +287,9 @@ mod tests {
         let local = vec![poor.clone(), poor.clone(), poor.clone(), poor];
         let chosen = relay_load(world, &request, &local, &nearby).expect("the poor board relays");
         assert!(chosen.job.pay > relay.job.pay, "the deadhead is paid");
-        assert!(
-            chosen.job.deadline_game_h > relay.job.deadline_game_h,
-            "and timed"
-        );
+        // The delivery clock starts at the shipper: the deadhead's hours are
+        // not the loaded run's to spend.
+        assert_eq!(chosen.job.deadline_game_h, relay.job.deadline_game_h);
     }
 
     #[test]

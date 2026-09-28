@@ -56,7 +56,7 @@ pub fn secure_truck_for_stopped_menu_at(
     truck.throttle = 0.0;
     truck.brake = 1.0;
     truck.set_parking_brake();
-    driving.cancel_cruise(ctx, false);
+    driving.cancel_cruise_for_parking_brake(ctx);
     // The parking brake holds the truck now, so every assist lets go of the
     // service brake. The brake ramp keeps whatever pedal an assist is
     // holding, so a hold left latched under the menu kept the brakes on

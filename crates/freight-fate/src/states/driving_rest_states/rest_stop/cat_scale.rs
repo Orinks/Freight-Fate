@@ -49,6 +49,7 @@ impl RestStopState {
     fn weigh_price(&self, d: &DrivingState, ctx: &GameContext) -> (bool, f64) {
         let now = d.absolute_game_hour(ctx, None);
         let reweigh = self
+            .visit
             .full_weigh_h
             .is_some_and(|at| now - at < REWEIGH_WINDOW_H);
         let price = if reweigh {
@@ -93,7 +94,12 @@ impl RestStopState {
         if !carrier {
             profile_mut_of(ctx).spend(price);
         }
-        let Some((text, now)) = self.driving.clone().with(ctx, |d, ctx| {
+        let stop = self.stop.clone();
+        let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
+            if !reweigh {
+                let now = d.absolute_game_hour(ctx, None);
+                d.stop_visit(&stop).full_weigh_h = Some(now);
+            }
             let ticket = d.trip.truck.axle_loads().ticket_text();
             advance_rest_clock(
                 d,
@@ -112,20 +118,14 @@ impl RestStopState {
                     fmt_grouped(profile_of(ctx).money(), 0)
                 )
             };
-            (
-                format!(
-                    "CAT Scale ticket. {ticket} {billing} It is {}. {}",
-                    clock_text(d.trip.local_hour()),
-                    deadline_text(d, ctx)
-                ),
-                d.absolute_game_hour(ctx, None),
+            format!(
+                "CAT Scale ticket. {ticket} {billing} It is {}. {}",
+                clock_text(d.trip.local_hour()),
+                deadline_text(d, ctx)
             )
         }) else {
             return;
         };
-        if !reweigh {
-            self.full_weigh_h = Some(now);
-        }
         self.save_here(ctx, true);
         ctx.audio.play("ui/notify");
         ctx.say(&text);

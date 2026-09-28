@@ -469,8 +469,12 @@ impl DrivingState {
         } else {
             0.0
         };
-        let clutch_disengaged =
-            self.trip.truck.transmission.clutch > 0.5 || self.trip.truck.transmission.shifting();
+        // Neutral on a manual is a disengaged clutch too: nothing reaches the
+        // wheels, so cruise and the keeper only raced the engine.
+        let clutch_disengaged = self.trip.truck.transmission.clutch > 0.5
+            || self.trip.truck.transmission.shifting()
+            || (!self.trip.truck.transmission.automatic
+                && self.trip.truck.transmission.in_neutral());
         self.update_lane(ctx, dt);
         // `update_lane` can complete a held-wheel crossing. Mirror that
         // discrete result before cruise reads the traffic bubble: steering
@@ -532,10 +536,23 @@ impl DrivingState {
         if was_on && !self.trip.truck.engine_on {
             ctx.audio.engine_stop();
             if self.trip.truck.stalled {
-                let text = format!(
-                    "Engine stalled. Press {} to restart.",
-                    ctx.control_hint("engine")
-                );
+                let tr = &self.trip.truck.transmission;
+                // A manual stalls in gear, and restarting it there with the
+                // clutch out stalls it again the next frame: name the clutch
+                // and the gear that will hold (2026-09-28).
+                let text = if tr.automatic || tr.in_neutral() {
+                    format!(
+                        "Engine stalled. Press {} to restart.",
+                        ctx.control_hint("engine")
+                    )
+                } else {
+                    format!(
+                        "Engine stalled. Hold {} and press {} to restart, then select {}.",
+                        ctx.control_hint("clutch"),
+                        ctx.control_hint("engine"),
+                        ctx.control_hint("gear_first")
+                    )
+                };
                 ctx.say_event_with(text, SayEvent::new().category(SpeechCategory::Safety));
             } else if self.trip.truck.fuel_gal <= 0.0 {
                 self.handle_out_of_fuel(ctx);

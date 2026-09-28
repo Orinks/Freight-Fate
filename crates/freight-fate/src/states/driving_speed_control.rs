@@ -464,6 +464,22 @@ impl DrivingState {
         }
     }
 
+    /// The parking brake ends speed control -- except under the pause a
+    /// facility gate made, which belongs to the departure. The gate asks for
+    /// the brake, and ending the session there lost the driver's set speed
+    /// at every pickup (tester report, 2026-09-28).
+    pub fn cancel_cruise_for_parking_brake(&mut self, ctx: &mut GameContext) {
+        let gate_pause = self.trip.finished
+            && self.speed_control_paused_at_stop
+            && !self.speed_control_transit_pause;
+        if gate_pause {
+            self.clear_cruise(false);
+            self.clear_keeper();
+        } else {
+            self.disarm_speed_control(ctx);
+        }
+    }
+
     /// `_cancel_keeper(*, preserve_session=False)`.
     pub fn cancel_keeper(&mut self, ctx: &mut GameContext, preserve_session: bool) {
         if preserve_session {

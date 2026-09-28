@@ -64,10 +64,26 @@ impl Trip {
             // its advance warning area; the taper is the short merge at the
             // end of it (MUTCD Part 6), so the word is kept for that spot
             // alone (owner ruling, 2026-09-14).
+            // The approach's own limit, not the constant: on a road posted
+            // under it the zone steps down from the road (2026-09-28).
+            let taper_mph = self
+                .zones
+                .iter()
+                .find(|z| {
+                    z.reason == "construction merge" && (z.end_mi - zone.start_mi).abs() < 1e-6
+                })
+                .map_or(CONSTRUCTION_TAPER_LIMIT_MPH, |z| z.limit_mph);
+            if taper_mph <= zone.limit_mph {
+                return format!(
+                    "In {}, construction ahead. {merge_part}Speed limit {} through the work zone.",
+                    self.ahead_text(ahead),
+                    self.speed_value(zone.limit_mph)
+                );
+            }
             return format!(
                 "In {}, construction ahead. {merge_part}Speed limit {} from {} out, then {} through the work zone.",
                 self.ahead_text(ahead),
-                self.speed_value(CONSTRUCTION_TAPER_LIMIT_MPH),
+                self.speed_value(taper_mph),
                 self.ahead_text(CONSTRUCTION_TAPER_MI),
                 self.speed_value(zone.limit_mph)
             );

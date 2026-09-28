@@ -213,8 +213,12 @@ impl DrivingState {
                 return;
             }
         }
-        if self.cruise_mph.is_none() && self.keeper_mph.is_none() {
-            self.say_plain(ctx, "Adaptive cruise off. Press K to set it.");
+        // A paused session is not off: the dial sets the speed it resumes at
+        // below. Telling a paused driver to press K sent them to the key that
+        // switches it off (2026-09-28).
+        if self.cruise_mph.is_none() && self.keeper_mph.is_none() && !self.speed_control_armed {
+            let key = ctx.control_name(crate::bindings::Action::Cruise);
+            self.say_plain(ctx, format!("Adaptive cruise off. Press {key} to set it."));
             return;
         }
         let base = match self.speed_control_target_mph {

@@ -55,6 +55,16 @@
 
 ### Changed
 
+- **Downshifting a manual with the clutch held matches revs.** The engine follows the truck's speed down instead of dropping to idle, so letting the clutch out is smooth.
+
+- **A manual no longer stalls while you brake to a stop in a tall gear.** Coming off the brake at a standstill in that gear still stalls it.
+
+- **Choosing Back to the road at an open weigh station checks you in first.**
+
+- **Company drivers no longer see the truck dealer, upgrades, trucks, trailer programs or tire choice.** The owner-operator buy-in is still under Business status.
+
+- **The loyalty desk offers only the shower, at stops that sell one.** Parking, food and laundry rewards did nothing, so they are gone for now.
+
 - **The exit lane opens just before the gore, and you steer into it there.** Already in the right lane, you hear no lane instructions before that.
 
 - **The exit blinker starts clicking half a mile out.** X still sets the signal from miles away, and the game says "Signal set" until then.
@@ -158,6 +168,68 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Adaptive cruise keeps its set speed through a pickup again.** Setting the parking brake or stopping assistance at the gate no longer switches it off.
+
+- **A shower that came free with your fuel stays free if you leave the truck stop menu and open it again.**
+
+- **A weigh station check-in is not offered twice when you reopen the stop.**
+
+- **After loading, the fuel you burned idling before shutting the engine down is named as such.** It no longer sounds like the engine ran through the load.
+
+- **At a shipper or receiver you hear a running engine idle, and shutting it down makes its sound.**
+
+- **Loyalty shower credits and points now make the shower free.** They used to be spent while the shower still cost full price.
+
+- **Loyalty points and shower credits from a fill-up are saved right away.**
+
+- **Leaving a stop with the engine running no longer tells you to start it.**
+
+- **Motel and repair lines at a stop give local time.**
+
+- **Canceling a pickup frees the pay advance for your next load.**
+
+- **After a manual stalls in gear, the game tells you to hold the clutch before restarting.** Restarting in gear with the clutch out stalled it again.
+
+- **Descent control no longer asks for a lower gear during every manual shift.**
+
+- **Cruise no longer revs the engine while a manual is in neutral.**
+
+- **Exit and facility stopping assistance leave the throttle alone while you shift a manual.**
+
+- **The engine brake no longer counts against a no-jake zone, or answers G, while the clutch is in.**
+
+- **A speeding ticket no longer takes your driving record's points out of your reputation for good.**
+
+- **A record hold now names the day it lifts.** It used to name the day the oldest entry left, even when the rest still held it.
+
+- **A relayed load's delivery deadline no longer counts the drive to the shipper.**
+
+- **A failed log check no longer counts as a passed inspection.**
+
+- **Credential courses count as off-duty time on your hours of service.**
+
+- **While cruise is paused, plus and minus set the speed it resumes at.** They used to say cruise was off and point at the key that turns it off.
+
+- **In Synthesized mode, a station fading out of range is announced again.**
+
+- **The Tab radio screen names your own keys for saving a favorite and turning the radio on or off.**
+
+- **Synthesized Roadhouse pieces come back on the next pass instead of staying replaced by a 1.5 track.**
+
+- **Trip status says whole hours as whole numbers.**
+
+- **Opening a screen from the pause menu no longer signs you off the drivers board.**
+
+- **Two stops at one exit always hear the same control at the end of the ramp.**
+
+- **Work zones no longer raise the speed limit on roads posted under 55.**
+
+- **Turning descent control off and back on during a grade holds the safe speed again.**
+
+- **Hold slash straightens the truck on partial lane keeping too.**
+
+- **The controls help says cruise holds at most five over the limit.**
 
 - **The siren, weigh station, and lane guide tone now stop when you leave the drive.** They used to keep playing until you closed the game.
 

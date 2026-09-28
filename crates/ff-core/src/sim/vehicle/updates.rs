@@ -82,7 +82,17 @@ impl TruckState {
             0.0
         };
         let coupled = ratio != 0.0 && tr.clutch <= 0.5 && !tr.shifting();
-        if tr.automatic && tr.shifting() && ratio != 0.0 {
+        // A manual downshift with the clutch held matches revs the way the
+        // automatic does, so the engine follows the braking truck down
+        // instead of dropping straight to idle (tester request, 2026-09-28).
+        // The driver's own blip still free-revs, and a missed shift into a
+        // gear the road would over-rev is never blipped past the governor.
+        let manual_rev_match = !tr.automatic
+            && tr.rev_match
+            && !coupled
+            && self.throttle <= 0.05
+            && self.coupled_rpm(None) <= s.max_rpm;
+        if ((tr.automatic && tr.shifting()) || manual_rev_match) && ratio != 0.0 {
             // Rev-match through the torque interrupt: head for the NEW
             // gear's synchronous speed in both directions, at the rate the
             // engine's spare torque over its inertia allows, and hold there
@@ -133,15 +143,21 @@ impl TruckState {
                 let gear = tr.gear;
                 let automatic = tr.automatic;
                 if gear >= 4 && road_rpm < s.idle_rpm * 0.5 {
+                    let braking = self.brake > 0.01 || self.emergency_brake;
                     if !automatic {
-                        self.stall();
-                        return;
-                    }
-                    // A real automatic kicks down rather than lugging to a
-                    // stall while still rolling. The RPM-threshold downshift
-                    // can be outrun by a hard deceleration during the shift
-                    // delay, so force the drop here.
-                    if self.brake <= 0.01 && !self.emergency_brake {
+                        // Braking to a stop in a tall gear holds idle rather
+                        // than stalling, so a manual driver can gear down and
+                        // brake for traffic at once (owner ruling,
+                        // 2026-09-28). Off the brake it still stalls.
+                        if !braking {
+                            self.stall();
+                            return;
+                        }
+                    } else if !braking {
+                        // A real automatic kicks down rather than lugging to
+                        // a stall while still rolling. The RPM-threshold
+                        // downshift can be outrun by a hard deceleration
+                        // during the shift delay, so force the drop here.
                         self.transmission.kickdown();
                     }
                 }

@@ -935,6 +935,41 @@ fn a_scale_stop(at_mi: f64) -> RoadStop {
     stop
 }
 
+/// Back to the road at an open scale runs the check-in first (owner ruling,
+/// 2026-09-28): leaving used to skip the inspection.
+#[test]
+fn test_leaving_an_open_scale_runs_the_check_in_first() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let mut state = rest_stop_at(&mut app, &drive, stop.clone());
+    build_labels(&mut state, &mut app.ctx);
+    app.clear_speech();
+    state.go_back(&mut app.ctx);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Inspection check-in complete"), "{said}");
+    assert!(said.contains("Back on the road"), "{said}");
+    assert!(with_drive(&drive, |d| d.stop_visit(&stop).inspected));
+}
+
+/// The engine is whatever it already was: a running one is not "started".
+#[test]
+fn test_leaving_a_stop_with_the_engine_running_does_not_ask_to_start_it() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    with_drive(&drive, |d| {
+        d.trip.truck.start_engine();
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = rest_stop_at(&mut app, &drive, travel_center("Love's Travel Stop", at));
+    app.clear_speech();
+    state.go_back(&mut app.ctx);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Back on the road"), "{said}");
+    assert!(!said.contains("starts the engine"), "{said}");
+}
+
 #[test]
 fn test_scale_wave_through_is_two_minutes_not_fifteen() {
     assert_eq!(WAVE_THROUGH_MIN, 2.0);

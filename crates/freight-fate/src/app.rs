@@ -836,10 +836,19 @@ impl App {
         if let Some(state) = self.ctx.state() {
             state.borrow_mut().update(&mut self.ctx, dt);
             self.ctx.run_deferred();
-            let (presence, online) = {
-                let s = state.borrow();
-                (s.presence(&self.ctx), s.online_presence(&self.ctx))
-            };
+            // A screen with no presence of its own (Settings, help, the
+            // drivers list over the pause menu) is still wherever the state
+            // under it is. Reading the top alone signed a paused driver off
+            // the duty board 20 seconds into a sub-screen (2026-09-28).
+            let states = self.ctx.states();
+            let presence = states
+                .iter()
+                .rev()
+                .find_map(|s| s.try_borrow().ok()?.presence(&self.ctx));
+            let online = states
+                .iter()
+                .rev()
+                .find_map(|s| s.try_borrow().ok()?.online_presence(&self.ctx));
             self.ctx.services.presence.update(presence);
             self.ctx.services.online.update(online);
         }

@@ -235,8 +235,8 @@ fn hold_cause_phrases<P: CareerProfile + ?Sized>(profile: &P) -> (String, String
                 enforcement::record_window_phrase(record, profile.game_hours())
             ),
             format!(
-                "Keep the record clean until the oldest ages out {}",
-                enforcement::record_ages_out_text(profile)
+                "Keep the record clean until the hold lifts {}",
+                enforcement::record_review_clears_text(profile)
             ),
         );
     }

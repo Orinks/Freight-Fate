@@ -14,8 +14,11 @@ use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{GameContext, SharedState};
 use freight_fate::states::base::Menu;
+use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_menu_states::DriveRef;
-use freight_fate::states::driving_rest_states::{ParkingFullState, RestStopState};
+use freight_fate::states::driving_rest_states::{
+    LoyaltyRewardsState, ParkingFullState, RestStopState,
+};
 
 /// Activate the row whose HELP contains `needle`.
 ///
@@ -152,6 +155,109 @@ fn test_shower_is_free_after_fueling_at_pilot() {
         app.ctx.profile.as_ref().expect("a career").active_buffs[0]["id"],
         "shower"
     );
+}
+
+/// Leaving the stop menu and opening it again with T is the same visit: the
+/// fuel bought on the first screen still pays for the shower on the second
+/// (tester report, 2026-09-28).
+#[test]
+fn test_free_shower_survives_reopening_the_stop_menu() {
+    let mut app = TestApp::new();
+    let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(5_000.0);
+    with_drive(&drive, |d| d.trip.truck.fuel_gal = 40.0);
+    let stop = buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
+    let mut first = RestStopState::with_drive(DriveRef::of(&drive), stop.clone(), false);
+    activate_by_help(&mut first, &mut app.ctx, "Fills the tank");
+
+    let mut reopened = RestStopState::with_drive(DriveRef::of(&drive), stop, false);
+    let label = row(&mut reopened, &mut app.ctx, "Shower").text(&reopened, &app.ctx);
+    assert!(label.contains("free with your fuel purchase"), "{label}");
+    let money_before = money(&app);
+    activate(&mut reopened, &mut app.ctx, "Shower");
+    approx(money(&app), money_before);
+
+    // The next stop down the road is a new visit and charges again.
+    let later = buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
+    let mut next = RestStopState::with_drive(
+        DriveRef::of(&drive),
+        RoadStop {
+            at_mi: later.at_mi + 80.0,
+            ..later
+        },
+        false,
+    );
+    let priced = row(&mut next, &mut app.ctx, "Shower").text(&next, &app.ctx);
+    assert_eq!(priced, "Shower: 15 dollars", "{priced}");
+}
+
+/// Parked at the stop through a save and a reload, the fuel still pays for
+/// the shower.
+#[test]
+fn test_the_stop_visit_survives_a_save_and_reload() {
+    let mut app = TestApp::new();
+    let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .set_money(5_000.0);
+    with_drive(&drive, |d| d.trip.truck.fuel_gal = 40.0);
+    let stop = buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
+    let mut state = RestStopState::with_drive(DriveRef::of(&drive), stop.clone(), false);
+    activate_by_help(&mut state, &mut app.ctx, "Fills the tank");
+
+    let snapshot = drive_and_ctx(&drive, &mut app, |d, ctx| d.snapshot(ctx));
+    let mut reloaded =
+        DrivingState::from_snapshot(&mut app.ctx, &snapshot).expect("the snapshot reloads");
+    assert!(reloaded.stop_visit(&stop).fueled);
+}
+
+/// A shower credit pays for one shower at a stop that sells one; it used to
+/// spend the credit and still charge full price (2026-09-28).
+#[test]
+fn test_a_shower_credit_makes_one_shower_free() {
+    let mut app = TestApp::new();
+    let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.set_money(5_000.0);
+        p.loyalty.shower_credits = 1;
+    }
+    // No shower sold at a Love's: the credit is not offered there.
+    let loves = buff_stop(&drive, "Love's Travel Stop", &["fuel", "break"]);
+    let mut desk = LoyaltyRewardsState::new(DriveRef::of(&drive), loves);
+    let rows = build_labels(&mut desk, &mut app.ctx);
+    assert!(
+        !rows.iter().any(|r| r.starts_with("Use shower credit")),
+        "{rows:?}"
+    );
+
+    let stop = buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
+    let mut desk = LoyaltyRewardsState::new(DriveRef::of(&drive), stop.clone());
+    activate(&mut desk, &mut app.ctx, "Use shower credit");
+    assert_eq!(
+        app.ctx
+            .profile
+            .as_ref()
+            .expect("a career")
+            .loyalty
+            .shower_credits,
+        0
+    );
+
+    let mut state = RestStopState::with_drive(DriveRef::of(&drive), stop, false);
+    let label = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
+    assert_eq!(label, "Shower: free with your loyalty reward");
+    let before = money(&app);
+    activate(&mut state, &mut app.ctx, "Shower");
+    approx(money(&app), before);
+    let label = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
+    assert_eq!(label, "Shower: 15 dollars", "one credit, one shower");
 }
 
 #[test]

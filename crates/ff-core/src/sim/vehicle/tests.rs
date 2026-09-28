@@ -118,6 +118,65 @@ fn test_manual_downshift_with_clutch_in_does_not_overrev_or_damage_engine() {
     assert!(approx(truck.damage_pct, 0.0));
 }
 
+/// A manual downshift with the clutch held matches revs like the automatic:
+/// the engine climbs to the new gear's road speed and follows it, so letting
+/// the clutch out lands without a jump (tester request, 2026-09-28).
+#[test]
+fn test_manual_downshift_with_clutch_held_matches_revs() {
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    truck.set_air_ready(false);
+    truck.velocity_mps = 15.0;
+    truck.transmission.gear = 8;
+    truck.rpm = truck.coupled_rpm(None);
+    truck.transmission.clutch = 1.0;
+    assert!(truck.transmission.request_gear(7).ok);
+
+    for _ in 0..(0.4 / DT) as usize {
+        truck.update(DT);
+    }
+    let sync = truck.coupled_rpm(None);
+    assert!(
+        approx_rel(truck.rpm, sync, 0.03),
+        "engine {:.0} vs the new gear's {sync:.0} with the clutch held",
+        truck.rpm
+    );
+
+    truck.transmission.clutch = 0.0;
+    let before = truck.rpm;
+    truck.update(DT);
+    assert!(
+        (truck.rpm - before).abs() < 100.0,
+        "letting the clutch out must not jump the engine: {before:.0} -> {:.0}",
+        truck.rpm
+    );
+    assert!(
+        !truck.transmission.rev_match,
+        "the match ends with the clutch out"
+    );
+}
+
+/// Braking a manual to a stop in a tall gear holds idle; off the brake, the
+/// same gear at a standstill stalls (owner ruling, 2026-09-28).
+#[test]
+fn test_manual_braking_in_a_tall_gear_holds_idle_until_the_brake_lifts() {
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    truck.set_air_ready(false);
+    truck.transmission.gear = 7;
+    truck.velocity_mps = 1.0;
+    truck.brake = 1.0;
+    for _ in 0..(3.0 / DT) as usize {
+        truck.update(DT);
+    }
+    assert!(truck.engine_on && !truck.stalled, "braking must not stall");
+    assert!(truck.velocity_mps.abs() < 0.1, "the truck came to rest");
+
+    truck.brake = 0.0;
+    truck.update(DT);
+    assert!(truck.stalled, "off the brake in seventh at a standstill");
+}
+
 fn loaded_automatic_avoids_steep_grade_shift_hunting(grade: f64) {
     let mut truck = make_auto_truck();
     truck.set_air_ready(false);

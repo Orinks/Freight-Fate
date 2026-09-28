@@ -71,16 +71,21 @@ impl Trip {
                 if side.is_some() && !self.span_is_multilane(taper_start, end) {
                     side = None;
                 }
+                // A work zone steps the limit down, never up: through a town
+                // posted 35 the fixed 55 and 45 raised it (2026-09-28).
+                let road = self.lowest_limit_over(taper_start, end);
                 zones.push(
                     Zone::new(
                         taper_start,
                         at,
-                        CONSTRUCTION_TAPER_LIMIT_MPH,
+                        CONSTRUCTION_TAPER_LIMIT_MPH.min(road),
                         "construction merge",
                     )
                     .with_closed_side(side),
                 );
-                zones.push(Zone::new(at, end, 45.0, "construction").with_closed_side(side));
+                zones.push(
+                    Zone::new(at, end, 45.0_f64.min(road), "construction").with_closed_side(side),
+                );
                 spans.push((taper_start, end));
             }
         }

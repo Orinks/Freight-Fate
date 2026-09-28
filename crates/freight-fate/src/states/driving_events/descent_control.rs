@@ -81,6 +81,9 @@ impl DrivingState {
         });
         if ctx.settings.descent_speed_control == "off" {
             self.descent_safe_mph = None;
+            // Forget the grade too, or turning it back on mid-grade finds
+            // the same key and never sets a safe speed again (2026-09-28).
+            self.descent_safe_key = None;
             return;
         }
         let Some(steepest) = self.steep_descent_ahead() else {
@@ -283,7 +286,12 @@ impl DrivingState {
             }
             let mut limit_state = String::new();
             let mut limit_message = String::new();
-            if !self.trip.truck.transmission.automatic && self.trip.truck.rpm < 1100.0 {
+            // Mid-shift the clutch lets the revs fall to idle; that is the
+            // shift, not a gear too tall, and warning on it spoke at every
+            // manual shift on the hill, the right downshift included.
+            let tr = &self.trip.truck.transmission;
+            let mid_shift = tr.clutch > 0.5 || tr.shifting();
+            if !tr.automatic && !mid_shift && self.trip.truck.rpm < 1100.0 {
                 limit_state = "gear".to_string();
                 limit_message = "Descent control needs a lower gear.".to_string();
                 self.descent_beaten_s = 0.0; // a different limit; not this count

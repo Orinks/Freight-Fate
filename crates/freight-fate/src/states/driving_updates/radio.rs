@@ -363,6 +363,7 @@ impl DrivingState {
         self.music_night = night;
         self.radio_station_id = station.id.clone();
         self.radio_playlist = self.station_rotation_pool(ctx, station, night);
+        self.radio_playing_key.clear();
         self.synth_music_applied = Some(self.roadhouse_synth_state(ctx));
         let cue = self.station_cue(ctx, station, &self.radio_playlist);
         let key = if cue.in_break() {
@@ -411,8 +412,7 @@ impl DrivingState {
         let len = if !self.radio_break_queue.is_empty() {
             content_duration_s(&self.radio_break_queue[self.radio_break_pos])
         } else {
-            let current =
-                self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone();
+            let current = self.current_station_track();
             self.station_track_len_s(ctx, &station, &current)
         };
         if self.radio_elapsed_s < len {
@@ -518,6 +518,7 @@ impl DrivingState {
             }
             self.radio_station_id = station.id.clone();
             self.radio_playlist = Vec::new();
+            self.radio_playing_key.clear();
             self.radio_break_queue = Vec::new();
             // A file's fade-in window would read as "finished" to
             // music_playing on some backends, and a stream has not even

@@ -15,6 +15,7 @@ use crate::states::driving_core::{
     shut_down_engine, FacilityEngine, MOTEL_COST,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
+use crate::states::driving_rest_states::back_on_the_road_line;
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::shoulder::ShoulderSleepConfirmationState;
 
@@ -24,7 +25,6 @@ pub struct ParkingFullState {
     menu: MenuCore<Self>,
     driving: DriveRef,
     pub stop: RoadStop,
-    fueled_here: bool,
 }
 
 impl ParkingFullState {
@@ -33,7 +33,6 @@ impl ParkingFullState {
             menu: MenuCore::new("Parking full").with_intro_help(PARKING_FULL_INTRO_HELP),
             driving: DriveRef::active(ctx),
             stop,
-            fueled_here: false,
         }
     }
 
@@ -43,7 +42,6 @@ impl ParkingFullState {
             menu: MenuCore::new("Parking full").with_intro_help(PARKING_FULL_INTRO_HELP),
             driving,
             stop,
-            fueled_here: false,
         }
     }
 
@@ -60,7 +58,7 @@ impl ParkingFullState {
 
     fn announce_over_drive(&mut self, ctx: &mut GameContext, d: &mut DrivingState) {
         ctx.audio
-            .set_ambient(Some(poi_ambient_key(&self.stop, d.trip.current_hour())));
+            .set_ambient(Some(poi_ambient_key(&self.stop, d.trip.local_hour())));
         // The lot and the island are separate facilities, and a driver who
         // cannot park here can still fuel here. Saying so up front is what
         // stops a full lot from reading as a closed truck stop.
@@ -127,17 +125,13 @@ impl ParkingFullState {
     fn drive_on(&mut self, ctx: &mut GameContext) {
         // No sleep happened here, so the engine is whatever it already was --
         // never claim it needs a restart it may not need.
+        let engine_on = self
+            .driving
+            .read(|d| d.trip.truck.engine_on)
+            .unwrap_or(false);
         ctx.audio.play("ui/menu_back");
         ctx.pop_state();
-        let engine = ctx.control_hint("engine");
-        let brake = ctx.control_hint("parking_brake");
-        ctx.say_with(
-            format!(
-                "Back on the road. Parking brake set. {engine} starts the engine, {brake} \
-                 releases the brake."
-            ),
-            Say::new(),
-        );
+        ctx.say_with(back_on_the_road_line(ctx, engine_on), Say::new());
     }
 
     fn motel(&mut self, ctx: &mut GameContext) {
@@ -172,7 +166,7 @@ impl ParkingFullState {
                  is {}. Hours of service reset and you wake fresh. You have {} dollars. {} \
                  starts the engine.",
                 fmt_grouped(MOTEL_COST, 0),
-                clock_text(d.trip.current_hour()),
+                clock_text(d.trip.local_hour()),
                 fmt_grouped(money, 0),
                 ctx.control_hint("engine")
             )
@@ -247,14 +241,6 @@ impl FuelPump for ParkingFullState {
 
     fn stop(&self) -> &RoadStop {
         &self.stop
-    }
-
-    fn fueled_here(&self) -> bool {
-        self.fueled_here
-    }
-
-    fn set_fueled_here(&mut self, fueled: bool) {
-        self.fueled_here = fueled;
     }
 }
 

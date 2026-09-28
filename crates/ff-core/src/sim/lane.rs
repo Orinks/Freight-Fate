@@ -373,10 +373,14 @@ impl LaneKeeping {
         // What the driver asked the front axle for, plus whatever partial
         // lane keeping is contributing, capped so a held key is a steering
         // input rather than a rollover (see MAX_STEER_LATERAL_G).
-        let helper = if assist_steers(assist) {
-            -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
-        } else if self.straighten {
+        // Straighten first: held, it squares the truck with the road and
+        // leaves the lane position alone, on partial as the help promises.
+        // Checked after partial's own help, it added nothing there and the
+        // truck was still pulled to the centre (2026-09-28).
+        let helper = if self.straighten {
             -self.yaw_rad * ASSIST_YAW_GAIN
+        } else if assist_steers(assist) {
+            -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
         } else {
             0.0
         };

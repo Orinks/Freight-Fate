@@ -42,6 +42,20 @@ use crate::states::driving_core::{profile_mut_of, profile_of};
 use crate::states::driving_menu_states::{push_over_drive, DriveRef};
 use crate::states::driving_updates::pending::EnforcementStopParams;
 
+/// Leaving a stop menu. The engine is whatever it already was: "starts the
+/// engine" over a running one sent the driver's press to shut it down.
+pub fn back_on_the_road_line(ctx: &GameContext, engine_on: bool) -> String {
+    let brake = ctx.control_hint("parking_brake");
+    if engine_on {
+        return format!("Back on the road. Parking brake set. {brake} releases the brake.");
+    }
+    let engine = ctx.control_hint("engine");
+    format!(
+        "Back on the road. Parking brake set. {engine} starts the engine, {brake} releases the \
+         brake."
+    )
+}
+
 /// Where the career clock stands right now, mid-trip included.
 pub fn record_hours(ctx: &GameContext, driving: &DrivingState) -> f64 {
     profile_of(ctx).game_hours + driving.trip.game_minutes / 60.0

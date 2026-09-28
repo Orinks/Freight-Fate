@@ -494,9 +494,11 @@ impl Trip {
                 }) {
                     continue;
                 }
-                let limit_mph = Self::construction_zone_speed(&event);
                 let mut closed_side = Self::construction_closed_side(&event);
                 let taper_start = (start_mi - CONSTRUCTION_TAPER_MI).max(0.0);
+                // Never above the road's own limit (see `place_zones`).
+                let road = self.lowest_limit_over(taper_start, end_mi);
+                let limit_mph = Self::construction_zone_speed(&event).min(road);
                 // A reported closure still needs a lane to merge into.
                 if closed_side.is_some() && !self.span_is_multilane(taper_start, end_mi) {
                     closed_side = None;
@@ -505,7 +507,7 @@ impl Trip {
                     Zone::new(
                         taper_start,
                         start_mi,
-                        CONSTRUCTION_TAPER_LIMIT_MPH,
+                        CONSTRUCTION_TAPER_LIMIT_MPH.min(road),
                         "construction merge",
                     )
                     .with_closed_side(closed_side),

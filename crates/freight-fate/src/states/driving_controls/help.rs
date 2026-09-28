@@ -86,7 +86,9 @@ impl DrivingState {
         text.push_str("Braking cancels the session. At the planned pickup it pauses and ");
         text.push_str("resumes once you depart. ");
         text.push_str("Plus and minus, including the keypad keys, change the open-road ");
-        text.push_str("target by five; it never holds above the posted limit. Control ");
+        text.push_str(
+            "target by five; it never holds more than five over the posted limit. Control ",
+        );
         text.push_str("with plus or minus, by one. ");
         text.push_str(&format!(
             "{} resumes the last cruise speed. ",

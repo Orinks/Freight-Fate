@@ -1123,9 +1123,11 @@ impl EndorsementCourseState {
         let mut announcements: Vec<String> = Vec::new();
         let money = {
             let p = profile_mut(ctx);
-            // A day-long course covers a full rest; a morning one does not.
+            // Off duty on the hours clock too, as the logbook says: a day-long
+            // course is a full rest, a shorter one still counts toward the
+            // break and the window (2026-09-28).
+            p.hos.off_duty(cred.course_hours * 60.0);
             if cred.course_hours >= 10.0 {
-                p.hos.sleep();
                 p.fatigue = 0.0;
             }
             let day = p.market_day();

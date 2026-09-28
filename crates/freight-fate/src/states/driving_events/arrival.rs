@@ -176,7 +176,14 @@ impl DrivingState {
         if self.arrival_menu_open {
             return true;
         }
-        self.cancel_cruise(ctx, false);
+        // An arrival pause, held until the departure resumes it. Ending the
+        // session here lost the driver's set speed at every assisted pickup
+        // (tester report, 2026-09-28).
+        if self.speed_control_armed {
+            self.pause_speed_control(ctx, false);
+        } else {
+            self.cancel_cruise(ctx, false);
+        }
         self.trip.truck.throttle = 0.0;
         self.trip.truck.brake = 1.0;
         if self.trip.truck.speed_mph() <= 0.5 && !self.arrival_full_stop_said {

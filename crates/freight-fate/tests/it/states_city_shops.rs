@@ -598,10 +598,18 @@ fn test_bought_truck_starts_fresh_and_each_keeps_its_own_condition() {
 
 // -- tests/test_truck_dealer_menu.py ---------------------------------------------------
 
+/// An owner-operator in a company driver's seat.
+fn owner_operator(app: &mut TestApp) {
+    let p = profile_mut(app);
+    p.business_status = LEASED_OWNER_OPERATOR.to_string();
+    p.owned_trucks = vec!["rig".to_string()];
+}
+
 #[test]
 fn test_the_terminal_menu_offers_truck_dealer_directly() {
     let mut app = TestApp::new();
     career(&mut app, "Dale", "Buffalo");
+    owner_operator(&mut app);
     let mut menu = CityMenuState::new(&app.ctx, false);
     let rows = built_labels(&mut app, &mut menu);
 
@@ -609,10 +617,35 @@ fn test_the_terminal_menu_offers_truck_dealer_directly() {
     assert!(!rows.iter().any(|t| t == "Drive to city services"));
 }
 
+/// The carrier assigns a company driver's tractor, tires and trailer, so the
+/// owner's shopping stays off their menus until the buy-in (owner,
+/// 2026-09-28).
+#[test]
+fn test_a_company_driver_is_not_shown_owner_operator_shops() {
+    let mut app = TestApp::new();
+    career(&mut app, "Dale", "Buffalo");
+    profile_mut(&mut app).business_status = COMPANY_DRIVER.to_string();
+    let mut menu = CityMenuState::new(&app.ctx, false);
+    let rows = built_labels(&mut app, &mut menu);
+    assert!(!rows.iter().any(|t| t == "Truck dealer"), "{rows:?}");
+    assert!(rows.iter().any(|t| t == "Business status"), "{rows:?}");
+
+    app.push_state(GarageState::new());
+    let rows = labels::<GarageState>(&app);
+    for hidden in ["Upgrades", "Trucks", "Trailer programs"] {
+        assert!(!rows.iter().any(|t| t == hidden), "{hidden}: {rows:?}");
+    }
+    assert!(
+        !rows.iter().any(|t| t.starts_with("Tire compound")),
+        "{rows:?}"
+    );
+}
+
 #[test]
 fn test_the_truck_dealer_item_pushes_truck_shop_state() {
     let mut app = TestApp::new();
     career(&mut app, "Dale", "Buffalo");
+    owner_operator(&mut app);
     let city = CityMenuState::new(&app.ctx, false);
     app.push_state(city);
     activate::<CityMenuState>(&mut app, "Truck dealer");
@@ -678,6 +711,7 @@ fn test_truck_shop_entry_stays_plain_from_the_garage() {
         .city_service("Indianapolis", "truck_dealer")
         .expect("Indianapolis has a dealer");
     assert!(!dealer.fallback);
+    owner_operator(&mut app);
 
     app.push_state(GarageState::new());
     app.clear_speech();

@@ -1230,7 +1230,8 @@ impl DrivingState {
                 return_message,
                 &lights,
             );
-            record_inspection(ctx);
+            // A failed log check is not a passed inspection: no badge, and
+            // no clean-inspection credit on the safety record (2026-09-28).
             return;
         }
         {
@@ -1249,7 +1250,6 @@ impl DrivingState {
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Self::event_category(event);
         ctx.say_event_with(message, opts);
-        record_inspection(ctx);
     }
 
     /// `_place_out_of_service()`. A full 10-hour reset: fatigue, drive, or

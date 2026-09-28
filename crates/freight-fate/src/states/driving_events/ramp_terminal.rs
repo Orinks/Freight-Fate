@@ -99,13 +99,13 @@ impl DrivingState {
     /// and a traffic light for the truck stop 0.1 mile on, and the driver
     /// heard both (agent drive, 2026-09-23).
     fn ramp_rng(&self, stop: &RoadStop) -> PyRandom {
+        // Both in the route's frame: the record's own mile is leg-local, and
+        // the destination (which never carries `interchange_mi`) seeded off
+        // it while the truck stop on the same exit seeded off the route mile
+        // (2026-09-28).
         let exit_mi = stop
             .interchange_mi
-            .or_else(|| {
-                self.trip
-                    .interchange_at(stop.at_mi, 0.15)
-                    .map(|interchange| interchange.at_mi)
-            })
+            .or_else(|| self.trip.interchange_mile_at(stop.at_mi, 0.15))
             .unwrap_or(stop.at_mi);
         PyRandom::new_from_i64((self.trip_seed << 16) ^ (exit_mi * 100.0) as i64)
     }

@@ -742,12 +742,15 @@ impl Menu for CityMenuState {
                      load, load choice opens with seniority.",
                 ),
             ];
-        items.push(
-            MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
-                "Tractors at the local dealer. Owner-operators buy and switch here, company \
-                 drivers can look.",
-            ),
-        );
+        // Owner-operator business stays off a company driver's menus (owner,
+        // 2026-09-28): the carrier assigns the tractor, and the buy-in lives
+        // under Business status.
+        if is_owner_operator(status) {
+            items.push(
+                MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx))
+                    .help("Tractors at the local dealer. Buy a truck or switch between yours."),
+            );
+        }
         // Owner-operators only (owner ruling, 2026-08-20): a company
         // driver's tractor goes where dispatch sends it -- repositioning
         // on a whim is the owner's privilege because it is the owner's

@@ -81,6 +81,23 @@ pub struct PlaylistShuffleLap {
     pub lap: u64,
 }
 
+/// What the driver has done at the stop the truck is parked at. It lives on
+/// the drive, not the stop's menu, because leaving the menu and opening it
+/// again with T is the same visit: the fuel still pays for the shower, the
+/// scale check-in is still done, the CAT ticket still prices a reweigh.
+#[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct StopVisit {
+    /// `RoadStop::key` of the stop; any other stop starts a fresh visit.
+    pub key: String,
+    pub fueled: bool,
+    /// A loyalty shower credit or points redeemed here: the shower is free.
+    pub free_shower: bool,
+    pub inspected: bool,
+    /// Game hour of this visit's full-price CAT Scale ticket.
+    pub full_weigh_h: Option<f64>,
+}
+
 pub struct DrivingState {
     // ---- driving.py: identity -----------------------------------------------------------
     pub job: Job,
@@ -107,6 +124,8 @@ pub struct DrivingState {
     // Rig-care buffs (quick lube, tire rotation) hold for the rest of
     // the trip and die with it -- keyed by buff group, see data/buffs.py.
     pub rig_buffs: RigBuffs,
+    /// See [`StopVisit`]; read and written through `stop_visit`.
+    pub stop_visit: StopVisit,
     pub weather_source_real: bool,
     /// The route mile the cab next asks the Weather Service for warnings at.
     pub alerts_next_poll_mi: f64,
@@ -129,6 +148,9 @@ pub struct DrivingState {
     // (host/id/ad) every few songs on the stations that have a live host.
     pub radio_station_id: String,
     pub radio_playlist: Vec<String>,
+    /// The playlist entry now playing, as resolved (a synthesized piece's
+    /// classic stand-in while it renders); empty when nothing was resolved.
+    pub radio_playing_key: String,
     pub radio_track_index: usize,
     pub radio_elapsed_s: f64,
     pub radio_break_queue: Vec<String>,

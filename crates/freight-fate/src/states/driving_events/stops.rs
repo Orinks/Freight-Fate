@@ -7,7 +7,7 @@ use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, Say};
 use crate::states::base::TimedMessageState;
-use crate::states::driving::DrivingState;
+use crate::states::driving::{DrivingState, StopVisit};
 use crate::states::driving_core::*;
 use crate::states::driving_rest_states::RestFocus;
 
@@ -359,6 +359,18 @@ impl DrivingState {
             (Some(key), Some(stop)) => *key == stop.key(),
             _ => false,
         }
+    }
+
+    /// This visit's record at `stop`, fresh when it is a different stop.
+    pub fn stop_visit(&mut self, stop: &RoadStop) -> &mut StopVisit {
+        let key = stop.key();
+        if self.stop_visit.key != key {
+            self.stop_visit = StopVisit {
+                key,
+                ..StopVisit::default()
+            };
+        }
+        &mut self.stop_visit
     }
 
     /// Speak the selected stop and the HOS purpose when this press chose it.
