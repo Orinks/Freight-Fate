@@ -55,8 +55,6 @@
 
 ### Changed
 
-- **Hidden achievements for a real-world date follow today's date, not the career calendar.** They need the game online, since the date comes from orinks.net.
-
 - **The exit lane opens just before the gore, and you steer into it there.** Already in the right lane, you hear no lane instructions before that.
 
 - **The exit blinker starts clicking half a mile out.** X still sets the signal from miles away, and the game says "Signal set" until then.
