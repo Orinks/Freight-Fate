@@ -356,6 +356,17 @@ are in the [release gate](#release-gate-190).
         `tools/build_appimage.py`'s Python path and their tests are
         deleted. The Rust build is the only one; `--rust` is still
         accepted and does nothing.
+- [x] The release candidate reaches 1.8 developer-snapshot players
+      (2026-09-28). Their updater reads only `nightly-YYYYMMDD` prereleases
+      among the 20 newest releases, and a `-macos.zip` asset, so it had
+      offered them nothing since 2026-08-29. Dispatching the snapshot
+      workflow with `release_candidate` also publishes the build as
+      `nightly-YYYYMMDD` with a `-macos.zip` copy of the Apple Silicon app.
+      Rehearsed on Windows: the 1.8 apply script's copy over a 1.8 nightly
+      install leaves 1.8's Python files beside the new ones, and 1.9 boots
+      from that folder with the 1.8 settings. Stable notes are bounded now:
+      the Unreleased block alone was 153,255 characters, past the tag
+      build's 120,000 check, so `v1.9.0` would have failed after building.
 - [x] The owner voice pass over seven achievement titles (2026-09-22).
       The category-description cut landed and the owner accepted all
       seven titles as-is. The physical-Mac VoiceOver listening pass was

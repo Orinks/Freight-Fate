@@ -257,6 +257,30 @@ def test_stable_notes_fall_back_to_unreleased_when_version_missing(tmp_path, mon
     assert release_notes.stable_notes("9.9.9") == "## Changed\n- Upcoming change."
 
 
+def test_stable_notes_are_bounded_and_point_at_the_changelog(tmp_path, monkeypatch):
+    # 1.9's Unreleased block is past GitHub's limit on its own; the v1.9.0
+    # tag build checks the size after every platform has built.
+    release_notes = load_release_notes_module()
+    added_entries = "\n".join(
+        f"- **Career improvement {index}.** " + ("Player-facing detail. " * 90)
+        for index in range(100)
+    )
+    fixed_entries = "\n".join(
+        f"- **Career fix {index}.** " + ("Clear fix detail. " * 90) for index in range(100)
+    )
+    repo = make_repo(
+        tmp_path, changelog(f"### Added\n{added_entries}\n\n### Fixed\n{fixed_entries}\n")
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.stable_notes("1.9.0")
+
+    assert len(notes) + 1 <= release_notes.GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+    assert notes.startswith("## Added\n- **Career improvement 0.**")
+    assert "\n## Fixed\n- **Career fix 0.**" in notes
+    assert notes.endswith(release_notes.STABLE_COMPLETE_LIST)
+
+
 def test_nightly_notes_exclude_entries_from_previous_nightly(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(tmp_path, changelog("### Added\n- Old curated note.\n"))
