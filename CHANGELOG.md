@@ -21,6 +21,8 @@
 
 - **Two new achievements, both hidden.** One is earned at the wheel and one only on a particular day of the year.
 
+- **A new hidden achievement belongs to one week of the real year.**
+
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
 
 - **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
@@ -52,6 +54,8 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **Hidden achievements for a real-world date follow today's date, not the career calendar.** They need the game online, since the date comes from orinks.net.
 
 - **The exit lane opens just before the gore, and you steer into it there.** Already in the right lane, you hear no lane instructions before that.
 

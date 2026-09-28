@@ -2,12 +2,17 @@
 //! (`ArrivalState._award_arrival_achievements`), kept apart from the money
 //! so the settlement arithmetic stays readable.
 
+use chrono::{Datelike, Local};
 use ff_core::achievements::{add_unique_stat, increment_stat, reset_stat};
 use ff_core::models::carrier_fleet::{fleet_tier_for_level, FLEET_TIERS};
-use ff_core::sim::season::{date_text, is_friday_the_thirteenth, player_calendar_hours, season};
+use ff_core::sim::season::{
+    date_text, is_friday_the_thirteenth, is_truck_driver_appreciation_week, player_calendar_hours,
+    season,
+};
 use serde_json::Value;
 
 use crate::app::GameContext;
+use crate::net::server_now;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{is_night, profile_mut_of, profile_of};
 use crate::states::driving_menu_states::{simple_arrival_badge, ArrivalState};
@@ -471,13 +476,21 @@ pub(crate) fn award_arrival_achievements(
     if arrival_date == "January 1" && arrival_hour < 3.0 {
         push(&mut ids, "new_year_run");
     }
-    if is_friday_the_thirteenth(calendar_hours) && trip_damage <= 1.0 {
-        push(&mut ids, "friday_thirteenth");
-    }
-    // Ten-four day: the date reads as the acknowledgment every driver on the
-    // channel has been saying all year.
-    if arrival_date == "October 4" {
-        push(&mut ids, "ten_four_day");
+    // Days the player is living rather than the career's: read off
+    // orinks.net's clock, because the computer's can be set to any date. No
+    // word from the server this session, no badge.
+    if let Some(today) = server_now().map(|now| now.with_timezone(&Local).date_naive()) {
+        if is_friday_the_thirteenth(today) && trip_damage <= 1.0 {
+            push(&mut ids, "friday_thirteenth");
+        }
+        // Ten-four day: the date reads as the acknowledgment every driver on
+        // the channel has been saying all year.
+        if (today.month(), today.day()) == (10, 4) {
+            push(&mut ids, "ten_four_day");
+        }
+        if is_truck_driver_appreciation_week(today) {
+            push(&mut ids, "appreciation_week");
+        }
     }
     if job.distance_mi >= 1_000.0 {
         push(&mut ids, "five_hundred_mile_run");

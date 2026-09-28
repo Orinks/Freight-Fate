@@ -847,6 +847,15 @@ its status or release decision.
       settled on October 4, which reads as ten-four. Both carry the invariants
       export, so the cloud validator's copy needs regenerating on staging
       before a build ships with them.
+- [x] Real-date badges read the server's clock (2026-09-28). Ten-four day
+      and Friday the thirteenth moved off the career calendar to the real
+      date, taken from the last orinks.net reply's Date header carried on
+      the monotonic clock, so setting the computer's date earns nothing and
+      an offline session earns none. Christmas and New Year's stay on the
+      career calendar: their copy is the game world, and New Year's reads
+      the career hour. New hidden badge for National Truck Driver
+      Appreciation Week (ATA: second Sunday of September through Saturday),
+      182 in the catalog.
 - [x] Losing the exit lane is spoken (2026-09-19). "Exit lane set." was a
       promise the drive could break in silence -- a lane change away or a
       quarter-lane wander left decays the alignment -- and the next word on

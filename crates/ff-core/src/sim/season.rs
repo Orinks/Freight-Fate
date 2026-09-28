@@ -203,14 +203,21 @@ pub fn date_text(game_hours: f64) -> String {
     format!("{} {}", MONTH_NAMES[date.month0() as usize], date.day())
 }
 
-/// Whether the career calendar has landed on a Friday the thirteenth.
-///
-/// The career runs the same fixed 365-day year every lap, mapped onto 2001,
-/// so the unlucky dates are the ones 2001 had -- and they come round again
-/// each career year, which is what a superstition wants anyway.
-pub fn is_friday_the_thirteenth(game_hours: f64) -> bool {
-    let date = calendar_date(game_hours);
+/// Whether a real calendar date is a Friday the thirteenth. The superstition
+/// belongs to the day the player is living, so the badge reads the real date,
+/// not the career calendar.
+pub fn is_friday_the_thirteenth(date: NaiveDate) -> bool {
     date.day() == 13 && date.weekday() == Weekday::Fri
+}
+
+/// Whether a real calendar date falls in National Truck Driver Appreciation
+/// Week: the American Trucking Associations hold it Sunday to Saturday from
+/// the second Sunday of September (September 13-19 in 2026).
+pub fn is_truck_driver_appreciation_week(date: NaiveDate) -> bool {
+    let Some(sunday) = NaiveDate::from_weekday_of_month_opt(date.year(), 9, Weekday::Sun, 2) else {
+        return false;
+    };
+    (sunday..sunday + chrono::Duration::days(7)).contains(&date)
 }
 
 /// Which year of the career this clock falls in (1 on the first lap of the
@@ -347,6 +354,26 @@ mod tests {
         assert_eq!(date_text(24.0 * 100.0), "June 29"); // a hundred days on
                                                         // The fixed 365-day year wraps cleanly back to the start.
         assert_eq!(date_text(24.0 * DAYS_PER_YEAR), "March 21");
+    }
+
+    #[test]
+    fn appreciation_week_is_the_weeks_the_ata_announced() {
+        // ATA's published dates: the second full Sunday-to-Saturday week.
+        for (year, first) in [(2023, 10), (2024, 8), (2025, 14), (2026, 13)] {
+            let day = |d: u32| NaiveDate::from_ymd_opt(year, 9, d).unwrap();
+            assert!(!is_truck_driver_appreciation_week(day(first - 1)), "{year}");
+            assert!(is_truck_driver_appreciation_week(day(first)), "{year}");
+            assert!(is_truck_driver_appreciation_week(day(first + 6)), "{year}");
+            assert!(!is_truck_driver_appreciation_week(day(first + 7)), "{year}");
+        }
+    }
+
+    #[test]
+    fn friday_the_thirteenth_is_the_real_date() {
+        let date = |m, d| NaiveDate::from_ymd_opt(2026, m, d).unwrap();
+        assert!(is_friday_the_thirteenth(date(11, 13)));
+        assert!(!is_friday_the_thirteenth(date(10, 13))); // a Tuesday
+        assert!(!is_friday_the_thirteenth(date(11, 6))); // a Friday
     }
 
     #[test]
@@ -741,12 +768,8 @@ mod tests {
     }
 
     #[test]
-    fn test_weekday_name_and_friday_the_thirteenth_follow_the_2001_calendar() {
+    fn test_weekday_name_follows_the_2001_calendar() {
         assert_eq!(weekday_name(0.0), "Wednesday");
         assert_eq!(weekday_name(2.0 * 24.0), "Friday");
-        // 2001-04-13 was a Friday: day-of-year 103, 23 career days in.
-        assert!(is_friday_the_thirteenth(23.0 * 24.0 + 6.0));
-        assert!(!is_friday_the_thirteenth(22.0 * 24.0));
-        assert!(!is_friday_the_thirteenth(0.0));
     }
 }

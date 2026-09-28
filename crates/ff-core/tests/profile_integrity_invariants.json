@@ -58,6 +58,10 @@
       "category": "places",
       "description": "You delivered into Appalachian coal-and-ridge country, where the roads bend like fiddle tunes. The hills watched you come in, and the dock was glad you did."
     },
+    "appreciation_week": {
+      "category": "hidden",
+      "description": "A load delivered during Truck Driver Appreciation Week. There were doughnuts at the receiving window, and a dispatcher said thanks without being asked. Next week it goes back to being the job."
+    },
     "april_first": {
       "category": "hidden",
       "description": "A delivery settled on the first day of April. Dispatch swore the load was real, and for once the joke was on nobody -- paperwork clean, payment posted."
@@ -763,6 +767,7 @@
     "all_upgrades",
     "amarillo_arrival",
     "appalachia_delivery",
+    "appreciation_week",
     "april_first",
     "authority_active",
     "bakersfield_arrival",
@@ -946,6 +951,7 @@
     "all_upgrades": "Every Box on the Order Sheet",
     "amarillo_arrival": "Amarillo by Daybreak",
     "appalachia_delivery": "Freight Up the Holler",
+    "appreciation_week": "Somebody Said Thank You",
     "april_first": "Nobody's Fool on the First",
     "authority_active": "Running Under Your Own Numbers",
     "bakersfield_arrival": "The Bakersfield Sound",
