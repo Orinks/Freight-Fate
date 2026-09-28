@@ -445,6 +445,20 @@ impl DrivingState {
             // second the box takes to find a gear, a truck on a steep grade
             // gained two or three miles an hour a shift and landed the lower
             // gear past its governor (bench, twelve percent, 2026-09-24).
+            // On a manual it lets go on the same edge it would in gear: the
+            // clutch or neutral lasts as long as the driver holds it, and the
+            // snub rode it down to a stop. An automatic's shift is a second,
+            // and its snub may be guarding revs rather than speed, so it rides
+            // the shift out.
+            let held = self
+                .cruise_held_mph
+                .or(self.cruise_mph)
+                .unwrap_or(CRUISE_MIN_MPH);
+            if !self.trip.truck.transmission.automatic
+                && self.trip.truck.speed_mph() <= held - CRUISE_SNUB_UNDER_MPH
+            {
+                self.cruise_snubbing = false;
+            }
             if self.cruise_snubbing {
                 let weather_brake: f64 = if self.trip.weather.effects().grip < 0.7 {
                     0.45

@@ -212,6 +212,12 @@ pub fn parse_lcs_csv(body: &[u8], now_epoch: f64) -> Vec<TrafficEvent> {
             location_text,
             work_type: "construction".into(),
             closure: closure.into(),
+            // A freeway closure holds one carriageway; a two-way road
+            // reads "North / South" and holds both.
+            direction: match get("travelFlowDirection") {
+                one @ ("North" | "South" | "East" | "West") => one.to_string(),
+                _ => String::new(),
+            },
         });
     }
     events
@@ -261,11 +267,15 @@ mod tests {
         assert_eq!(i5.location_text, "Between milepost 56.6 and 59.01");
         assert_eq!(i5.county, "Los Angeles");
         assert!(i5.latitude.is_some() && i5.longitude.is_some());
+        // A freeway closure holds one carriageway.
+        assert_eq!(i5.direction, "North");
 
         // State routes are CA-, not SR-; shoulders do not count as lanes.
         let sr1 = by_id(&events, "C1PB-0004").unwrap();
         assert_eq!(sr1.road_name, "CA-1");
         assert_eq!(sr1.lanes_affected.as_deref(), Some("2 of 4 lanes closed"));
+        // "North / South" holds both ways.
+        assert_eq!(sr1.direction, "");
         // A shoulder-only closure is shoulder work; one-way traffic is
         // alternating; a moving closure takes a lane.
         assert_eq!(by_id(&events, "C101JD-0004").unwrap().closure, "shoulder");

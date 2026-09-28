@@ -304,8 +304,24 @@ impl DrivingState {
         self.engine_guide_pan_applied = None;
         self.road_pan_applied = None;
         ctx.audio.stop_world();
+        self.forget_stopped_loops();
         ctx.audio.stop_music_with(600);
         ctx.apply_volumes();
+    }
+
+    /// Clear the latches of every cue loop `stop_world` just silenced.
+    ///
+    /// Each of these loops starts once on its latch rather than every frame,
+    /// so a latch left set kept its sound off after the world came back: the
+    /// lane guide tone stayed silent through the next drift after a pause,
+    /// which is the tone saying "centred" to a driver who was not. Every
+    /// place that stops the world under a live drive calls this after it.
+    pub fn forget_stopped_loops(&mut self) {
+        self.reverse_cue_active = false;
+        self.air_cue_active = false;
+        self.jake_cue_key = None;
+        self.lane_guide_tone_on = false;
+        self.lane_guide_pan_applied = 0.0;
     }
 
     /// `is_night(self.trip.local_hour)`: the drive's own day/night flag, for

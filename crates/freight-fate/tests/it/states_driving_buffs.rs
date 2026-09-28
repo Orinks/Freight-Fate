@@ -228,14 +228,12 @@ fn test_a_shower_credit_makes_one_shower_free() {
         p.set_money(5_000.0);
         p.loyalty.shower_credits = 1;
     }
-    // No shower sold at a Love's: the credit is not offered there.
+    // No shower sold at a Love's: the credit is not offered there, and a
+    // driver holding one is not told they need more points.
     let loves = buff_stop(&drive, "Love's Travel Stop", &["fuel", "break"]);
     let mut desk = LoyaltyRewardsState::new(DriveRef::of(&drive), loves);
     let rows = build_labels(&mut desk, &mut app.ctx);
-    assert!(
-        !rows.iter().any(|r| r.starts_with("Use shower credit")),
-        "{rows:?}"
-    );
+    assert_eq!(rows, vec!["Back to truck stop"]);
 
     let stop = buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
     let mut desk = LoyaltyRewardsState::new(DriveRef::of(&drive), stop.clone());

@@ -282,6 +282,24 @@ Everything found before 2026-09-25 moved to
       seeded from a leg-local mile, work zones raising low limits, descent
       control lost after an off-and-on, straighten inert on partial. Manual
       stalls under braking and leaving an open scale settled by owner ruling.
+- [x] Release-candidate sweep of the 190 commits since main (2026-09-28),
+      each finding checked by two reviewers: a scale checked in at the taper
+      charged later as bypassed, a yard spare wiping a wrecked load, the
+      manual stall line shifting up into a second stall, cruise's snub held
+      under a manual's clutch,
+      the exit hold passing a lower limit, a cancelled destination exit never
+      retaken, the sleep preview promising a full reset, Back at a closed
+      scale running an inspection, the lane guide tone lost after pause,
+      route calls dropped behind a hand-back, live closures matched 25 miles
+      apart, read under the start state and applied to both carriageways,
+      Virginia and Montana rural rows baked with the car limit, and a dozen
+      spoken lines naming the wrong key or saying something untrue.
+- [ ] Predictive cruise's build-up for a climb is clamped only to the
+      posted cap, so it can bank a few miles an hour past a bend's number or
+      a hill's safe descent speed. Clamping it to those too (2026-09-28)
+      made the bend sweep hear "too fast" on I-80 Donner with a half-full
+      tank under cruise, so it was backed out; find why a lower build-up
+      lands the tank's surge on that bend before clamping again.
 - [x] Dispatch trust's spoken band and its effects read different inputs:
       the line used the worst of service, licence, record and debt, while
       the board, refusals and load choice read reputation alone. All three

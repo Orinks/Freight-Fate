@@ -85,9 +85,7 @@ impl PauseMenuState {
         driving.prepare_warning_speech_pause(ctx);
         ctx.pause_event_speech();
         driving.pending_ambient_events.clear();
-        driving.reverse_cue_active = false;
-        driving.air_cue_active = false;
-        driving.jake_cue_key = None;
+        driving.forget_stopped_loops();
         let items = self.rows(ctx, driving);
         self.menu.items = items;
         self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));
@@ -595,9 +593,7 @@ impl Menu for PauseMenuState {
         ctx.pause_event_speech();
         self.driving.read(|d| {
             d.pending_ambient_events.clear();
-            d.reverse_cue_active = false;
-            d.air_cue_active = false;
-            d.jake_cue_key = None;
+            d.forget_stopped_loops();
         });
         let items = self.build_items(ctx);
         self.menu.items = items;

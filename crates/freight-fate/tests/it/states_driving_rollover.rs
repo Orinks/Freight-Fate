@@ -208,6 +208,38 @@ fn test_a_hot_ramp_curve_with_a_full_load_rolls_the_truck() {
 }
 
 #[test]
+fn test_a_rollover_with_no_load_aboard_names_no_load_or_receiver() {
+    // A pickup deadhead hauls an empty box and a reposition runs bobtail:
+    // neither has a load to call secure or a receiver to refuse it.
+    for quiet in [false, true] {
+        for trailer_attached in [true, false] {
+            let mut harness = PlaytestHarness::new();
+            harness.start_delivery(StartDelivery::named("Empty Rollover"));
+            if quiet {
+                harness.app.ctx.settings.driving_speech = "quiet".to_string();
+            }
+            harness.with_drive(move |d, ctx| {
+                d.truck_mut().cargo_kg = 0.0;
+                d.truck_mut().trailer_attached = trailer_attached;
+                d.truck_mut().liquid = None;
+                d.roll_over(ctx);
+            });
+            let case = format!("quiet {quiet}, trailer {trailer_attached}");
+            let lines = harness.app.event_lines();
+            let line = lines
+                .iter()
+                .find(|line| line.contains("olled over in the"))
+                .unwrap_or_else(|| panic!("{case}: no rollover line in {lines:?}"));
+            let lower = line.to_lowercase();
+            assert!(
+                !lower.contains("load") && !lower.contains("receiver"),
+                "{case}: {line}"
+            );
+        }
+    }
+}
+
+#[test]
 fn test_the_same_curve_with_exit_speed_assistance_stays_far_from_the_threshold() {
     // Same truck, same load, same 50 at the gore: exit speed assistance
     // brakes the deceleration lane down and the curve never asks the load for

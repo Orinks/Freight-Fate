@@ -820,10 +820,14 @@ impl DrivingState {
     /// end. The floor is [`Self::exit_approach_floor_mph`], at most ten under
     /// road speed: holding the RAMP's number here is what left trucks
     /// crawling down the through lane.
+    /// Never above the posted limit where the truck is: the floor reads the
+    /// gore's number, and a work zone that ends before the gore still binds.
     /// Says nothing: the slowing line already named who has the pedal, and
     /// holding the speed it announced is the same assist finishing its job.
     pub fn hold_exit_approach_speed(&mut self) {
-        let target = self.exit_approach_floor_mph(None);
+        let position = self.trip.position_mi;
+        let (here, _) = self.trip.speed_limit_at(position);
+        let target = self.exit_approach_floor_mph(None).min(here);
         let t = &mut self.trip.truck;
         if !t.engine_on || t.stalled || t.air_brakes_holding() {
             return;

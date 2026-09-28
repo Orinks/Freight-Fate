@@ -8,7 +8,7 @@
 
 - **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
 
-- **Opt-in HOS planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
+- **Opt-in hours of service planning hints guide T to a comfortable break or sleep stop.** Speech and Alt+D name the last legally reachable fallback.
 - **Hold slash to straighten up.** With lane keeping on partial or off, the truck turns to point down the road and leaves your lane position to you. (Suggested by flight)
 
 - **Bananavision channels are on the dial.** Nine HTTPS Icecast mounts from bananavision.tv — Main, Bananalodeon 80s, Bananalodeon, Bananarang, Educational, Brain, Star Trek Vision, MST3K, and Over the Edge — and they come in anywhere you drive.
@@ -84,7 +84,7 @@
 
 - **A bend is never called faster than your load can take it.** Where the sign asks too much of a heavy load or part-filled tank, you hear a lower number.
 
-- **Partial lane keeping now steers the truck through bends.** Lane changes and speed stay yours; with lane keeping off, bends are still yours to steer.
+- **Partial lane keeping now steers the truck through bends, as curve assistance does.** Lane changes and speed stay yours.
 
 - **A rollover goes on your driving record as a crash.** It counts against your safety record and reputation like a serious violation.
 
@@ -177,6 +177,54 @@
 
 - **Exit and hours of service prompts name your own keys.** A moved steering or hours key is named as you set it.
 
+- **More prompts and settings help name your own keys.** The cruise resume reply, driving assistance help and the controller's hours tip follow your shortcuts.
+
+- **A key you moved onto Slash keeps working.** Hold slash to straighten stays off it until you move that action elsewhere.
+
+- **Checking in at a weigh station no longer gets you fined for bypassing it.** Steering into the exit lane early used to leave the scale ahead of you.
+
+- **Leaving a closed weigh station no longer runs an inspection.**
+
+- **Exit speed assistance no longer speeds you past a lower limit before your exit.**
+
+- **Lane keeping takes the destination exit after you cancel and miss it.** The loop-back's promise now holds.
+
+- **Space and U say the signal is set, not on, until the blinker starts.**
+
+- **Holding the clutch or sitting in neutral no longer leaves cruise's brake on.** Once the truck drops under its number, the brake lets go.
+
+- **A wrecked load stays wrecked when the carrier moves you to a spare truck.** A tank load keeps its surge too.
+
+- **A rollover with no load aboard no longer mentions a load or a receiver.**
+
+- **The sleep preview counts only the rest you still owe.** Finishing a reset you started gives the real wake time and deadline.
+
+- **The rest key waits for the highway when you leave a shipper.** On the streets to the on-ramp it no longer plans a stop it then drops.
+
+- **The loyalty desk no longer says you need more points when you have them.**
+
+- **The lane guide tone comes back after the pause menu.**
+
+- **Route calls are no longer lost when the voice is busy.** A turn or exit call waiting behind a repeated line was dropped unheard.
+
+- **The departure line about a required sleep names the rest stop key.** It named the hours readout, which cannot plan a stop.
+
+- **Job details give a delivery time counted from loading.** A load waiting in a nearby town no longer shows a time before you could arrive.
+
+- **Suspension and disqualification notices no longer mention the truck dealer to company drivers.**
+
+- **The clock keeps the right time zone name after you change the driving pace on the move.**
+
+- **Live construction reports cover your whole route.** Closures between towns and past a state line used to be missed.
+
+- **A closure on the other side of a divided highway no longer slows your side.**
+
+- **Route status on city streets reads street and city names as written.** A road like US 83 is no longer read as the word "us".
+
+- **Resuming a save on the streets to a facility warns about the first turn again.**
+
+- **Unposted back roads in Virginia and Montana carry the truck speed limit.** You hear 45 on Virginia back roads and 65 in Montana.
+
 - **The dispatch board opens without a pause in a new city.** It used to take about a second the first time.
 
 - **Adaptive cruise keeps its set speed through a pickup again.** Setting the parking brake or stopping assistance at the gate no longer switches it off.
@@ -199,7 +247,7 @@
 
 - **Canceling a pickup frees the pay advance for your next load.**
 
-- **After a manual stalls in gear, the game tells you to hold the clutch before restarting.** Restarting in gear with the clutch out stalled it again.
+- **After a manual stalls, the game walks you back into first gear.** Its old advice shifted up a gear and stalled the truck again.
 
 - **Descent control no longer asks for a lower gear during every manual shift.**
 
@@ -236,8 +284,6 @@
 - **Work zones no longer raise the speed limit on roads posted under 55.**
 
 - **Turning descent control off and back on during a grade holds the safe speed again.**
-
-- **Hold slash straightens the truck on partial lane keeping too.**
 
 - **The controls help says cruise holds at most five over the limit.**
 
@@ -357,13 +403,9 @@
 
 - **City streets to a delivery keep the game's pace.** Real time starts near the gate, not for the whole drive in from the ramp.
 
-- **Announcements made at the same moment are spoken in order.** An older line no longer plays after the newer one that replaced it.
-
 - **The route readout on an exit ramp counts to the facility gate.** When streets follow the ramp, it no longer reads the ramp's end as the destination.
 
 - **The upcoming readout stops listing highway stops once you leave the highway.**
-
-- **Every stop at one exit agrees on how its ramp ends.** You no longer hear a traffic light and a stop sign for the same ramp.
 
 - **Following the engine lean out of a drift no longer swings you across the lane.** It centres as the truck straightens, not once it reaches the middle. (Reported by flight.)
 
@@ -1734,8 +1776,8 @@
 - **Turn latching off under Settings, Driving assistance, Latching brake.**
 
 - **One key now answers "how fast should I be going?"** Press D while
-  driving for a single safe-speed number for right now, with weather and an
-  upcoming ramp already in it.
+  driving for a single safe-speed number for right now, with weather, the
+  grade and the next bend already in it.
 
 - **Career stats now list your endorsements.** An Endorsements line on the
   Career stats screen shows which you hold, any time.

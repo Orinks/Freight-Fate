@@ -104,9 +104,9 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Driving information keys",
         &[
-            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state, then, with the signal on, how far to the exit.",
+            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state, then, with the signal set, how far to the exit.",
             "{{speed_limit}} speaks the posted speed limit here, the zone if any, and how far over you are.",
-            "{{safe_speed}} speaks one safe-speed number for right now, with weather grip and an armed exit ramp already in it.",
+            "{{safe_speed}} speaks one safe-speed number for right now, with weather grip, a steep downgrade and the next bend already in it; on an exit ramp it is the exit speed.",
             "{{grade}} speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
             "Steep grades of three percent or more announce themselves ahead, except on quiet or urgent only speech, where {{grade}} answers on demand.",
             "{{status}} opens a driving status menu for route, driver, map, and the Driver apps tablet: Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD, each read line by line.",

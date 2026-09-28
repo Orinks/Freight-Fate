@@ -85,12 +85,6 @@ fn settlement_for(p: &Profile, job: &Job, with_reputation: bool) -> BusinessSett
     )
 }
 
-/// Whether the job's origin facility is the yard the truck is parked in.
-///
-/// The home terminal is a real facility in the city's list (a template
-/// company yard where the data has none), so the board can hand out loads
-/// that ship from it. Name and city both have to match: a same-named yard
-/// in another city is a drive away.
 /// Minutes of shift the hours warning refuses to plan away.
 ///
 /// The route estimate already runs slower than the posted limits
@@ -101,6 +95,12 @@ fn settlement_for(p: &Profile, job: &Job, with_reputation: bool) -> BusinessSett
 /// spare is called what it is: one that needs a rest first.
 pub const HOS_FIT_CUSHION_MIN: f64 = 30.0;
 
+/// Whether the job's origin facility is the yard the truck is parked in.
+///
+/// The home terminal is a real facility in the city's list (a template
+/// company yard where the data has none), so the board can hand out loads
+/// that ship from it. Name and city both have to match: a same-named yard
+/// in another city is a drive away.
 pub fn job_origin_is_this_yard(ctx: &GameContext, job: &Job, terminal_name: &str) -> bool {
     if job.bobtail {
         return false;
@@ -108,6 +108,33 @@ pub fn job_origin_is_this_yard(ctx: &GameContext, job: &Job, terminal_name: &str
     let here = ctx.world.resolve_city_key(&profile(ctx).current_city);
     ctx.world.resolve_city_key(&job.origin) == here
         && job.origin_location.trim() == terminal_name.trim()
+}
+
+/// Driving hours from the board to the shipper's dock: nothing for a load
+/// from this yard, else the facility approach, after the corridor to the
+/// origin city when dispatch relayed the load from a nearby one.
+fn pickup_drive_hours(ctx: &GameContext, job: &Job) -> f64 {
+    if job_origin_is_this_yard(ctx, job, &home_terminal(ctx).name) {
+        return 0.0;
+    }
+    let here = ctx.world.resolve_city_key(&profile(ctx).current_city);
+    let origin = ctx.world.resolve_city_key(&job.origin);
+    let corridor_h = if origin != here {
+        ctx.world
+            .supported_route(&here, &origin, None)
+            .ok()
+            .flatten()
+            .map(|corridor| route_drive_hours(Some(&corridor), 0.0, Some(ctx.world)))
+            .unwrap_or(0.0)
+    } else {
+        0.0
+    };
+    corridor_h
+        + ctx
+            .world
+            .facility_approach_route(&job.origin, &job.origin_location)
+            .map(|approach| route_drive_hours(Some(&approach), 0.0, Some(ctx.world)))
+            .unwrap_or(0.0)
 }
 
 /// `JobBoardState._locked_reason`: why this driver cannot take the job, or "".
@@ -613,31 +640,8 @@ impl JobBoardState {
         // (Chippewa Falls to Duluth, owner, 2026-09-12): it fit by minutes on
         // paper, the pickup and the yard roads ate them, and the drive ended
         // with a forced 10-hour sleep 5 hours past the deadline.
-        let deadhead_h = if job_origin_is_this_yard(ctx, job, &home_terminal(ctx).name) {
-            0.0
-        } else {
-            // A load relayed from a nearby city adds the corridor to that
-            // city ahead of the shipper's own approach.
-            let here = ctx.world.resolve_city_key(&p.current_city);
-            let origin = ctx.world.resolve_city_key(&job.origin);
-            let corridor_h = if origin != here {
-                ctx.world
-                    .supported_route(&here, &origin, None)
-                    .ok()
-                    .flatten()
-                    .map(|corridor| route_drive_hours(Some(&corridor), 0.0, Some(ctx.world)))
-                    .unwrap_or(0.0)
-            } else {
-                0.0
-            };
-            corridor_h
-                + ctx
-                    .world
-                    .facility_approach_route(&job.origin, &job.origin_location)
-                    .map(|approach| route_drive_hours(Some(&approach), 0.0, Some(ctx.world)))
-                    .unwrap_or(0.0)
-        };
-        let drive_h = deadhead_h + route_drive_hours(Some(&route), 0.0, Some(ctx.world));
+        let drive_h =
+            pickup_drive_hours(ctx, job) + route_drive_hours(Some(&route), 0.0, Some(ctx.world));
         let shift_h = drive_limit / 60.0;
         let fresh_first_h = (drive_limit - HOS_FIT_CUSHION_MIN)
             .min(duty_limit - pickup_work_min - HOS_FIT_CUSHION_MIN)

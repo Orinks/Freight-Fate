@@ -665,9 +665,9 @@ wherever the pad has one.
 | Alt+T | Switch between automatic and manual transmission on the road. This changes your whole control scheme, so it is worth knowing you pressed it. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
-| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. With the turn signal on for an exit, it ends with that exit and how far away it is. |
+| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. With the signal set for an exit, it ends with that exit and how far away it is. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
-| D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
+| D | Report one safe-speed number for right now. Weather grip, a steep downgrade, and the next bend are already baked into the number. On an exit ramp it is the exit speed. |
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding, pulling, or losing it -- including whether the engine brake has the descent or is about to lose it. G also names the next grade ahead worth planning for, how far off and how long it runs -- including one that steepens without flattening out first, and the gentler pull automatic speed control is building speed for when nothing steep is coming. |
 | I | Turn the lane locator on or off: a soft tock, once a beat, panned to where the truck sits inside its lane. It keeps ticking until you turn it off. Needs lane keeping on partial or off. |
 | Enter | Arrive: accept a facility arrival once you are fully stopped. |
@@ -738,7 +738,8 @@ means switching into that truck's actual state.
 Fuel adds to gross weight. Burning fuel makes the truck lighter; refueling
 adds that weight back. Check the weight margin before accepting a load or
 filling the tank. The fuel menu reports the projected weight after refueling.
-This is a gross-weight check; the game does not simulate axle-weight limits.
+This is a gross-weight check: dispatch and weigh stations judge the 80,000-pound
+gross only. A CAT Scale ticket at a truck stop also reads each axle group.
 
 A loaded tractor-trailer pulls away gradually. The automatic transmission holds
 the first few gears long enough to feel the weight, then settles into normal
@@ -1538,7 +1539,7 @@ Use these keys when you need status without leaving the road:
 
 | Key | Information |
 | --- | --- |
-| Space | Speed, gear, RPM, air pressure, and brake state, and with the signal on, how far to the exit. |
+| Space | Speed, gear, RPM, air pressure, and brake state, and with the signal set, how far to the exit. |
 | F | Fuel level and estimated range. |
 | C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
 | Alt+A | Time at the wheel so far this shift, and time on duty. |
@@ -1692,9 +1693,11 @@ T plans it and X signals for it.
 
 Curve assistance slows the truck for mapped curves before you reach them, whatever is holding the speed: adaptive cruise, the speed keeper, or your own pedals. It starts at the curve call. If you are over the bend's advisory when the call comes, the assist takes the service brakes on the approach so the truck is at the advisory by the start of the bend, holds it through the bend (the tightest number when the call names two bends together), and lets go on the far side.
 
+It also steers the truck through every mapped bend, whatever lane keeping is set to, so you steer only to correct drift.
+
 With curve callouts on it says so in the same breath as the call: "Sharp left, half a mile. Advise 35 miles per hour. Curve assistance slowing." Under adaptive cruise the call names cruise instead ("Adaptive cruise easing to 35 miles per hour for the bend"), and a bend too tight for cruise to hold pauses cruise while the assist slows the truck; cruise resumes once you are through and back up to speed.
 
-Your own brake cancels it for that bend, and it says "Curve assistance released." With curve callouts off nothing is said and the slowing is what you hear.
+Your own brake cancels the slowing for that bend, and it says "Curve assistance released." It keeps steering. With curve callouts off nothing is said and the slowing is what you hear.
 
 Inside a bend you entered too fast, it brakes and it reaches for the engine brake only when the corner needs about 10 miles per hour or more taken off, or the road under you is a real downgrade. This limits engine braking to bends and descents that need it.
 
@@ -1712,7 +1715,7 @@ Predictive cruise sits outside the presets. It lets cruise read the road about a
 
 #### Lane keeping
 
-Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel, bends included, and every exit needs your turn signal set and a steer into the exit lane where it opens.
+Lane keeping controls how much steering you do. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial steers the truck through the road's bends and drifts gently, with generous steering help; lane changes and speed are yours. Off drifts like a real wheel; bends are yours to steer unless curve assistance is on, and every exit needs your turn signal set and a steer into the exit lane where it opens.
 
 On partial or off, with lane-departure warning on, the engine leans back toward lane center when you drift, and you steer the way it leans; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. The road noise underneath leans to where you sit in your lane whichever way you are drifting, so it tells you position, not direction. On full the engine still leans for the bends and corners ahead, and the road noise stays centered because the truck is.
 
@@ -1757,6 +1760,7 @@ listed under. Driving assistance is covered in full above.
 | --- | --- |
 | Driving mode | Choose Relaxed, Standard, or Real time pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. Real time keeps Standard's pressure, lines the date and time up with your computer's clock, and runs the driving clock at the speed of a real clock, so a mile takes as long as it really would; with the weather source set to real world it is the most true to life the game gets. Aligning the clock does not move delivery time remaining, career progress, or hours of service. At low speed the compressed pacings ease toward real time, and deliberate parked waiting runs at double the selected pace; in Real time the clock is real at every speed, parked included. Breaks and sleep at stops pass the clock the same way in every mode. Any of the three can be changed mid-drive from the pause menu; the new pacing starts when the truck next stops. |
 | Hours of service | Choose realistic or relaxed legal limits. Both use the same 11-hour driving limit, 14-hour duty window, and break after 8 hours. Relaxed reduces fines, inspections, and random hazards. |
+| Hours of service planning hints | Off by default. On, when the delivery is out of legal reach, the cab suggests a break or sleep stop once, with time to spare before the next hours warning, and names the last stop you can legally reach if it suggests an earlier one. While rolling, T plans that stop; press it again to cancel. Quiet and Urgent only driving speech skip the spoken suggestion. |
 
 The dash overspeed alert has no setting. It speaks once and then chimes,
 faster the further over you go, when you are more than 7 miles per hour over

@@ -25,9 +25,11 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::audio::CH_LANE_GUIDE;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
+use freight_fate::states::driving_menu_states::DriveRef;
+use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::driving_turns::TURN_COMMIT_TAIL_MI;
 
-use super::states_driving_engine_audio::{Calls, Log, TrackingAudio};
+use super::states_driving_engine_audio::{Calls, Log, LoopCall, TrackingAudio};
 
 // -- rigging -------------------------------------------------------------------------
 
@@ -301,6 +303,38 @@ fn test_the_inverted_guide_reverses_the_opt_in_tone_too() {
     assert!(
         (toward + away).abs() < 1e-9,
         "{away} is not the mirror of {toward}"
+    );
+}
+
+#[test]
+fn test_the_opt_in_tone_comes_back_after_the_pause_menu() {
+    // The pause silences the tone with the rest of the world, but the tone
+    // starts on a latch. Left set, a truck still drifting after Resume got
+    // silence, which is the tone saying "centred" to a driver who was not.
+    let tone_starts = |log: &Log| {
+        log.borrow()
+            .loops
+            .iter()
+            .filter(
+                |call| matches!(call, LoopCall::Start(channel, ..) if *channel == CH_LANE_GUIDE),
+            )
+            .count()
+    };
+    let mut app = TestApp::new();
+    by_hand(&mut app);
+    app.ctx.settings.lane_guide_tone = true;
+    let (mut drive, log) = a_drive(&mut app);
+    drive.lane.offset = 0.8;
+    lean_for(&mut app, &mut drive, 2.0);
+    assert_eq!(tone_starts(&log), 1, "the drift never woke the tone");
+
+    PauseMenuState::with_drive(DriveRef::empty()).enter_over_drive(&mut app.ctx, &mut drive);
+    // Resume only pops the menu: the drive's next frame is what runs next.
+    drive.update_lane_guidance_audio(&mut app.ctx, DT);
+    assert_eq!(
+        tone_starts(&log),
+        2,
+        "the tone stayed silent after the pause while the truck was still off centre"
     );
 }
 

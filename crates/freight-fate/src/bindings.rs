@@ -790,10 +790,19 @@ impl KeyBindings {
     // -- keyboard ----------------------------------------------------------------
 
     /// The chords that trigger `action` today.
+    ///
+    /// A default the player already moved another control onto stays with
+    /// that control: a default added in an update (Straighten on slash) must
+    /// never take over a key the player bound before it existed.
     pub fn chords(&self, action: Action) -> Vec<Chord> {
         match self.keys.get(&action) {
             Some(chord) => vec![*chord],
-            None => action.default_chords().to_vec(),
+            None => action
+                .default_chords()
+                .iter()
+                .copied()
+                .filter(|chord| !self.keys.values().any(|moved| moved == chord))
+                .collect(),
         }
     }
 
@@ -853,10 +862,16 @@ impl KeyBindings {
 
     // -- pad ---------------------------------------------------------------------
 
+    /// Same rule as [`Self::chords`]: a player's binding outranks a default.
     pub fn pad_chords(&self, action: Action) -> Vec<PadChord> {
         match self.pad.get(&action) {
             Some(chord) => vec![*chord],
-            None => action.default_pad_chords().to_vec(),
+            None => action
+                .default_pad_chords()
+                .iter()
+                .copied()
+                .filter(|chord| !self.pad.values().any(|moved| moved == chord))
+                .collect(),
         }
     }
 
@@ -1010,6 +1025,19 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn a_saved_binding_keeps_its_key_when_an_update_adds_that_default() {
+        // Horn moved to slash on a build before Straighten took slash by
+        // default: the horn keeps it, and straighten waits for a key.
+        let settings = Settings {
+            key_bindings: "horn=slash".into(),
+            ..Settings::default()
+        };
+        let b = KeyBindings::from_settings(&settings);
+        assert_eq!(b.action_for(Key::Slash, Mods::NONE), Some(Action::Horn));
+        assert!(b.chords(Action::Straighten).is_empty());
     }
 
     #[test]

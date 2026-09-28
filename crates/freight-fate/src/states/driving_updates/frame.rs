@@ -540,19 +540,32 @@ impl DrivingState {
             ctx.audio.engine_stop();
             if self.trip.truck.stalled {
                 let tr = &self.trip.truck.transmission;
-                // A manual stalls in gear, and restarting it there with the
-                // clutch out stalls it again the next frame: name the clutch
-                // and the gear that will hold (2026-09-28).
+                // A manual only stalls in fourth or taller, and restarting it
+                // there with the clutch out stalls it again the next frame.
+                // Shifting up from there only goes taller, so the line routes
+                // through neutral, which needs no clutch, then up into first.
+                // The pad has no neutral: it steps down to first on the
+                // clutch instead (2026-09-28).
                 let text = if tr.automatic || tr.in_neutral() {
                     format!(
                         "Engine stalled. Press {} to restart.",
                         ctx.control_hint("engine")
                     )
-                } else {
+                } else if ctx.controller.device() == ff_core::input_hints::CONTROLLER {
                     format!(
-                        "Engine stalled. Hold {} and press {} to restart, then select {}.",
+                        "Engine stalled. Hold {}, press {} to restart, and shift down to first \
+                         with {} before letting the clutch out.",
                         ctx.control_hint("clutch"),
                         ctx.control_hint("engine"),
+                        ctx.control_name(Action::ShiftDown)
+                    )
+                } else {
+                    format!(
+                        "Engine stalled. Press {} for neutral and {} to restart, then hold {} \
+                         and press {} for first gear.",
+                        ctx.control_hint("neutral"),
+                        ctx.control_hint("engine"),
+                        ctx.control_hint("clutch"),
                         ctx.control_hint("gear_first")
                     )
                 };

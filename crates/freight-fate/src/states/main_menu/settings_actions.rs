@@ -16,6 +16,7 @@ use super::settings::{save_settings, SettingsCategoryState};
 use super::settings_items::assist_flag;
 use crate::app::{version, GameContext, Say};
 use crate::audio::VolumeUpdate;
+use crate::bindings::Action;
 use crate::states::text_entry::TextEntryState;
 use crate::updater;
 
@@ -175,8 +176,11 @@ impl SettingsCategoryState {
         self.announce(ctx);
         if ctx.settings.lane_keeping != lane_before {
             let note = if ctx.settings.lane_is_automated() {
-                "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
-                    .to_string()
+                format!(
+                    "Lane keeping full: the truck holds the lane, tap {} or {} to change lanes.",
+                    ctx.control_name(Action::SteerLeft),
+                    ctx.control_name(Action::SteerRight)
+                )
             } else {
                 format!(
                     "Lane keeping back to {}.",

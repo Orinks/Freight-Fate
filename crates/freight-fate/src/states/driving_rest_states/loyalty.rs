@@ -130,7 +130,9 @@ impl Menu for LoyaltyRewardsState {
             );
         }
 
-        if items.is_empty() {
+        // Only true when the shower is on offer and the balance falls short.
+        // With no shower to buy, the entry line's balance is all there is.
+        if items.is_empty() && offer_shower {
             items.push(
                 MenuItem::inert("No rewards available, more points needed")
                     .help("Fuel at truck stops to earn loyalty points."),

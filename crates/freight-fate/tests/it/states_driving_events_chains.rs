@@ -329,6 +329,59 @@ fn test_chain_survives_save_and_resume() {
 }
 
 #[test]
+fn test_a_resumed_street_chain_calls_its_first_corner_fresh() {
+    // Rebuilding a saved chain ran the live off-the-ramp handoff: the first
+    // corner was marked as called in a line that is never spoken on a
+    // resume, so the resumed drive heard no approach call for it, and an
+    // armed session asked the speed keeper to take a parked, engine-off
+    // truck ("needs the engine running") as the drive loaded. Ardmore's yard
+    // streets open with a corner inside the first call's window.
+    use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.start_route(
+        "oklahoma_city_ok_us",
+        "ardmore_ok_us",
+        RouteSetup::seeded(4242)
+            .named("Ardmore Resume")
+            .destination_location("Ardmore Company Yard"),
+    );
+    let key = harness.with_drive(|d, ctx| {
+        d.destination_exit_taken = true;
+        assert!(d.begin_surface_chain(ctx, true));
+        let corner = d
+            .turn_cue_in_play()
+            .expect("the yard's streets open with a corner");
+        assert!(
+            d.turn_advised.contains(&corner.key),
+            "the live handoff calls the first corner"
+        );
+        corner.key
+    });
+    harness.app.clear_speech();
+
+    let resumed = harness.with_drive(|d, ctx| {
+        d.speed_control_armed = true;
+        let snap = d.snapshot(ctx);
+        DrivingState::from_snapshot(ctx, &snap).expect("the snapshot resumes")
+    });
+
+    assert!(resumed.surface_chain);
+    assert!(!resumed.turn_advised.contains(&key));
+    assert!(!resumed.turn_announced.contains(&key));
+    assert!(
+        resumed.speed_control_armed,
+        "the session waits for the truck to roll"
+    );
+    assert!(resumed.keeper_mph.is_none());
+    let heard = [harness.app.main_lines(), harness.app.event_lines()].concat();
+    assert!(
+        !heard.iter().any(|line| line.contains("speed keeper needs")),
+        "{heard:?}"
+    );
+}
+
+#[test]
 fn test_a_departure_chain_and_a_surface_chain_never_run_together() {
     let world = get_world();
     let Some((city, location)) = a_turn_level_facility(world) else {

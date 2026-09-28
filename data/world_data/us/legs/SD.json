@@ -14415,7 +14415,7 @@
                   "cue": "Start on I 90 Bus;MT 47.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []

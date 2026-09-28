@@ -34,7 +34,8 @@ use freight_fate::states::driving_core::{
 use freight_fate::states::driving_rest_states::{ParkingFullState, RestStopState};
 
 use crate::transcript_cruise_support::{
-    bench_road, frame, hold, quiet, release_keys, spoken, start_drive, DT, MPS_PER_MPH,
+    bench_road, bench_road_with, frame, hold, quiet, release_keys, spoken, start_drive, DT,
+    MPS_PER_MPH,
 };
 
 // -- rigging -------------------------------------------------------------------------
@@ -444,6 +445,33 @@ fn canceled_destination_exit_can_be_explicitly_signaled_again() {
         harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.at_mi)),
         Some(stop.at_mi)
     );
+}
+
+#[test]
+fn test_a_canceled_destination_exit_is_taken_after_the_loop_back() {
+    // Canceled, then missed: the loop-back says lane keeping will take the
+    // exit this time. The cancel used to outlive the miss, the scanner skipped
+    // the same exit again, and the truck looped past it for good.
+    let mut harness = a_drive("Loop Back After Cancel");
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
+    let stop = destination_exit(&mut harness);
+    let at = stop.at_mi;
+    harness.with_drive(move |d, _| {
+        d.trip.position_mi = at - 1.0;
+        d.truck_mut().velocity_mps = 12.0;
+    });
+    press_x(&mut harness);
+    press_x(&mut harness);
+    press_x(&mut harness);
+    assert!(harness.read_drive(|d| d.canceled_exit_key.is_some()));
+
+    harness.with_drive(move |d, ctx| {
+        d.handle_missed_destination_exit(ctx);
+        d.trip.position_mi = at - 0.5;
+        d.check_destination_exit(ctx);
+        assert_eq!(d.exit_stop.as_ref().map(|s| s.at_mi), Some(at));
+        assert!(d.exit_lane_entered, "lane keeping takes the exit");
+    });
 }
 
 // -- the destination exit's automation ------------------------------------------------
@@ -1233,6 +1261,40 @@ fn test_the_exit_assist_leaves_cruise_alone_while_it_has_nothing_to_shed() {
         assert!(d.cruise_mph.is_none());
         assert!(d.truck().brake > 0.0);
     });
+}
+
+#[test]
+fn test_the_exit_hold_never_pushes_past_a_lower_limit_before_the_gore() {
+    // The hold aims for the gore's road speed less ten. A 45 that ends just
+    // short of a 70 gore used to be throttled toward 60 while the truck was
+    // still inside it, with nobody on the pedals.
+    let mut harness = a_drive("Exits");
+    harness.app.ctx.settings.exit_speed_assist = true;
+    harness.with_drive(|d, _| {
+        bench_road_with(d, &[(0.0, 45.0), (199.7, 70.0)], 0.0, 1.0);
+        d.trip.position_mi = 199.0;
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().velocity_mps = 45.5 * MPS_PER_MPH;
+        d.truck_mut().throttle = 0.0;
+        d.truck_mut().brake = 0.0;
+        d.exit_stop = Some(RoadStop::new("Gore Travel Plaza", 200.0, "truck_stop"));
+        d.hold_exit_approach_speed();
+    });
+    assert_eq!(
+        harness.read_drive(|d| d.truck().throttle),
+        0.0,
+        "the hold pushed the truck over the 45 in force here"
+    );
+
+    // Past the 45, the hold brings the truck up toward the gore's floor.
+    harness.with_drive(|d, _| {
+        d.trip.position_mi = 199.8;
+        d.hold_exit_approach_speed();
+    });
+    assert!(harness.read_drive(|d| d.truck().throttle) > 0.0);
 }
 
 // -- the destination approach ------------------------------------------------------------

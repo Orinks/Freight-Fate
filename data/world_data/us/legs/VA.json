@@ -38418,7 +38418,7 @@
                   "cue": "Start on Raphine Road (SR 606).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -38429,7 +38429,7 @@
                   "cue": "Turn left onto Oakland Circle (SR 917).",
                   "speed_mph": 25.0,
                   "turn_deg": 92.4,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -51495,7 +51495,7 @@
                   "cue": "Turn left onto Mud Pike (SR 600).",
                   "speed_mph": 25.0,
                   "turn_deg": 107.3,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -51581,7 +51581,7 @@
                   "cue": "Start on North Fork Road (SR 603).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -51627,7 +51627,7 @@
                   "cue": "Start on North Fork Road (SR 603).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []

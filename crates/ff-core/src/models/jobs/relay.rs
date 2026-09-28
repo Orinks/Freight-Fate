@@ -60,7 +60,8 @@ pub struct RelayRequest<'a> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct RelayLoad {
     /// The load as the board shows it: pay includes the deadhead at the
-    /// empty-mile rate, the deadline includes the deadhead hours.
+    /// empty-mile rate; the deadline does not, since the delivery clock
+    /// starts at the shipper.
     pub job: Job,
     pub deadhead_mi: f64,
     pub deadhead_h: f64,

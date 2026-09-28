@@ -10,6 +10,7 @@
 
 use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
+use ff_core::sim::enforcement_posts::{EnforcementPost, KIND_FIXED_SCALE};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::controller::ControllerButton;
@@ -517,13 +518,8 @@ fn test_the_loyalty_row_opens_the_rewards_desk() {
     activate(&mut state, &mut app.ctx, "Loyalty program");
     assert!(top_is::<LoyaltyRewardsState>(&app));
     let desk_rows = with_top_ctx::<LoyaltyRewardsState, _>(&mut app, build_labels);
-    assert_eq!(
-        desk_rows,
-        vec![
-            "No rewards available, more points needed",
-            "Back to truck stop",
-        ]
-    );
+    // A Love's sells no shower, so there is nothing here to need points for.
+    assert_eq!(desk_rows, vec!["Back to truck stop"]);
 }
 
 // -- the pay advance ------------------------------------------------------------------------
@@ -943,6 +939,11 @@ fn test_leaving_an_open_scale_runs_the_check_in_first() {
     let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    with_drive(&drive, |d| {
+        let mut post = EnforcementPost::new(at, KIND_FIXED_SCALE);
+        post.anchor = stop.key();
+        d.trip.posts = vec![post];
+    });
     let mut state = rest_stop_at(&mut app, &drive, stop.clone());
     build_labels(&mut state, &mut app.ctx);
     app.clear_speech();
@@ -951,6 +952,25 @@ fn test_leaving_an_open_scale_runs_the_check_in_first() {
     assert!(said.contains("Inspection check-in complete"), "{said}");
     assert!(said.contains("Back on the road"), "{said}");
     assert!(with_drive(&drive, |d| d.stop_visit(&stop).inspected));
+}
+
+/// A closed scale has no lane to pull into: Back only leaves.
+#[test]
+fn test_leaving_a_closed_scale_only_leaves() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let mut state = rest_stop_at(&mut app, &drive, stop.clone());
+    build_labels(&mut state, &mut app.ctx);
+    app.clear_speech();
+    state.go_back(&mut app.ctx);
+    let said = app.main_lines().join(" ");
+    assert!(!said.contains("Inspection check-in complete"), "{said}");
+    assert!(said.contains("Back on the road"), "{said}");
+    assert!(!with_drive(&drive, |d| d.stop_visit(&stop).inspected));
+    assert_eq!(with_drive(&drive, |d| d.trip.game_minutes), before);
 }
 
 /// The engine is whatever it already was: a running one is not "started".

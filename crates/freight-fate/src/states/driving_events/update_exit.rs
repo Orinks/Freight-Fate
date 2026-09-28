@@ -477,6 +477,12 @@ impl DrivingState {
 
     /// The truck makes the gore: onto the ramp.
     fn take_the_ramp(&mut self, ctx: &mut GameContext, stop: &ff_core::sim::trip_models::RoadStop) {
+        // A truck that steered in at the taper is up to 300 feet short of the
+        // gore, and the ramp holds the highway odometer where it stands. The
+        // exit lane leads to the gore, so the highway rejoins there: otherwise
+        // the scale the truck just checked in at was crossed again on the way
+        // out and charged as a bypass.
+        self.trip.position_mi = self.trip.position_mi.max(stop.at_mi);
         self.reset_exit_lane_state();
         self.exit_signal_on = false;
         // Gore to stop bar, then the terminal-to-driveway stretch: the

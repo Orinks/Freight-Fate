@@ -16,6 +16,7 @@ use ff_core::models::profile::Profile;
 use ff_core::pyfmt::fmt_f;
 use ff_core::sim::hos::limits;
 use freight_fate::app::testing::TestApp;
+use freight_fate::bindings::Action;
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::city::{CityMenuState, JobBoardState};
 use freight_fate::states::city_pickup::{
@@ -144,7 +145,13 @@ fn loaded_departure_with_mandatory_sleep_has_an_achievable_deadline() {
         .main_lines()
         .join(" ")
         .contains("current hours require a 10-hour sleep en route"));
-    assert!(app.main_lines().join(" ").contains("selects a rest stop"));
+    // The key that plans the stop, not the hours readout.
+    let rest_line = format!("{} selects a rest stop", app.ctx.control_name(Action::Rest));
+    assert!(
+        app.main_lines().join(" ").contains(&rest_line),
+        "{:?}",
+        app.main_lines()
+    );
     let drive = app.ctx.state().expect("loaded driving state");
     let stop = with_drive(&drive, |d| {
         d.trip.position_mi = stop_mi;

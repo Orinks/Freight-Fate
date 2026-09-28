@@ -25928,7 +25928,7 @@
                   "cue": "Turn left onto Mullan Gulch Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.7,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": [

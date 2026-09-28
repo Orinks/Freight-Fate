@@ -8,6 +8,7 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{CityMenuState, CloseOutCareerState};
+use freight_fate::states::driving_rest_states::{major_offense_text, suspension_text};
 use freight_fate::states::main_menu::MainMenuState;
 
 const DAY: f64 = 24.0;
@@ -79,6 +80,26 @@ fn test_the_disqualification_notice_reads_once_at_the_terminal() {
     with_state_mut::<CareerSetbackNoticeState, _>(&mut app, Menu::go_back);
     assert!(is::<CityMenuState>(&app));
     assert!(profile(&app).driving_record.setback_notice_lines.is_empty());
+}
+
+/// What still works after a suspension or disqualification names only rows a
+/// company driver has: the truck dealer is an owner-operator row.
+#[test]
+fn test_what_still_works_names_no_row_a_company_driver_lacks() {
+    let mut app = TestApp::new();
+    ended_career(&mut app);
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    let rows = labels::<CityMenuState>(&app);
+    assert!(!rows.iter().any(|r| r == "Truck dealer"), "{rows:?}");
+    let hours = profile(&app).game_hours;
+    for text in [
+        enforcement::disqualification_notice_lines().join(" "),
+        suspension_text(&app.ctx, hours, "suspended"),
+        major_offense_text(&app.ctx, enforcement::SUSPENSION_LIFETIME, hours),
+    ] {
+        assert!(!text.contains("truck dealer"), "{text}");
+    }
 }
 
 #[test]

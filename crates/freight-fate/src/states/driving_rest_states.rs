@@ -68,8 +68,7 @@ pub fn suspension_text(ctx: &GameContext, hours: f64, verb: &str) -> String {
     let left = enforcement::days_text(profile.driving_record.days_left(hours));
     format!(
         "Your CDL is {verb} for {left}. Driving jobs are off the dispatch board until it clears, \
-         {}. Your money and your truck are safe; rest, repairs, the garage, and the truck dealer \
-         are still open.",
+         {}. Your money and your truck are safe; rest, repairs, and the garage are still open.",
         enforcement::clears_text(profile)
     )
 }
@@ -102,7 +101,7 @@ pub fn major_offense_text(ctx: &GameContext, kind: &str, hours: f64) -> String {
              disqualifies a commercial licence for life, so this driver will not drive \
              commercially again. Nothing is taken away: {name} keeps every dollar, the truck, \
              and the whole record, and you can open this career any time to look back over it. \
-             Rest, repairs, the garage, and the truck dealer still work here, and the dispatch \
+             Rest, repairs, and the garage still work here, and the dispatch \
              board can still be read, but there is no driving work and no date this clears. When \
              you want the road again, start a new career from the title menu. Everything you \
              learned still applies."

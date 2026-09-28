@@ -1308,6 +1308,44 @@ fn test_a_signaled_speed_valid_open_scale_enters_its_ramp() {
 }
 
 #[test]
+fn test_a_scale_taken_at_the_taper_is_not_crossed_again_on_the_way_out() {
+    // Steered into the exit lane where it opened, 300 feet short of the gore.
+    // The ramp holds the highway odometer, so the truck rejoined short of the
+    // scale, crossed it pulling away, and was charged with bypassing the
+    // scale it had just checked in at.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Taper Scale");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.trip.position_mi = scale.at_mi - EXIT_TAPER_MI;
+    drive.trip.truck.velocity_mps = mph_to_mps(40.0);
+    drive.exit_stop = Some(scale.clone());
+    drive.exit_signal_on = true;
+    drive.exit_lane_entered = true;
+    drive.exit_taper_said = true;
+
+    drive.update_exit(&mut app.ctx, 0.02, 0.1);
+
+    assert_eq!(
+        drive.ramp_stop.as_ref().map(RoadStop::key),
+        Some(scale.key())
+    );
+    assert!(drive.trip.position_mi >= scale.at_mi);
+
+    // Checked in, back on the road, and past 15 pulling away.
+    drive.ramp_mi = None;
+    drive.ramp_stop = None;
+    let previous = drive.trip.position_mi;
+    drive.trip.position_mi += 0.01;
+    drive.trip.truck.velocity_mps = mph_to_mps(25.0);
+    drive.check_weigh_station_enforcement(&mut app.ctx, previous);
+
+    assert!(!drive
+        .enforcement_events
+        .contains(&drive.weigh_station_key(&scale)));
+    assert!(drive.pull_over.is_none());
+}
+
+#[test]
 fn test_a_scale_ramp_uses_real_time_so_the_driver_can_stop_at_the_bar() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Scale Clock");

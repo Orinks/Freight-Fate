@@ -22938,7 +22938,7 @@
                   "cue": "Start on I 90 Bus;MT 47.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -24968,7 +24968,7 @@
                   "cue": "Turn left onto East 8th Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 76.1,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -25026,7 +25026,7 @@
                   "cue": "Start on I 90 Bus.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -25037,7 +25037,7 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -25048,7 +25048,7 @@
                   "cue": "Turn left onto South Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 97.8,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -29818,7 +29818,7 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -29829,7 +29829,7 @@
                   "cue": "Turn right onto Nissler Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 93.5,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -32165,7 +32165,7 @@
                   "cue": "Start on MT 261.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -32176,7 +32176,7 @@
                   "cue": "Turn left onto 2nd Avenue North.",
                   "speed_mph": 25.0,
                   "turn_deg": 59.6,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -34238,7 +34238,7 @@
                   "cue": "Turn right onto Wilson Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 52.7,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -34276,7 +34276,7 @@
                   "cue": "Turn right onto Wilson Avenue.",
                   "speed_mph": 25.0,
                   "turn_deg": 52.7,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -42024,7 +42024,7 @@
                   "cue": "Start on MT 253.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46258,7 +46258,7 @@
                   "cue": "Start on a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46269,7 +46269,7 @@
                   "cue": "Turn right onto East Browns Gulch Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 47.4,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46360,7 +46360,7 @@
                   "cue": "Turn right onto West Farm Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 89.7,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46459,7 +46459,7 @@
                   "cue": "Start on I 90 Bus.",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46470,7 +46470,7 @@
                   "cue": "Continue onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -46481,7 +46481,7 @@
                   "cue": "Turn left onto South Frontage Road.",
                   "speed_mph": 25.0,
                   "turn_deg": 97.8,
-                  "limit_mph": 70.0,
+                  "limit_mph": 65.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []

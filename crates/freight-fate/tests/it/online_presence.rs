@@ -452,6 +452,35 @@ fn test_pause_left_for_the_idle_window_signs_off_once() {
 }
 
 #[test]
+fn test_a_failed_idle_sign_off_from_a_pause_waits_for_the_heartbeat() {
+    // Over a paused game the worker woke every twentieth of a second and
+    // posted a failed idle sign-off again each time.
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.update(Some(paused()));
+    service.pump();
+    let sent = transport.request_count();
+
+    transport.set_error(Some(NetError::http(503)));
+    clock.advance(IDLE_SIGNOFF_S);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 1);
+    clock.advance(1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 1);
+
+    transport.set_error(None);
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 2);
+    assert_eq!(last_activity(&transport), "");
+}
+
+#[test]
 fn test_shutdown_signs_off() {
     let transport = FakeTransport::new();
     let service = service(&transport, &ManualClock::new());

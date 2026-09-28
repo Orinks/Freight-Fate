@@ -730,8 +730,11 @@ impl Inner {
             return WORKER_TICK_S;
         }
         // Paused and listed as such: nothing to send until the idle sign-off.
+        // Once that is due it falls through too, so a failed one waits out the
+        // heartbeat instead of being posted again on every 50 ms wake.
         if !pending
             && st.on_board
+            && idle_for(&st, now) < self.idle_signoff
             && st
                 .desired
                 .as_ref()
@@ -807,11 +810,15 @@ impl Inner {
             // keeps the idle snapshot so the next real change is still
             // detected and re-lists the driver.
             if on_board {
+                if failed && since_send.is_some_and(|s| s < self.heartbeat) {
+                    return;
+                }
                 let ok = self.post("", "");
                 let mut st = self.state.lock().unwrap();
                 if ok {
                     st.on_board = false;
                 }
+                st.failed = !ok;
                 st.last_send_t = Some(now);
             }
             return;

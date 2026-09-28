@@ -16,6 +16,7 @@ use super::settings_actions::{
 use super::shortcuts::{ShortcutDevice, ShortcutsState};
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
+use crate::states::main_menu_help::render_help_line;
 use crate::states::update::UpdateCheckState;
 
 type Row = MenuItem<SettingsCategoryState>;
@@ -47,11 +48,14 @@ fn adjust(f: impl Fn(&mut SettingsCategoryState, &mut GameContext, i64) + 'stati
     Rc::new(f)
 }
 
+/// A settings row. Its help may name a control as `{{id}}`, read in the
+/// player's own keys the way the help pages read them.
 fn row(label: Label<SettingsCategoryState>, action: Adjust, help: &str) -> Row {
+    let help = help.to_string();
     MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| {
         action(s, ctx, 1)
     })
-    .help(help)
+    .help(Label::dynamic(move |_s, ctx| render_help_line(ctx, &help)))
 }
 
 fn back_row() -> Row {
@@ -107,7 +111,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "pedal_latch",
         "Latching brake",
-        "Tap the brake, then press again and hold half a second: a click and a spoken confirmation latch it hands-free. Down arrow once releases it; the accelerator releases it instantly. The throttle key never latches. Presets never change this.",
+        "Tap the brake, then press again and hold half a second: a click and a spoken confirmation latch it hands-free. One press of {{brake}} releases it; the accelerator releases it instantly. The throttle key never latches. Presets never change this.",
     ),
     (
         "predictive_cruise",
@@ -117,7 +121,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "curve_callouts",
         "Curve callouts",
-        "Bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. U lists the next few either way. Presets never change this.",
+        "Bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. Press {{upcoming}} to list the next few either way. Presets never change this.",
     ),
     // The speed keeper holds a speed for you, so it belongs with the
     // rest of the driving help rather than in Controls, where it sat
@@ -126,7 +130,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "speed_keeper",
         "Speed keeper",
-        "In low-speed zones, like facility roads, gates, and construction zones, K holds your current speed, then hands back to adaptive cruise on open roads. It eases off early for the next turn or the next lower limit. Braking cancels the session. Presets never change this.",
+        "In low-speed zones, like facility roads, gates, and construction zones, {{cruise}} holds your current speed, then hands back to adaptive cruise on open roads. It eases off early for the next turn or the next lower limit. Braking cancels the session. Presets never change this.",
     ),
 ];
 
@@ -421,12 +425,12 @@ impl SettingsCategoryState {
                 row(
                     dyn_label(|s| {
                         format!(
-                            "HOS planning hints: {}",
+                            "Hours of service planning hints: {}",
                             if s.hos_planning_hints { "On" } else { "Off" }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_hos_planning_hints(ctx, d)),
-                    "Optional early advice for a break or sleep stop with time to spare. If an earlier stop fits, the hint also names the last legally reachable fallback. While rolling, use the Rest control to select the recommended stop; use it again to cancel. Standard driving speech speaks one suggestion before the next hours warning. The HOS drive-time readout gives full hours and route details. Quiet and Urgent only keep the automatic hint silent. Your required hours warnings and readout controls still work when this is off.",
+                    "Optional early advice for a break or sleep stop with time to spare. If an earlier stop fits, the hint also names the last legally reachable fallback. While rolling, use the Rest control to select the recommended stop; use it again to cancel. Standard driving speech speaks one suggestion before the next hours warning. The driving time readout gives full hours and route details. Quiet and Urgent only keep the automatic hint silent. Your required hours warnings and readout controls still work when this is off.",
                 ),
                 // The overspeed warning no longer has a row. It armed at the
                 // same 5-over pace predictive cruise itself holds, so it
@@ -679,13 +683,13 @@ impl SettingsCategoryState {
             dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
             adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
             "How much of the lane-holding work the truck does. Full \
-             holds the lane, turns Left and Right into tap lane \
+             holds the lane, turns {{steer_left}} and {{steer_right}} into tap lane \
              changes, and takes your exits, including the destination \
              exit, without a signal. Partial steers the truck through \
              the road's bends and drifts gently, with generous steering \
              help; lane changes and speed are yours. Off drifts like a \
-             real wheel, bends included, and \
-             every exit needs its signal and its exit lane. On partial \
+             real wheel; bends are yours unless curve assistance is \
+             on, and every exit needs its signal and its exit lane. On partial \
              or off the road sound leans toward where the wheel should \
              go, and the road edge answers: a stutter clipping the \
              rumble strip, a buzz fully on it, gravel off the pavement. \

@@ -107,6 +107,16 @@ pub(crate) fn py_capitalize(text: &str) -> String {
     ff_core::data::world_models::py_capitalize(text)
 }
 
+/// First character upper, the rest as written: a sentence opening on a
+/// street or city name keeps "US 83" and "Abilene" as they are spelled.
+pub(crate) fn upper_first(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
+    }
+}
+
 pub(crate) fn record_city_duty(
     ctx: &mut GameContext,
     status: &str,
@@ -492,11 +502,12 @@ pub(crate) fn warm_dispatch_board(world: &'static World, city: &str) {
 
 /// The load dispatch relays onto a company driver's board when the board
 /// here is thin (`ff_core::models::jobs::relay`): a load from one of the
-/// nearest freight towns, its deadhead paid at the empty-mile rate and
-/// counted in the deadline, offered as one assignment. None when the board
-/// here is good enough, for an owner-operator (their own "Bobtail to a
-/// nearby city" is how they reposition, on their own fuel), and for a brand
-/// new hire, whose first dispatch is always freight from this yard.
+/// nearest freight towns, its deadhead paid at the empty-mile rate (the
+/// delivery clock starts at the shipper), offered as one assignment. None
+/// when the board here is good enough, for an owner-operator (their own
+/// "Bobtail to a nearby city" is how they reposition, on their own fuel),
+/// and for a brand new hire, whose first dispatch is always freight from
+/// this yard.
 ///
 /// Seeded off the board's own cache key so the same board relays the same
 /// load every time it is reopened, exactly like the rest of the cached
@@ -734,7 +745,7 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
                 format!(
                     " Dispatch adjusted the delivery deadline to {} hours. Your current hours require a 10-hour sleep en route. {} selects a rest stop.",
                     fmt_f(job.deadline_game_h, 1),
-                    ctx.control_name(Action::HosDrive)
+                    ctx.control_name(Action::Rest)
                 )
             } else {
                 format!(

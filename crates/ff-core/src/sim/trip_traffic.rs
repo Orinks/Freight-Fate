@@ -14,7 +14,7 @@ use crate::sim::real_traffic::RealTrafficProvider;
 use crate::sim::real_traffic_parsers::TrafficEvent;
 use crate::sim::trip::Trip;
 use crate::sim::trip_models::*;
-use crate::sim::trip_route_helpers::nearest_mile_on_leg;
+use crate::sim::trip_route_helpers::{leg_states, leg_track, runs_against_travel, snap_to_leg};
 use crate::speech_text::SpokenMessage;
 
 /// Incident lookups filter the whole cached state feed by distance, so
@@ -387,47 +387,21 @@ impl Trip {
             .cloned()
     }
 
-    /// `{highway: (state, [(lat, lon), ...])}` from the route legs, so
-    /// construction-zone snapping can check proximity in parallel.
-    pub fn collect_route_geometry(&self) -> IndexMap<String, (String, Vec<(f64, f64)>)> {
-        let mut geometry: IndexMap<String, (String, Vec<(f64, f64)>)> = IndexMap::new();
+    /// `{(highway, state): [(lat, lon), ...]}` from the route legs, each
+    /// leg's road filled in about every mile and listed under every state it
+    /// runs in, so a leg into California reads Caltrans for its California
+    /// miles.
+    pub fn collect_route_geometry(&self) -> IndexMap<(String, String), Vec<(f64, f64)>> {
+        let mut geometry: IndexMap<(String, String), Vec<(f64, f64)>> = IndexMap::new();
         for (i, leg) in self.route.legs.iter().enumerate() {
             let forward = self.route.cities[i] == leg.a;
-            let mut state = String::new();
-            for sc in leg.state_crossings() {
-                state = if forward {
-                    sc.from_state.clone()
-                } else {
-                    sc.state.clone()
-                };
-            }
-            let state_miles = leg.state_miles();
-            if !state_miles.is_empty() {
-                let first = if forward {
-                    &state_miles[0]
-                } else {
-                    &state_miles[state_miles.len() - 1]
-                };
-                if state.is_empty() {
-                    state = first.state.clone();
-                }
-            }
-            let points: Vec<(f64, f64)> = leg
-                .route_points()
-                .iter()
-                .map(|rp| (rp.lat, rp.lon))
-                .collect();
-            let normalized = leg.highway.trim().to_uppercase();
-            match geometry.get_mut(&normalized) {
-                None => {
-                    geometry.insert(normalized, (state, points));
-                }
-                Some((existing_state, existing_points)) => {
-                    existing_points.extend(points);
-                    if !state.is_empty() && existing_state.is_empty() {
-                        *existing_state = state;
-                    }
-                }
+            let track = leg_track(leg);
+            let highway = leg.highway.trim().to_uppercase();
+            for state in leg_states(leg, forward) {
+                geometry
+                    .entry((highway.clone(), state))
+                    .or_default()
+                    .extend_from_slice(&track);
             }
         }
         geometry
@@ -447,8 +421,8 @@ impl Trip {
         let mut seen_spans: Vec<(f64, f64)> = Vec::new();
         let route_geo = self.collect_route_geometry();
 
-        for (highway, (state, points)) in route_geo.iter() {
-            if state.is_empty() || points.is_empty() {
+        for ((highway, state), points) in route_geo.iter() {
+            if points.is_empty() {
                 continue;
             }
             let events = provider.get_construction_near_route(state, points, Some(highway), 3.0);
@@ -459,23 +433,22 @@ impl Trip {
                 let (Some(latitude), Some(longitude)) = (event.latitude, event.longitude) else {
                     continue;
                 };
-                // Find the nearest leg and snap to route mile.
-                let mut best_leg_mile: Option<f64> = None;
-                for (i, (start, leg)) in self
+                // Find the nearest leg and snap to route mile; a closure on
+                // the far carriageway from the truck is not on its road.
+                let nearest = self
                     .leg_starts
                     .iter()
                     .zip(self.route.legs.iter())
                     .enumerate()
-                {
-                    let forward = self.route.cities[i] == leg.a;
-                    if let Some(snapped) =
-                        nearest_mile_on_leg(latitude, longitude, leg, forward, *start)
-                    {
-                        best_leg_mile = Some(snapped);
-                        break;
-                    }
-                }
-                let Some(best_leg_mile) = best_leg_mile else {
+                    .filter_map(|(i, (start, leg))| {
+                        let forward = self.route.cities[i] == leg.a;
+                        snap_to_leg(latitude, longitude, leg, forward, *start)
+                    })
+                    .min_by(|a, b| a.off_road_mi.total_cmp(&b.off_road_mi));
+                let Some(best_leg_mile) = nearest
+                    .filter(|snap| !runs_against_travel(&event.direction, snap.bearing_deg))
+                    .map(|snap| snap.mile)
+                else {
                     continue;
                 };
                 let zone_length = Self::construction_zone_length(&event);

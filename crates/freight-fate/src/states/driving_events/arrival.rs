@@ -68,6 +68,10 @@ impl DrivingState {
         self.exit_stop = None;
         self.exit_signal_on = false;
         self.exit_signal_canceled = false;
+        // A cancel belongs to the approach it was made on. Left standing, the
+        // rebuilt exit carries the same key, the scanner skips it, and lane
+        // keeping never takes the exit this loop-back says it will.
+        self.canceled_exit_key = None;
         self.cancel_cruise(ctx, false);
         let exit_at = match exit_details {
             Some(details) => details.0,

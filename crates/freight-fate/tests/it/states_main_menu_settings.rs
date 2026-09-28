@@ -81,16 +81,25 @@ fn hos_planning_hints_row_explains_and_persists_the_opt_in() {
     let mut app = TestApp::new();
     assert!(!app.ctx.settings.hos_planning_hints);
     open_settings_category(&mut app, "Difficulty and hours of service");
-    move_to::<Cat>(&mut app, "HOS planning hints");
-    assert_eq!(current_label::<Cat>(&app), "HOS planning hints: Off");
+    move_to::<Cat>(&mut app, "Hours of service planning hints");
+    assert_eq!(
+        current_label::<Cat>(&app),
+        "Hours of service planning hints: Off"
+    );
     let help = cat_rows(&mut app, "difficulty")
         .into_iter()
-        .find(|(label, _)| label.starts_with("HOS planning hints"))
+        .find(|(label, _)| label.starts_with("Hours of service planning hints"))
         .map(|(_, help)| help)
         .unwrap();
     assert!(help.contains("Quiet and Urgent only"), "{help}");
+    // The ontology's noun is "hours of service"; a screen reader spells
+    // "HOS" out letter by letter.
+    assert!(!help.contains("HOS"), "{help}");
     key(&mut app, Key::Return);
-    assert_eq!(current_label::<Cat>(&app), "HOS planning hints: On");
+    assert_eq!(
+        current_label::<Cat>(&app),
+        "Hours of service planning hints: On"
+    );
     assert!(Settings::load().hos_planning_hints);
     key(&mut app, Key::Left);
     assert!(!Settings::load().hos_planning_hints);
@@ -218,7 +227,7 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
         "difficulty" => &[
             "Driving mode",
             "Hours of service",
-            "HOS planning hints",
+            "Hours of service planning hints",
             "Back",
         ],
         "world" => &[
@@ -370,7 +379,7 @@ fn test_every_gameplay_setting_stays_reachable_after_the_split() {
     assert!(!reachable("controls", "Speed keeper"));
     assert!(reachable("difficulty", "Driving mode"));
     assert!(reachable("difficulty", "Hours of service"));
-    assert!(reachable("difficulty", "HOS planning hints"));
+    assert!(reachable("difficulty", "Hours of service planning hints"));
     // The overspeed warning lost its row: it no longer fires at speeds
     // cruise itself picks, so there is nothing to turn off.
     assert!(!rows
@@ -784,6 +793,35 @@ fn test_lane_keeping_row_updates_the_preset_row() {
     key(&mut app, Key::Return);
     assert_ne!(app.ctx.settings.lane_keeping, "full");
     assert_eq!(app.ctx.settings.driving_assistance_preset, "custom");
+}
+
+/// The assistance screen names the player's own keys, not the defaults.
+#[test]
+fn driving_assistance_names_moved_keys() {
+    let mut app = TestApp::new();
+    app.ctx.settings.key_bindings =
+        "brake=f7;upcoming=f8;cruise=f9;steer_left=f10;steer_right=f11".into();
+    app.ctx.apply_bindings();
+    let rows = cat_rows(&mut app, "assistance");
+    let help = |label: &str| {
+        rows.iter()
+            .find(|(row, _)| row.starts_with(label))
+            .map(|(_, help)| help.clone())
+            .unwrap_or_else(|| panic!("no {label} row in {rows:?}"))
+    };
+    assert!(help("Latching brake").contains("One press of F7 releases it"));
+    assert!(help("Curve callouts").contains("Press F8 to list the next few"));
+    assert!(help("Speed keeper").contains("F9 holds your current speed"));
+    assert!(help("Lane keeping").contains("turns F10 and F11 into tap lane changes"));
+
+    open_settings_category(&mut app, "Driving assistance");
+    app.ctx.settings.apply_driving_assistance_preset("balanced");
+    with_state_mut::<Cat, _>(&mut app, |c, ctx| c.refresh(ctx, true));
+    app.clear_speech();
+    key(&mut app, Key::Right);
+    assert_eq!(app.ctx.settings.lane_keeping, "full");
+    let heard = app.main_lines().join(" ");
+    assert!(heard.contains("tap F10 or F11 to change lanes"), "{heard}");
 }
 
 #[test]

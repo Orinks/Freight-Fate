@@ -132,7 +132,7 @@ impl DrivingState {
             return false;
         };
         let local_state = self.city_state(ctx, &self.job.destination.clone());
-        let first_corner = self.enter_streets(ctx, &route, local_state, false);
+        let first_corner = self.enter_streets(ctx, &route, local_state, false, announce);
         self.surface_chain = true;
         if announce {
             let street = Self::start_street_text(&route);
@@ -174,12 +174,20 @@ impl DrivingState {
     /// terminal released the truck to facility stopping assistance. Returns
     /// the first corner's call, " Then ...", when the chain starts inside its
     /// window, for the caller's off-the-ramp line; empty otherwise.
+    ///
+    /// `live` is false when a save is being rebuilt: the truck is parked with
+    /// its engine off and the restored position is not set yet, so both
+    /// handoffs are left to the per-frame paths -- the keeper resumes once the
+    /// truck rolls, and the first corner is called from where the truck
+    /// really is. Latched here, a resumed drive never heard that corner's
+    /// approach call, and the keeper refused a parked truck as it loaded.
     fn enter_streets(
         &mut self,
         ctx: &mut GameContext,
         route: &Route,
         local_state: String,
         road_stop: bool,
+        live: bool,
     ) -> String {
         let options = TripOptions {
             time_scale: self.trip.time_scale,
@@ -246,6 +254,9 @@ impl DrivingState {
         // later: a free-flowing ramp hands over at the ramp's own speed, and
         // for that frame nothing held the truck to the street's number.
         let pull_ahead = std::mem::take(&mut self.approach_pull_ahead);
+        if !live {
+            return String::new();
+        }
         if (pull_ahead || self.speed_control_armed) && ctx.settings.speed_keeper {
             let (limit, zone_reason) = self.trip.speed_limit_at(self.trip.position_mi);
             if let Some(zone_reason) = zone_reason {
@@ -314,7 +325,7 @@ impl DrivingState {
         };
         let city = route.cities.first().cloned().unwrap_or_default();
         let local_state = self.city_state(ctx, &city);
-        let first_corner = self.enter_streets(ctx, &route, local_state, true);
+        let first_corner = self.enter_streets(ctx, &route, local_state, true, true);
         self.stop_chain = Some(stop.clone());
         self.stop_chain_end_said = false;
         let street = Self::start_street_text(&route);

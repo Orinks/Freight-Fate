@@ -859,8 +859,8 @@ pub fn disqualification_notice_lines() -> Vec<String> {
          it out."
             .to_string(),
         "No carrier can put you in a seat, the dispatch board is closed to you, and the \
-         owner-operator buy-in is off the table. Rest, the garage, the truck dealer, the \
-         logbook and your stats still work here."
+         owner-operator buy-in is off the table. Rest, the garage, the logbook and your \
+         stats still work here."
             .to_string(),
         "Nothing is taken away. Your money, your levels, your achievements, your road journal \
          and your whole record stay, and this career can be opened and read any time."

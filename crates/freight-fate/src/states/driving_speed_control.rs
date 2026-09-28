@@ -168,7 +168,8 @@ impl DrivingState {
             return;
         }
         let Some(target) = self.resume_target_mph else {
-            ctx.say("No remembered cruise speed yet. K sets one.");
+            let key = ctx.control_name(crate::bindings::Action::Cruise);
+            ctx.say(&format!("No remembered cruise speed yet. {key} sets one."));
             return;
         };
         if !self.trip.truck.engine_on {

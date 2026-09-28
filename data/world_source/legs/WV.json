@@ -14828,7 +14828,7 @@
                   "cue": "Start on Raphine Road (SR 606).",
                   "speed_mph": 25.0,
                   "turn_deg": 0.0,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -14839,7 +14839,7 @@
                   "cue": "Turn left onto Oakland Circle (SR 917).",
                   "speed_mph": 25.0,
                   "turn_deg": 92.4,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": []
@@ -14930,7 +14930,7 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 89.8,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": [
@@ -14991,7 +14991,7 @@
                   "cue": "Turn right onto a side street.",
                   "speed_mph": 15.0,
                   "turn_deg": 89.8,
-                  "limit_mph": 55.0,
+                  "limit_mph": 45.0,
                   "limit_source": "statutory",
                   "limit_basis": "rural",
                   "controls": [

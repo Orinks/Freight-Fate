@@ -878,8 +878,18 @@ impl EventSpeechPacer {
     /// channel is busy for its length too, but the flushing line stays the
     /// newest protected one, so a later flush rescues that line rather than
     /// this one a second time.
+    ///
+    /// The flushing line now starts after this one, so its projected finish
+    /// moves with the channel's. Left where the flush put it, the line read
+    /// as speaking since the flush, and a second flush or an interrupt while
+    /// the hand-back still played dropped it as heard -- a turn call the
+    /// player never heard a word of.
     pub fn note_ahead(&mut self, text: &str) {
-        self.clear_at += Self::duration_s(text);
+        let duration = Self::duration_s(text);
+        self.clear_at += duration;
+        if let Some(held) = self.protected.as_mut() {
+            held.done_at += duration;
+        }
     }
 
     /// A rescued line is the same delivery, now queued to finish.

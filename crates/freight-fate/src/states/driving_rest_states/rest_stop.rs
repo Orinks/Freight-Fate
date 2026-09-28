@@ -679,6 +679,7 @@ impl RestStopState {
         if before_fatigue < hos::FATIGUE_SEVERE {
             ctx.award_achievement("sleep_before_exhaustion");
         }
+        self.refresh(ctx, true);
     }
 
     /// A paid bed where the parking is rough: a legal reset with real rest.
@@ -1194,7 +1195,12 @@ impl RestStopState {
 
     /// Whether this is an open scale the driver has not checked in at yet.
     fn check_in_pending(&self) -> bool {
-        self.stop.actions.iter().any(|a| a == "inspect") && !self.visit.inspected
+        self.stop.actions.iter().any(|a| a == "inspect")
+            && !self.visit.inspected
+            && self
+                .driving
+                .read(|d| d.scale_is_open(&self.stop))
+                .unwrap_or(false)
     }
 
     /// The scale check-in itself, settled and saved: the spoken result, and

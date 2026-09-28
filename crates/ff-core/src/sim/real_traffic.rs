@@ -782,14 +782,11 @@ impl RealTrafficProvider {
     ) -> Vec<TrafficEvent> {
         // California publishes per district: ask only for the districts
         // this stretch of road passes through.
-        let events: Vec<TrafficEvent> = if state.to_lowercase().trim() == caltrans::CALTRANS_STATE {
-            caltrans::districts_near_route(route_points, radius_mi)
-                .into_iter()
-                .flat_map(|d| self.fetch_construction(&caltrans::feed_key(d)).events)
-                .collect()
-        } else {
-            self.fetch_construction(state).events
-        };
+        let events: Vec<TrafficEvent> =
+            caltrans::construction_feed_keys(state, route_points, radius_mi)
+                .iter()
+                .flat_map(|key| self.fetch_construction(key).events)
+                .collect();
         if events.is_empty() || route_points.is_empty() {
             return Vec::new();
         }
