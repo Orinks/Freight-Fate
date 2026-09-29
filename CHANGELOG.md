@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
+
+- **Start the game with `--key-probe` to see what your screen reader sends it.** It reports how held arrow keys arrive, for support.
+
 - **Space and U say how far away your signalled exit is.** Space ends with it, and U names it first.
 
 - **Truck stops with a CAT Scale let you weigh.** The ticket reads steer, drive and trailer axles and gross, and says which are over.
@@ -170,6 +174,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **With JAWS, a held arrow keeps working when you tap another key.** Hold Up and tap Space for your speed, and the truck keeps accelerating.
 
 - **Dispatch no longer says assigned loads last until level 8 once you are past it.** It now says they last until your standing recovers.
 

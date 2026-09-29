@@ -761,6 +761,37 @@ its status or release decision.
       the desktop app launches the server hidden (STARTUPINFO `SW_HIDE`
       turned SDL's first show into a hide); the startup log records
       whether a show had to be forced.
+- [x] `freightfate --key-probe` and the agent server's `key_probe` tool
+      (2026-09-29) replace Noel's deleted `tools/key_probe.py`: they record
+      every key event with its frame, what the keyboard and the held-key
+      tracker each said, and how many JAWS-style press-and-release pairs the
+      tracker missed (a frame over 40 ms, or a pair split across two frames).
+- [x] JAWS held keys (2026-09-29): probed on the owner's JAWS machine. The
+      game is not at fault (frames under 20 ms, every pair read as a hold).
+      JAWS runs its own arrow script per key, one pair every ~255 ms, so
+      speech lags the longer an arrow is held and menus react slowly; JAWS
+      Key+3 (pass-through) restores native 34 ms repeats and normal speed.
+- [x] JAWS held arrows survive another key's tap (2026-09-29). The keyboard
+      repeats only the last key pressed, and JAWS never sends the release,
+      so tapping Space while holding Up looked like a lifted finger.
+      `HeldKeys::set_bridge` (on when Prism's voice is JAWS) carries an
+      established arrow hold 1.5 s past such a tap, 4 s at most, and never
+      for the opposite pedal. Still true: JAWS hides the real key state
+      (Windows reported a 17 ms hold), so a finger lifted mid-tap keeps the
+      pedal for that bridge.
+- [x] The JAWS arrow script ships as an opt-in Settings, Speech row (2026-09-29,
+      owner-approved shape): `jaws_script` copies `tools/jaws/freightfate.jss`
+      into the player's own `%APPDATA%\Freedom Scientific\JAWS\<version>\
+      Settings\<language>` and compiles it with that version's `scompile.exe`,
+      on a worker thread, touching only its own two files. It sends each
+      arrow on at once instead of JAWS's ~255 ms script, which fixed slow
+      menus and held-arrow speech lag on the owner's machine. Tested on
+      JAWS 2026 only; other versions and languages await a JAWS tester.
+      Tried and dropped: passing arrows through natively
+      from a script (no effect) and holding the key for the game with
+      `PressKey` (arrows stopped working); resending while `GetKeyState`
+      says down ran the truck away, because JAWS reports the key down after
+      it lifts. Key+3 still passes one key through without the script.
 - [x] `weather_collector`'s copy names all nine skies the award needs
       (2026-09-24). It listed eight and left out ice, which it now calls
       freezing rain, the word the weather readout speaks. The award is

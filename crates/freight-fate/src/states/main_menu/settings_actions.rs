@@ -579,6 +579,13 @@ impl SettingsCategoryState {
         }
     }
 
+    /// Faster or default JAWS arrow keys. The work runs on its own thread and
+    /// the app loop speaks the result, so this row says nothing itself.
+    pub(super) fn toggle_jaws_arrow_script(&mut self, ctx: &mut GameContext, _d: i64) {
+        let install = !ctx.services.jaws_script.installed();
+        ctx.services.jaws_script.request(install);
+    }
+
     pub(super) fn adjust_speech(&mut self, ctx: &mut GameContext, attr: &str, delta: f64) {
         Self::step_level(&mut ctx.settings, attr, delta);
         save_settings(&ctx.settings);

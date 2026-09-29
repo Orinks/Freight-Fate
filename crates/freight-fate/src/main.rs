@@ -26,6 +26,8 @@
 //!   maintainers cannot install is answered by its own user running this.
 //! * `--break-scenario NAME` / `--break-battery` `[--transcript]` -- run one
 //!   scenario, or all of them, and print the verdict table.
+//! * `--key-probe [--seconds N]` -- measure what the keyboard delivers to the
+//!   game, screen reader included (formerly `tools/key_probe.py`).
 //! * `--playtest-sandbox` -- prepare (and with `--launch`, run the real game
 //!   in) a data directory that cannot reach the owner's account
 //!   (formerly `tools/playtest_sandbox.py`).
@@ -187,7 +189,51 @@ fn run(args: &[String]) -> i32 {
     if has(args, "--agent-server") {
         return agent_server(args);
     }
+    if has(args, "--key-probe") {
+        return key_probe(args);
+    }
     app::main_with(CliOptions::parse(args.iter().cloned()))
+}
+
+/// `--key-probe [--seconds N] [--log PATH]`: show what the keyboard delivers
+/// to the game (see `app::key_probe`), for a player whose screen reader
+/// re-sends held keys. Speaks its findings and writes them to a log.
+fn key_probe(args: &[String]) -> i32 {
+    let seconds = flag_value(args, "--seconds")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(25);
+    let mut app = match App::new() {
+        Ok(app) => app,
+        Err(e) => {
+            eprintln!("Could not start the key probe: {e}");
+            return 1;
+        }
+    };
+    let report = app.run_key_probe(seconds);
+    let path = flag_value(args, "--log")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            let stamp = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map_or(0, |d| d.as_secs());
+            PathBuf::from(format!("key_probe-{stamp}.log"))
+        });
+    let text = report.text();
+    println!("{text}");
+    let saved = match std::fs::write(&path, &text) {
+        Ok(()) => format!("The log is saved as {}.", path.display()),
+        Err(e) => format!("The log could not be saved: {e}."),
+    };
+    println!("{saved}");
+    let spoken = format!("{} {saved}", report.spoken());
+    app.ctx.say(&spoken);
+    // The speech worker talks on its own thread; give it time to finish
+    // before the process, and the voice with it, goes away.
+    let words = spoken.split_whitespace().count() as f64;
+    std::thread::sleep(std::time::Duration::from_secs_f64(
+        (1.0 + words / 2.5).min(30.0),
+    ));
+    0
 }
 
 #[cfg(feature = "agent-server")]
@@ -244,6 +290,7 @@ const KNOWN_SWITCHES: &[&str] = &[
     "--help",
     "--hour",
     "--lane-keeping",
+    "--key-probe",
     "--launch",
     "--lead",
     "--level",
@@ -268,6 +315,7 @@ const KNOWN_SWITCHES: &[&str] = &[
     "--routes",
     "--sample",
     "--scan",
+    "--seconds",
     "--seed",
     "--smoke",
     "--speed",
@@ -323,6 +371,10 @@ Drive tools:
                                     alongside the agent; --staging uses its
                                     own directory and its own driver on the
                                     staging site, cloud backup on)
+  --key-probe [--seconds N]         show what your keyboard delivers to the game,
+                                    for a screen reader that re-sends held keys
+                                    (JAWS): hold each arrow key for a few seconds;
+                                    it speaks its findings and writes a log
   --log PATH                        session log for the watcher
 ";
 

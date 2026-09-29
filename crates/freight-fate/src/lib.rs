@@ -12,6 +12,7 @@ pub mod cloud_saves;
 pub mod controller;
 pub mod discord_presence;
 pub mod duty_watch;
+pub mod jaws_script;
 pub mod meaningful_play;
 pub mod net;
 pub mod online_activation;

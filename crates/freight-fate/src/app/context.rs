@@ -48,6 +48,7 @@ use crate::cloud_saves::{BackupAnnouncements, CloudSaves};
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
 use crate::duty_watch::DutyWatch;
+use crate::jaws_script::JawsScript;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::net::UreqTransport;
 use crate::online_journal::{queue_achievement, JournalOutbox};
@@ -110,6 +111,8 @@ pub struct Services {
     /// The background watch on the drivers list (the "Say when drivers go
     /// on or off duty" row).
     pub duty: DutyWatch,
+    /// The optional JAWS arrow-key script (Settings, Speech).
+    pub jaws_script: JawsScript,
     pub cloud: CloudSaves,
     pub journal: JournalOutbox,
     pub mastodon: JournalOutbox,

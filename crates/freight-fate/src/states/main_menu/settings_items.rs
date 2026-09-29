@@ -285,6 +285,24 @@ impl SettingsCategoryState {
                        with any other voice the game keeps speaking and says so.",
             },
         ];
+        if speech.backend_name().eq_ignore_ascii_case("jaws") {
+            specs.push(SpeechSpec {
+                label: Label::dynamic(|_s, ctx| {
+                    let state = if ctx.services.jaws_script.installed() {
+                        "faster"
+                    } else {
+                        "default"
+                    };
+                    format!("JAWS arrow keys: {state}")
+                }),
+                action: adjust(|s, ctx, d| s.toggle_jaws_arrow_script(ctx, d)),
+                help: "JAWS reads each arrow key with its own script, which waits for \
+                       the screen to change, so menus answer slowly and held arrows \
+                       lag. Faster adds a small script for this game to your JAWS \
+                       settings so the arrows answer at once. Default removes it. \
+                       Restart JAWS if nothing changes.",
+            });
+        }
         if speech.supports_rate() {
             specs.push(SpeechSpec {
                 label: dyn_label(|s| format!("Speech rate: {} percent", pct(s.speech_rate))),
