@@ -10,9 +10,9 @@
 //! the spoken hints read.
 //!
 //! What stays fixed, on purpose: Escape for the pause menu, Enter to confirm,
-//! F1 for help, the Control keys that stop the event voice, the clutch on
-//! Shift and the left bumper, plus and minus for the cruise target, the radio
-//! dial keys, the message-review keys, and every menu key. Those are either
+//! F1 for help, F2 for the command list, the Control keys that stop the event
+//! voice, the clutch on Shift and the left bumper, plus and minus for the
+//! cruise target, the radio dial keys, the message-review keys, and every menu key. Those are either
 //! the screen reader's own vocabulary or a control with several physical
 //! keys already, and moving them would cost more than it gives. On the pad,
 //! Start (pause), Back (stop the voice, then help), the two bumpers and the
@@ -658,6 +658,7 @@ pub fn reserved_key_reason(chord: &Chord) -> Option<&'static str> {
         Key::Escape => Some("Escape is the pause menu"),
         Key::Return | Key::KpEnter => Some("Enter confirms"),
         Key::F1 => Some("F1 is help"),
+        Key::F2 => Some("F2 lists the driving commands"),
         Key::LCtrl | Key::RCtrl | Key::LShift | Key::RShift | Key::LAlt | Key::RAlt => {
             Some("a modifier key on its own cannot be a shortcut")
         }
@@ -674,13 +675,14 @@ pub fn reserved_key_reason(chord: &Chord) -> Option<&'static str> {
         _ => None,
     };
     if let Some(reason) = fixed {
-        // Escape, F1 and the modifier keys are fixed however they are
-        // pressed (the first two are answered before the table is asked);
+        // Escape, F1, F2 and the modifier keys are fixed however they are
+        // pressed (the first three are answered before the table is asked);
         // the rest are only claimed bare, so Alt with a review key is free.
         let always = matches!(
             chord.key,
             Key::Escape
                 | Key::F1
+                | Key::F2
                 | Key::LCtrl
                 | Key::RCtrl
                 | Key::LShift

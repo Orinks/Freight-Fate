@@ -41,6 +41,7 @@ enum {
     FF_DECREMENT = 21,
     FF_THREE_FINGER_SWIPE_LEFT = 22,
     FF_THREE_FINGER_SWIPE_RIGHT = 23,
+    FF_THREE_FINGER_TAP = 24,
 };
 
 #define FF_QUEUE_CAPACITY 64
@@ -91,7 +92,8 @@ int32_t ff_touch_next(void) {
     self.accessibilityLabel = @"Freight Fate";
     self.accessibilityHint =
         @"Swipe up or down to move, double tap to choose, scrub to go back. "
-        @"Touch and hold the top half to accelerate, the bottom half to brake.";
+        @"Touch and hold the top half to accelerate, the bottom half to brake. "
+        @"While driving, three-finger tap lists every command.";
     self.accessibilityTraits =
         UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;
     [self installRecognizers];
@@ -100,6 +102,8 @@ int32_t ff_touch_next(void) {
 
 - (void)installRecognizers {
     UITapGestureRecognizer *threeDouble = [self tapWithTouches:3 taps:2 code:FF_THREE_FINGER_DOUBLE_TAP];
+    UITapGestureRecognizer *threeSingle = [self tapWithTouches:3 taps:1 code:FF_THREE_FINGER_TAP];
+    [threeSingle requireGestureRecognizerToFail:threeDouble];
     UITapGestureRecognizer *twoDouble = [self tapWithTouches:2 taps:2 code:FF_MAGIC_TAP];
     UITapGestureRecognizer *twoSingle = [self tapWithTouches:2 taps:1 code:FF_TWO_FINGER_TAP];
     [twoSingle requireGestureRecognizerToFail:twoDouble];

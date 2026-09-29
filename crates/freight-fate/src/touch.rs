@@ -29,6 +29,8 @@ pub enum Gesture {
     ThreeFingerSwipeLeft,
     ThreeFingerSwipeRight,
     ThreeFingerDoubleTap,
+    /// Opens the driving command list, and reads a name field back.
+    ThreeFingerTap,
     /// One finger held still on the top half of the screen.
     HoldUpperBegan,
     /// One finger held still on the bottom half of the screen.
@@ -74,6 +76,7 @@ impl Gesture {
             21 => Gesture::Decrement,
             22 => Gesture::ThreeFingerSwipeLeft,
             23 => Gesture::ThreeFingerSwipeRight,
+            24 => Gesture::ThreeFingerTap,
             _ => return None,
         })
     }
@@ -97,6 +100,7 @@ impl Gesture {
             Gesture::ThreeFingerSwipeDown => Key::End,
             Gesture::ThreeFingerSwipeLeft => Key::PageUp,
             Gesture::ThreeFingerSwipeRight => Key::PageDown,
+            Gesture::ThreeFingerTap => Key::F2,
             Gesture::ThreeFingerDoubleTap
             | Gesture::HoldUpperBegan
             | Gesture::HoldLowerBegan
@@ -202,10 +206,10 @@ mod tests {
 
     #[test]
     fn every_native_code_round_trips_and_unknown_codes_are_ignored() {
-        for code in 0..24 {
+        for code in 0..25 {
             assert!(Gesture::from_code(code).is_some(), "code {code}");
         }
-        assert_eq!(Gesture::from_code(24), None);
+        assert_eq!(Gesture::from_code(25), None);
         assert_eq!(Gesture::from_code(-1), None);
     }
 
@@ -222,6 +226,7 @@ mod tests {
             (Gesture::Increment, Key::Up),
             (Gesture::Decrement, Key::Down),
             (Gesture::TwoFingerSwipeUp, Key::F1),
+            (Gesture::ThreeFingerTap, Key::F2),
         ] {
             let out = touch.handle(gesture);
             assert_eq!(

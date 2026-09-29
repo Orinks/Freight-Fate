@@ -98,6 +98,7 @@ mod states_driving_buffs;
 mod states_driving_cab_systems;
 mod states_driving_cat_scale;
 mod states_driving_chain_law;
+mod states_driving_commands;
 mod states_driving_controls;
 mod states_driving_core;
 mod states_driving_damage;

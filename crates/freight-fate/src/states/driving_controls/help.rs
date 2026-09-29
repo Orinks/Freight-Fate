@@ -287,7 +287,7 @@ impl DrivingState {
             "automatic mode. {} switches between automatic and manual ",
             n(Action::TransmissionMode)
         ));
-        text.push_str("shifting. Escape pause menu. ");
+        text.push_str("shifting. Escape pause menu. F2 lists every driving command by name. ");
         if !self.trip.truck.transmission.automatic {
             text.push_str(&format!(
                 "Hold Left Shift for clutch, then {} to shift up or {} to shift down, \

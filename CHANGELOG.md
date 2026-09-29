@@ -5,6 +5,7 @@
 ### Added
 
 - **Freight Fate runs on iPhone and iPad.** It speaks through VoiceOver, answers touch gestures, and plays with game controllers.
+- **F2 lists every driving command by name.** Pick one and it runs as its key would, then you are back on the road. On iPhone and iPad, a three-finger tap opens the list.
 
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
 

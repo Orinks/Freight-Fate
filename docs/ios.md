@@ -26,12 +26,20 @@ VoiceOver's own standard actions are also answered.
 | VoiceOver magic tap (two-finger double tap) | Space |
 | Three-finger swipe up / down | Home / End |
 | Three-finger swipe left / right | Page Up / Page Down |
+| Three-finger tap | F2: while driving, the list of every driving command; in a name field, read the name back |
 | Three-finger double tap | Show or hide the on-screen keyboard, for letter commands |
 | Touch and hold the top half | Hold Up (throttle) until you lift |
 | Touch and hold the bottom half | Hold Down (brake) until you lift |
 
 Because the game screen takes touches directly, VoiceOver's scrub (two-finger
 Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
+
+While driving, the holds are the pedals, swipes left and right steer (or change
+lanes with lane keeping on full), a two-finger tap opens the status menu, the
+magic tap reads your speed, and three-finger swipes left and right tune the
+radio. Everything else a letter key does is on the driving command list: a
+three-finger tap opens it, swipe to a command, and double tap runs it and puts
+you back on the road.
 
 VoiceOver's adjustable swipes (up and down with VoiceOver focus on the game)
 also send Up and Down.
