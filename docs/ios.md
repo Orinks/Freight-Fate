@@ -21,7 +21,7 @@ VoiceOver's own standard actions are also answered.
 | Swipe left / right | Left / Right |
 | Two-finger tap | Tab |
 | Two-finger swipe up | F1 (help) |
-| Two-finger swipe down, or VoiceOver scrub (two-finger Z) | Escape |
+| Two-finger swipe down | Escape |
 | Two-finger swipe left / right | Comma / Period |
 | VoiceOver magic tap (two-finger double tap) | Space |
 | Three-finger swipe up / down | Home / End |
@@ -29,6 +29,9 @@ VoiceOver's own standard actions are also answered.
 | Three-finger double tap | Show or hide the on-screen keyboard, for letter commands |
 | Touch and hold the top half | Hold Up (throttle) until you lift |
 | Touch and hold the bottom half | Hold Down (brake) until you lift |
+
+Because the game screen takes touches directly, VoiceOver's scrub (two-finger
+Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
 
 VoiceOver's adjustable swipes (up and down with VoiceOver focus on the game)
 also send Up and Down.
