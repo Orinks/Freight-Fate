@@ -355,6 +355,18 @@ fn next_gesture() -> Option<crate::touch::Gesture> {
 /// SDL events to game events, pairing each `KeyDown` with the `TextInput`
 /// that follows it.
 pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
+    translate_events_with(raw, cfg!(target_os = "ios"))
+}
+
+/// [`translate_events`], with the iOS on-screen keyboard's order allowed.
+///
+/// UIKit's keyboard reaches SDL as a finished edit: each character's key
+/// press and release first, then one `TextInput` for the lot -- or, while
+/// SDL believes a hardware keyboard is attached (the Simulator, always),
+/// the `TextInput` alone. With `soft_keyboard` set, each character finds the
+/// unpaired press of its own key earlier in the batch, and a character with
+/// none becomes a press of its own, so typed names are not lost.
+pub fn translate_events_with(raw: Vec<Event>, soft_keyboard: bool) -> Vec<InputEvent> {
     let mut out = Vec::with_capacity(raw.len());
     let mut pending_text: Option<usize> = None; // index in `out` of the last KeyDown
     for event in raw {
@@ -380,6 +392,8 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
                     if let Some(InputEvent::KeyDown { text: slot, .. }) = out.get_mut(index) {
                         *slot = text.chars().next();
                     }
+                } else if soft_keyboard {
+                    pair_typed_text(&mut out, &text);
                 }
                 continue;
             }
@@ -435,6 +449,40 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
         pending_text = None;
     }
     out
+}
+
+/// Give each typed character to the unpaired press of its key, or a press
+/// of its own when the batch has none.
+fn pair_typed_text(out: &mut Vec<InputEvent>, text: &str) {
+    let mut searched_to = 0;
+    for ch in text.chars() {
+        let key = Key::from_char(ch);
+        let found = out[searched_to..].iter().position(
+            |event| matches!(event, InputEvent::KeyDown { key: k, text: None, .. } if *k == key),
+        );
+        match found {
+            Some(offset) => {
+                let index = searched_to + offset;
+                if let InputEvent::KeyDown { text: slot, .. } = &mut out[index] {
+                    *slot = Some(ch);
+                }
+                searched_to = index + 1;
+            }
+            None => {
+                out.push(InputEvent::KeyDown {
+                    key,
+                    mods: Mods::NONE,
+                    text: Some(ch),
+                    repeat: false,
+                });
+                out.push(InputEvent::KeyUp {
+                    key,
+                    mods: Mods::NONE,
+                });
+                searched_to = out.len();
+            }
+        }
+    }
 }
 
 /// `event.mod & KMOD_*`.
@@ -589,6 +637,90 @@ mod tests {
                 InputEvent::key(Key::Left),
             ]
         );
+    }
+
+    fn down(keycode: Keycode) -> Event {
+        Event::KeyDown {
+            timestamp: 0,
+            window_id: 0,
+            keycode: Some(keycode),
+            scancode: None,
+            keymod: Mod::NOMOD,
+            repeat: false,
+        }
+    }
+
+    fn up(keycode: Keycode) -> Event {
+        Event::KeyUp {
+            timestamp: 0,
+            window_id: 0,
+            keycode: Some(keycode),
+            scancode: None,
+            keymod: Mod::NOMOD,
+            repeat: false,
+        }
+    }
+
+    fn text(text: &str) -> Event {
+        Event::TextInput {
+            timestamp: 0,
+            window_id: 0,
+            text: text.to_string(),
+        }
+    }
+
+    fn typed(events: &[InputEvent]) -> String {
+        events
+            .iter()
+            .filter_map(|event| match event {
+                InputEvent::KeyDown { text, .. } => *text,
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn soft_keyboard_text_after_the_release_reaches_its_press() {
+        let raw = vec![down(Keycode::I), up(Keycode::I), text("i")];
+        let events = translate_events_with(raw, true);
+        assert_eq!(typed(&events), "i");
+        assert_eq!(events.len(), 2, "{events:?}");
+    }
+
+    #[test]
+    fn soft_keyboard_text_with_no_press_types_on_its_own() {
+        let events = translate_events_with(vec![text("Jo")], true);
+        assert_eq!(typed(&events), "Jo");
+        assert!(matches!(
+            events.first(),
+            Some(InputEvent::KeyDown { key: Key::J, .. })
+        ));
+    }
+
+    #[test]
+    fn soft_keyboard_text_skips_a_backspace_before_it() {
+        let raw = vec![
+            down(Keycode::BACKSPACE),
+            up(Keycode::BACKSPACE),
+            down(Keycode::A),
+            up(Keycode::A),
+            text("a"),
+        ];
+        let events = translate_events_with(raw, true);
+        assert!(matches!(
+            events.first(),
+            Some(InputEvent::KeyDown {
+                key: Key::Backspace,
+                text: None,
+                ..
+            })
+        ));
+        assert_eq!(typed(&events), "a");
+    }
+
+    #[test]
+    fn desktop_drops_text_that_no_press_is_waiting_for() {
+        assert!(translate_events_with(vec![text("x")], false).is_empty());
     }
 
     #[test]
