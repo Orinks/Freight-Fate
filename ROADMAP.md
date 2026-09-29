@@ -308,6 +308,16 @@ Everything found before 2026-09-25 moved to
       and "Tap Right" on the exit approach, and the one-time "Hours of
       service moved to Alt A, Alt S, and Alt D" notice. All three read the
       bindings now (2026-09-28).
+- [x] Freight Fate builds for iPhone and iPad: the same Rust game, speech
+      through Prism's VoiceOver backend, controllers through SDL, touch and
+      VoiceOver gestures as key presses, and F2 or a three-finger tap for a
+      spoken list of driving commands. `tools/build_ios.py` packages it;
+      `docs/ios.md` has the gestures (2026-09-29).
+- [ ] iOS still needs a signed install on a real iPhone, a real
+      controller, BASS sound on hardware (the Simulator has no audio
+      device) and VoiceOver's scrub on hardware. For the App Store: an app
+      icon, a privacy manifest, BASS licensing for iOS, and a title screen
+      or review note for the blank game screen.
 
 ### Release gate record
 
