@@ -122,6 +122,14 @@ impl SdlShell {
         // game has no use for a tilt stick among its controllers.
         #[cfg(target_os = "ios")]
         sdl2::hint::set("SDL_ACCELEROMETER_AS_JOYSTICK", "0");
+        // SDL locks a window wider than tall to landscape; the screen is one
+        // touch surface, so follow however the player holds the device and
+        // keep swipe directions matching their hand.
+        #[cfg(target_os = "ios")]
+        sdl2::hint::set(
+            "SDL_IOS_ORIENTATIONS",
+            "Portrait PortraitUpsideDown LandscapeLeft LandscapeRight",
+        );
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let window = video
