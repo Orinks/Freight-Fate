@@ -660,6 +660,7 @@ dependencies = [
  "anyhow",
  "base64 0.22.1",
  "bass-sys",
+ "cc",
  "chrono",
  "discord-rich-presence",
  "env_logger",

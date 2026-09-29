@@ -121,6 +121,13 @@ impl Default for UpdateCheckState {
 
 impl State for UpdateCheckState {
     fn enter(&mut self, ctx: &mut GameContext) {
+        if !updater::SELF_UPDATES {
+            self.message = "On iPhone and iPad, updates come through the App Store \
+                            or TestFlight."
+                .to_string();
+            ctx.say(&format!("{} Escape goes back.", self.message));
+            return;
+        }
         if !updater::is_frozen() {
             self.message = "Updates are only available in the packaged game. \
                             This copy runs from source; update it with git."

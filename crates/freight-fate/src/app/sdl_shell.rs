@@ -52,6 +52,10 @@ pub struct SdlShell {
     pump: EventPump,
     #[cfg(target_os = "windows")]
     window_handle: Option<isize>,
+    #[cfg(target_os = "ios")]
+    touch: crate::touch::TouchInput,
+    #[cfg(target_os = "ios")]
+    keyboard_shown: bool,
 }
 
 #[cfg(target_os = "windows")]
@@ -114,6 +118,10 @@ fn release_at_process_exit<T>(resource: T) {
 impl SdlShell {
     /// `pygame.init()` + `set_caption` + `set_mode(WINDOW_SIZE)`.
     pub fn new(title: &str) -> Result<Self, String> {
+        // SDL on iOS offers the accelerometer as a joystick by default; the
+        // game has no use for a tilt stick among its controllers.
+        #[cfg(target_os = "ios")]
+        sdl2::hint::set("SDL_ACCELEROMETER_AS_JOYSTICK", "0");
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let window = video
@@ -150,8 +158,13 @@ impl SdlShell {
         }
         let pump = sdl.event_pump()?;
         // pygame delivered event.unicode for every key; SDL needs text
-        // input running for TextInput events.
+        // input running for TextInput events. On iOS starting text input
+        // raises the on-screen keyboard, so there it waits for the player's
+        // three-finger double tap; a hardware keyboard types regardless.
+        #[cfg(not(target_os = "ios"))]
         video.text_input().start();
+        #[cfg(target_os = "ios")]
+        install_touch_surface(canvas.window());
         Ok(Self {
             sdl,
             video,
@@ -159,6 +172,10 @@ impl SdlShell {
             pump,
             #[cfg(target_os = "windows")]
             window_handle,
+            #[cfg(target_os = "ios")]
+            touch: crate::touch::TouchInput::new(),
+            #[cfg(target_os = "ios")]
+            keyboard_shown: false,
         })
     }
 
@@ -244,7 +261,36 @@ impl SdlShell {
             pump.poll_iter().collect::<Vec<Event>>()
         }))
         .ok()?;
-        Some(translate_events(raw))
+        #[cfg(not(target_os = "ios"))]
+        let events = translate_events(raw);
+        #[cfg(target_os = "ios")]
+        let events = self.with_touch(translate_events(raw));
+        Some(events)
+    }
+
+    /// Append this frame's gestures, as key presses, to the SDL events. A
+    /// lost focus (the app leaving the foreground) lets go of a held pedal.
+    #[cfg(target_os = "ios")]
+    fn with_touch(&mut self, mut events: Vec<InputEvent>) -> Vec<InputEvent> {
+        if events
+            .iter()
+            .any(|event| matches!(event, InputEvent::WindowFocusLost))
+        {
+            self.touch.release_into(&mut events);
+        }
+        while let Some(gesture) = next_gesture() {
+            let out = self.touch.handle(gesture);
+            events.extend(out.events);
+            if out.toggle_keyboard {
+                self.keyboard_shown = !self.keyboard_shown;
+                if self.keyboard_shown {
+                    self.video.text_input().start();
+                } else {
+                    self.video.text_input().stop();
+                }
+            }
+        }
+        events
     }
 
     /// `screen.fill(BG_COLOR)` ... `display.flip()`. The text lines are not
@@ -255,6 +301,46 @@ impl SdlShell {
             .set_draw_color(Color::RGB(BG_COLOR.0, BG_COLOR.1, BG_COLOR.2));
         self.canvas.clear();
         self.canvas.present();
+    }
+}
+
+#[cfg(target_os = "ios")]
+extern "C" {
+    fn ff_touch_install(window: *mut std::ffi::c_void) -> i32;
+    fn ff_touch_next() -> i32;
+}
+
+/// Lay the gesture surface (`ios/ff_touch.m`) over SDL's view.
+#[cfg(target_os = "ios")]
+fn install_touch_surface(window: &sdl2::video::Window) {
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+    let ui_window = match window.window_handle().map(|handle| handle.as_raw()) {
+        // sdl2 reports the UIWindow in the `ui_view` slot.
+        Ok(RawWindowHandle::UiKit(handle)) => handle.ui_view.as_ptr(),
+        _ => {
+            log::warn!("touch: SDL gave no UIKit window; gestures are off");
+            return;
+        }
+    };
+    // SAFETY: the pointer is SDL's live UIWindow, and this runs on the main
+    // thread, where SDL created it.
+    if unsafe { ff_touch_install(ui_window) } == 0 {
+        log::warn!("touch: the gesture surface could not be installed");
+    }
+}
+
+#[cfg(target_os = "ios")]
+fn next_gesture() -> Option<crate::touch::Gesture> {
+    loop {
+        // SAFETY: a plain queue pop, no arguments.
+        let code = unsafe { ff_touch_next() };
+        if code < 0 {
+            return None;
+        }
+        if let Some(gesture) = crate::touch::Gesture::from_code(code) {
+            return Some(gesture);
+        }
     }
 }
 

@@ -12,6 +12,7 @@ use std::{env, fs, path::PathBuf};
 fn main() {
     delay_load_prism_backends();
     link_prism_system_libraries();
+    build_ios_bridge();
     let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let root = manifest.ancestors().nth(2).unwrap().to_path_buf();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
@@ -25,7 +26,7 @@ fn main() {
         // macOS and Linux are not vendored on purpose: SDL2 is compiled in
         // statically there (see Cargo.toml), so there is nothing missing and
         // nothing to warn about.
-        if os != "macos" && os != "linux" {
+        if os != "macos" && os != "linux" && os != "ios" {
             println!("cargo:warning=freight-fate: no vendored SDL2 for {os}-{arch} under vendor/sdl2; expecting a system SDL2");
         }
         return;
@@ -71,7 +72,7 @@ fn delay_load_prism_backends() {
 /// decide whether to build those backends at all.
 fn link_prism_system_libraries() {
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    if os == "linux" || os == "macos" {
+    if os == "linux" || os == "macos" || os == "ios" {
         // Each backend registers itself from a static initializer in its own
         // object, which nothing references, so a plain static link drops
         // every one and Prism starts with an empty registry. Prism anchors
@@ -92,6 +93,37 @@ fn link_prism_system_libraries() {
                 println!("cargo:rustc-link-lib=framework={framework}");
             }
             println!("cargo:rustc-link-lib=objc");
+        }
+        Ok("ios") => {
+            // Prism (VoiceOver announcements, AVSpeech) and the SDL2 UIKit
+            // backend compiled in by sdl2-sys, whose static link names only
+            // the macOS frameworks.
+            for framework in [
+                "Foundation",
+                "UIKit",
+                "AVFoundation",
+                "AudioToolbox",
+                "CoreAudio",
+                "CoreBluetooth",
+                "CoreFoundation",
+                "CoreGraphics",
+                "CoreHaptics",
+                "CoreMotion",
+                "GameController",
+                "Metal",
+                "OpenGLES",
+                "QuartzCore",
+                "Security",
+            ] {
+                println!("cargo:rustc-link-lib=framework={framework}");
+            }
+            println!("cargo:rustc-link-lib=objc");
+            println!("cargo:rustc-link-lib=iconv");
+            println!("cargo:rustc-link-lib=c++");
+            // BASS and its add-ons ship as embedded frameworks in the app's
+            // own Frameworks folder.
+            println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/Frameworks");
+            link_clang_runtime();
         }
         Ok("linux") => {
             link_libstdcxx_statically();
@@ -146,4 +178,44 @@ fn link_libstdcxx_statically() {
     if fs::create_dir_all(&dir).is_ok() && fs::copy(&archive, dir.join("libstdc++.a")).is_ok() {
         println!("cargo:rustc-link-search=native={}", dir.display());
     }
+}
+
+/// Compile the UIKit gesture and VoiceOver bridge (`ios/ff_touch.m`).
+///
+/// It is the one piece of the iOS port that has to be Objective-C: a view
+/// over SDL's own, carrying the gesture recognizers and the accessibility
+/// element VoiceOver focuses. Everything it sees is queued as a plain gesture
+/// code that `touch` turns into the same key events the desktop game reads.
+fn build_ios_bridge() {
+    let source = "ios/ff_touch.m";
+    println!("cargo:rerun-if-changed={source}");
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("ios") {
+        return;
+    }
+    cc::Build::new()
+        .file(source)
+        .flag("-fobjc-arc")
+        .flag("-fmodules")
+        .compile("ff_touch");
+}
+
+/// Link clang's own runtime for iOS. SDL2's and Prism's `@available` checks
+/// compile to `__isPlatformVersionAtLeast`, which lives there, and rustc links
+/// with `-nodefaultlibs`, so clang does not add it by itself.
+fn link_clang_runtime() {
+    let simulator = env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("sim");
+    let Ok(output) = std::process::Command::new("xcrun")
+        .args(["clang", "-print-resource-dir"])
+        .output()
+    else {
+        println!("cargo:warning=freight-fate: xcrun clang not found; not linking clang_rt");
+        return;
+    };
+    let resource_dir = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    // A fat archive, which rustc cannot bundle into the rlib, so it goes to
+    // the final link directly.
+    println!(
+        "cargo:rustc-link-arg={resource_dir}/lib/darwin/libclang_rt.{}.a",
+        if simulator { "iossim" } else { "ios" }
+    );
 }

@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Freight Fate runs on iPhone and iPad.** It speaks through VoiceOver, answers touch gestures, and plays with game controllers.
+
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
 
 - **Start the game with `--key-probe` to see what your screen reader sends it.** It reports how held arrow keys arrive, for support.
