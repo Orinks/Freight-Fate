@@ -171,6 +171,8 @@
 
 ### Fixed
 
+- **Dispatch no longer says assigned loads last until level 8 once you are past it.** It now says they last until your standing recovers.
+
 - **The manual transmission bonus is paid only for a run driven in manual.** Switching to manual near the end no longer earns it.
 
 - **A running engine burns fuel while you wait at a stop.** Breaks, meals and shop work idle the engine as the dock always did.

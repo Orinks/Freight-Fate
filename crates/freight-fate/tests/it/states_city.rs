@@ -188,6 +188,27 @@ fn test_senior_company_driver_gets_browsable_board() {
         .any(|l| l.contains("Job 1 of 2")));
 }
 
+/// A senior driver dispatch has stopped trusting is on assigned loads because
+/// of standing, so the board must not promise "until level 8" at level 9.
+#[test]
+fn test_senior_driver_on_assigned_loads_hears_standing_not_a_level() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Slipped Senior");
+    {
+        let p = profile_mut(&mut app);
+        p.career.xp = LEVEL_XP[SENIOR_LOAD_CHOICE_LEVEL as usize]; // level 9
+        p.career.deliveries = 20;
+        p.career.reputation = 5.0;
+    }
+
+    push_board(&mut app, vec![job(180.0), job(70.0)]);
+
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.assigned_mode()));
+    let said = app.main_lines().last().cloned().unwrap();
+    assert!(said.contains("assigns your load and route until your standing recovers"));
+    assert!(!said.contains("until level"));
+}
+
 #[test]
 fn test_owner_operator_board_stays_browsable() {
     let mut app = TestApp::new();

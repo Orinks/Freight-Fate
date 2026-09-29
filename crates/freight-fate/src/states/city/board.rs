@@ -60,6 +60,16 @@ const ASSIGNED_INTRO_HELP: &str =
      budget that refills at your next promotion. F1 reads the job details. Escape returns to \
      the terminal.";
 
+/// How long dispatch keeps assigning loads: a new hire waits for level 8, but
+/// a driver at level 8 or above is only here because standing slipped.
+fn assignment_ends(p: &Profile) -> String {
+    if p.career.level() < SENIOR_LOAD_CHOICE_LEVEL {
+        format!("until level {SENIOR_LOAD_CHOICE_LEVEL}")
+    } else {
+        "until your standing recovers".to_string()
+    }
+}
+
 // -- shared job wording ----------------------------------------------------------------
 
 fn settlement_for(p: &Profile, job: &Job, with_reputation: bool) -> BusinessSettlement {
@@ -290,10 +300,11 @@ impl JobBoardState {
         };
         let market = p.market.summary();
         let current = self.current_text(ctx);
+        let until = assignment_ends(p);
         ctx.say(&format!(
-            "Dispatch board. Dispatch assigns your load and route until level \
-             {SENIOR_LOAD_CHOICE_LEVEL}. Listed amounts are carrier gross, your settlement \
-             pays driver wages. {objective_text}{decline_note} {hos_note}{market} {current}"
+            "Dispatch board. Dispatch assigns your load and route {until}. Listed amounts are \
+             carrier gross, your settlement pays driver wages. \
+             {objective_text}{decline_note} {hos_note}{market} {current}"
         ));
     }
 
@@ -340,8 +351,8 @@ impl JobBoardState {
                     s.review_locked_board(ctx)
                 })
                 .help(format!(
-                    "The other loads dispatch posted today. Assigned loads only until level \
-                     {SENIOR_LOAD_CHOICE_LEVEL}."
+                    "The other loads dispatch posted today. Assigned loads only {}.",
+                    assignment_ends(profile(ctx))
                 )),
             );
         }
@@ -378,9 +389,13 @@ impl JobBoardState {
                 }
             })
             .collect();
+        let choice = if profile(ctx).career.level() < SENIOR_LOAD_CHOICE_LEVEL {
+            format!("Load choice unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}.")
+        } else {
+            "Load choice returns when your standing recovers.".to_string()
+        };
         ctx.say(&format!(
-            "Dispatch also posted today: {}. Declining draws the first of these next. Load \
-             choice unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}.",
+            "Dispatch also posted today: {}. Declining draws the first of these next. {choice}",
             lines.join("; ")
         ));
     }

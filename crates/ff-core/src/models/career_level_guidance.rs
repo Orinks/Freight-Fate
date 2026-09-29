@@ -4,7 +4,7 @@
 use crate::models::business::OWNER_OPERATOR_LEVEL;
 use crate::models::business_constants::{is_owner_operator, INDEPENDENT_AUTHORITY};
 use crate::models::career::CareerProfile;
-use crate::models::dispatch_policy::SENIOR_LOAD_CHOICE_LEVEL;
+use crate::models::dispatch_policy::{dispatch_policy, SENIOR_LOAD_CHOICE_LEVEL};
 
 #[cfg(test)]
 mod tests;
@@ -156,6 +156,15 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
             "Choose freight that protects service quality while savings grow.",
             "business-prep load",
             "Business prep starts before the buy-in appears.",
+        );
+    }
+    if level >= SENIOR_LOAD_CHOICE_LEVEL && dispatch_policy(profile).assigns_load {
+        return CareerLevelGuidance::new(
+            "Earn back your load choice",
+            "Dispatch is assigning your loads because your standing has slipped.",
+            "Run assigned freight cleanly, keep the record clear, and the choice of loads comes back.",
+            "standing-repair lane",
+            "Load choice returns when your service, licence, record and debt are back in good standing.",
         );
     }
     if level >= 10 {
