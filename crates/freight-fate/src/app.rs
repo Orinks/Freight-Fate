@@ -897,6 +897,13 @@ impl App {
         }
         self.ctx.audio.update(dt); // advance time-based audio fades
         self.ctx.update_speech_duck(); // restore the mix after speech
+
+        // Which calendar the player hears, for every date the career speaks.
+        let live_calendar =
+            self.ctx.settings.real_weather && self.ctx.settings.live_weather_controls_calendar;
+        if let Some(profile) = self.ctx.profile.as_mut() {
+            profile.live_calendar = live_calendar;
+        }
         if let Some(state) = self.ctx.state() {
             state.borrow_mut().update(&mut self.ctx, dt);
             self.ctx.run_deferred();

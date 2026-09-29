@@ -37,8 +37,8 @@ impl StandingProfile for Profile {
     fn game_hours(&self) -> f64 {
         self.game_hours
     }
-    fn calendar_offset_days(&self) -> f64 {
-        self.calendar_offset_days as f64
+    fn calendar_now_hours(&self) -> f64 {
+        self.player_calendar_hours()
     }
     fn driving_record(&self) -> Option<&DrivingRecord> {
         Some(&self.driving_record)
