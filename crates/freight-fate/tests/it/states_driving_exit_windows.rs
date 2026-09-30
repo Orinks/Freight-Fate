@@ -451,6 +451,8 @@ fn test_exit_announcements_speak_each_name_once() {
     // Fallback phrasing must not repeat the facility or exit label -- the
     // sentence is heard, not read.
     let mut harness = a_drive("Name Once");
+    // A miss needs a driver who can miss: full lane keeping takes the exit.
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
     let facility = "grocery warehouse Trenton Distribution in Trenton";
     harness.with_drive(|drive, _| {
         let mut stop = RoadStop::new(facility, 10.0, "delivery_destination");

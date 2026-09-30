@@ -25,9 +25,13 @@ returning from an earlier version, read What Changed Recently first.
    button appears for about an hour after macOS blocks the launch. VoiceOver
    reads these controls. You only need to do this for the first launch of a
    newly downloaded app.
-4. Choose **New career**, enter a driver name, pick a home region, and pick a
+4. The first time the game starts, it asks how much the truck should do for
+   you. All assists is recommended for your first drives: the truck steers
+   while you learn how the road sounds. You can change it later in Settings,
+   Gameplay, Driving assistance.
+5. Choose **New career**, enter a driver name, pick a home region, and pick a
    home terminal.
-5. Listen to the first-day briefing, open the dispatch board, accept a job,
+6. Listen to the first-day briefing, open the dispatch board, accept a job,
    and follow the current objective.
 
 In the Windows and Linux archive downloads, saves, settings, save identity
@@ -1658,7 +1662,7 @@ quarters always reaching you. See When You Owe Money.
 
 ### Driving assistance and speed keeper
 
-Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. The first time the game starts it asks which of the three you want, with the cursor on the one you already have; Escape keeps it. A new install starts on All assists, so the truck does the steering while you learn how the road sounds; switch to Balanced when you want to steer yourself. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
 #### Individual assists
 

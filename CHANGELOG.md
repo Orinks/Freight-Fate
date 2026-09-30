@@ -4,6 +4,8 @@
 
 ### Added
 
+- **The game asks how much the truck should do for you before the main menu, once.** Choose All assists, Balanced or Realistic; Escape keeps what you have.
+
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
 
 - **Start the game with `--key-probe` to see what your screen reader sends it.** It reports how held arrow keys arrive, for support.
@@ -58,6 +60,10 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **New installs start on All assists.** The truck steers, street corners included, until you switch to Balanced under Driving assistance.
+
+- **The Lane keeping help describes the lean your Steering guide and Lane guide sound settings give you.**
 
 - **The turn signal ticks and tocks like a real flasher, and clicks off when the move ends.**
 

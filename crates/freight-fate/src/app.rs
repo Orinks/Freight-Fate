@@ -118,7 +118,12 @@ impl FrameClock {
 /// the headless loop have a screen to stand on.
 pub type InitialState = Box<dyn FnOnce(&mut GameContext) -> SharedState>;
 
-fn placeholder_main_menu(_ctx: &mut GameContext) -> SharedState {
+fn placeholder_main_menu(ctx: &mut GameContext) -> SharedState {
+    use crate::states::assist_picker::AssistPickerState;
+    // The one-time Driving assistance picker goes first until it is answered.
+    if AssistPickerState::is_owed(ctx) {
+        return share(AssistPickerState::new());
+    }
     share(crate::states::main_menu::MainMenuState::new())
 }
 

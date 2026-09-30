@@ -79,6 +79,7 @@ mod secret_store_guard;
 mod single_instance;
 mod speech;
 mod speech_live;
+mod states_assist_picker;
 mod states_career_close_out;
 mod states_city;
 mod states_city_hos;

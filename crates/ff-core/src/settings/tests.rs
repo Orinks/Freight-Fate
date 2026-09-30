@@ -85,13 +85,14 @@ fn the_struct_carries_the_persisted_fields_in_python_order() {
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12), the two shortcut tables (2026-09-14),
     // radio_shuffle_playlists and steering_guide_inverted (2026-09-18), and
-    // synth_music and music_seed (2026-09-21) were added on the Rust side;
-    // lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 83);
+    // synth_music and music_seed (2026-09-21), and assist_preset_chosen
+    // (2026-09-30) were added on the Rust side; lane_centering_assist was
+    // retired for 1.9.
+    assert_eq!(Settings::FIELD_NAMES.len(), 84);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
     assert_eq!(Settings::FIELD_NAMES[79], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 83);
+    assert_eq!(pairs.len(), 84);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -114,11 +115,11 @@ fn the_defaults_match_the_python_dataclass() {
         "real_parking": false, "real_fuel_prices": true,
         "live_weather_controls_calendar": true,
         "hos_mode": "realistic", "hos_planning_hints": false,
-        "lane_keeping": "partial", "lane_keeping_rename_notice_left": 0,
+        "lane_keeping": "full", "lane_keeping_rename_notice_left": 0,
         "lane_cue_loudness": "standard", "lane_guide_tone": false,
-        "driving_assistance_preset": "balanced", "automatic_emergency_braking": true,
+        "driving_assistance_preset": "all", "automatic_emergency_braking": true,
         "lane_departure_warning": true, "stop_and_go_assist": true,
-        "descent_speed_control": "balanced",
+        "descent_speed_control": "interactive",
         "exit_speed_assist": true, "destination_approach_assist": true,
         "selected_stop_assist": false, "curve_speed_assist": true,
         "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
@@ -141,14 +142,15 @@ fn the_defaults_match_the_python_dataclass() {
         "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
         "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
         "settings_version": 3, "settings_layout_notice_from": -1,
-        "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false
+        "key_bindings": "", "pad_bindings": "", "steering_guide_inverted": false,
+        "assist_preset_chosen": false
     }"#,
     )
     .unwrap();
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 83);
+    assert_eq!(expected.len(), 84);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -172,8 +174,8 @@ fn the_file_text_is_what_json_dump_wrote() {
     let text = s.to_file_text();
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
     assert!(text.ends_with(
-        "  \"pad_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \
-         \"steering_assist\": \"light\"\n}"
+        "  \"steering_guide_inverted\": false,\n  \"assist_preset_chosen\": false,\n  \
+         \"steering_assist\": \"off\"\n}"
     ));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));
@@ -360,7 +362,7 @@ fn test_driving_assistance_presets_apply_complete_mappings() {
 }
 
 #[test]
-fn test_a_fresh_install_is_the_balanced_preset() {
+fn test_a_fresh_install_is_the_all_assists_preset() {
     // The shipped defaults ARE a named preset, and the row says so -- the
     // point of the 2026-08-09 ruling, which the preset must keep honouring
     // whichever preset that is. For months the row read "Realistic" while
@@ -372,12 +374,15 @@ fn test_a_fresh_install_is_the_balanced_preset() {
     // continuous driving task, so shipping it would hand every new driver a
     // job they cannot yet do. Partial steers for the error and still leaves
     // them something to feel.
+    //
+    // And to All assists on 2026-09-30: too many first drives still went
+    // wrong at the wheel, street corners above all, so the truck steers until
+    // the driver chooses to.
     let mut settings = Settings::default();
-    assert_eq!(settings.lane_keeping, "partial");
-    assert!(settings.lane_is_manual());
-    assert!(!settings.lane_is_automated());
-    assert_eq!(settings.driving_assistance_preset, "balanced");
-    assert_eq!(settings.refresh_driving_assistance_preset(), "balanced");
+    assert_eq!(settings.lane_keeping, "full");
+    assert!(settings.lane_is_automated());
+    assert_eq!(settings.driving_assistance_preset, "all");
+    assert_eq!(settings.refresh_driving_assistance_preset(), "all");
 }
 
 #[test]
@@ -508,9 +513,10 @@ fn test_a_fresh_install_hears_no_rename_notice() {
             std::fs::remove_file(&path).unwrap();
         }
         let loaded = Settings::load();
-        // The shipped default, not the unreadable-value fallback (which is
-        // "full"): a fresh install must land on what the preset promises.
-        assert_eq!(loaded.lane_keeping, "partial");
+        // The shipped default, which the preset promises. It is "full", the
+        // same as the unreadable-value fallback, but the fallback also
+        // announces itself and a fresh install must not.
+        assert_eq!(loaded.lane_keeping, "full");
         assert_eq!(loaded.lane_keeping_rename_notice_left, 0);
         assert!(!loaded.lane_keeping_unreadable);
     });
@@ -1003,12 +1009,12 @@ fn a_file_that_is_not_an_object_reads_as_an_empty_one() {
         assert_eq!(loaded.driving_assistance_preset, "custom");
         assert_eq!(loaded.lane_keeping, "full");
         // Unparseable text is not a file at all, so this reads as a fresh
-        // install and lands on the shipped defaults -- Balanced since
-        // 2026-09-18 -- rather than on the corrupt-value fallback above.
+        // install and lands on the shipped defaults -- All assists since
+        // 2026-09-30 -- rather than on the pre-preset migration above.
         write_settings_file("{not json");
         let loaded = Settings::load();
-        assert_eq!(loaded.driving_assistance_preset, "balanced");
-        assert_eq!(loaded.lane_keeping, "partial");
+        assert_eq!(loaded.driving_assistance_preset, "all");
+        assert_eq!(loaded.lane_keeping, "full");
     });
 }
 

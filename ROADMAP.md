@@ -41,6 +41,18 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] New installs start on All assists (owner, 2026-09-30): first drives kept
+      going wrong at the wheel, city street corners above all, so the truck
+      steers until the driver steps down to Balanced. Saved settings keep
+      their preset. The Lane keeping help now reads the Steering guide and
+      Lane guide sound rows and says which way the lean points and what
+      carries it; it used to teach steering by the road sound.
+
+- [x] One-time Driving assistance picker before the main menu (owner,
+      2026-09-30): every player, fresh install or existing, answers it once;
+      the cursor starts on their current preset, Escape keeps it, and a
+      Custom player gets a keep row first.
+
 - [x] Ramp-end traffic lights keep one seeded 62 to 80 second plan per
       intersection, with a 6 second yellow (the MUTCD ceiling; the spoken
       call eats the first second and a half) and a 7 second all-red so cross

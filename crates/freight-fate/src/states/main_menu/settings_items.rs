@@ -52,10 +52,38 @@ fn adjust(f: impl Fn(&mut SettingsCategoryState, &mut GameContext, i64) + 'stati
 /// player's own keys the way the help pages read them.
 fn row(label: Label<SettingsCategoryState>, action: Adjust, help: &str) -> Row {
     let help = help.to_string();
+    row_dyn_help(label, action, move |_| help.clone())
+}
+
+/// A row whose help reads the settings as they stand, for help that has to
+/// describe what another row has set.
+fn row_dyn_help(
+    label: Label<SettingsCategoryState>,
+    action: Adjust,
+    help: impl Fn(&Settings) -> String + 'static,
+) -> Row {
     MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| {
         action(s, ctx, 1)
     })
-    .help(Label::dynamic(move |_s, ctx| render_help_line(ctx, &help)))
+    .help(Label::dynamic(move |_s, ctx| {
+        render_help_line(ctx, &help(&ctx.settings))
+    }))
+}
+
+/// What leans and which way to steer, as the Steering guide and Lane guide
+/// sound rows under Audio have it set.
+fn steering_lean_text(s: &Settings) -> String {
+    let what = if s.lane_guide_tone {
+        "a soft tone leans"
+    } else {
+        "the engine leans"
+    };
+    let way = if s.steering_guide_inverted {
+        "away from"
+    } else {
+        "toward"
+    };
+    format!("{what} {way} where the wheel should go, so steer {way} it")
 }
 
 fn back_row() -> Row {
@@ -697,23 +725,27 @@ impl SettingsCategoryState {
                 help_text,
             ));
         }
-        items.push(row(
+        items.push(row_dyn_help(
             dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
             adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
-            "How much of the lane-holding work the truck does. Full \
-             holds the lane, turns {{steer_left}} and {{steer_right}} into tap lane \
-             changes, and takes your exits, including the destination \
-             exit, without a signal. Partial steers the truck through \
-             the road's bends and drifts gently, with generous steering \
-             help; lane changes and speed are yours. Off drifts like a \
-             real wheel; bends are yours unless curve assistance is \
-             on, and every exit needs its signal and its exit lane. On partial \
-             or off the engine leans toward where the wheel should go, the \
-             road sound sits where you are in your lane, and the road edge \
-             answers: a stutter clipping the \
-             rumble strip, a buzz fully on it, gravel off the pavement. \
-             Realistic sets this off, Balanced partial, All assists \
-             full.",
+            |s| {
+                "How much of the lane-holding work the truck does. Full \
+                 holds the lane, turns {{steer_left}} and {{steer_right}} into tap lane \
+                 changes, and takes your exits, including the destination \
+                 exit, without a signal. Partial steers the truck through \
+                 the road's bends and drifts gently, with generous steering \
+                 help; lane changes and speed are yours. Off drifts like a \
+                 real wheel; bends are yours unless curve assistance is \
+                 on, and every exit needs its signal and its exit lane. On \
+                 partial or off {lean}. The road sound only says where you \
+                 sit in your lane, and the road edge answers: a stutter \
+                 clipping the rumble strip, a buzz fully on it, gravel off \
+                 the pavement. Steering guide and Lane guide sound, under \
+                 Audio, change which way to steer and what leans. \
+                 Realistic sets this off, Balanced partial, All assists \
+                 full."
+                    .replace("{lean}", &steering_lean_text(s))
+            },
         ));
         items.push(row(
             dyn_label(|s| format!("Following gap: {}", acc_gap_label(s))),
