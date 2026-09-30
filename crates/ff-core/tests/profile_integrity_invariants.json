@@ -1180,6 +1180,68 @@
     "roadstead_owner_operator": "Northstar Freight Lines",
     "summit_value": "Summit Value Logistics"
   },
+  "carriers": {
+    "great_lakes_training": {
+      "description": "A practical training-fleet start. Stop pay is better on short loads, and dispatch leans toward shorter training work with a little more deadline room. Equipment and routine costs stay carrier-paid.",
+      "dispatch": "more short training loads, more appointment slack",
+      "favoredFreight": [],
+      "name": "Great Lakes Training Transport",
+      "pay": {
+        "minPerMile": 0.74,
+        "onTimeBonusShare": 0.02,
+        "payShare": 0.33,
+        "stopPay": 225
+      },
+      "suggestedHomeTerminal": "Milwaukee"
+    },
+    "northstar": {
+      "description": "A balanced company-driver path. The carrier assigns and maintains the tractor, pays fuel and routine repairs, and offers steady wage math without a sharp specialty.",
+      "dispatch": "balanced dispatch",
+      "favoredFreight": [],
+      "name": "Northstar Freight Lines",
+      "pay": {
+        "minPerMile": 0.82,
+        "onTimeBonusShare": 0.04,
+        "payShare": 0.36,
+        "stopPay": 175
+      },
+      "suggestedHomeTerminal": "Chicago"
+    },
+    "prairie_link": {
+      "description": "A mile-focused company start. The per-mile wage floor is higher, but stop pay is lower, so it favors steady regional mileage over very short hops. Dispatch leans toward same-region grain and bulk work. The carrier still assigns and maintains the tractor.",
+      "dispatch": "more same-region lanes, more longer lanes",
+      "favoredFreight": [
+        "grain",
+        "farm inputs",
+        "bulk materials"
+      ],
+      "name": "Prairie Link Regional",
+      "pay": {
+        "minPerMile": 0.95,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 130
+      },
+      "suggestedHomeTerminal": "Kansas City"
+    },
+    "summit_value": {
+      "description": "A performance-sensitive company start. Good on-time runs pay better, but the guaranteed floor is smaller. Dispatch leans toward longer and higher-value lanes. The carrier still supplies equipment, authority, insurance, fuel, and repairs.",
+      "dispatch": "more longer lanes",
+      "favoredFreight": [
+        "electronics",
+        "automotive parts",
+        "parcel freight"
+      ],
+      "name": "Summit Value Logistics",
+      "pay": {
+        "minPerMile": 0.78,
+        "onTimeBonusShare": 0.06,
+        "payShare": 0.38,
+        "stopPay": 150
+      },
+      "suggestedHomeTerminal": "Denver"
+    }
+  },
   "cityLabels": {
     "aberdeen_sd_us": "Aberdeen, South Dakota",
     "abilene_tx_us": "Abilene, Texas",
@@ -1838,6 +1900,10 @@
     "Company Career Veteran",
     "Freight Fate Company Driver"
   ],
+  "companyPay": {
+    "assignedRepositionPayFraction": 0.6,
+    "reputationBonusMaxShare": 0.06
+  },
   "companyRankForkLevel": 18,
   "endorsements": {
     "doubles_triples": {

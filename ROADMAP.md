@@ -2219,6 +2219,16 @@ rev ceiling.
       alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
       line, or show why two are right.
 
+### September 30 carrier pages
+
+- [x] **A page per carrier on orinks.net** (`/freight-fate/carriers`): each
+      company carrier's wage plan, dispatch leanings and favored freight, a
+      side-by-side comparison, and what every carrier gives its drivers
+      (fleet tiers, sponsored training, reputation and reposition pay, the
+      owner-operator buy-in). The profile's Carrier line links to its page.
+      Every figure rides the invariants export (`carriers`, `companyPay`),
+      so a wage-plan rebalance needs an invariants regen to reach the site.
+
 ## 2.0 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
