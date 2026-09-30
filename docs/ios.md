@@ -40,8 +40,8 @@ Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
 ## Driving gestures
 
 While driving, the gestures below run their commands directly, with no menu in
-between. Each one can be moved to any other command in Settings, Controls,
-Touch gestures, the way keyboard keys and controller buttons can.
+between. Each one can be moved to any other command in Settings, Gameplay,
+Controls, Touch gestures, the way keyboard keys and controller buttons can.
 
 | Gesture | Default command |
 |---|---|

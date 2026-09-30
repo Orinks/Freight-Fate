@@ -314,12 +314,14 @@ Everything found before 2026-09-25 moved to
       spoken list of driving commands. `tools/build_ios.py` packages it;
       `docs/ios.md` has the gestures (2026-09-29).
 - [x] iOS driving gestures run commands directly and can be rebound in
-      Settings, Controls, Touch gestures: a second finger while holding a
+      Settings, Gameplay, Controls, Touch gestures: a second finger while holding a
       pedal (cruise, shifts, parking brake, engine), plus tap for speed,
       swipes for the cruise target, magic tap to pause (2026-09-29).
-- [ ] (Found along the way) The iOS second-finger gestures need a pass on
-      real hardware: the tap and swipe thresholds were tuned in the
-      Simulator only.
+- [ ] (Found along the way) The iOS second-finger gestures (hold a pedal,
+      then tap, double tap or swipe with another finger) need a pass on real
+      hardware: the Simulator's touch replay lifts both fingers together, so
+      cruise, engine and parking brake from a held pedal are covered only by
+      the headless tests.
 - [ ] iOS still needs a signed install on a real iPhone, a real
       controller, BASS sound on hardware (the Simulator has no audio
       device) and VoiceOver's scrub on hardware. For the App Store: an app
